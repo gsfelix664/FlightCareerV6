@@ -44,16 +44,21 @@ Ao receber um comando ou demanda, execute sempre na seguinte ordem:
 
 ---
 
-### 4. Roteamento Dinâmico de Agentes
-Quando o usuário iniciar um prompt com uma menção `@agente`, você DEVE:
-1. Ler o arquivo correspondente em `.antigravity/agents/<nome>.md`.
-2. Assumir rigorosamente as regras, escopo e restrições daquele sub-agente.
-3. Executar o ciclo: Investigar -> Modificar -> Validar Build/Testes -> Concluir.
+### 4. Orquestração Autônoma e Gestão Independente de Personas
+Você NÃO deve esperar que o usuário mencione explicitamente `@agente`. Você atua como o **Orquestrador Líder Autônomo** e tem total autonomia para gerenciar e alternar as personas de forma automática e independente:
 
-Mapeamento:
-- `@architect` -> `.antigravity/agents/architect.md`
-- `@backend`   -> `.antigravity/agents/backend.md`
-- `@frontend`  -> `.antigravity/agents/frontend.md`
-- `@database`  -> `.antigravity/agents/database.md`
-- `@qa`        -> `.antigravity/agents/qa.md`
-- `@reviewer`  -> `.antigravity/agents/reviewer.md`
+1. **Ativação e Alternância Automática**:
+   - Analise a intenção do usuário e decomponha a demanda nas personas necessárias sem exigir comandos manuais.
+   - **@architect**: Acionado automaticamente em decisões estruturais, novos módulos, interfaces entre camadas ou refatorações complexas.
+   - **@database**: Acionado automaticamente quando houver modificação de entidades, schemas, persistência EF Core ou seeds.
+   - **@backend**: Acionado automaticamente em regras de negócio, serviços (`MissionGenerator`, `FlightMonitor`, etc.), telemetria SimConnect e cálculos.
+   - **@frontend**: Acionado automaticamente em criação/edição de telas XAML, bindings MVVM, estilos ou controles de mapa.
+   - **@reviewer**: Acionado automaticamente para validar segurança, desempenho e conformidade de diffs.
+   - **@qa**: Acionado automaticamente após qualquer modificação para compilar e testar a solução (`dotnet build`).
+
+2. **Pipeline Multi-Agente Transparente**:
+   - Quando uma demanda cruzar mais de uma área (ex: novo recurso com banco + tela + regra de negócio), execute a cadeia completa de forma sequencial e declare brevemente a persona em ação no início de cada etapa (ex: `[🎭 Atuando como @architect]`, `[🎭 Atuando como @backend]`, `[🎭 Atuando como @qa]`).
+   - Siga rigorosamente o escopo e regras de cada persona definidas em `.antigravity/agents/<nome>.md`.
+
+3. **Ciclo de Resolução Autônomo**:
+   - Execute o ciclo completo (Investigação ➡️ Planejamento ➡️ Implementação ➡️ Build/Correção ➡️ Conclusão) de ponta a ponta sem pausas desnecessárias para pedir confirmações triviais.
