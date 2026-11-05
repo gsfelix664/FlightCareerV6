@@ -92,7 +92,14 @@ namespace FlightCareer.UI
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite("Data Source=flightcareer.db"),
+                {
+                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "flightcareer.db");
+                if (!System.IO.File.Exists(dbPath) && System.IO.File.Exists("flightcareer.db"))
+                {
+                    dbPath = System.IO.Path.GetFullPath("flightcareer.db");
+                }
+                options.UseSqlite($"Data Source={dbPath}");
+            },
                 ServiceLifetime.Singleton); // DbContext como Singleton para WPF
 
             services.AddSingleton<IPilotRepository, PilotRepository>();

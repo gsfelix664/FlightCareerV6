@@ -41,6 +41,10 @@ namespace FlightCareer.UI.ViewModels
         {
             var pilots = await _pilotRepository.GetAllAsync();
             Profiles = new ObservableCollection<Pilot>(pilots);
+            if (SelectedProfile == null && Profiles.Any())
+            {
+                SelectedProfile = Profiles.First();
+            }
         }
 
         private void OpenCreatePilotWindow()
@@ -54,7 +58,11 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task LoadSelectedProfile()
         {
-            if (SelectedProfile == null) return;
+            if (SelectedProfile == null)
+            {
+                MessageBox.Show("Por favor, selecione um perfil de piloto na lista acima para iniciar a carreira.", "Atenção", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
             try
             {

@@ -31,7 +31,29 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task CreatePilotAsync()
         {
-            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(InitialBaseICAO) || string.IsNullOrWhiteSpace(CompanyName)) return;
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                System.Windows.MessageBox.Show("Por favor, informe o Nome do Piloto.", "Campo Obrigatório", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(CompanyName))
+            {
+                System.Windows.MessageBox.Show("Por favor, informe o Nome da Companhia.", "Campo Obrigatório", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(InitialBaseICAO) || InitialBaseICAO.Trim().Length < 3)
+            {
+                System.Windows.MessageBox.Show("Por favor, informe um código ICAO válido para a base inicial (ex: SBMT, SBGR, etc.).", "Campo Obrigatório", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            string icaoCheck = InitialBaseICAO.Trim().ToUpper();
+            var airportCheck = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == icaoCheck);
+            if (airportCheck == null)
+            {
+                System.Windows.MessageBox.Show($"O aeroporto com código ICAO '{icaoCheck}' não foi encontrado no banco de dados.", "Aeroporto Inválido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
 
             double initialBalance = SelectedDifficulty switch
             {

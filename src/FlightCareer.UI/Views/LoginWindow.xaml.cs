@@ -22,6 +22,14 @@ namespace FlightCareer.UI.Views
                     MessageBox.Show($"Erro ao carregar perfis: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             };
+
+            MouseDoubleClick += (s, e) =>
+            {
+                if (DataContext is LoginViewModel vm && vm.SelectedProfile != null)
+                {
+                    vm.LoadSelectedProfileCommand.Execute(null);
+                }
+            };
         }
     }
 }
