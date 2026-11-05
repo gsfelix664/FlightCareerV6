@@ -1,0 +1,85 @@
+<Window x:Class="FlightCareer.UI.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Flight Career - Seleção de Piloto" Height="600" Width="900"
+        Background="#0F1113" Foreground="#E1E2E5" WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="#1A1C1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" BorderBrush="#2D3033" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2D3033"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource ActionButton}">
+            <Setter Property="Background" Value="#00A3FF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#0086D1"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="50">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,40">
+            <TextBlock Text="BEM-VINDO DE VOLTA" FontSize="12" FontWeight="Bold" Foreground="#00A3FF" HorizontalAlignment="Center"/>
+            <TextBlock Text="Selecione seu Perfil" FontSize="32" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+        </StackPanel>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}"
+                 Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel HorizontalAlignment="Center"/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border x:Name="card" Background="#1A1C1E" Width="240" Height="140" Margin="10" CornerRadius="12" BorderBrush="#2D3033" BorderThickness="1" Padding="20">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="{Binding Rank}" FontSize="11" Foreground="#00A3FF" Margin="0,2,0,15"/>
+                            
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Base: " FontSize="12" Foreground="#6B7280"/>
+                                <TextBlock Text="{Binding InitialBaseICAO}" FontSize="12" FontWeight="Bold" Foreground="White"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding Balance, StringFormat=C}" FontSize="14" FontWeight="Bold" Foreground="#2ECC71" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
+            <Button Content="NOVO PILOTO" Width="180" Height="45" Style="{StaticResource ActionButton}" Margin="10,0" Command="{Binding NewPilotCommand}"/>
+            <Button Content="INICIAR CARREIRA" Width="180" Height="45" Style="{StaticResource PrimaryButton}" Margin="10,0" Command="{Binding LoadSelectedProfileCommand}"/>
+            <Button Content="" Width="45" Height="45" Style="{StaticResource ActionButton}" Margin="10,0" Command="{Binding DeleteProfileCommand}" Foreground="#EF4444"/>
+        </StackPanel>
+    </Grid>
+</Window>

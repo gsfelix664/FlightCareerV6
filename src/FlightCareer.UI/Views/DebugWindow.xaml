@@ -1,0 +1,198 @@
+<Window x:Class="FlightCareer.UI.Views.DebugWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:utils="clr-namespace:FlightCareer.UI.Utils"
+        mc:Ignorable="d"
+        Title="FlightCareer V6 - Debug Simulator" Height="800" Width="850"
+        Background="#2C3E50" Foreground="White">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#9CA3AF"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#1A1C1E"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#2D3033"/>
+            <Setter Property="Padding" Value="5,2"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="350"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Column="0">
+            <StackPanel Margin="0,0,10,0">
+                <CheckBox Content="Habilitar Modo Debug (Enganar Sistema)" IsChecked="{Binding DebugEnabled}" 
+                      Command="{Binding ToggleDebugCommand}" Foreground="White" Margin="0,0,0,10"/>
+
+                <GroupBox Header="Configuração da Aeronave" Foreground="White" Margin="0,5">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="Aeronave (Title/Model)"/>
+                        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+                        <UniformGrid Columns="3" Margin="0,5">
+                            <Button Content="C152" Command="{Binding LoadPresetCommand}" CommandParameter="C152" Margin="2"/>
+                            <Button Content="C172" Command="{Binding LoadPresetCommand}" CommandParameter="C172" Margin="2"/>
+                            <Button Content="B350" Command="{Binding LoadPresetCommand}" CommandParameter="B350" Margin="2"/>
+                        </UniformGrid>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Pesos e Combustível" Foreground="White" Margin="0,5">
+                    <StackPanel Margin="5">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Combustível (GAL)"/>
+                                <TextBox Text="{Binding FuelGallons, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Right">
+                                <TextBlock Text="Capacidade"/>
+                                <TextBox Text="{Binding FuelCapacity}" IsReadOnly="True" Opacity="0.5"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Margin="0,5,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Peso Vazio (LBS)"/>
+                                <TextBox Text="{Binding EmptyWeight, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Right">
+                                <TextBlock Text="Peso Total (LBS)"/>
+                                <TextBox Text="{Binding TotalWeight, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Teletransporte" Foreground="White" Margin="0,5">
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding AirportSearch, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                        <Button Grid.Column="1" Content="IR PARA ICAO" Command="{Binding TeleportCommand}" Padding="10,2"/>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Telemetria Simulada" Foreground="White" Margin="0,5">
+                    <StackPanel Margin="5">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock Text="Latitude"/>
+                                <TextBox Text="{Binding Latitude, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Right">
+                                <TextBlock Text="Longitude"/>
+                                <TextBox Text="{Binding Longitude, UpdateSourceTrigger=PropertyChanged}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Altitude (ft)" Margin="0,5,0,0"/>
+                        <Slider Minimum="0" Maximum="40000" Value="{Binding Altitude}"/>
+                        <TextBlock Text="{Binding Altitude, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <TextBlock Text="Ground Speed (knots)" Margin="0,5,0,0"/>
+                        <Slider Minimum="0" Maximum="500" Value="{Binding GroundSpeed}"/>
+                        <TextBlock Text="{Binding GroundSpeed, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <TextBlock Text="Vertical Speed (fpm)" Margin="0,5,0,0"/>
+                        <Slider Minimum="-2000" Maximum="2000" Value="{Binding VerticalSpeed}"/>
+                        <TextBlock Text="{Binding VerticalSpeed, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10">
+                            <CheckBox Content="On Ground" IsChecked="{Binding OnGround}" Foreground="White" Margin="0,0,20,0"/>
+                            <CheckBox Content="Engines Running" IsChecked="{Binding EngineRunning}" Foreground="White"/>
+                        </StackPanel>
+
+                        <TextBlock Text="Parking Brake (0.0 a 1.0)"/>
+                        <Slider Minimum="0" Maximum="1" Value="{Binding ParkingBrake}"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Desgaste e Estresse (DEBUG)" Foreground="White" Margin="0,5">
+                    <StackPanel Margin="5">
+                        <TextBlock Text="G-Force" Margin="0,5,0,0"/>
+                        <Slider Minimum="-3" Maximum="10" Value="{Binding GForce}"/>
+                        <TextBlock Text="{Binding GForce, StringFormat=F1}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <CheckBox Content="OVERSPEED WARNING" IsChecked="{Binding Overspeed}" Foreground="#EF4444" FontWeight="Bold" Margin="0,5"/>
+                        
+                        <TextBlock Text="CRASH SEQUENCE (0=OK, >0=CRASH)" Margin="0,5,0,0"/>
+                        <Slider Minimum="0" Maximum="2" Value="{Binding CrashSequence}"/>
+                        
+                        <Separator Background="#2D3033" Margin="0,10"/>
+                        
+                        <TextBlock Text="Brakes Intensity (0-32K)" Margin="0,5,0,0"/>
+                        <Slider Minimum="0" Maximum="32767" Value="{Binding BrakeLeft}"/>
+                        <TextBlock Text="{Binding BrakeLeft, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <TextBlock Text="Velocity Body Y (Touchdown FPS)" Margin="0,5,0,0"/>
+                        <Slider Minimum="-20" Maximum="0" Value="{Binding VelocityBodyY}"/>
+                        <TextBlock Text="{Binding VelocityBodyY, StringFormat=F1}" HorizontalAlignment="Right" Foreground="White"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox Header="Monitoramento do Motor" Foreground="White" Margin="0,5">
+                    <StackPanel Margin="5">
+                        <CheckBox Content="MODO JATO / TURBOPROP" IsChecked="{Binding IsJetMode}" Foreground="{StaticResource PrimaryBlue}" FontWeight="Bold" Margin="0,0,0,10"/>
+                        
+                        <TextBlock Text="RPM / N1" Margin="0,5,0,0"/>
+                        <Slider Minimum="0" Maximum="4000" Value="{Binding EngineRPM}"/>
+                        <TextBlock Text="{Binding EngineRPM, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+
+                        <!-- PISTÃO -->
+                        <StackPanel Visibility="{Binding IsJetMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <TextBlock Text="CHT (Celsius)" Margin="0,5,0,0"/>
+                            <Slider Minimum="0" Maximum="300" Value="{Binding EngineCHT}"/>
+                            <TextBlock Text="{Binding EngineCHT, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+                            
+                            <TextBlock Text="Oil Pressure (PSI)" Margin="0,5,0,0"/>
+                            <Slider Minimum="0" Maximum="100" Value="{Binding EngineOilPressure}"/>
+                            <TextBlock Text="{Binding EngineOilPressure, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+                        </StackPanel>
+
+                        <!-- JATO -->
+                        <StackPanel Visibility="{Binding IsJetMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="ITT (Celsius)" Margin="0,5,0,0"/>
+                            <Slider Minimum="0" Maximum="1000" Value="{Binding TurboITT}"/>
+                            <TextBlock Text="{Binding TurboITT, StringFormat=N0}" HorizontalAlignment="Right" Foreground="White"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+
+                <UniformGrid Columns="2" Margin="0,5">
+                    <Button Content="START ENGINES" Command="{Binding StartEnginesCommand}" Margin="2" Background="#27AE60" Foreground="White"/>
+                    <Button Content="STOP ENGINES" Command="{Binding StopEnginesCommand}" Margin="2" Background="#C0392B" Foreground="White"/>
+                    <Button Content="RELEASE PB" Command="{Binding ReleaseParkingBrakeCommand}" Margin="2"/>
+                    <Button Content="SET PB" Command="{Binding SetParkingBrakeCommand}" Margin="2"/>
+                    <Button Content="TAKE OFF" Command="{Binding TakeOffCommand}" Margin="2" Background="#2980B9" Foreground="White"/>
+                    <Button Content="LAND" Command="{Binding LandCommand}" Margin="2" Background="#F39C12" Foreground="White"/>
+                </UniformGrid>
+
+                <Button Content="ATUALIZAR DADOS" Command="{Binding UpdateCommand}" Height="40" Margin="0,10" FontWeight="Bold"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Column="1" Margin="10,0,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="MAPA INTERATIVO" FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Foreground="White"/>
+            <utils:FlightMapControl Grid.Row="1" 
+                                   AircraftLat="{Binding Latitude, Mode=TwoWay}" 
+                                   AircraftLon="{Binding Longitude, Mode=TwoWay}"
+                                   Airports="{Binding Airports}"/>
+            <TextBlock Grid.Row="2" Text="Dica: Use o Scroll para Zoom e Arraste o Mapa para mover a aeronave." 
+                       FontSize="10" Foreground="#9CA3AF" Margin="0,10,0,0" HorizontalAlignment="Center"/>
+        </Grid>
+    </Grid>
+</Window>

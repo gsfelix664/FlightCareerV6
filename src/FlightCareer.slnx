@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="FlightCareer.Domain/FlightCareer.Domain.csproj" />
+  <Project Path="FlightCareer.Infrastructure/FlightCareer.Infrastructure.csproj" />
+  <Project Path="FlightCareer.UI/FlightCareer.UI.csproj" />
+</Solution>

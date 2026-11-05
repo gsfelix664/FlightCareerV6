@@ -1,0 +1,19 @@
+<Application x:Class="FlightCareer.UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FlightCareer.UI"
+             xmlns:utils="clr-namespace:FlightCareer.UI.Utils"
+             ShutdownMode="OnLastWindowClose">
+    <Application.Resources>
+         <!-- Cores -->
+         <SolidColorBrush x:Key="PrimaryBlue" Color="#00A3FF"/>
+         <SolidColorBrush x:Key="SurfaceDark" Color="#1A1C1E"/>
+         <SolidColorBrush x:Key="CardBackground" Color="#222529"/>
+         <SolidColorBrush x:Key="TextSecondary" Color="#D1D5DB"/>
+
+         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+         <utils:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+         <utils:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+         <utils:InverseBooleanToOpacityConverter x:Key="InverseBooleanToOpacityConverter"/>
+    </Application.Resources>
+</Application>
