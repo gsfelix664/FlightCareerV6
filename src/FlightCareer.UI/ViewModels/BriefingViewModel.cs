@@ -156,6 +156,51 @@ namespace FlightCareer.UI.ViewModels
             ValidatePreFlightConditions();
         }
 
+        private static bool IsAircraftMatching(string? simTitle, string? hangarModel)
+        {
+            if (string.IsNullOrWhiteSpace(simTitle) || string.IsNullOrWhiteSpace(hangarModel))
+                return false;
+
+            string sSim = simTitle.Trim().ToUpper();
+            string sHangar = hangarModel.Split('(')[0].Trim().ToUpper();
+
+            // 1. Contenção direta em qualquer direção
+            if (sSim.Contains(sHangar) || sHangar.Contains(sSim))
+                return true;
+
+            // 2. Normalizar removendo 'C' antes de números de 3 dígitos (ex: C152 -> 152, C172 -> 172, C208 -> 208) e caracteres especiais
+            string Clean(string s)
+            {
+                s = System.Text.RegularExpressions.Regex.Replace(s, @"\bC([0-9]{3})\b", "$1");
+                return System.Text.RegularExpressions.Regex.Replace(s, @"[^A-Z0-9]", "");
+            }
+
+            string cSim = Clean(sSim);
+            string cHangar = Clean(sHangar);
+
+            if (!string.IsNullOrEmpty(cSim) && !string.IsNullOrEmpty(cHangar))
+            {
+                if (cSim.Contains(cHangar) || cHangar.Contains(cSim))
+                    return true;
+            }
+
+            // 3. Comparação de identificador numérico de modelo (3 a 4 dígitos: 152, 172, 208, 350, 737, 747, 787, 320, 330)
+            var simNums = System.Text.RegularExpressions.Regex.Matches(sSim, @"\d{3,4}")
+                .Select(m => m.Value)
+                .ToList();
+            var hangarNums = System.Text.RegularExpressions.Regex.Matches(sHangar, @"\d{3,4}")
+                .Select(m => m.Value)
+                .ToList();
+
+            if (simNums.Any() && hangarNums.Any())
+            {
+                if (simNums.Intersect(hangarNums).Any())
+                    return true;
+            }
+
+            return false;
+        }
+
         private void ValidatePreFlightConditions()
         {
             if (!_simConnect.IsConnected)
@@ -166,8 +211,8 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            string modelOnly = (HangarAircraftModel ?? "").Split('(')[0].Trim().ToUpper();
-            bool aircraftOk = !string.IsNullOrEmpty(modelOnly) && (AircraftTitle ?? "").ToUpper().Contains(modelOnly);
+            string modelOnly = (HangarAircraftModel ?? "").Split('(')[0].Trim();
+            bool aircraftOk = IsAircraftMatching(AircraftTitle, HangarAircraftModel);
             
             // Comparação de localização robusta e insensível a maiúsculas
             string simLocation = (_nearestAirportICAO ?? "").Trim().ToUpper();
@@ -183,8 +228,8 @@ namespace FlightCareer.UI.ViewModels
 
             if (!aircraftOk) { WeightStatusText = $"ERRO: AERONAVE INCORRETA (SIM: {AircraftTitle} / HANGAR: {modelOnly})"; WeightStatusColor = "#EF4444"; }
             else if (!locationOk) { WeightStatusText = $"ERRO: LOCALIZAÇÃO INCORRETA (SIM: {simLocation} / HANGAR: {hangarLocation})"; WeightStatusColor = "#EF4444"; }
-            else if (!fuelOk) { WeightStatusText = "ERRO: COMBUSTÍVEL INCORRETO"; WeightStatusColor = "#EF4444"; }
-            else if (!weightOk) { WeightStatusText = "ERRO: CARGA/ZFW INCORRETO"; WeightStatusColor = "#EF4444"; }
+            else if (!fuelOk) { WeightStatusText = $"ERRO: COMBUSTÍVEL INCORRETO (SIM: {FuelQuantity:F1} / HANGAR: {HangarAircraftFuel:F1} GAL)"; WeightStatusColor = "#EF4444"; }
+            else if (!weightOk) { WeightStatusText = $"ERRO: CARGA/ZFW INCORRETO (SIM: {TotalWeight:F0} / NECESSÁRIO: {CalculatedTotalWeight:F0} LBS)"; WeightStatusColor = "#EF4444"; }
             else { WeightStatusText = "PRONTO PARA DECOLAGEM"; WeightStatusColor = "#2ECC71"; CanStartFlight = true; }
         }
     }

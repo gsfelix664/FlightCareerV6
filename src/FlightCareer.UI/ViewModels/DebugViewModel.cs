@@ -15,7 +15,7 @@ namespace FlightCareer.UI.ViewModels
         private System.Windows.Threading.DispatcherTimer? _timer;
 
         [ObservableProperty] private bool _debugEnabled;
-        [ObservableProperty] private string _title = "Cessna 152";
+        [ObservableProperty] private string _title = "Cessna C152";
         [ObservableProperty] private double _latitude = -23.5017;
         [ObservableProperty] private double _longitude = -46.6358;
         [ObservableProperty] private double _altitude = 2500;
@@ -26,7 +26,7 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _fuelGallons = 13.0;
         [ObservableProperty] private double _fuelCapacity = 26.0;
         [ObservableProperty] private double _emptyWeight = 1101;
-        [ObservableProperty] private double _totalWeight = 1670;
+        [ObservableProperty] private double _totalWeight = 1349;
         [ObservableProperty] private double _maxGrossWeight = 1670;
 
         // Novos campos para Debug de Desgaste
@@ -82,33 +82,33 @@ namespace FlightCareer.UI.ViewModels
             switch (preset)
             {
                 case "C152":
-                    Title = "Cessna 152";
+                    Title = "Cessna C152";
                     IsJetMode = false;
                     FuelCapacity = 26;
                     FuelGallons = 13;
                     EmptyWeight = 1101;
                     MaxGrossWeight = 1670;
-                    TotalWeight = 1670;
+                    TotalWeight = 1349;
                     MaxRPM = 2700;
                     break;
                 case "C172":
-                    Title = "Cessna Skyhawk G1000";
+                    Title = "C172SP G1000";
                     IsJetMode = false;
                     FuelCapacity = 56;
                     FuelGallons = 28;
                     EmptyWeight = 1665;
                     MaxGrossWeight = 2550;
-                    TotalWeight = 2400;
+                    TotalWeight = 2003;
                     MaxRPM = 2700;
                     break;
                 case "B350":
-                    Title = "Beechcraft King Air 350i";
+                    Title = "Beechcraft King Air";
                     IsJetMode = true;
                     FuelCapacity = 539;
                     FuelGallons = 200;
                     EmptyWeight = 9955;
                     MaxGrossWeight = 15000;
-                    TotalWeight = 12500;
+                    TotalWeight = 11325;
                     break;
             }
             UpdateData();
