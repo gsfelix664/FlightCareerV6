@@ -41,6 +41,11 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _destLon;
         [ObservableProperty] private string _currentView = "Missions";
         [ObservableProperty] private Guid? _activeAircraftId;
+        [ObservableProperty] private CompanyTier _companyTier = CompanyTier.Tier1_FlightSchool;
+
+        public string CompanyTierDisplay => CompanyTier.GetDisplayName();
+        public string CompanyTierBadge => CompanyTier.GetShortName();
+        public string CompanyTierColor => CompanyTier.GetBadgeColor();
         
         partial void OnSelectedMissionChanged(Mission? value)
         {
@@ -188,6 +193,7 @@ namespace FlightCareer.UI.ViewModels
                 else StartFlight();
             });
             ShowDebugCommand = new RelayCommand(ShowDebug);
+            PromoteCompanyTierCommand = new AsyncRelayCommand(PromoteCompanyTierAsync);
 
             _simConnect.OnConnected += (s, e) => {
                 SimStatusText = "SIMULADOR CONECTADO";
@@ -246,6 +252,7 @@ namespace FlightCareer.UI.ViewModels
         public IRelayCommand RemoveMissionCommand { get; }
         public IAsyncRelayCommand StartFlightCommand { get; }
         public IRelayCommand ShowDebugCommand { get; }
+        public IAsyncRelayCommand PromoteCompanyTierCommand { get; }
 
         private void ShowDebug()
         {
@@ -349,6 +356,12 @@ namespace FlightCareer.UI.ViewModels
                 var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
                 if (pilot != null)
                 {
+                    if (mission.RequiredTier > pilot.CompanyTier)
+                    {
+                        System.Windows.MessageBox.Show($"Sua empresa ({pilot.CompanyTier.GetDisplayName()}) ainda não possui homologação para realizar missões do tipo '{mission.RequiredTier.GetDisplayName()}'.\n\nEvolua a certificação da sua empresa para desbloquear esta operação.", "Missão Bloqueada por Homologação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                        return;
+                    }
+
                     ActiveMissions.Add(mission);
                     AvailableMissions.Remove(mission);
                     mission.IsAccepted = true;
@@ -374,12 +387,96 @@ namespace FlightCareer.UI.ViewModels
             var aircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
             if (aircraft == null) return;
 
+            if (aircraft.IsInterdicted)
+            {
+                System.Windows.MessageBox.Show($"Voo não autorizado! A aeronave {aircraft.Prefix} está INTERDITADA.\n\nMotivo: {aircraft.InterdictionReason}\n\nRealize a manutenção regulatória obrigatória no Hangar antes da decolagem.", "Aeronave Interditada", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredTier > pilot.CompanyTier);
+            if (prohibitedMission != null)
+            {
+                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredTier.GetDisplayName()}, mas sua empresa opera em {pilot.CompanyTier.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            if (ActiveMissions.Any(m => m.PassengerCount > 0) && aircraft.Configuration.Contains("Carga"))
+            {
+                System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
             _flightMonitor.StartMonitoring(pilot, aircraft, ActiveMissions.ToList());
             IsMonitoring = true;
             _briefingViewModel.IsMonitoring = true;
             _hangarViewModel.IsMonitoring = true;
             OnPropertyChanged(nameof(StartFlightButtonText));
             OnPropertyChanged(nameof(StartFlightButtonColor));
+        }
+
+        private async Task PromoteCompanyTierAsync()
+        {
+            var pilots = await _pilotRepository.GetAllAsync();
+            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            if (pilot == null) return;
+
+            if (CompanyTier >= CompanyTier.Tier5_MajorAirline)
+            {
+                System.Windows.MessageBox.Show("Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Tier 5 (Grande Linha Aérea Regular)!", "Nível Máximo Atingido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            var nextTier = (CompanyTier)((int)CompanyTier + 1);
+            double cost = CompanyTier.GetPromotionCost();
+            double reqHours = CompanyTier.GetRequiredHours();
+
+            string reqDesc = nextTier switch
+            {
+                CompanyTier.Tier2_SAE => "- Carteira de Piloto Privado (40+ Horas de Voo)\n- Manual de Serviços Especializados e Inspeção ANAC/FAA",
+                CompanyTier.Tier3_AirTaxi => "- Licença de Piloto Comercial (PC) + IFR (150+ Horas)\n- Homologação de Táxi Aéreo, Gestor SGSO e Mecânico Responsável (DTS)",
+                CompanyTier.Tier4_Regional => "- Habilitação Multimotor (MLTE) + IFR (500+ Horas)\n- Infraestrutura de Rampa/Ground Handling e Sistema DOV",
+                CompanyTier.Tier5_MajorAirline => "- Licença de Piloto de Linha Aérea (PLA) (1500+ Horas)\n- Slots em Hubs Principais, Auditoria IOSA e Homologação Regular",
+                _ => ""
+            };
+
+            string statusMsg = $"CERTIFICAÇÃO REGULATÓRIA DA EMPRESA\n\n" +
+                               $"Homologação Atual: {CompanyTier.GetDisplayName()}\n" +
+                               $"Próximo Nível: {nextTier.GetDisplayName()}\n\n" +
+                               $"REQUISITOS OPERACIONAIS:\n{reqDesc}\n\n" +
+                               $"Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h necessárias\n" +
+                               $"Taxa de Homologação: {cost:C2} (Seu saldo: {Balance:C2})\n\n";
+
+            bool canPromote = (TotalHours >= reqHours) && (Balance >= cost);
+
+            if (!canPromote)
+            {
+                statusMsg += "Você ainda NÃO cumpre todos os requisitos para homologar este nível.";
+                System.Windows.MessageBox.Show(statusMsg, "Progressão de Companhia", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                return;
+            }
+
+            statusMsg += "Deseja pagar a taxa de homologação e certificar sua empresa para o novo Tier agora?";
+            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Homologação", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            pilot.CompanyTier = nextTier;
+
+            _context.FinancialTransactions.Add(new FinancialTransaction
+            {
+                Id = Guid.NewGuid(),
+                PilotId = pilot.Id,
+                Date = DateTime.Now,
+                Category = "Certificação",
+                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextTier.GetDisplayName()}",
+                Amount = cost,
+                Type = TransactionType.Expense
+            });
+
+            await _context.SaveChangesAsync();
+            await InitializeForPilotAsync(pilot.Name);
+
+            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob: {nextTier.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         private async Task CancelFlightAsync()
@@ -391,18 +488,25 @@ namespace FlightCareer.UI.ViewModels
                 System.Windows.MessageBoxButton.YesNo, 
                 System.Windows.MessageBoxImage.Warning);
 
-            if (result == System.Windows.MessageBoxResult.Yes)
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
+            if (_simConnect.IsConnected)
             {
                 await _flightMonitor.CancelMonitoringAsync(_simConnect.CurrentData);
-                IsMonitoring = false;
-                _briefingViewModel.IsMonitoring = false;
-                _hangarViewModel.IsMonitoring = false;
-                OnPropertyChanged(nameof(StartFlightButtonText));
-                OnPropertyChanged(nameof(StartFlightButtonColor));
-                
-                // Recarregar dados do piloto caso a localização tenha mudado
-                await InitializeForPilotAsync(PilotName);
             }
+            else
+            {
+                _flightMonitor.StopMonitoring();
+            }
+
+            IsMonitoring = false;
+            _briefingViewModel.IsMonitoring = false;
+            _hangarViewModel.IsMonitoring = false;
+            OnPropertyChanged(nameof(StartFlightButtonText));
+            OnPropertyChanged(nameof(StartFlightButtonColor));
+            
+            // Recarregar dados do piloto caso a localização tenha mudado
+            await InitializeForPilotAsync(PilotName);
         }
 
         private void OnFlightFinished(Infrastructure.Services.FlightOutcome outcome)
@@ -444,6 +548,7 @@ namespace FlightCareer.UI.ViewModels
             Balance = pilot.Balance;
             ExperiencePoints = pilot.ExperiencePoints;
             ActiveAircraftId = pilot.ActiveAircraftId;
+            CompanyTier = pilot.CompanyTier;
 
             // REGRA: A localização do piloto é ONDE ESTÁ O AVIÃO ATIVO
             var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
@@ -464,6 +569,9 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(CashDisplay));
             OnPropertyChanged(nameof(RankDisplay));
             OnPropertyChanged(nameof(XpProgress));
+            OnPropertyChanged(nameof(CompanyTierDisplay));
+            OnPropertyChanged(nameof(CompanyTierBadge));
+            OnPropertyChanged(nameof(CompanyTierColor));
 
             // Carregar missões aceitas do banco para o manifesto
             var acceptedMissions = await _context.Missions

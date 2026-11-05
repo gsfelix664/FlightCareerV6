@@ -59,6 +59,19 @@ namespace FlightCareer.UI.Services
                 return;
             }
 
+            if (aircraft.IsInterdicted)
+            {
+                OnAlert?.Invoke("AERONAVE INTERDITADA", $"Aeronave impedida de voar! Motivo: {aircraft.InterdictionReason}. Efetue a manutenção obrigatória no Hangar.", true);
+                return;
+            }
+
+            var prohibitedMission = missions.FirstOrDefault(m => m.RequiredTier > pilot.CompanyTier);
+            if (prohibitedMission != null)
+            {
+                OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredTier.GetDisplayName()}, mas sua empresa está operando em {pilot.CompanyTier.GetDisplayName()}!", true);
+                return;
+            }
+
             _pilot = pilot;
             _aircraft = aircraft;
             _activeMissions = missions;

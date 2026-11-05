@@ -86,6 +86,22 @@ namespace FlightCareer.Infrastructure.Services
                 aircraft.CurrentLocationICAO = destinationIcao;
                 double hours = outcome.FlightTimeMinutes / 60.0;
                 aircraft.CurrentAirframeHours += hours;
+
+                // Consumo de TBO e Inspeções Regulatórias
+                aircraft.EngineTboRemainingHours = Math.Max(0, aircraft.EngineTboRemainingHours - hours);
+                aircraft.HoursUntilNext50hInspection = Math.Max(0, aircraft.HoursUntilNext50hInspection - hours);
+                aircraft.HoursUntilNext100hInspection = Math.Max(0, aircraft.HoursUntilNext100hInspection - hours);
+
+                if (aircraft.EngineTboRemainingHours <= 0)
+                {
+                    aircraft.IsInterdicted = true;
+                    aircraft.InterdictionReason = "TBO Vencido (Retífica Obrigatória de Motor)";
+                }
+                else if (aircraft.HoursUntilNext100hInspection <= 0)
+                {
+                    aircraft.IsInterdicted = true;
+                    aircraft.InterdictionReason = "Inspeção Regulatória de 100 Horas Vencida";
+                }
                 
                 // 2. Atualizar Piloto
                 pilot.CurrentAirportICAO = destinationIcao;

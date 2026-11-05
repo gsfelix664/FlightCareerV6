@@ -58,7 +58,8 @@ namespace FlightCareer.UI
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    await dbContext.Database.EnsureCreatedAsync();
+                    await dbContext.Database.EnsureCreatedAsync();
+                    await dbContext.EnsureSchemaUpdatedAsync();
 
                     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
                     if (!seeder.IsSeeded())
@@ -92,13 +93,20 @@ namespace FlightCareer.UI
         private void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>(options =>
-                {
-                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "flightcareer.db");
-                if (!System.IO.File.Exists(dbPath) && System.IO.File.Exists("flightcareer.db"))
-                {
-                    dbPath = System.IO.Path.GetFullPath("flightcareer.db");
-                }
-                options.UseSqlite($"Data Source={dbPath}");
+                {
+
+                string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "flightcareer.db");
+
+                if (!System.IO.File.Exists(dbPath) && System.IO.File.Exists("flightcareer.db"))
+
+                {
+
+                    dbPath = System.IO.Path.GetFullPath("flightcareer.db");
+
+                }
+
+                options.UseSqlite($"Data Source={dbPath}");
+
             },
                 ServiceLifetime.Singleton); // DbContext como Singleton para WPF
 

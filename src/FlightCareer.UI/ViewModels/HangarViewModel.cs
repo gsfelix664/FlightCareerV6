@@ -126,6 +126,7 @@ namespace FlightCareer.UI.ViewModels
             if (pilot.Balance < totalCost)
             {
                 MessageBox.Show($"Saldo insuficiente! Você precisa de {totalCost:C2}.");
+                return;
             }
 
             var result = MessageBox.Show($"Deseja autorizar todos os serviços selecionados por {totalCost:C2}?", 
@@ -170,6 +171,193 @@ namespace FlightCareer.UI.ViewModels
             SelectedAircraft.Refresh();
 
             MessageBox.Show("Serviços realizados com sucesso! Sua aeronave está pronta.");
+        }
+
+        [RelayCommand]
+        private async Task Perform50hInspection()
+        {
+            if (SelectedAircraft == null) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Aeronave destruída!");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = SelectedAircraft.Cost50hInspection;
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! A inspeção de 50h custa {cost:C2}.");
+                return;
+            }
+
+            var result = MessageBox.Show($"Deseja realizar a Inspeção Preventiva de 50 Horas para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso revisará filtros, velas e fluidos do motor.",
+                "Inspeção de 50 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var aircraft = SelectedAircraft.Aircraft;
+            aircraft.HoursUntilNext50hInspection = 50.0;
+
+            if (aircraft.IsInterdicted && aircraft.InterdictionReason.Contains("50") && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
+            {
+                aircraft.IsInterdicted = false;
+                aircraft.InterdictionReason = string.Empty;
+            }
+
+            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO 50H: {aircraft.Prefix}", cost));
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.ResetOperations();
+            SelectedAircraft.Refresh();
+            MessageBox.Show("Inspeção de 50 horas concluída com sucesso!");
+        }
+
+        [RelayCommand]
+        private async Task Perform100hInspection()
+        {
+            if (SelectedAircraft == null) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Aeronave destruída!");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = SelectedAircraft.Cost100hInspection;
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! A inspeção regulatória de 100h custa {cost:C2}.");
+                return;
+            }
+
+            var result = MessageBox.Show($"Deseja realizar a Inspeção Obrigatória de 100 Horas para {SelectedAircraft.Prefix} por {cost:C2}?\n\nEsta inspeção zera tanto a contagem de 100h quanto a de 50h.",
+                "Inspeção de 100 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var aircraft = SelectedAircraft.Aircraft;
+            aircraft.HoursUntilNext100hInspection = 100.0;
+            aircraft.HoursUntilNext50hInspection = 50.0;
+
+            if (aircraft.IsInterdicted && aircraft.EngineTboRemainingHours > 0)
+            {
+                aircraft.IsInterdicted = false;
+                aircraft.InterdictionReason = string.Empty;
+            }
+
+            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO REGULATÓRIA 100H: {aircraft.Prefix}", cost));
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.ResetOperations();
+            SelectedAircraft.Refresh();
+            MessageBox.Show("Inspeção regulatória de 100 horas concluída com sucesso! Aeronave liberada para voo.");
+        }
+
+        [RelayCommand]
+        private async Task PerformOverhaul()
+        {
+            if (SelectedAircraft == null) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Aeronave destruída!");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = SelectedAircraft.CostOverhaul;
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! A retífica geral (Overhaul de TBO) custa {cost:C2}.");
+                return;
+            }
+
+            var result = MessageBox.Show($"Deseja realizar o Overhaul Geral do Motor (Retífica de TBO) para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso restaura o TBO para 1.800 horas e condição do motor para 100%.",
+                "Overhaul de Motor (TBO)", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var aircraft = SelectedAircraft.Aircraft;
+            aircraft.EngineTboRemainingHours = 1800.0;
+            aircraft.EngineCondition = 100.0;
+
+            if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0)
+            {
+                aircraft.IsInterdicted = false;
+                aircraft.InterdictionReason = string.Empty;
+            }
+
+            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"RETÍFICA GERAL / OVERHAUL TBO: {aircraft.Prefix}", cost));
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.ResetOperations();
+            SelectedAircraft.Refresh();
+            MessageBox.Show("Overhaul concluído com sucesso! Motor retificado e TBO restaurado para 1.800h.");
+        }
+
+        [RelayCommand]
+        private async Task ToggleConfiguration()
+        {
+            if (SelectedAircraft == null) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Aeronave destruída!");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode alterar a configuração durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = SelectedAircraft.CostToggleConfiguration;
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! A conversão de cabine custa {cost:C2}.");
+                return;
+            }
+
+            string currentConfig = SelectedAircraft.Configuration;
+            string newConfig = currentConfig.Contains("Carga") ? "Passageiro" : "Carga (Sem Assentos)";
+
+            var result = MessageBox.Show($"Deseja converter a aeronave {SelectedAircraft.Prefix} de '{currentConfig}' para '{newConfig}' por {cost:C2}?",
+                "Conversão de Configuração de Cabine", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var aircraft = SelectedAircraft.Aircraft;
+            aircraft.Configuration = newConfig;
+
+            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"CONVERSÃO CABINE ({newConfig}): {aircraft.Prefix}", cost));
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.ResetOperations();
+            SelectedAircraft.Refresh();
+            MessageBox.Show($"Aeronave convertida com sucesso para configuração: {newConfig}!");
         }
 
         [RelayCommand]
@@ -307,4 +495,3 @@ namespace FlightCareer.UI.ViewModels
         }
     }
 }
-

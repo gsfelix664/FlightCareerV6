@@ -184,3 +184,28 @@ Você NÃO deve esperar que o usuário mencione explicitamente `@agente`. Você 
   - Adicionado `.gitignore` cobrindo artefatos de compilação (.NET/VS), bancos locais (`*.db`, `*.db-wal`), arquivos de usuário e backups da pasta `antigos/`.
   - Criado `README.md` detalhado documentando os recursos, arquitetura (Clean Architecture, MVVM, EF Core) e instruções de execução.
   - Inicializada branch `main` e realizado o primeiro push para o GitHub.
+
+
+## 2026-11-05 - Sistema de Progressão Regulatória em 5 Tiers, TBO e Manutenção
+- **Progressão da Empresa (5 Tiers Operacionais)**:
+  - Implementado enum `CompanyTier`:
+    - **Tier 1 (CIAC / Escola de Aviação)**: Foco na instrução de pilotos (PP/PC/INVA), voos locais e aeronaves de treinamento.
+    - **Tier 2 (Serviços Aéreos Especializados - SAE)**: Operações agro, reboque de faixas, foto aérea e pequenas cargas com conversão de assentos.
+    - **Tier 3 (Táxi Aéreo / Charter & Carga Fechada)**: Transporte não regular sob demanda, bimotores, turboélices e jatos leves com gestão SGSO/DTS.
+    - **Tier 4 (Aviação Regional & Sub-regulares)**: Rotas regulares diárias/semanais conectando cidades ao hub, com suporte DOV e ground handling.
+    - **Tier 5 (Grande Linha Aérea Regular)**: Malha de alta densidade nacional/internacional e transporte de cargas heavy (widebody).
+- **Manutenção Regulatória & TBO**:
+  - Implementado controle de TBO (Time Between Overhaul) de motor (1.800h padrão) em `PilotAircraft`.
+  - Adicionado controle das inspeções regulatórias periódicas obrigatórias de **50 Horas** e **100 Horas**.
+  - Interdição automática da aeronave caso o TBO ou a inspeção de 100 horas atinjam zero, impedindo decolagem até a realização dos serviços.
+  - Comandos dedicados no Hangar para:
+    - **Inspeção de 50h** ($850)
+    - **Inspeção de 100h** ($2.500)
+    - **Retífica Geral de Motor / Overhaul TBO** ($25.000 ou 20% do valor da aeronave)
+    - **Conversão de Cabine Pax/Carga** ($1.200) permitindo remover/adicionar assentos.
+- **Homologação e Restrições de Missões**:
+  - O `MissionGenerator` classifica missões por categoria e atribui o `RequiredTier` correspondente.
+  - A interface bloqueia o aceite e o início de voos de missões que excedam a certificação atual da companhia.
+  - Criado botão de evolução e consulta de requisitos regulatórios no badge de Tier do perfil lateral.
+- **Migração Dinâmica de Banco de Dados**:
+  - Adicionado método `EnsureSchemaUpdatedAsync` em `AppDbContext` para atualizar automaticamente a estrutura de bancos SQLite existentes sem quebrar dados de pilotos anteriores.

@@ -141,7 +141,19 @@
                         <StackPanel>
                             <TextBlock Text="{Binding PilotName}" FontSize="16" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Text="{Binding PilotCompanyName}" FontSize="12" Foreground="{StaticResource PrimaryBlue}" FontWeight="SemiBold" Margin="0,2,0,0"/>
-                            <TextBlock Text="{Binding RankDisplay}" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,10"/>
+
+                            <!-- Badge de Homologação da Empresa com Ação de Evolução -->
+                            <Button Command="{Binding PromoteCompanyTierCommand}" Cursor="Hand" Background="Transparent" BorderThickness="0" Padding="0" Margin="0,6,0,6" HorizontalAlignment="Left" ToolTip="Clique para ver requisitos e homologação da empresa">
+                                <Border Background="#161B22" BorderBrush="{Binding CompanyTierColor}" BorderThickness="1" CornerRadius="6" Padding="8,4">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="7" Height="7" Fill="{Binding CompanyTierColor}" Margin="0,0,6,0"/>
+                                        <TextBlock Text="{Binding CompanyTierBadge}" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                                        <TextBlock Text=" ⮵" FontSize="10" Foreground="{Binding CompanyTierColor}" FontWeight="Bold" Margin="3,0,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+
+                            <TextBlock Text="{Binding RankDisplay}" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,10"/>
                             
                             <ProgressBar Height="4" Value="{Binding XpProgress, Mode=OneWay}" Maximum="100" 
                                          Background="#0F1113" Foreground="{StaticResource PrimaryBlue}" BorderThickness="0"/>
@@ -265,7 +277,8 @@
                                 </Style>
                             </Border.Style>
                             <StackPanel>
-                                <TextBlock Text="BRIEFING DE VOO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,10"/>
+                                <TextBlock Text="BRIEFING DE VOO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,4"/>
+                                <TextBlock Text="{Binding SelectedMission.MissionCategoryType}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,6"/>
                                 <TextBlock Text="{Binding SelectedMission.Title}" FontSize="20" FontWeight="Bold" Foreground="White" TextWrapping="Wrap" Margin="0,0,0,15"/>
                                 
                                 <UniformGrid Columns="2" Margin="0,0,0,15">
@@ -353,11 +366,19 @@
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
-                                        <DataGridTextColumn Header="PESO" Binding="{Binding PayloadLbs, StringFormat={}{0:N0} LBS}" Width="*">
+                                        <DataGridTextColumn Header="PESO" Binding="{Binding PayloadLbs, StringFormat={}{0:N0} LBS}" Width="85">
                                             <DataGridTextColumn.ElementStyle>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Foreground" Value="{StaticResource PrimaryBlue}"/>
                                                     <Setter Property="FontWeight" Value="Bold"/>
+                                                </Style>
+                                            </DataGridTextColumn.ElementStyle>
+                                        </DataGridTextColumn>
+                                        <DataGridTextColumn Header="OPERAÇÃO" Binding="{Binding MissionCategoryType}" Width="*">
+                                            <DataGridTextColumn.ElementStyle>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                                    <Setter Property="FontSize" Value="11"/>
                                                 </Style>
                                             </DataGridTextColumn.ElementStyle>
                                         </DataGridTextColumn>
@@ -954,22 +975,37 @@
                                                     <TextBlock Text="{Binding SelectedAircraft.MTOW, StringFormat={}{0:N0} LBS}" Foreground="{StaticResource TextMain}" FontSize="12" FontWeight="Bold"/>
                                                 </StackPanel>
                                             </Border>
-                                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
+                                                                                        <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBlock Text="COMBUSTÍVEL: " Foreground="{StaticResource TextMuted}" FontSize="12"/>
                                                     <TextBlock Text="{Binding SelectedAircraft.FuelCapacity, StringFormat={}{0:F0} GAL}" Foreground="{StaticResource TextMain}" FontSize="12" FontWeight="Bold" Margin="0,0,5,0"/>
                                                     <TextBlock Text="{Binding SelectedAircraft.FuelType, StringFormat=({0})}" Foreground="{StaticResource TextMuted}" FontSize="11"/>
                                                 </StackPanel>
                                             </Border>
+                                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="TBO: " Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                                                    <TextBlock Text="{Binding SelectedAircraft.EngineTboRemainingHours, StringFormat={}{0:F0}h}" Foreground="{StaticResource TextMain}" FontSize="12" FontWeight="Bold"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="CABINE: " Foreground="{StaticResource TextMuted}" FontSize="12"/>
+                                                    <TextBlock Text="{Binding SelectedAircraft.Configuration}" Foreground="{StaticResource PrimaryBlue}" FontSize="12" FontWeight="Bold"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <Border Background="{Binding SelectedAircraft.StatusColor}" CornerRadius="6" Padding="12,6">
+                                                <TextBlock Text="{Binding SelectedAircraft.StatusText}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                                            </Border>
                                         </WrapPanel>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
 
-                            <!-- DASHBOARD GRID -->
+                                                        <!-- DASHBOARD GRID -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                                <UniformGrid Columns="3">
-                                    <!-- CARD: MANUTENÇÃO -->
+                                <UniformGrid Columns="2">
+                                    <!-- CARD: MANUTENÇÃO CORRETIVA -->
                                     <Border Style="{StaticResource HangarCard}" Margin="0,0,20,20">
                                         <StackPanel>
                                             <TextBlock Text="🛠️ Manutenção e Reparos" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
@@ -1000,6 +1036,57 @@
                                             </StackPanel>
 
                                             <Button Content="Aplicar Reparos" Command="{Binding AuthorizeServicesCommand}" Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Height="45" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- CARD: MANUTENÇÃO REGULATÓRIA & TBO -->
+                                    <Border Style="{StaticResource HangarCard}" Margin="0,0,0,20">
+                                        <StackPanel>
+                                            <TextBlock Text="📋 Inspeções Regulatórias &amp; TBO" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
+                                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Margin="0,0,0,15"/>
+
+                                            <!-- TBO Motor -->
+                                            <Grid Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <TextBlock Text="TBO Restante do Motor:" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding SelectedAircraft.EngineTboRemainingHours, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="13"/>
+                                                </StackPanel>
+                                                <Button Content="Retífica TBO" Command="{Binding PerformOverhaulCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                        Style="{StaticResource NavButton}" Background="#D97706" Foreground="White" Height="32" Padding="12,0" FontSize="11"
+                                                        ToolTip="Restaura motor a 100% e TBO para 1.800h"/>
+                                            </Grid>
+
+                                            <!-- Inspeção 50 Horas -->
+                                            <Grid Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <TextBlock Text="Próxima Inspeção 50h:" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext50hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="13"/>
+                                                </StackPanel>
+                                                <Button Content="Fazer 50h ($850)" Command="{Binding Perform50hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="32" Padding="12,0" FontSize="11"/>
+                                            </Grid>
+
+                                            <!-- Inspeção 100 Horas -->
+                                            <Grid Margin="0,0,0,12">
+                                                <StackPanel>
+                                                    <TextBlock Text="Próxima Inspeção 100h (Obrigatória):" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext100hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="13"/>
+                                                </StackPanel>
+                                                <Button Content="Fazer 100h ($2.500)" Command="{Binding Perform100hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="32" Padding="12,0" FontSize="11"/>
+                                            </Grid>
+
+                                            <!-- Configuração de Cabine (Pax vs Carga) -->
+                                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,5,0,0">
+                                                <Grid>
+                                                    <StackPanel>
+                                                        <TextBlock Text="Configuração da Cabine:" Foreground="{StaticResource TextMuted}" FontSize="11"/>
+                                                        <TextBlock Text="{Binding SelectedAircraft.Configuration}" Foreground="{StaticResource PrimaryBlue}" FontWeight="Bold" FontSize="13"/>
+                                                    </StackPanel>
+                                                    <Button Content="Converter ($1.200)" Command="{Binding ToggleConfigurationCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                            Style="{StaticResource NavButton}" Background="#374151" Foreground="White" Height="32" Padding="12,0" FontSize="11"/>
+                                                </Grid>
+                                            </Border>
                                         </StackPanel>
                                     </Border>
 

@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace FlightCareer.Infrastructure.Persistence
 {
@@ -35,6 +36,51 @@ namespace FlightCareer.Infrastructure.Persistence
                 .IsUnique();
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        public async Task EnsureSchemaUpdatedAsync()
+        {
+            var connection = Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            using var command = connection.CreateCommand();
+
+            string[] migrationStatements = new[]
+            {
+                "ALTER TABLE Pilots ADD COLUMN CompanyTier INTEGER DEFAULT 1;",
+                "ALTER TABLE Pilots ADD COLUMN HasPPLicense INTEGER DEFAULT 1;",
+                "ALTER TABLE Pilots ADD COLUMN HasCPLicense INTEGER DEFAULT 0;",
+                "ALTER TABLE Pilots ADD COLUMN HasIFRRating INTEGER DEFAULT 0;",
+                "ALTER TABLE Pilots ADD COLUMN HasMultiEngineRating INTEGER DEFAULT 0;",
+                "ALTER TABLE Pilots ADD COLUMN HasATPLicense INTEGER DEFAULT 0;",
+                "ALTER TABLE Pilots ADD COLUMN HasCFIInstructor INTEGER DEFAULT 0;",
+
+                "ALTER TABLE PilotAircrafts ADD COLUMN EngineTboRemainingHours REAL DEFAULT 1800;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN HoursUntilNext50hInspection REAL DEFAULT 50;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN HoursUntilNext100hInspection REAL DEFAULT 100;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN IsInterdicted INTEGER DEFAULT 0;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN InterdictionReason TEXT DEFAULT '';",
+                "ALTER TABLE PilotAircrafts ADD COLUMN Configuration TEXT DEFAULT 'Passageiro';",
+
+                "ALTER TABLE Missions ADD COLUMN RequiredTier INTEGER DEFAULT 1;",
+                "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';"
+            };
+
+            foreach (var stmt in migrationStatements)
+            {
+                try
+                {
+                    command.CommandText = stmt;
+                    await command.ExecuteNonQueryAsync();
+                }
+                catch
+                {
+                    // Coluna já existente (ignorar)
+                }
+            }
         }
     }
 }

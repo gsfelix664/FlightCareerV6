@@ -29,16 +29,39 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(RefuelCost));
             OnPropertyChanged(nameof(TotalOperationCost));
             OnPropertyChanged(nameof(IsInsured));
+            OnPropertyChanged(nameof(EngineTboRemainingHours));
+            OnPropertyChanged(nameof(HoursUntilNext50hInspection));
+            OnPropertyChanged(nameof(HoursUntilNext100hInspection));
+            OnPropertyChanged(nameof(IsInterdicted));
+            OnPropertyChanged(nameof(InterdictionReason));
+            OnPropertyChanged(nameof(Configuration));
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(StatusColor));
         }
 
         public string Prefix => Aircraft.Prefix;
         public string Model => Aircraft.AircraftType?.Model ?? "N/A";
         public double PurchasePrice => Aircraft.AircraftType?.PurchasePrice ?? 0;
-        public double MTOW => (Aircraft.AircraftType?.MaxPayloadLbs ?? 0) + 2000; // Simulação de Peso Vazio + MaxPayload
-        public double ZFW => 2000; // Peso Vazio Fixo para Simulação
+        public double MTOW => (Aircraft.AircraftType?.MaxPayloadLbs ?? 0) + 2000;
+        public double ZFW => 2000;
         public double FuelCapacity => Aircraft.AircraftType?.FuelTankGallons ?? 0;
         public double Hobbs => Aircraft.CurrentAirframeHours;
         public string FuelType => Aircraft.AircraftType?.FuelType ?? "AVGAS";
+
+        // Manutenção Regulatória & TBO
+        public double EngineTboRemainingHours => Math.Round(Aircraft.EngineTboRemainingHours, 1);
+        public double HoursUntilNext50hInspection => Math.Round(Aircraft.HoursUntilNext50hInspection, 1);
+        public double HoursUntilNext100hInspection => Math.Round(Aircraft.HoursUntilNext100hInspection, 1);
+        public bool IsInterdicted => Aircraft.IsInterdicted;
+        public string InterdictionReason => Aircraft.InterdictionReason;
+        public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
+        public bool IsCargoConfig => Configuration.Contains("Carga");
+
+        // Custos Regulatórios
+        public double Cost50hInspection => 850.0;
+        public double Cost100hInspection => 2500.0;
+        public double CostOverhaul => Math.Max(25000.0, Math.Round(PurchasePrice * 0.20, 2));
+        public double CostToggleConfiguration => 1200.0;
 
         // Estado do Heatmap
         public double EngineCondition => Aircraft.EngineCondition;
@@ -81,8 +104,9 @@ namespace FlightCareer.UI.ViewModels
             get
             {
                 if (IsCrashed) return "PERDA TOTAL (CRASH)";
-                if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30) return "GROUNDED";
-                if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70) return "MANUTENÇÃO NECESSÁRIA";
+                if (IsInterdicted) return $"INTERDITADA: {InterdictionReason}";
+                if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30) return "GROUNDED (MANUT. CRÍTICA)";
+                if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70 || HoursUntilNext50hInspection <= 5 || HoursUntilNext100hInspection <= 10 || EngineTboRemainingHours <= 50) return "MANUTENÇÃO NECESSÁRIA";
                 return "PRONTA PARA VOO";
             }
         }
@@ -92,9 +116,9 @@ namespace FlightCareer.UI.ViewModels
             get
             {
                 if (IsCrashed) return new SolidColorBrush(Color.FromRgb(0, 0, 0)); // Preto para Perda Total
-                if (StatusText == "GROUNDED") return new SolidColorBrush(Color.FromRgb(231, 76, 60));
-                if (StatusText == "MANUTENÇÃO NECESSÁRIA") return new SolidColorBrush(Color.FromRgb(241, 196, 15));
-                return new SolidColorBrush(Color.FromRgb(46, 204, 113));
+                if (IsInterdicted || StatusText.StartsWith("GROUNDED")) return new SolidColorBrush(Color.FromRgb(231, 76, 60)); // Vermelho
+                if (StatusText == "MANUTENÇÃO NECESSÁRIA") return new SolidColorBrush(Color.FromRgb(241, 196, 15)); // Amarelo
+                return new SolidColorBrush(Color.FromRgb(46, 204, 113)); // Verde
             }
         }
 
