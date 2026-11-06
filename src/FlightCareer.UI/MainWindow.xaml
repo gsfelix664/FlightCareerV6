@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Flight Career V6" Height="800" Width="1400"
         WindowStartupLocation="CenterScreen"
-        Background="#0F1113" Foreground="#E1E2E5">
+        Background="#0B0F14" Foreground="#F0F4F8"
+        FontFamily="Inter, Segoe UI, sans-serif">
 
     <Window.Resources>
         <!-- Estilo Botão Menu -->
@@ -116,6 +117,81 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!-- Estilo Chip de Filtro (Avionics Dark Mode) -->
+        <Style x:Key="ChipFilterButton" TargetType="Button">
+            <Setter Property="Background" Value="#141C24"/>
+            <Setter Property="Foreground" Value="#8B9BAE"/>
+            <Setter Property="BorderBrush" Value="#263545"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,4"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,5,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#00E5FF"/>
+                                <Setter Property="Foreground" Value="#F0F4F8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Tabela Densa de Missões (Dark Mode Avionics) -->
+        <Style x:Key="MissionsTableDataGrid" TargetType="DataGrid" BasedOn="{StaticResource ModernDataGrid}">
+            <Setter Property="RowHeight" Value="46"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="RowBackground" Value="Transparent"/>
+            <Setter Property="AlternatingRowBackground" Value="#10161D"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#8B9BAE"/>
+                        <Setter Property="FontSize" Value="11"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+                        <Setter Property="Padding" Value="10,0,10,8"/>
+                        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                        <Setter Property="BorderBrush" Value="#263545"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#F0F4F8"/>
+                        <Setter Property="Margin" Value="0,1"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#1F2B37"/>
+                                <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                <Setter Property="Foreground" Value="#F0F4F8"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#19232D"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -143,7 +219,7 @@
                             <TextBlock Text="{Binding PilotCompanyName}" FontSize="12" Foreground="{StaticResource PrimaryBlue}" FontWeight="SemiBold" Margin="0,2,0,0"/>
 
                             <!-- Badge de Homologação da Empresa com Ação de Evolução -->
-                            <Button Command="{Binding PromoteCompanyTierCommand}" Cursor="Hand" Background="Transparent" BorderThickness="0" Padding="0" Margin="0,6,0,6" HorizontalAlignment="Left" ToolTip="Clique para ver requisitos e homologação da empresa">
+                            <Button Command="{Binding PromoteCompanyTierCommand}" Cursor="Hand" Background="Transparent" BorderThickness="0" Padding="0" Margin="0,6,0,6" HorizontalAlignment="Left" ToolTip="Clique para ver requisitos e categoria operacional da empresa">
                                 <Border Background="#161B22" BorderBrush="{Binding CompanyTierColor}" BorderThickness="1" CornerRadius="6" Padding="8,4">
                                     <StackPanel Orientation="Horizontal">
                                         <Ellipse Width="7" Height="7" Fill="{Binding CompanyTierColor}" Margin="0,0,6,0"/>
@@ -168,6 +244,7 @@
                     <TextBlock Text="OPERAÇÕES" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,0,0,10"/>
                     <Button Content="  Quadro de Missões" Style="{StaticResource NavButton}" Command="{Binding ShowMissionsCommand}"/>
                     <Button Content="  Briefing de Voo" Style="{StaticResource NavButton}" Command="{Binding ShowBriefingCommand}"/>
+                    <Button Content="  Voo de Translado (Ferry)" Style="{StaticResource NavButton}" Command="{Binding OpenFerryWindowCommand}"/>
                     
                     <TextBlock Text="CARREIRA" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,25,0,10"/>
                     <Button Content="  Mercado de Aeronaves" Style="{StaticResource NavButton}" Command="{Binding ShowMarketCommand}"/>
@@ -206,8 +283,8 @@
             </Border>
 
             <Grid Grid.Row="1">
-                <!-- VIEW: MISSÕES -->
-                <Grid Margin="30">
+                <!-- VIEW: MISSÕES (QUADRO DE CONTRATOS & DESPACHO OPERACIONAL) -->
+                <Grid Margin="25">
                     <Grid.Style>
                         <Style TargetType="Grid">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -218,181 +295,483 @@
                             </Style.Triggers>
                         </Style>
                     </Grid.Style>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1.2*"/>
-                        <ColumnDefinition Width="1.8*"/>
-                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/> <!-- Header e Métricas -->
+                        <RowDefinition Height="*"/>    <!-- Split-Screen Assimétrico -->
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,30">
-                        <TextBlock Text="Painel de Controle" FontSize="28" FontWeight="Bold" Foreground="White"/>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <Ellipse Width="8" Height="8" Fill="#2ECC71" Margin="0,0,10,0"/>
-                            <TextBlock Text="{Binding CurrentLocation}" FontSize="13" Foreground="{StaticResource TextSecondary}"/>
-                        </StackPanel>
-                    </StackPanel>
-
-                    <UniformGrid Grid.Row="1" Grid.ColumnSpan="2" Columns="3" Margin="0,0,0,30">
-                        <Border Background="{StaticResource CardBackground}" CornerRadius="12" Padding="20" Margin="0,0,10,0">
-                            <StackPanel>
-                                <TextBlock Text="MISSÕES ACEITAS" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding ActiveMissions.Count}" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Background="{StaticResource CardBackground}" CornerRadius="12" Padding="20" Margin="5,0,5,0">
-                            <StackPanel>
-                                <TextBlock Text="HORAS DE VOO" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding TotalHours, StringFormat={}{0:F1}h}" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Background="{StaticResource CardBackground}" CornerRadius="12" Padding="20" Margin="10,0,0,0">
-                            <StackPanel>
-                                <TextBlock Text="XP TOTAL" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding ExperiencePoints}" FontSize="20" FontWeight="Bold" Foreground="White"/>
-                            </StackPanel>
-                        </Border>
-                    </UniformGrid>
-
-                    <!-- Coluna da Esquerda: Detalhes e Lista -->
-                    <Grid Grid.Row="2" Grid.Column="0">
+                    <!-- HEADER SUPERIOR E MÉTRICAS (AVIONICS DARK MODE) -->
+                    <Grid Grid.Row="0" Margin="0,0,0,15">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Detalhes da Missão Selecionada (Acima) -->
-                        <Border Grid.Row="0" Background="{StaticResource SurfaceDark}" CornerRadius="15" Padding="20" Margin="0,0,0,20">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedMission}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <StackPanel>
-                                <TextBlock Text="BRIEFING DE VOO" FontSize="10" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,4"/>
-                                <TextBlock Text="{Binding SelectedMission.MissionCategoryType}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" Margin="0,0,0,6"/>
-                                <TextBlock Text="{Binding SelectedMission.Title}" FontSize="20" FontWeight="Bold" Foreground="White" TextWrapping="Wrap" Margin="0,0,0,15"/>
-                                
-                                <UniformGrid Columns="2" Margin="0,0,0,15">
-                                    <StackPanel>
-                                        <TextBlock Text="PESSOAS A BORDO" FontSize="9" Foreground="{StaticResource TextSecondary}"/>
-                                        <TextBlock Text="{Binding TotalPaxCount, StringFormat={}{0} (incl. Piloto)}" FontSize="13" FontWeight="Bold" Foreground="White"/>
-                                    </StackPanel>
-                                    <StackPanel>
-                                        <TextBlock Text="RECOMPENSA" FontSize="9" Foreground="{StaticResource TextSecondary}"/>
-                                        <TextBlock Text="{Binding SelectedMission.RewardMoney, StringFormat=C}" FontSize="13" FontWeight="Bold" Foreground="#2ECC71"/>
-                                    </StackPanel>
-                                </UniformGrid>
+                        <!-- Título e Botão Ferry -->
+                        <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="QUADRO DE MISSÕES &amp; CONTRATOS" FontSize="20" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <Border Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" CornerRadius="3" Padding="6,2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding PilotCategoryBadge}" FontSize="10" FontWeight="Bold" Foreground="{Binding PilotCategoryColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                    </Border>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                    <Ellipse Width="7" Height="7" Fill="#00E676" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding CurrentLocation}" FontSize="12" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                </StackPanel>
+                            </StackPanel>
+                            
+                            <Button Grid.Column="1" Command="{Binding OpenFerryWindowCommand}" Cursor="Hand" Background="#141C24" BorderBrush="#263545" BorderThickness="1" Padding="12,6" VerticalAlignment="Center" ToolTip="Planejar voo de translado ou reposicionar sua aeronave para outro aeroporto">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="✈️ " FontSize="12" VerticalAlignment="Center"/>
+                                                <TextBlock Text="VOO DE TRANSLADO (FERRY)" FontSize="10" FontWeight="Bold" Foreground="#F0F4F8" VerticalAlignment="Center" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="border" Property="Background" Value="#1F2B37"/>
+                                                <Setter TargetName="border" Property="BorderBrush" Value="#00E5FF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
 
-                                <Border Background="{StaticResource CardBackground}" CornerRadius="10" Padding="12" Margin="0,0,0,15">
-                                    <StackPanel>
-                                        <TextBlock Text="DISTRIBUIÇÃO DE PESO" FontSize="9" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,10"/>
-                                        <Grid Margin="0,0,0,5">
-                                            <TextBlock Text="Carga/Bags" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
-                                            <TextBlock Text="{Binding SelectedMission.PayloadLbs, StringFormat={}{0:N0} LBS}" FontSize="10" FontWeight="Bold" HorizontalAlignment="Right" Foreground="White"/>
-                                        </Grid>
+                        <!-- Banner de Métricas Rápidas (Surface Elevada #141C24 com borda #263545) -->
+                        <UniformGrid Grid.Row="1" Columns="4" Margin="0,0,0,5">
+                            <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <TextBlock Text="CONTRATOS DISPONÍVEIS" FontSize="10" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <TextBlock Text="{Binding FilteredMissions.Count}" FontSize="18" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <TextBlock Text="SELECIONADOS EM LOTE" FontSize="10" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <TextBlock Text="{Binding SelectedBatchCount}" FontSize="18" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,10" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <TextBlock Text="HOMOLOGAÇÃO DA EMPRESA" FontSize="10" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <TextBlock Text="{Binding CompanyTierDisplay}" FontSize="13" FontWeight="Bold" Foreground="{Binding CompanyTierColor}" FontFamily="Inter, Segoe UI, sans-serif" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,10">
+                                <StackPanel>
+                                    <TextBlock Text="SALDO DISPONÍVEL" FontSize="10" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <TextBlock Text="{Binding CashDisplay}" FontSize="18" FontWeight="Bold" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+                    </Grid>
+
+                    <!-- LAYOUT SPLIT-SCREEN ASSIMÉTRICO (58% ESQUERDA / 42% DIREITA) -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="58*"/>
+                            <ColumnDefinition Width="42*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- COLUNA DA ESQUERDA (58%): FILTROS, BUSCA E TABELA DENSA DE MISSÕES -->
+                        <Grid Grid.Column="0" Margin="0,0,10,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/> <!-- Barra Superior de Filtros e Busca -->
+                                <RowDefinition Height="*"/>    <!-- Tabela Densa & Empty State -->
+                            </Grid.RowDefinitions>
+
+                            <!-- 1. BARRA SUPERIOR DE FILTROS E BUSCA -->
+                            <Border Grid.Row="0" Background="#141C24" CornerRadius="8" Padding="12" Margin="0,0,0,10" BorderBrush="#263545" BorderThickness="1">
+                                <StackPanel>
+                                    <!-- Chips de Filtro por Categoria de Operação -->
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,0,10">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="TODOS" Command="{Binding SetCategoryFilterCommand}" CommandParameter="TODOS">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="TODOS">
+                                                                <Setter Property="Background" Value="#00E5FF"/>
+                                                                <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="TÁXI AÉREO" Command="{Binding SetCategoryFilterCommand}" CommandParameter="TÁXI AÉREO">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="TÁXI AÉREO">
+                                                                <Setter Property="Background" Value="#00E676"/>
+                                                                <Setter Property="BorderBrush" Value="#00E676"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="LINHA REGIONAL" Command="{Binding SetCategoryFilterCommand}" CommandParameter="LINHA REGIONAL">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="LINHA REGIONAL">
+                                                                <Setter Property="Background" Value="#00E5FF"/>
+                                                                <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="LINHA REGULAR" Command="{Binding SetCategoryFilterCommand}" CommandParameter="LINHA REGULAR">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="LINHA REGULAR">
+                                                                <Setter Property="Background" Value="#00B0FF"/>
+                                                                <Setter Property="BorderBrush" Value="#00B0FF"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="CARGA / SAE" Command="{Binding SetCategoryFilterCommand}" CommandParameter="CARGA / SAE">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="CARGA / SAE">
+                                                                <Setter Property="Background" Value="#FFB300"/>
+                                                                <Setter Property="BorderBrush" Value="#FFB300"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="INSTRUÇÃO" Command="{Binding SetCategoryFilterCommand}" CommandParameter="INSTRUÇÃO">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="INSTRUÇÃO">
+                                                                <Setter Property="Background" Value="#E040FB"/>
+                                                                <Setter Property="BorderBrush" Value="#E040FB"/>
+                                                                <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                            <Button Content="MÉDICA / ESPECIAL" Command="{Binding SetCategoryFilterCommand}" CommandParameter="MÉDICA / ESPECIAL">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ChipFilterButton}">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="MÉDICA / ESPECIAL">
+                                                                <Setter Property="Background" Value="#FF5252"/>
+                                                                <Setter Property="BorderBrush" Value="#FF5252"/>
+                                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+                                        </StackPanel>
+                                    </ScrollViewer>
+
+                                    <!-- Linha 2: Busca Rápida + Slider Raio Distância + Checkbox Carga + Reset -->
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Input Rápido de Busca -->
+                                        <Border Grid.Column="0" Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Width="180" Height="32" Margin="0,0,10,0">
+                                            <Grid>
+                                                <TextBlock Text="🔍" FontSize="11" Foreground="#526375" VerticalAlignment="Center" Margin="8,0,0,0" IsHitTestVisible="False"/>
+                                                <TextBox Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" 
+                                                         Background="Transparent" Foreground="#F0F4F8" BorderThickness="0"
+                                                         Padding="24,6,6,6" FontSize="11" VerticalAlignment="Center"
+                                                         FontFamily="Inter, Segoe UI, sans-serif"
+                                                         ToolTip="Filtrar por código ICAO ou nome da cidade (ex: SBRJ ou Rio)"/>
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Controles de Raio de Distância e Carga -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="RAIO:" FontSize="10" FontWeight="Bold" Foreground="#8B9BAE" VerticalAlignment="Center" Margin="0,0,6,0" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            <Slider Minimum="50" Maximum="1000" Value="{Binding MaxDistanceFilter, UpdateSourceTrigger=PropertyChanged}" 
+                                                    Width="105" SmallChange="50" LargeChange="100" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding MaxDistanceDisplay}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" Margin="6,0,10,0" Width="60"/>
+
+                                            <CheckBox IsChecked="{Binding FilterOnlyCompatiblePayload, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Cursor="Hand">
+                                                <CheckBox.Content>
+                                                    <TextBlock Text="Carga compatível" FontSize="11" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                </CheckBox.Content>
+                                            </CheckBox>
+                                        </StackPanel>
+
+                                        <!-- Botão Limpar Filtros -->
+                                        <Button Grid.Column="2" Content="LIMPAR" Command="{Binding ResetFiltersCommand}" Background="#1F2B37" Foreground="#8B9BAE" BorderBrush="#263545" BorderThickness="1" Padding="8,4" FontSize="10" FontWeight="Bold" Cursor="Hand" FontFamily="Inter, Segoe UI, sans-serif">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 2. TABELA DENSA DE MISSÕES & EMPTY STATE -->
+                            <Border Grid.Row="1" Background="#141C24" CornerRadius="8" Padding="8" BorderBrush="#263545" BorderThickness="1">
+                                <Grid>
+                                    <!-- DataGrid Densa com Tipografia Tabular Monoespaçada e Navegação por ↑ ↓ e Enter -->
+                                    <DataGrid ItemsSource="{Binding FilteredMissions}" SelectedItem="{Binding SelectedMissionItem}"
+                                              Style="{StaticResource MissionsTableDataGrid}"
+                                              PreviewKeyDown="MissionsDataGrid_PreviewKeyDown"
+                                              Visibility="{Binding HasFilteredMissions, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <DataGrid.Columns>
+                                            <!-- Coluna 1: Checkbox para Aceite em Lote -->
+                                            <DataGridTemplateColumn Width="36">
+                                                <DataGridTemplateColumn.Header>
+                                                    <Button Command="{Binding ToggleSelectAllBatchCommand}" ToolTip="Marcar / Desmarcar todos" Background="Transparent" BorderThickness="0" Cursor="Hand" Padding="0">
+                                                        <TextBlock Text="✓" FontSize="11" FontWeight="Bold" Foreground="#00E5FF"/>
+                                                    </Button>
+                                                </DataGridTemplateColumn.Header>
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <CheckBox IsChecked="{Binding IsSelectedForBatch, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <!-- Coluna 2: Destino (ICAO em JetBrains Mono + Cidade) -->
+                                            <DataGridTemplateColumn Header="DESTINO" Width="120" SortMemberPath="DestinationICAO">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding DestinationICAO}" FontWeight="Bold" FontSize="13" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                            <TextBlock Text="{Binding DestinationCity}" FontSize="10" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <!-- Coluna 3: Distância (NM) Tabular -->
+                                            <DataGridTemplateColumn Header="DIST (NM)" Width="75" SortMemberPath="DistanceNM">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding DistanceNM, StringFormat={}{0:N0} NM}" FontWeight="SemiBold" FontSize="12" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" Foreground="#F0F4F8"/>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <!-- Coluna 4: Pagamento ($) e Lucro/NM (Verde Lucro #00E676) -->
+                                            <DataGridTemplateColumn Header="PAGAMENTO" Width="105" SortMemberPath="RewardMoney">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding RewardMoney, StringFormat=C0}" FontWeight="Bold" FontSize="13" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                            <TextBlock Text="{Binding ProfitPerNmDisplay}" FontSize="10" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <!-- Coluna 5: Peso (lbs) com Badge de Sobrepeso se aplicável -->
+                                            <DataGridTemplateColumn Header="PESO" Width="95" SortMemberPath="PayloadLbs">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding PayloadLbs, StringFormat={}{0:N0} LBS}" FontWeight="Bold" FontSize="12" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                            <Border Background="#2D220D" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="3" Padding="2,1" Margin="0,2,0,0" HorizontalAlignment="Left"
+                                                                    Visibility="{Binding IsOverweight, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                    ToolTip="Excede a carga útil máxima suportada pela aeronave atual">
+                                                                <TextBlock Text="SOBREPESO" FontSize="7" FontWeight="Bold" Foreground="#FFB300" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+
+                                            <!-- Coluna 6: Tipo de Operação com Badge Cromático Semântico -->
+                                            <DataGridTemplateColumn Header="OPERAÇÃO" Width="*" SortMemberPath="MissionCategoryType">
+                                                <DataGridTemplateColumn.CellTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                            <Border Background="{Binding CategoryBadgeBackground}" BorderBrush="{Binding CategoryColor}" BorderThickness="1" CornerRadius="3" Padding="6,2" Margin="0,0,4,0">
+                                                                <TextBlock Text="{Binding CategoryShortTag}" FontSize="10" FontWeight="Bold" Foreground="{Binding CategoryColor}" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                            </Border>
+                                                            <Border Background="#2E1214" BorderBrush="#FF5252" BorderThickness="1" CornerRadius="3" Padding="4,1"
+                                                                    Visibility="{Binding IsEligibleForPilot, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                                                                    ToolTip="{Binding IneligibilityReason}">
+                                                                <TextBlock Text="🔒 BLOQUEADO" FontSize="8" FontWeight="Bold" Foreground="#FF5252" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </DataGridTemplateColumn.CellTemplate>
+                                            </DataGridTemplateColumn>
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+
+                                    <!-- EMPTY STATE (Background Base #0B0F14) -->
+                                    <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="30" Margin="10"
+                                            Visibility="{Binding HasFilteredMissions, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="380">
+                                            <TextBlock Text="🔍" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,12" Foreground="#526375"/>
+                                            <TextBlock Text="Nenhum Contrato Encontrado" FontSize="15" FontWeight="Bold" Foreground="#F0F4F8" HorizontalAlignment="Center" Margin="0,0,0,6" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            <TextBlock Text="Nenhuma missão encontrada para os filtros atuais. Tente expandir o raio de distância ou alternar os tipos de carga." 
+                                                       FontSize="11" Foreground="#8B9BAE" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,16" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            <Button Content="RESETAR FILTROS" Command="{Binding ResetFiltersCommand}" HorizontalAlignment="Center" Padding="16,6"
+                                                    Background="#1F2B37" Foreground="#00E5FF" BorderBrush="#00E5FF" BorderThickness="1" Cursor="Hand" FontFamily="Inter, Segoe UI, sans-serif" FontWeight="Bold">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                            </Button>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Grid>
+
+                        <!-- COLUNA DA DIREITA (42%): VIEWPORT DO MAPA TÁTICO, PRÉ-DESPACHO E CTA -->
+                        <Grid Grid.Column="1" Margin="10,0,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1.35*"/> <!-- Viewport do Mapa Tático -->
+                                <RowDefinition Height="Auto"/>  <!-- Card de Pré-Despacho Operacional -->
+                                <RowDefinition Height="Auto"/>  <!-- CTA Travado no Rodapé -->
+                            </Grid.RowDefinitions>
+
+                            <!-- 1. VIEWPORT DE MAPA TÁTICO COM SINCRONIZAÇÃO EM TEMPO REAL -->
+                            <Border Grid.Row="0" Background="#141C24" CornerRadius="8" ClipToBounds="True" Margin="0,0,0,10" BorderBrush="#263545" BorderThickness="1">
+                                <utils:FlightMapControl AircraftLat="{Binding OriginLat}" AircraftLon="{Binding OriginLon}"
+                                                        DestLat="{Binding DestLat}" DestLon="{Binding DestLon}"
+                                                        OriginIcao="{Binding CurrentAirportICAO}"
+                                                        DestIcao="{Binding SelectedMissionItem.DestinationICAO}"/>
+                            </Border>
+
+                            <!-- 2. CARD DE PRÉ-DESPACHO OPERACIONAL & METEOROLOGIA -->
+                            <Border Grid.Row="1" Background="#141C24" CornerRadius="8" Padding="14" Margin="0,0,0,10" BorderBrush="#263545" BorderThickness="1">
+                                <StackPanel>
+                                    <!-- Header do Card de Despacho com H1 Resumo de Rota -->
+                                    <Grid Margin="0,0,0,10">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="📋 " FontSize="12" VerticalAlignment="Center"/>
+                                            <TextBlock Text="PRÉ-DESPACHO OPERACIONAL" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" VerticalAlignment="Center" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                        </StackPanel>
+                                        <!-- H1 Resumo de Rota: 20px Bold Ciano #00E5FF -->
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding CurrentAirportICAO}" FontSize="18" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Text=" ➔ " FontSize="16" Foreground="#00E5FF" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SelectedMissionItem.DestinationICAO, FallbackValue='---'}" FontSize="18" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <!-- Grid de Indicadores: ETE, Consumo e Distância (JetBrains Mono) -->
+                                    <UniformGrid Columns="3" Margin="0,0,0,10">
+                                        <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                                            <StackPanel>
+                                                <TextBlock Text="TEMPO ESTIMADO (ETE)" FontSize="9" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <TextBlock Text="{Binding SelectedMissionItem.EteFormatted, FallbackValue='--'}" FontSize="16" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                                            <StackPanel>
+                                                <TextBlock Text="CONSUMO ESTIMADO" FontSize="9" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding SelectedMissionItem.EstimatedFuelGallons, StringFormat={}{0:F1} gal, FallbackValue='--'}" FontSize="13" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    <TextBlock Text="{Binding SelectedMissionItem.EstimatedFuelLbs, StringFormat={} ({0:N0} lbs), FallbackValue=''}" FontSize="10" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Bottom" Margin="4,0,0,1"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                                            <StackPanel>
+                                                <TextBlock Text="DISTÂNCIA CORREDOR" FontSize="9" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <TextBlock Text="{Binding SelectedMissionItem.DistanceNM, StringFormat={}{0:N0} NM, FallbackValue='0 NM'}" FontSize="16" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </UniformGrid>
+
+                                    <!-- Card de Meteorologia Simplificada (METAR) -->
+                                    <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8">
                                         <Grid>
-                                            <TextBlock Text="PESO TOTAL" FontSize="11" FontWeight="Bold" Foreground="White"/>
-                                            <TextBlock Text="{Binding TotalFlightWeight, StringFormat={}{0:N0} LBS}" FontSize="13" FontWeight="Black" Foreground="{StaticResource PrimaryBlue}" HorizontalAlignment="Right"/>
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <!-- Badge Categoria VFR / MVFR / IFR -->
+                                            <Border Grid.Column="0" Background="{Binding SelectedMissionItem.WeatherColor, FallbackValue='#00E676'}" CornerRadius="3" Padding="6,2" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding SelectedMissionItem.WeatherIcon, FallbackValue='☀️'}" FontSize="11" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="{Binding SelectedMissionItem.WeatherCategory, FallbackValue='VFR'}" FontSize="10" FontWeight="Bold" Foreground="#0B0F14" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </StackPanel>
+                                            </Border>
 
-                                <Button Content="ACEITAR MISSÃO" Command="{Binding AcceptMissionCommand}" Height="45" Background="{StaticResource PrimaryBlue}" Foreground="White" FontWeight="Bold">
+                                            <!-- Resumo das Condições Meteorológicas -->
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                <TextBlock Text="METAR DESTINO (SIMULADO)" FontSize="8" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <TextBlock Text="{Binding SelectedMissionItem.WeatherSummary, FallbackValue='Condições visuais ideais para voo'}" FontSize="11" FontWeight="SemiBold" Foreground="#F0F4F8" FontFamily="Inter, Segoe UI, sans-serif" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 3. CALL TO ACTION (CTA) TRAVADO NO RODAPÉ (#00E5FF Ciano Aviônica) -->
+                            <Border Grid.Row="2" Background="#141C24" CornerRadius="8" Padding="10" BorderBrush="#263545" BorderThickness="1">
+                                <Button Command="{Binding AcceptSelectedMissionsCommand}" IsEnabled="{Binding CanAcceptMission}" Height="46" Cursor="Hand" Background="#00E5FF" Foreground="#0B0F14" FontWeight="Bold">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6" Padding="16,0">
+                                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="🛫 " FontSize="15" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding CtaButtonText}" FontSize="13" FontWeight="Bold" Foreground="#0B0F14" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                </Grid>
                                             </Border>
                                             <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="#0086D1"/></Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#00B4D8"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="border" Property="Background" Value="#1F2B37"/>
+                                                    <Setter Property="Foreground" Value="#526375"/>
+                                                </Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                 </Button>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Placeholder quando nenhuma missão está selecionada -->
-                        <Border Grid.Row="0" Background="{StaticResource SurfaceDark}" CornerRadius="15" Padding="20" Margin="0,0,0,20" Opacity="0.5">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding SelectedMission}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                <TextBlock Text="Selecione uma missão" FontSize="12" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Lista de Missões (Abaixo) -->
-                        <Border Grid.Row="1" Background="{StaticResource CardBackground}" CornerRadius="15" Padding="10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="MISSÕES DISPONÍVEIS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="15,15,15,15"/>
-                                <DataGrid Grid.Row="1" ItemsSource="{Binding AvailableMissions}" SelectedItem="{Binding SelectedMission}" Style="{StaticResource ModernDataGrid}">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="DESTINO" Binding="{Binding DestinationICAO}" Width="80">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="FontWeight" Value="Bold"/>
-                                                    <Setter Property="Foreground" Value="White"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                        <DataGridTextColumn Header="DIST (NM)" Binding="{Binding DistanceNM, StringFormat={}{0:N0} NM}" Width="70"/>
-                                        <DataGridTextColumn Header="PAGAMENTO" Binding="{Binding RewardMoney, StringFormat=C}" Width="90">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="#2ECC71"/>
-                                                    <Setter Property="FontWeight" Value="SemiBold"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                        <DataGridTextColumn Header="PESO" Binding="{Binding PayloadLbs, StringFormat={}{0:N0} LBS}" Width="85">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{StaticResource PrimaryBlue}"/>
-                                                    <Setter Property="FontWeight" Value="Bold"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                        <DataGridTextColumn Header="OPERAÇÃO" Binding="{Binding MissionCategoryType}" Width="*">
-                                            <DataGridTextColumn.ElementStyle>
-                                                <Style TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-                                                    <Setter Property="FontSize" Value="11"/>
-                                                </Style>
-                                            </DataGridTextColumn.ElementStyle>
-                                        </DataGridTextColumn>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </Grid>
-                        </Border>
+                            </Border>
+                        </Grid>
                     </Grid>
-
-                    <!-- Coluna da Direita: Mapa Full -->
-                    <Border Grid.Row="2" Grid.Column="1" Background="{StaticResource SurfaceDark}" CornerRadius="15" Margin="20,0,0,0" ClipToBounds="True">
-                        <utils:FlightMapControl AircraftLat="{Binding OriginLat}" AircraftLon="{Binding OriginLon}"
-                                                DestLat="{Binding DestLat}" DestLon="{Binding DestLon}"/>
-                    </Border>
                 </Grid>
 
                 <!-- VIEW: BRIEFING -->

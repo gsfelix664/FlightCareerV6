@@ -21,8 +21,15 @@ namespace FlightCareer.Domain.Entities
         public bool IsAccepted { get; set; }
         public Guid? PilotId { get; set; }
 
-        // Tier Regulatório Requerido e Categoria da Missão
-        public CompanyTier RequiredTier { get; set; } = CompanyTier.Tier1_FlightSchool;
+        // Categoria Regulatória Requerida e Tipo da Missão
+        public PilotCategory RequiredCategory { get; set; } = PilotCategory.Category1_FlightSchool;
+
+        // Mantido para compatibilidade com código existente
+        public CompanyTier RequiredTier
+        {
+            get => (CompanyTier)(int)RequiredCategory;
+            set => RequiredCategory = (PilotCategory)(int)value;
+        }
         public string MissionCategoryType { get; set; } = "Instrucao"; // Instrucao, SAE_Foto, SAE_Reboque, SAE_Carga, Taxi_Charter, etc.
     }
 }

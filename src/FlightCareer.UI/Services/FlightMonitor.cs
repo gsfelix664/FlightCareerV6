@@ -65,10 +65,10 @@ namespace FlightCareer.UI.Services
                 return;
             }
 
-            var prohibitedMission = missions.FirstOrDefault(m => m.RequiredTier > pilot.CompanyTier);
+            var prohibitedMission = missions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
             if (prohibitedMission != null)
             {
-                OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredTier.GetDisplayName()}, mas sua empresa está operando em {pilot.CompanyTier.GetDisplayName()}!", true);
+                OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa está operando em {pilot.PilotCategory.GetDisplayName()}!", true);
                 return;
             }
 

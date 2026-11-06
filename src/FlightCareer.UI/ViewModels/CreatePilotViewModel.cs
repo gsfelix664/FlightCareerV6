@@ -73,7 +73,7 @@ namespace FlightCareer.UI.ViewModels
                 Balance = initialBalance,
                 Difficulty = SelectedDifficulty,
                 Rank = "Student Pilot",
-                CompanyTier = CompanyTier.Tier1_FlightSchool,
+                PilotCategory = PilotCategory.Category1_FlightSchool,
                 HasPPLicense = true
             };
 

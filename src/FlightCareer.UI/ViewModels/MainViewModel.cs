@@ -33,6 +33,7 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _balance;
         [ObservableProperty] private int _experiencePoints;
         [ObservableProperty] private Mission? _selectedMission;
+        [ObservableProperty] private MissionDisplayItem? _selectedMissionItem;
         [ObservableProperty] private double _latitude;
         [ObservableProperty] private double _longitude;
         [ObservableProperty] private double _originLat;
@@ -41,11 +42,81 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _destLon;
         [ObservableProperty] private string _currentView = "Missions";
         [ObservableProperty] private Guid? _activeAircraftId;
-        [ObservableProperty] private CompanyTier _companyTier = CompanyTier.Tier1_FlightSchool;
+        [ObservableProperty] private PilotCategory _pilotCategory = PilotCategory.Category1_FlightSchool;
 
-        public string CompanyTierDisplay => CompanyTier.GetDisplayName();
-        public string CompanyTierBadge => CompanyTier.GetShortName();
-        public string CompanyTierColor => CompanyTier.GetBadgeColor();
+        // Filtros e Busca da Tabela de Missões
+        [ObservableProperty] private string _selectedCategoryFilter = "TODOS";
+        [ObservableProperty] private string _searchQuery = string.Empty;
+        [ObservableProperty] private double _maxDistanceFilter = 1000.0;
+        [ObservableProperty] private bool _filterOnlyCompatiblePayload = false;
+        [ObservableProperty] private bool _hasFilteredMissions = true;
+        [ObservableProperty] private int _selectedBatchCount = 0;
+
+        private readonly List<MissionDisplayItem> _allMissionDisplayItems = new();
+        public ObservableCollection<MissionDisplayItem> FilteredMissions { get; } = new();
+
+        public string MaxDistanceDisplay => MaxDistanceFilter >= 990 ? "ILIMITADO" : $"{MaxDistanceFilter:N0} NM";
+
+        public string CtaButtonText
+        {
+            get
+            {
+                if (SelectedBatchCount > 1)
+                    return $"ACEITAR {SelectedBatchCount} CONTRATOS & INICIAR BRIEFING";
+                if (SelectedBatchCount == 1)
+                    return "ACEITAR 1 CONTRATO & INICIAR BRIEFING";
+                if (SelectedMissionItem != null)
+                    return "ACEITAR CONTRATO & INICIAR BRIEFING";
+                return "SELECIONE UM CONTRATO";
+            }
+        }
+
+        public bool CanAcceptMission => SelectedBatchCount > 0 || SelectedMissionItem != null;
+
+        partial void OnSelectedCategoryFilterChanged(string value) => ApplyMissionFilters();
+        partial void OnSearchQueryChanged(string value) => ApplyMissionFilters();
+        partial void OnMaxDistanceFilterChanged(double value)
+        {
+            OnPropertyChanged(nameof(MaxDistanceDisplay));
+            ApplyMissionFilters();
+        }
+        partial void OnFilterOnlyCompatiblePayloadChanged(bool value) => ApplyMissionFilters();
+
+        partial void OnSelectedMissionItemChanged(MissionDisplayItem? value)
+        {
+            SelectedMission = value?.Mission;
+            if (value != null)
+            {
+                DestLat = value.DestLat;
+                DestLon = value.DestLon;
+            }
+            else
+            {
+                DestLat = 0;
+                DestLon = 0;
+            }
+            OnPropertyChanged(nameof(SelectedMission));
+            OnPropertyChanged(nameof(TotalPaxCount));
+            OnPropertyChanged(nameof(TotalPaxWeight));
+            OnPropertyChanged(nameof(TotalFlightWeight));
+            OnPropertyChanged(nameof(CtaButtonText));
+            OnPropertyChanged(nameof(CanAcceptMission));
+        }
+
+        public CompanyTier CompanyTier
+        {
+            get => (CompanyTier)(int)PilotCategory;
+            set => PilotCategory = (PilotCategory)(int)value;
+        }
+
+        public string PilotCategoryDisplay => PilotCategory.GetDisplayName();
+        public string PilotCategoryBadge => PilotCategory.GetShortName();
+        public string PilotCategoryColor => PilotCategory.GetBadgeColor();
+
+        // Aliases para compatibilidade XAML
+        public string CompanyTierDisplay => PilotCategoryDisplay;
+        public string CompanyTierBadge => PilotCategoryBadge;
+        public string CompanyTierColor => PilotCategoryColor;
         
         partial void OnSelectedMissionChanged(Mission? value)
         {
@@ -55,6 +126,11 @@ namespace FlightCareer.UI.ViewModels
 
             if (value != null)
             {
+                if (SelectedMissionItem?.Mission != value)
+                {
+                    _selectedMissionItem = FilteredMissions.FirstOrDefault(m => m.Mission == value);
+                    OnPropertyChanged(nameof(SelectedMissionItem));
+                }
                 _ = UpdateMissionMapAsync(value);
             }
             else
@@ -186,7 +262,12 @@ namespace FlightCareer.UI.ViewModels
                 }
             });
 
-            AcceptMissionCommand = new RelayCommand(AcceptMission);
+            AcceptSelectedMissionsCommand = new AsyncRelayCommand(AcceptSelectedMissionsAsync);
+            AcceptMissionCommand = AcceptSelectedMissionsCommand;
+            SetCategoryFilterCommand = new RelayCommand<string>(SetCategoryFilter);
+            ResetFiltersCommand = new RelayCommand(ResetFilters);
+            ToggleSelectAllBatchCommand = new RelayCommand(ToggleSelectAllBatch);
+
             RemoveMissionCommand = new RelayCommand<Mission>(RemoveMission);
             StartFlightCommand = new AsyncRelayCommand(async () => {
                 if (IsMonitoring) await CancelFlightAsync();
@@ -194,6 +275,7 @@ namespace FlightCareer.UI.ViewModels
             });
             ShowDebugCommand = new RelayCommand(ShowDebug);
             PromoteCompanyTierCommand = new AsyncRelayCommand(PromoteCompanyTierAsync);
+            OpenFerryWindowCommand = new RelayCommand(OpenFerryWindow);
 
             _simConnect.OnConnected += (s, e) => {
                 SimStatusText = "SIMULADOR CONECTADO";
@@ -249,10 +331,44 @@ namespace FlightCareer.UI.ViewModels
         public IRelayCommand ShowHangarCommand { get; }
         public IRelayCommand ShowFinanceCommand { get; }
         public IRelayCommand AcceptMissionCommand { get; }
+        public IAsyncRelayCommand AcceptSelectedMissionsCommand { get; }
+        public IRelayCommand<string> SetCategoryFilterCommand { get; }
+        public IRelayCommand ResetFiltersCommand { get; }
+        public IRelayCommand ToggleSelectAllBatchCommand { get; }
         public IRelayCommand RemoveMissionCommand { get; }
         public IAsyncRelayCommand StartFlightCommand { get; }
         public IRelayCommand ShowDebugCommand { get; }
         public IAsyncRelayCommand PromoteCompanyTierCommand { get; }
+        public IAsyncRelayCommand PromotePilotCategoryCommand => PromoteCompanyTierCommand;
+        public IRelayCommand OpenFerryWindowCommand { get; }
+
+        private void OpenFerryWindow()
+        {
+            var pilots = _pilotRepository.GetAllAsync().GetAwaiter().GetResult();
+            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            if (pilot == null || pilot.ActiveAircraftId == null)
+            {
+                System.Windows.MessageBox.Show("Você precisa ter uma aeronave ativa selecionada no Hangar para planejar um translado.", "Aeronave Necessária", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            var vm = new FerryFlightViewModel(
+                _context,
+                _pilotRepository,
+                PilotName,
+                async () =>
+                {
+                    await InitializeForPilotAsync(PilotName);
+                    CurrentView = "Briefing";
+                });
+
+            var window = new Views.FerryFlightWindow
+            {
+                DataContext = vm,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            window.ShowDialog();
+        }
 
         private void ShowDebug()
         {
@@ -340,38 +456,182 @@ namespace FlightCareer.UI.ViewModels
 
                 AvailableMissions.Add(mission);
                 await _context.SaveChangesAsync();
+
+                try
+                {
+                    var pilots = await _pilotRepository.GetAllAsync();
+                    var p = pilots.FirstOrDefault(x => x.Name == PilotName);
+                    var activeAircraft = p?.Hangar.FirstOrDefault(a => a.Id == p.ActiveAircraftId);
+                    var pCat = p?.PilotCategory ?? PilotCategory.Category1_FlightSchool;
+                    var destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
+                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pCat);
+                    item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
+                    _allMissionDisplayItems.Add(item);
+                    ApplyMissionFilters();
+                }
+                catch { }
                 
                 System.Windows.MessageBox.Show($"Missão para {mission.DestinationICAO} removida. A carga foi deixada em {CurrentAirportICAO} e a recompensa foi atualizada.");
             }
         }
 
-        private async void AcceptMission()
+        public void ApplyMissionFilters()
         {
-            if (SelectedMission == null) return;
-            
-            var mission = SelectedMission;
-            if (!ActiveMissions.Contains(mission))
-            {
-                var pilots = await _pilotRepository.GetAllAsync();
-                var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
-                if (pilot != null)
-                {
-                    if (mission.RequiredTier > pilot.CompanyTier)
-                    {
-                        System.Windows.MessageBox.Show($"Sua empresa ({pilot.CompanyTier.GetDisplayName()}) ainda não possui homologação para realizar missões do tipo '{mission.RequiredTier.GetDisplayName()}'.\n\nEvolua a certificação da sua empresa para desbloquear esta operação.", "Missão Bloqueada por Homologação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                        return;
-                    }
+            var query = _allMissionDisplayItems.AsEnumerable();
 
+            // 1. Categoria
+            if (!string.IsNullOrWhiteSpace(SelectedCategoryFilter) && SelectedCategoryFilter != "TODOS")
+            {
+                query = query.Where(m =>
+                {
+                    if (SelectedCategoryFilter == "TÁXI AÉREO")
+                        return m.MissionCategoryType.Contains("Táxi", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Charter", StringComparison.OrdinalIgnoreCase);
+                    if (SelectedCategoryFilter == "LINHA REGIONAL")
+                        return m.MissionCategoryType.Contains("Linha Regional", StringComparison.OrdinalIgnoreCase);
+                    if (SelectedCategoryFilter == "LINHA REGULAR")
+                        return m.MissionCategoryType.Contains("Linha Regular", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Heavy", StringComparison.OrdinalIgnoreCase);
+                    if (SelectedCategoryFilter == "CARGA / SAE")
+                        return m.MissionCategoryType.Contains("Carga", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("SAE", StringComparison.OrdinalIgnoreCase);
+                    if (SelectedCategoryFilter == "INSTRUÇÃO")
+                        return m.MissionCategoryType.Contains("Instrução", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Treinamento", StringComparison.OrdinalIgnoreCase);
+                    if (SelectedCategoryFilter == "MÉDICA / ESPECIAL")
+                        return m.MissionCategoryType.Contains("Saúde", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Remoção", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Médica", StringComparison.OrdinalIgnoreCase);
+                    return true;
+                });
+            }
+
+            // 2. Busca Rápida (ICAO ou Cidade)
+            if (!string.IsNullOrWhiteSpace(SearchQuery))
+            {
+                var term = SearchQuery.Trim();
+                query = query.Where(m =>
+                    m.DestinationICAO.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    m.DestinationCity.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                    m.DestinationName.Contains(term, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // 3. Raio de Distância
+            if (MaxDistanceFilter < 990)
+            {
+                query = query.Where(m => m.DistanceNM <= MaxDistanceFilter);
+            }
+
+            // 4. Carga Compatível
+            if (FilterOnlyCompatiblePayload)
+            {
+                query = query.Where(m => !m.IsOverweight);
+            }
+
+            var list = query.ToList();
+
+            FilteredMissions.Clear();
+            foreach (var item in list)
+            {
+                FilteredMissions.Add(item);
+            }
+
+            HasFilteredMissions = FilteredMissions.Count > 0;
+
+            if (SelectedMissionItem == null || !FilteredMissions.Contains(SelectedMissionItem))
+            {
+                SelectedMissionItem = FilteredMissions.FirstOrDefault();
+            }
+
+            UpdateBatchCount();
+        }
+
+        public void UpdateBatchCount()
+        {
+            SelectedBatchCount = FilteredMissions.Count(m => m.IsSelectedForBatch);
+            OnPropertyChanged(nameof(CtaButtonText));
+            OnPropertyChanged(nameof(CanAcceptMission));
+        }
+
+        public void SetCategoryFilter(string? category)
+        {
+            SelectedCategoryFilter = category ?? "TODOS";
+        }
+
+        public void ResetFilters()
+        {
+            SelectedCategoryFilter = "TODOS";
+            SearchQuery = string.Empty;
+            MaxDistanceFilter = 1000.0;
+            FilterOnlyCompatiblePayload = false;
+        }
+
+        public void ToggleSelectAllBatch()
+        {
+            bool anyUnselected = FilteredMissions.Any(m => !m.IsSelectedForBatch);
+            foreach (var m in FilteredMissions)
+            {
+                m.IsSelectedForBatch = anyUnselected;
+            }
+            UpdateBatchCount();
+        }
+
+        public async Task AcceptSelectedMissionsAsync()
+        {
+            var pilots = await _pilotRepository.GetAllAsync();
+            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            if (pilot == null) return;
+
+            var itemsToAccept = FilteredMissions.Where(m => m.IsSelectedForBatch).ToList();
+            if (itemsToAccept.Count == 0 && SelectedMissionItem != null)
+            {
+                itemsToAccept.Add(SelectedMissionItem);
+            }
+
+            if (itemsToAccept.Count == 0) return;
+
+            // Checagem de Homologação
+            var blocked = itemsToAccept.Where(i => i.Mission.RequiredCategory > pilot.PilotCategory).ToList();
+            if (blocked.Count > 0)
+            {
+                var firstBlocked = blocked.First();
+                System.Windows.MessageBox.Show(
+                    $"Sua empresa ({pilot.PilotCategory.GetDisplayName()}) ainda não possui homologação para realizar contratos do tipo '{firstBlocked.Mission.RequiredCategory.GetDisplayName()}'.\n\nEvolua a categoria da sua empresa para desbloquear esta operação.",
+                    "Contrato Bloqueado por Homologação",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            // Modal de Confirmação com detalhes
+            string title = itemsToAccept.Count == 1 ? "Confirmar Contrato de Voo" : "Confirmar Contratos em Lote";
+            string message = itemsToAccept.Count == 1
+                ? $"Destino: {itemsToAccept[0].DestinationICAO} ({itemsToAccept[0].DestinationCity})\nDistância: {itemsToAccept[0].DistanceNM:N0} NM\nPeso: {itemsToAccept[0].PayloadLbs:N0} LBS\nRecompensa: {itemsToAccept[0].RewardMoney:C0}\n\nDeseja aceitar o contrato e prosseguir para o Briefing?"
+                : $"Você selecionou {itemsToAccept.Count} contratos.\nPeso Total: {itemsToAccept.Sum(m => m.PayloadLbs):N0} LBS\nReceita Estimada: {itemsToAccept.Sum(m => m.RewardMoney):C0}\n\nDeseja aceitar todos os contratos selecionados e prosseguir para o Briefing?";
+
+            var confirmResult = System.Windows.MessageBox.Show(message, title, System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (confirmResult != System.Windows.MessageBoxResult.Yes) return;
+
+            foreach (var item in itemsToAccept)
+            {
+                var mission = item.Mission;
+                if (!ActiveMissions.Contains(mission))
+                {
                     ActiveMissions.Add(mission);
                     AvailableMissions.Remove(mission);
+                    _allMissionDisplayItems.Remove(item);
                     mission.IsAccepted = true;
                     mission.PilotId = pilot.Id;
-                    
-                    SelectedMission = null;
-                    await _context.SaveChangesAsync();
-                    System.Windows.MessageBox.Show($"Missão para {mission.DestinationICAO} aceita!");
                 }
             }
+
+            SelectedMissionItem = null;
+            SelectedMission = null;
+
+            await _context.SaveChangesAsync();
+            ApplyMissionFilters();
+
+            // Redireciona e prepara o Briefing
+            ShowBriefingCommand.Execute(null);
+        }
+
+        private async void AcceptMission()
+        {
+            await AcceptSelectedMissionsAsync();
         }
 
         private async void StartFlight()
@@ -393,10 +653,10 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredTier > pilot.CompanyTier);
+            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
             if (prohibitedMission != null)
             {
-                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredTier.GetDisplayName()}, mas sua empresa opera em {pilot.CompanyTier.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa opera em {pilot.PilotCategory.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
@@ -420,28 +680,28 @@ namespace FlightCareer.UI.ViewModels
             var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
             if (pilot == null) return;
 
-            if (CompanyTier >= CompanyTier.Tier5_MajorAirline)
+            if (PilotCategory >= PilotCategory.Category5_MajorAirline)
             {
-                System.Windows.MessageBox.Show("Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Tier 5 (Grande Linha Aérea Regular)!", "Nível Máximo Atingido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Categoria 5 (Linha Aérea Regular)!", "Nível Máximo Atingido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            var nextTier = (CompanyTier)((int)CompanyTier + 1);
-            double cost = CompanyTier.GetPromotionCost();
-            double reqHours = CompanyTier.GetRequiredHours();
+            var nextCategory = (PilotCategory)((int)PilotCategory + 1);
+            double cost = PilotCategory.GetPromotionCost();
+            double reqHours = PilotCategory.GetRequiredHours();
 
-            string reqDesc = nextTier switch
+            string reqDesc = nextCategory switch
             {
-                CompanyTier.Tier2_SAE => "- Carteira de Piloto Privado (40+ Horas de Voo)\n- Manual de Serviços Especializados e Inspeção ANAC/FAA",
-                CompanyTier.Tier3_AirTaxi => "- Licença de Piloto Comercial (PC) + IFR (150+ Horas)\n- Homologação de Táxi Aéreo, Gestor SGSO e Mecânico Responsável (DTS)",
-                CompanyTier.Tier4_Regional => "- Habilitação Multimotor (MLTE) + IFR (500+ Horas)\n- Infraestrutura de Rampa/Ground Handling e Sistema DOV",
-                CompanyTier.Tier5_MajorAirline => "- Licença de Piloto de Linha Aérea (PLA) (1500+ Horas)\n- Slots em Hubs Principais, Auditoria IOSA e Homologação Regular",
+                PilotCategory.Category2_SAE => "- Carteira de Piloto Privado (40+ Horas de Voo)\n- Manual de Serviços Especializados e Inspeção ANAC/FAA",
+                PilotCategory.Category3_AirTaxi => "- Licença de Piloto Comercial (PC) + IFR (150+ Horas)\n- Homologação de Táxi Aéreo, Gestor SGSO e Mecânico Responsável (DTS)",
+                PilotCategory.Category4_Regional => "- Habilitação Multimotor (MLTE) + IFR (500+ Horas)\n- Infraestrutura de Rampa/Ground Handling e Sistema DOV",
+                PilotCategory.Category5_MajorAirline => "- Licença de Piloto de Linha Aérea (PLA) (1500+ Horas)\n- Slots em Hubs Principais, Auditoria IOSA e Homologação Regular",
                 _ => ""
             };
 
             string statusMsg = $"CERTIFICAÇÃO REGULATÓRIA DA EMPRESA\n\n" +
-                               $"Homologação Atual: {CompanyTier.GetDisplayName()}\n" +
-                               $"Próximo Nível: {nextTier.GetDisplayName()}\n\n" +
+                               $"Homologação Atual: {PilotCategory.GetDisplayName()}\n" +
+                               $"Próxima Categoria: {nextCategory.GetDisplayName()}\n\n" +
                                $"REQUISITOS OPERACIONAIS:\n{reqDesc}\n\n" +
                                $"Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h necessárias\n" +
                                $"Taxa de Homologação: {cost:C2} (Seu saldo: {Balance:C2})\n\n";
@@ -450,17 +710,17 @@ namespace FlightCareer.UI.ViewModels
 
             if (!canPromote)
             {
-                statusMsg += "Você ainda NÃO cumpre todos os requisitos para homologar este nível.";
+                statusMsg += "Você ainda NÃO cumpre todos os requisitos para homologar esta categoria.";
                 System.Windows.MessageBox.Show(statusMsg, "Progressão de Companhia", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            statusMsg += "Deseja pagar a taxa de homologação e certificar sua empresa para o novo Tier agora?";
-            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Homologação", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            statusMsg += "Deseja pagar a taxa de homologação e certificar sua empresa para a nova Categoria agora?";
+            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Categoria Operacional", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             if (result != System.Windows.MessageBoxResult.Yes) return;
 
             pilot.Balance -= cost;
-            pilot.CompanyTier = nextTier;
+            pilot.PilotCategory = nextCategory;
 
             _context.FinancialTransactions.Add(new FinancialTransaction
             {
@@ -468,7 +728,7 @@ namespace FlightCareer.UI.ViewModels
                 PilotId = pilot.Id,
                 Date = DateTime.Now,
                 Category = "Certificação",
-                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextTier.GetDisplayName()}",
+                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextCategory.GetDisplayName()}",
                 Amount = cost,
                 Type = TransactionType.Expense
             });
@@ -476,7 +736,7 @@ namespace FlightCareer.UI.ViewModels
             await _context.SaveChangesAsync();
             await InitializeForPilotAsync(pilot.Name);
 
-            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob: {nextTier.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob: {nextCategory.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         private async Task CancelFlightAsync()
@@ -548,7 +808,7 @@ namespace FlightCareer.UI.ViewModels
             Balance = pilot.Balance;
             ExperiencePoints = pilot.ExperiencePoints;
             ActiveAircraftId = pilot.ActiveAircraftId;
-            CompanyTier = pilot.CompanyTier;
+            PilotCategory = pilot.PilotCategory;
 
             // REGRA: A localização do piloto é ONDE ESTÁ O AVIÃO ATIVO
             var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
@@ -569,6 +829,9 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(CashDisplay));
             OnPropertyChanged(nameof(RankDisplay));
             OnPropertyChanged(nameof(XpProgress));
+            OnPropertyChanged(nameof(PilotCategoryDisplay));
+            OnPropertyChanged(nameof(PilotCategoryBadge));
+            OnPropertyChanged(nameof(PilotCategoryColor));
             OnPropertyChanged(nameof(CompanyTierDisplay));
             OnPropertyChanged(nameof(CompanyTierBadge));
             OnPropertyChanged(nameof(CompanyTierColor));
@@ -602,11 +865,32 @@ namespace FlightCareer.UI.ViewModels
                 
                 var missions = await _missionGenerator.GenerateMissionsAsync(airport);
                 var missionList = missions.ToList();
+
+                activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
+                var pilotCategory = pilot.PilotCategory;
+
+                var destIcaos = missionList.Select(m => m.DestinationICAO).Distinct().ToList();
+                var destAirports = await _context.Airports
+                    .Where(a => destIcaos.Contains(a.ICAO))
+                    .ToDictionaryAsync(a => a.ICAO);
+
+                var displayItems = new List<MissionDisplayItem>();
+                foreach (var m in missionList)
+                {
+                    destAirports.TryGetValue(m.DestinationICAO, out var dest);
+                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotCategory);
+                    item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
+                    displayItems.Add(item);
+                }
                 
                 System.Windows.Application.Current.Dispatcher.Invoke(() =>
                 {
                     AvailableMissions.Clear();
                     foreach (var m in missionList) AvailableMissions.Add(m);
+
+                    _allMissionDisplayItems.Clear();
+                    _allMissionDisplayItems.AddRange(displayItems);
+                    ApplyMissionFilters();
                 });
             }
             else

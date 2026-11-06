@@ -150,7 +150,7 @@ namespace FlightCareer.Infrastructure.Services
 
             // TIER 2
             var t2 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2 } };
-            var c2_1 = new CategoryConfig { Id = "2.1", Name = "Linha Aérea Regional", Weight = 50 };
+            var c2_1 = new CategoryConfig { Id = "2.1", Name = "Linha Aérea Regional", Weight = 45 };
             c2_1.SubCategories.Add(new SubCategoryConfig
             {
                 Id = "2.1.1", Name = "Alimentação de Hub",
@@ -245,6 +245,33 @@ namespace FlightCareer.Infrastructure.Services
                 RangeRules = { new(40, 100, 250), new(50, 251, 450), new(10, 451, 700) }
             });
             t2.Categories.Add(c2_4);
+
+            var c2_5 = new CategoryConfig { Id = "3.4", Name = "Treinamento", Weight = 5 };
+            c2_5.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.1", Name = "Voo de Instrução Local",
+                Description = "Prática de manobras e pousos (TGL) na vizinhança do aeroporto.",
+                Weight = 60, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(90, 1, 1), new(10, 0, 0) },
+                RangeRules = { new(100, 5, 15) }
+            });
+            c2_5.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.2", Name = "Navegação (Cross-Country)",
+                Description = "Aluno em treinamento de rota entre duas ou três cidades.",
+                Weight = 30, MinExpHours = 2, MaxExpHours = 6, RequiresHardSurface = false, MinRunwayDest = 1200,
+                PaxRules = { new(60, 1, 1), new(40, 0, 0) },
+                RangeRules = { new(60, 50, 100), new(30, 101, 180), new(10, 181, 300) }
+            });
+            c2_5.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.3", Name = "Voo de Cheque (Exame)",
+                Description = "Avaliação prática com examinador da ANAC a bordo.",
+                Weight = 10, MinExpHours = 2, MaxExpHours = 4, RequiresHardSurface = false, MinRunwayDest = 1200, Urgency = 1.2,
+                PaxRules = { new(100, 1, 1) },
+                RangeRules = { new(70, 30, 60), new(30, 61, 120) }
+            });
+            t2.Categories.Add(c2_5);
             Rules.Add(2, t2);
 
             // TIER 3
@@ -363,7 +390,7 @@ namespace FlightCareer.Infrastructure.Services
 
             // TIER 4
             var t4 = new TierConfig { AllowedDestinationTiers = new List<int> { 3, 4 } };
-            var c4_1 = new CategoryConfig { Id = "4.1", Name = "Logística de Sede", Weight = 60 };
+            var c4_1 = new CategoryConfig { Id = "4.1", Name = "Logística de Sede", Weight = 55 };
             c4_1.SubCategories.Add(new SubCategoryConfig
             {
                 Id = "4.1.1", Name = "Abastecimento e Rancho",
@@ -440,6 +467,33 @@ namespace FlightCareer.Infrastructure.Services
                 RangeRules = { new(70, 30, 90), new(30, 91, 200) }
             });
             t4.Categories.Add(c4_3);
+
+            var c4_4 = new CategoryConfig { Id = "3.4", Name = "Treinamento", Weight = 5 };
+            c4_4.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.1", Name = "Voo de Instrução Local",
+                Description = "Prática de manobras e pousos (TGL) na vizinhança do aeródromo.",
+                Weight = 60, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(90, 1, 1), new(10, 0, 0) },
+                RangeRules = { new(100, 5, 15) }
+            });
+            c4_4.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.2", Name = "Navegação (Cross-Country)",
+                Description = "Aluno em treinamento de rota entre duas ou três cidades.",
+                Weight = 30, MinExpHours = 2, MaxExpHours = 6, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(60, 1, 1), new(40, 0, 0) },
+                RangeRules = { new(60, 50, 100), new(30, 101, 180), new(10, 181, 300) }
+            });
+            c4_4.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.4.3", Name = "Voo de Cheque (Exame)",
+                Description = "Avaliação prática com examinador a bordo.",
+                Weight = 10, MinExpHours = 2, MaxExpHours = 4, RequiresHardSurface = false, MinRunwayDest = 1000, Urgency = 1.2,
+                PaxRules = { new(100, 1, 1) },
+                RangeRules = { new(70, 30, 60), new(30, 61, 120) }
+            });
+            t4.Categories.Add(c4_4);
             Rules.Add(4, t4);
         }
     }

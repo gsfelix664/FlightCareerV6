@@ -5,11 +5,24 @@
              xmlns:utils="clr-namespace:FlightCareer.UI.Utils"
              ShutdownMode="OnLastWindowClose">
     <Application.Resources>
-         <!-- Cores -->
-         <SolidColorBrush x:Key="PrimaryBlue" Color="#00A3FF"/>
-         <SolidColorBrush x:Key="SurfaceDark" Color="#1A1C1E"/>
-         <SolidColorBrush x:Key="CardBackground" Color="#222529"/>
-         <SolidColorBrush x:Key="TextSecondary" Color="#D1D5DB"/>
+         <!-- Paleta de Cores (Dark Mode Avionics - Proporção 60-30-10) -->
+         <SolidColorBrush x:Key="AvionicsBackgroundBase" Color="#0B0F14"/>
+         <SolidColorBrush x:Key="SurfaceDark" Color="#141C24"/>
+         <SolidColorBrush x:Key="CardBackground" Color="#141C24"/>
+         <SolidColorBrush x:Key="AvionicsSurfaceActive" Color="#1F2B37"/>
+         <SolidColorBrush x:Key="AvionicsBorder" Color="#263545"/>
+
+         <SolidColorBrush x:Key="TextPrimary" Color="#F0F4F8"/>
+         <SolidColorBrush x:Key="TextSecondary" Color="#8B9BAE"/>
+         <SolidColorBrush x:Key="TextMuted" Color="#526375"/>
+
+         <!-- Cores Semânticas & Status Aeronáutico -->
+         <SolidColorBrush x:Key="PrimaryBlue" Color="#00E5FF"/>
+         <SolidColorBrush x:Key="AvionicsCyan" Color="#00E5FF"/>
+         <SolidColorBrush x:Key="AvionicsGreen" Color="#00E676"/>
+         <SolidColorBrush x:Key="AvionicsAmber" Color="#FFB300"/>
+         <SolidColorBrush x:Key="AvionicsMagenta" Color="#E040FB"/>
+         <SolidColorBrush x:Key="AvionicsRed" Color="#FF5252"/>
 
          <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
          <utils:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>

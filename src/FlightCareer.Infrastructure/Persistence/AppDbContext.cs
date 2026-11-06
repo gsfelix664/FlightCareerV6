@@ -35,6 +35,12 @@ namespace FlightCareer.Infrastructure.Persistence
                 .HasIndex(a => a.ICAO)
                 .IsUnique();
 
+            modelBuilder.Entity<Pilot>()
+                .Ignore(p => p.CompanyTier);
+
+            modelBuilder.Entity<Mission>()
+                .Ignore(m => m.RequiredTier);
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -51,6 +57,8 @@ namespace FlightCareer.Infrastructure.Persistence
             string[] migrationStatements = new[]
             {
                 "ALTER TABLE Pilots ADD COLUMN CompanyTier INTEGER DEFAULT 1;",
+                "ALTER TABLE Pilots ADD COLUMN PilotCategory INTEGER DEFAULT 1;",
+                "UPDATE Pilots SET PilotCategory = CompanyTier WHERE CompanyTier IS NOT NULL AND (PilotCategory IS NULL OR PilotCategory = 1);",
                 "ALTER TABLE Pilots ADD COLUMN HasPPLicense INTEGER DEFAULT 1;",
                 "ALTER TABLE Pilots ADD COLUMN HasCPLicense INTEGER DEFAULT 0;",
                 "ALTER TABLE Pilots ADD COLUMN HasIFRRating INTEGER DEFAULT 0;",
@@ -66,6 +74,8 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE PilotAircrafts ADD COLUMN Configuration TEXT DEFAULT 'Passageiro';",
 
                 "ALTER TABLE Missions ADD COLUMN RequiredTier INTEGER DEFAULT 1;",
+                "ALTER TABLE Missions ADD COLUMN RequiredCategory INTEGER DEFAULT 1;",
+                "UPDATE Missions SET RequiredCategory = RequiredTier WHERE RequiredTier IS NOT NULL AND (RequiredCategory IS NULL OR RequiredCategory = 1);",
                 "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';"
             };
 

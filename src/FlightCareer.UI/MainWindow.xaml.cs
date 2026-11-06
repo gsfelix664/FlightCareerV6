@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -34,5 +34,17 @@ public partial class MainWindow : Window
     private void Button_Click(object sender, RoutedEventArgs e)
     {
         Application.Current.Shutdown();
+    }
+
+    private void MissionsDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            e.Handled = true;
+            if (DataContext is ViewModels.MainViewModel vm && vm.CanAcceptMission)
+            {
+                vm.AcceptSelectedMissionsCommand.Execute(null);
+            }
+        }
     }
 }

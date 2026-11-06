@@ -6,32 +6,32 @@
              xmlns:gmap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Border Background="#15181C" CornerRadius="10" ClipToBounds="True" BorderBrush="#2D3033" BorderThickness="1">
+    <Border Background="#0B0F14" CornerRadius="10" ClipToBounds="True" BorderBrush="#263545" BorderThickness="1">
         <Grid>
             <gmap:GMapControl x:Name="MainMap" MouseRightButtonDown="MainMap_MouseRightButtonDown"/>
 
             <!-- Atribuição Obrigatória (ESRI/ArcGIS) -->
             <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" 
-                    Background="#AA000000" Padding="5,2" Margin="5" CornerRadius="3" IsHitTestVisible="False">
-                <TextBlock Text="© Esri, OpenStreetMap contributors" FontSize="8" Foreground="White" Opacity="0.6"/>
+                    Background="#CC0B0F14" Padding="5,2" Margin="5" CornerRadius="3" IsHitTestVisible="False">
+                <TextBlock Text="© Esri, OpenStreetMap contributors" FontSize="8" Foreground="#8B9BAE" Opacity="0.7"/>
             </Border>
             
             <!-- Overlay para informações de distância dos waypoints -->
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" 
-                    Background="#CC0F1113" CornerRadius="5" Padding="8,4" IsHitTestVisible="False">
+                    Background="#E6141C24" CornerRadius="6" Padding="8,4" BorderBrush="#263545" BorderThickness="1" IsHitTestVisible="False">
                 <StackPanel>
-                    <TextBlock x:Name="TxtDistance" Text="0.0 NM" FontSize="12" FontWeight="Bold" Foreground="#2ECC71"/>
-                    <TextBlock Text="WAYPOINTS ACTIVE" FontSize="8" Foreground="#9CA3AF" HorizontalAlignment="Right"/>
+                    <TextBlock x:Name="TxtDistance" Text="0.0 NM" FontSize="12" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                    <TextBlock Text="WAYPOINTS ATIVOS" FontSize="8" FontWeight="SemiBold" Foreground="#8B9BAE" HorizontalAlignment="Right"/>
                 </StackPanel>
             </Border>
 
             <!-- Botão para limpar waypoints -->
             <Button VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10"
-                    Content="LIMPAR" Click="BtnClear_Click" FontSize="9" Padding="8,2"
-                    Background="#2D3033" Foreground="White" BorderThickness="0">
+                    Content="LIMPAR" Click="BtnClear_Click" FontSize="9" FontWeight="Bold" Padding="8,3"
+                    Background="#1F2B37" Foreground="#8B9BAE" BorderBrush="#263545" BorderThickness="1">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                     </ControlTemplate>

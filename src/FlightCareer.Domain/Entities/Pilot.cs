@@ -24,8 +24,15 @@ namespace FlightCareer.Domain.Entities
         public string Rank { get; set; } = "Student Pilot";
         public Guid? ActiveAircraftId { get; set; }
 
-        // Progressão Regulatória da Empresa (Tiers 1 a 5)
-        public CompanyTier CompanyTier { get; set; } = CompanyTier.Tier1_FlightSchool;
+        // Progressão Regulatória da Empresa (Categorias 1 a 5)
+        public PilotCategory PilotCategory { get; set; } = PilotCategory.Category1_FlightSchool;
+
+        // Mantido para compatibilidade com código existente
+        public CompanyTier CompanyTier
+        {
+            get => (CompanyTier)(int)PilotCategory;
+            set => PilotCategory = (PilotCategory)(int)value;
+        }
 
         // Licenças e Habilitações Aeronáuticas
         public bool HasPPLicense { get; set; } = true;          // Piloto Privado (Inicial)

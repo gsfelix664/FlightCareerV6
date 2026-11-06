@@ -68,9 +68,14 @@ namespace FlightCareer.Infrastructure.Services
             if (!MissionRules.Rules.TryGetValue(currentAirport.Tier, out var tierConfig))
                 return currentMktMissions;
 
+            // Cota de missões visíveis proporcional ao porte do aeroporto
             int targetCount = currentAirport.Tier switch
             {
-                1 => 12, 2 => 10, 3 => 8, 4 => 6, _ => 6
+                1 => 70, // Grandes Hubs
+                2 => 50, // Regionais Médios
+                3 => 35, // Municipais / Interior
+                4 => 20, // Pistas Remotas / Não Pavimentadas
+                _ => 20
             };
 
             if (currentMktMissions.Count < targetCount)
@@ -78,16 +83,30 @@ namespace FlightCareer.Infrastructure.Services
                 int needed = targetCount - currentMktMissions.Count;
                 var newMissions = new List<Mission>();
 
-                for (int i = 0; i < needed; i++)
+                // Algumas subcategorias podem não encontrar destino válido na faixa sorteada.
+                // Permite tentativas extras para garantir que a cota seja atingida.
+                int maxAttempts = needed * 4;
+                int attempts = 0;
+
+                while (newMissions.Count < needed && attempts < maxAttempts)
                 {
+                    attempts++;
+
                     var category = PickWeighted(tierConfig.Categories);
                     if (category == null) continue;
 
                     var subCategory = PickWeighted(category.SubCategories);
                     if (subCategory == null) continue;
 
-                    var mission = await CreateMissionFromSubCategory(currentAirport, subCategory, tierConfig.AllowedDestinationTiers);
-                    if (mission != null) newMissions.Add(mission);
+                    try
+                    {
+                        var mission = await CreateMissionFromSubCategory(currentAirport, subCategory, tierConfig.AllowedDestinationTiers);
+                        if (mission != null) newMissions.Add(mission);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[MissionGenerator] Falha ao gerar missão ({subCategory.Id}): {ex.Message}");
+                    }
                 }
 
                 if (newMissions.Any())
@@ -226,55 +245,55 @@ namespace FlightCareer.Infrastructure.Services
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
-            // Determinar o Tier Regulatório e Tipo da Missão
-            CompanyTier requiredTier;
+            // Determinar a Categoria Regulatória e Tipo da Missão
+            PilotCategory requiredCategory;
             string categoryType;
 
             if (sub.Id.StartsWith("3.4"))
             {
-                requiredTier = CompanyTier.Tier1_FlightSchool;
+                requiredCategory = PilotCategory.Category1_FlightSchool;
                 categoryType = "Instrução / Treinamento";
             }
             else if (sub.Id.StartsWith("3.2") || sub.Id.StartsWith("4.") || sub.Id.StartsWith("2.3"))
             {
-                requiredTier = CompanyTier.Tier2_SAE;
+                requiredCategory = PilotCategory.Category2_SAE;
                 categoryType = "SAE / Carga Especializada";
             }
             else if (sub.Id.StartsWith("3.1") || sub.Id.StartsWith("3.3") || sub.Id.StartsWith("1.3") || sub.Id.StartsWith("2.2"))
             {
-                requiredTier = CompanyTier.Tier3_AirTaxi;
+                requiredCategory = PilotCategory.Category3_AirTaxi;
                 categoryType = "Táxi Aéreo / Charter";
             }
             else if (sub.Id.StartsWith("2.1"))
             {
-                requiredTier = CompanyTier.Tier4_Regional;
+                requiredCategory = PilotCategory.Category4_Regional;
                 categoryType = "Linha Regional";
             }
             else if (sub.Id.StartsWith("1.1") || sub.Id.StartsWith("1.2"))
             {
-                requiredTier = CompanyTier.Tier5_MajorAirline;
+                requiredCategory = PilotCategory.Category5_MajorAirline;
                 categoryType = "Linha Regular / Heavy";
             }
             else
             {
                 if (paxCount > 19 || totalPayload > 10000)
                 {
-                    requiredTier = CompanyTier.Tier5_MajorAirline;
+                    requiredCategory = PilotCategory.Category5_MajorAirline;
                     categoryType = "Linha Regular";
                 }
                 else if (paxCount > 9 || totalPayload > 3000)
                 {
-                    requiredTier = CompanyTier.Tier4_Regional;
+                    requiredCategory = PilotCategory.Category4_Regional;
                     categoryType = "Linha Regional";
                 }
                 else if (paxCount > 0 || totalPayload > 1000)
                 {
-                    requiredTier = CompanyTier.Tier3_AirTaxi;
+                    requiredCategory = PilotCategory.Category3_AirTaxi;
                     categoryType = "Táxi Aéreo";
                 }
                 else
                 {
-                    requiredTier = CompanyTier.Tier2_SAE;
+                    requiredCategory = PilotCategory.Category2_SAE;
                     categoryType = "SAE / Carga Leve";
                 }
             }
@@ -295,7 +314,8 @@ namespace FlightCareer.Infrastructure.Services
                 RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
                 ExpirationTime = DateTime.Now.AddHours(_random.Next(sub.MinExpHours, sub.MaxExpHours + 1)),
-                RequiredTier = requiredTier,
+                RequiredCategory = requiredCategory,
+                RequiredTier = (CompanyTier)(int)requiredCategory,
                 MissionCategoryType = categoryType
             };
         }
