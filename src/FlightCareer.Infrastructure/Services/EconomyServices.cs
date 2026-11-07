@@ -58,19 +58,9 @@ namespace FlightCareer.Infrastructure.Services
 
     public static class FuelService
     {
-        private const double BASE_PRICE_JETA = 6.50;
-        private const double BASE_PRICE_AVGAS = 7.80;
-
         public static double GetCurrentPrice(string fuelType)
         {
-            string type = fuelType.ToUpper();
-            double basePrice = type.Contains("JET") ? BASE_PRICE_JETA : BASE_PRICE_AVGAS;
-
-            int seed = DateTime.UtcNow.Year * 1000 + DateTime.UtcNow.DayOfYear;
-            Random rng = new Random(seed);
-            double fluctuation = 0.95 + (rng.NextDouble() * 0.10);
-
-            return Math.Round(basePrice * fluctuation, 2);
+            return FuelPriceService.GetCurrentPrice(fuelType);
         }
     }
 }

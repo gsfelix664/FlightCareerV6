@@ -26,8 +26,10 @@ bld/
 *.sqlite
 *.sqlite3
 
-## Backup / Legacy local archives
+## Backup / Legacy local archives & Reference Repos
 antigos/
+references/
+logs/
 *.rar
 *.zip
 *.7z

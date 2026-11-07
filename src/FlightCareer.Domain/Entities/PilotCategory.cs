@@ -84,11 +84,24 @@ namespace FlightCareer.Domain.Entities
             };
         }
 
+        public static int GetRequiredXP(this PilotCategory currentCategory)
+        {
+            return currentCategory switch
+            {
+                PilotCategory.Category1_FlightSchool => 2500,     // Formação Básica e Prática
+                PilotCategory.Category2_SAE => 12000,             // Proficiência Comercial
+                PilotCategory.Category3_AirTaxi => 45000,         // Experiência em Rotas e Gestão
+                PilotCategory.Category4_Regional => 150000,       // Alta Performance e Precisão IFR
+                _ => 0
+            };
+        }
+
         // Extensões para manter compatibilidade com CompanyTier
         public static string GetDisplayName(this CompanyTier tier) => ((PilotCategory)(int)tier).GetDisplayName();
         public static string GetShortName(this CompanyTier tier) => ((PilotCategory)(int)tier).GetShortName();
         public static string GetBadgeColor(this CompanyTier tier) => ((PilotCategory)(int)tier).GetBadgeColor();
         public static double GetPromotionCost(this CompanyTier tier) => ((PilotCategory)(int)tier).GetPromotionCost();
         public static double GetRequiredHours(this CompanyTier tier) => ((PilotCategory)(int)tier).GetRequiredHours();
+        public static int GetRequiredXP(this CompanyTier tier) => ((PilotCategory)(int)tier).GetRequiredXP();
     }
 }

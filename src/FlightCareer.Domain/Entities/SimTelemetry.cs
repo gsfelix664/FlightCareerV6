@@ -56,6 +56,9 @@ namespace FlightCareer.Domain.Entities
         public double PlaneBank;  // Degrees
         public double PlanePitch; // Degrees
 
+        // Proa / Navegação
+        public double PlaneHeading; // Degrees Magnetic
+
         public bool IsOnGround => OnGround > 0.5;
         public bool IsEngineRunning => EngineRunning > 0.5;
     }

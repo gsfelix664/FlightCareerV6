@@ -30,6 +30,12 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty OriginIcaoProperty = DependencyProperty.Register("OriginIcao", typeof(string), typeof(FlightMapControl), new PropertyMetadata(string.Empty, OnIcaoChanged));
         public static readonly DependencyProperty DestIcaoProperty = DependencyProperty.Register("DestIcao", typeof(string), typeof(FlightMapControl), new PropertyMetadata(string.Empty, OnIcaoChanged));
         public static readonly DependencyProperty AirportsProperty = DependencyProperty.Register("Airports", typeof(System.Collections.ObjectModel.ObservableCollection<Airport>), typeof(FlightMapControl), new PropertyMetadata(null, OnAirportsChanged));
+        
+        // Novas propriedades de telemetria em tempo real
+        public static readonly DependencyProperty IsOnGroundProperty = DependencyProperty.Register("IsOnGround", typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true, OnTelemetryChanged));
+        public static readonly DependencyProperty AircraftHeadingProperty = DependencyProperty.Register("AircraftHeading", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
+        public static readonly DependencyProperty AltitudeProperty = DependencyProperty.Register("Altitude", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
+        public static readonly DependencyProperty GroundSpeedProperty = DependencyProperty.Register("GroundSpeed", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
 
         public double AircraftLat { get => (double)GetValue(AircraftLatProperty); set => SetValue(AircraftLatProperty, value); }
         public double AircraftLon { get => (double)GetValue(AircraftLonProperty); set => SetValue(AircraftLonProperty, value); }
@@ -38,6 +44,18 @@ namespace FlightCareer.UI.Utils
         public string OriginIcao { get => (string)GetValue(OriginIcaoProperty); set => SetValue(OriginIcaoProperty, value); }
         public string DestIcao { get => (string)GetValue(DestIcaoProperty); set => SetValue(DestIcaoProperty, value); }
         public System.Collections.ObjectModel.ObservableCollection<Airport> Airports { get => (System.Collections.ObjectModel.ObservableCollection<Airport>)GetValue(AirportsProperty); set => SetValue(AirportsProperty, value); }
+        public bool IsOnGround { get => (bool)GetValue(IsOnGroundProperty); set => SetValue(IsOnGroundProperty, value); }
+        public double AircraftHeading { get => (double)GetValue(AircraftHeadingProperty); set => SetValue(AircraftHeadingProperty, value); }
+        public double Altitude { get => (double)GetValue(AltitudeProperty); set => SetValue(AltitudeProperty, value); }
+        public double GroundSpeed { get => (double)GetValue(GroundSpeedProperty); set => SetValue(GroundSpeedProperty, value); }
+
+        private static void OnTelemetryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateAircraftPosition();
+            }
+        }
 
         private static void OnIcaoChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -154,40 +172,109 @@ namespace FlightCareer.UI.Utils
                 var pos = new PointLatLng(AircraftLat, AircraftLon);
                 _aircraftMarker.Position = pos;
 
-                // Tactical Origin Badge
                 var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-                panel.Children.Add(new Ellipse
-                {
-                    Width = 10,
-                    Height = 10,
-                    Fill = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
-                    Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
-                    StrokeThickness = 2,
-                    Margin = new Thickness(0, 0, 4, 0)
-                });
 
-                if (!string.IsNullOrWhiteSpace(OriginIcao))
+                if (IsOnGround)
                 {
+                    // === MODO SOLO (ON GROUND) ===
+                    // Círculo tático de rampa com radar ping
+                    var groundIcon = new Grid
+                    {
+                        Width = 18,
+                        Height = 18,
+                        Margin = new Thickness(0, 0, 6, 0)
+                    };
+                    groundIcon.Children.Add(new Ellipse
+                    {
+                        Width = 18,
+                        Height = 18,
+                        Fill = (Brush)new BrushConverter().ConvertFromString("#33FFB300")!,
+                        Stroke = (Brush)new BrushConverter().ConvertFromString("#FFB300")!,
+                        StrokeThickness = 1.5
+                    });
+                    groundIcon.Children.Add(new Ellipse
+                    {
+                        Width = 8,
+                        Height = 8,
+                        Fill = (Brush)new BrushConverter().ConvertFromString("#00E676")!,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    panel.Children.Add(groundIcon);
+
+                    string badgeText = !string.IsNullOrWhiteSpace(OriginIcao) ? $"SOLO • {OriginIcao}" : "SOLO / RAMPA";
+                    if (GroundSpeed > 3.0)
+                    {
+                        badgeText += $" ({GroundSpeed:N0} kt)";
+                    }
+
                     var border = new Border
                     {
                         Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
-                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E676")!,
                         BorderThickness = new Thickness(1),
-                        CornerRadius = new CornerRadius(3),
-                        Padding = new Thickness(5, 2, 5, 2),
+                        CornerRadius = new CornerRadius(4),
+                        Padding = new Thickness(6, 2, 6, 2),
                         Child = new TextBlock
                         {
-                            Text = OriginIcao,
-                            FontSize = 10,
+                            Text = badgeText,
+                            FontSize = 9,
                             FontWeight = FontWeights.Bold,
                             Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
                             FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
                         }
                     };
                     panel.Children.Add(border);
+                    panel.ToolTip = $"AERONAVE EM SOLO | Posição: {AircraftLat:F4}, {AircraftLon:F4}";
+                }
+                else
+                {
+                    // === MODO EM VOO (AIRBORNE) ===
+                    // Silhueta vetorial de aeronave com rotação de proa em tempo real
+                    var planeGrid = new Grid
+                    {
+                        Width = 28,
+                        Height = 28,
+                        Margin = new Thickness(0, 0, 6, 0)
+                    };
+
+                    var planeGeom = System.Windows.Media.Geometry.Parse("M 12,2 L 15,9 L 25,13 L 25,15 L 15,14 L 14,21 L 18,23 L 18,25 L 12,24 L 6,25 L 6,23 L 10,21 L 9,14 L -1,15 L -1,13 L 9,9 Z");
+                    var planePath = new Path
+                    {
+                        Data = planeGeom,
+                        Fill = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
+                        Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
+                        StrokeThickness = 1.5,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        RenderTransformOrigin = new Point(0.5, 0.5),
+                        RenderTransform = new RotateTransform(AircraftHeading)
+                    };
+                    planeGrid.Children.Add(planePath);
+                    panel.Children.Add(planeGrid);
+
+                    // Badge de Telemetria de Voo Ativo
+                    var flightBorder = new Border
+                    {
+                        Background = (Brush)new BrushConverter().ConvertFromString("#E60B0F14")!,
+                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(4),
+                        Padding = new Thickness(6, 2, 6, 2),
+                        Child = new TextBlock
+                        {
+                            Text = $"✈️ {Altitude:N0} FT • {GroundSpeed:N0} KT • {AircraftHeading:N0}°",
+                            FontSize = 9,
+                            FontWeight = FontWeights.Bold,
+                            Foreground = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                            FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
+                        }
+                    };
+                    panel.Children.Add(flightBorder);
+                    panel.ToolTip = $"EM VOO | ALT: {Altitude:N0} ft | GS: {GroundSpeed:N0} kt | HDG: {AircraftHeading:N0}°";
                 }
 
-                panel.ToolTip = $"ORIGEM: {OriginIcao}";
+                _aircraftMarker.ZIndex = 200;
                 _aircraftMarker.Shape = panel;
                 
                 // Centraliza o mapa se estiver no início

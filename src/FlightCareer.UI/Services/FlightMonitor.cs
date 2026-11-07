@@ -17,6 +17,8 @@ namespace FlightCareer.UI.Services
         private readonly Infrastructure.Persistence.AppDbContext _context;
         private readonly WearAndFailureService _wearService;
         private readonly FlightQualityService _qualityService = new();
+        private readonly FlightTelemetryLogger _telemetryLogger = new();
+        private string _currentStatus = "AGUARDANDO PREPARAÇÃO (ENGINES/PB)";
 
         public bool IsMonitoring { get; private set; }
         public bool IsFlightActive { get; private set; }
@@ -105,6 +107,7 @@ namespace FlightCareer.UI.Services
             // Se o voo já estava ativo (motores ligados/PB solto), salvamos o estado atual
             if (IsFlightActive && lastData != null && _pilot != null && _aircraft != null)
             {
+                _telemetryLogger.StopFlightLog("CANCELADO_PELO_PILOTO", 0, _qualityService.GetQualityScore());
                 OnStatusChanged?.Invoke("CANCELANDO E SALVANDO ESTADO...");
                 
                 try
@@ -166,6 +169,7 @@ namespace FlightCareer.UI.Services
         {
             if (_aircraft == null) return;
             
+            _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", 999, 0);
             StopMonitoring();
             
             // Salvar estado de 0% no banco para garantir que a aeronave está "morta"
@@ -267,13 +271,24 @@ namespace FlightCareer.UI.Services
             if (!_isAirborne && !data.IsOnGround && data.GroundSpeed > 30)
             {
                 _isAirborne = true;
-                OnStatusChanged?.Invoke("VOANDO (NO AR)");
+                _currentStatus = "VOANDO (NO AR)";
+                OnStatusChanged?.Invoke(_currentStatus);
             }
 
-            // Lógica de Finalização: OnGround + PB + Engines OFF por 5 segundos
-            if (_isAirborne && data.IsOnGround && !data.IsEngineRunning && data.ParkingBrake > 0.5)
+            // Gravar Blackbox de Telemetria Contínua
+            string destIcao = _activeMissions.FirstOrDefault()?.DestinationICAO ?? "DEST";
+            _telemetryLogger.LogFrame(data, _aircraft, _originIcao, destIcao, _currentStatus);
+
+            // Lógica de Finalização Inteligente: OnGround + Motores Desligados + (PB ou Parada Total GS < 1.0) por 5 segundos
+            bool isParkedOrStopped = data.ParkingBrake > 0.5 || data.GroundSpeed < 1.0;
+            if (_isAirborne && data.IsOnGround && !data.IsEngineRunning && isParkedOrStopped)
             {
-                if (_startConditionTime == null) _startConditionTime = DateTime.Now;
+                if (_startConditionTime == null)
+                {
+                    _startConditionTime = DateTime.Now;
+                    _currentStatus = "POUSO E CORTE DE MOTORES DETECTADOS (ENCERRANDO EM 5s)...";
+                    OnStatusChanged?.Invoke(_currentStatus);
+                }
                 
                 if ((DateTime.Now - _startConditionTime.Value).TotalSeconds >= 5)
                 {
@@ -284,7 +299,10 @@ namespace FlightCareer.UI.Services
             }
             else
             {
-                _startConditionTime = null;
+                if (_startConditionTime != null && !isParkedOrStopped)
+                {
+                    _startConditionTime = null;
+                }
             }
         }
 
@@ -363,11 +381,17 @@ namespace FlightCareer.UI.Services
             _lastLon = data.Longitude;
             _lastDatabaseUpdate = DateTime.Now;
             _lastWearUpdate = DateTime.Now;
-            OnStatusChanged?.Invoke("VOO EM PROGRESSO - GRAVANDO");
+            _currentStatus = "VOO EM PROGRESSO - GRAVANDO";
+            OnStatusChanged?.Invoke(_currentStatus);
+
+            // Iniciar Gravação Blackbox
+            string destIcao = _activeMissions.FirstOrDefault()?.DestinationICAO ?? "DEST";
+            _telemetryLogger.StartFlightLog(_originIcao, destIcao, _aircraft);
         }
 
         private async Task FinalizeFlightAsync(SimTelemetry data)
         {
+            _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", Math.Abs(data.VelocityBodyY * 60.0), _qualityService.GetQualityScore());
             StopMonitoring();
 
             if (_pilot == null || _aircraft == null) return;

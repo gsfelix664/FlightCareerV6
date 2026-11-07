@@ -53,6 +53,7 @@ namespace FlightCareer.UI.ViewModels
         // Atitude
         [ObservableProperty] private double _planeBank = 0;
         [ObservableProperty] private double _planePitch = 0;
+        [ObservableProperty] private double _planeHeading = 0;
 
         [ObservableProperty] private string _airportSearch = string.Empty;
         public ObservableCollection<Airport> Airports { get; } = new();
@@ -181,7 +182,8 @@ namespace FlightCareer.UI.ViewModels
                 EngineN1 = EngineN1,
 
                 PlaneBank = PlaneBank,
-                PlanePitch = PlanePitch
+                PlanePitch = PlanePitch,
+                PlaneHeading = PlaneHeading
             };
 
             _simConnect.SetDebugData(data);

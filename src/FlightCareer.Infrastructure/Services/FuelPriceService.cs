@@ -7,11 +7,11 @@ namespace FlightCareer.Infrastructure.Services
         // Data base para o início da economia do sistema
         private static readonly DateTime ProjectStartDate = new DateTime(2024, 1, 1);
         
-        // Preços base em USD por GALÃO
-        private const double BaseAvgasPrice = 5.50; 
-        private const double BaseJetAPrice = 4.80; 
+        // Preços base em USD por GALÃO (Calibrados para o mercado real de aviação)
+        private const double BaseAvgasPrice = 6.80; // Avgas 100LL
+        private const double BaseJetAPrice = 5.40;  // Jet A-1
 
-        public static double GetCurrentPrice(string fuelType)
+        public static double GetCurrentPrice(string fuelType, int airportTier = 3)
         {
             double basePrice = fuelType.ToUpper().Contains("JET") ? BaseJetAPrice : BaseAvgasPrice;
             
@@ -25,7 +25,17 @@ namespace FlightCareer.Infrastructure.Services
             var rng = new Random(DateTime.Today.Year * 1000 + DateTime.Today.DayOfYear);
             double dailyVariation = 0.97 + (rng.NextDouble() * 0.06);
 
-            return Math.Round(inflatedPrice * dailyVariation, 2);
+            // 3. Diferencial Logístico por Porte do Aeródromo
+            double tierFactor = airportTier switch
+            {
+                1 => 0.94, // Hubs internacionais (economia de escala em grandes tanques)
+                2 => 0.98, // Regionais médios
+                3 => 1.00, // Municipais e executivos (preço padrão FBO)
+                4 => 1.22, // Pistas remotas / rurais (custo de frete rodoviário e tamboramento)
+                _ => 1.00
+            };
+
+            return Math.Round(inflatedPrice * dailyVariation * tierFactor, 2);
         }
     }
 }

@@ -29,6 +29,9 @@ namespace FlightCareer.UI.ViewModels
         
         [ObservableProperty] private bool _isLoading;
         [ObservableProperty] private double _userBalance;
+        [ObservableProperty] private string _searchText = string.Empty;
+
+        private List<MarketOffer> _allOffers = new();
 
         public MarketViewModel(AppDbContext context, IPilotRepository pilotRepository)
         {
@@ -43,6 +46,32 @@ namespace FlightCareer.UI.ViewModels
             await LoadOffersAsync();
         }
 
+        partial void OnSearchTextChanged(string value)
+        {
+            ApplyFilter();
+        }
+
+        private void ApplyFilter()
+        {
+            var query = _allOffers.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var term = SearchText.Trim().ToLowerInvariant();
+                query = query.Where(o =>
+                    (o.BaseType?.Model != null && o.BaseType.Model.ToLowerInvariant().Contains(term)) ||
+                    (o.BaseType?.Type != null && o.BaseType.Type.ToLowerInvariant().Contains(term)) ||
+                    (o.Prefix != null && o.Prefix.ToLowerInvariant().Contains(term)));
+            }
+
+            var filtered = query.OrderBy(o => o.SalePrice).ToList();
+            Offers = new ObservableCollection<MarketOffer>(filtered);
+
+            if (SelectedOffer == null || !Offers.Contains(SelectedOffer))
+            {
+                SelectedOffer = Offers.FirstOrDefault();
+            }
+        }
+
         public async Task LoadOffersAsync()
         {
             IsLoading = true;
@@ -51,44 +80,51 @@ namespace FlightCareer.UI.ViewModels
                 var aircraftTypes = await _context.AircraftTypes.ToListAsync();
                 var generatedOffers = new List<MarketOffer>();
 
-                // Gerar 12 ofertas aleatórias de aeronaves usadas
-                for (int i = 0; i < 12; i++)
+                if (aircraftTypes.Count > 0)
                 {
-                    var type = aircraftTypes[_random.Next(aircraftTypes.Count)];
-                    
-                    // Gerar Prefix aleatório (PT-XXX)
-                    string prefix = $"PT-{ (char)_random.Next('A', 'Z') }{(char)_random.Next('A', 'Z')}{(char)_random.Next('A', 'Z')}";
-                    
-                    // Gerar condições (entre 40% e 100%)
-                    double engine = _random.Next(60, 101);
-                    double tires = _random.Next(40, 101);
-                    double airframe = _random.Next(70, 101);
-                    
-                    double avg = (engine + tires + airframe) / 3.0;
-                    
-                    // Preço: Base * (Condição Média / 100) * Fator de Mercado (0.8 a 1.1)
-                    double marketFactor = 0.8 + (_random.NextDouble() * 0.3);
-                    double aircraftValue = type.PurchasePrice * (avg / 100.0) * marketFactor;
+                    // Embaralha para que cada geração mostre modelos variados em destaque
+                    var shuffledTypes = aircraftTypes.OrderBy(_ => _random.Next()).ToList();
+                    const int targetCount = 50;
 
-                    // Valor do combustível (Cotação diária)
-                    double fuelAmount = Math.Round(_random.NextDouble() * type.FuelTankGallons, 1);
-                    double currentFuelPrice = FuelPriceService.GetCurrentPrice(type.FuelType);
-                    double fuelValue = fuelAmount * currentFuelPrice;
-
-                    generatedOffers.Add(new MarketOffer
+                    for (int i = 0; i < targetCount; i++)
                     {
-                        BaseType = type,
-                        Prefix = GeneratePrefix(),
-                        EngineCondition = engine,
-                        TiresCondition = tires,
-                        AirframeCondition = airframe,
-                        AirframeHours = _random.Next(100, 8000), // Horas totais da célula
-                        FuelAmount = fuelAmount,
-                        SalePrice = Math.Round(aircraftValue + fuelValue, 2)
-                    });
+                        // Garante que cada modelo apareça ao menos uma vez antes de repetir
+                        var type = (i < shuffledTypes.Count)
+                            ? shuffledTypes[i]
+                            : aircraftTypes[_random.Next(aircraftTypes.Count)];
+
+                        // Gerar condições (entre 40% e 100%)
+                        double engine = _random.Next(60, 101);
+                        double tires = _random.Next(40, 101);
+                        double airframe = _random.Next(70, 101);
+
+                        double avg = (engine + tires + airframe) / 3.0;
+
+                        // Preço: Base * (Condição Média / 100) * Fator de Mercado (0.8 a 1.1)
+                        double marketFactor = 0.8 + (_random.NextDouble() * 0.3);
+                        double aircraftValue = type.PurchasePrice * (avg / 100.0) * marketFactor;
+
+                        // Valor do combustível (Cotação diária)
+                        double fuelAmount = Math.Round(_random.NextDouble() * type.FuelTankGallons, 1);
+                        double currentFuelPrice = FuelPriceService.GetCurrentPrice(type.FuelType);
+                        double fuelValue = fuelAmount * currentFuelPrice;
+
+                        generatedOffers.Add(new MarketOffer
+                        {
+                            BaseType = type,
+                            Prefix = GeneratePrefix(),
+                            EngineCondition = engine,
+                            TiresCondition = tires,
+                            AirframeCondition = airframe,
+                            AirframeHours = _random.Next(100, 8000), // Horas totais da célula
+                            FuelAmount = fuelAmount,
+                            SalePrice = Math.Round(aircraftValue + fuelValue, 2)
+                        });
+                    }
                 }
 
-                Offers = new ObservableCollection<MarketOffer>(generatedOffers.OrderBy(o => o.SalePrice));
+                _allOffers = generatedOffers.OrderBy(o => o.SalePrice).ToList();
+                ApplyFilter();
             }
             catch (Exception ex)
             {
@@ -186,10 +222,14 @@ namespace FlightCareer.UI.ViewModels
 
                 MessageBox.Show($"Parabéns! O {SelectedOffer.BaseType.Model} ({SelectedOffer.Prefix}) agora faz parte da sua frota.", "Sucesso", MessageBoxButton.OK, MessageBoxImage.Information);
                 
-                // Remover a oferta comprada da lista UI
+                // Remover a oferta comprada da lista UI e da lista geral
                 var offerToRemove = SelectedOffer;
                 SelectedOffer = null;
-                Offers.Remove(offerToRemove);
+                if (offerToRemove != null)
+                {
+                    _allOffers.Remove(offerToRemove);
+                    Offers.Remove(offerToRemove);
+                }
                 
                 OnPropertyChanged(nameof(BuyButtonText));
             }

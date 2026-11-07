@@ -311,7 +311,7 @@ namespace FlightCareer.Infrastructure.Services
                 CargoWeightLbs = Math.Round(cargoWeight, 0),
                 PayloadLbs = Math.Round(totalPayload, 0),
                 Urgency = sub.Urgency,
-                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency),
+                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
                 ExpirationTime = DateTime.Now.AddHours(_random.Next(sub.MinExpHours, sub.MaxExpHours + 1)),
                 RequiredCategory = requiredCategory,
@@ -335,10 +335,108 @@ namespace FlightCareer.Infrastructure.Services
             return items.LastOrDefault();
         }
 
-        public double CalculateReward(double distance, double payload, double urgency)
+        public double CalculateReward(
+            double distance, 
+            double payload, 
+            double urgency, 
+            string subId = "", 
+            int paxCount = 0, 
+            int originTier = 3, 
+            int destTier = 3)
         {
-            double rate = 15.0 * urgency;
-            return Math.Round((distance * rate) + (payload * 0.05), 2);
+            // 1. Taxa Base de Despacho (Fixed Minimum Dispatch Fee) e Tarifas por Tipo de Operação
+            double baseFee;
+            double ratePerMile;
+            double ratePerPayloadLb;
+
+            if (subId.StartsWith("3.4")) // Instrução / Treinamento de Pilotos
+            {
+                // Cobre a hora/aula do instrutor de voo (INVA) e custos mínimos de pátio do aeroclube
+                baseFee = subId == "3.4.1" ? 220.0 : 350.0;
+                ratePerMile = 6.5;
+                ratePerPayloadLb = 0.10;
+            }
+            else if (subId.StartsWith("3.3") || subId == "4.3.1") // Remoção Médica / Medevac / Órgãos
+            {
+                // Serviço crítico de UTI aérea com equipe médica e equipamentos a bordo
+                baseFee = 2400.0;
+                ratePerMile = 14.0;
+                ratePerPayloadLb = 0.25;
+            }
+            else if (subId == "4.3.2" || subId == "3.2.1") // AOG Máquinas / Peças Críticas Urgentes
+            {
+                // Urgência industrial/agrícola: maquinário parado na colheita pagando prêmio de socorro
+                baseFee = 950.0;
+                ratePerMile = 8.0;
+                ratePerPayloadLb = 0.35;
+            }
+            else if (subId.StartsWith("4.")) // Agro Interior / Logística de Sede / Bush
+            {
+                baseFee = 380.0;
+                ratePerMile = 4.5;
+                ratePerPayloadLb = 0.18;
+            }
+            else if (subId.StartsWith("3.2")) // Agro Suporte Municipal
+            {
+                baseFee = 450.0;
+                ratePerMile = 5.0;
+                ratePerPayloadLb = 0.15;
+            }
+            else if (subId.StartsWith("3.1") || subId.StartsWith("2.2") || subId.StartsWith("1.3")) // Táxi Aéreo / Charter Executivo
+            {
+                // Fretamento executivo: taxa de acionamento de perna mínima + adicional por assento ocupado
+                baseFee = 950.0;
+                ratePerMile = 7.5 + (Math.Max(1, paxCount) * 1.5);
+                ratePerPayloadLb = 0.12;
+            }
+            else if (subId.StartsWith("2.3")) // Carga Expressa / E-Commerce
+            {
+                baseFee = 500.0;
+                ratePerMile = 4.0;
+                ratePerPayloadLb = 0.22;
+            }
+            else if (subId.StartsWith("2.1")) // Linha Aérea Regional (Feeder)
+            {
+                baseFee = 1800.0;
+                ratePerMile = 6.0 + (paxCount * 0.45);
+                ratePerPayloadLb = 0.08;
+            }
+            else if (subId.StartsWith("1.1") || subId.StartsWith("1.2")) // Linha Regular Comercial & Carga Heavy
+            {
+                baseFee = 5500.0;
+                ratePerMile = 8.0 + (paxCount * 0.30);
+                ratePerPayloadLb = 0.05;
+            }
+            else // Fallback Geral
+            {
+                baseFee = 400.0;
+                ratePerMile = 5.5;
+                ratePerPayloadLb = 0.10;
+            }
+
+            // 2. Base Bruta multiplicada pela Urgência da Missão
+            double urgencyMultiplier = Math.Max(1.0, urgency);
+            double grossBase = (baseFee + (distance * ratePerMile) + (payload * ratePerPayloadLb)) * urgencyMultiplier;
+
+            // 3. Fator Econômico do Aeródromo de Origem
+            double originFactor = originTier switch
+            {
+                1 => 1.20, // Hubs internacionais (maior poder aquisitivo e taxas de solo)
+                2 => 1.08, // Regionais médios
+                3 => 1.00, // Municipais (base)
+                4 => 0.95, // Remotos rurais
+                _ => 1.00
+            };
+
+            // 4. Adicional de Pista Desafiadora / Não Pavimentada (Bush Premium: +25% de taxa de risco)
+            double bushBonus = (destTier == 4) ? 1.25 : 1.00;
+
+            // 5. Flutuação de Mercado Orgânica (+/- 14% de variação estocástica realista)
+            double marketSpread = 0.88 + (_random.NextDouble() * 0.26);
+
+            double finalReward = grossBase * originFactor * bushBonus * marketSpread;
+
+            return Math.Round(finalReward, 2);
         }
 
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)

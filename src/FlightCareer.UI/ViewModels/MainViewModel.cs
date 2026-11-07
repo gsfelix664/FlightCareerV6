@@ -389,16 +389,24 @@ namespace FlightCareer.UI.ViewModels
                 if (active != null)
                 {
                     _briefingViewModel.HangarAircraftModel = $"{active.AircraftType?.Model} ({active.Prefix})";
+                    _briefingViewModel.HangarAircraftPrefix = active.Prefix;
                     _briefingViewModel.HangarAircraftFuel = active.FuelAmount;
                     _briefingViewModel.HangarAircraftLocation = active.CurrentLocationICAO;
+                    _briefingViewModel.HangarAircraftMtow = (active.AircraftType?.MaxPayloadLbs ?? 500) + 2000.0;
+                    _briefingViewModel.HangarAircraftCruiseSpeed = active.AircraftType?.CruiseSpeedKts ?? 110.0;
                 }
             }
             else
             {
                 _briefingViewModel.HangarAircraftModel = "NENHUMA ATIVA";
+                _briefingViewModel.HangarAircraftPrefix = "---";
                 _briefingViewModel.HangarAircraftFuel = 0;
                 _briefingViewModel.HangarAircraftLocation = "---";
+                _briefingViewModel.HangarAircraftMtow = 2500.0;
+                _briefingViewModel.HangarAircraftCruiseSpeed = 110.0;
             }
+            
+            await _briefingViewModel.RebuildItineraryAndValidateAsync();
         }
 
         private async void RemoveMission(Mission? mission)
@@ -449,7 +457,14 @@ namespace FlightCareer.UI.ViewModels
                     // Recalcular usando a lógica do gerador
                     if (_missionGenerator is Infrastructure.Services.MissionGenerator mg)
                     {
-                        mission.RewardMoney = mg.CalculateReward(newDist, mission.PayloadLbs, mission.Urgency);
+                        mission.RewardMoney = mg.CalculateReward(
+                            newDist, 
+                            mission.PayloadLbs, 
+                            mission.Urgency, 
+                            mission.Title, 
+                            mission.PassengerCount, 
+                            origin.Tier, 
+                            dest.Tier);
                         mission.ExperienceGain = (int)(newDist * 0.5 * mission.Urgency);
                     }
                 }
@@ -689,6 +704,7 @@ namespace FlightCareer.UI.ViewModels
             var nextCategory = (PilotCategory)((int)PilotCategory + 1);
             double cost = PilotCategory.GetPromotionCost();
             double reqHours = PilotCategory.GetRequiredHours();
+            int reqXP = PilotCategory.GetRequiredXP();
 
             string reqDesc = nextCategory switch
             {
@@ -699,23 +715,32 @@ namespace FlightCareer.UI.ViewModels
                 _ => ""
             };
 
-            string statusMsg = $"CERTIFICAÇÃO REGULATÓRIA DA EMPRESA\n\n" +
+            bool hoursOk = TotalHours >= reqHours;
+            bool xpOk = pilot.ExperiencePoints >= reqXP;
+            bool balanceOk = Balance >= cost;
+            bool canPromote = hoursOk && xpOk && balanceOk;
+
+            string statusMsg = $"=== CERTIFICAÇÃO REGULATÓRIA DA EMPRESA ===\n\n" +
                                $"Homologação Atual: {PilotCategory.GetDisplayName()}\n" +
                                $"Próxima Categoria: {nextCategory.GetDisplayName()}\n\n" +
                                $"REQUISITOS OPERACIONAIS:\n{reqDesc}\n\n" +
-                               $"Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h necessárias\n" +
-                               $"Taxa de Homologação: {cost:C2} (Seu saldo: {Balance:C2})\n\n";
-
-            bool canPromote = (TotalHours >= reqHours) && (Balance >= cost);
+                               $"TRÍADE DE PROGRESSÃO:\n" +
+                               $"• Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h {(hoursOk ? "[OK]" : "[PENDENTE]")}\n" +
+                               $"• Experiência (XP): {pilot.ExperiencePoints:N0} / {reqXP:N0} XP {(xpOk ? "[OK]" : "[PENDENTE]")}\n" +
+                               $"• Taxa de Homologação: {cost:C2} (Saldo: {Balance:C2}) {(balanceOk ? "[OK]" : "[PENDENTE]")}\n\n";
 
             if (!canPromote)
             {
-                statusMsg += "Você ainda NÃO cumpre todos os requisitos para homologar esta categoria.";
-                System.Windows.MessageBox.Show(statusMsg, "Progressão de Companhia", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                statusMsg += "SUA EMPRESA AINDA NÃO CUMPRE TODOS OS REQUISITOS:\n";
+                if (!hoursOk) statusMsg += $"- Faltam {(reqHours - TotalHours):F1} horas de voo registradas no manche.\n";
+                if (!xpOk) statusMsg += $"- Faltam {(reqXP - pilot.ExperiencePoints):N0} pontos de XP. Realize voos com pousos suaves e sem infrações para elevar sua pontuação de proficiência.\n";
+                if (!balanceOk) statusMsg += $"- Capital insuficiente. Faltam {(cost - Balance):C2} em caixa para pagar a homologação regulatória.\n";
+
+                System.Windows.MessageBox.Show(statusMsg, "Progresso de Certificação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            statusMsg += "Deseja pagar a taxa de homologação e certificar sua empresa para a nova Categoria agora?";
+            statusMsg += "Todos os requisitos regulatórios, horas e pontuação de XP foram atingidos!\n\nDeseja pagar a taxa e homologar sua empresa para a nova Categoria agora?";
             var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Categoria Operacional", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             if (result != System.Windows.MessageBoxResult.Yes) return;
 

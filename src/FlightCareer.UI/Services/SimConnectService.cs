@@ -110,6 +110,7 @@ namespace FlightCareer.UI.Services
 
                 AddToDef("PLANE BANK DEGREES", "degrees");
                 AddToDef("PLANE PITCH DEGREES", "degrees");
+                AddToDef("PLANE HEADING DEGREES MAGNETIC", "degrees");
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 

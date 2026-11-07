@@ -283,3 +283,278 @@ Você NÃO deve esperar que o usuário mencione explicitamente `@agente`. Você 
   - Tipografia de Interface e Navegação: `Inter, Segoe UI, sans-serif` (pesos Regular 400 para descrições e nomes de cidades; Semi-Bold 600 para cabeçalhos e badges de operação).
   - Tipografia Numérica e ICAO: `JetBrains Mono, Consolas, monospace` com numerais tabulares uniformes para códigos ICAO, distâncias, peso e valores monetários.
   - Escala Tipográfica: H1 / Resumo de Rota em 20px (Bold / Ciano `#00E5FF`), cabeçalhos de tabela em 11px Semi-Bold (`#8B9BAE`), células em 13px monoespaçadas e badges de operação em 10px Bold All Caps com padding compacto `2,6` e border radius `3`.
+
+## 2026-11-07 - Exibição de Roleplay e Situação Operacional no Quadro de Missões
+- **Integração de Briefing Narrativo no Pré-Despacho**:
+  - Adicionado card dedicado **"SITUAÇÃO OPERACIONAL"** logo acima do painel METAR no Card de Pré-Despacho Operacional (`MainWindow.xaml`).
+  - Exibe o título da missão (`SelectedMissionItem.Title`) em destaque âmbar e o texto de roleplay contextual (`SelectedMissionItem.Description`) em tipografia legível (`Inter`) com container de rolagem suave (`ScrollViewer MaxHeight="85"`).
+  - Permite aos pilotos lerem a narrativa operacional detalhada (situações de safra, urgências AOG, transporte médico, executivos e instruções) em tempo real conforme selecionam ou navegam pelas missões do quadro via teclado ou mouse.
+
+## 2026-11-07 - Calibração Holística da Economia (Dólar Realista, Recompensas e Combustíveis)
+- **Precificação Dinâmica de Missões (`CalculateReward`)**:
+  - Implementada taxa base de despacho fixa (*Minimum Dispatch Fee*) por categoria operacional (Instrução: $220/$350; Táxi Aéreo: $950; AOG Agrícola: $950; Aeromédico UTI: $2.400; Regional: $1.800; Regular/Heavy: $5.500).
+  - Tarifas variáveis calculadas por milha náutica e passageiro/peso segundo o tipo de operação aeronáutica real.
+  - Multiplicador de porte do aeroporto de origem (`OriginTier`: Tier 1 = 1.20x; Tier 2 = 1.08x; Tier 3 = 1.00x; Tier 4 = 0.95x).
+  - Adicional de risco para pistas desafiadoras/não pavimentadas (*Bush Premium* de +25% quando o destino for Tier 4).
+  - Flutuação estocástica de mercado de $\pm 14\%$ ($0.88$ a $1.14$), gerando variabilidade realista entre contratos semelhantes.
+- **Calibração Realista do Mercado de Combustíveis (`FuelPriceService`)**:
+  - Ajustados os preços base para cotações reais da aviação em 2026: Avgas 100LL ($6.80/gal) e Jet A-1 ($5.40/gal).
+  - Adicionado multiplicador logístico por Tier do aeroporto: Hubs internacionais (Tier 1 = 0.94x por economia de escala); Pistas remotas/rurais (Tier 4 = 1.22x por frete rodoviário de tambores de combustível).
+  - Unificação de `FuelService` com `FuelPriceService` para garantir fonte única e coesa de precificação em todo o sistema.
+
+## 2026-11-07 - Redesign da Tela de Briefing de Voo (Dispatch & Pre-Flight Gate)
+- **Arquitetura de Layout em 3 Colunas (30% / 45% / 25%)**:
+  - **Coluna 1 (30%): Manifesto & Rota Multi-Leg**:
+    - **Itinerário Dinâmico (Leg Sequencer)**: Construção automática de pernas com pontos de embarque, ação no destino (desembarque de PAX/Cargas) e envelope visual de Takeoff Weight com barra de MTOW dinâmica e alerta `OVERWEIGHT`.
+    - **Cards de Manifesto**: Cartões compactos de cada missão aceita com detalhe de carga, destino e botão sutil de exclusão `[✕]` para abortar o contrato individualmente.
+  - **Coluna 2 (45%): Mapa Tático & Navegação Interativa**:
+    - Viewport com `FlightMapControl` integrado e overlay superior com telemetria do corredor (Distância Total da rota em NM, contagem de escalas e ETE Total estimado).
+  - **Coluna 3 (25%): Gatekeeper "Plan vs Sim" (Diff Checklist)**:
+    - Checklist comparativo em tempo real para os 5 parâmetros fundamentais: Conexão SimConnect, Modelo da Aeronave, Posição no Pátio/Aeródromo, Payload (W&B) e Combustível nos Tanques.
+    - Status cromático visual (`🟢 OK` ou `🔴 DIVERGENTE` com indicação precisa da diferença em lbs ou galões).
+    - Botão contextual `[ 📋 COPIAR W&B P/ O SIM ]` para copiar despacho de peso para a área de transferência.
+    - **Botão Mestre de Liberação**: Bloqueado em cinza escuro com tooltip explicativo enquanto houver qualquer discrepância; ativado em verde brilhante quando todos os 5 parâmetros estiverem validados.
+
+## 2026-11-07 - Telemetria em Tempo Real no Mapa, Blackbox Logger, Auditoria de Voo e RPG de Progressão
+- **Ícone Dinâmico da Aeronave no Mapa de Briefing (`FlightMapControl`)**:
+  - Marcador dinâmico de alta fidelidade visual com alternância automática de estado:
+    - **Modo Solo (On Ground)**: Radar ping com círculo tático em `#FFB300`/`#00E676` e badge de pátio `SOLO • {OriginIcao} • {GroundSpeed} kt`.
+    - **Modo em Voo (Airborne)**: Silhueta vetorial de aeronave com preenchimento em `#00E5FF` (Ciano Aviônica) e rotação de proa em tempo real (`RotateTransform` centrado em `PlaneHeading`) acompanhado de badge de telemetria ativo `✈️ {Altitude:N0} FT • {GroundSpeed:N0} KT • {Heading:N0}°`.
+  - Novas DependencyProperties integradas via MVVM: `IsOnGround`, `AircraftHeading`, `Altitude`, `GroundSpeed`.
+- **Correção de Bugs do Status de Pré-Voo Durante o Voo (`BriefingViewModel`)**:
+  - Eliminado o bug onde o afastamento do aeródromo de origem durante a decolagem reacusava indevidamente "LOCALIZAÇÃO DIVERGENTE" ou mantinha "PRONTO PARA DECOLAGEM".
+  - Durante o monitoramento ativo (`IsMonitoring == true`), o Gatekeeper suspende as validações estáticas de rampa e transiciona para painel operacional de voo ativo (`VOO EM PROGRESSO • GS: {gs} KT • ALT: {alt} FT`), com itens do checklist exibindo carimbos operacionais contínuos (`ATIVO`, `CONFIRMADO`, `A BORDO`, `DESPACHADO`, `EM USO`).
+- **Auditoria do Ciclo de Voo e Encerramento Automático Infalível (`FlightMonitor`)**:
+  - **Início**: Validação com MSFS real e Simulador de Debug (`data.IsEngineRunning && data.ParkingBrake < 0.5` por 10s contínuos).
+  - **Encerramento Automático**: Refatorada a checagem de corte final para `_isAirborne && data.IsOnGround && !data.IsEngineRunning && (data.ParkingBrake > 0.5 || data.GroundSpeed < 1.0)`. Garante o encerramento do voo mesmo se o piloto cortar a mistura no pátio e a variável do freio não atingir o threshold exato.
+- **Flight Blackbox Logger (`FlightTelemetryLogger`)**:
+  - Novo serviço de telemetria contínua gravando registros estruturados em `logs/flights/flight_{data}_{origem}_{destino}_{prefixo}.csv` a cada 2 segundos.
+  - Monitora 32 parâmetros aeronáuticos por frame: Timestamp, tempo decorrido, coordenadas, altitude, velocidades (IAS, GS, VS), Força G, atitude (Pitch/Bank), proa, controles (PB, Flaps, Freios), motores (RPM, CHT, Temp/Pressão de Óleo, ITT, N1), combustível e desgaste dos componentes (fuselagem, motor, pneus).
+  - Finaliza com sumário de touchdown FPM, G-Force range, score de qualidade e status de término.
+- **Sistema RPG de Progressão da Companhia (Tríade: Horas + XP + Dinheiro)**:
+  - Adicionado método `GetRequiredXP` em `PilotCategory`:
+    - **Cat 1 ➔ Cat 2 (SAE)**: 40h de voo, 2.500 XP, $35.000.
+    - **Cat 2 ➔ Cat 3 (Táxi Aéreo)**: 150h de voo, 12.000 XP, $120.000.
+    - **Cat 3 ➔ Cat 4 (Regional)**: 500h de voo, 45.000 XP, $500.000.
+    - **Cat 4 ➔ Cat 5 (Regular)**: 1.500h de voo, 150.000 XP, $2.000.000.
+  - O comando `PromoteCompanyTierAsync` valida simultaneamente a tríade completa. Voos com baixa qualidade ou pousos duros reduzem o ganho de XP (via `FlightQualityService`), exigindo que o piloto voe mais e com melhor técnica para atingir a meta, além de manter o saldo bancário da empresa em dia.
+
+---
+
+## 📋 PLANO MESTRE DE REFATORAÇÃO (PRÓXIMA SESSÃO): COMUNICAÇÃO SIMCONNECT, PESOS & BALANCEAMENTO (W&B), COMBUSTÍVEL, LOCALIZAÇÃO E DETECÇÃO DE AERONAVE
+
+> **ATENÇÃO AGENTE EXECUTOR**: Este plano técnico detalhado foi elaborado com base na auditoria do código atual do `FlightCareer V6` e na análise de engenharia reversa de três repositórios de referência clonados localmente em `C:\PROJETOS\FLIGHTCAREERV6\references\`:
+> 1. **`references/FSTRaK`** (`https://github.com/o4oren/FSTRaK`): Referência em C# WPF + SimConnect (`FSTRaK/BusinessLogic/SimconnectService/SimConnectService.cs`, `FlightStateEvaluator.cs`, `AircraftResolver.cs`, `ConnectionRecovery.cs`).
+> 2. **`references/MSFS-Passenger-Map`** (`https://github.com/Inigo2210/MSFS-Passenger-Map`): Referência em validação de coordenadas de menu/sessão e telemetria (`app.py`).
+> 3. **`references/flightsim-mcp`** (`https://github.com/eythan-decker/flightsim-mcp`): Referência em arquitetura de SimVars, Polling Tiers e sistema de combustível/pesos (`spec.md`).
+
+---
+
+### 1. Diagnóstico de Bugs Críticos Encontrados no Sistema Atual
+
+1. **BUG CRÍTICO #1 — Fator `1.15` Indevido no Combustível (`BriefingViewModel.cs` e `DebugViewModel.cs`)**:
+   - **Onde está o erro**:
+     - Em `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs` (linha 127): `FuelQuantity = Math.Round(data.FuelTotalGallons * 1.15, 1);`
+     - Em `src/FlightCareer.UI/ViewModels/DebugViewModel.cs` (linha 156): `FuelTotalGallons = FuelGallons / 1.15;`
+   - **Causa-Raiz**: A SimVar `"FUEL TOTAL QUANTITY"` requisitada com unidade `"Gallons"` no SimConnect **já retorna US Gallons exatos**. Multiplicar por `1.15` infla a leitura do MSFS em **+15%** (ex: o usuário coloca `20.0 gal` no MSFS e o FlightCareer lê `23.0 gal`), travando o Gatekeeper por divergência falsa de combustível.
+   - **Correção**: Remover imediatamente o fator `* 1.15` em `BriefingViewModel.cs` (`FuelQuantity = Math.Round(data.FuelTotalGallons, 1);`) e o `/ 1.15` em `DebugViewModel.cs` (`FuelTotalGallons = FuelGallons;`).
+
+2. **BUG CRÍTICO #2 — Cálculo Errôneo do Payload Reportado pelo Simulador (`BriefingViewModel.cs`)**:
+   - **Onde está o erro**:
+     - Em `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs`: `double reportedSimPayload = Math.Max(0, TotalWeight - EmptyWeight - (FuelQuantity * 6.0));`
+   - **Causa-Raiz**:
+     - Assume que todo combustível pesa `6.0 lbs/gal` (densidade da Avgas 100LL). Porém, no MSFS 2020/2024, aeronaves Turboélice e Jato (Cessna 208 Caravan, King Air 350i, CJ4, A320, B737) utilizam **Jet A-1 (~6.7 lbs/gal)**. Em um tanque com 200 galões de Jet A-1, o erro é de **140 lbs**, fazendo o Payload calculado divergir mesmo quando o jogador configurou o peso exato!
+     - Além disso, o SimConnect **já fornece diretamente** `FUEL TOTAL QUANTITY WEIGHT` (`data.FuelWeightLbs`), `ZERO FUEL WEIGHT` (`data.ZeroFuelWeightLbs`) e `FUEL WEIGHT PER GALLON` (`data.FuelWeightPerGallon`).
+   - **Correção**:
+     - Calcular o Payload atual do simulador usando o peso real de combustível reportado pela física do MSFS:
+       ```csharp
+       double simFuelWeightLbs = data.FuelWeightLbs > 0 
+           ? data.FuelWeightLbs 
+           : data.FuelTotalGallons * (data.FuelWeightPerGallon > 0 ? data.FuelWeightPerGallon : 6.0);
+       double reportedSimPayload = Math.Max(0, data.TotalWeightLbs - data.EmptyWeightLbs - simFuelWeightLbs);
+       ```
+     - Calcular o peso planejado do combustível (`PlannedFuelWeightLbs`) usando a densidade real da aeronave conectada (`double density = data.FuelWeightPerGallon > 0 ? data.FuelWeightPerGallon : 6.0; double plannedFuelLbs = HangarAircraftFuel * density;`).
+
+3. **BUG CRÍTICO #3 — Detecção de Aeronave Frágil contra Pinturas/Liveries da Comunidade (`SimConnectService.cs` & `BriefingViewModel.cs`)**:
+   - **Onde está o erro**: Hoje o `SimTelemetry` lê apenas a SimVar `"TITLE"`. Quando o piloto usa uma pintura customizada (ex: `"PMDG 737-800 Gol Linhas Aereas PR-GXP"` ou `"Asobo Cessna 208B Grand Caravan EX Azul Conecta"`), o `TITLE` muitas vezes omite o nome do fabricante ou muda a grafia do modelo do hangar.
+   - **Inspiração no `FSTRaK` (`SimConnectService.cs` linhas 566-588)**:
+     - O `FSTRaK` requisita simultaneamente:
+       - `"TITLE"` (`STRING256`) — Nome da variante/livery
+       - `"ATC MODEL"` (`STRING32`) — Código ICAO/Modelo interno da aeronave (ex: `"C152"`, `"C172"`, `"C208"`, `"B350"`, `"G58"`, `"A320"`, `"B738"`)
+       - `"ATC TYPE"` (`STRING32` ou `STRING256`) — Fabricante/Tipo (ex: `"CESSNA"`, `"BEECH"`, `"AIRBUS"`, `"BOEING"`)
+       - `"ATC ID"` (`STRING32`) — Matrícula/Prefixo no simulador
+       - `"CAMERA STATE"` (`INT32` / `FLOAT64`) — Para detectar se o piloto está no Menu Principal do MSFS (`CameraState >= 11`) ou já carregado no cockpit/pátio (`CameraState` 2 a 9).
+
+4. **BUG CRÍTICO #4 — Falta de Clareza e Decomposição Visual de Pesos para o Usuário no Briefing**:
+   - **Problema de UX**: O usuário vê apenas "Payload: 820 lbs" e não sabe quanto desse valor vem do Piloto/Tripulação, quanto vem dos Passageiros (`X PAX`), quanto vem de Bagagem/Carga, qual é o Peso Vazio (`Empty Weight`), qual é o `Zero Fuel Weight (ZFW)` e se deve configurar o combustível em Galões ou em Libras no simulador.
+   - **Problema de Menu Principal (`0,0 Lat/Lon`)**: Como visto em `MSFS-Passenger-Map/app.py` (linha 183: `if abs(lat) < 0.1 and abs(lon) < 0.1`), quando o MSFS está aberto no Menu Principal, o SimConnect conecta mas envia coordenadas `(0,0)` e pesos zerados. O sistema deve detectar `IsInMainMenu` e exibir um aviso claro: `"MSFS NO MENU PRINCIPAL — Carregue o voo no pátio de [ICAO] e clique em VOAR"`.
+
+---
+
+### 2. Arquitetura e Passo a Passo da Implementação (Executar na Ordem Abaixo)
+
+#### ETAPA 1: Expandir `SimTelemetry.cs` e `SimConnectService.cs` (Padrão FSTRaK + flightsim-mcp)
+**Arquivos afetados**:
+- `src/FlightCareer.Domain/Entities/SimTelemetry.cs`
+- `src/FlightCareer.UI/Services/SimConnectService.cs`
+- `src/FlightCareer.UI/ViewModels/DebugViewModel.cs`
+
+**O que implementar**:
+1. Em `SimTelemetry.cs` (mantendo `[StructLayout(LayoutKind.Sequential, Pack = 1)]` e a ordem **exata** do `AddToDataDefinition`):
+   - Adicionar ao final do struct:
+     ```csharp
+     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+     public string AtcModel;
+
+     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+     public string AtcType;
+
+     [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+     public string AtcId;
+
+     public double CameraState;
+     public double PayloadStationCount;
+     ```
+   - Adicionar propriedades auxiliares calculadas no struct `SimTelemetry`:
+     ```csharp
+     // No MSFS 2020/2024, CameraState entre 2 e 9 indica dentro do voo (Cockpit/External/Drone).
+     // Coordenadas próximas de (0,0) ou EmptyWeight <= 0 indicam que o jogador ainda está no Menu Principal.
+     public bool IsInMenuOrLoading => (Math.Abs(Latitude) < 0.1 && Math.Abs(Longitude) < 0.1) 
+                                      || EmptyWeightLbs <= 10 
+                                      || (CameraState >= 11 && CameraState <= 35);
+
+     public double EffectiveFuelDensityLbsPerGal => FuelWeightPerGallon > 1.0 
+         ? FuelWeightPerGallon 
+         : (EngineType >= 1.0 ? 6.7 : 6.0); // 6.7 lbs/gal p/ Jet-A1, 6.0 lbs/gal p/ Avgas
+
+     public double ActualPayloadLbs => Math.Max(0, TotalWeightLbs - EmptyWeightLbs - FuelWeightLbs);
+     ```
+2. Em `SimConnectService.cs`:
+   - No método `Connect()`, logo após `AddToDef("PLANE HEADING DEGREES MAGNETIC", "degrees");`, registrar na mesma ordem:
+     ```csharp
+     _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "ATC MODEL", null, SIMCONNECT_DATATYPE.STRING32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+     _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "ATC TYPE", null, SIMCONNECT_DATATYPE.STRING32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+     _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "ATC ID", null, SIMCONNECT_DATATYPE.STRING32, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+     AddToDef("CAMERA STATE", "Enum");
+     AddToDef("PAYLOAD STATION COUNT", "number");
+     ```
+   - Assinar `OnRecvException` (inspirado em `FSTRaK`) para logar qualquer erro de protocolo SimConnect sem derrubar a aplicação.
+   - **NOVO RECURSO — Injeção Direta de Combustível no Simulador (`SetFuelInSimulator`)**:
+     - Criar uma segunda `DEFINITIONS.FuelWriteData` ou método `TrySyncFuelToSim(double targetTotalGallons)` em `SimConnectService` que permita enviar `FUEL TANK LEFT MAIN QUANTITY` e `FUEL TANK RIGHT MAIN QUANTITY` (cada um com `targetTotalGallons / 2.0`) via `_simConnect.SetDataOnSimObject(...)`. Isso permite ao jogador sincronizar o combustível com 1 clique caso queira!
+3. Em `DebugViewModel.cs`:
+   - Remover a divisão `/ 1.15` na linha `FuelTotalGallons = FuelGallons;`!
+   - Calcular `FuelWeightLbs = FuelGallons * (IsJetMode ? 6.7 : 6.0);` e `FuelWeightPerGallon = IsJetMode ? 6.7 : 6.0;`.
+   - Preencher `AtcModel`, `AtcType` e `CameraState = 2` (Cockpit) nos presets (`C152`, `C172`, `B350`) e adicionar um botão no Debug Window: **`[ ⚡ IGUALAR PESOS E COMBUSTÍVEL AO BRIEFING ATUAL ]`** para facilitar testes instantâneos!
+
+---
+
+#### ETAPA 2: Motor Inteligente de Identificação de Aeronave (`AircraftMatcher` inspirado no `FSTRaK`)
+**Arquivo afetado**: `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs`
+
+**O que implementar**:
+1. Substituir o método `IsAircraftMatching(string? simTitle, string? hangarModel)` por `IsAircraftMatching(SimTelemetry data, string? hangarModel)` que avalia em 4 camadas:
+   - **Camada 1 (Match Direto por `Title`, `AtcModel` ou `AtcType`)**: Concatena `"{data.Title} {data.AtcType} {data.AtcModel}"` e compara com o modelo do hangar.
+   - **Camada 2 (Dicionário de Códigos ICAO e Aliases Oficiais MSFS 2020/2024)**:
+     - Mapear equivalências canônicas entre os modelos do banco do FlightCareer e os códigos `ATC MODEL` / `TITLE` do MSFS:
+       - `Cessna 152` ➔ `["C152", "152", "AEROBA"]`
+       - `Cessna 172` ➔ `["C172", "172", "SKYHAWK"]`
+       - `Cessna 208 Caravan` ➔ `["C208", "208", "CARAVAN", "EX"]`
+       - `Beechcraft Baron G58` ➔ `["BE58", "G58", "BARON", "58"]`
+       - `Beechcraft Bonanza G36` ➔ `["BE36", "G36", "BONANZA", "36"]`
+       - `Beechcraft King Air 350i` ➔ `["B350", "BE30", "KING AIR", "350"]`
+       - `Daher TBM 930` ➔ `["TBM9", "TBM", "930"]`
+       - `Pilatus PC-12` / `PC-6` ➔ `["PC12", "PC6", "PILATUS", "PORTER"]`
+       - `CubCrafters` / `Savage Cub` / `XCUB` ➔ `["XCUB", "SAVAGE", "CUB"]`
+       - `Diamond DA40` / `DA62` ➔ `["DA40", "DA62", "DIAMOND"]`
+       - `Cirrus SR22` / `SF50` ➔ `["SR22", "SF50", "VISION", "CIRRUS"]`
+       - `Cessna Citation CJ4` / `Longitude` ➔ `["C25C", "CJ4", "C700", "LONGITUDE", "CITATION"]`
+       - `ATR 42` / `ATR 72` ➔ `["AT45", "AT46", "AT75", "AT76", "ATR"]`
+       - `Embraer` ➔ `["E110", "E120", "E170", "E175", "E190", "E195", "PHENOM", "PRAETOR"]`
+       - `Airbus A320` ➔ `["A320", "A20N", "FBW", "FENIX"]`
+       - `Boeing 737` / `747` / `787` ➔ `["B737", "B738", "B748", "B78X", "737", "747", "787", "PMDG"]`
+   - **Camada 3 (Intersecção de Designadores Numéricos)**: `152`, `172`, `208`, `350`, `930`, `320`, `737`, etc.
+   - Exibir no Checklist do Gatekeeper tanto o `Title` quanto o `AtcModel` detectado (ex: `"C172SP Skyhawk (ICAO: C172)"`).
+
+---
+
+#### ETAPA 3: Painel Detalhado de Decomposição de Pesos e Combustível ("LOADSHEET & W&B GUIDE")
+**Arquivos afetados**:
+- `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs`
+- `src/FlightCareer.UI/MainWindow.xaml`
+
+**O que o Usuário Precisa Ver Claramente na Tela de Briefing**:
+No `BriefingViewModel.cs`, expor propriedades calculadas em tempo real para alimentar um card **"FOLHA DE CARREGAMENTO (LOADSHEET) — CONFIGURE NO SIMULADOR"** na Coluna 3 (logo acima ou integrado ao Gatekeeper):
+
+1. **Decomposição Exata do Payload (O que colocar na aba Pesos do MSFS)**:
+   - `CrewWeightLbs`: **`170 lbs`** (1 Piloto em comando fixo em 170 lbs; mostrar claramente `"Piloto / Tripulação: 170 lbs"`).
+   - `TotalPaxCount`: Quantidade total de passageiros embarcados (ex: `2 PAX`).
+   - `PassengersWeightLbs`: `TotalPaxCount * 170.0` lbs (mostrar: `"Passageiros ({TotalPaxCount} PAX × 170 lbs): {PassengersWeightLbs:N0} lbs"`).
+   - `TotalLuggageWeightLbs`: `AcceptedMissions.Sum(m => m.LuggageWeightLbs)` (mostrar: `"Bagagem dos PAX: {TotalLuggageWeightLbs:N0} lbs"`).
+   - `TotalPureCargoWeightLbs`: `AcceptedMissions.Sum(m => m.CargoWeightLbs)` (mostrar: `"Carga Comercial: {TotalPureCargoWeightLbs:N0} lbs"`).
+   - `TotalCargoAndBagsLbs`: `TotalLuggageWeightLbs + TotalPureCargoWeightLbs` (mostrar: `"Total Bagagem + Carga: {TotalCargoAndBagsLbs:N0} lbs"`).
+   - **`PlannedPayloadLbs` (PAYLOAD TOTAL A CONFIGURAR NO SIMULADOR)**:
+     - Fórmula: `CrewWeightLbs (170) + PassengersWeightLbs + TotalCargoAndBagsLbs`
+     - Comparativo ao vivo:
+       - **Meta (Briefing)**: `{PlannedPayloadLbs:N0} lbs` (`{PlannedPayloadLbs / 2.20462:N0} kg`)
+       - **Atual no Simulador**: `{SimReportedPayloadLbs:N0} lbs` (`{SimReportedPayloadLbs / 2.20462:N0} kg`)
+       - **Diferença (Ajuste necessário)**: `{SimReportedPayloadLbs - PlannedPayloadLbs:+0;-0;0} lbs`
+
+2. **Decomposição Exata do Combustível (Quantidade vs. Peso)**:
+   - `FuelDensityLbsPerGal`: Lida de `data.EffectiveFuelDensityLbsPerGal` (`6.0 lbs/gal` para Avgas ou `6.7 lbs/gal` para Jet A-1).
+   - `SimFuelCapacityGallons`: Lida de `data.FuelTotalCapacity` (ex: `56.0 gal`).
+   - **`PlannedFuelGallons` (QUANTIDADE DE COMBUSTÍVEL NO HANGAR)**: `{HangarAircraftFuel:F1} US Gal` (`{HangarAircraftFuel * 3.78541:F0} Litros`).
+   - **`PlannedFuelPercent` (% DOS TANQUES NO SLIDER DO MSFS)**: `SimFuelCapacityGallons > 0 ? (HangarAircraftFuel / SimFuelCapacityGallons) * 100.0 : 0` (ex: `50.0%`).
+   - **`PlannedFuelWeightLbs` (PESO DO COMBUSTÍVEL)**: `HangarAircraftFuel * FuelDensityLbsPerGal` (ex: `168 lbs` / `76 kg`).
+   - Comparativo ao vivo no Gatekeeper:
+     - **Planejado (Configure no Sim)**: `{HangarAircraftFuel:F1} gal ({PlannedFuelWeightLbs:N0} lbs | {PlannedFuelPercent:F0}%)`
+     - **Atual no Simulador**: `{FuelQuantity:F1} gal ({SimFuelWeightLbs:N0} lbs)`
+     - **Diferença**: `{FuelQuantity - HangarAircraftFuel:+0.0;-0.0;0.0} gal ({SimFuelWeightLbs - PlannedFuelWeightLbs:+0;-0;0} lbs)`
+
+3. **Pesos Estruturais Resultantes (Conferência Final com a Barra Inferior do MSFS)**:
+   - **`EmptyWeightLbs` (Peso Vazio da Aeronave no Sim)**: `{EmptyWeight:N0} lbs`
+   - **`PlannedZeroFuelWeightLbs` (ZFW Esperado = Vazio + Payload)**: `{EmptyWeight + PlannedPayloadLbs:N0} lbs` vs `Sim ZFW: {EmptyWeight + SimReportedPayloadLbs:N0} lbs`
+   - **`PlannedTakeoffWeightLbs` (TOW / Peso Total de Decolagem = Vazio + Payload + Combustível)**: `{EmptyWeight + PlannedPayloadLbs + PlannedFuelWeightLbs:N0} lbs` vs `Sim Total Weight: {TotalWeight:N0} lbs` (MTOW Máx: `{MaxGrossWeight:N0} lbs`).
+
+---
+
+#### ETAPA 4: Refinar Validação de Localização e Estado do Simulador no Gatekeeper
+**Arquivo afetado**: `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs`
+
+**Regras de Validação (`ValidatePreFlightConditions`)**:
+1. **Detecção de Menu Principal**:
+   - Se `_simConnect.IsConnected && data.IsInMenuOrLoading`:
+     - Item 0 (Conexão): `"Conectado (No Menu Principal)"` — Status Âmbar/Vermelho `"AGUARDANDO VOO"`.
+     - `WeightStatusText`: `"MSFS NO MENU PRINCIPAL — Carregue o voo em " + HangarAircraftLocation`.
+     - `GatekeeperBlockedReason`: `"Inicie o voo no pátio do aeroporto " + HangarAircraftLocation + " e clique em 'VOAR' no MSFS para carregar os pesos da aeronave."`
+2. **Tolerância e Precisão de Localização (ICAO)**:
+   - Aumentar o raio de busca de aeroportos próximos em `UpdateNearestAirportAsync` para aceitar até `8.0 NM` (cobrindo pistas e terminais afastados de grandes hubs Tier 1 como SBGR, KJFK, etc.).
+   - Exibir no item "Posição" do Gatekeeper:
+     - Planejado: `"{HangarAircraftLocation} (Pátio / Rampa)"`
+     - Simulador: `$"{simLocation} ({nearestDistance:F1} NM)"`
+3. **Tolerâncias Justas de Peso e Combustível**:
+   - **Combustível (`fuelOk`)**: Aceitar diferença de até `±1.5 gal` (ou `±5%` do combustível planejado, o que for maior), pois sliders do MSFS arredondam porcentagens.
+   - **Payload (`payloadOk`)**: Aceitar diferença de até `±35 lbs` (ou `±3%` do payload planejado), permitindo rápido ajuste manual nos sliders do MSFS.
+
+---
+
+#### ETAPA 5: Sincronização Rápida para Testes e Simulador (`SyncWeightsCommand`)
+**Arquivos afetados**:
+- `src/FlightCareer.UI/ViewModels/BriefingViewModel.cs`
+- `src/FlightCareer.UI/Services/SimConnectService.cs`
+- `src/FlightCareer.UI/MainWindow.xaml`
+
+**O que implementar**:
+1. Adicionar comando `SyncFuelAndWeightsToSimCommand` em `BriefingViewModel`:
+   - Se estiver em `DebugMode` (`_simConnect.DebugMode == true`):
+     - Atualiza automaticamente os dados do `SimConnectService.CurrentData` (e `DebugViewModel`) com a aeronave correta (`HangarAircraftModel`), coordenadas exatas do aeroporto `HangarAircraftLocation`, combustível exato (`HangarAircraftFuel`) e peso total exato (`EmptyWeight + PlannedPayloadLbs + PlannedFuelWeightLbs`)! Com **1 único clique**, o desenvolvedor/jogador em modo Debug deixa todos os 5 indicadores `🟢 OK` instantaneamente!
+   - Se estiver conectado ao **MSFS Real**:
+     - Tenta injetar o combustível via SimConnect (`SetDataOnSimObject` nos tanques Left/Right Main) e copia o guia passo-a-passo de Payload (Piloto + PAX + Carga em lbs e kg) para a Área de Transferência, exibindo um resumo visual.
+
+---
+
+### 3. Checklist de Validação para o Agente Executor
+Ao implementar este plano, o agente executor deve:
+- [ ] Executar todas as 5 etapas preservando o padrão MVVM e o estilo visual Avionics Dark UI (`#0B0F14`, `#141C24`, `#00E5FF`, `#00E676`, `#FFB300`, `#FF3D00`).
+- [ ] Garantir que o fator `* 1.15` / `/ 1.15` de combustível foi 100% erradicado.
+- [ ] Compilar o projeto com `dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj` e assegurar **0 Error(s)**.
+- [ ] Registrar a conclusão da implementação no `GEMINI.md`.
