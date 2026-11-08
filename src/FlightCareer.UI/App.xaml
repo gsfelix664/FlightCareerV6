@@ -28,5 +28,211 @@
          <utils:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
          <utils:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
          <utils:InverseBooleanToOpacityConverter x:Key="InverseBooleanToOpacityConverter"/>
+
+         <!-- Estilo Botão Menu / Geral -->
+         <Style x:Key="NavButton" TargetType="Button">
+             <Setter Property="Background" Value="Transparent"/>
+             <Setter Property="Foreground" Value="#94A3B8"/>
+             <Setter Property="FontSize" Value="13.5"/>
+             <Setter Property="FontWeight" Value="SemiBold"/>
+             <Setter Property="Height" Value="42"/>
+             <Setter Property="HorizontalContentAlignment" Value="Left"/>
+             <Setter Property="Padding" Value="15,0"/>
+             <Setter Property="BorderThickness" Value="0"/>
+             <Setter Property="Cursor" Value="Hand"/>
+             <Setter Property="Template">
+                 <Setter.Value>
+                     <ControlTemplate TargetType="Button">
+                         <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Margin="5,2">
+                             <StackPanel Orientation="Horizontal">
+                                 <Rectangle x:Name="indicator" Width="3" Height="15" Fill="{StaticResource PrimaryBlue}" Visibility="Hidden" Margin="0,0,10,0" RadiusX="1.5" RadiusY="1.5"/>
+                                 <ContentPresenter VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                             </StackPanel>
+                         </Border>
+                         <ControlTemplate.Triggers>
+                             <Trigger Property="IsMouseOver" Value="True">
+                                 <Setter TargetName="border" Property="Background" Value="#2D3033"/>
+                                 <Setter Property="Foreground" Value="White"/>
+                             </Trigger>
+                             <Trigger Property="IsPressed" Value="True">
+                                 <Setter TargetName="indicator" Property="Visibility" Value="Visible"/>
+                                 <Setter Property="Foreground" Value="{StaticResource PrimaryBlue}"/>
+                             </Trigger>
+                         </ControlTemplate.Triggers>
+                     </ControlTemplate>
+                 </Setter.Value>
+             </Setter>
+         </Style>
+
+         <!-- Estilo DataGrid Moderno Base -->
+         <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+             <Setter Property="Background" Value="Transparent"/>
+             <Setter Property="Foreground" Value="White"/>
+             <Setter Property="FontSize" Value="13"/>
+             <Setter Property="BorderThickness" Value="0"/>
+             <Setter Property="RowHeight" Value="56"/>
+             <Setter Property="GridLinesVisibility" Value="None"/>
+             <Setter Property="CanUserAddRows" Value="False"/>
+             <Setter Property="AutoGenerateColumns" Value="False"/>
+             <Setter Property="IsReadOnly" Value="True"/>
+             <Setter Property="SelectionMode" Value="Single"/>
+             <Setter Property="RowBackground" Value="Transparent"/>
+             <Setter Property="AlternatingRowBackground" Value="#15181C"/>
+             <Setter Property="HeadersVisibility" Value="Column"/>
+             <Setter Property="ColumnHeaderStyle">
+                 <Setter.Value>
+                     <Style TargetType="DataGridColumnHeader">
+                         <Setter Property="Background" Value="Transparent"/>
+                         <Setter Property="Foreground" Value="#8B9BAE"/>
+                         <Setter Property="FontSize" Value="12"/>
+                         <Setter Property="FontWeight" Value="Bold"/>
+                         <Setter Property="Padding" Value="10,0,10,10"/>
+                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                         <Setter Property="BorderBrush" Value="#263545"/>
+                     </Style>
+                 </Setter.Value>
+             </Setter>
+             <Setter Property="RowStyle">
+                 <Setter.Value>
+                     <Style TargetType="DataGridRow">
+                         <Setter Property="BorderThickness" Value="0"/>
+                         <Setter Property="Foreground" Value="White"/>
+                         <Setter Property="Margin" Value="0,2"/>
+                         <Style.Triggers>
+                             <Trigger Property="IsSelected" Value="True">
+                                 <Setter Property="Background" Value="#2D3033"/>
+                                 <Setter Property="Foreground" Value="{StaticResource PrimaryBlue}"/>
+                             </Trigger>
+                             <Trigger Property="IsMouseOver" Value="True">
+                                 <Setter Property="Background" Value="#1F2225"/>
+                             </Trigger>
+                         </Style.Triggers>
+                     </Style>
+                 </Setter.Value>
+             </Setter>
+             <Setter Property="CellStyle">
+                 <Setter.Value>
+                     <Style TargetType="DataGridCell">
+                         <Setter Property="Padding" Value="10,0"/>
+                         <Setter Property="Foreground" Value="White"/>
+                         <Setter Property="Template">
+                             <Setter.Value>
+                                 <ControlTemplate TargetType="DataGridCell">
+                                     <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                         <ContentPresenter VerticalAlignment="Center"/>
+                                     </Border>
+                                 </ControlTemplate>
+                             </Setter.Value>
+                         </Setter>
+                         <Style.Triggers>
+                             <Trigger Property="IsSelected" Value="True">
+                                 <Setter Property="Background" Value="Transparent"/>
+                                 <Setter Property="Foreground" Value="{StaticResource PrimaryBlue}"/>
+                             </Trigger>
+                         </Style.Triggers>
+                     </Style>
+                 </Setter.Value>
+             </Setter>
+         </Style>
+
+         <!-- Estilo Chip de Filtro (Avionics Dark Mode) -->
+         <Style x:Key="ChipFilterButton" TargetType="Button">
+             <Setter Property="Background" Value="#141C24"/>
+             <Setter Property="Foreground" Value="#8B9BAE"/>
+             <Setter Property="BorderBrush" Value="#263545"/>
+             <Setter Property="BorderThickness" Value="1"/>
+             <Setter Property="Padding" Value="12,5"/>
+             <Setter Property="FontSize" Value="12"/>
+             <Setter Property="FontWeight" Value="SemiBold"/>
+             <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+             <Setter Property="Cursor" Value="Hand"/>
+             <Setter Property="Margin" Value="0,0,6,0"/>
+             <Setter Property="Template">
+                 <Setter.Value>
+                     <ControlTemplate TargetType="Button">
+                         <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                                 BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="12" Padding="{TemplateBinding Padding}">
+                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                         </Border>
+                         <ControlTemplate.Triggers>
+                             <Trigger Property="IsMouseOver" Value="True">
+                                 <Setter TargetName="border" Property="BorderBrush" Value="#00E5FF"/>
+                                 <Setter Property="Foreground" Value="#F0F4F8"/>
+                             </Trigger>
+                         </ControlTemplate.Triggers>
+                     </ControlTemplate>
+                 </Setter.Value>
+             </Setter>
+         </Style>
+
+         <!-- Estilo Tabela Densa de Missões (Dark Mode Avionics) -->
+         <Style x:Key="MissionsTableDataGrid" TargetType="DataGrid" BasedOn="{StaticResource ModernDataGrid}">
+             <Setter Property="RowHeight" Value="50"/>
+             <Setter Property="FontSize" Value="13.5"/>
+             <Setter Property="Background" Value="Transparent"/>
+             <Setter Property="BorderThickness" Value="0"/>
+             <Setter Property="GridLinesVisibility" Value="None"/>
+             <Setter Property="RowBackground" Value="Transparent"/>
+             <Setter Property="AlternatingRowBackground" Value="#10161D"/>
+             <Setter Property="ColumnHeaderStyle">
+                 <Setter.Value>
+                     <Style TargetType="DataGridColumnHeader">
+                         <Setter Property="Background" Value="Transparent"/>
+                         <Setter Property="Foreground" Value="#8B9BAE"/>
+                         <Setter Property="FontSize" Value="11.5"/>
+                         <Setter Property="FontWeight" Value="SemiBold"/>
+                         <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+                         <Setter Property="Padding" Value="10,0,10,8"/>
+                         <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                         <Setter Property="BorderBrush" Value="#263545"/>
+                     </Style>
+                 </Setter.Value>
+             </Setter>
+             <Setter Property="RowStyle">
+                 <Setter.Value>
+                     <Style TargetType="DataGridRow">
+                         <Setter Property="BorderThickness" Value="1"/>
+                         <Setter Property="BorderBrush" Value="Transparent"/>
+                         <Setter Property="Foreground" Value="#F0F4F8"/>
+                         <Setter Property="Margin" Value="0,1"/>
+                         <Style.Triggers>
+                             <Trigger Property="IsSelected" Value="True">
+                                 <Setter Property="Background" Value="#1F2B37"/>
+                                 <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                 <Setter Property="Foreground" Value="#F0F4F8"/>
+                             </Trigger>
+                             <Trigger Property="IsMouseOver" Value="True">
+                                 <Setter Property="Background" Value="#19232D"/>
+                             </Trigger>
+                         </Style.Triggers>
+                     </Style>
+                 </Setter.Value>
+             </Setter>
+         </Style>
+
+         <!-- Estilos de Cabeçalho Alinhados para a Tabela de Missões -->
+         <Style x:Key="RightAlignedHeader" TargetType="DataGridColumnHeader">
+             <Setter Property="Background" Value="Transparent"/>
+             <Setter Property="Foreground" Value="#8B9BAE"/>
+             <Setter Property="FontSize" Value="11"/>
+             <Setter Property="FontWeight" Value="SemiBold"/>
+             <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+             <Setter Property="HorizontalContentAlignment" Value="Right"/>
+             <Setter Property="Padding" Value="6,0,10,8"/>
+             <Setter Property="BorderThickness" Value="0,0,0,1"/>
+             <Setter Property="BorderBrush" Value="#263545"/>
+         </Style>
+
+         <Style x:Key="CenterAlignedHeader" TargetType="DataGridColumnHeader">
+             <Setter Property="Background" Value="Transparent"/>
+             <Setter Property="Foreground" Value="#8B9BAE"/>
+             <Setter Property="FontSize" Value="11"/>
+             <Setter Property="FontWeight" Value="SemiBold"/>
+             <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif"/>
+             <Setter Property="HorizontalContentAlignment" Value="Center"/>
+             <Setter Property="Padding" Value="4,0,4,8"/>
+             <Setter Property="BorderThickness" Value="0,0,0,1"/>
+             <Setter Property="BorderBrush" Value="#263545"/>
+         </Style>
     </Application.Resources>
 </Application>

@@ -71,9 +71,20 @@ namespace FlightCareer.UI.Services
     public class MetarService
     {
         private readonly HttpClient _httpClient;
-        private readonly AppDbContext _context;
+        private readonly AppDbContext? _context;
+        private readonly IDbContextFactory<AppDbContext>? _contextFactory;
         private readonly ConcurrentDictionary<string, (MetarInfo Info, DateTime FetchedAt)> _cache = new(StringComparer.OrdinalIgnoreCase);
         private readonly TimeSpan _cacheTtl = TimeSpan.FromMinutes(10);
+
+        public MetarService(IDbContextFactory<AppDbContext> contextFactory)
+        {
+            _contextFactory = contextFactory;
+            _httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(12)
+            };
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "FlightCareerV6/1.0 (Aviation Weather Client; Windows)");
+        }
 
         public MetarService(AppDbContext context)
         {
@@ -270,9 +281,24 @@ namespace FlightCareer.UI.Services
             try
             {
                 // Obter coordenadas dos aeródromos sem METAR direto
-                var missingAirports = await _context.Airports
-                    .Where(a => missingIcaos.Contains(a.ICAO))
-                    .ToDictionaryAsync(a => a.ICAO);
+                Dictionary<string, Domain.Entities.Airport> missingAirports;
+                if (_contextFactory != null)
+                {
+                    await using var context = await _contextFactory.CreateDbContextAsync();
+                    missingAirports = await context.Airports
+                        .Where(a => missingIcaos.Contains(a.ICAO))
+                        .ToDictionaryAsync(a => a.ICAO);
+                }
+                else if (_context != null)
+                {
+                    missingAirports = await _context.Airports
+                        .Where(a => missingIcaos.Contains(a.ICAO))
+                        .ToDictionaryAsync(a => a.ICAO);
+                }
+                else
+                {
+                    return;
+                }
 
                 // Estações ativas em cache que possuem coordenadas válidas
                 var reportingStations = _cache.Values

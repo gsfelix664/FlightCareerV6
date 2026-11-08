@@ -15,7 +15,7 @@
 
             <StackPanel Grid.Row="0" Margin="0,0,0,20">
                 <TextBlock Text="ABASTECIMENTO" FontSize="20" FontWeight="Black" Foreground="{StaticResource PrimaryBlue}"/>
-                <TextBlock Text="{Binding FuelType}" FontSize="11" Foreground="{StaticResource TextSecondary}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding FuelType}" FontSize="13" Foreground="{StaticResource TextSecondary}" FontWeight="SemiBold"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1">
@@ -26,17 +26,17 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel>
-                            <TextBlock Text="COTAÇÃO DIÁRIA" FontSize="9" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding PricePerGallon, StringFormat={}{0:C2} / GAL}" FontSize="18" FontWeight="Bold" Foreground="#F1C40F"/>
+                            <TextBlock Text="COTAÇÃO DIÁRIA" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock Text="{Binding PricePerGallon, StringFormat={}{0:C2} / GAL}" FontSize="20" FontWeight="Bold" Foreground="#F1C40F" FontFamily="JetBrains Mono, Consolas, monospace"/>
                         </StackPanel>
                         <TextBlock Grid.Column="1" Text="" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#F1C40F" VerticalAlignment="Center" Opacity="0.5"/>
                     </Grid>
                 </Border>
 
-                <TextBlock Text="QUANTIDADE DESEJADA" FontSize="10" FontWeight="Bold" Margin="0,0,0,10"/>
+                <TextBlock Text="QUANTIDADE DESEJADA" FontSize="12" FontWeight="Bold" Margin="0,0,0,10"/>
                 <Grid Margin="0,0,0,5">
-                    <TextBlock Text="{Binding CurrentFuel, StringFormat={}{0:F1} GAL}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                    <TextBlock Text="{Binding TargetFuel, StringFormat={}{0:F1} GAL}" FontSize="14" FontWeight="Black" HorizontalAlignment="Right"/>
+                    <TextBlock Text="{Binding CurrentFuel, StringFormat={}{0:F1} GAL}" FontSize="12.5" Foreground="{StaticResource TextSecondary}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                    <TextBlock Text="{Binding TargetFuel, StringFormat={}{0:F1} GAL}" FontSize="15" FontWeight="Black" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                 </Grid>
                 <Slider Minimum="0" Maximum="{Binding MaxFuel}" Value="{Binding TargetFuel}" Margin="0,0,0,20"/>
 
@@ -44,10 +44,10 @@
 
                 <Grid>
                     <StackPanel>
-                        <TextBlock Text="TOTAL A PAGAR" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBlock Text="{Binding TotalCost, StringFormat={}{0:C2}}" FontSize="24" FontWeight="Black" Foreground="{StaticResource PrimaryBlue}"/>
+                        <TextBlock Text="TOTAL A PAGAR" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding TotalCost, StringFormat={}{0:C2}}" FontSize="26" FontWeight="Black" Foreground="{StaticResource PrimaryBlue}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding BalanceInfo}" FontSize="10" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                    <TextBlock Text="{Binding BalanceInfo}" FontSize="12" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
                 </Grid>
             </StackPanel>
 

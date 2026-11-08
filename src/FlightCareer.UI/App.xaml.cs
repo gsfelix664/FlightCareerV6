@@ -106,23 +106,18 @@ namespace FlightCareer.UI
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDbContext>(options =>
-                {
-
+            services.AddDbContextFactory<AppDbContext>(options =>
+            {
                 string dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "flightcareer.db");
-
                 if (!System.IO.File.Exists(dbPath) && System.IO.File.Exists("flightcareer.db"))
-
                 {
-
                     dbPath = System.IO.Path.GetFullPath("flightcareer.db");
-
                 }
-
                 options.UseSqlite($"Data Source={dbPath}");
+            });
 
-            },
-                ServiceLifetime.Singleton); // DbContext como Singleton para WPF
+            // Registrar AppDbContext transient a partir da fábrica para compatibilidade de DI direta
+            services.AddTransient<AppDbContext>(sp => sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             services.AddSingleton<IPilotRepository, PilotRepository>();
             services.AddSingleton<IDataSeeder, DataSeeder>();

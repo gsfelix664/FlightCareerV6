@@ -911,10 +911,39 @@ Ao implementar este plano, o agente executor deve:
   - **Voo de Translado (Ferry Flight)**: A busca de aeródromos agora aceita indistintamente o ICAO oficial (`SBPG`) ou o ident do simulador (`SSZW`).
 
 ## 2026-11-08 - Calibração Tipográfica e Aumento Geral de Escala Visual (Legibilidade Total)
-- **Remoção de Badge Redundante**:
+- **Remoção de Badge Redundante e Limpeza Visual de Categoria da Empresa**:
   - Removido o badge `[Cat 1: CIAC / Escola]` que aparecia repetido ao lado do título principal `QUADRO DE MISSÕES & CONTRATOS`, eliminando poluição visual no cabeçalho.
-- **Aumento Proporcional de Fontes em Todas as Seções do Quadro de Missões**:
-  - **Cabeçalho & KPIs**: Título expandido para 22px, métricas rápidas de 10px/18px para 11.5px/22px, e homologação para 15px.
-  - **Filtros e Controles**: Chips de categoria de 11px para 12px com respiro ampliado (12x5px), caixa de busca com altura de 36px e fonte 12.5px, e botões `[🔄 METAR]` e `[LIMPAR]` ampliados para 11.5px.
-  - **Tabela Densa de Missões (DataGrid)**: Altura das linhas aumentada para 50px, cabeçalhos de coluna aumentados para 11.5px/12px, códigos ICAO ampliados para 14px, cidades e metadados para 11px, valores financeiros para 14.5px e larguras de coluna recalculadas para eliminar qualquer corte de texto.
-  - **Pré-Despacho Operacional**: Resumo de rota aumentado para 21px, indicadores técnicos (ETE, Consumo, Distância) ampliados para 11px/18px, descrição da missão aumentada para 13.5px com entrelinha de 19px, e botão primário de despacho ampliado para 15px bold.
+  - Removido o card duplicado `HOMOLOGAÇÃO DA EMPRESA` do banner de métricas superiores (a categoria operacional permanece acessível e centralizada exclusivamente no perfil do piloto na barra lateral: `[Cat 1: CIAC / Escola ⮵]`).
+  - O banner de métricas rápidas foi reorganizado em 3 colunas amplas e equilibradas (`CONTRATOS DISPONÍVEIS`, `SELECIONADOS EM LOTE`, `AEROPORTO DE PARTIDA`).
+- **Padronização Global de Tipografia no Projeto (Fim de Fontes Pequenas)**:
+  - Eliminadas todas as ocorrências de fontes microscópicas (7px, 8px, 9px, 10px) em toda a solução.
+  - **Quadro de Missões**: Títulos e KPIs calibrados (22px bold / 11.5px rótulos / 50px linhas da tabela / 14.5px mono).
+  - **Briefing de Voo**: Rota e número de voo (18px-20px), tags e itinerário multi-leg (11px-14px), W&B envelope e guias do EFB MSFS 2024 (11px-13.5px), Gatekeeper checklist e botões mestre (11.5px-15px).
+  - **Financeiro**: Título 24px, métricas de fluxo de caixa 24px bold JetBrains Mono, histórico de transações e tabela 13.5px-14.5px.
+  - **Mercado de Aeronaves**: Cards com modelos 19px, prefixos 15px, horas e combustível 12px, preços 22px bold, e painel de especificações técnicas 11.5px (rótulos) e 14.5px (valores).
+  - **Hangar / Frota**: Lista de frota 13.5px-14px com badge ATIVA 11px, painel de especificações 12.5px-13.5px, e botões de inspeções regulatórias (TBO, 50h, 100h, conversão de cabine) ampliados para 12.5px bold e 36px de altura.
+  - **Logs de Voo (Blackbox)**: Cards da lista 11.5px-14px, KPIs de telemetria 10.5px (rótulos) / 13.5px (valores mono), tabela de amostragem de telemetria 11.5px mono, e mapa de trajetória 11px.
+  - **Janelas Modais**: `FerryFlightWindow` (cards e custos de pulo/voo 11.5px-22px), `RefuelWindow` (cotação e sliders 11.5px-26px) e `DebugOverlayWindow` (métricas de cockpit e falhas 10.5px-14px).
+
+## 2026-11-08 - Modularização em UserControls (Fase 1) e Blindagem Multithread com IDbContextFactory (Fase 2)
+- **Fase 1 (@frontend): Decomposição Modular de `MainWindow.xaml`**:
+  - `MainWindow.xaml` foi reduzido de **2.451 linhas** para **409 linhas**, eliminando o acoplamento monolítico.
+  - Criados 6 `UserControls` modulares dedicados na pasta `Views/`:
+    - `MissionsView.xaml` & `MissionsView.xaml.cs`: Quadro de contratos, filtros dinâmicos, tabela split-screen e drawer de pré-despacho.
+    - `BriefingView.xaml` & `BriefingView.xaml.cs`: Despacho operacional, itinerário multi-leg, envelope de massa e centragem (W&B), mapa tático e Gatekeeper pré-voo.
+    - `FinanceView.xaml` & `FinanceView.xaml.cs`: Painel contábil, balanço de receitas/despesas e histórico de transações.
+    - `MarketView.xaml` & `MarketView.xaml.cs`: Catálogo de aeronaves usadas, busca instantânea e especificações técnicas completas.
+    - `HangarView.xaml` & `HangarView.xaml.cs`: Gestão de frota, manutenção corretiva, inspeções regulatórias periódicas (50h/100h), retífica TBO e cotação de seguros.
+    - `FlightLogsView.xaml` & `FlightLogsView.xaml.cs`: Diário de bordo, reconstituição de trajetória GPS no mapa e telemetria segundo a segundo da Blackbox.
+  - Estilos compartilhados e conversores centralizados no `App.xaml` para reuso universal em qualquer controle ou janela.
+- **Fase 2 (@database & @backend): Blindagem Multithread com `IDbContextFactory`**:
+  - Configurado `services.AddDbContextFactory<AppDbContext>` no container de injeção de dependência (`App.xaml.cs`).
+  - Mantido registro `services.AddTransient<AppDbContext>` para garantir 100% de retrocompatibilidade com serviços e comandos síncronos legados.
+  - Refatorado o `FlightMonitor` para operar com instâncias isoladas de `AppDbContext` criadas via factory nas operações de segundo plano:
+    - Gravação contínua do estado do hangar (`UpdateHangarStateAsync`) a cada 60s em voo.
+    - Cancelamento de voo e atualização de localização/missões (`CancelMonitoringAsync`).
+    - Detecção e registro de colisão/perda total (`HandleTotalLossAsync`).
+    - Busca de aeródromos mais próximos por GPS (`GetNearestAirportICAO`).
+    - Encerramento e debriefing automático de voo (`FinalizeFlightAsync`).
+  - Refatorado o `MetarService` para resolver estações meteorológicas mais próximas em tarefas assíncronas periódicas (timer de 5 minutos) utilizando contextos efêmeros e thread-safe.
+  - Prevenção definitiva de exceções do tipo `InvalidOperationException: A second operation was started on this context instance before a previous operation completed`.

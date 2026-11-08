@@ -46,11 +46,11 @@
 
                     <!-- Origem -->
                     <StackPanel Grid.Row="0" Grid.Column="0">
-                        <TextBlock Text="LOCALIZAÇÃO ATUAL (ORIGEM)" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBlock Text="{Binding OriginIcao}" FontSize="22" FontWeight="Black" Foreground="#2ECC71" Margin="0,4,0,2"/>
-                        <TextBlock Text="{Binding OriginAirportName}" FontSize="12" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding OriginLocation}" FontSize="10" Foreground="{StaticResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding AircraftPrefix, StringFormat={}Aeronave: {0}}" FontSize="10" Foreground="#F59E0B" FontWeight="Bold" Margin="0,4,0,0"/>
+                        <TextBlock Text="LOCALIZAÇÃO ATUAL (ORIGEM)" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="{Binding OriginIcao}" FontSize="24" FontWeight="Black" Foreground="#2ECC71" Margin="0,4,0,2" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                        <TextBlock Text="{Binding OriginAirportName}" FontSize="13.5" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding OriginLocation}" FontSize="11.5" Foreground="{StaticResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding AircraftPrefix, StringFormat={}Aeronave: {0}}" FontSize="11.5" Foreground="#F59E0B" FontWeight="Bold" Margin="0,4,0,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
                     </StackPanel>
 
                     <!-- Ícone Seta -->
@@ -58,7 +58,7 @@
 
                     <!-- Destino com Busca -->
                     <StackPanel Grid.Row="0" Grid.Column="2">
-                        <TextBlock Text="DESTINO DESEJADO (QUALQUER AEROPORTO)" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock Text="DESTINO DESEJADO (QUALQUER AEROPORTO)" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}"/>
                         <Grid Margin="0,6,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -101,49 +101,49 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0">
-                            <Border Background="#1E3A8A" CornerRadius="6" Padding="6,3" HorizontalAlignment="Left" Margin="0,0,0,8">
-                                <TextBlock Text="RECOMENDADO • VOAR NO SIMULADOR" FontSize="9" FontWeight="Bold" Foreground="#93C5FD"/>
+                            <Border Background="#1E3A8A" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8">
+                                <TextBlock Text="RECOMENDADO • VOAR NO SIMULADOR" FontSize="11" FontWeight="Bold" Foreground="#93C5FD"/>
                             </Border>
-                            <TextBlock Text="Opção 1: Voo Manual (Você no Manche)" FontSize="15" FontWeight="Bold" Foreground="White"/>
-                            <TextBlock Text="Decole no MSFS e voe a rota completa até o destino." FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,12"/>
+                            <TextBlock Text="Opção 1: Voo Manual (Você no Manche)" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="Decole no MSFS e voe a rota completa até o destino." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,12"/>
                         </StackPanel>
 
                         <Separator Grid.Row="1" Background="#262D35" Margin="0,0,0,12"/>
 
                         <StackPanel Grid.Row="2">
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Distância Estimada" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding DistanceNM, StringFormat={}{0:F0} NM}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Distância Estimada" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding DistanceNM, StringFormat={}{0:F0} NM}" FontSize="13.5" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Tempo Estimado de Voo" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding EstimatedHours, StringFormat={}{0:F1} horas}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Tempo Estimado de Voo" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding EstimatedHours, StringFormat={}{0:F1} horas}" FontSize="13.5" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Consumo Estimado" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding EstimatedFuelGallons, StringFormat={}{0:F1} GAL}" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Consumo Estimado" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding EstimatedFuelGallons, StringFormat={}{0:F1} GAL}" FontSize="13.5" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
                             <Grid Margin="0,0,0,8">
-                                <TextBlock Text="Custo Direto (Combustível)" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding DirectFuelCost, StringFormat={}{0:C2}}" FontSize="14" FontWeight="Bold" Foreground="#2ECC71" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Custo Direto (Combustível)" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding DirectFuelCost, StringFormat={}{0:C2}}" FontSize="15" FontWeight="Bold" Foreground="#2ECC71" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
 
-                            <Border Background="#111827" CornerRadius="8" Padding="10" Margin="0,10,0,0">
+                            <Border Background="#111827" CornerRadius="8" Padding="12" Margin="0,10,0,0">
                                 <StackPanel>
-                                    <TextBlock Text="✓ Acumula horas no Logbook e perfil do piloto" FontSize="10" Foreground="#2ECC71" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <TextBlock Text="✓ Ganho integral de XP com base na distância" FontSize="10" Foreground="#2ECC71" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                    <TextBlock Text="✓ Gera rota no Briefing e mapa de navegação" FontSize="10" Foreground="#2ECC71" FontWeight="SemiBold"/>
+                                    <TextBlock Text="✓ Acumula horas no Logbook e perfil do piloto" FontSize="11.5" Foreground="#2ECC71" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="✓ Ganho integral de XP com base na distância" FontSize="11.5" Foreground="#2ECC71" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                    <TextBlock Text="✓ Gera rota no Briefing e mapa de navegação" FontSize="11.5" Foreground="#2ECC71" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
 
                         <Button Grid.Row="3" Command="{Binding SetupRealFlightCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                                 IsEnabled="{Binding HasValidDestination}" Background="{StaticResource PrimaryBlue}" Foreground="White" 
-                                FontWeight="Bold" FontSize="12" Height="42" Cursor="Hand" BorderThickness="0" Margin="0,14,0,0">
+                                FontWeight="Bold" FontSize="13.5" Height="44" Cursor="Hand" BorderThickness="0" Margin="0,14,0,0">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}" CornerRadius="8" Opacity="{TemplateBinding IsEnabled, Converter={StaticResource InverseBooleanToOpacityConverter}}">
-                                        <TextBlock Text="GERAR VOO NO BRIEFING" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
+                                        <TextBlock Text="GERAR VOO NO BRIEFING" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="13.5"/>
                                     </Border>
                                 </ControlTemplate>
                             </Button.Template>
@@ -162,41 +162,41 @@
                         </Grid.RowDefinitions>
 
                         <StackPanel Grid.Row="0">
-                            <Border Background="#78350F" CornerRadius="6" Padding="6,3" HorizontalAlignment="Left" Margin="0,0,0,8">
-                                <TextBlock Text="CONTRATAR PILOTO • TRANSLADO IMEDIATO" FontSize="9" FontWeight="Bold" Foreground="#FDE68A"/>
+                            <Border Background="#78350F" CornerRadius="6" Padding="8,4" HorizontalAlignment="Left" Margin="0,0,0,8">
+                                <TextBlock Text="CONTRATAR PILOTO • TRANSLADO IMEDIATO" FontSize="11" FontWeight="Bold" Foreground="#FDE68A"/>
                             </Border>
-                            <TextBlock Text="Opção 2: Pular Imediatamente" FontSize="15" FontWeight="Bold" Foreground="White"/>
-                            <TextBlock Text="Reposiciona a aeronave e piloto sem voar no simulador." FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,12"/>
+                            <TextBlock Text="Opção 2: Pular Imediatamente" FontSize="16" FontWeight="Bold" Foreground="White"/>
+                            <TextBlock Text="Reposiciona a aeronave e piloto sem voar no simulador." FontSize="12" Foreground="{StaticResource TextSecondary}" Margin="0,2,0,12"/>
                         </StackPanel>
 
                         <Separator Grid.Row="1" Background="#262D35" Margin="0,0,0,12"/>
 
                         <StackPanel Grid.Row="2">
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="Combustível Translado (Margem)" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding DirectFuelCost, StringFormat={}{0:C2}}" FontSize="11" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Combustível Translado (Margem)" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding DirectFuelCost, StringFormat={}{0:C2}}" FontSize="13" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="Diária Piloto Comercial Ferry" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding JumpPilotFee, StringFormat={}{0:C2}}" FontSize="11" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Diária Piloto Comercial Ferry" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding JumpPilotFee, StringFormat={}{0:C2}}" FontSize="13" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
                             <Grid Margin="0,0,0,6">
-                                <TextBlock Text="Taxas de Despacho &amp; Solo" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
-                                <TextBlock Text="{Binding JumpHandlingFee, StringFormat={}{0:C2}}" FontSize="11" Foreground="White" HorizontalAlignment="Right"/>
+                                <TextBlock Text="Taxas de Despacho &amp; Solo" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="{Binding JumpHandlingFee, StringFormat={}{0:C2}}" FontSize="13" Foreground="White" HorizontalAlignment="Right" FontFamily="JetBrains Mono, Consolas, monospace"/>
                             </Grid>
 
-                            <Border Background="#231A12" BorderBrush="#B45309" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,8,0,0">
+                            <Border Background="#231A12" BorderBrush="#B45309" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,8,0,0">
                                 <StackPanel>
-                                    <TextBlock Text="CUSTO TOTAL PARA PULAR" FontSize="10" FontWeight="Bold" Foreground="#F59E0B"/>
-                                    <TextBlock Text="{Binding TotalJumpCost, StringFormat={}{0:C2}}" FontSize="20" FontWeight="Black" Foreground="#F59E0B" Margin="0,2,0,4"/>
-                                    <TextBlock Text="⚠ Custo superior ao voo real para cobrir custos de tripulação terceirizada e incentivar a simulação de voo." FontSize="9" Foreground="#D97706" TextWrapping="Wrap"/>
+                                    <TextBlock Text="CUSTO TOTAL PARA PULAR" FontSize="11" FontWeight="Bold" Foreground="#F59E0B"/>
+                                    <TextBlock Text="{Binding TotalJumpCost, StringFormat={}{0:C2}}" FontSize="22" FontWeight="Black" Foreground="#F59E0B" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,4"/>
+                                    <TextBlock Text="⚠ Custo superior ao voo real para cobrir custos de tripulação terceirizada e incentivar a simulação de voo." FontSize="11.5" Foreground="#D97706" TextWrapping="Wrap" LineHeight="16"/>
                                 </StackPanel>
                             </Border>
 
                             <StackPanel Margin="0,8,0,0">
-                                <TextBlock Text="✗ NÃO concede horas de voo para o piloto" FontSize="10" Foreground="#EF4444" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                <TextBlock Text="✗ NÃO concede pontos de experiência (XP)" FontSize="10" Foreground="#EF4444" FontWeight="SemiBold" Margin="0,0,0,2"/>
-                                <TextBlock Text="• Aplica o desgaste de horas na célula e TBO do avião" FontSize="10" Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock Text="✗ NÃO concede horas de voo para o piloto" FontSize="11.5" Foreground="#EF4444" FontWeight="SemiBold" Margin="0,0,0,3"/>
+                                <TextBlock Text="✗ NÃO concede pontos de experiência (XP)" FontSize="11.5" Foreground="#EF4444" FontWeight="SemiBold" Margin="0,0,0,3"/>
+                                <TextBlock Text="• Aplica o desgaste de horas na célula e TBO do avião" FontSize="11.5" Foreground="{StaticResource TextSecondary}"/>
                             </StackPanel>
                         </StackPanel>
 

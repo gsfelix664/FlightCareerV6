@@ -14,7 +14,8 @@ namespace FlightCareer.UI.Services
     {
         private readonly SimConnectService _simConnect;
         private readonly FlightService _flightService;
-        private readonly Infrastructure.Persistence.AppDbContext _context;
+        private readonly IDbContextFactory<Infrastructure.Persistence.AppDbContext>? _contextFactory;
+        private readonly Infrastructure.Persistence.AppDbContext? _fallbackContext;
         private readonly WearAndFailureService _wearService;
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
@@ -52,13 +53,37 @@ namespace FlightCareer.UI.Services
 
         public WearAndFailureService WearService => _wearService;
 
-        public FlightMonitor(SimConnectService simConnect, FlightService flightService, Infrastructure.Persistence.AppDbContext context)
+        public FlightMonitor(
+            SimConnectService simConnect, 
+            FlightService flightService, 
+            IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory)
         {
             _simConnect = simConnect;
             _flightService = flightService;
-            _context = context;
+            _contextFactory = contextFactory;
             _wearService = new WearAndFailureService(simConnect);
             _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
+        }
+
+        public FlightMonitor(
+            SimConnectService simConnect, 
+            FlightService flightService, 
+            Infrastructure.Persistence.AppDbContext context)
+        {
+            _simConnect = simConnect;
+            _flightService = flightService;
+            _fallbackContext = context;
+            _wearService = new WearAndFailureService(simConnect);
+            _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
+        }
+
+        private async Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
+        {
+            if (_contextFactory != null)
+            {
+                return await _contextFactory.CreateDbContextAsync();
+            }
+            return _fallbackContext!;
         }
 
         private void OnAircraftFailureTriggered(FailureRecord failure)
@@ -133,8 +158,9 @@ namespace FlightCareer.UI.Services
                 
                 try
                 {
+                    await using var context = await CreateDbContextAsync();
                     // 1. Atualizar Desgaste e Combustível no Hangar
-                    var dbAircraft = await _context.PilotAircrafts.FindAsync(_aircraft.Id);
+                    var dbAircraft = await context.PilotAircrafts.FindAsync(_aircraft.Id);
                     if (dbAircraft != null)
                     {
                         dbAircraft.FuelAmount = lastData.Value.FuelTotalGallons;
@@ -148,21 +174,21 @@ namespace FlightCareer.UI.Services
                         if (!string.IsNullOrEmpty(currentIcao))
                         {
                             dbAircraft.CurrentLocationICAO = currentIcao;
-                            var dbPilot = await _context.Pilots.FindAsync(_pilot.Id);
+                            var dbPilot = await context.Pilots.FindAsync(_pilot.Id);
                             if (dbPilot != null) dbPilot.CurrentAirportICAO = currentIcao;
 
                             // ATUALIZAR MISSÕES: A carga parou aqui
                             foreach (var mission in _activeMissions)
                             {
                                 mission.OriginICAO = currentIcao; // Atualiza em memória
-                                var dbMission = await _context.Missions.FindAsync(mission.Id);
+                                var dbMission = await context.Missions.FindAsync(mission.Id);
                                 if (dbMission != null)
                                 {
                                     dbMission.OriginICAO = currentIcao;
                                     
                                     // Recalcular distância restante
-                                    var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
-                                    var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == currentIcao);
+                                    var destAirp = await context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
+                                    var curAirp = await context.Airports.FirstOrDefaultAsync(a => a.ICAO == currentIcao);
                                     if (destAirp != null && curAirp != null)
                                     {
                                         double newDist = LocationUtils.CalculateDistance(curAirp.Latitude, curAirp.Longitude, destAirp.Latitude, destAirp.Longitude);
@@ -173,7 +199,7 @@ namespace FlightCareer.UI.Services
                             }
                         }
                         
-                        await _context.SaveChangesAsync();
+                        await context.SaveChangesAsync();
                     }
                 }
                 catch (Exception ex)
@@ -196,13 +222,21 @@ namespace FlightCareer.UI.Services
             StopMonitoring();
             
             // Salvar estado de 0% no banco para garantir que a aeronave está "morta"
-            var dbAircraft = await _context.PilotAircrafts.FindAsync(_aircraft.Id);
-            if (dbAircraft != null)
+            try
             {
-                dbAircraft.EngineCondition = 0;
-                dbAircraft.TiresCondition = 0;
-                dbAircraft.AirframeCondition = 0;
-                await _context.SaveChangesAsync();
+                await using var context = await CreateDbContextAsync();
+                var dbAircraft = await context.PilotAircrafts.FindAsync(_aircraft.Id);
+                if (dbAircraft != null)
+                {
+                    dbAircraft.EngineCondition = 0;
+                    dbAircraft.TiresCondition = 0;
+                    dbAircraft.AirframeCondition = 0;
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving total loss: {ex.Message}");
             }
 
             OnTotalLoss?.Invoke(_aircraft);
@@ -213,7 +247,8 @@ namespace FlightCareer.UI.Services
             try
             {
                 double range = 0.5;
-                var nearbyAirports = await _context.Airports.Where(a => 
+                await using var context = await CreateDbContextAsync();
+                var nearbyAirports = await context.Airports.Where(a => 
                         a.Latitude > lat - range && a.Latitude < lat + range &&
                         a.Longitude > lon - range && a.Longitude < lon + range)
                     .ToListAsync();
@@ -391,9 +426,10 @@ namespace FlightCareer.UI.Services
             
             try 
             {
+                await using var context = await CreateDbContextAsync();
                 // Buscar novamente para evitar problemas de concorrência/contexto
-                var dbAircraft = await _context.PilotAircrafts.FindAsync(_aircraft.Id);
-                var dbPilot = await _context.Pilots.FindAsync(_pilot.Id);
+                var dbAircraft = await context.PilotAircrafts.FindAsync(_aircraft.Id);
+                var dbPilot = await context.Pilots.FindAsync(_pilot.Id);
 
                 if (dbAircraft != null)
                 {
@@ -418,14 +454,14 @@ namespace FlightCareer.UI.Services
                         foreach (var mission in _activeMissions)
                         {
                             mission.OriginICAO = currentIcao; // Atualiza em memória
-                            var dbMission = await _context.Missions.FindAsync(mission.Id);
+                            var dbMission = await context.Missions.FindAsync(mission.Id);
                             if (dbMission != null)
                             {
                                 dbMission.OriginICAO = currentIcao;
                                 
                                 // Atualizar distância restante
-                                var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
-                                var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == currentIcao);
+                                var destAirp = await context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
+                                var curAirp = await context.Airports.FirstOrDefaultAsync(a => a.ICAO == currentIcao);
                                 if (destAirp != null && curAirp != null)
                                 {
                                     double newDist = LocationUtils.CalculateDistance(curAirp.Latitude, curAirp.Longitude, destAirp.Latitude, destAirp.Longitude);
@@ -436,7 +472,7 @@ namespace FlightCareer.UI.Services
                         }
                     }
 
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -488,7 +524,8 @@ namespace FlightCareer.UI.Services
                 var lon = data.Longitude;
                 double range = 0.5;
                 
-                var nearbyAirports = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(_context.Airports.Where(a => 
+                await using var context = await CreateDbContextAsync();
+                var nearbyAirports = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(context.Airports.Where(a => 
                         a.Latitude > lat - range && a.Latitude < lat + range &&
                         a.Longitude > lon - range && a.Longitude < lon + range));
 
