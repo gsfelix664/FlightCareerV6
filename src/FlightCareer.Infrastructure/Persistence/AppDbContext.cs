@@ -76,7 +76,15 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE Missions ADD COLUMN RequiredTier INTEGER DEFAULT 1;",
                 "ALTER TABLE Missions ADD COLUMN RequiredCategory INTEGER DEFAULT 1;",
                 "UPDATE Missions SET RequiredCategory = RequiredTier WHERE RequiredTier IS NOT NULL AND (RequiredCategory IS NULL OR RequiredCategory = 1);",
-                "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';"
+                "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';",
+
+                // Cenário MSFS 2024 e Divergências de ICAO
+                "ALTER TABLE Airports ADD COLUMN IsInSimulator INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN MsfsIdent TEXT DEFAULT '';",
+                "CREATE INDEX IF NOT EXISTS IX_Airports_IsInSimulator ON Airports(IsInSimulator);",
+                "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
+                "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
+                "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';"
             };
 
             foreach (var stmt in migrationStatements)

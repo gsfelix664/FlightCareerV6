@@ -122,8 +122,8 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            // Buscar por ICAO ou Nome
-            _destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == cleanQuery)
+            // Buscar por ICAO, MsfsIdent ou Nome
+            _destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == cleanQuery || a.MsfsIdent == cleanQuery)
                         ?? await _context.Airports.FirstOrDefaultAsync(a => a.Name.ToUpper().Contains(cleanQuery) || a.City.ToUpper().Contains(cleanQuery));
 
             if (_destAirport == null)
@@ -185,6 +185,8 @@ namespace FlightCareer.UI.ViewModels
                 Description = $"Voo técnico de reposicionamento de aeronave até {_destAirport.Name} ({_destAirport.City}, {_destAirport.Country}). Sem passageiros ou carga comercial a bordo.",
                 OriginICAO = OriginIcao,
                 DestinationICAO = _destAirport.ICAO,
+                OriginMsfsIdent = (await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == OriginIcao))?.MsfsIdent ?? OriginIcao,
+                DestinationMsfsIdent = _destAirport.MsfsIdent ?? _destAirport.ICAO,
                 DistanceNM = DistanceNM,
                 PassengerCount = 0,
                 LuggageWeightLbs = 0,

@@ -108,11 +108,12 @@ namespace FlightCareer.Infrastructure.Services
                 
                 double qualityScore = qualityService.GetQualityScore();
                 double qualityMultiplier = qualityScore / 100.0;
-                bool isCrash = qualityService.TouchdownFPM > 500;
+                bool isHardLanding = qualityService.TouchdownFPM > 500;
+                bool isCrash = qualityService.TouchdownFPM >= 900;
 
                 if (isCrash)
                 {
-                    // CASO DE CRASH NO POUSO
+                    // CASO DE CRASH NO POUSO (Impacto violento >= 900 FPM com colapso de trem/célula)
                     foreach (var mission in activeMissions)
                     {
                         if (mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())

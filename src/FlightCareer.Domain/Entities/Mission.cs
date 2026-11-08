@@ -9,6 +9,17 @@ namespace FlightCareer.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public string OriginICAO { get; set; } = string.Empty;
         public string DestinationICAO { get; set; } = string.Empty;
+
+        // Identificadores compatíveis com o Microsoft Flight Simulator (caso haja divergência ICAO)
+        public string? OriginMsfsIdent { get; set; }
+        public string? DestinationMsfsIdent { get; set; }
+
+        public bool HasOriginDivergence => !string.IsNullOrEmpty(OriginMsfsIdent) && !string.Equals(OriginICAO, OriginMsfsIdent, StringComparison.OrdinalIgnoreCase);
+        public bool HasDestinationDivergence => !string.IsNullOrEmpty(DestinationMsfsIdent) && !string.Equals(DestinationICAO, DestinationMsfsIdent, StringComparison.OrdinalIgnoreCase);
+
+        public string OriginDisplayIdent => HasOriginDivergence ? $"{OriginICAO} (MSFS: {OriginMsfsIdent})" : OriginICAO;
+        public string DestinationDisplayIdent => HasDestinationDivergence ? $"{DestinationICAO} (MSFS: {DestinationMsfsIdent})" : DestinationICAO;
+
         public double PayloadLbs { get; set; }
         public int PassengerCount { get; set; }
         public double LuggageWeightLbs { get; set; }

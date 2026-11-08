@@ -10,7 +10,7 @@ namespace FlightCareer.UI.Services
 {
     public enum DATA_REQUESTS { RequestTelemetry }
     public enum DEFINITIONS { AircraftData }
-    public enum EVENTS { FailureEvent }
+    public enum EVENTS { FailureEvent, CrashedEvent }
 
     public class SimConnectService
     {
@@ -20,6 +20,14 @@ namespace FlightCareer.UI.Services
         public event EventHandler? OnConnected;
         public event EventHandler? OnDisconnected;
         public event EventHandler<SimTelemetry>? OnDataReceived;
+        public event EventHandler? OnCrashEvent;
+
+        public bool IsCrashed { get; set; } = false;
+
+        public void ResetCrashState()
+        {
+            IsCrashed = false;
+        }
 
         private bool _debugMode;
         public bool DebugMode 
@@ -70,51 +78,79 @@ namespace FlightCareer.UI.Services
             {
                 _simConnect = new SimConnect("Flight Career V6", _handle, WM_USER_SIMCONNECT, null, 0);
 
+                // 1. Identificação da Aeronave (256 bytes)
                 _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "TITLE", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+
+                // 2. Posição e Movimento (6 doubles)
                 AddToDef("PLANE LATITUDE", "degrees");
                 AddToDef("PLANE LONGITUDE", "degrees");
                 AddToDef("PLANE ALTITUDE", "feet");
                 AddToDef("GROUND VELOCITY", "knots");
+                AddToDef("AIRSPEED INDICATED", "knots");
+                AddToDef("VERTICAL SPEED", "ft/min");
+
+                // 3. Estados Gerais (4 doubles)
                 AddToDef("SIM ON GROUND", "Bool");
                 AddToDef("GENERAL ENG COMBUSTION:1", "Bool");
                 AddToDef("BRAKE PARKING POSITION", "Bool");
-                AddToDef("ENGINE TYPE", "Enum");
+                AddToDef("ENGINE TYPE", "number");
+
+                // 4. Combustível e Pesos (6 doubles)
                 AddToDef("FUEL TOTAL QUANTITY", "Gallons");
                 AddToDef("FUEL TOTAL CAPACITY", "Gallons");
                 AddToDef("FUEL TOTAL QUANTITY WEIGHT", "Pounds");
                 AddToDef("MAX GROSS WEIGHT", "Pounds");
                 AddToDef("TOTAL WEIGHT", "Pounds");
                 AddToDef("EMPTY WEIGHT", "Pounds");
-                AddToDef("ZERO FUEL WEIGHT", "Pounds");
-                AddToDef("FUEL WEIGHT PER GALLON", "Pounds per gallon");
 
-                AddToDef("GENERAL ENG RPM:1", "rpm");
-                AddToDef("GENERAL ENG MAX RPM:1", "rpm");
-                AddToDef("VERTICAL SPEED", "Feet per second");
-                AddToDef("G FORCE", "G force");
-                AddToDef("AIRSPEED INDICATED", "knots");
-                AddToDef("FLAPS HANDLE PERCENT", "Percent");
-                
+                // 5. Atitude e Força G (4 doubles)
+                AddToDef("G FORCE", "GForce");
+                AddToDef("PLANE PITCH DEGREES", "degrees");
+                AddToDef("PLANE BANK DEGREES", "degrees");
+                AddToDef("PLANE HEADING DEGREES MAGNETIC", "degrees");
+
+                // 6. Controles e Trem/Freios (4 doubles)
+                AddToDef("FLAPS HANDLE PERCENT", "Percent Over 100");
                 AddToDef("VELOCITY BODY Y", "Feet per second");
                 AddToDef("BRAKE LEFT POSITION", "Position");
                 AddToDef("BRAKE RIGHT POSITION", "Position");
 
+                // 7. Alertas (1 double)
                 AddToDef("OVERSPEED WARNING", "Bool");
-                AddToDef("CRASH SEQUENCE", "Enum");
 
+                // 8. Motor (6 doubles)
+                AddToDef("GENERAL ENG RPM:1", "rpm");
                 AddToDef("RECIP ENG CYLINDER HEAD TEMPERATURE:1", "Celsius");
-                AddToDef("ENG OIL TEMPERATURE:1", "Celsius");
-                AddToDef("ENG OIL PRESSURE:1", "psi");
+                AddToDef("GENERAL ENG OIL TEMPERATURE:1", "Celsius");
+                AddToDef("GENERAL ENG OIL PRESSURE:1", "psi");
                 AddToDef("TURB ENG ITT:1", "Celsius");
                 AddToDef("TURB ENG N1:1", "Percent");
 
-                AddToDef("PLANE BANK DEGREES", "degrees");
-                AddToDef("PLANE PITCH DEGREES", "degrees");
-                AddToDef("PLANE HEADING DEGREES MAGNETIC", "degrees");
+                // 9. Condições Ambientais e Atmosféricas (5 doubles)
+                AddToDef("SURFACE CONDITION", "Number");
+                AddToDef("AMBIENT TEMPERATURE", "Celsius");
+                AddToDef("AMBIENT PRECIP STATE", "Mask");
+                AddToDef("AMBIENT WIND VELOCITY", "Knots");
+                AddToDef("AMBIENT WIND DIRECTION", "Degrees");
+
+                // 10. Dinâmica Lateral e Comandos do Piloto (4 doubles)
+                AddToDef("VELOCITY BODY X", "Feet per second");
+                AddToDef("GENERAL ENG THROTTLE LEVER POSITION:1", "Percent");
+                AddToDef("GENERAL ENG MIXTURE LEVER POSITION:1", "Percent");
+                AddToDef("ENG ANTI ICE:1", "Bool");
+
+                // 11. Gelo e Pressurização (3 doubles)
+                AddToDef("STRUCTURAL ICE PCT", "Percent");
+                AddToDef("PITOT ICE PCT", "Percent");
+                AddToDef("PRESSURIZATION CABIN ALTITUDE", "Feet");
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
+                // Inscrição no evento do sistema de Crash
+                _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
+
                 _simConnect.OnRecvOpen += (s, e) => {
+                    IsCrashed = false;
                     _reconnectTimer?.Stop();
                     OnConnected?.Invoke(this, EventArgs.Empty);
                 };
@@ -123,6 +159,19 @@ namespace FlightCareer.UI.Services
                     Disconnect();
                     _reconnectTimer?.Start();
                 };
+
+                _simConnect.OnRecvEvent += (s, e) => {
+                    if (e.uEventID == (uint)EVENTS.CrashedEvent)
+                    {
+                        IsCrashed = true;
+                        OnCrashEvent?.Invoke(this, EventArgs.Empty);
+                    }
+                };
+
+                _simConnect.OnRecvException += (s, e) => {
+                    Debug.WriteLine($"[SimConnect EXCEPTION] ID: {(SIMCONNECT_EXCEPTION)e.dwException}, SendID: {e.dwSendID}, Index: {e.dwIndex}");
+                };
+
                 _simConnect.OnRecvSimobjectData += SimConnect_OnRecvSimobjectData;
 
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTelemetry, DEFINITIONS.AircraftData,

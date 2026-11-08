@@ -48,7 +48,7 @@ namespace FlightCareer.UI.Services
                     _writer = new StreamWriter(new FileStream(_currentFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite));
                     
                     // Cabeçalho CSV formatado
-                    _writer.WriteLine("Timestamp;ElapsedSec;Origin;Dest;Latitude;Longitude;AltitudeFt;GroundSpeedKt;AirspeedKt;VerticalSpeedFps;GForce;PitchDeg;BankDeg;HeadingDeg;IsOnGround;ParkingBrake;FlapsPct;EngineRunning;EngineRPM;EngineCHT;EngineOilTemp;EngineOilPress;TurboITT;EngineN1;FuelGallons;FuelWeightLbs;BrakeLeft;BrakeRight;AirframeCondition;EngineCondition;TiresCondition;Status");
+                    _writer.WriteLine("Timestamp;ElapsedSec;Origin;Dest;Latitude;Longitude;AltitudeFt;GroundSpeedKt;AirspeedKt;VerticalSpeedFpm;GForce;PitchDeg;BankDeg;HeadingDeg;IsOnGround;ParkingBrake;FlapsPct;EngineRunning;EngineRPM;EngineCHT;EngineOilTemp;EngineOilPress;TurboITT;EngineN1;FuelGallons;FuelWeightLbs;BrakeLeft;BrakeRight;AirframeCondition;EngineCondition;TiresCondition;Status");
                     _writer.Flush();
 
                     System.Diagnostics.Debug.WriteLine($"[TelemetryLogger] Blackbox iniciada em: {_currentFilePath}");
@@ -98,7 +98,7 @@ namespace FlightCareer.UI.Services
                         data.PlaneHeading.ToString("F1", inv),
                         data.IsOnGround ? "1" : "0",
                         data.ParkingBrake.ToString("F2", inv),
-                        data.FlapsHandlePercent.ToString("F1", inv),
+                        data.FlapsPercent.ToString("F0", inv),
                         data.IsEngineRunning ? "1" : "0",
                         data.EngineRPM.ToString("F0", inv),
                         data.EngineCHT.ToString("F1", inv),
@@ -123,6 +123,22 @@ namespace FlightCareer.UI.Services
                 {
                     System.Diagnostics.Debug.WriteLine($"[TelemetryLogger] Erro ao gravar frame: {ex.Message}");
                 }
+            }
+        }
+
+        public void LogEvent(string eventType, string description)
+        {
+            lock (_lock)
+            {
+                if (_writer == null) return;
+                try
+                {
+                    double elapsed = Math.Round((DateTime.Now - _flightStartTime).TotalSeconds, 1);
+                    var inv = CultureInfo.InvariantCulture;
+                    _writer.WriteLine($"# [EVENTO {elapsed.ToString("F1", inv)}s] {eventType}: {description}");
+                    _writer.Flush();
+                }
+                catch { }
             }
         }
 

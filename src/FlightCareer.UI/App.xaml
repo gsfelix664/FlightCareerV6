@@ -13,7 +13,7 @@
          <SolidColorBrush x:Key="AvionicsBorder" Color="#263545"/>
 
          <SolidColorBrush x:Key="TextPrimary" Color="#F0F4F8"/>
-         <SolidColorBrush x:Key="TextSecondary" Color="#8B9BAE"/>
+         <SolidColorBrush x:Key="TextSecondary" Color="#94A3B8"/>
          <SolidColorBrush x:Key="TextMuted" Color="#526375"/>
 
          <!-- Cores Semânticas & Status Aeronáutico -->

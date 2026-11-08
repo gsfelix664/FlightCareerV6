@@ -21,8 +21,15 @@ namespace FlightCareer.UI.Utils
         private GMapMarker? _destinationMarker;
         private GMapRoute? _destinationRoute;
         private GMapRoute? _waypointRoute;
+        private GMapRoute? _recordedFlightRoute;
+        private GMapMarker? _originPinMarker;
+        private GMapMarker? _destPinMarker;
+        private readonly List<GMapRoute> _multiLegRoutes = new List<GMapRoute>();
+        private readonly List<GMapMarker> _multiLegMarkers = new List<GMapMarker>();
 
         // Dependency Properties
+        public static readonly DependencyProperty RecordedPathProperty = DependencyProperty.Register("RecordedPath", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRecordedPathChanged));
+        public static readonly DependencyProperty RouteLegsProperty = DependencyProperty.Register("RouteLegs", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRouteLegsChanged));
         public static readonly DependencyProperty AircraftLatProperty = DependencyProperty.Register("AircraftLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty AircraftLonProperty = DependencyProperty.Register("AircraftLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty DestLatProperty = DependencyProperty.Register("DestLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnDestinationChanged));
@@ -37,6 +44,8 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty AltitudeProperty = DependencyProperty.Register("Altitude", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty GroundSpeedProperty = DependencyProperty.Register("GroundSpeed", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
 
+        public System.Collections.IEnumerable? RecordedPath { get => (System.Collections.IEnumerable?)GetValue(RecordedPathProperty); set => SetValue(RecordedPathProperty, value); }
+        public System.Collections.IEnumerable? RouteLegs { get => (System.Collections.IEnumerable?)GetValue(RouteLegsProperty); set => SetValue(RouteLegsProperty, value); }
         public double AircraftLat { get => (double)GetValue(AircraftLatProperty); set => SetValue(AircraftLatProperty, value); }
         public double AircraftLon { get => (double)GetValue(AircraftLonProperty); set => SetValue(AircraftLonProperty, value); }
         public double DestLat { get => (double)GetValue(DestLatProperty); set => SetValue(DestLatProperty, value); }
@@ -48,6 +57,25 @@ namespace FlightCareer.UI.Utils
         public double AircraftHeading { get => (double)GetValue(AircraftHeadingProperty); set => SetValue(AircraftHeadingProperty, value); }
         public double Altitude { get => (double)GetValue(AltitudeProperty); set => SetValue(AltitudeProperty, value); }
         public double GroundSpeed { get => (double)GetValue(GroundSpeedProperty); set => SetValue(GroundSpeedProperty, value); }
+
+        private static void OnRouteLegsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
+                    oldColl.CollectionChanged -= map.RouteLegs_CollectionChanged;
+
+                if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
+                    newColl.CollectionChanged += map.RouteLegs_CollectionChanged;
+
+                map.UpdateMultiLegRoute();
+            }
+        }
+
+        private void RouteLegs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateMultiLegRoute();
+        }
 
         private static void OnTelemetryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -123,8 +151,8 @@ namespace FlightCareer.UI.Utils
             GMap.NET.MapProviders.GMapProvider.UserAgent = "FlightCareerV6/1.0 (WPF; Windows; https://github.com/gsfel/FlightCareerV6)";
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
 
-            // Trocando para ArcGIS (Baseado em OSM mas com servidores ESRI mais estáveis)
-            MainMap.MapProvider = GMapProviders.ArcGIS_World_Street_Map;
+            // Camada Noturna Tática Escura (CartoDB Dark Matter) perfeitamente integrada ao tema Avionics Dark
+            MainMap.MapProvider = CartoDbDarkMapProvider.Instance;
             
             MainMap.Position = new PointLatLng(0, 0);
             MainMap.MinZoom = 2;
@@ -156,13 +184,30 @@ namespace FlightCareer.UI.Utils
             if (d is FlightMapControl map)
             {
                 map.UpdateAircraftPosition();
-                map.UpdateDestinationRoute();
+                if (map.RouteLegs != null && map.RouteLegs.OfType<object>().Any())
+                {
+                    map.UpdateMultiLegRoute();
+                }
+                else
+                {
+                    map.UpdateDestinationRoute();
+                }
             }
         }
 
         private static void OnDestinationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is FlightMapControl map) map.UpdateDestinationRoute();
+            if (d is FlightMapControl map)
+            {
+                if (map.RouteLegs != null && map.RouteLegs.OfType<object>().Any())
+                {
+                    map.UpdateMultiLegRoute();
+                }
+                else
+                {
+                    map.UpdateDestinationRoute();
+                }
+            }
         }
 
         private void UpdateAircraftPosition()
@@ -370,6 +415,201 @@ namespace FlightCareer.UI.Utils
             }
         }
 
+        private void ClearMultiLegVisuals()
+        {
+            foreach (var r in _multiLegRoutes) MainMap.Markers.Remove(r);
+            _multiLegRoutes.Clear();
+            foreach (var m in _multiLegMarkers) MainMap.Markers.Remove(m);
+            _multiLegMarkers.Clear();
+        }
+
+        private GMapMarker CreateWaypointBadge(PointLatLng pos, string text, string hexColor, string tooltip)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            panel.Children.Add(new Ellipse
+            {
+                Width = 9,
+                Height = 9,
+                Fill = (Brush)new BrushConverter().ConvertFromString(hexColor)!,
+                Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
+                StrokeThickness = 1.5,
+                Margin = new Thickness(0, 0, 4, 0)
+            });
+
+            var border = new Border
+            {
+                Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
+                BorderBrush = (Brush)new BrushConverter().ConvertFromString(hexColor)!,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(3),
+                Padding = new Thickness(5, 2, 5, 2),
+                Child = new TextBlock
+                {
+                    Text = text,
+                    FontSize = 9,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
+                    FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
+                }
+            };
+            panel.Children.Add(border);
+            panel.ToolTip = tooltip;
+
+            return new GMapMarker(pos)
+            {
+                ZIndex = 120,
+                Shape = panel
+            };
+        }
+
+        public void UpdateMultiLegRoute()
+        {
+            ClearMultiLegVisuals();
+
+            if (RouteLegs == null)
+            {
+                UpdateDestinationRoute();
+                return;
+            }
+
+            var legs = RouteLegs.OfType<ViewModels.FlightLegModel>().ToList();
+            if (!legs.Any())
+            {
+                UpdateDestinationRoute();
+                return;
+            }
+
+            // Ocultar rota simples de destino único se estiver em modo multi-pernas
+            if (_destinationRoute != null) MainMap.Markers.Remove(_destinationRoute);
+            if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
+
+            var allRoutePoints = new List<PointLatLng>();
+            if (AircraftLat != 0 && AircraftLon != 0)
+            {
+                allRoutePoints.Add(new PointLatLng(AircraftLat, AircraftLon));
+            }
+
+            var plottedIcaos = new HashSet<string>();
+
+            for (int i = 0; i < legs.Count; i++)
+            {
+                var leg = legs[i];
+                bool isFirstLeg = (i == 0);
+                bool isLastLeg = (i == legs.Count - 1);
+
+                // 1. Circuito de Tráfego / Toque e Arremetida (TGL)
+                if (leg.IsTglOrLocal || leg.OriginICAO == leg.DestinationICAO)
+                {
+                    double lat0 = leg.OriginLat != 0 ? leg.OriginLat : AircraftLat;
+                    double lon0 = leg.OriginLon != 0 ? leg.OriginLon : AircraftLon;
+
+                    if (lat0 == 0 && lon0 == 0) continue;
+
+                    // Circuito retangular padrão de tráfego aéreo (~1.2 NM de largura/comprimento)
+                    double dLat = 0.018; // ~1.1 NM
+                    double dLon = 0.024; // ~1.2 NM
+
+                    var pRwy = new PointLatLng(lat0, lon0);
+                    var pUpwind = new PointLatLng(lat0 - dLat, lon0);
+                    var pCrosswind = new PointLatLng(lat0 - dLat, lon0 + dLon);
+                    var pDownwind = new PointLatLng(lat0 + dLat, lon0 + dLon);
+                    var pBase = new PointLatLng(lat0 + dLat, lon0);
+
+                    var circuitPoints = new List<PointLatLng> { pRwy, pUpwind, pCrosswind, pDownwind, pBase, pRwy };
+                    allRoutePoints.AddRange(circuitPoints);
+
+                    var tglRoute = new GMapRoute(circuitPoints)
+                    {
+                        Shape = new Path
+                        {
+                            Stroke = (Brush)new BrushConverter().ConvertFromString("#FFB300")!, // Âmbar para Instrução/TGL
+                            StrokeThickness = 2.8,
+                            StrokeDashArray = new DoubleCollection { 3, 2 },
+                            Opacity = 0.95
+                        }
+                    };
+                    _multiLegRoutes.Add(tglRoute);
+                    MainMap.Markers.Add(tglRoute);
+
+                    var tglBadge = CreateWaypointBadge(
+                        new PointLatLng(lat0 + (dLat * 0.4), lon0 + dLon),
+                        $"LEG {leg.LegNumber} • {leg.OriginICAO} (TGL)",
+                        "#FFB300",
+                        $"CIRCUITO DE TRÁFEGO • TOQUE E ARREMETIDA EM {leg.OriginICAO} ({leg.DistanceNM:N0} NM)");
+                    _multiLegMarkers.Add(tglBadge);
+                    MainMap.Markers.Add(tglBadge);
+
+                    plottedIcaos.Add(leg.OriginICAO);
+                }
+                else
+                {
+                    // 2. Perna de Navegação entre Aeródromos Distintos
+                    var pStart = new PointLatLng(leg.OriginLat, leg.OriginLon);
+                    var pEnd = new PointLatLng(leg.DestLat, leg.DestLon);
+
+                    if (pStart.Lat == 0 && pStart.Lng == 0 && AircraftLat != 0)
+                        pStart = new PointLatLng(AircraftLat, AircraftLon);
+
+                    if (pEnd.Lat == 0 && pEnd.Lng == 0) continue;
+
+                    allRoutePoints.Add(pStart);
+                    allRoutePoints.Add(pEnd);
+
+                    var legRoute = new GMapRoute(new List<PointLatLng> { pStart, pEnd })
+                    {
+                        Shape = new Path
+                        {
+                            Stroke = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
+                            StrokeThickness = 3,
+                            StrokeDashArray = new DoubleCollection { 4, 2 },
+                            Opacity = 0.95
+                        }
+                    };
+                    _multiLegRoutes.Add(legRoute);
+                    MainMap.Markers.Add(legRoute);
+
+                    if (isFirstLeg && !plottedIcaos.Contains(leg.OriginICAO))
+                    {
+                        var originBadge = CreateWaypointBadge(pStart, $"PARTIDA • {leg.OriginICAO}", "#00E676", $"AERÓDROMO DE PARTIDA: {leg.OriginICAO}");
+                        _multiLegMarkers.Add(originBadge);
+                        MainMap.Markers.Add(originBadge);
+                        plottedIcaos.Add(leg.OriginICAO);
+                    }
+
+                    string pinColor = isLastLeg ? "#00E676" : "#00E5FF";
+                    string pinLabel = isLastLeg 
+                        ? $"LEG {leg.LegNumber} • {leg.DestinationICAO} (FINAL)" 
+                        : $"LEG {leg.LegNumber} • {leg.DestinationICAO}";
+
+                    var destBadge = CreateWaypointBadge(pEnd, pinLabel, pinColor, $"ESCALA / DESTINO: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)");
+                    _multiLegMarkers.Add(destBadge);
+                    MainMap.Markers.Add(destBadge);
+                    plottedIcaos.Add(leg.DestinationICAO);
+                }
+            }
+
+            // Enquadramento automático cobrindo todas as pernas do voo
+            if (allRoutePoints.Count >= 2)
+            {
+                double minLat = allRoutePoints.Min(p => p.Lat);
+                double maxLat = allRoutePoints.Max(p => p.Lat);
+                double minLon = allRoutePoints.Min(p => p.Lng);
+                double maxLon = allRoutePoints.Max(p => p.Lng);
+
+                double latSpan = Math.Max(0.06, maxLat - minLat);
+                double lonSpan = Math.Max(0.06, maxLon - minLon);
+
+                var rect = RectLatLng.FromLTRB(
+                    minLon - (lonSpan * 0.30),
+                    maxLat + (latSpan * 0.30),
+                    maxLon + (lonSpan * 0.30),
+                    minLat - (latSpan * 0.30)
+                );
+
+                MainMap.SetZoomToFitRect(rect);
+            }
+        }
+
         private void MainMap_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             var p = e.GetPosition(MainMap);
@@ -426,6 +666,228 @@ namespace FlightCareer.UI.Utils
             _waypoints.Clear();
             UpdateWaypointMarkers();
             UpdateWaypointRoute();
+        }
+
+        private static void OnRecordedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
+                    oldColl.CollectionChanged -= map.RecordedPath_CollectionChanged;
+
+                if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
+                    newColl.CollectionChanged += map.RecordedPath_CollectionChanged;
+
+                map.UpdateRecordedPath();
+            }
+        }
+
+        private void RecordedPath_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateRecordedPath();
+        }
+
+        public void UpdateRecordedPath()
+        {
+            if (_recordedFlightRoute != null)
+            {
+                MainMap.Markers.Remove(_recordedFlightRoute);
+                _recordedFlightRoute = null;
+            }
+            if (_originPinMarker != null)
+            {
+                MainMap.Markers.Remove(_originPinMarker);
+                _originPinMarker = null;
+            }
+            if (_destPinMarker != null)
+            {
+                MainMap.Markers.Remove(_destPinMarker);
+                _destPinMarker = null;
+            }
+
+            var points = (RecordedPath as System.Collections.IEnumerable)?.OfType<PointLatLng>().ToList();
+            if (points == null || points.Count == 0) return;
+
+            // 1. Rota Ciano Neon de Trajetória Real
+            _recordedFlightRoute = new GMapRoute(points)
+            {
+                Shape = new Path
+                {
+                    Stroke = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                    StrokeThickness = 3.5,
+                    Opacity = 0.95
+                },
+                ZIndex = 80
+            };
+            MainMap.Markers.Add(_recordedFlightRoute);
+
+            // 2. Pin de Decolagem / Origem (Verde)
+            var pStart = points.First();
+            _originPinMarker = new GMapMarker(pStart)
+            {
+                ZIndex = 110,
+                Shape = CreatePinBadge(!string.IsNullOrWhiteSpace(OriginIcao) ? OriginIcao : "DECOLAGEM", "#00E676")
+            };
+            MainMap.Markers.Add(_originPinMarker);
+
+            // 3. Pin de Pouso / Destino (Amarelo Ouro)
+            var pEnd = points.Last();
+            _destPinMarker = new GMapMarker(pEnd)
+            {
+                ZIndex = 110,
+                Shape = CreatePinBadge(!string.IsNullOrWhiteSpace(DestIcao) ? DestIcao : "POUSO", "#FFB300")
+            };
+            MainMap.Markers.Add(_destPinMarker);
+
+            // 4. Enquadramento e Zoom Automático da Rota
+            try
+            {
+                double minLat = points.Min(p => p.Lat);
+                double maxLat = points.Max(p => p.Lat);
+                double minLon = points.Min(p => p.Lng);
+                double maxLon = points.Max(p => p.Lng);
+
+                double latSpan = Math.Max(0.04, maxLat - minLat);
+                double lonSpan = Math.Max(0.04, maxLon - minLon);
+
+                var rect = RectLatLng.FromLTRB(
+                    minLon - (lonSpan * 0.25),
+                    maxLat + (latSpan * 0.25),
+                    maxLon + (lonSpan * 0.25),
+                    minLat - (latSpan * 0.25)
+                );
+
+                MainMap.SetZoomToFitRect(rect);
+            }
+            catch { }
+        }
+
+        private FrameworkElement CreatePinBadge(string text, string colorHex)
+        {
+            var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+            panel.Children.Add(new Ellipse
+            {
+                Width = 10,
+                Height = 10,
+                Fill = (Brush)new BrushConverter().ConvertFromString(colorHex)!,
+                Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
+                StrokeThickness = 2,
+                Margin = new Thickness(0, 0, 4, 0)
+            });
+
+            var border = new Border
+            {
+                Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
+                BorderBrush = (Brush)new BrushConverter().ConvertFromString(colorHex)!,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(3),
+                Padding = new Thickness(5, 2, 5, 2),
+                Child = new TextBlock
+                {
+                    Text = text,
+                    FontSize = 10,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
+                    FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
+                }
+            };
+            panel.Children.Add(border);
+            return panel;
+        }
+    }
+
+    /// <summary>
+    /// Provedor de Camada de Referência e Rótulos Noturnos (Cidades, Fronteiras) sobreposta ao mapa escuro.
+    /// </summary>
+    public class EsriDarkReferenceMapProvider : GMapProvider
+    {
+        public static readonly EsriDarkReferenceMapProvider Instance;
+        private readonly Guid _id = new Guid("E5A91D32-1234-4C5E-9876-0ABCDEF12345");
+        public override Guid Id => _id;
+
+        private readonly string _name = "Esri_Dark_Reference";
+        public override string Name => _name;
+
+        private GMapProvider[]? _overlays;
+        public override GMapProvider[] Overlays
+        {
+            get
+            {
+                if (_overlays == null)
+                {
+                    _overlays = new GMapProvider[] { this };
+                }
+                return _overlays;
+            }
+        }
+
+        public override PureProjection Projection => GMap.NET.Projections.MercatorProjection.Instance;
+
+        static EsriDarkReferenceMapProvider()
+        {
+            Instance = new EsriDarkReferenceMapProvider();
+        }
+
+        public override PureImage? GetTileImage(GPoint pos, int zoom)
+        {
+            try
+            {
+                string url = $"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{zoom}/{pos.Y}/{pos.X}";
+                return GetTileImageUsingHttp(url);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Provedor de Mapa Noturno / Dark Mode Tático Avionics baseado em ESRI World Dark Gray Canvas.
+    /// Tile server de altíssima velocidade, 100% livre de marcas d'água / API keys e paleta ultra-escura (#0B0F14 / #141C24).
+    /// </summary>
+    public class CartoDbDarkMapProvider : GMapProvider
+    {
+        public static readonly CartoDbDarkMapProvider Instance;
+
+        // Novo GUID e Nome para forçar limpeza de cache de tiles antigos com marca d'água
+        private readonly Guid _id = new Guid("B7E20F45-8899-4A1C-99BB-27F389A8E2E5");
+        public override Guid Id => _id;
+
+        private readonly string _name = "Esri_Dark_Canvas_Avionics";
+        public override string Name => _name;
+
+        private GMapProvider[]? _overlays;
+        public override GMapProvider[] Overlays
+        {
+            get
+            {
+                if (_overlays == null)
+                {
+                    _overlays = new GMapProvider[] { this, EsriDarkReferenceMapProvider.Instance };
+                }
+                return _overlays;
+            }
+        }
+
+        public override PureProjection Projection => GMap.NET.Projections.MercatorProjection.Instance;
+
+        static CartoDbDarkMapProvider()
+        {
+            Instance = new CartoDbDarkMapProvider();
+        }
+
+        public override PureImage? GetTileImage(GPoint pos, int zoom)
+        {
+            try
+            {
+                string url = $"https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{zoom}/{pos.Y}/{pos.X}";
+                return GetTileImageUsingHttp(url);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

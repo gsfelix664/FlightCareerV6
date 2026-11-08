@@ -13,6 +13,36 @@ namespace FlightCareer.UI.ViewModels
         public string Description => Mission.Description;
         public string OriginICAO => Mission.OriginICAO;
         public string DestinationICAO => Mission.DestinationICAO;
+
+        // Dicionário de Códigos ICAO que divergiram entre a base DECEA/AISWEB e a base do MSFS (Asobo/NavBlue)
+        public static readonly System.Collections.Generic.Dictionary<string, string> MsfsIcaoAliases = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "SBPG", "SSZW" }, // Ponta Grossa - PR (Comandante Antonio Amilton Beraldo)
+            { "SBCA", "SSKW" }, // Cascavel - PR (Adalberto Mendes da Silva)
+            { "SBTD", "SSTW" }, // Toledo - PR (Luiz dal Canalle Filho)
+            { "SBPO", "SSPB" }, // Pato Branco - PR (Juvenal Cardoso)
+            { "SBPF", "SSPF" }, // Passo Fundo - RS (Lauro Kurtz)
+            { "SBNM", "SSAN" }  // Santo Ângelo - RS (Sepé Tiaraju)
+        };
+
+        public string? MsfsAliasIcao
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(Mission.DestinationMsfsIdent) && !string.Equals(DestinationICAO, Mission.DestinationMsfsIdent, StringComparison.OrdinalIgnoreCase))
+                    return Mission.DestinationMsfsIdent;
+
+                return MsfsIcaoAliases.TryGetValue(DestinationICAO, out var alias) ? alias : null;
+            }
+        }
+
+        public bool HasMsfsAlias => !string.IsNullOrEmpty(MsfsAliasIcao);
+        public string MsfsBadgeText => HasMsfsAlias ? $"MSFS: {MsfsAliasIcao}" : string.Empty;
+        public string DestinationIcaoWithMsfsNotice => HasMsfsAlias ? $"{DestinationICAO} (MSFS: {MsfsAliasIcao})" : DestinationICAO;
+        public string DestinationTooltip => HasMsfsAlias 
+            ? $"{DestinationName} - {DestinationCity}\n💡 MSFS 2024: No simulador, este aeroporto utiliza o código '{MsfsAliasIcao}'."
+            : $"{DestinationName} - {DestinationCity}";
+
         public double DistanceNM => Mission.DistanceNM;
         public double PayloadLbs => Mission.PayloadLbs;
         public int PassengerCount => Mission.PassengerCount;
@@ -60,41 +90,163 @@ namespace FlightCareer.UI.ViewModels
         public double ProfitPerNM => DistanceNM > 0 ? Math.Round(RewardMoney / DistanceNM, 1) : 0;
         public string ProfitPerNmDisplay => $"${ProfitPerNM:F1}/NM";
 
-        // Badges Cromáticos Semânticos (Dark Mode Avionics)
-        public string CategoryColor => MissionCategoryType switch
+        // Badges Cromáticos Semânticos (Cores apenas para exceções/destaques; neutro sutil para padrão)
+        public string SemanticBorderBrush => MissionCategoryType switch
         {
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#E040FB", // Magenta GPS / IFR
-            var t when t.Contains("Táxi") || t.Contains("Charter") => "#00E676",          // Verde Lucro / VFR
-            var t when t.Contains("Linha Regional") => "#00E5FF",                          // Ciano Aviônica
-            var t when t.Contains("Linha Regular") || t.Contains("Heavy") => "#00B0FF",    // Ciano / Azul Elétrico
-            var t when t.Contains("SAE") || t.Contains("Carga") => "#FFB300",              // Âmbar / Alerta
-            var t when t.Contains("Saúde") || t.Contains("Remoção") => "#FF5252",          // Vermelho Aviso
-            _ => "#8B9BAE"
+            var t when t.Contains("VIP") => "#F59E0B",
+            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
+            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#A855F7",
+            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            _ => "#2A3749" // Neutro sutil
         };
 
-        public string CategoryBadgeBackground => MissionCategoryType switch
+        public string SemanticBadgeBackground => MissionCategoryType switch
         {
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#2B123A",
-            var t when t.Contains("Táxi") || t.Contains("Charter") => "#0D2B1E",
-            var t when t.Contains("Linha Regional") => "#0D2A3A",
-            var t when t.Contains("Linha Regular") || t.Contains("Heavy") => "#0E2338",
-            var t when t.Contains("SAE") || t.Contains("Carga") => "#2D220D",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") => "#2E1214",
-            _ => "#141C24"
+            var t when t.Contains("VIP") => "#2E1E05",
+            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#2E1214",
+            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#251233",
+            var t when t.Contains("SAE") || t.Contains("Agro") => "#0B2730",
+            _ => "#161F2A" // Fundo neutro discreto
         };
+
+        public string SemanticTextColor => MissionCategoryType switch
+        {
+            var t when t.Contains("VIP") => "#F59E0B",
+            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
+            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#C084FC",
+            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            _ => "#94A3B8" // Neutro suave
+        };
+
+        public string CategoryColor => SemanticTextColor;
+        public string CategoryBadgeBackground => SemanticBadgeBackground;
+
+        public string RequiredCategoryDisplay => RequiredCategory.GetShortName();
+        public string RequiredCategoryTooltip => RequiredCategory.GetDisplayName();
+
+        // Metadados Formatados para a Tabela e Cards Operacionais
+        public string PayloadFormatted => PassengerCount > 0 
+            ? $"{PassengerCount} PAX • {PayloadLbs:N0} lbs" 
+            : $"{PayloadLbs:N0} lbs Carga";
+
+        public string MinRunwayDisplay => DestTier switch
+        {
+            1 => "3.000m+",
+            2 => "1.800m",
+            3 => "1.200m",
+            _ => "800m"
+        };
+
+        public string XpDisplay => $"+{ExperienceGain} XP";
+        public string FlightRulesDisplay => WeatherCategory == "IFR" ? "IFR" : "VFR";
+        public string FlightRulesColor => WeatherCategory == "IFR" ? "#FF5252" : "#00E676";
+
+        public string CargoPaxDetailChip => PassengerCount > 0 
+            ? $"👥 {PassengerCount} Passageiro(s) • {LuggageWeightLbs:N0} lbs bagagem" 
+            : $"📦 {CargoWeightLbs:N0} lbs Carga Útil";
 
         // Estimativas de Pré-Despacho (calculadas com a aeronave ativa)
         [ObservableProperty] private string _eteFormatted = "--";
         [ObservableProperty] private double _estimatedFuelGallons;
         [ObservableProperty] private double _estimatedFuelLbs;
 
-        // Meteorologia Simulada Determinística (METAR Simplificado)
-        [ObservableProperty] private string _weatherCategory = "VFR";
-        [ObservableProperty] private string _weatherColor = "#10B981";
-        [ObservableProperty] private string _weatherIcon = "☀️";
-        [ObservableProperty] private string _weatherSummary = "Céu Claro • Vis > 10 km • Vento Calmo";
+        // Proa / Rumo Geográfico (Initial Bearing)
+        [ObservableProperty] private double _headingDegrees;
+        [ObservableProperty] private string _headingCardinal = string.Empty;
+        [ObservableProperty] private string _headingDisplay = "---";
 
-        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory)
+        // Meteorologia Real (NOAA AviationWeather.gov)
+        [ObservableProperty] private string _weatherCategory = "---";
+        [ObservableProperty] private string _weatherColor = "#8B9BAE";
+        [ObservableProperty] private string _weatherIcon = "🌐";
+        [ObservableProperty] private string _weatherSummary = "Buscando transmissão METAR da NOAA...";
+        [ObservableProperty] private string _rawMetar = string.Empty;
+        [ObservableProperty] private bool _isRealMetarLoaded;
+        [ObservableProperty] private bool _isNearestStationMetar;
+        [ObservableProperty] private string _weatherStationIcao = string.Empty;
+
+        public string WeatherDisplay => $"{WeatherIcon} {WeatherCategory}";
+        public string WeatherBadgeBg => WeatherCategory switch
+        {
+            "LIFR" => "#2E122A",
+            "IFR" => "#2E1214",
+            "MVFR" => "#2E1E05",
+            "VFR" => "#0D2B1E",
+            _ => "#161F2A"
+        };
+        public string WeatherBadgeBorder => WeatherCategory switch
+        {
+            "LIFR" => "#5A1E54",
+            "IFR" => "#5A1E24",
+            "MVFR" => "#593D0F",
+            "VFR" => "#1B4D3E",
+            _ => "#263545"
+        };
+
+        public string WeatherTooltip
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(RawMetar))
+                    return $"Consultando transmissão METAR oficial da NOAA para {DestinationICAO}...";
+
+                if (IsNearestStationMetar)
+                    return $"📡 METAR REAL VIA {WeatherStationIcao} (Estação mais próxima do destino):\n{RawMetar}";
+
+                return $"📡 METAR REAL ({DestinationICAO}):\n{RawMetar}";
+            }
+        }
+
+        public void ApplyRealMetar(FlightCareer.UI.Services.MetarInfo metar)
+        {
+            WeatherCategory = metar.FlightCategory;
+            WeatherColor = metar.CategoryColor;
+            WeatherIcon = metar.CategoryIcon;
+            RawMetar = metar.RawMetar;
+            WeatherSummary = metar.FormattedSummary;
+            IsRealMetarLoaded = true;
+            IsNearestStationMetar = metar.IsNearestStation;
+            WeatherStationIcao = metar.IsNearestStation ? (metar.NearestStationIcao ?? metar.Icao) : metar.Icao;
+
+            OnPropertyChanged(nameof(WeatherDisplay));
+            OnPropertyChanged(nameof(WeatherBadgeBg));
+            OnPropertyChanged(nameof(WeatherBadgeBorder));
+            OnPropertyChanged(nameof(WeatherTooltip));
+            OnPropertyChanged(nameof(FlightRulesDisplay));
+            OnPropertyChanged(nameof(FlightRulesColor));
+        }
+
+        // Expiração do Contrato
+        public string ExpirationDisplay
+        {
+            get
+            {
+                var remaining = ExpirationTime - DateTime.Now;
+                if (remaining.TotalMinutes <= 0) return "EXPIRADO";
+                if (remaining.TotalHours < 1) return $"{(int)remaining.TotalMinutes}m rest.";
+                if (remaining.TotalHours < 24) return $"{(int)remaining.TotalHours}h {remaining.Minutes:D2}m";
+                int days = (int)remaining.TotalDays;
+                int hours = remaining.Hours;
+                return $"{days}d {hours:D2}h";
+            }
+        }
+
+        public string ExpirationColor
+        {
+            get
+            {
+                var remaining = ExpirationTime - DateTime.Now;
+                if (remaining.TotalMinutes <= 0 || remaining.TotalHours < 2) return "#FF5252";
+                if (remaining.TotalHours < 6) return "#FFB300";
+                return "#94A3B8";
+            }
+        }
+
+        public string ExpirationBadgeBg => ExpirationColor == "#FF5252" ? "#2E1214" : (ExpirationColor == "#FFB300" ? "#2E1E05" : "#161F2A");
+        public string ExpirationBadgeBorder => ExpirationColor == "#FF5252" ? "#5A1E24" : (ExpirationColor == "#FFB300" ? "#593D0F" : "#263545");
+        public string ExpirationTooltip => $"Validade do contrato até {ExpirationTime:dd/MM/yyyy HH:mm}";
+
+        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory, Airport? originAirport = null)
         {
             Mission = mission;
 
@@ -111,6 +263,28 @@ namespace FlightCareer.UI.ViewModels
             {
                 DestinationName = mission.DestinationICAO;
                 DestinationCity = "Destino";
+            }
+
+            // Cálculo de Proa / Rumo (Heading Geográfico)
+            if (originAirport != null && destAirport != null)
+            {
+                if (string.Equals(originAirport.ICAO, destAirport.ICAO, StringComparison.OrdinalIgnoreCase))
+                {
+                    HeadingDegrees = 0;
+                    HeadingCardinal = "LOC";
+                    HeadingDisplay = "LOCAL";
+                }
+                else
+                {
+                    double bearing = CalculateBearing(originAirport.Latitude, originAirport.Longitude, destAirport.Latitude, destAirport.Longitude);
+                    HeadingDegrees = Math.Round(bearing);
+                    HeadingCardinal = DegreesToCardinal(bearing);
+                    HeadingDisplay = $"{HeadingDegrees:000}° {HeadingCardinal}";
+                }
+            }
+            else
+            {
+                HeadingDisplay = "---";
             }
 
             // Checagem de Homologação
@@ -139,49 +313,26 @@ namespace FlightCareer.UI.ViewModels
                 EstimatedFuelGallons = Math.Round(hours * gph, 1);
                 EstimatedFuelLbs = Math.Round(EstimatedFuelGallons * 6.0, 0); // 1 gal Avgas ~ 6 lbs
             }
-
-            // Gerar Condições Meteorológicas (METAR Simplificado determinístico pelo ICAO e dia do ano)
-            GenerateWeather(mission.DestinationICAO);
         }
 
-        private void GenerateWeather(string icao)
+        private static double CalculateBearing(double lat1, double lon1, double lat2, double lon2)
         {
-            int seed = Math.Abs(icao.GetHashCode() ^ (DateTime.Today.Year * 1000 + DateTime.Today.DayOfYear));
-            var rng = new Random(seed);
-            int roll = rng.Next(100);
+            double phi1 = lat1 * Math.PI / 180.0;
+            double phi2 = lat2 * Math.PI / 180.0;
+            double deltaLambda = (lon2 - lon1) * Math.PI / 180.0;
 
-            if (roll < 72)
-            {
-                // VFR (72% dos casos)
-                WeatherCategory = "VFR";
-                WeatherColor = "#00E676"; // Verde Lucro / VFR
-                WeatherIcon = "☀️";
-                int windDir = rng.Next(1, 36) * 10;
-                int windSpd = rng.Next(3, 12);
-                WeatherSummary = $"CÉU CLARO • Vento {windDir:D3}/{windSpd:D2}kt • Vis > 10 km • Teto Ilimitado";
-            }
-            else if (roll < 90)
-            {
-                // MVFR (18% dos casos)
-                WeatherCategory = "MVFR";
-                WeatherColor = "#FFB300"; // Âmbar / Alerta
-                WeatherIcon = "⛅";
-                int windDir = rng.Next(1, 36) * 10;
-                int windSpd = rng.Next(8, 16);
-                int ceiling = rng.Next(15, 30) * 100;
-                WeatherSummary = $"PARCIALMENTE NUBLADO • Vento {windDir:D3}/{windSpd:D2}kt • Vis 6-8 km • Teto {ceiling:N0}ft";
-            }
-            else
-            {
-                // IFR (10% dos casos)
-                WeatherCategory = "IFR";
-                WeatherColor = "#FF5252"; // Vermelho Aviso / IFR
-                WeatherIcon = "🌧️";
-                int windDir = rng.Next(1, 36) * 10;
-                int windSpd = rng.Next(14, 25);
-                int ceiling = rng.Next(5, 10) * 100;
-                WeatherSummary = $"CHUVA LEVE / NÉVOA • Vento {windDir:D3}/{windSpd:D2}G{windSpd+6}kt • Vis 3-4 km • Teto {ceiling:N0}ft";
-            }
+            double y = Math.Sin(deltaLambda) * Math.Cos(phi2);
+            double x = Math.Cos(phi1) * Math.Sin(phi2) - Math.Sin(phi1) * Math.Cos(phi2) * Math.Cos(deltaLambda);
+            double theta = Math.Atan2(y, x);
+            double bearing = (theta * 180.0 / Math.PI + 360.0) % 360.0;
+            return bearing;
+        }
+
+        private static string DegreesToCardinal(double degrees)
+        {
+            string[] cardinals = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW" };
+            int index = (int)Math.Round((degrees % 360.0) / 22.5) % 16;
+            return cardinals[index];
         }
     }
 }

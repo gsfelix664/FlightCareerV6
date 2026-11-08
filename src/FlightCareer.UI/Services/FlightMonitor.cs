@@ -22,7 +22,11 @@ namespace FlightCareer.UI.Services
 
         public bool IsMonitoring { get; private set; }
         public bool IsFlightActive { get; private set; }
+        public string CurrentStatus => _currentStatus;
+        public PilotAircraft? CurrentAircraft => _aircraft;
+        public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
+        private bool _hasTouchedDown;
         private DateTime? _startConditionTime;
 
         private PilotAircraft? _aircraft;
@@ -37,11 +41,16 @@ namespace FlightCareer.UI.Services
         private string _originIcao = string.Empty;
         private DateTime _lastDatabaseUpdate = DateTime.MinValue;
         private DateTime _lastWearUpdate = DateTime.MinValue;
+        private DateTime? _groundAbortTime;
+        private SimTelemetry? _lastData;
 
         public event Action<string, string, bool>? OnAlert;
         public event Action<string>? OnStatusChanged;
         public event Action<FlightOutcome>? OnFlightFinished;
         public event Action<PilotAircraft>? OnTotalLoss;
+        public event Action? OnMonitoringCancelled;
+
+        public WearAndFailureService WearService => _wearService;
 
         public FlightMonitor(SimConnectService simConnect, FlightService flightService, Infrastructure.Persistence.AppDbContext context)
         {
@@ -49,6 +58,13 @@ namespace FlightCareer.UI.Services
             _flightService = flightService;
             _context = context;
             _wearService = new WearAndFailureService(simConnect);
+            _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
+        }
+
+        private void OnAircraftFailureTriggered(FailureRecord failure)
+        {
+            OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
+            _telemetryLogger.LogEvent("PANE_EM_VOO", $"{failure.Title} - {failure.Description}");
         }
 
         public void StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
@@ -79,9 +95,12 @@ namespace FlightCareer.UI.Services
             _activeMissions = missions;
             _originIcao = pilot.CurrentAirportICAO;
 
+            _simConnect.ResetCrashState();
+            _wearService.Reset();
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
+            _hasTouchedDown = false;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             IsMonitoring = true;
@@ -94,6 +113,8 @@ namespace FlightCareer.UI.Services
         {
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
+            _simConnect.ResetCrashState();
+            _wearService.Reset();
             IsMonitoring = false;
             IsFlightActive = false;
             _startConditionTime = null;
@@ -163,13 +184,15 @@ namespace FlightCareer.UI.Services
 
             StopMonitoring();
             OnStatusChanged?.Invoke("MONITORAMENTO CANCELADO");
+            OnMonitoringCancelled?.Invoke();
         }
 
         private async Task HandleTotalLossAsync()
         {
             if (_aircraft == null) return;
             
-            _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", 999, 0);
+            double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
+            _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
             StopMonitoring();
             
             // Salvar estado de 0% no banco para garantir que a aeronave está "morta"
@@ -208,6 +231,7 @@ namespace FlightCareer.UI.Services
         private void OnSimDataReceived(object? sender, SimTelemetry data)
         {
             if (!IsMonitoring) return;
+            _lastData = data;
 
             // Lógica de Início de Gravação: Quando ligar motores E soltar PB por 10 segundos
             if (!IsFlightActive)
@@ -254,7 +278,7 @@ namespace FlightCareer.UI.Services
                 _wearService.ProcessWear(_aircraft, data, deltaHours);
 
                 // Checar Perda Total
-                if (_aircraft.EngineCondition <= 0 && _aircraft.TiresCondition <= 0 && _aircraft.AirframeCondition <= 0)
+                if (IsFlightActive && _aircraft.EngineCondition <= 0 && _aircraft.TiresCondition <= 0 && _aircraft.AirframeCondition <= 0)
                 {
                     _ = HandleTotalLossAsync();
                     return;
@@ -271,8 +295,38 @@ namespace FlightCareer.UI.Services
             if (!_isAirborne && !data.IsOnGround && data.GroundSpeed > 30)
             {
                 _isAirborne = true;
+                _hasTouchedDown = false;
                 _currentStatus = "VOANDO (NO AR)";
                 OnStatusChanged?.Invoke(_currentStatus);
+            }
+
+            // --- DETECÇÃO DE TOUCHDOWN REAL EM VOO ---
+            if (_isAirborne && data.IsOnGround)
+            {
+                double fpmBody = Math.Abs(data.VelocityBodyY * 60.0);
+                double fpmVs = Math.Abs(data.VerticalSpeed);
+                double touchdownRate = fpmBody > 10 ? fpmBody : fpmVs;
+
+                if (!_hasTouchedDown)
+                {
+                    _hasTouchedDown = true;
+                    _qualityService.RecordTouchdownFpm(touchdownRate);
+                    if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+
+                    _currentStatus = $"POUSO REALIZADO ({_qualityService.TouchdownFPM:F0} FPM) - TAXIANDO";
+                    OnStatusChanged?.Invoke(_currentStatus);
+                }
+                else
+                {
+                    // Bounce detection: se o impacto subsequente for mais forte
+                    if (touchdownRate > _qualityService.TouchdownFPM)
+                    {
+                        _qualityService.RecordTouchdownFpm(touchdownRate);
+                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, touchdownRate, data.VelocityBodyX);
+                        _currentStatus = $"POUSO REALIZADO ({_qualityService.TouchdownFPM:F0} FPM - BOUNCE) - TAXIANDO";
+                        OnStatusChanged?.Invoke(_currentStatus);
+                    }
+                }
             }
 
             // Gravar Blackbox de Telemetria Contínua
@@ -292,9 +346,30 @@ namespace FlightCareer.UI.Services
                 
                 if ((DateTime.Now - _startConditionTime.Value).TotalSeconds >= 5)
                 {
-                    if (_aircraft != null) _wearService.ProcessLanding(_aircraft, data);
-                    _qualityService.RecordTouchdown(data.VelocityBodyY);
+                    if (!_hasTouchedDown)
+                    {
+                        double fpm = Math.Abs(data.VelocityBodyY * 60.0);
+                        _qualityService.RecordTouchdownFpm(fpm > 10 ? fpm : Math.Abs(data.VerticalSpeed));
+                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+                    }
                     _ = FinalizeFlightAsync(data);
+                }
+            }
+            else if (!_isAirborne && data.IsOnGround && !data.IsEngineRunning && isParkedOrStopped)
+            {
+                // Piloto iniciou o voo no app, mas cortou motores no pátio sem decolar (Cancelamento em solo)
+                if (_groundAbortTime == null)
+                {
+                    _groundAbortTime = DateTime.Now;
+                    _currentStatus = "CORTE DE MOTORES EM SOLO DETECTADO (CANCELANDO EM 5s)...";
+                    OnStatusChanged?.Invoke(_currentStatus);
+                }
+
+                if ((DateTime.Now - _groundAbortTime.Value).TotalSeconds >= 5)
+                {
+                    _currentStatus = "VOO CANCELADO EM SOLO";
+                    OnStatusChanged?.Invoke(_currentStatus);
+                    _ = CancelMonitoringAsync(data);
                 }
             }
             else
@@ -302,6 +377,10 @@ namespace FlightCareer.UI.Services
                 if (_startConditionTime != null && !isParkedOrStopped)
                 {
                     _startConditionTime = null;
+                }
+                if (_groundAbortTime != null && (data.IsEngineRunning || !isParkedOrStopped))
+                {
+                    _groundAbortTime = null;
                 }
             }
         }
@@ -374,6 +453,11 @@ namespace FlightCareer.UI.Services
         private void ActivateFlight(SimTelemetry data)
         {
             IsFlightActive = true;
+            _isAirborne = false;
+            _hasTouchedDown = false;
+            _simConnect.ResetCrashState();
+            _wearService.Reset();
+            _qualityService.Reset();
             _startTime = DateTime.Now;
             _initialFuel = data.FuelTotalGallons;
             _distanceTraveled = 0;
@@ -391,7 +475,7 @@ namespace FlightCareer.UI.Services
 
         private async Task FinalizeFlightAsync(SimTelemetry data)
         {
-            _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", Math.Abs(data.VelocityBodyY * 60.0), _qualityService.GetQualityScore());
+            _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
             StopMonitoring();
 
             if (_pilot == null || _aircraft == null) return;

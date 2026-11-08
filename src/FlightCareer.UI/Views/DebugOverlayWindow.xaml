@@ -1,0 +1,409 @@
+<Window x:Class="FlightCareer.UI.Views.DebugOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="FlightCareer - HUD Overlay"
+        Width="340"
+        SizeToContent="Height"
+        Topmost="{Binding IsTopmost}"
+        Opacity="{Binding WindowOpacity}"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        Background="Transparent"
+        ShowInTaskbar="True"
+        WindowStartupLocation="Manual"
+        Left="40" Top="80"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+
+    <Window.Resources>
+        <!-- Estilo dos Rótulos Mini -->
+        <Style x:Key="MetricLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="9"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+        </Style>
+        <!-- Estilo dos Valores Primários -->
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#F8FAFC"/>
+            <Setter Property="FontFamily" Value="Consolas, Cascadia Code, Courier New, monospace"/>
+        </Style>
+        <!-- Estilo dos Cards Internos -->
+        <Style x:Key="TileCard" TargetType="Border">
+            <Setter Property="Background" Value="#101722"/>
+            <Setter Property="BorderBrush" Value="#1E293B"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6,4"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- CONTAINER PRINCIPAL GLASS DARK HUD -->
+    <Border Background="#E6070B12" BorderBrush="#00E5FF" BorderThickness="1.2" CornerRadius="8" Margin="4">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="4" Opacity="0.75"/>
+        </Border.Effect>
+
+        <Grid Margin="10,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/> <!-- Barra de Controles / Título -->
+                <RowDefinition Height="Auto"/> <!-- Conteúdo Compacto ou Expandido -->
+            </Grid.RowDefinitions>
+
+            <!-- 1. BARRA SUPERIOR (HEADER & CONTROLES) -->
+            <Grid Grid.Row="0" Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Status de Conexão + Prefixo da Aeronave -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Fill="{Binding SimStatusColor}" Margin="0,0,6,0"/>
+                    <TextBlock Text="HUD" FontWeight="ExtraBold" FontSize="11" Foreground="#00E5FF" VerticalAlignment="Center"/>
+                    <TextBlock Text=" • " Foreground="#334155" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding AircraftPrefix}" FontWeight="Bold" FontSize="11" Foreground="#F8FAFC" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Botões de Controle Rápido (Pin, Opacidade, Compactar, Fechar) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Pin / Topmost -->
+                    <Button Command="{Binding ToggleTopmostCommand}" 
+                            ToolTip="Fixar sobre o Simulador (Topmost)"
+                            Background="Transparent" BorderThickness="0" Padding="4,2" Cursor="Hand" Margin="0,0,3,0">
+                        <TextBlock Text="📌" FontSize="10" Opacity="{Binding TopmostOpacity}"/>
+                    </Button>
+
+                    <!-- Ciclo de Opacidade -->
+                    <Button Command="{Binding CycleOpacityCommand}"
+                            ToolTip="Alternar Nível de Transparência"
+                            Background="#1E293B" BorderBrush="#334155" BorderThickness="1" Padding="5,1" Cursor="Hand" Margin="0,0,3,0">
+                        <TextBlock Text="{Binding OpacityLabel}" FontSize="9" FontWeight="Bold" Foreground="#94A3B8"/>
+                    </Button>
+
+                    <!-- Modo Compacto / Expandido -->
+                    <Button Command="{Binding ToggleCompactCommand}" 
+                            ToolTip="Alternar Modo Mini HUD / Detalhado"
+                            Background="#1E293B" BorderBrush="#334155" BorderThickness="1" Padding="6,1" Cursor="Hand" Margin="0,0,4,0">
+                        <TextBlock Text="{Binding CompactToggleIcon}" 
+                                   FontSize="10" FontWeight="Bold" Foreground="#00E5FF"/>
+                    </Button>
+
+                    <!-- Fechar -->
+                    <Button Command="{Binding CloseCommand}" 
+                            ToolTip="Fechar HUD"
+                            Background="Transparent" BorderThickness="0" Padding="3,1" Cursor="Hand">
+                        <TextBlock Text="✕" FontSize="11" FontWeight="Bold" Foreground="#EF4444"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- 2. CONTEÚDO PRINCIPAL -->
+            <StackPanel Grid.Row="1">
+
+                <!-- ========== MODO COMPACTO (TICKER MINIMALISTA) ========== -->
+                <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <!-- Ticker de Velocidades e Altitude -->
+                    <Grid Margin="0,2,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource TileCard}" Margin="0,0,2,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="IAS" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding Airspeed, StringFormat={}{0:F0}k}" Style="{StaticResource MetricValue}" Foreground="#00E5FF"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="ALT" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding Altitude, StringFormat={}{0:F0}ft}" Style="{StaticResource MetricValue}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="VS" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding VerticalSpeed, StringFormat={}{0:+0;-0;0}}" Style="{StaticResource MetricValue}" Foreground="{Binding VerticalSpeedColor}"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="3" Style="{StaticResource TileCard}" Margin="2,0,0,0">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock Text="G-FORCE" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding GForce, StringFormat={}{0:F1}G}" Style="{StaticResource MetricValue}" Foreground="{Binding GForceColor}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <!-- Linha de Status Mini -->
+                    <Grid Margin="0,2">
+                        <TextBlock Text="{Binding FlightPhase}" FontSize="10" FontWeight="Bold" Foreground="{Binding FlightPhaseColor}" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding RouteText}" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- ========== MODO DETALHADO (EXPANDIDO) ========== -->
+                <StackPanel Visibility="{Binding IsCompactMode, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    
+                    <!-- FASE DE VOO & ROTA -->
+                    <Border Background="#131B26" BorderBrush="#1F2D3D" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <DockPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="FASE: " FontSize="9" FontWeight="Bold" Foreground="#64748B" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding FlightPhase}" FontSize="10" FontWeight="ExtraBold" Foreground="{Binding FlightPhaseColor}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding RouteText}" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- GRUPO 1: VELOCIDADES & ALTITUDE (4 TILES) -->
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- IAS -->
+                        <Border Grid.Column="0" Style="{StaticResource TileCard}" Margin="0,0,2,0">
+                            <StackPanel>
+                                <TextBlock Text="IAS (KTS)" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding Airspeed, StringFormat={}{0:F0}}" Style="{StaticResource MetricValue}" Foreground="#00E5FF"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- GS -->
+                        <Border Grid.Column="1" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel>
+                                <TextBlock Text="GS (KTS)" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding GroundSpeed, StringFormat={}{0:F0}}" Style="{StaticResource MetricValue}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ALT -->
+                        <Border Grid.Column="2" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel>
+                                <TextBlock Text="ALT (FT)" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding Altitude, StringFormat={}{0:N0}}" Style="{StaticResource MetricValue}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- VS -->
+                        <Border Grid.Column="3" Style="{StaticResource TileCard}" Margin="2,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="VS (FPM)" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding VerticalSpeed, StringFormat={}{0:+0;-0;0}}" Style="{StaticResource MetricValue}" Foreground="{Binding VerticalSpeedColor}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- GRUPO 2: ATITUDE & DINÂMICA (G-FORCE, PITCH, BANK, FLAPS) -->
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- G-FORCE -->
+                        <Border Grid.Column="0" Style="{StaticResource TileCard}" Margin="0,0,2,0">
+                            <StackPanel>
+                                <TextBlock Text="G-FORCE" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding GForce, StringFormat={}{0:F2}}" Style="{StaticResource MetricValue}" Foreground="{Binding GForceColor}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- PITCH / BANK -->
+                        <Border Grid.Column="1" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel>
+                                <TextBlock Text="PITCH/BANK" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Style="{StaticResource MetricValue}" FontSize="11">
+                                    <Run Text="{Binding Pitch, StringFormat={}{0:F0}°}"/>
+                                    <Run Text="/"/>
+                                    <Run Text="{Binding Bank, StringFormat={}{0:F0}°}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- PROA HDG -->
+                        <Border Grid.Column="2" Style="{StaticResource TileCard}" Margin="1,0,1,0">
+                            <StackPanel>
+                                <TextBlock Text="PROA HDG" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding Heading, StringFormat={}{0:000}°}" Style="{StaticResource MetricValue}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- FLAPS / PB -->
+                        <Border Grid.Column="3" Style="{StaticResource TileCard}" Margin="2,0,0,0">
+                            <StackPanel>
+                                <TextBlock Text="FLAP / FREIO" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Style="{StaticResource MetricValue}" FontSize="11">
+                                    <Run Text="{Binding FlapsPercent, StringFormat={}{0:F0}%}"/>
+                                    <Run Text=" • "/>
+                                    <Run Text="{Binding ParkingBrakeText}" Foreground="{Binding ParkingBrakeColor}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- GRUPO 3: GRUPO MOTO-PROPULSOR (MOTOR) -->
+                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="6,5" Margin="0,0,0,6">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Text="SISTEMA PROPULSOR" Style="{StaticResource MetricLabel}" Foreground="#38BDF8"/>
+                                <TextBlock Text="{Binding AircraftTitle}" FontSize="9" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- RPM ou N1 -->
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding EngineModeLabel}" Style="{StaticResource MetricLabel}"/>
+                                    <TextBlock Text="{Binding EngineRPM, StringFormat={}{0:N0}}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="#38BDF8"/>
+                                </StackPanel>
+
+                                <!-- CHT ou ITT -->
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding EngineTempLabel}" Style="{StaticResource MetricLabel}"/>
+                                    <TextBlock Text="{Binding EngineCHT, StringFormat={}{0:F0}°}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="{Binding EngineChtColor}"/>
+                                </StackPanel>
+
+                                <!-- Pressão Óleo -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="ÓLEO (PSI)" Style="{StaticResource MetricLabel}"/>
+                                    <TextBlock Text="{Binding EngineOilPressure, StringFormat={}{0:F0}}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="{Binding EngineOilPressureColor}"/>
+                                </StackPanel>
+
+                                <!-- Temp Óleo -->
+                                <StackPanel Grid.Column="3">
+                                    <TextBlock Text="ÓLEO (°C)" Style="{StaticResource MetricLabel}"/>
+                                    <TextBlock Text="{Binding EngineOilTemp, StringFormat={}{0:F0}°}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="{Binding EngineOilTempColor}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- GRUPO 4: PESOS & COMBUSTÍVEL -->
+                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="6,5" Margin="0,0,0,6">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Combustível -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="COMBUSTÍVEL" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Style="{StaticResource MetricValue}" FontSize="12">
+                                    <Run Text="{Binding FuelGallons, StringFormat={}{0:F1} gal}" Foreground="#38BDF8"/>
+                                    <Run Text=" (" FontSize="10" Foreground="#64748B"/>
+                                    <Run Text="{Binding FuelLbs, StringFormat={}{0:F0} lbs}" FontSize="10" Foreground="#64748B"/>
+                                    <Run Text=")" FontSize="10" Foreground="#64748B"/>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <!-- TOW (Takeoff / Total Weight) -->
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Right">
+                                <TextBlock Text="PESO TOTAL (TOW)" Style="{StaticResource MetricLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Style="{StaticResource MetricValue}" FontSize="12" HorizontalAlignment="Right">
+                                    <Run Text="{Binding TotalWeightLbs, StringFormat={}{0:N0}}"/>
+                                    <Run Text=" / " Foreground="#475569"/>
+                                    <Run Text="{Binding MaxGrossWeightLbs, StringFormat={}{0:N0} lbs}" Foreground="#64748B" FontSize="10"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- GRUPO 5: INTEGRIDADE DA AERONAVE & DESGASTE (HANGAR) -->
+                    <Border Background="#0A0F1A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="6,5" Margin="0,0,0,6">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,3">
+                                <TextBlock Text="INTEGRIDADE DA AERONAVE" Style="{StaticResource MetricLabel}" Foreground="#00E676"/>
+                                <TextBlock Text="MANUTENÇÃO V6" FontSize="8" FontWeight="Bold" Foreground="#475569" HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Fuselagem -->
+                                <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                                    <Grid>
+                                        <TextBlock Text="CÉLULA" FontSize="9" FontWeight="Bold" Foreground="#94A3B8"/>
+                                        <TextBlock Text="{Binding AirframeCondition, StringFormat={}{0:F0}%}" FontSize="9" FontWeight="ExtraBold" Foreground="{Binding AirframeConditionColor}" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <ProgressBar Height="3" Minimum="0" Maximum="100" Value="{Binding AirframeCondition}" Foreground="{Binding AirframeConditionColor}" Background="#1E293B" BorderThickness="0" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <!-- Motor -->
+                                <StackPanel Grid.Column="1" Margin="2,0,2,0">
+                                    <Grid>
+                                        <TextBlock Text="MOTOR" FontSize="9" FontWeight="Bold" Foreground="#94A3B8"/>
+                                        <TextBlock Text="{Binding EngineCondition, StringFormat={}{0:F0}%}" FontSize="9" FontWeight="ExtraBold" Foreground="{Binding EngineConditionColor}" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <ProgressBar Height="3" Minimum="0" Maximum="100" Value="{Binding EngineCondition}" Foreground="{Binding EngineConditionColor}" Background="#1E293B" BorderThickness="0" Margin="0,2,0,0"/>
+                                </StackPanel>
+
+                                <!-- Pneus -->
+                                <StackPanel Grid.Column="2" Margin="3,0,0,0">
+                                    <Grid>
+                                        <TextBlock Text="PNEUS" FontSize="9" FontWeight="Bold" Foreground="#94A3B8"/>
+                                        <TextBlock Text="{Binding TiresCondition, StringFormat={}{0:F0}%}" FontSize="9" FontWeight="ExtraBold" Foreground="{Binding TiresConditionColor}" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <ProgressBar Height="3" Minimum="0" Maximum="100" Value="{Binding TiresCondition}" Foreground="{Binding TiresConditionColor}" Background="#1E293B" BorderThickness="0" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- GRUPO 6: SEGURANÇA & CRASH MONITOR (RODAPÉ DEBUG) -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Crash Sequence status -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="CRASH SEQ: " FontSize="9" FontWeight="Bold" Foreground="#64748B"/>
+                            <TextBlock Text="{Binding CrashText}" FontSize="9" FontWeight="ExtraBold" Foreground="{Binding CrashTextColor}"/>
+                        </StackPanel>
+
+                        <!-- Badges de Alerta (Overspeed & Falhas) -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#EF4444" CornerRadius="3" Padding="5,1" Margin="0,0,4,0"
+                                    Visibility="{Binding OverspeedWarning, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="⚠️ OVERSPEED" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+                            <Border Background="#DC2626" CornerRadius="3" Padding="5,1" 
+                                    Visibility="{Binding HasActiveFailure, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="{Binding ActiveFailureText}" FontSize="9" FontWeight="ExtraBold" Foreground="White"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

@@ -13,6 +13,17 @@ namespace FlightCareer.Domain.Services
         public double MaxPitch { get; private set; }
         public double TouchdownFPM { get; private set; }
 
+        public void Reset()
+        {
+            ComfortViolations = 0;
+            CargoViolations = 0;
+            MaxGForce = 1.0;
+            MinGForce = 1.0;
+            MaxBank = 0;
+            MaxPitch = 0;
+            TouchdownFPM = 0;
+        }
+
         public void ProcessFrame(SimTelemetry data, bool isPaxFlight)
         {
             if (data.OnGround > 0.5) return;
@@ -21,7 +32,7 @@ namespace FlightCareer.Domain.Services
             if (data.GForce > MaxGForce) MaxGForce = data.GForce;
             if (data.GForce < MinGForce) MinGForce = data.GForce;
 
-            if (data.GForce > 1.5 || data.GForce < 0.5)
+            if (data.GForce > 1.6 || data.GForce < 0.4)
             {
                 if (isPaxFlight) ComfortViolations++;
                 else CargoViolations++;
@@ -38,33 +49,49 @@ namespace FlightCareer.Domain.Services
             if (data.PlanePitch > 20 || data.PlanePitch < -15) ComfortViolations++;
         }
 
+        public void RecordTouchdownFpm(double fpm)
+        {
+            double safeFpm = Math.Round(Math.Abs(fpm), 0);
+            if (safeFpm > TouchdownFPM)
+            {
+                TouchdownFPM = safeFpm;
+            }
+        }
+
         public void RecordTouchdown(double velocityBodyY)
         {
-            TouchdownFPM = Math.Abs(velocityBodyY) * 60.0;
+            RecordTouchdownFpm(Math.Abs(velocityBodyY) * 60.0);
         }
 
         public double GetQualityScore()
         {
             double score = 100.0;
 
-            if (TouchdownFPM > 150 && TouchdownFPM <= 300) score -= 10;
-            else if (TouchdownFPM > 300 && TouchdownFPM <= 500) score -= 30;
-            else if (TouchdownFPM > 500) score -= 60;
+            if (TouchdownFPM > 0)
+            {
+                if (TouchdownFPM <= 180) { /* Butter - Sem penalidade */ }
+                else if (TouchdownFPM <= 350) score -= 5;
+                else if (TouchdownFPM <= 500) score -= 15;
+                else if (TouchdownFPM <= 750) score -= 35;
+                else score -= 60;
+            }
 
             score -= (ComfortViolations * 0.1); 
             score -= (CargoViolations * 0.05);
 
-            return Math.Max(0, score);
+            return Math.Max(0, Math.Min(100.0, score));
         }
 
         public string GetRating()
         {
+            if (TouchdownFPM >= 900) return "CRASH / COLAPSO ESTRUTURAL";
+            if (TouchdownFPM > 600) return "POUSO DURO (MANUTENÇÃO)";
             double score = GetQualityScore();
-            if (score >= 95) return "EXCELENTE (MANTEIGA)";
-            if (score >= 80) return "BOM";
+            if (score >= 90) return "EXCELENTE (MANTEIGA)";
+            if (score >= 75) return "BOM";
             if (score >= 60) return "ACEITÁVEL";
             if (score >= 40) return "RUIM (RECLAMAÇÕES)";
-            return "PÉSSIMO (DANOS)";
+            return "PÉSSIMO (DESCONFORTO)";
         }
     }
 }

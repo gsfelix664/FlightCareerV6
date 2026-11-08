@@ -19,9 +19,12 @@ namespace FlightCareer.UI.ViewModels
         private readonly HangarViewModel _hangarViewModel;
         private readonly BriefingViewModel _briefingViewModel;
         private readonly FinanceViewModel _financeViewModel;
+        private readonly FlightLogsViewModel _flightLogsViewModel;
         private readonly Infrastructure.Persistence.AppDbContext _context;
         private readonly Services.SimConnectService _simConnect;
         private readonly Services.FlightMonitor _flightMonitor;
+        private readonly Services.MetarService _metarService;
+        private System.Timers.Timer? _metarRefreshTimer;
 
         [ObservableProperty] private string _pilotName = string.Empty;
         [ObservableProperty] private string _pilotCompanyName = string.Empty;
@@ -89,6 +92,18 @@ namespace FlightCareer.UI.ViewModels
             {
                 DestLat = value.DestLat;
                 DestLon = value.DestLon;
+
+                if (!value.IsRealMetarLoaded)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        var metar = await _metarService.GetMetarAsync(value.DestinationICAO);
+                        if (metar != null)
+                        {
+                            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => value.ApplyRealMetar(metar));
+                        }
+                    });
+                }
             }
             else
             {
@@ -196,6 +211,7 @@ namespace FlightCareer.UI.ViewModels
         public HangarViewModel Hangar => _hangarViewModel;
         public BriefingViewModel Briefing => _briefingViewModel;
         public FinanceViewModel Finance => _financeViewModel;
+        public FlightLogsViewModel FlightLogs => _flightLogsViewModel;
         public string CashDisplay => Balance.ToString("C2");
         public string RankDisplay => Rank?.ToUpper() ?? "STUDENT";
         public double XpProgress => (TotalHours % 100);
@@ -204,23 +220,37 @@ namespace FlightCareer.UI.ViewModels
         public ObservableCollection<Flight> RecentFlights { get; } = new();
         public ObservableCollection<Mission> AvailableMissions { get; } = new();
 
+        public IAsyncRelayCommand RefreshMetarsCommand { get; }
+
         public MainViewModel(IPilotRepository pilotRepository, 
             IMissionGenerator missionGenerator, 
             MarketViewModel marketViewModel,
             HangarViewModel hangarViewModel,
+            FlightLogsViewModel flightLogsViewModel,
             Infrastructure.Persistence.AppDbContext context,
             Services.SimConnectService simConnect,
-            Services.FlightMonitor flightMonitor)
+            Services.FlightMonitor flightMonitor,
+            Services.MetarService metarService)
         {
             _pilotRepository = pilotRepository;
             _missionGenerator = missionGenerator;
             _marketViewModel = marketViewModel;
             _hangarViewModel = hangarViewModel;
+            _flightLogsViewModel = flightLogsViewModel;
             _context = context;
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
+            _metarService = metarService;
             _briefingViewModel = new BriefingViewModel(_simConnect, ActiveMissions, _context);
             _financeViewModel = new FinanceViewModel(_context);
+
+            RefreshMetarsCommand = new AsyncRelayCommand(FetchRealMetarsForMissionsAsync);
+
+            // Timer para atualização periódica de METAR a cada 5 minutos
+            _metarRefreshTimer = new System.Timers.Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
+            _metarRefreshTimer.Elapsed += async (s, e) => await FetchRealMetarsForMissionsAsync();
+            _metarRefreshTimer.AutoReset = true;
+            _metarRefreshTimer.Start();
 
             ShowMissionsCommand = new RelayCommand(() => CurrentView = "Missions");
             ShowBriefingCommand = new AsyncRelayCommand(async () => {
@@ -237,6 +267,7 @@ namespace FlightCareer.UI.ViewModels
                 }
 
                 _briefingViewModel.FlightNumber = $"{prefix}{new Random().Next(1000, 9999)}";
+                await _briefingViewModel.RebuildItineraryAndValidateAsync();
                 CurrentView = "Briefing";
             });
             ShowMarketCommand = new AsyncRelayCommand(async () => {
@@ -261,6 +292,10 @@ namespace FlightCareer.UI.ViewModels
                     CurrentView = "Finance";
                 }
             });
+            ShowFlightLogsCommand = new AsyncRelayCommand(async () => {
+                await _flightLogsViewModel.LoadLogsAsync();
+                CurrentView = "FlightLogs";
+            });
 
             AcceptSelectedMissionsCommand = new AsyncRelayCommand(AcceptSelectedMissionsAsync);
             AcceptMissionCommand = AcceptSelectedMissionsCommand;
@@ -274,8 +309,10 @@ namespace FlightCareer.UI.ViewModels
                 else StartFlight();
             });
             ShowDebugCommand = new RelayCommand(ShowDebug);
+            ShowOverlayCommand = new RelayCommand(ShowOverlay);
             PromoteCompanyTierCommand = new AsyncRelayCommand(PromoteCompanyTierAsync);
             OpenFerryWindowCommand = new RelayCommand(OpenFerryWindow);
+            RefreshMarketMissionsCommand = new AsyncRelayCommand(RefreshMarketMissionsAsync);
 
             _simConnect.OnConnected += (s, e) => {
                 SimStatusText = "SIMULADOR CONECTADO";
@@ -308,6 +345,20 @@ namespace FlightCareer.UI.ViewModels
             };
             _flightMonitor.OnFlightFinished += OnFlightFinished;
             _flightMonitor.OnTotalLoss += OnTotalLoss;
+            _flightMonitor.OnMonitoringCancelled += OnMonitoringCancelled;
+        }
+
+        private void OnMonitoringCancelled()
+        {
+            System.Windows.Application.Current.Dispatcher.Invoke(async () => {
+                IsMonitoring = false;
+                _briefingViewModel.IsMonitoring = false;
+                _hangarViewModel.IsMonitoring = false;
+                OnPropertyChanged(nameof(StartFlightButtonText));
+                OnPropertyChanged(nameof(StartFlightButtonColor));
+
+                await InitializeForPilotAsync(PilotName);
+            });
         }
 
         private void OnTotalLoss(PilotAircraft aircraft)
@@ -330,6 +381,7 @@ namespace FlightCareer.UI.ViewModels
         public IRelayCommand ShowMarketCommand { get; }
         public IRelayCommand ShowHangarCommand { get; }
         public IRelayCommand ShowFinanceCommand { get; }
+        public IRelayCommand ShowFlightLogsCommand { get; }
         public IRelayCommand AcceptMissionCommand { get; }
         public IAsyncRelayCommand AcceptSelectedMissionsCommand { get; }
         public IRelayCommand<string> SetCategoryFilterCommand { get; }
@@ -338,9 +390,40 @@ namespace FlightCareer.UI.ViewModels
         public IRelayCommand RemoveMissionCommand { get; }
         public IAsyncRelayCommand StartFlightCommand { get; }
         public IRelayCommand ShowDebugCommand { get; }
+        public IRelayCommand ShowOverlayCommand { get; }
         public IAsyncRelayCommand PromoteCompanyTierCommand { get; }
         public IAsyncRelayCommand PromotePilotCategoryCommand => PromoteCompanyTierCommand;
         public IRelayCommand OpenFerryWindowCommand { get; }
+        public IAsyncRelayCommand RefreshMarketMissionsCommand { get; }
+
+        public async Task RefreshMarketMissionsAsync()
+        {
+            try
+            {
+                var pilots = await _pilotRepository.GetAllAsync();
+                var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+                if (pilot == null) return;
+
+                // 1. Remover ofertas não aceitas do aeroporto atual
+                var currentAirportIcao = pilot.CurrentAirportICAO;
+                var currentMktMissions = await _context.Missions
+                    .Where(m => m.OriginICAO == currentAirportIcao && !m.IsAccepted)
+                    .ToListAsync();
+
+                if (currentMktMissions.Any())
+                {
+                    _context.Missions.RemoveRange(currentMktMissions);
+                    await _context.SaveChangesAsync();
+                }
+
+                // 2. Recarregar e gerar com o novo volume e novas regras
+                await InitializeForPilotAsync(pilot.Name);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainViewModel] Erro ao atualizar mercado: {ex.Message}");
+            }
+        }
 
         private void OpenFerryWindow()
         {
@@ -374,6 +457,13 @@ namespace FlightCareer.UI.ViewModels
         {
             var debugWindow = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Views.DebugWindow>(((App)System.Windows.Application.Current).ServiceProvider);
             debugWindow.Show();
+        }
+
+        private void ShowOverlay()
+        {
+            var overlayWindow = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Views.DebugOverlayWindow>(((App)System.Windows.Application.Current).ServiceProvider);
+            overlayWindow.Show();
+            overlayWindow.Activate();
         }
 
         private async Task RefreshBriefingAircraftAsync()
@@ -478,8 +568,9 @@ namespace FlightCareer.UI.ViewModels
                     var p = pilots.FirstOrDefault(x => x.Name == PilotName);
                     var activeAircraft = p?.Hangar.FirstOrDefault(a => a.Id == p.ActiveAircraftId);
                     var pCat = p?.PilotCategory ?? PilotCategory.Category1_FlightSchool;
+                    var originAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.OriginICAO);
                     var destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
-                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pCat);
+                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pCat, originAirport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     _allMissionDisplayItems.Add(item);
                     ApplyMissionFilters();
@@ -903,7 +994,7 @@ namespace FlightCareer.UI.ViewModels
                 foreach (var m in missionList)
                 {
                     destAirports.TryGetValue(m.DestinationICAO, out var dest);
-                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotCategory);
+                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotCategory, airport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     displayItems.Add(item);
                 }
@@ -917,6 +1008,8 @@ namespace FlightCareer.UI.ViewModels
                     _allMissionDisplayItems.AddRange(displayItems);
                     ApplyMissionFilters();
                 });
+
+                _ = FetchRealMetarsForMissionsAsync();
             }
             else
             {
@@ -926,6 +1019,33 @@ namespace FlightCareer.UI.ViewModels
 
             // Atualizar dados da aeronave no briefing (para sincronizar localização/combustível)
             await RefreshBriefingAircraftAsync();
+        }
+
+        public async Task FetchRealMetarsForMissionsAsync()
+        {
+            try
+            {
+                var itemsToUpdate = _allMissionDisplayItems.ToList();
+                if (!itemsToUpdate.Any()) return;
+
+                var icaos = itemsToUpdate.Select(m => m.DestinationICAO).Distinct().ToList();
+                if (!string.IsNullOrEmpty(CurrentAirportICAO) && !icaos.Contains(CurrentAirportICAO))
+                    icaos.Add(CurrentAirportICAO);
+
+                var metars = await _metarService.GetMetarsAsync(icaos);
+
+                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    foreach (var item in itemsToUpdate)
+                    {
+                        if (metars.TryGetValue(item.DestinationICAO, out var metar))
+                        {
+                            item.ApplyRealMetar(metar);
+                        }
+                    }
+                });
+            }
+            catch { }
         }
     }
 }

@@ -51,3 +51,6 @@ $RECYCLE.BIN/
 *.tlog
 *.dmp
 *.crashreport
+
+## Scratch / Temporary scripts
+scratch/

@@ -5,6 +5,8 @@ using FlightCareer.UI.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace FlightCareer.UI.ViewModels
 {
@@ -12,6 +14,7 @@ namespace FlightCareer.UI.ViewModels
     {
         private readonly SimConnectService _simConnect;
         private readonly Infrastructure.Persistence.AppDbContext _context;
+        private readonly IServiceProvider? _serviceProvider;
         private System.Windows.Threading.DispatcherTimer? _timer;
 
         [ObservableProperty] private bool _debugEnabled;
@@ -55,13 +58,19 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _planePitch = 0;
         [ObservableProperty] private double _planeHeading = 0;
 
+        // Status de Conexão e Telemetria
+        [ObservableProperty] private string _simStatusBadge = "⚪ SIMULADOR DESCONECTADO (AGUARDANDO MSFS)";
+        [ObservableProperty] private string _simStatusColor = "#6B7280";
+        [ObservableProperty] private bool _isSimulatorLive = false;
+
         [ObservableProperty] private string _airportSearch = string.Empty;
         public ObservableCollection<Airport> Airports { get; } = new();
 
-        public DebugViewModel(SimConnectService simConnect, Infrastructure.Persistence.AppDbContext context)
+        public DebugViewModel(SimConnectService simConnect, Infrastructure.Persistence.AppDbContext context, IServiceProvider? serviceProvider = null)
         {
             _simConnect = simConnect;
             _context = context;
+            _serviceProvider = serviceProvider;
             UpdateCommand = new RelayCommand(UpdateData);
             ToggleDebugCommand = new RelayCommand(ToggleDebug);
             TeleportCommand = new RelayCommand(Teleport);
@@ -71,11 +80,124 @@ namespace FlightCareer.UI.ViewModels
             _timer = new System.Windows.Threading.DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += (s, e) => { if (DebugEnabled) UpdateData(); };
+
+            // Inscrição para receber telemetria real do simulador
+            _simConnect.OnDataReceived += OnSimDataReceived;
+            _simConnect.OnConnected += (s, e) => UpdateConnectionStatus();
+            _simConnect.OnDisconnected += (s, e) => UpdateConnectionStatus();
+            UpdateConnectionStatus();
+        }
+
+        private void UpdateConnectionStatus()
+        {
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                if (DebugEnabled)
+                {
+                    SimStatusBadge = "🟡 MODO DEBUG ATIVO (INJEÇÃO MANUAL HABILITADA)";
+                    SimStatusColor = "#F59E0B";
+                    IsSimulatorLive = false;
+                }
+                else if (_simConnect.IsConnected)
+                {
+                    SimStatusBadge = "🟢 TELEMETRIA AO VIVO DO SIMULADOR (MSFS CONECTADO)";
+                    SimStatusColor = "#10B981";
+                    IsSimulatorLive = true;
+                }
+                else
+                {
+                    SimStatusBadge = "⚪ SIMULADOR DESCONECTADO (AGUARDANDO MSFS)";
+                    SimStatusColor = "#6B7280";
+                    IsSimulatorLive = false;
+                }
+            });
+        }
+
+        private void OnSimDataReceived(object? sender, SimTelemetry data)
+        {
+            if (DebugEnabled) return;
+
+            System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
+            {
+                Title = data.Title ?? string.Empty;
+                Latitude = Math.Round(data.Latitude, 6);
+                Longitude = Math.Round(data.Longitude, 6);
+                Altitude = Math.Round(data.Altitude, 0);
+                GroundSpeed = Math.Round(data.GroundSpeed, 1);
+                OnGround = data.IsOnGround;
+                EngineRunning = data.IsEngineRunning;
+                ParkingBrake = Math.Round(data.ParkingBrake, 2);
+                FuelGallons = Math.Round(data.FuelTotalGallons, 1);
+                FuelCapacity = Math.Round(data.FuelTotalCapacity, 1);
+                EmptyWeight = Math.Round(data.EmptyWeightLbs, 0);
+                TotalWeight = Math.Round(data.TotalWeightLbs, 0);
+                MaxGrossWeight = Math.Round(data.MaxGrossWeightLbs, 0);
+
+                VerticalSpeed = Math.Round(data.VerticalSpeed, 0);
+                GForce = Math.Round(data.GForce, 2);
+                Airspeed = Math.Round(data.Airspeed, 1);
+                FlapsPercent = Math.Round(data.FlapsHandlePercent * 100.0, 1);
+                VelocityBodyY = Math.Round(data.VelocityBodyY, 2);
+                BrakeLeft = Math.Round(data.BrakeLeftPosition, 0);
+                BrakeRight = Math.Round(data.BrakeRightPosition, 0);
+                Overspeed = data.OverspeedWarning > 0.5;
+                CrashSequence = _simConnect.IsCrashed ? 11 : 0;
+
+                EngineRPM = Math.Round(data.EngineRPM, 0);
+                MaxRPM = Math.Round(data.MaxRPM, 0);
+                EngineCHT = Math.Round(data.EngineCHT, 1);
+                EngineOilTemp = Math.Round(data.EngineOilTemp, 1);
+                EngineOilPressure = Math.Round(data.EngineOilPressure, 1);
+                TurboITT = Math.Round(data.TurboITT, 1);
+                EngineN1 = Math.Round(data.EngineN1, 1);
+                IsJetMode = data.EngineType == 1 || data.EngineType == 5;
+
+                PlaneBank = Math.Round(data.PlaneBank, 1);
+                PlanePitch = Math.Round(data.PlanePitch, 1);
+                PlaneHeading = (Math.Round(data.PlaneHeading, 0) % 360 + 360) % 360;
+
+                UpdateConnectionStatus();
+            });
+        }
+
+        [RelayCommand]
+        private async Task ResetMarketMissionsAsync()
+        {
+            try
+            {
+                if (_serviceProvider != null)
+                {
+                    var mainVm = _serviceProvider.GetService<MainViewModel>();
+                    if (mainVm != null)
+                    {
+                        await mainVm.RefreshMarketMissionsAsync();
+                        System.Windows.MessageBox.Show("Missões do aeroporto atual foram resetadas e regeradas com sucesso com base nas regras atualizadas de hubs!", "Debug - Mercado de Missões", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                        return;
+                    }
+                }
+
+                System.Windows.MessageBox.Show("Não foi possível acessar a instância de MainViewModel.", "Aviso Debug", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Erro ao resetar missões: {ex.Message}", "Erro Debug", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
         }
 
         public IRelayCommand UpdateCommand { get; }
         public IRelayCommand ToggleDebugCommand { get; }
         public IRelayCommand TeleportCommand { get; }
+
+        [RelayCommand]
+        private void OpenOverlay()
+        {
+            if (_serviceProvider != null)
+            {
+                var overlayWindow = _serviceProvider.GetService<Views.DebugOverlayWindow>();
+                overlayWindow?.Show();
+                overlayWindow?.Activate();
+            }
+        }
 
         [RelayCommand]
         private void LoadPreset(string preset)
@@ -132,12 +254,16 @@ namespace FlightCareer.UI.ViewModels
         private void ToggleDebug()
         {
             _simConnect.DebugMode = DebugEnabled;
+            UpdateConnectionStatus();
             if (DebugEnabled) 
             {
                 _timer?.Start();
                 UpdateData();
             }
-            else _timer?.Stop();
+            else 
+            {
+                _timer?.Stop();
+            }
         }
 
         private void UpdateData()
@@ -160,20 +286,17 @@ namespace FlightCareer.UI.ViewModels
                 EmptyWeightLbs = EmptyWeight,
                 MaxGrossWeightLbs = MaxGrossWeight,
                 ZeroFuelWeightLbs = TotalWeight - (FuelGallons * 6.0),
-                FuelWeightPerGallon = 6.0,
 
                 EngineRPM = EngineRPM,
-                MaxRPM = MaxRPM,
                 VerticalSpeed = VerticalSpeed,
                 GForce = GForce,
                 Airspeed = Airspeed,
-                FlapsHandlePercent = FlapsPercent,
+                FlapsHandlePercent = FlapsPercent / 100.0,
 
                 VelocityBodyY = VelocityBodyY,
                 BrakeLeftPosition = BrakeLeft,
                 BrakeRightPosition = BrakeRight,
                 OverspeedWarning = Overspeed ? 1.0 : 0.0,
-                CrashSequence = CrashSequence,
 
                 EngineCHT = EngineCHT,
                 EngineOilTemp = EngineOilTemp,

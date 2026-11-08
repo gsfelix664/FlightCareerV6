@@ -554,7 +554,367 @@ No `BriefingViewModel.cs`, expor propriedades calculadas em tempo real para alim
 
 ### 3. Checklist de Validação para o Agente Executor
 Ao implementar este plano, o agente executor deve:
-- [ ] Executar todas as 5 etapas preservando o padrão MVVM e o estilo visual Avionics Dark UI (`#0B0F14`, `#141C24`, `#00E5FF`, `#00E676`, `#FFB300`, `#FF3D00`).
-- [ ] Garantir que o fator `* 1.15` / `/ 1.15` de combustível foi 100% erradicado.
-- [ ] Compilar o projeto com `dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj` e assegurar **0 Error(s)**.
-- [ ] Registrar a conclusão da implementação no `GEMINI.md`.
+- [x] Executar todas as 5 etapas preservando o padrão MVVM e o estilo visual Avionics Dark UI (`#0B0F14`, `#141C24`, `#00E5FF`, `#00E676`, `#FFB300`, `#FF3D00`).
+- [x] Garantir que o fator `* 1.15` / `/ 1.15` de combustível foi 100% erradicado.
+- [x] Compilar o projeto com `dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj` e assegurar **0 Error(s)**.
+- [x] Registrar a conclusão da implementação no `GEMINI.md`.
+
+---
+
+## 2026-11-08 - Redesign de UX do Briefing, Status Topo Sim/Debug e Despacho Humanizado
+- **Status Central de Conexão no Topo do Briefing**:
+  - Incorporado no cabeçalho tático operacional um badge proeminente de telemetria com detecção visual instantânea:
+    - **MSFS 2020/2024 CONECTADO**: Ícone `🟢`, cor `#00E676` (Verde Esmeralda), badge `#0D2B1E` com legenda *"SimConnect SDK sincronizado em tempo real"*.
+    - **MODO DEBUG / TESTE ATIVO**: Ícone `⚡`, cor `#00E5FF` (Ciano Neon), badge `#0B2533` com legenda *"Telemetria artificial simulada via painel de Depuração"*.
+    - **SIMULADOR DESCONECTADO**: Ícone `🔴`, cor `#EF4444` (Vermelho Alerta), badge `#2E1214` com instrução *"Inicie o simulador MSFS ou ative o painel Debug"*.
+- **Eliminação de Rótulos Mecânicos ("Planejado/Simulador")**:
+  - Cards do Gatekeeper pré-voo reformulados com linguagem de aviação e cockpit:
+    - Bloco superior destaca a especificação da empresa na carreira (ex: `Cessna C152 (PR-FCA)`).
+    - Bloco de status do simulador exibe a identificação direta do modelo reportado em **Verde** se compatível (`✓ Sincronizada no MSFS: Cessna 152`) ou em **Vermelho** se divergente (`✕ Detectada no MSFS: Boeing 737-800`).
+- **Instruções e Orientações Operacionais Acionáveis**:
+  - Textos explicativos contextuais para cada pilar físico do despacho:
+    - **Aeronave**: Explica se está pronta ou instrui qual modelo selecionar no menu do simulador.
+    - **Posição / Rampa**: Informa a base de saída e alerta caso a aeronave esteja posicionada em outro aeródromo.
+    - **Payload & Passageiros**: Apresenta PAX, carga e piloto, orientando o ajuste exato no menu de Combustível e Carga do MSFS.
+    - **Combustível**: Valida o nível dos tanques e avisa se há falta ou excesso para a rota.
+
+## 2026-11-08 - Tela de Logs de Voo & Telemetria Blackbox com Mapa de Trajetória
+- **Nova Tela Integrada (`Carreira ➔ Logs de Voo (Blackbox)`)**:
+  - Implementada tela completa split-screen no padrão Avionics Dark UI (`32% / 68%`).
+  - **Painel Esquerdo (Lista de Voos Gravados)**:
+    - Varredura assíncrona automática dos arquivos CSV na pasta `logs/flights/`.
+    - Cards de voo com rota (`ORIGEM ➔ DESTINO`), status (Concluído/Cancelado), modelo/prefixo, data/hora, duração e rating de voo (ex: `100% • EXCELENTE`).
+    - Campo de busca rápida por ICAO ou aeronave e botão de atualizar lista.
+  - **Painel Direito (Detalhes Completos, Mapa e Blackbox)**:
+    - **Banner de KPIs da Missão**: Duração, Touchdown FPM, Nota de Qualidade, Faixa de Força G (`Min/Max`) e Altitude Máxima atingida.
+    - **Mapa de Trajetória Interativo**: Renderização da rota real voada com a polilinha ciano neon conectando todos os pontos de telemetria GPS registrados, pins com badges ICAO de decolagem (Verde) e pouso (Amarelo Ouro), e auto-enquadramento de zoom (`SetZoomToFitRect`).
+    - **Tabela de Telemetria Detalhada**: DataGrid navegável com amostragem de 2 em 2 segundos (Tempo decorrido, Altitude ft, Ground Speed kt, Vertical Speed fps, Força G, RPM, Combustível gal e Fase/Status).
+    - **Ações Rápidas**: Botão para abrir o arquivo CSV nativamente no Microsoft Excel ou Bloco de Notas, e botão para abrir a pasta de arquivos no Windows Explorer.
+
+## 2026-11-08 - Arquitetura Data-Driven de Hubs Operacionais (700 Aeródromos e Calibração Dinâmica)
+- **Eliminação de Listas Hardcoded**:
+  - Toda a base de hubs foi desacoplada de código estático C# e migrada para configuração externa [`src/FlightCareer.Infrastructure/Data/hubs_data.json`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Infrastructure/Data/hubs_data.json).
+  - O arquivo é copiado automaticamente no build para a pasta de saída da aplicação (`PreserveNewest`).
+- **Base Curada de 700 Aeródromos Verificados (100% de Compatibilidade no Simulador)**:
+  - Catalogados **50 aeródromos para o Brasil** e **50 aeródromos Globais** para cada uma das 7 categorias operacionais:
+    1. **InstructionHubs** (100 aeródromos): Escolas de aviação, aeroclubes históricos e academias de cadetes (ex: SBJD, SBBP, SDCO, SDTB, KDVT, KFFZ, CYHU, YMMB, etc.).
+    2. **CargoHubs** (100 aeródromos): Terminais de carga pesada, logística e e-commerce (ex: SBKP, SBGR, SBEG, KMEM, KSDF, PANC, EDDP, etc.).
+    3. **ExecutiveHubs** (100 aeródromos): Aviação corporativa, táxi aéreo e FBOs VIP (ex: SBMT, SBSP, SBJH, KTEB, KVNY, LFPB, EGLF, etc.).
+    4. **CommercialPaxHubs** (100 aeródromos): Conexões troncais de passageiros e malha aérea regular (ex: SBGR, SBBR, SBCF, KATL, EGLL, LFPG, RJTT, etc.).
+    5. **MaintenanceHubs** (100 aeródromos): Oficinas aeronáuticas, centros de overhaul e MROs (ex: SBSJ Embraer, SBKP Azul, SDSC Latam MRO, WSSL Seletar, LETL Teruel, etc.).
+    6. **AgroHubs** (100 aeródromos): Pistas do agronegócio, apoio à safra e aviação agrícola (ex: SBSO Sorriso, SWLC Rio Verde, SDNM Nova Mutum, KICT, SAAR, etc.).
+    7. **HealthHubs** (100 aeródromos): Centros hospitalares, transporte de órgãos e bases aeromédicas/UTI aérea (ex: SBGR, SBBH, KROC Mayo Clinic, YBAS Flying Doctor, etc.).
+  - 100% dos códigos ICAO validados e confirmados na base de dados `airports.csv`.
+- **Serviço de Registro e Injeção de Dependência (`HubDataService`)**:
+  - Criada a interface [`IHubDataService`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Domain/Services/IHubDataService.cs) no Domain e implementada em [`HubDataService`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Infrastructure/Services/HubDataService.cs).
+  - Estrutura indexada com `HashSet<string>` para buscas instantâneas $O(1)$ em tempo de execução.
+  - Registrado como `Singleton` no container de DI em [`App.xaml.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/App.xaml.cs).
+- **Calibração Dinâmica de Probabilidades no Gerador de Missões (`MissionGenerator`)**:
+  - Implementado o método `GetCalibratedCategories`:
+    - **Aeroporto é Hub de Instrução**: Categoria `3.4 (Treinamento)` tem peso elevado dinamicamente para ~35-40% do total de contratos (mesmo em aeroportos grandes como SBMT ou KDVT).
+    - **Aeroporto é Hub de Carga**: Categorias `1.2` e `2.3` recebem boost de até 50%.
+    - **Aeroporto é Hub Executivo**: Categorias `1.3` e `3.1` sobem para 50%.
+    - **Aeroporto é Hub de Passageiros**: Categorias `1.1` e `2.1` sobem para 60-65%.
+    - **Aeroporto é Hub Agro**: Categorias `2.2`, `3.2` e `4.x` sobem para 50-70%.
+    - **Aeroporto é Hub de Saúde**: Categoria `3.3 (Aeromédico)` sobe para 35%.
+  - O sorteio de destinos agora utiliza os novos conjuntos do `HubDataService`, garantindo voos de navegação e cheques direcionados a aeródromos reais de treinamento e hubs da categoria.
+
+## 2026-11-08 - Expansão de Hubs (AERODROMOS_PRINCIPAIS.txt), Multi-Role Balancing e Cotas por Tier
+- **Processamento Integral de `AERODROMOS_PRINCIPAIS.txt`**:
+  - Ingestão automatizada de todos os aeródromos descritos no documento de referência, cobrindo polos de Aviação Executiva, MRO/Manutenção, Carga Aérea, Grandes Conexões Comerciais, Hubs Alimentadores (Feeder), Portais Internacionais e AgroPoints/InvestPoints.
+  - Adição de nova categoria **`FeederHubs`** (Hubs Alimentadores Regionais) à arquitetura.
+  - Base de dados [`hubs_data.json`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Infrastructure/Data/hubs_data.json) enriquecida com mais de 1.200 mapeamentos de vocações operacionais.
+- **Solução Arquitetural para Conflito Multi-Vocação (Additive Affinity Balancing)**:
+  - Resolvido matematicamente o problema de aeroportos com múltiplas vocações simultâneas (ex: `SBKP` como Carga + Pax + Manutenção + Executiva, ou `SBMT` como Instrução + Executiva + Saúde).
+  - Em vez de substituições fixas ou sobrescritas de pesos, o sistema adota um modelo aditivo onde cada perfil do aeroporto concede bônus de afinidade proporcionais para suas respectivas categorias.
+  - Em `SBKP`: Carga, Linha Regular, MRO e Táxi Aéreo coexistem proporcionalmente de forma idêntica à operação real de Viracopos.
+  - Em `SBMT`: Instrução (3.4), Executiva (2.2/3.1) e Saúde/Aeromédico (3.3) dividem o painel harmonicamente.
+- **Emparelhamento Realista de Destinos Conforme Perfil Operacional**:
+  - Voos de instrução (3.4.1/3.4.2/3.4.3) direcionados preferencialmente para polos de treinamento e alívio (ex: Jundiaí, Bragança, Sorocaba, Atibaia, Pampulha, Bacacheri).
+  - Voos cargueiros conectam grandes terminais de carga e capitais industriais.
+  - Voos executivos ligam grandes centros a resorts VIP, capitais e feiras do agronegócio.
+  - Voos de manutenção (1.3.3/2.4.1) direcionados a centros MRO reais (Embraer SBSJ, Azul MRO SBKP, Latam MRO SDSC, Gol Aerotech SBCF, etc.).
+- **Escalação de Cotas de Missões Disponíveis por Tier**:
+  - **Tier 1 (Grandes Hubs Internacionais)**: Cota mínima elevada para **200 missões ativas** simultâneas (painel vibrante de conexões).
+  - **Tier 2 (Regionais Médios / Capitais Estaduais / Polos de Instrução como SBMT)**: Cota ajustada para **120 missões ativas** (garantindo 30 a 40 contratos de instrução disponíveis de imediato para novos pilotos).
+  - **Tier 3 (Municipais / Polos do Interior / Aeroclubes Locais)**: Cota ampliada para **60 missões ativas**.
+  - **Tier 4 (Pistas Remotas / Fazendas e Garimpos)**: Cota ajustada para **25 missões ativas**.
+
+## 2026-11-08 - Limpeza da Interface de Produção e Migração do Reset para o Painel Debug
+- **Remoção do Botão de Reset da View de Produção**:
+  - Removido o botão de teste `ATUALIZAR MERCADO (RESET)` do cabeçalho do quadro de missões em [`MainWindow.xaml`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/MainWindow.xaml), mantendo a experiência imersiva e livre de controles de desenvolvimento na tela do jogador.
+- **Integração no Painel de Debug (`DebugWindow`)**:
+  - Adicionado novo grupo **"Mercado & Missões (DEBUG)"** com o botão `[🔄 RESETAR E REGERAR MISSÕES]` em [`DebugWindow.xaml`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Views/DebugWindow.xaml).
+  - Acessível a qualquer momento durante testes clicando em ` DEBUG SIM` no menu lateral esquerdo.
+  - O comando executa a limpeza das ofertas não aceitas do aeroporto atual e comanda a regeneração instantânea via `MainViewModel` e `IMissionGenerator`, disparando um diálogo de confirmação.
+
+## 2026-11-08 - Renderização Completa de Pernas Multi-Leg e Circuito TGL no Mapa do Briefing
+- **Visualização Completa de Pernas no Mapa Tático (`FlightMapControl`)**:
+  - Implementada a propriedade de dependência `RouteLegs` em [`FlightMapControl.xaml.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Utils/FlightMapControl.xaml.cs), conectando diretamente a coleção de pernas ativas do Briefing ao mapa.
+  - O mapa agora traça todas as pernas sequencialmente com linhas tracejadas em Ciano Aviônica (`#00E5FF`), além de posicionar badges informativos para cada escala (`PARTIDA`, `LEG X • ICAO`, `LEG N • ICAO (FINAL)`).
+- **Suporte a Circuitos de Toque e Arremetida (TGL / Voo Local)**:
+  - Quando a missão é de instrução local ou TGL (ex: `SDTB -> SDTB`), o mapa desenha o circuito de tráfego retangular padrão (Upwind, Crosswind, Downwind, Base e Final) em Âmbar (`#FFB300`), com badge dedicado `LEG 1 • SDTB (TGL)` e distância real de 10 NM (em vez de 0 NM).
+  - Em rotas combinadas como `SDTB (TGL) -> SDTK -> SDIM`, o mapa exibe primeiro o circuito TGL em SDTB e, em seguida, as pernas de travessia para SDTK e SDIM de forma contínua e integrada.
+- **Reestruturação do Algoritmo Multi-Leg (`BriefingViewModel`)**:
+  - Encadeamento automático de missões aceitas priorizando voos locais na base seguidos das pernas de navegação.
+  - Enquadramento automático suave (`SetZoomToFitRect`) cobrindo toda a extensão geográfica da rota com margem de segurança de 30%.
+
+## 2026-11-08 - Guia de Abas MSFS (Assentos vs Carga) e Detecção Inteligente de PAX
+- **Diagnóstico da Divergência de W&B**:
+  - Identificado que no menu "Massa e Equilíbrio" do MSFS (2020/2024), passageiros e pilotos são configurados exclusivamente na aba **"Assentos"**, enquanto cargas/bagagens são na aba **"Carga"**.
+  - O Gatekeeper acusava falta de 171 lbs porque o assento do passageiro permaneceu vazio (1/2 assentos ocupados = apenas o piloto de 170 lbs) no simulador.
+- **Implementação do Guia Visual de Abas MSFS no Manifesto**:
+  - Adicionado painel no rodapé do manifesto em [`MainWindow.xaml`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/MainWindow.xaml) detalhando a distribuição exata:
+    - **💺 ABA ASSENTOS**: Quantidade de assentos a preencher e peso total (Piloto + PAX x 170 lbs).
+    - **📦 ABA CARGA**: Peso total de bagagens/mercadorias.
+- **Mensagens Contextuais e Copiar W&B Otimizado**:
+  - O Gatekeeper em [`BriefingViewModel.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/ViewModels/BriefingViewModel.cs) agora identifica especificamente quando um assento de passageiro foi deixado vazio e instrui o piloto a preencher o assento correspondente na aba "Assentos".
+  - O texto do botão "Copiar W&B" foi formatado no padrão exato das abas do MSFS.
+
+## 2026-11-08 - Correção de Falso-Positivo de Perda Total, Aborto em Solo e Telemetria Real no Debug
+- **Correção da Detecção de Crash Catastrófico (`WearAndFailureService.cs`)**:
+  - Identificada a causa-raiz do falso-positivo de perda total imediata: a condição `data.CrashSequence > 0` zerava instantaneamente a fuselagem, motor e pneus assim que o voo iniciava, devido a estados transitórios da variável `CRASH SEQUENCE` do SimConnect ou assistências de colisão desligadas no MSFS.
+  - Implementada restrição estrita: crash real catastrófico agora exige `CrashSequence == 11` (início formal de crash no MSFS) ou `CrashSequence > 0` com evidências dinâmicas de impacto no ar / alta velocidade / estresse g-force severo (`!data.IsOnGround || data.GroundSpeed > 45 || Math.Abs(data.GForce) > 4.5 || Math.Abs(data.VerticalSpeed * 60) > 2500`).
+  - Operações no pátio, táxi ou parada com motores cortados são blindadas contra falsos crashes.
+- **Tratamento de Aborto / Corte de Motor em Solo (`FlightMonitor.cs`)**:
+  - Implementada detecção de aborto de voo quando o piloto liga os sistemas mas desliga o motor com PB acionado sem decolar (`!_isAirborne && data.IsOnGround && !data.IsEngineRunning && isParkedOrStopped`).
+  - O voo é cancelado de forma segura após 5 segundos como `VOO CANCELADO EM SOLO`, preservando a aeronave sem danos ou penalidades.
+  - Substituído o valor fixo de `999` fpm no log de perda total pelo valor dinâmico real lido de velocidade vertical.
+  - Restauradas as condições de célula, motor e pneus da aeronave `PR-NZY` de volta a 100% no banco de dados.
+- **Monitoramento de Telemetria ao Vivo no Painel de Debug (`DebugViewModel.cs` e `DebugWindow.xaml`)**:
+  - Inscrito o `DebugViewModel` nos eventos de telemetria `SimConnectService.OnDataReceived`.
+  - Quando a opção "Injeção Manual (Modo Debug)" estiver desmarcada, a janela de debug exibe em tempo real TODOS os parâmetros transmitidos diretamente pelo Microsoft Flight Simulator (Velocidades, Altitude, Coordenadas, Pesos, Combustível, Rotação do Motor, Pressão, CHT/ITT, G-Force e Crash Sequence).
+  - Adicionado banner superior com indicador de status dinâmico:
+    - `🟢 TELEMETRIA AO VIVO DO SIMULADOR (MSFS CONECTADO)`
+    - `🟡 MODO DEBUG ATIVO (INJEÇÃO MANUAL HABILITADA)`
+    - `⚪ SIMULADOR DESCONECTADO (AGUARDANDO MSFS)`
+
+## 2026-11-08 - Tela HUD Overlay Flutuante / Topmost para Acompanhamento em Voo
+- **Criação da Janela HUD Overlay (`DebugOverlayWindow.xaml` e `DebugOverlayWindow.xaml.cs`)**:
+  - Janela flutuante no estilo *Glass Dark Avionics* com `Topmost="True"`, `WindowStyle="None"`, `AllowsTransparency="True"` e fundo translúcido (`#E6070B12`) para se sobrepor diretamente à tela do Microsoft Flight Simulator sem minimizar o jogo.
+  - Arrastável livremente em qualquer monitor clicando e segurando com o botão esquerdo.
+  - **Controle de Opacidade Rápido (`CycleOpacityCommand`)**: Ciclo de transparência configurável (100% ➔ 80% ➔ 60% ➔ 40%) para não obstruir o painel da aeronave.
+  - **Modo Compacto / Mini HUD (`ToggleCompactCommand`)**: Botão de alternância entre ticker horizontal minimalista (apenas velocidades essenciais, altitude e fase) e o painel técnico completo.
+  - **Pin Topmost**: Botão para fixar ou desafixar o comportamento flutuante da janela.
+- **Implementação do ViewModel Dedicado (`DebugOverlayViewModel.cs`)**:
+  - Telemetria de alta frequência conectada ao `SimConnectService.OnDataReceived` e fases do `FlightMonitor`.
+  - **Instrumentos Primários**: Airspeed (IAS), Ground Speed (GS), Altitude (ft) e Razão Vertical (VS fpm com coloração dinâmica por gradiente de subida/descida).
+  - **Atitude e Dinâmica**: Força G com alertas de cor em estresse, Pitch, Bank, Proa (HDG), Flaps (%) e Parking Brake (Livre / Acionado).
+  - **Grupo Moto-Propulsor**: Detecção automática de pistão vs jato/turboprop, monitorando RPM/N1, CHT/ITT, pressão de óleo e temperatura de óleo.
+  - **Pesos e W&B**: TOW em tempo real vs Peso Máximo Estrutural e galões/libras de combustível.
+  - **Saúde e Desgaste (Hangar)**: Barras coloridas de desgaste em tempo real da Célula, Motor e Pneus.
+- **Acesso Rápido na Interface**:
+  - Botão integrado no cabeçalho superior de [`MainWindow.xaml`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/MainWindow.xaml): `[ 🖥️ HUD OVERLAY (MSFS) ]`.
+  - Botão integrado no menu lateral esquerdo sob a categoria DEBUG.
+  - Botão dedicado dentro da janela clássica [`DebugWindow.xaml`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Views/DebugWindow.xaml).
+
+## 2026-11-08 - Correção Definitiva do Deslocamento de 8 Bytes do SimConnect (`ZERO FUEL WEIGHT`) e Crash no HUD
+- **Diagnóstico com o MSFS 2024 em Execução**:
+  - Conectamos uma rotina de teste ao vivo no MSFS 2024 e capturamos a exceção exata do SimConnect:
+    `[EXCEPTION] ID: NAME_UNRECOGNIZED, SendID: 19, Datum: 'ZERO FUEL WEIGHT', Unit: 'Pounds'`
+  - **Causa-Raiz**: O SimVar `ZERO FUEL WEIGHT` não existe no Microsoft Flight Simulator.
+  - Ao descartar essa variável, o SimConnect encurtou a mensagem de telemetria em 8 bytes, deslocando **todas as variáveis subsequentes** na memória:
+    - O campo `GForce` recebeu o valor de Pitch (ex: `-5.21G`).
+    - `PlanePitch` recebeu Bank (ex: `3°`).
+    - `PlaneBank` recebeu Heading (ex: `4°`).
+    - `PlaneHeading` recebeu Flaps (`000°`).
+    - `FlapsPercent` recebeu VelocityBodyY (resultando em `-931%`).
+    - `Overspeed` recebeu o valor de RPM (ex: `2630 > 0.5`), acendendo falsamente o alerta de Overspeed.
+    - `EngineRPM` recebeu CHT.
+    - `EngineOilPressure` recebeu `-273.15` (valor nulo/zero absoluto de uma temperatura).
+    - O estresse aerodinâmico surreal de `-5.21G` e overspeed constante destruíam a integridade da aeronave para `0%` em segundos, disparando falso crash/perda total.
+- **Correções Aplicadas**:
+  - **Remoção de `ZERO FUEL WEIGHT`**: Removido de [`SimConnectService.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Services/SimConnectService.cs) e de [`SimTelemetry.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Domain/Entities/SimTelemetry.cs).
+  - **Telemetria 100% Validada ao Vivo com MSFS 2024**:
+    - `GForce`: **1.19 G** (estável).
+    - `Heading (Proa)`: **004°** (preciso).
+    - `Flaps`: **0%** (normalizado).
+    - `RPM`: **2630 RPM** (cruzeiro do C152).
+    - `Pressão de Óleo`: **69.1 PSI** (faixa verde perfeita).
+    - `Temperatura de Óleo`: **27.4 °C**.
+    - `CHT`: **208.3 °C** (ideal).
+    - `Overspeed`: **0** (desativado).
+  - **Reset do Estado de Crash**:
+    - Adicionado método `ResetCrashState()` em `SimConnectService`.
+    - `FlightMonitor` redefine `_simConnect.ResetCrashState()` ao iniciar ou cancelar o monitoramento.
+    - Restabelecida a integridade de `PR-NZY` no banco de dados local para **100% Célula, 100% Motor, 100% Pneus**.
+    - Atualização periódica da saúde da célula no HUD flutuante vinculada ao loop de telemetria.
+
+## 2026-11-08 - Renderização da Trajetória Voada no Mapa dos Logs de Voo (Blackbox)
+- **Diagnóstico do Traçado Não Exibido**:
+  - Os arquivos CSV da Blackbox gravavam os pontos GPS perfeitamente (ex: 112 amostras de latitude e longitude).
+  - No entanto, a propriedade `MapRoutePoints` em [`FlightLogEntry.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/ViewModels/FlightLogEntry.cs) era uma `List<PointLatLng>` estática com getter simples.
+  - Como o parsing do CSV roda em segundo plano assincronamente após o clique no card de voo, a adição de pontos na lista não notificava o WPF (`INotifyPropertyChanged`), e a `DependencyProperty` `RecordedPath` do mapa nunca recebia o evento de alteração (`OnRecordedPathChanged`).
+- **Solução Implementada**:
+  - `MapRoutePoints` convertido para `[ObservableProperty] private ObservableCollection<PointLatLng> _mapRoutePoints`.
+  - O carregamento em [`FlightLogsViewModel.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/ViewModels/FlightLogsViewModel.cs) agora instancia a coleção completa e atribui na UI Dispatcher, disparando a atualização do WPF.
+  - `FlightMapControl` atualizado para aceitar `IEnumerable` genérico e observar `INotifyCollectionChanged`, limpando e redesenhando automaticamente a rota ciano neon, os pins de partida (Verde) e pouso (Amarelo Ouro), e chamando `SetZoomToFitRect` para enquadrar a trajetória completa voada.
+
+## 2026-11-08 - Matriz de Panes Contextuais e Realistas (Ambiente, Meteorologia e Operação do Piloto)
+- **Integração de Telemetria Ambiental e de Comandos do Piloto**:
+  - Adicionadas 12 novas variáveis ao [`SimTelemetry.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.Domain/Entities/SimTelemetry.cs) e mapeadas no [`SimConnectService.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Services/SimConnectService.cs) com validação em tempo real contra o MSFS 2024:
+    - `SURFACE CONDITION` (0 = Normal, 1 = Molhado, 2 = Gelo, 3 = Neve)
+    - `AMBIENT TEMPERATURE` (°C) e `AMBIENT PRECIP STATE` (Mask de Chuva/Precipitação)
+    - `AMBIENT WIND VELOCITY` e `AMBIENT WIND DIRECTION` (cálculo de componente de vento cruzado / crosswind)
+    - `VELOCITY BODY X` (velocidade lateral no toque e na rolagem de pista)
+    - `GENERAL ENG THROTTLE LEVER POSITION:1` e `MIXTURE LEVER POSITION:1` (%)
+    - `ENG ANTI ICE:1` (Status do aquecimento de carburador / anti-gelo do motor)
+    - `STRUCTURAL ICE PCT` e `PITOT ICE PCT` (% de gelo acumulado na fuselagem e no pitot)
+    - `PRESSURIZATION CABIN ALTITUDE` (altitude de pressão interna da cabine)
+- **Panes Operacionais Contextuais Implementadas em [`WearAndFailureService.cs`](file:///C:/PROJETOS/FLIGHTCAREERV6/src/FlightCareer.UI/Services/WearAndFailureService.cs)**:
+  1. **Aquaplanagem e Estouro por Borracha Revertida (*Reverted Rubber Blowout*)**:
+     - Quando `SURFACE CONDITION >= 1` (Pista Molhada/Gelo) e velocidade de solo $> 40\text{ kts}$.
+     - Se os pneus estiverem com banda gasta ($< 60\%$) e o piloto frear bruscamente, a capacidade de drenagem falha e o multiplicador de estouro salta até **25x**, simulando fricção térmica violenta sobre lâmina d'água.
+  2. **Congelamento de Carburador (*Carb Icing*)**:
+     - Monitora descidas em baixa potência (`Throttle < 35%`) em ar úmido (`Ambient Temperature` entre 4°C e 24°C ou chuva ativa).
+     - Se o piloto esquecer o `Carb Heat` desativado, o gelo acumula progressivamente em `_carbIceAccumulator` até provocar engasgo e apagamento total do motor (`TOGGLE_ENGINE_FAILURE_1`).
+     - Acionar o `Carb Heat` derrete o gelo de forma dinâmica.
+  3. **Encharcamento de Velas (*Spark Plug Fouling*)**:
+     - Detecta táxi prolongado no solo com mistura 100% rica, rotação baixa ($< 1200\text{ RPM}$) e motor frio ($< 130^\circ\text{C}$).
+     - Simula depósito de chumbo nos eletrodos gerando aspereza e falha de centelha, reversível apenas acelerando a 1800 RPM com mistura empobrecida para queima de chumbo.
+  4. **Stall de Compressor (*Engine Surge*) em Jatos/Turbinas**:
+     - Detecta avanço brusco de manete (*slam throttle* $> 45\%/\text{s}$) durante decolagem sob vento cruzado severo ($> 20\text{ kts}$).
+     - Provoca desorganização de fluxo de ar nas palhetas, disparando corte/stall de compressor no simulador.
+  5. **Colapso Estrutural de Perna de Trem por Carga Lateral (*Side-Load Collapse*)**:
+     - Avalia no toque o vetor lateral (`VelocityBodyX > 7.0 fps`) decorrente de pouso caranguejado com vento de través.
+     - Se a célula estiver desgastada ($< 50\%$), o estresse cisalha os pinos mestres da tesoura do amortecedor e recolhe a perna no impacto.
+  6. **Bloqueio de Pitot por Gelo**:
+     - Disparado automaticamente se `PITOT ICE PCT > 25%` durante o voo em nuvens/gelo sem aquecimento.
+  7. **Despressurização de Cabine**:
+     - Detecta altitude de voo $> 12.000\text{ ft}$ com altitude de cabine subindo além de $10.000\text{ ft}$ em células com fadiga ($< 65\%$).
+
+
+
+
+
+
+
+
+## 2026-11-08 - Redesign do Quadro de Missões, Dark Map Tático e Análise de W&B do MSFS 2024
+- **Diagnóstico de Divergência de W&B no Gatekeeper (MSFS 2024 EFB)**:
+  - Identificada a causa-raiz da divergência de payload reportada pelo Gatekeeper (-161 lbs):
+    - No MSFS 2024, ajustar os controles deslizantes de "Assentos", "Carga" e "Combustível" no tablet/EFB altera apenas o rascunho de pré-visualização.
+    - O simulador **não aplica** as alterações aos pesos reais da aeronave até que o piloto clique fisicamente no botão azul **`[ CARREGAR A AERONAVE ]`** no rodapé do EFB.
+    - Antes de clicar no botão, a aeronave permanece com a configuração padrão do Cessna C152 (227 lbs de payload e 9.4 gal de combustível), que era lida pelo SimConnect com precisão.
+    - Teste ao vivo via SimConnect confirmou que após clicar no botão do EFB, os pesos sobem instantaneamente para 1.547 lbs de TOW e ~397 lbs de payload, validando a sincronização com o manifesto.
+    - Atualizada a mensagem orientativa de pré-voo no Gatekeeper com instrução explícita sobre o botão `[ CARREGAR A AERONAVE ]`.
+- **Redesign Completo da Interface do Quadro de Missões & Contratos**:
+  - **Eliminação do Espaço Vazio na Tabela**:
+    - Distribuídas as colunas de forma fluida nos 58% do split, eliminando o espaço escuro ocioso.
+    - Inseridas colunas operacionais de alto valor: `CARGA/PAX`, `DISTÂNCIA`, `PISTA MÍN`, `REGRA (VFR/IFR)`, `XP` e `PAGAMENTO`.
+  - **Alinhamento Numérico e Tabular Rigoroso**:
+    - Colunas numéricas e financeiras alinhadas à direita com fonte `JetBrains Mono` monoespaçada, tanto nos cabeçalhos (`RightAlignedHeader`) quanto nas células.
+  - **Hierarquia Visual Cromática e Badges Semânticos**:
+    - Badges padrão neutros (`#2A3749` / `#161F2A`), reservando cores vibrantes para contratos VIP (dourado `#F59E0B`), Emergência/Médica (vermelho `#EF4444`), Cargas Especiais (ciano `#00E5FF`) e Instrução (roxo `#C084FC`).
+  - **Dark Map Tático (Redução de Fadiga Visual)**:
+    - Implementado `CartoDbDarkMapProvider` no `FlightMapControl`, substituindo o mapa diurno brilhante por camada noturna escura de cartas táticas.
+  - **Card de Pré-Despacho Operacional Escaneável**:
+    - Adicionados chips visuais para tipo de carga, pista mínima requerida, categoria da companhia e regras de voo.
+    - Tipografia da descrição operacional calibrada com alto contraste (`#E2E8F0`).
+  - **Botão de Ação Primária**:
+    - Atualizado para 48px de altura com tipografia ExtraBold e ícone destacado: `[➕ ACEITAR CONTRATO & INICIAR BRIEFING]`.
+  - **Remoção de Redundância de Saldo**:
+    - Saldo duplicado substituído no banner superior pelo card **AEROPORTO DE PARTIDA** (`CurrentAirportICAO`).
+  - **Correção no HUD Overlay**:
+    - Resolvido o problema de sobreposição entre o texto da Fase de Voo e a Rota com uso de Grid de 2 colunas e DockPanel com reticências (`TextTrimming="CharacterEllipsis"`).
+
+
+## 2026-11-08 - Redesign do Despacho Operacional (Pre-Flight Gatekeeper, W&B e Manifesto)
+- **Eliminação de Espaços Vazios Verticais (Layout Collapse)**:
+  - Reestruturada a Coluna Esquerda (30%) em três blocos operacionais auto-ajustáveis:
+    1. `ITINERÁRIO DINÂMICO MULTI-LEG` (Compacto com limite de altura).
+    2. `CONTRATOS NO MANIFESTO` (Ocupa o espaço intermediário com scroll).
+    3. `ENVELOPE DE MASSA E BALANCEAMENTO (W&B)` (Bloco dedicado ancorado ao rodapé).
+  - Eliminado o grande "buraco" escuro que existia quando havia apenas 1 ou 2 contratos no manifesto.
+- **Micro-Tipografia de Auditoria Plan vs. Sim (Coluna Direita)**:
+  - Criado componente de comparação lado a lado de 2 colunas para cada item do checklist:
+    - `PLANO (CARREIRA)` vs `SIMULADOR (MSFS)` com fontes monoespaçadas `JetBrains Mono` de 11px em negrito e alto contraste.
+    - Badges consolidadas de tolerância integradas diretamente no cabeçalho do valor simulado (ex.: `✓ 100% EXATO`, `✓ ±9 lbs`, `✓ ±0.6 gal`).
+    - Alerta explicativo dinâmico exibido apenas quando houver divergência, orientando o piloto sobre os ajustes específicos no EFB do MSFS.
+- **Centralização do Status do Gatekeeper**:
+  - Removido o badge duplicado de "Despacho Aprovado" da barra de título do briefing.
+  - O cabeçalho do Gatekeeper agora hospeda o status centralizado de auditoria: `🟢 4/4 SISTEMAS CONFORMES` ou `⚠️ X/4 SINCRONIZADOS`.
+  - A barra superior do briefing agora exibe com exclusividade o status de link ao vivo do SimConnect (`🟢 MSFS 2020/2024 CONECTADO`).
+- **Unificação do Envelope de Massa e Centragem (W&B)**:
+  - Removida a barra isolada de MTOW do card de pernas e os dados fragmentados do rodapé do manifesto.
+  - Agrupados todos os dados em um único bloco de W&B:
+    - Indicador de margem livre (`X LBS LIVRES` ou `⚠️ SOBREPESO`).
+    - Barra contínua de envelope de MTOW com comparativo TOW vs MTOW e porcentagem.
+    - Três cards técnicos detalhando: Assentos (`TotalSeatsWeight`), Carga (`TotalCargoWeight`) e Combustível (`FuelWeightLbs`).
+    - Guia prático de preenchimento das abas 'Assentos' e 'Carga' do tablet do MSFS 2024.
+- **Botão de Exclusão Ghost / Outline**:
+  - Substituído o botão vermelho agressivo `[ X ]` de cancelamento por um botão discreto de estilo outline/ghost (`#263545` / `#64748B`), que só ganha coloração vermelha ao passar o mouse (`MouseOver`).
+- **Limpeza do Viewport do Mapa Tático (Coluna 2)**:
+  - Removidos os chips flutuantes redundantes sobre o mapa (`ROTA CORREDOR`, `DISTÂNCIA`, `TEMPO ESTIMADO`), que competiam com a barra superior de despacho.
+  - O mapa agora é 100% livre de sobreposições para navegação visual limpa.
+- **Botões de Ação com Espaçamento e Estado Inteligente**:
+  - Adicionado respiro de 16px na margem inferior dos botões de ação da coluna direita.
+  - Botão de Cópia W&B atualizado para estado inteligente:
+    - Quando o W&B já estiver sincronizado com o simulador: `✓ W&B JÁ SINCRONIZADO NO MSFS` em verde/neutro.
+    - Quando houver divergência: `📋 COPIAR W&B P/ O SIMULADOR` em ciano com tooltip explicativo.
+
+## 2026-11-08 - Expansão do Quadro de Missões (Colunas ETE, Rumo, METAR, Expiração), Mapa Noturno ESRI e Correção de Crash
+- **Correção Crítica de Crash de Runtime (`TowPercentage`)**:
+  - **Causa Raiz**: O controle WPF `ProgressBar` herda de `RangeBase.ValueProperty`, cujo padrão é `BindsTwoWayByDefault`. Como a propriedade `TowPercentage` na ViewModel tinha apenas getter (read-only), o WPF lançava `InvalidOperationException` ao abrir a janela principal.
+  - **Resolução**:
+    - Convertido `TowPercentage` em `[ObservableProperty] private double _towPercentage;` com recálculo automático em `OnCalculatedTotalWeightChanged` e `OnHangarAircraftMtowChanged`.
+    - Explicitado `Mode=OneWay` no XAML (`<ProgressBar Value="{Binding TowPercentage, Mode=OneWay}" ... />`).
+- **Eliminação de Vazio Horizontal no Quadro de Missões (Novas Colunas)**:
+  - Adicionadas 4 novas colunas técnicas ao grid do Quadro de Missões, preenchendo 100% da largura útil de forma densa e balanceada:
+    1. **`RUMO` (Proa Geográfica)**: Rumo inicial em graus e direção cardeal (ex: `045° NE`, `180° S` ou `LOCAL`), calculado via trigonometria esférica (Great-Circle Bearing) entre as coordenadas de origem e destino.
+    2. **`ETE` (Tempo Estimado de Voo)**: Calculado dinamicamente com base na velocidade de cruzeiro da aeronave ativa no Hangar (ex: `1h 32m`, `28 min`).
+    3. **`METAR` (Meteorologia do Destino)**: Badge de alta visibilidade avionics (`☀️ VFR`, `⛅ MVFR`, `🌧️ IFR`) com cores semânticas e tooltip detalhando vento, visibilidade e teto.
+    4. **`EXPIRAÇÃO`**: Tempo restante de validade do contrato (ex: `2h 15m`, `1d 04h`), com badge adaptativo em âmbar/vermelho para contratos próximos ao vencimento.
+- **Substituição de Tiles de Mapa (Fim das Marcas d'Água do CartoDB)**:
+  - O antigo CartoDB passou a injetar marca d'água (`API KEY REQUIRED`) nas requisições gratuitas sem token.
+  - Substituído pelo **ESRI World Dark Gray Canvas** (`server.arcgisonline.com`), combinado com uma camada de sobreposição transparente (`EsriDarkReferenceMapProvider`) para renderização nítida de fronteiras e cidades.
+  - Atualizado o GUID e o identificador do provedor para forçar o GMap.NET a purgar o cache local e carregar os novos tiles noturnos limpos e sem marcas d'água.
+
+## 2026-11-08 - Suporte a Códigos ICAO Legados do MSFS (Ex: SBPG vs SSZW Ponta Grossa)
+- **Diagnóstico da Divergência de ICAO**:
+  - Na aviação real brasileira (DECEA / AISWEB), o aeroporto de Ponta Grossa - PR (Comandante Antonio Amilton Beraldo) foi modernizado e teve seu código ICAO alterado do antigo **SSZW** para o oficial **SBPG**.
+  - O banco de dados de navegação padrão do Microsoft Flight Simulator (Asobo / NavBlue) não atualizou esse aeródromo e ainda o registra sob o código legado **SSZW**.
+- **Solução Integrada**:
+  - Implementado o dicionário de equivalências `MsfsIcaoAliases` mapeando aeroportos brasileiros cujos códigos diferem no MSFS (ex.: `SBPG` ➔ `SSZW`, `SBCA` ➔ `SSKW`, `SBTD` ➔ `SSTW`, etc.).
+  - No Pré-despacho, Itinerário de Briefing e Tooltip da tabela de contratos, o sistema exibe dinamicamente a anotação clara: `SBPG (MSFS: SSZW)`.
+  - Como a detecção de pouso e tracking de voo do `FlightMonitor` utiliza coordenadas geográficas puras (Latitude/Longitude), pousar na pista de Ponta Grossa no MSFS (mesmo selecionando SSZW no simulador) conclui o voo normalmente no software com 100% de precisão.
+
+## 2026-11-08 - Integração Oficial com a API da NOAA (AviationWeather.gov) e METAR Real Contínuo
+- **Remoção Integral do Gerador Aleatório/Simulado**:
+  - Eliminado o método `GenerateWeather` de sorteio procedural determinístico. O sistema agora opera exclusivamente com observações meteorológicas reais oficiais.
+- **Criação do Serviço de Meteorologia Aeronáutica Real (`MetarService.cs`)**:
+  - Conectado diretamente à API REST pública da NOAA (`https://aviationweather.gov/api/data/metar`).
+  - Implementada consulta em lote (*batching*) para múltiplos destinos simultaneamente em uma única requisição HTTP leve e assíncrona.
+  - Parse de campos oficiais: METAR bruto (`rawOb`), categoria de voo (`fltCat`: VFR, MVFR, IFR, LIFR), vento (direção, velocidade e rajadas), temperatura, ponto de orvalho e altímetro.
+- **Resolução de Aeródromos Remotos sem Estação**:
+  - Para pistas e aeródromos locais desprovidos de estação meteorológica oficial (AWOS/METAR), o `MetarService` calcula a distância geodésica em relação às estações ativas e vincula a estação reportante real mais próxima, sinalizando explicitamente: `Via XXXX (YY NM): [Raw METAR]`.
+- **Motor de Atualização Contínua e em Tempo Real**:
+  - Criado timer de atualização automática a cada 5 minutos em segundo plano no `MainViewModel`.
+  - Adicionado botão dedicado `[ 🔄 METAR ]` na barra de filtros para forçar atualização instantânea a qualquer momento.
+  - No card de Pré-despacho, o cabeçalho agora exibe `METAR DESTINO (TRANSMISSÃO REAL NOAA) • AO VIVO`, acompanhado da string METAR oficial em destaque ciano monoespaçado.
+
+## 2026-11-08 - Sincronização Dinâmica com Cenários do MSFS 2024 e Sistema Dual de ICAO
+- **Verdade Absoluta no Simulador (Zero Missões Fantasmas)**:
+  - O banco de dados do Flight Simulator 2024 (extraído diretamente do banco SQLite do Little Navmap em `%APPDATA%\ABarthel\little_navmap_db\little_navmap_msfs24.sqlite`, com 83.095 aeródromos) passou a ser a **fonte de verdade primária** para a existência física de qualquer aeródromo.
+  - Missões no `MissionGenerator` são estritamente restritas a aeroportos que de fato existem no simulador (`query = query.Where(a => a.IsInSimulator)`). Pistas inexistentes na instalação do usuário recebem `IsInSimulator = false` e são completamente excluídas da geração.
+- **Enriquecimento Híbrido (DECEA / ANAC + MSFS 2024)**:
+  - Os dados oficiais ricos do CSV (cidades, nomes reais atualizados, Tiers regulatórios e códigos ICAO modernos) são preservados para o planejamento do piloto.
+  - Implementado o serviço `MsfsScenerySyncService` que executa correlação espacial ultra-rápida (grid espacial de 0.5°):
+    - **22.665 aeródromos** identificados com correspondência exata de ICAO (distância <= 5 NM).
+    - **3.309 divergências** identificadas e correlacionadas automaticamente (pistas existentes no MSFS sob idents legados/alternativos dentro de 3 NM, ex: `SBPG` ➔ `SSZW` Ponta Grossa com dist 0.004 NM).
+    - **4.317 aeródromos fictícios ou não modelados** excluídos da geração de voos.
+- **Exibição Dual de ICAO na Interface**:
+  - **Quadro de Missões**: Na coluna `DESTINO`, além do ICAO oficial e da cidade, quando há divergência o card exibe um badge visual ciano monoespaçado `[MSFS: SSZW]`.
+  - **Pré-Despacho Operacional**: Exibe `SBPG (MSFS: SSZW)`.
+  - **Itinerário do Briefing**: As pernas multi-leg e títulos exibem o destino acompanhado do ident simulado.
+  - **Gatekeeper Pré-Voo**: Valida a presença da aeronave na rampa tanto pelo código ICAO oficial quanto pelo ident MSFS (ex: se a aeronave spawnar em `SSZW`, o Gatekeeper reconhece como a posição correta de `SBPG` e libera o voo).
+  - **Voo de Translado (Ferry Flight)**: A busca de aeródromos agora aceita indistintamente o ICAO oficial (`SBPG`) ou o ident do simulador (`SSZW`).
+
+## 2026-11-08 - Calibração Tipográfica e Aumento Geral de Escala Visual (Legibilidade Total)
+- **Remoção de Badge Redundante**:
+  - Removido o badge `[Cat 1: CIAC / Escola]` que aparecia repetido ao lado do título principal `QUADRO DE MISSÕES & CONTRATOS`, eliminando poluição visual no cabeçalho.
+- **Aumento Proporcional de Fontes em Todas as Seções do Quadro de Missões**:
+  - **Cabeçalho & KPIs**: Título expandido para 22px, métricas rápidas de 10px/18px para 11.5px/22px, e homologação para 15px.
+  - **Filtros e Controles**: Chips de categoria de 11px para 12px com respiro ampliado (12x5px), caixa de busca com altura de 36px e fonte 12.5px, e botões `[🔄 METAR]` e `[LIMPAR]` ampliados para 11.5px.
+  - **Tabela Densa de Missões (DataGrid)**: Altura das linhas aumentada para 50px, cabeçalhos de coluna aumentados para 11.5px/12px, códigos ICAO ampliados para 14px, cidades e metadados para 11px, valores financeiros para 14.5px e larguras de coluna recalculadas para eliminar qualquer corte de texto.
+  - **Pré-Despacho Operacional**: Resumo de rota aumentado para 21px, indicadores técnicos (ETE, Consumo, Distância) ampliados para 11px/18px, descrição da missão aumentada para 13.5px com entrelinha de 19px, e botão primário de despacho ampliado para 15px bold.

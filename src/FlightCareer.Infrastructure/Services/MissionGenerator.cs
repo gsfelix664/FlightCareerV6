@@ -12,11 +12,13 @@ namespace FlightCareer.Infrastructure.Services
     public class MissionGenerator : IMissionGenerator
     {
         private readonly AppDbContext _context;
+        private readonly IHubDataService _hubService;
         private readonly Random _random = new();
 
-        public MissionGenerator(AppDbContext context)
+        public MissionGenerator(AppDbContext context, IHubDataService? hubService = null)
         {
             _context = context;
+            _hubService = hubService ?? new HubDataService();
         }
 
         public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport)
@@ -71,11 +73,11 @@ namespace FlightCareer.Infrastructure.Services
             // Cota de missões visíveis proporcional ao porte do aeroporto
             int targetCount = currentAirport.Tier switch
             {
-                1 => 70, // Grandes Hubs
-                2 => 50, // Regionais Médios
-                3 => 35, // Municipais / Interior
-                4 => 20, // Pistas Remotas / Não Pavimentadas
-                _ => 20
+                1 => 200, // Grandes Hubs Internacionais (mínimo de 200 missões ativas)
+                2 => 120, // Regionais Médios / Capitais Estaduais / Polos de Instrução
+                3 => 60,  // Municipais / Interior / Aeroclubes Locais
+                4 => 25,  // Pistas Remotas / Não Pavimentadas / Fazendas
+                _ => 25
             };
 
             if (currentMktMissions.Count < targetCount)
@@ -88,11 +90,13 @@ namespace FlightCareer.Infrastructure.Services
                 int maxAttempts = needed * 4;
                 int attempts = 0;
 
+                var calibratedCategories = GetCalibratedCategories(currentAirport, tierConfig);
+
                 while (newMissions.Count < needed && attempts < maxAttempts)
                 {
                     attempts++;
 
-                    var category = PickWeighted(tierConfig.Categories);
+                    var category = PickWeighted(calibratedCategories);
                     if (category == null) continue;
 
                     var subCategory = PickWeighted(category.SubCategories);
@@ -142,6 +146,8 @@ namespace FlightCareer.Infrastructure.Services
             double cargoWeight = lbsRule != null ? _random.Next(lbsRule.Min, lbsRule.Max + 1) : 0;
 
             var query = _context.Airports.AsQueryable();
+            // Filtrar estritamente apenas aeroportos verificados e existentes no MSFS
+            query = query.Where(a => a.IsInSimulator);
             query = query.Where(a => allowedTiers.Contains(a.Tier));
             if (sub.RequiresHardSurface) query = query.Where(a => a.Tier <= 3);
 
@@ -235,6 +241,30 @@ namespace FlightCareer.Infrastructure.Services
                 preferredList.AddRange(hubs);
             }
 
+            // 4. Incorporar Hubs dinâmicos via HubDataService (JSON) de acordo com o perfil de AERODROMOS_PRINCIPAIS.txt
+            var dynamicHubs = sub.Id switch
+            {
+                "1.1.1" => _hubService.GetHubs(HubType.CommercialPax, origin.Country),
+                "1.1.2" => _hubService.GetHubs(HubType.CommercialPax, "GLOBAL"),
+                "1.2.1" => _hubService.GetHubs(HubType.Cargo, origin.Country),
+                "1.2.2" => _hubService.GetHubs(HubType.Cargo, "GLOBAL"),
+                "1.3.1" => _hubService.GetHubs(HubType.Executive, origin.Country),
+                "1.3.3" or "2.4.1" => _hubService.GetHubs(HubType.Maintenance, origin.Country),
+                "2.1.1" => _hubService.GetHubs(HubType.Feeder, origin.Country).Concat(_hubService.GetHubs(HubType.CommercialPax, origin.Country)).ToList(),
+                "2.1.2" => _hubService.GetHubs(HubType.Feeder, origin.Country),
+                "2.2.1" or "3.2.1" or "4.1.1" or "4.2.1" or "4.2.2" or "4.2.3" => _hubService.GetHubs(HubType.Agro, origin.Country),
+                "2.3.1" or "2.3.2" => _hubService.GetHubs(HubType.Cargo, origin.Country),
+                "3.1.1" or "3.1.2" => _hubService.GetHubs(HubType.Executive, origin.Country),
+                "3.3.1" or "3.3.2" or "3.3.3" or "4.3.1" => _hubService.GetHubs(HubType.Health, origin.Country),
+                "3.4.1" or "3.4.2" or "3.4.3" => _hubService.GetHubs(HubType.Instruction, origin.Country),
+                _ => (IReadOnlyList<string>)Array.Empty<string>()
+            };
+
+            if (dynamicHubs.Any())
+            {
+                preferredList.AddRange(dynamicHubs);
+            }
+
             var preferredCandidates = validDestinations.Where(x => preferredList.Contains(x.Airport.ICAO)).ToList();
             var selected = preferredCandidates.Any() ? preferredCandidates[_random.Next(preferredCandidates.Count)] : validDestinations[_random.Next(validDestinations.Count)];
 
@@ -305,6 +335,8 @@ namespace FlightCareer.Infrastructure.Services
                 Description = sub.Description,
                 OriginICAO = origin.ICAO,
                 DestinationICAO = dest.ICAO,
+                OriginMsfsIdent = origin.MsfsIdent ?? origin.ICAO,
+                DestinationMsfsIdent = dest.MsfsIdent ?? dest.ICAO,
                 DistanceNM = Math.Round(dist, 0),
                 PassengerCount = paxCount,
                 LuggageWeightLbs = Math.Round(luggageWeightLbs, 0),
@@ -318,6 +350,124 @@ namespace FlightCareer.Infrastructure.Services
                 RequiredTier = (CompanyTier)(int)requiredCategory,
                 MissionCategoryType = categoryType
             };
+        }
+
+        private List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig)
+        {
+            var categories = tierConfig.Categories.Select(c => new CategoryConfig
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Weight = c.Weight,
+                SubCategories = c.SubCategories
+            }).ToList();
+
+            var hubTypes = _hubService.GetHubTypesForAirport(airport.ICAO);
+            if (!hubTypes.Any()) return categories;
+
+            // Se for Hub de Instrução e o Tier não possui nativamente a Categoria 3.4 (ex: Tier 1),
+            // importamos a definição de Categoria 3.4
+            if (hubTypes.Contains(HubType.Instruction) && !categories.Any(c => c.Id == "3.4"))
+            {
+                foreach (var t in MissionRules.Rules.Values)
+                {
+                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.4");
+                    if (found != null)
+                    {
+                        categories.Add(new CategoryConfig
+                        {
+                            Id = found.Id,
+                            Name = found.Name,
+                            Weight = 10,
+                            SubCategories = found.SubCategories
+                        });
+                        break;
+                    }
+                }
+            }
+
+            // Se for Hub de Saúde / Aeromédico e o Tier não possui nativamente a Categoria 3.3 (ex: Tier 1/2),
+            // importamos a definição de Categoria 3.3 (Saúde / Remoção UTI Aérea)
+            if (hubTypes.Contains(HubType.Health) && !categories.Any(c => c.Id == "3.3"))
+            {
+                foreach (var t in MissionRules.Rules.Values)
+                {
+                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.3");
+                    if (found != null)
+                    {
+                        categories.Add(new CategoryConfig
+                        {
+                            Id = found.Id,
+                            Name = found.Name,
+                            Weight = 5,
+                            SubCategories = found.SubCategories
+                        });
+                        break;
+                    }
+                }
+            }
+
+            // Aplicamos bônus aditivos para cada perfil de Hub em que o aeroporto se enquadra.
+            // Isso resolve matematicamente o problema de aeródromos híbridos (ex: SBKP = Carga + Pax + Manutenção):
+            // Cada vocação contribui proporcionalmente para o conjunto sem anular as demais.
+            foreach (var hubType in hubTypes)
+            {
+                switch (hubType)
+                {
+                    case HubType.Instruction:
+                        AddCategoryWeight(categories, "3.4", 45);
+                        break;
+
+                    case HubType.Cargo:
+                        AddCategoryWeight(categories, "1.2", 35);
+                        AddCategoryWeight(categories, "2.3", 30);
+                        break;
+
+                    case HubType.CommercialPax:
+                        AddCategoryWeight(categories, "1.1", 40);
+                        AddCategoryWeight(categories, "2.1", 35);
+                        break;
+
+                    case HubType.Executive:
+                        AddCategoryWeight(categories, "1.3", 30);
+                        AddCategoryWeight(categories, "2.2", 25);
+                        AddCategoryWeight(categories, "3.1", 35);
+                        break;
+
+                    case HubType.Maintenance:
+                        AddCategoryWeight(categories, "1.3", 20);
+                        AddCategoryWeight(categories, "2.4", 25);
+                        break;
+
+                    case HubType.Feeder:
+                        AddCategoryWeight(categories, "2.1", 30);
+                        AddCategoryWeight(categories, "4.1", 20);
+                        break;
+
+                    case HubType.Agro:
+                        AddCategoryWeight(categories, "2.2", 25);
+                        AddCategoryWeight(categories, "3.2", 35);
+                        AddCategoryWeight(categories, "4.1", 25);
+                        AddCategoryWeight(categories, "4.2", 30);
+                        break;
+
+                    case HubType.Health:
+                        AddCategoryWeight(categories, "3.3", 35);
+                        AddCategoryWeight(categories, "4.3", 25);
+                        break;
+                }
+            }
+
+            return categories;
+        }
+
+        private static void AddCategoryWeight(List<CategoryConfig> categories, string categoryId, double bonus)
+        {
+            var cat = categories.FirstOrDefault(c => c.Id == categoryId);
+            if (cat != null)
+            {
+                cat.Weight += bonus;
+            }
         }
 
         private T? PickWeighted<T>(IEnumerable<T> items) where T : class

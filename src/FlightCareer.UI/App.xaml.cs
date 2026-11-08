@@ -73,6 +73,20 @@ namespace FlightCareer.UI
                             });
                         });
                     }
+
+                    // Sincronização automática com cenários do MSFS 2024 (Little Navmap DB)
+                    var msfsSync = scope.ServiceProvider.GetRequiredService<IMsfsScenerySyncService>();
+                    if (await msfsSync.NeedsSyncAsync())
+                    {
+                        await msfsSync.SyncAirportsAsync((status, progress) =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                splash.StatusLabel.Text = status;
+                                splash.ProgressBar.Value = progress * 100;
+                            });
+                        });
+                    }
                 }
 
                 // 3. Fechar Splash e abrir Login
@@ -112,11 +126,14 @@ namespace FlightCareer.UI
 
             services.AddSingleton<IPilotRepository, PilotRepository>();
             services.AddSingleton<IDataSeeder, DataSeeder>();
+            services.AddSingleton<IHubDataService, HubDataService>();
+            services.AddSingleton<IMsfsScenerySyncService, MsfsScenerySyncService>();
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
             services.AddSingleton<FlightService>();
 
             services.AddSingleton<SimConnectService>();
             services.AddSingleton<Services.FlightMonitor>();
+            services.AddSingleton<MetarService>();
 
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<LoginWindow>(s => new LoginWindow
@@ -132,9 +149,11 @@ namespace FlightCareer.UI
 
             services.AddSingleton<MarketViewModel>();
             services.AddSingleton<HangarViewModel>();
+            services.AddSingleton<FlightLogsViewModel>();
             services.AddSingleton<DebugViewModel>(s => new DebugViewModel(
                 s.GetRequiredService<SimConnectService>(),
-                s.GetRequiredService<AppDbContext>()));
+                s.GetRequiredService<AppDbContext>(),
+                s));
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<MainWindow>(s => new MainWindow
             {
@@ -144,6 +163,12 @@ namespace FlightCareer.UI
             services.AddTransient<DebugWindow>(s => new DebugWindow
             {
                 DataContext = s.GetRequiredService<DebugViewModel>()
+            });
+
+            services.AddSingleton<DebugOverlayViewModel>();
+            services.AddTransient<DebugOverlayWindow>(s => new DebugOverlayWindow
+            {
+                DataContext = s.GetRequiredService<DebugOverlayViewModel>()
             });
         }
     }
