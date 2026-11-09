@@ -120,6 +120,7 @@ namespace FlightCareer.UI
 
             // Registrar AppDbContext transient a partir da fábrica para compatibilidade de DI direta
             services.AddTransient<AppDbContext>(sp => sp.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+            services.AddTransient<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());
 
             services.AddSingleton<IPilotRepository, PilotRepository>();
             services.AddSingleton<IDataSeeder, DataSeeder>();

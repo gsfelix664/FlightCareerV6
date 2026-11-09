@@ -1027,3 +1027,12 @@ Ao implementar este plano, o agente executor deve:
   - **Taxas de Pouso**: Proporcionais ao MTOW estimado da aeronave e porte do aeroporto de destino (Tier 1: $250 + $0.035/lb; Tier 2: $80 + $0.015/lb; Tier 3: $25 + $0.005/lb; Tier 4 Fazendas/Remotas: **GRATUITO / $0**).
   - **Depreciação Patrimonial**: Horas de voo debitadas do TBO de motor e inspeções de 50h/100h com interdição automática de aeronave caso vençam sem manutenção.
 - **Validação de Build**: Compilação executada com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.
+
+## 2026-11-09 - Correção de Resolução de Dependência DI (IAppDbContext)
+- **Diagnóstico da Causa-Raiz**:
+  - Ao carregar o perfil de piloto (`LoginViewModel.cs:69`), a ativação do `MainViewModel` tentava resolver o serviço `MissionGenerator` e `FlightService`.
+  - Ambos dependem da interface `IAppDbContext` no construtor.
+  - No container de injeção de dependência (`App.xaml.cs`), havia apenas o registro de `AppDbContext` e `IDbContextFactory<AppDbContext>`, faltando a amarração da interface `IAppDbContext`, disparando a exceção: `Unable to resolve service for type 'FlightCareer.Application.Interfaces.IAppDbContext' while attempting to activate 'FlightCareer.Application.Services.MissionGenerator'`.
+- **Correção Aplicada**:
+  - Registrado `services.AddTransient<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());` em `App.xaml.cs`.
+- **Validação (@reviewer)**: Build executado com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.
