@@ -82,6 +82,7 @@ namespace FlightCareer.Infrastructure.Persistence
                 // Cenário MSFS 2024 e Divergências de ICAO
                 "ALTER TABLE Airports ADD COLUMN IsInSimulator INTEGER DEFAULT 0;",
                 "ALTER TABLE Airports ADD COLUMN MsfsIdent TEXT DEFAULT '';",
+                "ALTER TABLE Airports ADD COLUMN ElevationFt INTEGER DEFAULT 0;",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_IsInSimulator ON Airports(IsInSimulator);",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",

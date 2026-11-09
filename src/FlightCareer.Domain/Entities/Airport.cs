@@ -13,6 +13,7 @@ namespace FlightCareer.Domain.Entities
         public string Country { get; set; } = string.Empty;
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public int ElevationFt { get; set; }
         public int Tier { get; set; }
 
         public Coordinates Coordinates => new(Latitude, Longitude);

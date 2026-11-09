@@ -28,6 +28,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly Services.FlightMonitor _flightMonitor;
         private readonly Services.MetarService _metarService;
         private System.Timers.Timer? _metarRefreshTimer;
+        private System.Timers.Timer? _missionLifecycleTimer;
 
         [ObservableProperty] private string _pilotName = string.Empty;
         [ObservableProperty] private string _pilotCompanyName = string.Empty;
@@ -255,6 +256,12 @@ namespace FlightCareer.UI.ViewModels
             _metarRefreshTimer.AutoReset = true;
             _metarRefreshTimer.Start();
 
+            // Timer para Mundo Vivo: Ciclo de Vida de Missões (TTL & Churn de Pilotos Virtuais NPC a cada 60s)
+            _missionLifecycleTimer = new System.Timers.Timer(TimeSpan.FromSeconds(60).TotalMilliseconds);
+            _missionLifecycleTimer.Elapsed += async (s, e) => await ProcessMissionLifecycleAndChurnAsync();
+            _missionLifecycleTimer.AutoReset = true;
+            _missionLifecycleTimer.Start();
+
             ShowMissionsCommand = new RelayCommand(() => CurrentView = "Missions");
             ShowBriefingCommand = new AsyncRelayCommand(async () => {
                 await RefreshBriefingAircraftAsync();
@@ -425,6 +432,24 @@ namespace FlightCareer.UI.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[MainViewModel] Erro ao atualizar mercado: {ex.Message}");
+            }
+        }
+
+        private async Task ProcessMissionLifecycleAndChurnAsync()
+        {
+            if (string.IsNullOrEmpty(PilotName) || string.IsNullOrEmpty(CurrentAirportICAO) || _flightMonitor.IsFlightActive) return;
+
+            try
+            {
+                // Mundo Vivo: executa churn, expiração de TTL e reposição caso estejamos na tela de missões
+                if (CurrentView == "Missions")
+                {
+                    await InitializeForPilotAsync(PilotName);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MissionLifecycle] Erro no ciclo de vida e churn: {ex.Message}");
             }
         }
 
@@ -704,6 +729,29 @@ namespace FlightCareer.UI.ViewModels
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Warning);
                 return;
+            }
+
+            // Checagem de Compatibilidade da Aeronave Ativa (Prevenir absurdos operacionais: Cessna 152 com 50 pax ou Boeing 737 em fazenda)
+            var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
+            if (activeAircraft?.AircraftType != null)
+            {
+                var type = activeAircraft.AircraftType;
+                double totalBatchPayload = itemsToAccept.Sum(m => m.PayloadLbs);
+                int totalBatchPax = itemsToAccept.Sum(m => m.PassengerCount);
+
+                if (totalBatchPayload > type.MaxPayloadLbs || totalBatchPax > type.MaxPax)
+                {
+                    var capacityWarning = System.Windows.MessageBox.Show(
+                        $"Aviso de Capacidade Operacional:\n\n" +
+                        $"Sua aeronave ativa ({type.Model}) possui capacidade máxima de {type.MaxPayloadLbs:N0} LBS e {type.MaxPax} PAX.\n" +
+                        $"O conjunto selecionado totaliza {totalBatchPayload:N0} LBS e {totalBatchPax} PAX.\n\n" +
+                        $"Deseja aceitar mesmo assim (ex: para realizar em múltiplos voos ou trocar de aeronave no Hangar)?",
+                        "Alerta de Capacidade da Aeronave",
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Question);
+
+                    if (capacityWarning != System.Windows.MessageBoxResult.Yes) return;
+                }
             }
 
             // Modal de Confirmação com detalhes

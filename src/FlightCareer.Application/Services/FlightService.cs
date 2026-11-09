@@ -168,11 +168,53 @@ namespace FlightCareer.Application.Services
                     }
                 }
 
+                // 3. Custos Operacionais: Combustível Consumido (SimConnect) e Taxa de Pouso (MTOW & Classificação)
+                double fuelUsed = outcome.FuelUsed;
+                string fuelType = aircraft.AircraftType?.FuelType ?? "AVGAS";
+                double fuelPrice = FuelPriceService.GetCurrentPrice(fuelType);
+                double fuelCost = Math.Round(fuelUsed * fuelPrice, 2);
+
+                if (fuelCost > 0)
+                {
+                    pilot.Balance -= fuelCost;
+                    _context.FinancialTransactions.Add(new FinancialTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        PilotId = pilot.Id,
+                        Date = DateTime.Now,
+                        Type = TransactionType.Expense,
+                        Category = "Combustível",
+                        Amount = fuelCost,
+                        Description = $"Combustível consumido ({fuelUsed:F1} GAL {fuelType} @ {fuelPrice:C2}/gal)"
+                    });
+                }
+
+                // Cálculo da Taxa de Pouso baseada no MTOW e classificação do aeroporto
+                double mtowLbs = aircraft.AircraftType != null 
+                    ? (aircraft.AircraftType.MaxPayloadLbs * 2.5 + aircraft.AircraftType.FuelTankGallons * 6.0) 
+                    : 2500;
+
+                double landingFee = CalculateLandingFee(destAirport, mtowLbs);
+                if (landingFee > 0)
+                {
+                    pilot.Balance -= landingFee;
+                    _context.FinancialTransactions.Add(new FinancialTransaction
+                    {
+                        Id = Guid.NewGuid(),
+                        PilotId = pilot.Id,
+                        Date = DateTime.Now,
+                        Type = TransactionType.Expense,
+                        Category = "Taxa de Pouso",
+                        Amount = landingFee,
+                        Description = $"Taxa de Pouso em {destinationIcao} (Tier {airportTier}, MTOW: {mtowLbs:N0} lbs)"
+                    });
+                }
+
                 pilot.Balance += totalRevenue;
                 pilot.ExperiencePoints += totalXP;
                 pilot.TotalHours += hours;
 
-                // 3. Registrar Voo no Logbook
+                // 4. Registrar Voo no Logbook
                 var flight = new Flight
                 {
                     Id = Guid.NewGuid(),
@@ -191,10 +233,12 @@ namespace FlightCareer.Application.Services
 
                 outcome.Success = true;
                 outcome.Revenue = totalRevenue;
+                outcome.FuelCost = fuelCost;
+                outcome.LandingFee = landingFee;
                 outcome.XP = totalXP;
                 outcome.CompletedMissions = missionsDone;
                 outcome.RemainingMissions = missionsRemaining;
-                outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%)";
+                outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2}";
                 return outcome;
             }
             catch (Exception ex)
@@ -203,6 +247,28 @@ namespace FlightCareer.Application.Services
                 outcome.Message = ex.Message;
                 return outcome;
             }
+        }
+        public static double CalculateLandingFee(Airport? airport, double mtowLbs)
+        {
+            if (airport == null || airport.Tier == 4)
+            {
+                // Pistas remotas, aeródromos rurais e fazendas cobram taxa ZERO
+                return 0.0;
+            }
+
+            return airport.Tier switch
+            {
+                // Tier 1: Grandes Hubs Internacionais (taxas elevadas proporcionais ao porte)
+                1 => Math.Round(250.0 + (mtowLbs * 0.035), 2),
+
+                // Tier 2: Regionais Médios / Capitais Estaduais
+                2 => Math.Round(80.0 + (mtowLbs * 0.015), 2),
+
+                // Tier 3: Aeródromos Municipais / Interior Pavimentado
+                3 => Math.Round(25.0 + (mtowLbs * 0.005), 2),
+
+                _ => 0.0
+            };
         }
     }
 }

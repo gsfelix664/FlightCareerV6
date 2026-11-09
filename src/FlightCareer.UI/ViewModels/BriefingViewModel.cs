@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Enums;
+using FlightCareer.Application.Services;
 using FlightCareer.UI.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -279,6 +281,7 @@ namespace FlightCareer.UI.ViewModels
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "📍", ParameterName = "LOCALIZAÇÃO / RAMPA", SoftwareValue = "Aguardando Base...", SimStatusValue = "Aguardando GPS...", IsOk = false });
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "👥", ParameterName = "PAYLOAD & PASSAGEIROS", SoftwareValue = "Aguardando Manifesto...", SimStatusValue = "Aguardando W&B...", IsOk = false });
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "⛽", ParameterName = "COMBUSTÍVEL NOS TANQUES", SoftwareValue = "Aguardando Dados...", SimStatusValue = "Aguardando Tanques...", IsOk = false });
+                ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "🛬", ParameterName = "VIABILIDADE FÍSICA DE PISTA", SoftwareValue = "Aguardando Rota...", SimStatusValue = "Aguardando Pistas...", IsOk = false });
             }
         }
 
@@ -739,11 +742,61 @@ namespace FlightCareer.UI.ViewModels
                 cleanSim: !connectionOk ? "--" : $"{FuelQuantity:F1} gal ({FuelQuantity * 6.0:N0} lbs)",
                 toleranceBadge: fuelTolerance);
 
-            bool allChecksPassed = connectionOk && aircraftOk && locationOk && fuelOk && payloadOk;
+            // 5. Viabilidade Física de Pista (Algoritmo Aeronave vs Pista)
+            bool runwayOk = true;
+            string runwaySoftware = "Pistas da rota em conformidade";
+            string runwaySim = "Pista compatível";
+            string runwayExplanation = "Comprimento e superfície viáveis para a operação.";
+            string runwayTolerance = "✓ VIÁVEL";
+
+            if (AcceptedMissions.Any())
+            {
+                var destIcaos = AcceptedMissions.Select(m => m.DestinationICAO).Distinct().ToList();
+                var aircraftType = _context.PilotAircrafts
+                    .Include(pa => pa.AircraftType)
+                    .FirstOrDefault(pa => pa.Prefix == HangarAircraftPrefix)?.AircraftType;
+
+                if (aircraftType != null)
+                {
+                    var calc = new RunwayViabilityCalculator();
+                    foreach (var destIcao in destIcaos)
+                    {
+                        var destApt = _context.Airports.FirstOrDefault(a => a.ICAO == destIcao);
+                        if (destApt != null)
+                        {
+                            var runways = _context.Runways.Where(r => r.AirportIdent == destApt.ICAO).ToList();
+                            var viability = calc.CalculateViability(aircraftType, destApt, runways, PilotCategory.Category3_AirTaxi);
+
+                            if (!viability.IsViable)
+                            {
+                                runwayOk = false;
+                                runwaySoftware = $"Requer: {viability.RequiredRunwayFt:N0} FT ({viability.SafetyFactor:F2}x)";
+                                runwaySim = $"Pista {destApt.ICAO}: {viability.AvailableRunwayFt:N0} FT";
+                                runwayExplanation = viability.Reason;
+                                runwayTolerance = "INVIÁVEL";
+                                break;
+                            }
+                            else
+                            {
+                                runwaySoftware = $"Requer: {viability.RequiredRunwayFt:N0} FT";
+                                runwaySim = $"Disp: {viability.AvailableRunwayFt:N0} FT ({viability.BestRunwaySurface})";
+                                runwayExplanation = $"Pista em {destApt.ICAO} ({viability.AvailableRunwayFt:N0} FT) atende ao mínimo operacional de {viability.RequiredRunwayFt:N0} FT com segurança.";
+                            }
+                        }
+                    }
+                }
+            }
+
+            UpdateChecklistItem(4, "🛬", "VIABILIDADE FÍSICA DE PISTA", runwaySoftware, runwaySim, runwayOk, runwayExplanation, runwayOk ? "OK" : "INSUFICIENTE",
+                cleanPlanned: runwaySoftware,
+                cleanSim: runwaySim,
+                toleranceBadge: runwayTolerance);
+
+            bool allChecksPassed = connectionOk && aircraftOk && locationOk && fuelOk && payloadOk && runwayOk;
             IsGatekeeperAllOk = allChecksPassed;
             CanStartFlight = allChecksPassed;
 
-            int passedCount = (aircraftOk ? 1 : 0) + (locationOk ? 1 : 0) + (payloadOk ? 1 : 0) + (fuelOk ? 1 : 0);
+            int passedCount = (aircraftOk ? 1 : 0) + (locationOk ? 1 : 0) + (payloadOk ? 1 : 0) + (fuelOk ? 1 : 0) + (runwayOk ? 1 : 0);
             if (!connectionOk)
             {
                 GatekeeperSummaryText = "MSFS DESCONECTADO";
@@ -754,7 +807,7 @@ namespace FlightCareer.UI.ViewModels
             }
             else if (allChecksPassed)
             {
-                GatekeeperSummaryText = "4/4 SISTEMAS CONFORMES";
+                GatekeeperSummaryText = "5/5 SISTEMAS CONFORMES";
                 GatekeeperSummaryIcon = "🟢";
                 GatekeeperSummaryBadgeBg = "#0D2B1E";
                 GatekeeperSummaryBadgeBorder = "#1B4D3E";
@@ -762,7 +815,7 @@ namespace FlightCareer.UI.ViewModels
             }
             else
             {
-                GatekeeperSummaryText = $"{passedCount}/4 SINCRONIZADOS";
+                GatekeeperSummaryText = $"{passedCount}/5 SINCRONIZADOS";
                 GatekeeperSummaryIcon = "⚠️";
                 GatekeeperSummaryBadgeBg = "#2D220D";
                 GatekeeperSummaryBadgeBorder = "#5C4408";
@@ -814,6 +867,12 @@ namespace FlightCareer.UI.ViewModels
                 WeightStatusText = $"PAYLOAD DIVERGENTE ({reportedSimPayload:F0} lbs)";
                 WeightStatusColor = "#FFB300";
                 GatekeeperBlockedReason = $"Voo bloqueado: Ajuste o Peso e Balanceamento (W&B) no MSFS para {plannedPayload:F0} lbs.";
+            }
+            else if (!runwayOk)
+            {
+                WeightStatusText = "OPERAÇÃO INVIÁVEL NA PISTA DE DESTINO";
+                WeightStatusColor = "#EF4444";
+                GatekeeperBlockedReason = $"Voo bloqueado: {runwayExplanation}";
             }
             else
             {

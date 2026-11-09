@@ -6,6 +6,7 @@ using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -36,12 +37,230 @@ namespace FlightCareer.Infrastructure.Services
             return _context.Airports.Any();
         }
 
+        public static string? LocateLittleNavmapDatabase()
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var candidateDirs = new[]
+            {
+                Path.Combine(appData, "ABarthel", "little_navmap_db"),
+                Path.Combine("C:\\Program Files", "Little Navmap", "little_navmap_db"),
+                Path.Combine("C:\\Program Files (x86)", "Little Navmap", "little_navmap_db")
+            };
+
+            var priorityFiles = new[]
+            {
+                "little_navmap_msfs24.sqlite",
+                "little_navmap_msfs.sqlite",
+                "little_navmap_navigraph.sqlite"
+            };
+
+            foreach (var dir in candidateDirs)
+            {
+                if (!Directory.Exists(dir)) continue;
+
+                foreach (var file in priorityFiles)
+                {
+                    var fullPath = Path.Combine(dir, file);
+                    if (File.Exists(fullPath)) return fullPath;
+                }
+
+                var anyMsfs = Directory.GetFiles(dir, "*msfs*.sqlite").FirstOrDefault();
+                if (anyMsfs != null) return anyMsfs;
+
+                var anySqlite = Directory.GetFiles(dir, "*.sqlite").FirstOrDefault();
+                if (anySqlite != null) return anySqlite;
+            }
+
+            return null;
+        }
+
         public async Task SeedAsync(Action<string, double>? progressCallback = null)
         {
             await SeedAircraftsAsync(progressCallback);
+
+            var lnmPath = LocateLittleNavmapDatabase();
+            if (!string.IsNullOrEmpty(lnmPath) && File.Exists(lnmPath))
+            {
+                progressCallback?.Invoke("Importando base global de aeroportos e pistas do Little Navmap (MSFS)...", 0.25);
+                bool lnmSuccess = await SeedFromLittleNavmapAsync(lnmPath, progressCallback);
+                if (lnmSuccess)
+                {
+                    progressCallback?.Invoke("Enriquecendo aeroportos com municípios e países do CSV...", 0.70);
+                    await EnrichFromCsvAsync(progressCallback);
+                    progressCallback?.Invoke("Base de dados global do simulador pronta!", 1.0);
+                    return;
+                }
+            }
+
+            // Fallback para os arquivos CSV tradicionais
             var runwaySurfaces = await GetRunwaySurfacesAsync(progressCallback);
             await SeedAirportsAsync(progressCallback, runwaySurfaces);
             await SeedRunwaysAsync(progressCallback);
+        }
+
+        private async Task<bool> SeedFromLittleNavmapAsync(string lnmPath, Action<string, double>? progressCallback)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            using var cmd = connection.CreateCommand();
+
+            try
+            {
+                // 1. Conectar banco do Little Navmap no SQLite da aplicação
+                cmd.CommandText = $"ATTACH DATABASE '{lnmPath.Replace("'", "''")}' AS lnm;";
+                await cmd.ExecuteNonQueryAsync();
+
+                progressCallback?.Invoke("Gravando mais de 80.000 aeródromos nativos do MSFS...", 0.35);
+
+                // 2. Inserir Aeródromos com ICAO oficial do simulador e elevação real
+                cmd.CommandText = @"
+                    INSERT OR IGNORE INTO Airports (Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, Tier, IsInSimulator, MsfsIdent)
+                    SELECT 
+                        hex(randomblob(16)),
+                        COALESCE(ident, icao),
+                        COALESCE(name, 'Aeródromo MSFS'),
+                        COALESCE(city, ''),
+                        COALESCE(country, region, ''),
+                        laty,
+                        lonx,
+                        CAST(altitude AS INTEGER),
+                        CASE 
+                            WHEN longest_runway_length >= 7500 AND num_runway_hard > 0 THEN 1
+                            WHEN longest_runway_length >= 4500 AND num_runway_hard > 0 THEN 2
+                            WHEN num_runway_hard > 0 OR longest_runway_length >= 2500 THEN 3
+                            ELSE 4
+                        END,
+                        1,
+                        ident
+                    FROM lnm.airport
+                    WHERE is_closed = 0 AND ident IS NOT NULL AND length(ident) >= 3;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+
+                progressCallback?.Invoke("Gravando pistas e superfícies operacionais do simulador...", 0.55);
+
+                // 3. Inserir Pistas reais com superfícies normalizadas e iluminação
+                cmd.CommandText = @"
+                    INSERT INTO Runways (Id, AirportIdent, LengthFt, WidthFt, Surface, IsLighted)
+                    SELECT 
+                        hex(randomblob(16)),
+                        a.ident,
+                        CAST(r.length AS INTEGER),
+                        CAST(r.width AS INTEGER),
+                        CASE r.surface
+                            WHEN 'A' THEN 'Asphalt'
+                            WHEN 'C' THEN 'Concrete'
+                            WHEN 'B' THEN 'Bituminous'
+                            WHEN 'G' THEN 'Grass'
+                            WHEN 'D' THEN 'Dirt'
+                            WHEN 'GR' THEN 'Gravel'
+                            WHEN 'W' THEN 'Water'
+                            WHEN 'S' THEN 'Sand'
+                            WHEN 'SN' THEN 'Snow'
+                            WHEN 'CR' THEN 'Coral'
+                            WHEN 'M' THEN 'Mat'
+                            WHEN 'T' THEN 'Tarmac'
+                            ELSE COALESCE(r.surface, 'Other')
+                        END,
+                        CASE WHEN r.edge_light IS NOT NULL AND r.edge_light != 'NO' THEN 1 ELSE 0 END
+                    FROM lnm.runway r
+                    JOIN lnm.airport a ON r.airport_id = a.airport_id
+                    WHERE a.ident IS NOT NULL;
+                ";
+                await cmd.ExecuteNonQueryAsync();
+
+                // 4. Desconectar LNM
+                cmd.CommandText = "DETACH DATABASE lnm;";
+                await cmd.ExecuteNonQueryAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DataSeeder] Erro ao importar do Little Navmap: {ex.Message}");
+                try
+                {
+                    cmd.CommandText = "DETACH DATABASE lnm;";
+                    await cmd.ExecuteNonQueryAsync();
+                }
+                catch { }
+                return false;
+            }
+        }
+
+        private async Task EnrichFromCsvAsync(Action<string, double>? progressCallback)
+        {
+            var filePath = Path.Combine(_csvPath, "airports.csv");
+            if (!File.Exists(filePath)) return;
+
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            using var createCmd = connection.CreateCommand();
+            createCmd.CommandText = @"
+                CREATE TEMP TABLE IF NOT EXISTS CsvAirports (
+                    ident TEXT PRIMARY KEY,
+                    municipality TEXT,
+                    iso_country TEXT,
+                    csv_name TEXT,
+                    elevation_ft INTEGER
+                );
+                DELETE FROM CsvAirports;
+            ";
+            await createCmd.ExecuteNonQueryAsync();
+
+            using var reader = new StreamReader(filePath);
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            await csv.ReadAsync();
+            csv.ReadHeader();
+
+            using var transaction = connection.BeginTransaction();
+            using var insertCmd = connection.CreateCommand();
+            insertCmd.Transaction = transaction;
+            insertCmd.CommandText = "INSERT OR IGNORE INTO CsvAirports (ident, municipality, iso_country, csv_name, elevation_ft) VALUES (@ident, @municipality, @iso_country, @csv_name, @elevation_ft);";
+            
+            var pIdent = insertCmd.CreateParameter(); pIdent.ParameterName = "@ident"; insertCmd.Parameters.Add(pIdent);
+            var pMuni = insertCmd.CreateParameter(); pMuni.ParameterName = "@municipality"; insertCmd.Parameters.Add(pMuni);
+            var pCountry = insertCmd.CreateParameter(); pCountry.ParameterName = "@iso_country"; insertCmd.Parameters.Add(pCountry);
+            var pName = insertCmd.CreateParameter(); pName.ParameterName = "@csv_name"; insertCmd.Parameters.Add(pName);
+            var pElev = insertCmd.CreateParameter(); pElev.ParameterName = "@elevation_ft"; insertCmd.Parameters.Add(pElev);
+
+            while (await csv.ReadAsync())
+            {
+                var ident = csv.GetField<string>("ident")?.Trim().ToUpperInvariant();
+                if (string.IsNullOrEmpty(ident)) continue;
+
+                pIdent.Value = ident;
+                pMuni.Value = csv.GetField<string>("municipality") ?? "";
+                pCountry.Value = csv.GetField<string>("iso_country") ?? "";
+                pName.Value = csv.GetField<string>("name") ?? "";
+                pElev.Value = int.TryParse(csv.GetField<string>("elevation_ft"), out var el) ? el : 0;
+
+                await insertCmd.ExecuteNonQueryAsync();
+            }
+            await transaction.CommitAsync();
+
+            progressCallback?.Invoke("Aplicando municípios e países aos aeroportos...", 0.85);
+
+            using var updateCmd = connection.CreateCommand();
+            updateCmd.CommandText = @"
+                UPDATE Airports
+                SET 
+                    City = CASE WHEN City IS NULL OR City = '' THEN (SELECT municipality FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE City END,
+                    Country = CASE WHEN Country IS NULL OR length(Country) > 2 OR Country = '' THEN (SELECT iso_country FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE Country END,
+                    ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END
+                WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO);
+                
+                DROP TABLE IF EXISTS CsvAirports;
+            ";
+            await updateCmd.ExecuteNonQueryAsync();
         }
 
         private async Task<Dictionary<string, List<string>>> GetRunwaySurfacesAsync(Action<string, double>? progressCallback)
@@ -131,7 +350,7 @@ namespace FlightCareer.Infrastructure.Services
                 var type = csv.GetField<string>("type") ?? "";
 
                 // Filtros: 4 letras, não heliporto, não nulo
-                if (string.IsNullOrEmpty(icao) || icao.Length != 4 || type == "heliport" || processedIcaos.Contains(icao))
+                if (string.IsNullOrEmpty(icao) || icao.Length < 3 || type == "heliport" || processedIcaos.Contains(icao))
                     continue;
 
                 processedIcaos.Add(icao);
@@ -141,7 +360,6 @@ namespace FlightCareer.Infrastructure.Services
                 else if (type == "medium_airport") tier = 2;
                 else if (type == "small_airport")
                 {
-                    // Checar se tem pista pavimentada
                     if (runwaySurfaces.TryGetValue(icao, out var surfaces))
                     {
                         if (surfaces.Any(s => hardSurfaces.Any(h => s.Contains(h))))
@@ -158,7 +376,10 @@ namespace FlightCareer.Infrastructure.Services
                     Country = csv.GetField<string>("iso_country") ?? string.Empty,
                     Latitude = double.TryParse(csv.GetField<string>("latitude_deg"), CultureInfo.InvariantCulture, out var lat) ? lat : 0,
                     Longitude = double.TryParse(csv.GetField<string>("longitude_deg"), CultureInfo.InvariantCulture, out var lon) ? lon : 0,
-                    Tier = tier
+                    ElevationFt = int.TryParse(csv.GetField<string>("elevation_ft"), out var elev) ? elev : 0,
+                    Tier = tier,
+                    IsInSimulator = true,
+                    MsfsIdent = icao
                 };
                 airports.Add(airport);
                 count++;

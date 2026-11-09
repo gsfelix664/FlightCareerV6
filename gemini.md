@@ -1004,3 +1004,29 @@ Ao implementar este plano, o agente executor deve:
     - `FlightRules`: VFR, MVFR, IFR, LIFR.
   - Enriquecidas entidades de domínio (`Airport.cs` com `Coordinates` e `Classification`; `Runway.cs` com `SurfaceType`) preservando total compatibilidade com o esquema do EF Core / SQLite.
 - **Validação de Build**: Compilação realizada com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.
+
+## 2026-11-09 - Importação Little Navmap (MSFS), Viabilidade Física de Pista e Economia Viva (Mundo Vivo)
+- **Importação Direta Little Navmap + Enriquecimento CSV (83.095 Aeródromos & 47.076 Pistas)**:
+  - Implementada em `DataSeeder.cs` a importação de alta performance via SQLite nativo (`ATTACH DATABASE`) conectando diretamente à base de cenários compilada do Little Navmap (`little_navmap_msfs24.sqlite` / `little_navmap_msfs.sqlite` / `little_navmap_navigraph.sqlite` em `%APPDATA%\ABarthel\little_navmap_db` ou `C:\Program Files\Little Navmap\little_navmap_db`).
+  - Importados **83.095 aeródromos nativos do MSFS 2024** com idents oficiais do simulador (`ICAO = ident`), elevação real em pés (`ElevationFt`), coordenadas exatas e classificação de Tier (Tiers 1 a 4).
+  - Importadas **47.076 pistas** com comprimento, largura, superfícies normalizadas (Asphalt, Concrete, Grass, Dirt, Gravel, etc.) e iluminação noturna.
+  - Enriquecimento automático ultra-rápido com municípios (`municipality`) e países (`iso_country`) a partir de `airports.csv`.
+  - Recriação limpa do banco de dados `flightcareer.db` no diretório de execução, garantindo que 100% dos aeródromos da carreira existam no MSFS e utilizem a nomenclatura exata do simulador.
+- **Algoritmo de Viabilidade Física (Aeronave vs Pista)**:
+  - Implementados `IRunwayViabilityCalculator` e `RunwayViabilityCalculator`:
+    $$\text{RequiredRunway} = \text{MinRunwayBase} \times \left(1 + \frac{\max(0, \text{ElevationFt})}{1000} \times 0.10\right) \times \text{SafetyFactor} \times \text{SurfacePenalty}$$
+    - `SafetyFactor`: 1.25x para VFR Geral / Instrução (Cat 1/2) e 1.67x para RBAC 135 / Táxi Aéreo / Linha Aérea (Cat 3/4/5).
+    - `ElevationFt`: Correção de densidade do ar (+10% a cada 1.000 pés de elevação).
+    - `SurfacePenalty`: Pistas de terra/grama/cascalho aplicam atrito de +25% a +35% de pista requerida.
+    - Restrição de Pavimento: Aeronaves pesadas/jatos comerciais (Cat 4 e 5) exigem pista pavimentada rígida (Asfalto/Concreto).
+- **Prevenção de Absurdos Operacionais (Aeronave vs Missão vs Pista)**:
+  - `MissionGenerator`: Filtra aeródromos de destino com base em `MinRunwayDest` e `RequiresHardSurface`. Voos de Linha Regular (B737, A320) são gerados exclusivamente para grandes hubs (Tier 1 e Tier 2 pavimentados), impedindo geração de missões para fazendas (Tier 4). Missões de fazenda/agro focam em Tiers 3 e 4.
+  - `MainViewModel` (Aceite de Contratos): Valida se a carga/passageiros do pacote selecionado excede a capacidade física (`MaxPayloadLbs`, `MaxPax`) da aeronave ativa, alertando o piloto e evitando sobrecargas absurdas.
+  - `BriefingViewModel` (Gatekeeper Pré-Voo): Incorporado o 5º item do checklist ("VIABILIDADE FÍSICA DE PISTA"). Se o comprimento da pista ou superfície de destino for insuficiente para a aeronave, o Gatekeeper bloqueia o despacho e detalha o motivo operacional.
+- **Mundo Vivo: Ciclo de Vida e Churn Dinâmico das Missões**:
+  - Implementado timer em segundo plano (a cada 60s) que remove contratos com TTL vencido (`ExpirationTime < Now`), simula pilotos virtuais concorrentes (NPCs) aceitando contratos da região (5% a 10% de churn por ciclo) e repõe proceduralmente novas oportunidades para manter o quadro de contratos aquecido e dinâmico.
+- **Custos Operacionais Realistas (Combustível, Taxas de Pouso, Depreciação)**:
+  - **Combustível Gasto**: Apurado pelo SimConnect (`initialFuel - finalFuel`) e cobrado no pouso com base na cotação diária do combustível (`AVGAS` / `Jet-A`), debitando o saldo e registrando despesa.
+  - **Taxas de Pouso**: Proporcionais ao MTOW estimado da aeronave e porte do aeroporto de destino (Tier 1: $250 + $0.035/lb; Tier 2: $80 + $0.015/lb; Tier 3: $25 + $0.005/lb; Tier 4 Fazendas/Remotas: **GRATUITO / $0**).
+  - **Depreciação Patrimonial**: Horas de voo debitadas do TBO de motor e inspeções de 50h/100h com interdição automática de aeronave caso vençam sem manutenção.
+- **Validação de Build**: Compilação executada com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.

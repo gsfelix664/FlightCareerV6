@@ -161,7 +161,26 @@ namespace FlightCareer.Application.Services
                 query = query.Where(a => a.IsInSimulator);
             }
             query = query.Where(a => allowedTiers.Contains(a.Tier));
-            if (sub.RequiresHardSurface) query = query.Where(a => a.Tier <= 3);
+            if (sub.RequiresHardSurface) 
+            {
+                // Missões que exigem pista rígida (Linha Aérea / Jatos) não aceitam pistas de terra/grama de fazenda (Tier 4)
+                query = query.Where(a => a.Tier <= 3);
+            }
+            if (sub.MinRunwayDest >= 7000)
+            {
+                // Jatos pesados / Linha Regular de Alta Densidade (B737/A320/B777): Apenas grandes Hubs internacionais
+                query = query.Where(a => a.Tier == 1);
+            }
+            else if (sub.MinRunwayDest >= 4500)
+            {
+                // Aviação Regional Pesada / Turboprops / Jatos médios: Tiers 1 e 2
+                query = query.Where(a => a.Tier <= 2);
+            }
+            else if (sub.MinRunwayDest >= 2500)
+            {
+                // Táxi Aéreo / Charter: Tiers 1, 2 e 3
+                query = query.Where(a => a.Tier <= 3);
+            }
 
             if (sub.Id == "3.4.1") 
             {
