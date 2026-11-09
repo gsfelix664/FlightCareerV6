@@ -1,4 +1,6 @@
 using System;
+using FlightCareer.Domain.Enums;
+using FlightCareer.Domain.ValueObjects;
 
 namespace FlightCareer.Domain.Entities
 {
@@ -12,6 +14,9 @@ namespace FlightCareer.Domain.Entities
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public int Tier { get; set; }
+
+        public Coordinates Coordinates => new(Latitude, Longitude);
+        public AirportClassification Classification => (AirportClassification)Tier;
 
         // Integração de Cenário do Simulador (MSFS 2024 via Little Navmap)
         public bool IsInSimulator { get; set; } = false;

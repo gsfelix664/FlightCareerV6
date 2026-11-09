@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
@@ -12,7 +13,7 @@ namespace FlightCareer.UI.Services
     public enum DEFINITIONS { AircraftData }
     public enum EVENTS { FailureEvent, CrashedEvent }
 
-    public class SimConnectService
+    public class SimConnectService : ISimConnectService
     {
         private SimConnect? _simConnect;
         private const int WM_USER_SIMCONNECT = 0x0402;
@@ -55,10 +56,9 @@ namespace FlightCareer.UI.Services
         private HwndSource? _hwndSource;
         private System.Timers.Timer? _reconnectTimer;
 
-        public void Initialize(Window window)
+        public void Initialize(IntPtr windowHandle)
         {
-            var helper = new WindowInteropHelper(window);
-            _handle = helper.Handle;
+            _handle = windowHandle;
 
             _hwndSource = HwndSource.FromHwnd(_handle);
             _hwndSource.AddHook(WndProc);
@@ -68,6 +68,12 @@ namespace FlightCareer.UI.Services
                 if (!IsConnected) Connect();
             };
             _reconnectTimer.Start();
+        }
+
+        public void Initialize(Window window)
+        {
+            var helper = new WindowInteropHelper(window);
+            Initialize(helper.Handle);
         }
 
         public void Connect()

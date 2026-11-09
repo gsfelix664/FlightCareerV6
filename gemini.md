@@ -974,3 +974,33 @@ Ao implementar este plano, o agente executor deve:
     - `FerryFlightViewModel.cs`: Implementado carregamento robusto do piloto e aeronave ativa no banco, com fallbacks caso o hangar não venha pré-carregado.
     - Separadas as mensagens de validação em `FerryFlightViewModel.cs` para indicar com precisão a causa real (destino, piloto ou aeronave não selecionada).
 - **Validação**: Build executado com sucesso e verificação de integridade no banco de dados.
+
+## 2026-11-09 - Clean Architecture: Implementação das Fases 1, 2 e 3
+- **Fase 1: Criação de `FlightCareer.Application` e Desacoplamento de Casos de Uso**:
+  - Criado o projeto `FlightCareer.Application.csproj` (.NET 10.0), integrado à solução `FlightCareer.slnx`.
+  - Definida a interface `IAppDbContext` em `Application/Interfaces/IAppDbContext.cs` desacoplando as operações de banco do EF Core direto.
+  - Criadas interfaces de serviços essenciais: `IMissionGenerator`, `IHubDataService`, `IMsfsScenerySyncService`, `IDataSeeder`.
+  - Criados DTOs em `Application/DTOs/`: `FlightOutcome`, `MsfsSyncResult`, `MissionBriefingDto`, `FlightTelemetryDto`.
+  - Migrados serviços de negócio e orquestração de `Infrastructure` para `Application/Services`:
+    - `MissionGenerator.cs` e `MissionRules.cs` (geração de missões e regras de distribuição)
+    - `G20Destinations.cs` e `HubDataService.cs` (hubs e rotas mundiais)
+    - `FlightService.cs` (processamento de voo, XP e pagamentos)
+    - `EconomyServices.cs` e `FuelPriceService.cs` (economia dinâmica, inflação e combustível)
+  - Resolvida colisão de namespace entre `FlightCareer.Application` e `System.Windows.Application` no WPF com qualificadores explícitos e `GlobalUsings.cs`.
+- **Fase 2: Desacoplamento do SimConnect**:
+  - Criada a interface `ISimConnectService` em `FlightCareer.Application/Interfaces/ISimConnectService.cs`, padronizando conexão, desconexão, envio de comandos (fuel, payload, pause, failures, teleport) e recepção de telemetria.
+  - Implementada a interface `ISimConnectService` em `SimConnectService.cs` na camada UI, suportando tanto `IntPtr` genérico de janela quanto `Window` do WPF.
+  - Registrado `services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>())` no DI container em `App.xaml.cs`.
+- **Fase 3: Value Objects e Enums Ricos no Domínio**:
+  - Implementados Value Objects imutáveis em `FlightCareer.Domain/ValueObjects/`:
+    - `Coordinates`: Latitude/Longitude com validação, cálculo esférico de distância Haversine (`DistanceTo`) e rumo (`BearingTo`).
+    - `WeightLbs`: Representação tipada de peso em libras com conversões automáticas (`ToKg`, `FromKg`) e operadores aritméticos.
+    - `FuelGallons`: Representação tipada de volume de combustível com cálculo de densidade e massa (`ToWeightLbs` para Avgas e Jet-A) e conversão para litros.
+    - `Money`: Representação tipada monetária em USD com formatação contábil padrão do sistema (`FormatUsd`) e operadores de soma/multiplicação.
+  - Implementados Enums de domínio em `FlightCareer.Domain/Enums/`:
+    - `AirportClassification`: Tiers 1 a 4.
+    - `MissionType`: Instrução, SAE, Táxi Aéreo, Linha Aérea Regional, Linha Aérea Regular, Voo Ferry.
+    - `RunwaySurface`: Asfalto, Concreto, Grama, Terra, Cascalho, Água, Outros.
+    - `FlightRules`: VFR, MVFR, IFR, LIFR.
+  - Enriquecidas entidades de domínio (`Airport.cs` com `Coordinates` e `Classification`; `Runway.cs` com `SurfaceType`) preservando total compatibilidade com o esquema do EF Core / SQLite.
+- **Validação de Build**: Compilação realizada com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.

@@ -129,6 +129,7 @@ namespace FlightCareer.UI
             services.AddSingleton<FlightService>();
 
             services.AddSingleton<SimConnectService>();
+            services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>());
             services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
                 sp.GetRequiredService<SimConnectService>(),
                 sp.GetRequiredService<FlightService>(),
