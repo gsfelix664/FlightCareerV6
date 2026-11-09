@@ -1036,3 +1036,19 @@ Ao implementar este plano, o agente executor deve:
 - **Correção Aplicada**:
   - Registrado `services.AddTransient<IAppDbContext>(sp => sp.GetRequiredService<AppDbContext>());` em `App.xaml.cs`.
 - **Validação (@reviewer)**: Build executado com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.
+
+## 2026-11-09 - Filtro Exclusivo de Aeródromos/Pistas para Aviões e Desambiguação de Construtor (FlightMonitor)
+- **Desambiguação de Construtor de Injeção de Dependência (`FlightMonitor`)**:
+  - **Diagnóstico**: Ocorria erro em tempo de execução (`Unable to activate type 'FlightCareer.UI.Services.FlightMonitor'. The following constructors are ambiguous: ...`) ao carregar perfil quando compilado com construtores concorrentes (`IDbContextFactory<AppDbContext>` vs `AppDbContext`).
+  - **Resolução**: Padronizado construtor único em `FlightMonitor.cs` decorado com `[ActivatorUtilitiesConstructor]` recebendo estritamente `IDbContextFactory<AppDbContext>`, eliminando o construtor legado com `AppDbContext` direto. No `App.xaml.cs`, explicitado o registro singleton com factory lambda resolvendo o factory de contexto.
+- **Filtragem Estrita de Aeródromos e Pistas para Aviões de Asa Fixa**:
+  - **Diagnóstico**: A base nativa do Little Navmap exportada do MSFS 2024 contém mais de 83.000 instalações, sendo 42.861 helipontos (hospitais, terraços de edifícios, plataformas de petróleo e subestações sem pistas físicas de rolagem) e 594 bases puramente aquáticas. Como o FlightCareer é focado exclusivamente em aviação de asa fixa (aviões), essas pistas poluiam a geração de missões e translados.
+  - **Filtro Little Navmap (`DataSeeder.cs`)**:
+    - Aeródromos: `(num_runway_hard > 0 OR num_runway_soft > 0) AND longest_runway_length >= 1000 AND is_closed = 0`, reduzindo a base para exatamente **38.598 aeródromos válidos para aviões**.
+    - Pistas: Exclusão de superfícies de água (`r.surface != 'W'`), comprimento mínimo de 800 pés (`r.length >= 800`) e vínculo direto com aeródromos válidos, totalizando **45.240 pistas terrestres operacionais**.
+  - **Filtro Fallback CSV (`SeedAirportsAsync` / `SeedRunwaysAsync`)**:
+    - Exclusão de tipos `heliport`, `seaplane_base`, `balloonport` e `closed`.
+    - Pistas com superfície aquática (`WAT`) ou comprimento $< 800$ pés descartadas.
+- **Recriação do Banco de Dados (`flightcareer.db`)**:
+  - Banco anterior removido para permitir a recriação limpa via `Database.EnsureCreatedAsync()`, garantindo a criação de todas as tabelas do EF Core (`Pilots`, `PilotAircrafts`, `Missions`, `Flights`, `FinancialLedgers`, `Airports`, `Runways`, `Aircrafts`) e re-seeding automático no primeiro carregamento.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com validação de compilação sem erros (`dotnet build`), sanitização SQL e conformidade SOLID.

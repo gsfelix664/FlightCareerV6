@@ -114,9 +114,10 @@ namespace FlightCareer.Infrastructure.Services
                 cmd.CommandText = $"ATTACH DATABASE '{lnmPath.Replace("'", "''")}' AS lnm;";
                 await cmd.ExecuteNonQueryAsync();
 
-                progressCallback?.Invoke("Gravando mais de 80.000 aeródromos nativos do MSFS...", 0.35);
+                progressCallback?.Invoke("Gravando aeródromos e pistas de aviões nativos do MSFS...", 0.35);
 
                 // 2. Inserir Aeródromos com ICAO oficial do simulador e elevação real
+                // FILTRO ESTRITO: Apenas aeródromos com pistas terrestres para aviões (exclui 42k helipontos e bases de água)
                 cmd.CommandText = @"
                     INSERT OR IGNORE INTO Airports (Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, Tier, IsInSimulator, MsfsIdent)
                     SELECT 
@@ -137,13 +138,17 @@ namespace FlightCareer.Infrastructure.Services
                         1,
                         ident
                     FROM lnm.airport
-                    WHERE is_closed = 0 AND ident IS NOT NULL AND length(ident) >= 3;
+                    WHERE is_closed = 0 
+                      AND ident IS NOT NULL 
+                      AND length(ident) >= 3
+                      AND (num_runway_hard > 0 OR num_runway_soft > 0)
+                      AND longest_runway_length >= 1000;
                 ";
                 await cmd.ExecuteNonQueryAsync();
 
-                progressCallback?.Invoke("Gravando pistas e superfícies operacionais do simulador...", 0.55);
+                progressCallback?.Invoke("Gravando pistas operacionais para aviões...", 0.55);
 
-                // 3. Inserir Pistas reais com superfícies normalizadas e iluminação
+                // 3. Inserir Pistas reais com superfícies normalizadas e iluminação (exclui água e pistas curtas < 800ft)
                 cmd.CommandText = @"
                     INSERT INTO Runways (Id, AirportIdent, LengthFt, WidthFt, Surface, IsLighted)
                     SELECT 
@@ -158,7 +163,6 @@ namespace FlightCareer.Infrastructure.Services
                             WHEN 'G' THEN 'Grass'
                             WHEN 'D' THEN 'Dirt'
                             WHEN 'GR' THEN 'Gravel'
-                            WHEN 'W' THEN 'Water'
                             WHEN 'S' THEN 'Sand'
                             WHEN 'SN' THEN 'Snow'
                             WHEN 'CR' THEN 'Coral'
@@ -169,7 +173,11 @@ namespace FlightCareer.Infrastructure.Services
                         CASE WHEN r.edge_light IS NOT NULL AND r.edge_light != 'NO' THEN 1 ELSE 0 END
                     FROM lnm.runway r
                     JOIN lnm.airport a ON r.airport_id = a.airport_id
-                    WHERE a.ident IS NOT NULL;
+                    WHERE a.is_closed = 0
+                      AND (a.num_runway_hard > 0 OR a.num_runway_soft > 0)
+                      AND a.longest_runway_length >= 1000
+                      AND r.surface != 'W'
+                      AND r.length >= 800;
                 ";
                 await cmd.ExecuteNonQueryAsync();
 
@@ -349,8 +357,10 @@ namespace FlightCareer.Infrastructure.Services
                 if (string.IsNullOrEmpty(icao)) icao = csv.GetField<string>("ident");
                 var type = csv.GetField<string>("type") ?? "";
 
-                // Filtros: 4 letras, não heliporto, não nulo
-                if (string.IsNullOrEmpty(icao) || icao.Length < 3 || type == "heliport" || processedIcaos.Contains(icao))
+                // Filtros de aviação: apenas aeródromos para aviões (exclui heliportos, hidro bases, balões e fechados)
+                if (string.IsNullOrEmpty(icao) || icao.Length < 3 || 
+                    type == "heliport" || type == "seaplane_base" || type == "balloonport" || type == "closed" ||
+                    processedIcaos.Contains(icao))
                     continue;
 
                 processedIcaos.Add(icao);
@@ -418,13 +428,20 @@ namespace FlightCareer.Infrastructure.Services
 
             while (await csv.ReadAsync())
             {
+                var surface = csv.GetField<string>("surface") ?? string.Empty;
+                var len = int.TryParse(csv.GetField<string>("length_ft"), out var l) ? l : 0;
+
+                // Excluir pistas de água e pistas muito curtas para aviões (< 800 ft)
+                if (surface.ToUpperInvariant().Contains("WAT") || len < 800)
+                    continue;
+
                 var runway = new Runway
                 {
                     Id = Guid.NewGuid(),
                     AirportIdent = csv.GetField<string>("airport_ident") ?? string.Empty,
-                    LengthFt = int.TryParse(csv.GetField<string>("length_ft"), out var len) ? len : 0,
+                    LengthFt = len,
                     WidthFt = int.TryParse(csv.GetField<string>("width_ft"), out var wid) ? wid : 0,
-                    Surface = csv.GetField<string>("surface") ?? string.Empty,
+                    Surface = surface,
                     IsLighted = csv.GetField<string>("lighted") == "1"
                 };
                 runways.Add(runway);
