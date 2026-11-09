@@ -1,7 +1,7 @@
 using CsvHelper;
 using CsvHelper.Configuration;
 using FlightCareer.Domain.Entities;
-using FlightCareer.Domain.Services;
+using FlightCareer.Application.Interfaces;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;

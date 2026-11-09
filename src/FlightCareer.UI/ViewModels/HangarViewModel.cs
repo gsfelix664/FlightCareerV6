@@ -90,7 +90,7 @@ namespace FlightCareer.UI.ViewModels
                 MessageBox.Show($"{SelectedAircraft.Model} ({SelectedAircraft.Prefix}) definida como ativa.\nSua localização atual agora é {pilot.CurrentAirportICAO}.");
                 
                 // Notificar MainViewModel para recarregar missões (via evento ou refresh direto se possível)
-                if (Application.Current.MainWindow.DataContext is MainViewModel mainVM)
+                if (System.Windows.Application.Current.MainWindow.DataContext is MainViewModel mainVM)
                 {
                     await mainVM.InitializeForPilotAsync(pilot.Name);
                 }

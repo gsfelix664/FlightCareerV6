@@ -106,7 +106,7 @@ namespace FlightCareer.UI.ViewModels
 
             _flightMonitor.OnStatusChanged += status =>
             {
-                Application.Current?.Dispatcher?.InvokeAsync(() =>
+                System.Windows.Application.Current?.Dispatcher?.InvokeAsync(() =>
                 {
                     FlightPhase = status;
                     UpdateFlightPhaseColor();
@@ -119,7 +119,7 @@ namespace FlightCareer.UI.ViewModels
 
         private void UpdateConnectionStatus()
         {
-            Application.Current?.Dispatcher?.InvokeAsync(() =>
+            System.Windows.Application.Current?.Dispatcher?.InvokeAsync(() =>
             {
                 IsSimConnected = _simConnect.IsConnected;
                 if (_simConnect.IsConnected)
@@ -137,7 +137,7 @@ namespace FlightCareer.UI.ViewModels
 
         private void OnSimDataReceived(object? sender, SimTelemetry data)
         {
-            Application.Current?.Dispatcher?.InvokeAsync(() =>
+            System.Windows.Application.Current?.Dispatcher?.InvokeAsync(() =>
             {
                 // Aeronave e Título
                 AircraftTitle = string.IsNullOrWhiteSpace(data.Title) ? "Aeronave MSFS" : data.Title;

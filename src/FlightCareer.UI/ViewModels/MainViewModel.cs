@@ -3,6 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
+using FlightCareer.Application.DTOs;
+using FlightCareer.Application.Interfaces;
+using FlightCareer.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -545,7 +548,7 @@ namespace FlightCareer.UI.ViewModels
                     mission.DistanceNM = Math.Round(newDist, 0);
                     
                     // Recalcular usando a lógica do gerador
-                    if (_missionGenerator is Infrastructure.Services.MissionGenerator mg)
+                    if (_missionGenerator is MissionGenerator mg)
                     {
                         mission.RewardMoney = mg.CalculateReward(
                             newDist, 
@@ -885,7 +888,7 @@ namespace FlightCareer.UI.ViewModels
             await InitializeForPilotAsync(PilotName);
         }
 
-        private void OnFlightFinished(Infrastructure.Services.FlightOutcome outcome)
+        private void OnFlightFinished(FlightOutcome outcome)
         {
             System.Windows.Application.Current.Dispatcher.Invoke(async () => {
                 IsMonitoring = false;

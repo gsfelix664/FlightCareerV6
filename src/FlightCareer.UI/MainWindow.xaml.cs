@@ -25,7 +25,7 @@ public partial class MainWindow : Window
 
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        var app = (App)Application.Current;
+        var app = (App)System.Windows.Application.Current;
         var simConnect = app.ServiceProvider.GetRequiredService<Services.SimConnectService>();
         simConnect.Initialize(this);
         simConnect.Connect();
@@ -33,7 +33,7 @@ public partial class MainWindow : Window
 
     private void Button_Click(object sender, RoutedEventArgs e)
     {
-        Application.Current.Shutdown();
+        System.Windows.Application.Current.Shutdown();
     }
 
     private void MissionsDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)

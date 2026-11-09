@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace FlightCareer.Domain.Services
+namespace FlightCareer.Application.Interfaces
 {
     public interface IDataSeeder
     {

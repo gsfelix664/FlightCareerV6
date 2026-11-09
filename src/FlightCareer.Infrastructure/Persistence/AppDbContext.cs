@@ -1,10 +1,11 @@
 using FlightCareer.Domain.Entities;
+using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace FlightCareer.Infrastructure.Persistence
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
         public DbSet<Pilot> Pilots { get; set; }
         public DbSet<Flight> Flights { get; set; }

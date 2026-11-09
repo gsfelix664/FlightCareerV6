@@ -1,7 +1,4 @@
-using System;
-using System.Threading.Tasks;
-
-namespace FlightCareer.Domain.Services
+namespace FlightCareer.Application.DTOs
 {
     public class MsfsSyncResult
     {
@@ -11,12 +8,5 @@ namespace FlightCareer.Domain.Services
         public int TotalValidatedInSim { get; set; }
         public int DivergencesIdentified { get; set; }
         public int NonSimulatorExcluded { get; set; }
-    }
-
-    public interface IMsfsScenerySyncService
-    {
-        string? LocateMsfsDatabasePath();
-        Task<bool> NeedsSyncAsync();
-        Task<MsfsSyncResult> SyncAirportsAsync(Action<string, double>? progressCallback = null);
     }
 }

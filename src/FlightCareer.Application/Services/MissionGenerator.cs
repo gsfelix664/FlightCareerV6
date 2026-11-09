@@ -1,24 +1,33 @@
 using FlightCareer.Domain.Entities;
-using FlightCareer.Domain.Services;
-using FlightCareer.Infrastructure.Persistence;
+using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlightCareer.Infrastructure.Services
+namespace FlightCareer.Application.Services
 {
     public class MissionGenerator : IMissionGenerator
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IHubDataService _hubService;
         private readonly Random _random = new();
+        private bool? _hasSimScenery;
 
-        public MissionGenerator(AppDbContext context, IHubDataService? hubService = null)
+        public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null)
         {
             _context = context;
             _hubService = hubService ?? new HubDataService();
+        }
+
+        private async Task<bool> HasSimSceneryAsync()
+        {
+            if (!_hasSimScenery.HasValue)
+            {
+                _hasSimScenery = await _context.Airports.AnyAsync(a => a.IsInSimulator);
+            }
+            return _hasSimScenery.Value;
         }
 
         public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport)
@@ -146,8 +155,11 @@ namespace FlightCareer.Infrastructure.Services
             double cargoWeight = lbsRule != null ? _random.Next(lbsRule.Min, lbsRule.Max + 1) : 0;
 
             var query = _context.Airports.AsQueryable();
-            // Filtrar estritamente apenas aeroportos verificados e existentes no MSFS
-            query = query.Where(a => a.IsInSimulator);
+            // Filtrar estritamente apenas aeroportos verificados e existentes no MSFS se houver sincronização ativa
+            if (await HasSimSceneryAsync())
+            {
+                query = query.Where(a => a.IsInSimulator);
+            }
             query = query.Where(a => allowedTiers.Contains(a.Tier));
             if (sub.RequiresHardSurface) query = query.Where(a => a.Tier <= 3);
 

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using FlightCareer.Domain.Services;
+using FlightCareer.Application.Interfaces;
 
-namespace FlightCareer.Infrastructure.Services
+namespace FlightCareer.Application.Services
 {
     public class HubDataService : IHubDataService
     {

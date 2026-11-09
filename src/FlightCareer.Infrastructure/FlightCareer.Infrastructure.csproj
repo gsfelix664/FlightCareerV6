@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FlightCareer.Domain\FlightCareer.Domain.csproj" />
+    <ProjectReference Include="..\FlightCareer.Application\FlightCareer.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

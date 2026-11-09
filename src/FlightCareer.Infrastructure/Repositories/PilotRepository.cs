@@ -19,13 +19,19 @@ namespace FlightCareer.Infrastructure.Repositories
         public async Task<Pilot?> GetByIdAsync(Guid id)
         {
             return await _context.Pilots
+                .Include(p => p.Hangar)
+                .ThenInclude(h => h.AircraftType)
                 .Include(p => p.Flights)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<IEnumerable<Pilot>> GetAllAsync()
         {
-            return await _context.Pilots.ToListAsync();
+            return await _context.Pilots
+                .Include(p => p.Hangar)
+                .ThenInclude(h => h.AircraftType)
+                .Include(p => p.Flights)
+                .ToListAsync();
         }
 
         public async Task AddAsync(Pilot pilot)

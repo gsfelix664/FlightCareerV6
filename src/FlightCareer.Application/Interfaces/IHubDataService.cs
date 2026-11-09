@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FlightCareer.Domain.Services
+namespace FlightCareer.Application.Interfaces
 {
     public enum HubType
     {

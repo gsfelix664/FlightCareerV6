@@ -1,8 +1,11 @@
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
+using FlightCareer.Application.DTOs;
+using FlightCareer.Application.Services;
 using FlightCareer.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +17,7 @@ namespace FlightCareer.UI.Services
     {
         private readonly SimConnectService _simConnect;
         private readonly FlightService _flightService;
-        private readonly IDbContextFactory<Infrastructure.Persistence.AppDbContext>? _contextFactory;
-        private readonly Infrastructure.Persistence.AppDbContext? _fallbackContext;
+        private readonly IDbContextFactory<Infrastructure.Persistence.AppDbContext> _contextFactory;
         private readonly WearAndFailureService _wearService;
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
@@ -53,6 +55,7 @@ namespace FlightCareer.UI.Services
 
         public WearAndFailureService WearService => _wearService;
 
+        [ActivatorUtilitiesConstructor]
         public FlightMonitor(
             SimConnectService simConnect, 
             FlightService flightService, 
@@ -65,25 +68,9 @@ namespace FlightCareer.UI.Services
             _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
         }
 
-        public FlightMonitor(
-            SimConnectService simConnect, 
-            FlightService flightService, 
-            Infrastructure.Persistence.AppDbContext context)
+        private Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
         {
-            _simConnect = simConnect;
-            _flightService = flightService;
-            _fallbackContext = context;
-            _wearService = new WearAndFailureService(simConnect);
-            _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
-        }
-
-        private async Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
-        {
-            if (_contextFactory != null)
-            {
-                return await _contextFactory.CreateDbContextAsync();
-            }
-            return _fallbackContext!;
+            return _contextFactory.CreateDbContextAsync();
         }
 
         private void OnAircraftFailureTriggered(FailureRecord failure)

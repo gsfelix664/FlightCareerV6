@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace FlightCareer.Infrastructure.Services
+namespace FlightCareer.Application.Services
 {
     public struct DestinationProfile
     {

@@ -286,7 +286,7 @@ namespace FlightCareer.UI.ViewModels
 
                 var obsPoints = new ObservableCollection<PointLatLng>(routePoints);
 
-                Application.Current?.Dispatcher?.Invoke(() =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
                 {
                     entry.TelemetryRecords.Clear();
                     foreach (var rec in telemetryRecords)

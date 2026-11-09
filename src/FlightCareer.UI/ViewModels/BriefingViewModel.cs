@@ -188,7 +188,7 @@ namespace FlightCareer.UI.ViewModels
             // Atualização contínua de telemetria
             _simConnect.OnDataReceived += (s, data) =>
             {
-                Application.Current?.Dispatcher?.Invoke(() =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
                 {
                     AircraftTitle = data.Title;
                     FuelQuantity = Math.Round(data.FuelTotalGallons, 1);
@@ -218,7 +218,7 @@ namespace FlightCareer.UI.ViewModels
             // Handlers para conexão / desconexão imediata
             _simConnect.OnConnected += (s, e) =>
             {
-                Application.Current?.Dispatcher?.Invoke(() =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
                 {
                     UpdateConnectionStatus();
                     ValidatePreFlightConditions();
@@ -227,7 +227,7 @@ namespace FlightCareer.UI.ViewModels
 
             _simConnect.OnDisconnected += (s, e) =>
             {
-                Application.Current?.Dispatcher?.Invoke(() =>
+                System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
                 {
                     UpdateConnectionStatus();
                     ValidatePreFlightConditions();

@@ -71,9 +71,9 @@ namespace FlightCareer.UI.ViewModels
 
                 // Como são Singletons, o MainWindow já terá este mesmo mainVm como DataContext
                 var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
-                var oldWindow = Application.Current.MainWindow;
+                var oldWindow = System.Windows.Application.Current.MainWindow;
                 
-                Application.Current.MainWindow = mainWindow;
+                System.Windows.Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
                 
                 oldWindow?.Close();

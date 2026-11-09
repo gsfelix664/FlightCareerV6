@@ -947,3 +947,30 @@ Ao implementar este plano, o agente executor deve:
     - Encerramento e debriefing automático de voo (`FinalizeFlightAsync`).
   - Refatorado o `MetarService` para resolver estações meteorológicas mais próximas em tarefas assíncronas periódicas (timer de 5 minutos) utilizando contextos efêmeros e thread-safe.
   - Prevenção definitiva de exceções do tipo `InvalidOperationException: A second operation was started on this context instance before a previous operation completed`.
+
+## 2026-11-09 - Correção de Ambiguidade de Construtores no DI Container (FlightMonitor & MetarService)
+- **Diagnóstico da Causa-Raiz**:
+  - Na refatoração de blindagem multithread anterior, `FlightMonitor` e `MetarService` receberam construtores aceitando `IDbContextFactory<AppDbContext>`, mantendo seus construtores originais que recebiam `AppDbContext` para fins de retrocompatibilidade.
+  - Como o container de DI (`App.xaml.cs`) possui registros tanto para `IDbContextFactory<AppDbContext>` quanto para `AppDbContext` (como transient), o `Microsoft.Extensions.DependencyInjection` não conseguia inferir qual construtor instanciar (mesmo número de parâmetros e todos resolvidos), disparando a exceção `System.InvalidOperationException: Unable to activate type 'FlightCareer.UI.Services.FlightMonitor'. The following constructors are ambiguous`.
+- **Correções Aplicadas**:
+  - Decorado o construtor primário (com `IDbContextFactory`) de `FlightMonitor` e `MetarService` com o atributo `[ActivatorUtilitiesConstructor]`.
+  - Configurada a instanciação explícita de `FlightMonitor` e `MetarService` em `App.xaml.cs` utilizando `sp.GetRequiredService<IDbContextFactory<AppDbContext>>()`, garantindo resolução determinística sem ambiguidade.
+- **Validação**: Compilação realizada com sucesso (`dotnet build src/FlightCareer.UI/FlightCareer.UI.csproj`) com 0 erros.
+
+## 2026-11-09 - Correção da Geração de Missões e Desbloqueio do Voo de Translado (Ferry Flight)
+- **Problema 1: Apenas Missões de Instrução em SBSP e Falha Geral de Destinos**:
+  - **Causa-Raiz 1 (Case-Sensitivity no SQLite)**: Em `MsfsScenerySyncService.cs`, o comando `UPDATE Airports SET IsInSimulator = ... WHERE Id = @Id` utilizava `u.Id.ToString()`, que em .NET produz GUID em minúsculas, enquanto o EF Core persistiu os IDs no SQLite em maiúsculas. Devido à comparação textual case-sensitive padrão do SQLite, o update afetou 0 linhas em todos os 30.291 aeroportos (`IsInSimulator` permaneceu `0`).
+  - **Causa-Raiz 2 (Filtro Exclusivo no Gerador)**: O `MissionGenerator` aplicava `query.Where(a => a.IsInSimulator)`. Com 0 aeroportos marcados, todas as subcategorias que exigiam aeroportos de destino falhavam (`validDestinations.Count == 0`). Apenas a subcategoria `3.4.1` (Voo de Instrução Local: origem ➔ origem a 10 NM) não requeria destino externo, resultando em 100% de missões de instrução.
+  - **Causa-Raiz 3 (AllowedDestinationTiers Restrito)**: No `MissionRules.cs`, o Tier 2 (onde SBSP se enquadra) permitia apenas destinos de Tiers 1 e 2 (`AllowedDestinationTiers = { 1, 2 }`), bloqueando destinos municipais e rurais (Tiers 3 e 4), que representam mais de 90% dos aeródromos a até 200 NM.
+  - **Solução**:
+    - Ajustado `MsfsScenerySyncService.cs` para `WHERE Id = UPPER(@Id)` e `u.Id.ToString().ToUpperInvariant()`.
+    - Executada a sincronização dos 25.975 aeródromos validados no MSFS 2024.
+    - Ampliado `AllowedDestinationTiers`: Tier 1 (`{1, 2, 3}`), Tier 2 (`{1, 2, 3, 4}`), Tier 3 (`{1, 2, 3, 4}`) e Tier 4 (`{2, 3, 4}`).
+    - Adicionada checagem defensiva em `MissionGenerator.cs` para não zerar destinos caso a sincronização de simulador ainda não esteja ativa.
+- **Problema 2: Bloqueio do Voo de Translado (Ferry Flight) com Destino Selecionado**:
+  - **Causa-Raiz**: O método `_pilotRepository.GetAllAsync()` não realizava `.Include(p => p.Hangar).ThenInclude(h => h.AircraftType)`. Como consequência, `_pilot.Hangar` estava vazio, fazendo `_aircraft` ser `null`. Ao clicar para voar ou pular o ferry, a validação `if (!HasValidDestination || _destAirport == null || _pilot == null || _aircraft == null)` caía na mensagem genérica `Selecione um destino válido primeiro`, induzindo ao erro de que o problema era o destino.
+  - **Solução**:
+    - `PilotRepository.cs`: Atualizados `GetAllAsync()` e `GetByIdAsync()` com `.Include(p => p.Hangar).ThenInclude(h => h.AircraftType)`.
+    - `FerryFlightViewModel.cs`: Implementado carregamento robusto do piloto e aeronave ativa no banco, com fallbacks caso o hangar não venha pré-carregado.
+    - Separadas as mensagens de validação em `FerryFlightViewModel.cs` para indicar com precisão a causa real (destino, piloto ou aeronave não selecionada).
+- **Validação**: Build executado com sucesso e verificação de integridade no banco de dados.

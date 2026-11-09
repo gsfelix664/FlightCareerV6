@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace FlightCareer.Infrastructure.Services
+namespace FlightCareer.Application.Services
 {
     public class TierConfig
     {
@@ -57,7 +57,7 @@ namespace FlightCareer.Infrastructure.Services
         static MissionRules()
         {
             // TIER 1
-            var t1 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2 } };
+            var t1 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2, 3 } };
             var c1_1 = new CategoryConfig { Id = "1.1", Name = "Linha Aérea PAX", Weight = 60 };
             c1_1.SubCategories.Add(new SubCategoryConfig
             {
@@ -149,7 +149,7 @@ namespace FlightCareer.Infrastructure.Services
             Rules.Add(1, t1);
 
             // TIER 2
-            var t2 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2 } };
+            var t2 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2, 3, 4 } };
             var c2_1 = new CategoryConfig { Id = "2.1", Name = "Linha Aérea Regional", Weight = 45 };
             c2_1.SubCategories.Add(new SubCategoryConfig
             {
@@ -275,7 +275,7 @@ namespace FlightCareer.Infrastructure.Services
             Rules.Add(2, t2);
 
             // TIER 3
-            var t3 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2, 3 } };
+            var t3 = new TierConfig { AllowedDestinationTiers = new List<int> { 1, 2, 3, 4 } };
             var c3_1 = new CategoryConfig { Id = "3.1", Name = "Táxi Aéreo / Charter", Weight = 45 };
             c3_1.SubCategories.Add(new SubCategoryConfig
             {
@@ -389,7 +389,7 @@ namespace FlightCareer.Infrastructure.Services
             Rules.Add(3, t3);
 
             // TIER 4
-            var t4 = new TierConfig { AllowedDestinationTiers = new List<int> { 3, 4 } };
+            var t4 = new TierConfig { AllowedDestinationTiers = new List<int> { 2, 3, 4 } };
             var c4_1 = new CategoryConfig { Id = "4.1", Name = "Logística de Sede", Weight = 55 };
             c4_1.SubCategories.Add(new SubCategoryConfig
             {

@@ -2,37 +2,23 @@ using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
 using FlightCareer.Domain.Utils;
-using FlightCareer.Infrastructure.Persistence;
+using FlightCareer.Application.DTOs;
+using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace FlightCareer.Infrastructure.Services
+namespace FlightCareer.Application.Services
 {
-    public class FlightOutcome
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string Origin { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty;
-        public double DistanceNM { get; set; }
-        public int FlightTimeMinutes { get; set; }
-        public double FuelUsed { get; set; }
-        public double Revenue { get; set; }
-        public int XP { get; set; }
-        public int CompletedMissions { get; set; }
-        public int RemainingMissions { get; set; }
-    }
-
     public class FlightService
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IPilotRepository _pilotRepository;
         private readonly IMissionGenerator _missionGenerator;
 
-        public FlightService(AppDbContext context, IPilotRepository pilotRepository, IMissionGenerator missionGenerator)
+        public FlightService(IAppDbContext context, IPilotRepository pilotRepository, IMissionGenerator missionGenerator)
         {
             _context = context;
             _pilotRepository = pilotRepository;

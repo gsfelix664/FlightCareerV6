@@ -3,6 +3,8 @@ using System.Windows;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using FlightCareer.Application.Interfaces;
+using FlightCareer.Application.Services;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.Infrastructure.Repositories;
 using FlightCareer.Infrastructure.Services;
@@ -14,7 +16,7 @@ using FlightCareer.UI.Services;
 
 namespace FlightCareer.UI
 {
-    public partial class App : Application
+    public partial class App : System.Windows.Application
     {
         public IServiceProvider ServiceProvider { get; private set; } = null!;
 
@@ -127,8 +129,12 @@ namespace FlightCareer.UI
             services.AddSingleton<FlightService>();
 
             services.AddSingleton<SimConnectService>();
-            services.AddSingleton<Services.FlightMonitor>();
-            services.AddSingleton<MetarService>();
+            services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
+                sp.GetRequiredService<SimConnectService>(),
+                sp.GetRequiredService<FlightService>(),
+                sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
+            services.AddSingleton<MetarService>(sp => new MetarService(
+                sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 
             services.AddSingleton<LoginViewModel>();
             services.AddSingleton<LoginWindow>(s => new LoginWindow

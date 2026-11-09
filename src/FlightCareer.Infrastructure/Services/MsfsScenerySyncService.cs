@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Entities;
-using FlightCareer.Domain.Services;
+using FlightCareer.Application.DTOs;
+using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
@@ -226,7 +227,7 @@ namespace FlightCareer.Infrastructure.Services
                     await conn.OpenAsync();
 
                 using var updateCmd = conn.CreateCommand();
-                updateCmd.CommandText = "UPDATE Airports SET IsInSimulator = @InSim, MsfsIdent = @MsfsIdent WHERE Id = @Id;";
+                updateCmd.CommandText = "UPDATE Airports SET IsInSimulator = @InSim, MsfsIdent = @MsfsIdent WHERE Id = UPPER(@Id);";
 
                 var paramInSim = updateCmd.CreateParameter();
                 paramInSim.ParameterName = "@InSim";
@@ -245,7 +246,7 @@ namespace FlightCareer.Infrastructure.Services
                     var u = updates[i];
                     paramInSim.Value = u.InSim ? 1 : 0;
                     paramMsfsIdent.Value = (object?)u.MsfsIdent ?? DBNull.Value;
-                    paramId.Value = u.Id.ToString();
+                    paramId.Value = u.Id.ToString().ToUpperInvariant();
                     await updateCmd.ExecuteNonQueryAsync();
 
                     if (i % 5000 == 0)

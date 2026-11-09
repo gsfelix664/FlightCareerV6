@@ -75,8 +75,17 @@ namespace FlightCareer.UI.ViewModels
 
         public async Task LoadCurrentDataAsync()
         {
-            var pilots = await _pilotRepository.GetAllAsync();
-            _pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            _pilot = await _context.Pilots
+                .Include(p => p.Hangar)
+                .ThenInclude(a => a.AircraftType)
+                .FirstOrDefaultAsync(p => p.Name == PilotName);
+
+            if (_pilot == null)
+            {
+                var pilots = await _pilotRepository.GetAllAsync();
+                _pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            }
+
             if (_pilot == null) return;
 
             PilotBalance = _pilot.Balance;
@@ -91,7 +100,14 @@ namespace FlightCareer.UI.ViewModels
                 OriginLon = originAirport.Longitude;
             }
 
-            _aircraft = _pilot.Hangar.FirstOrDefault(a => a.Id == _pilot.ActiveAircraftId);
+            _aircraft = _pilot.Hangar?.FirstOrDefault(a => a.Id == _pilot.ActiveAircraftId);
+            if (_aircraft == null && _pilot.ActiveAircraftId != null)
+            {
+                _aircraft = await _context.PilotAircrafts
+                    .Include(a => a.AircraftType)
+                    .FirstOrDefaultAsync(a => a.Id == _pilot.ActiveAircraftId.Value);
+            }
+
             if (_aircraft != null)
             {
                 AircraftPrefix = _aircraft.Prefix;
@@ -171,9 +187,21 @@ namespace FlightCareer.UI.ViewModels
         [RelayCommand]
         public async Task SetupRealFlightAsync(Window? window)
         {
-            if (!HasValidDestination || _destAirport == null || _pilot == null || _aircraft == null)
+            if (!HasValidDestination || _destAirport == null)
             {
-                MessageBox.Show("Selecione um destino válido primeiro.", "Destino Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Selecione um destino válido primeiro pesquisando pelo código ICAO ou nome da cidade.", "Destino Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_pilot == null)
+            {
+                MessageBox.Show("Perfil de piloto não encontrado.", "Erro de Perfil", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (_aircraft == null)
+            {
+                MessageBox.Show("Você precisa ter uma aeronave ativa selecionada no seu Hangar para realizar o translado.", "Aeronave Necessária", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -222,9 +250,21 @@ namespace FlightCareer.UI.ViewModels
         [RelayCommand]
         public async Task ExecuteInstantJumpAsync(Window? window)
         {
-            if (!HasValidDestination || _destAirport == null || _pilot == null || _aircraft == null)
+            if (!HasValidDestination || _destAirport == null)
             {
-                MessageBox.Show("Selecione um destino válido primeiro.", "Destino Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Selecione um destino válido primeiro pesquisando pelo código ICAO ou nome da cidade.", "Destino Inválido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (_pilot == null)
+            {
+                MessageBox.Show("Perfil de piloto não encontrado.", "Erro de Perfil", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (_aircraft == null)
+            {
+                MessageBox.Show("Você precisa ter uma aeronave ativa selecionada no seu Hangar para realizar o translado.", "Aeronave Necessária", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
