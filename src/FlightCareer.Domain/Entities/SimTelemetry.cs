@@ -73,6 +73,8 @@ namespace FlightCareer.Domain.Entities
         public double CabinAltitude;         // Feet
 
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
+        public double PlaneLatitude => Latitude;
+        public double PlaneLongitude => Longitude;
         public bool IsOnGround => OnGround > 0.5;
         public bool IsEngineRunning => EngineRunning > 0.5;
         public bool IsParkingBrakeSet => ParkingBrake > 0.5;

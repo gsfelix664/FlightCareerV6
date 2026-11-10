@@ -280,7 +280,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 2: Destino (ICAO em JetBrains Mono + Cidade + Badge MSFS se divergente) -->
-                                <DataGridTemplateColumn Header="DESTINO" Width="135" SortMemberPath="DestinationICAO">
+                                <DataGridTemplateColumn Header="DESTINO" Width="160" SortMemberPath="DestinationICAO">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel VerticalAlignment="Center" Margin="6,0" ToolTip="{Binding DestinationTooltip}">
@@ -299,7 +299,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 3: Tipo de Operação com Badge Semântico -->
-                                <DataGridTemplateColumn Header="OPERAÇÃO" Width="105" SortMemberPath="CategoryShortTag">
+                                <DataGridTemplateColumn Header="OPERAÇÃO" Width="110" SortMemberPath="CategoryShortTag">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0">
@@ -317,7 +317,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 4: Carga / PAX Formatado (Alinhado à Direita, Largura Ampliada para Não Cortar Textos Longos) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="CARGA / PAX" Width="140" SortMemberPath="PayloadLbs">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="CARGA / PAX" Width="145" SortMemberPath="PayloadLbs">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Grid VerticalAlignment="Center" Margin="4,0,8,0">
@@ -337,7 +337,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 5: Distância (NM) Tabular (Alinhado à Direita) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="DIST (NM)" Width="78" SortMemberPath="DistanceNM">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="DIST (NM)" Width="85" SortMemberPath="DistanceNM">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding DistanceNM, StringFormat={}{0:N0} NM}" FontWeight="SemiBold" FontSize="13" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#F0F4F8" Margin="4,0,8,0"/>
@@ -346,7 +346,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 6: Rumo / Proa (Heading Inicial, Centralizado) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="RUMO" Width="75" SortMemberPath="HeadingDegrees">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="RUMO" Width="80" SortMemberPath="HeadingDegrees">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="#101722" BorderBrush="#263545" BorderThickness="1" CornerRadius="3" Padding="5,2.5" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -357,7 +357,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 7: ETE (Tempo Estimado de Voo, Alinhado à Direita) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="ETE" Width="74">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="ETE" Width="80">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding EteFormatted}" FontWeight="SemiBold" FontSize="13" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#F0F4F8" Margin="4,0,8,0"/>
@@ -366,7 +366,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 8: Pista Mínima Requerida (Alinhado à Direita) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="PISTA MÍN" Width="78" SortMemberPath="DestTier">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="PISTA MÍN" Width="85" SortMemberPath="DestTier">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding MinRunwayDisplay}" FontWeight="SemiBold" FontSize="12" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#94A3B8" Margin="4,0,8,0"/>
@@ -375,7 +375,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 9: METAR (Meteorologia no Destino, Centralizado) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="METAR" Width="88" SortMemberPath="WeatherCategory">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="METAR" Width="92" SortMemberPath="WeatherCategory">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="{Binding WeatherBadgeBg}" BorderBrush="{Binding WeatherBadgeBorder}" BorderThickness="1" CornerRadius="3" Padding="6,2.5" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{Binding WeatherTooltip}">
@@ -389,7 +389,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 10: Expiração do Contrato (Centralizado) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="EXPIRAÇÃO" Width="86" SortMemberPath="ExpirationTime">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource CenterAlignedHeader}" Header="EXPIRAÇÃO" Width="90" SortMemberPath="ExpirationTime">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="{Binding ExpirationBadgeBg}" BorderBrush="{Binding ExpirationBadgeBorder}" BorderThickness="1" CornerRadius="3" Padding="5,2.5" HorizontalAlignment="Center" VerticalAlignment="Center" ToolTip="{Binding ExpirationTooltip}">
@@ -400,7 +400,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 11: XP (Alinhado à Direita) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="XP" Width="72" SortMemberPath="ExperienceGain">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="XP" Width="78" SortMemberPath="ExperienceGain">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding XpDisplay}" FontWeight="Bold" FontSize="13" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="#FFB300" Margin="4,0,8,0"/>
@@ -409,7 +409,7 @@
                                 </DataGridTemplateColumn>
 
                                 <!-- Coluna 12: Pagamento ($) e Lucro/NM (Largura Flexível *, Alinhado à Direita) -->
-                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="PAGAMENTO" Width="*" MinWidth="120" SortMemberPath="RewardMoney">
+                                <DataGridTemplateColumn HeaderStyle="{StaticResource RightAlignedHeader}" Header="PAGAMENTO" Width="*" MinWidth="130" SortMemberPath="RewardMoney">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0,10,0">

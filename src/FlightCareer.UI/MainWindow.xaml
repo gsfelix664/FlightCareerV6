@@ -270,7 +270,6 @@
                     <TextBlock Text="OPERAÃ‡Ã•ES" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,0,0,10"/>
                     <Button Content="îœ¡  Quadro de MissÃµes" Style="{StaticResource NavButton}" Command="{Binding ShowMissionsCommand}"/>
                     <Button Content="îœ–  Briefing de Voo" Style="{StaticResource NavButton}" Command="{Binding ShowBriefingCommand}"/>
-                    <Button Content="îœ¤  Voo de Translado (Ferry)" Style="{StaticResource NavButton}" Command="{Binding OpenFerryWindowCommand}"/>
                     
                     <TextBlock Text="CARREIRA" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,25,0,10"/>
                     <Button Content="î´  Mercado de Aeronaves" Style="{StaticResource NavButton}" Command="{Binding ShowMarketCommand}"/>
@@ -304,8 +303,6 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                         <Ellipse Width="10" Height="10" Fill="{Binding SimStatusColor}" Margin="0,0,10,0"/>
                         <TextBlock Text="{Binding SimStatusText}" FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
-                        <TextBlock Text=" | " Foreground="#2D3033" Margin="10,0"/>
-                        <TextBlock Text="{Binding MonitorStatus}" FontSize="12.5" Foreground="White" Opacity="0.8" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <!-- BotÃ£o de Acesso RÃ¡pido ao HUD Overlay Flutuante -->

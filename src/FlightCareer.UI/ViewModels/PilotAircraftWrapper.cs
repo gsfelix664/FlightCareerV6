@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Services;
 using System;
 using System.Windows.Media;
@@ -42,8 +43,8 @@ namespace FlightCareer.UI.ViewModels
         public string Prefix => Aircraft.Prefix;
         public string Model => Aircraft.AircraftType?.Model ?? "N/A";
         public double PurchasePrice => Aircraft.AircraftType?.PurchasePrice ?? 0;
-        public double MTOW => (Aircraft.AircraftType?.MaxPayloadLbs ?? 0) + 2000;
-        public double ZFW => 2000;
+        public double MTOW => AircraftWeightSpecs.GetMtow(Aircraft.AircraftType?.Model, Aircraft.AircraftType);
+        public double ZFW => AircraftWeightSpecs.GetEmptyWeight(Aircraft.AircraftType?.Model, Aircraft.AircraftType);
         public double FuelCapacity => Aircraft.AircraftType?.FuelTankGallons ?? 0;
         public double Hobbs => Aircraft.CurrentAirframeHours;
         public string FuelType => Aircraft.AircraftType?.FuelType ?? "AVGAS";

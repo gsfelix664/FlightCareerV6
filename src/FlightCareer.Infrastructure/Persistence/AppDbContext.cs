@@ -86,7 +86,14 @@ namespace FlightCareer.Infrastructure.Persistence
                 "CREATE INDEX IF NOT EXISTS IX_Airports_IsInSimulator ON Airports(IsInSimulator);",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
-                "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';"
+                "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';",
+
+                // Normalização de Dados Aeronáuticos e Correção de Bases Existentes
+                "UPDATE Airports SET Country = 'BR' WHERE (ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%') AND (Country IN ('SB','SS','SW','SJ','SD','SI','SN') OR Country = '' OR Country IS NULL);",
+                "UPDATE Airports SET City = 'Ribeirão Branco', Country = 'BR' WHERE ICAO = 'SBWM' AND (City IS NULL OR City = '' OR City = 'SB');",
+                "UPDATE Airports SET City = TRIM(SUBSTR(Name, 14)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND Name LIKE 'Aeroporto de %' AND length(Name) > 13;",
+                "UPDATE Airports SET City = TRIM(SUBSTR(Name, 13)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND (Name LIKE 'Aeródromo de %' OR Name LIKE 'Aerodromo de %') AND length(Name) > 12;",
+                "UPDATE Airports SET City = TRIM(SUBSTR(Name, 24)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND Name LIKE 'Aeroporto Municipal de %' AND length(Name) > 23;"
             };
 
             foreach (var stmt in migrationStatements)
@@ -100,6 +107,55 @@ namespace FlightCareer.Infrastructure.Persistence
                 {
                     // Coluna já existente (ignorar)
                 }
+            }
+
+            // Higienização e extração inteligente de municípios via AviationDataNormalizer para aeroportos com City vazio
+            try
+            {
+                using var selectCmd = connection.CreateCommand();
+                selectCmd.CommandText = "SELECT Id, Name, ICAO, Country FROM Airports WHERE City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN');";
+
+                var pendingUpdates = new System.Collections.Generic.List<(string Id, string City, string Country)>();
+                using (var reader = await selectCmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var id = reader.GetString(0);
+                        var name = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                        var icao = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                        var country = reader.IsDBNull(3) ? "" : reader.GetString(3);
+
+                        if (FlightCareer.Infrastructure.Services.AviationDataNormalizer.TryExtractCityFromName(name, out var extractedCity))
+                        {
+                            var resolvedCountry = FlightCareer.Infrastructure.Services.AviationDataNormalizer.ResolveCountryFromIcao(icao, country);
+                            pendingUpdates.Add((id, extractedCity, resolvedCountry));
+                        }
+                    }
+                }
+
+                if (pendingUpdates.Count > 0)
+                {
+                    using var updateCmd = connection.CreateCommand();
+                    using var trans = connection.BeginTransaction();
+                    updateCmd.Transaction = trans;
+                    updateCmd.CommandText = "UPDATE Airports SET City = @city, Country = @country WHERE Id = @id;";
+                    var pCity = updateCmd.CreateParameter(); pCity.ParameterName = "@city"; updateCmd.Parameters.Add(pCity);
+                    var pCountry = updateCmd.CreateParameter(); pCountry.ParameterName = "@country"; updateCmd.Parameters.Add(pCountry);
+                    var pId = updateCmd.CreateParameter(); pId.ParameterName = "@id"; updateCmd.Parameters.Add(pId);
+
+                    foreach (var (id, city, country) in pendingUpdates)
+                    {
+                        pCity.Value = city;
+                        pCountry.Value = country;
+                        pId.Value = id;
+                        await updateCmd.ExecuteNonQueryAsync();
+                    }
+                    await trans.CommitAsync();
+                }
+            }
+            catch
+            {
+                // Ignorar em caso de primeira inicialização antes da criação da tabela Airports
             }
         }
     }

@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Infrastructure.Services;
 using System;
 
 namespace FlightCareer.UI.ViewModels
@@ -39,9 +40,29 @@ namespace FlightCareer.UI.ViewModels
         public bool HasMsfsAlias => !string.IsNullOrEmpty(MsfsAliasIcao);
         public string MsfsBadgeText => HasMsfsAlias ? $"MSFS: {MsfsAliasIcao}" : string.Empty;
         public string DestinationIcaoWithMsfsNotice => HasMsfsAlias ? $"{DestinationICAO} (MSFS: {MsfsAliasIcao})" : DestinationICAO;
-        public string DestinationTooltip => HasMsfsAlias 
-            ? $"{DestinationName} - {DestinationCity}\n💡 MSFS 2024: No simulador, este aeroporto utiliza o código '{MsfsAliasIcao}'."
-            : $"{DestinationName} - {DestinationCity}";
+        public string DestinationTooltip
+        {
+            get
+            {
+                string info;
+                if (string.IsNullOrWhiteSpace(DestinationCity) || string.Equals(DestinationCity, "Destino", StringComparison.OrdinalIgnoreCase))
+                {
+                    info = DestinationName;
+                }
+                else if (string.Equals(DestinationName, DestinationCity, StringComparison.OrdinalIgnoreCase))
+                {
+                    info = DestinationName;
+                }
+                else
+                {
+                    info = $"{DestinationName} - {DestinationCity}";
+                }
+
+                return HasMsfsAlias 
+                    ? $"{info}\n💡 MSFS 2024: No simulador, este aeroporto utiliza o código '{MsfsAliasIcao}'."
+                    : info;
+            }
+        }
 
         public double DistanceNM => Mission.DistanceNM;
         public double PayloadLbs => Mission.PayloadLbs;
@@ -54,8 +75,13 @@ namespace FlightCareer.UI.ViewModels
         public string MissionCategoryType => Mission.MissionCategoryType;
         public DateTime ExpirationTime => Mission.ExpirationTime;
 
-        [ObservableProperty] private string _destinationName = string.Empty;
-        [ObservableProperty] private string _destinationCity = string.Empty;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DestinationTooltip))]
+        private string _destinationName = string.Empty;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DestinationTooltip))]
+        private string _destinationCity = string.Empty;
         [ObservableProperty] private string _destinationCountry = string.Empty;
         [ObservableProperty] private double _destLat;
         [ObservableProperty] private double _destLon;
@@ -252,12 +278,28 @@ namespace FlightCareer.UI.ViewModels
 
             if (destAirport != null)
             {
-                DestinationName = destAirport.Name;
-                DestinationCity = string.IsNullOrWhiteSpace(destAirport.City) ? destAirport.Country : destAirport.City;
-                DestinationCountry = destAirport.Country;
+                DestinationName = !string.IsNullOrWhiteSpace(destAirport.Name) ? destAirport.Name : mission.DestinationICAO;
+                DestinationCountry = AviationDataNormalizer.ResolveCountryFromIcao(destAirport.ICAO, destAirport.Country);
                 DestLat = destAirport.Latitude;
                 DestLon = destAirport.Longitude;
                 DestTier = destAirport.Tier;
+
+                if (IsValidCityName(destAirport.City, DestinationCountry))
+                {
+                    DestinationCity = AviationDataNormalizer.CapitalizeTitle(destAirport.City.Trim());
+                }
+                else if (AviationDataNormalizer.TryExtractCityFromName(destAirport.Name, out var extractedCity) && !string.IsNullOrWhiteSpace(extractedCity))
+                {
+                    DestinationCity = extractedCity;
+                }
+                else if (!string.IsNullOrWhiteSpace(destAirport.Name) && !AviationDataNormalizer.IsFirCode(destAirport.Name) && destAirport.Name.Trim().Length > 2)
+                {
+                    DestinationCity = AviationDataNormalizer.CapitalizeTitle(destAirport.Name.Trim());
+                }
+                else
+                {
+                    DestinationCity = "Destino";
+                }
             }
             else
             {
@@ -313,6 +355,26 @@ namespace FlightCareer.UI.ViewModels
                 EstimatedFuelGallons = Math.Round(hours * gph, 1);
                 EstimatedFuelLbs = Math.Round(EstimatedFuelGallons * 6.0, 0); // 1 gal Avgas ~ 6 lbs
             }
+        }
+
+        private static bool IsValidCityName(string? city, string? country)
+        {
+            if (string.IsNullOrWhiteSpace(city))
+                return false;
+
+            string trimmed = city.Trim();
+
+            // Siglas de 2 caracteres (códigos de FIR como "SB", "SS", "K4" ou códigos ISO de país como "BR", "US") não são cidades válidas
+            if (trimmed.Length <= 2)
+                return false;
+
+            if (AviationDataNormalizer.IsFirCode(trimmed))
+                return false;
+
+            if (!string.IsNullOrWhiteSpace(country) && string.Equals(trimmed, country.Trim(), StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            return true;
         }
 
         private static double CalculateBearing(double lat1, double lon1, double lat2, double lon2)

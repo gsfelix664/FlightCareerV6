@@ -126,7 +126,6 @@ namespace FlightCareer.UI
             services.AddSingleton<IDataSeeder, DataSeeder>();
             services.AddSingleton<IHubDataService, HubDataService>();
             services.AddSingleton<IMsfsScenerySyncService, MsfsScenerySyncService>();
-            services.AddSingleton<IRunwayViabilityCalculator, RunwayViabilityCalculator>();
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
             services.AddSingleton<FlightService>();
 

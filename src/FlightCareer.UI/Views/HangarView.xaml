@@ -122,24 +122,35 @@
                                 <TextBlock Text="{Binding SelectedAircraft.Model}" FontSize="32" FontWeight="SemiBold" Foreground="{StaticResource TextMain}"/>
                             </StackPanel>
 
-                            <Button HorizontalAlignment="Right" VerticalAlignment="Center" Padding="15,8" Command="{Binding SetActiveCommand}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
-                                        <Setter Property="Content" Value="Definir como Ativa"/>
-                                        <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                <Setter Property="Content" Value="Aeronave Selecionada para Voo"/>
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="BorderBrush" Value="{StaticResource SuccessGreen}"/>
-                                                <Setter Property="BorderThickness" Value="2"/>
-                                                <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <Button Command="{Binding DataContext.OpenFerryWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        Cursor="Hand" Background="#141C24" BorderBrush="#263545" BorderThickness="1" Padding="12,8" Margin="0,0,10,0"
+                                        ToolTip="Planejar voo de translado ou reposicionar sua aeronave para outro aeródromo">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="✈  " FontSize="12" Foreground="#00E5FF" VerticalAlignment="Center"/>
+                                        <TextBlock Text="VOO DE TRANSLADO (FERRY)" FontSize="11.5" FontWeight="Bold" Foreground="#F0F4F8" VerticalAlignment="Center" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Padding="15,8" Command="{Binding SetActiveCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
+                                            <Setter Property="Content" Value="Definir como Ativa"/>
+                                            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                    <Setter Property="Content" Value="Aeronave Selecionada para Voo"/>
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessGreen}"/>
+                                                    <Setter Property="BorderThickness" Value="2"/>
+                                                    <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                            </StackPanel>
                         </Grid>
 
                         <WrapPanel Margin="0,15,0,0">

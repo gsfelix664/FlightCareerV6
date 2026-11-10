@@ -1052,3 +1052,34 @@ Ao implementar este plano, o agente executor deve:
 - **Recriação do Banco de Dados (`flightcareer.db`)**:
   - Banco anterior removido para permitir a recriação limpa via `Database.EnsureCreatedAsync()`, garantindo a criação de todas as tabelas do EF Core (`Pilots`, `PilotAircrafts`, `Missions`, `Flights`, `FinancialLedgers`, `Airports`, `Runways`, `Aircrafts`) e re-seeding automático no primeiro carregamento.
 - **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com validação de compilação sem erros (`dotnet build`), sanitização SQL e conformidade SOLID.
+
+## 2026-11-10 - Normalização Aeronáutica Global, MTOW Real, Estabilidade do Mapa e Refinamento de UI
+- **Normalização e Saneamento de Dados Aeronáuticos (AviationDataNormalizer)**:
+  - Implementado `AviationDataNormalizer` em `FlightCareer.Infrastructure/Services`:
+    - Mapeamento determinístico de prefixos OACI (Anexo 10) para códigos de país ISO 3166-1 (prefixos brasileiros `SB`, `SS`, `SW`, `SD`, `SJ`, `SN`, `SI` mapeiam sempre para `BR`; prefixos globais mapeados para `US`, `CA`, `DE`, `FR`, `GB`, `AR`, etc.).
+    - Extração canônica de municípios a partir de padrões oficiais de nomenclatura aeronáutica (`Aeroporto de Ribeirão Branco` $\rightarrow$ `Ribeirão Branco`, `Aeroporto Municipal de Alexânia` $\rightarrow$ `Alexânia`).
+    - Eliminação de códigos de setor FIR/ARTCC (`SB`, `SS`, `K1`..`K7`) gravados indevidamente no lugar de países e municípios.
+  - Atualização automática e idempotente via `EnsureSchemaUpdatedAsync()` e integração ao pipeline de `DataSeeder`.
+  - Redução drástica de aeroportos sem município no mundo (de >16.000 para apenas 11).
+- **Especificações Técnicas de MTOW Real (`AircraftWeightSpecs`)**:
+  - Criada a classe `AircraftWeightSpecs` em `FlightCareer.Domain/Services` com os pesos operacionais reais (MTOW e Empty Weight) de toda a frota homologada (ex: Cessna 152 = 1.670 lbs, Cessna 172 = 2.550 lbs, A320neo = 174.165 lbs), eliminando a fórmula arbitrária anterior de `+ 2000`.
+  - Sincronização dinâmica com `data.MaxGrossWeightLbs` do SimConnect no `BriefingViewModel`.
+  - Calibração de tolerâncias rigorosas no despacho (Payload: $\max(15\text{ lbs}, 2\%)$; Combustível: $\max(1\text{ gal}, 2\%)$).
+- **Estabilidade e Correção do Zoom no Mapa Tático (`FlightMapControl`)**:
+  - Desacoplado o tick de telemetria da aeronave (1s) do auto-enquadramento da rota: `OnAircraftPosChanged` agora atualiza apenas a posição do marcador sem acionar `SetZoomToFitRect`. O enquadramento automático ocorre exclusivamente ao trocar de destino ou carregar a rota, permitindo navegação e zoom livres pelo piloto.
+  - Limitado `MaxZoom = 16` no mapa tático, evitando erros 404 e telas azuis de "Map data not yet available".
+- **Refinamento de UI e Experiência do Usuário**:
+  - **Briefing de Voo**:
+    - Removidas mensagens de instrução de "abas do EFB", focando nos cards visuais superiores (Assentos, Carga, Tanques) e detalhando estritamente PESO PARA PAX e PESO PARA CARGA.
+    - Botão de W&B fixado com texto limpo `📋 COPIAR W&B P/ O SIMULADOR`.
+    - Cabeçalho padronizado para `SIMULADOR CONECTADO`.
+  - **Header Principal & Navegação**:
+    - Removido ` | PRONTO PARA MISSÃO`, exibindo apenas o indicador com a bolinha colorida e `SIMULADOR CONECTADO` / `SIMULADOR DESCONECTADO`.
+    - Removido o link de Ferry da sidebar principal, mantendo-o no Quadro de Missões e adicionando botão dedicado `✈ VOO DE TRANSLADO (FERRY)` no card da aeronave no Hangar.
+  - **Quadro de Missões (`MissionsView`)**:
+    - Alargada a coluna DESTINO para 160px e otimizadas as demais larguras para acomodar ICAO, municípios e valores numéricos sem corte de texto.
+  - **HUD Overlay Flutuante (`DebugOverlayWindow`)**:
+    - Incorporado um mini-GPS / moving map em tempo real (150px) exibindo aeronave, proa e rota navegada durante o voo.
+- **Higienização de Código Obsoleto**:
+  - Removidos arquivos e dependências de cálculo de viabilidade física de pista (`RunwayViabilityCalculator`, `IRunwayViabilityCalculator`, enum `RunwaySurface`), desvinculando registros de DI no `App.xaml.cs` e restaurando a escala do Gatekeeper para 4/4 sistemas.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa em todos os projetos da solução (`dotnet build src/FlightCareer.slnx` com 0 erros).

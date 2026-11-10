@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Services;
 using System;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly SimConnectService _simConnect;
         private readonly FlightMonitor _flightMonitor;
         private readonly HangarViewModel _hangarViewModel;
+        private readonly AppDbContext? _context;
 
         // --- CONTROLES DE JANELA (HUD OVERLAY) ---
         [ObservableProperty] private bool _isTopmost = true;
@@ -25,6 +27,14 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private string _parkingBrakeColor = "#FF5252";
         [ObservableProperty] private string _engineModeLabel = "RPM";
         [ObservableProperty] private string _engineTempLabel = "CHT °C";
+
+        // --- NAVEGAÇÃO & MOVING MAP (MINI-GPS) ---
+        [ObservableProperty] private double _latitude = 0;
+        [ObservableProperty] private double _longitude = 0;
+        [ObservableProperty] private double _destLat = 0;
+        [ObservableProperty] private double _destLon = 0;
+        [ObservableProperty] private string _originIcao = string.Empty;
+        [ObservableProperty] private string _destIcao = string.Empty;
 
         // --- CONEXÃO E IDENTIFICAÇÃO ---
         [ObservableProperty] private bool _isSimConnected = false;
@@ -94,11 +104,12 @@ namespace FlightCareer.UI.ViewModels
 
         public event Action? RequestClose;
 
-        public DebugOverlayViewModel(SimConnectService simConnect, FlightMonitor flightMonitor, HangarViewModel hangarViewModel)
+        public DebugOverlayViewModel(SimConnectService simConnect, FlightMonitor flightMonitor, HangarViewModel hangarViewModel, AppDbContext? context = null)
         {
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
             _hangarViewModel = hangarViewModel;
+            _context = context;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnConnected += (s, e) => UpdateConnectionStatus();
@@ -151,19 +162,40 @@ namespace FlightCareer.UI.ViewModels
                     UpdateConditionColors();
                 }
 
+                // Posição GPS em Tempo Real
+                Latitude = data.PlaneLatitude;
+                Longitude = data.PlaneLongitude;
+
                 // Rota
                 if (_flightMonitor.ActiveMissions.Count > 0)
                 {
                     var m = _flightMonitor.ActiveMissions[0];
                     RouteText = $"{m.OriginICAO} ➔ {m.DestinationICAO} ({m.DistanceNM:N0} NM)";
+                    OriginIcao = m.OriginICAO;
+                    DestIcao = m.DestinationICAO;
+                    if (_context != null && (DestLat == 0 || DestLon == 0))
+                    {
+                        var destApt = _context.Airports.FirstOrDefault(a => a.ICAO == m.DestinationICAO);
+                        if (destApt != null)
+                        {
+                            DestLat = destApt.Latitude;
+                            DestLon = destApt.Longitude;
+                        }
+                    }
                 }
                 else if (_flightMonitor.IsMonitoring)
                 {
                     RouteText = "VOO LOCAL / CIRCUITO";
+                    DestLat = 0;
+                    DestLon = 0;
+                    DestIcao = string.Empty;
                 }
                 else
                 {
                     RouteText = "EM SOLO";
+                    DestLat = 0;
+                    DestLon = 0;
+                    DestIcao = string.Empty;
                 }
 
                 // Velocidades e Altitude

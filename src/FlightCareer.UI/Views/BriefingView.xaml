@@ -54,7 +54,7 @@
                             BorderBrush="{Binding ConnectionModeBorder, FallbackValue='#00E676'}" BorderThickness="1" CornerRadius="4" Padding="10,5" Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="{Binding ConnectionModeIcon, FallbackValue='🟢'}" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ConnectionModeText, FallbackValue='MSFS CONECTADO'}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding ConnectionModeColor}" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ConnectionModeText, FallbackValue='SIMULADOR CONECTADO'}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding ConnectionModeColor}" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
                     <Button Content="" Width="36" Height="36" Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" Foreground="#00E5FF" FontSize="14"
@@ -255,7 +255,7 @@
                         </Border>
 
                         <!-- Distribuição Detalhada de Peso (Assentos, Carga, Combustível) -->
-                        <Grid Margin="0,0,0,6">
+                        <Grid Margin="0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -289,23 +289,6 @@
                                 </StackPanel>
                             </Border>
                         </Grid>
-
-                        <!-- Guia Rápido de Abas do EFB (MSFS 2024) -->
-                        <Border Background="#0E1622" BorderBrush="#1F2D3D" BorderThickness="1" CornerRadius="4" Padding="8,6">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding MsfsSeatsGuideDisplay, StringFormat='↳ Aba Assentos: {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="JetBrains Mono, monospace" TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" Text="{Binding MsfsCargoGuideDisplay, StringFormat='↳ Aba Carga: {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="JetBrains Mono, monospace" TextTrimming="CharacterEllipsis"/>
-                                <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4,0,0" Text="{Binding MsfsFuelGuideDisplay, StringFormat='↳ Aba Combustível: {0}'}" FontSize="11" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="JetBrains Mono, monospace" TextTrimming="CharacterEllipsis"/>
-                            </Grid>
-                        </Border>
                     </StackPanel>
                 </Border>
             </Grid>

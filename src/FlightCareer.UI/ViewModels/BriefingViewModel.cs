@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Enums;
-using FlightCareer.Application.Services;
 using FlightCareer.UI.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -162,8 +161,6 @@ namespace FlightCareer.UI.ViewModels
         public double TotalCargoWeight => AcceptedMissions.Sum(m => m.CargoWeightLbs + m.LuggageWeightLbs);
         public double TotalSeatsWeight => (TotalPaxCount + 1) * 170.0;
         public int TotalOccupantsCount => TotalPaxCount + 1;
-        public string MsfsSeatsGuideDisplay => $"{TotalOccupantsCount} assentos ({TotalSeatsWeight:N0} lbs)";
-        public string MsfsCargoGuideDisplay => $"{TotalCargoWeight:N0} lbs na Carga";
         public bool HasAcceptedMissions => AcceptedMissions.Any();
 
         public BriefingViewModel(SimConnectService simConnect, 
@@ -181,8 +178,6 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(TotalCargoWeight));
                 OnPropertyChanged(nameof(TotalSeatsWeight));
                 OnPropertyChanged(nameof(TotalOccupantsCount));
-                OnPropertyChanged(nameof(MsfsSeatsGuideDisplay));
-                OnPropertyChanged(nameof(MsfsCargoGuideDisplay));
                 OnPropertyChanged(nameof(HasAcceptedMissions));
                 _ = RebuildItineraryAndValidateAsync();
             };
@@ -204,6 +199,11 @@ namespace FlightCareer.UI.ViewModels
                     Altitude = data.Altitude;
                     GroundSpeed = data.GroundSpeed;
                     CurrentLocation = $"{data.Latitude:F4}, {data.Longitude:F4}";
+
+                    if (data.MaxGrossWeightLbs > 500)
+                    {
+                        HangarAircraftMtow = Math.Round(data.MaxGrossWeightLbs, 0);
+                    }
 
                     CalculatedTotalWeight = TotalManifestWeight + data.FuelWeightLbs + data.EmptyWeightLbs;
                     UpdateConnectionStatus();
@@ -255,7 +255,7 @@ namespace FlightCareer.UI.ViewModels
             }
             else if (_simConnect.IsConnected)
             {
-                ConnectionModeText = "MSFS 2020/2024 CONECTADO";
+                ConnectionModeText = "SIMULADOR CONECTADO";
                 ConnectionModeColor = "#00E676";
                 ConnectionModeBg = "#0D2B1E";
                 ConnectionModeBorder = "#00E676";
@@ -281,7 +281,6 @@ namespace FlightCareer.UI.ViewModels
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "📍", ParameterName = "LOCALIZAÇÃO / RAMPA", SoftwareValue = "Aguardando Base...", SimStatusValue = "Aguardando GPS...", IsOk = false });
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "👥", ParameterName = "PAYLOAD & PASSAGEIROS", SoftwareValue = "Aguardando Manifesto...", SimStatusValue = "Aguardando W&B...", IsOk = false });
                 ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "⛽", ParameterName = "COMBUSTÍVEL NOS TANQUES", SoftwareValue = "Aguardando Dados...", SimStatusValue = "Aguardando Tanques...", IsOk = false });
-                ChecklistItems.Add(new PreFlightCheckItem { ItemIcon = "🛬", ParameterName = "VIABILIDADE FÍSICA DE PISTA", SoftwareValue = "Aguardando Rota...", SimStatusValue = "Aguardando Pistas...", IsOk = false });
             }
         }
 
@@ -611,13 +610,13 @@ namespace FlightCareer.UI.ViewModels
                 (simLocation == hangarLocation || (!string.IsNullOrEmpty(simMsfsIdent) && simMsfsIdent == hangarLocation));
 
             double fuelDiff = FuelQuantity - HangarAircraftFuel;
-            bool fuelOk = connectionOk && HangarAircraftFuel > 0 && (Math.Abs(fuelDiff) <= Math.Max(2.0, HangarAircraftFuel * 0.05));
+            bool fuelOk = connectionOk && HangarAircraftFuel > 0 && (Math.Abs(fuelDiff) <= Math.Max(1.0, HangarAircraftFuel * 0.02));
 
             double plannedPayload = TotalManifestWeight;
             double fuelWeight = FuelWeightLbs > 0 ? FuelWeightLbs : (FuelQuantity * 6.0);
             double reportedSimPayload = Math.Max(0, TotalWeight - EmptyWeight - fuelWeight);
             double payloadDiff = reportedSimPayload - plannedPayload;
-            bool payloadOk = connectionOk && (Math.Abs(payloadDiff) <= Math.Max(55.0, plannedPayload * 0.06));
+            bool payloadOk = connectionOk && (Math.Abs(payloadDiff) <= Math.Max(15.0, plannedPayload * 0.02));
 
             // 1. Aeronave
             string acftSoftware = string.IsNullOrWhiteSpace(HangarAircraftModel) || HangarAircraftModel == "---"
@@ -676,14 +675,14 @@ namespace FlightCareer.UI.ViewModels
                 toleranceBadge: locTolerance);
 
             // 3. Payload & Passageiros
-            string payloadSoftware = $"Manifesto: {TotalPaxCount} PAX • {plannedPayload:N0} lbs (Assentos: {TotalSeatsWeight:N0} lbs | Carga: {TotalCargoWeight:N0} lbs)";
+            string payloadSoftware = $"Manifesto: {TotalPaxCount} PAX • {plannedPayload:N0} lbs (Peso para PAX: {TotalSeatsWeight:N0} lbs | Peso para Carga: {TotalCargoWeight:N0} lbs)";
             string payloadSim;
             string payloadExplanation;
             string payloadTolerance;
             if (!connectionOk)
             {
                 payloadSim = "Aguardando telemetria de peso...";
-                payloadExplanation = $"Carga útil exigida no manifesto: {plannedPayload:N0} lbs (Aba 'Assentos': {TotalSeatsWeight:N0} lbs para {TotalOccupantsCount} ocupantes | Aba 'Carga': {TotalCargoWeight:N0} lbs).";
+                payloadExplanation = $"Carga útil exigida no manifesto: {plannedPayload:N0} lbs (Peso para PAX: {TotalSeatsWeight:N0} lbs | Peso para Carga: {TotalCargoWeight:N0} lbs).";
                 payloadTolerance = "AGUARDANDO";
             }
             else if (payloadOk)
@@ -697,16 +696,7 @@ namespace FlightCareer.UI.ViewModels
                 string diffStr = payloadDiff > 0 ? $"+{payloadDiff:N0} lbs (excesso)" : $"{payloadDiff:N0} lbs (falta)";
                 payloadSim = $"✕ Carga útil no MSFS: {reportedSimPayload:N0} lbs ({diffStr})";
                 payloadTolerance = payloadDiff > 0 ? $"+{payloadDiff:N0} lbs" : $"{payloadDiff:N0} lbs";
-
-                if (payloadDiff < -120)
-                {
-                    int missingSeats = (int)Math.Round(Math.Abs(payloadDiff) / 170.0);
-                    payloadExplanation = $"⚠️ Na aba 'Assentos' do MSFS, falta preencher {missingSeats} assento(s) ({missingSeats * 170} lbs)! Preencha o piloto (170 lbs) e o(s) passageiro(s) ({TotalPaxCount} PAX x 170 lbs) na aba Assentos ({TotalSeatsWeight:N0} lbs total), e a bagagem ({TotalCargoWeight:N0} lbs) na aba Carga. IMPORTANTE: No MSFS 2024, clique no botão azul 'CARREGAR A AERONAVE' para aplicar!";
-                }
-                else
-                {
-                    payloadExplanation = $"⚠️ Ajuste no MSFS: Aba 'Assentos' = {TotalSeatsWeight:N0} lbs ({TotalOccupantsCount} assentos preenchidos) e Aba 'Carga' = {TotalCargoWeight:N0} lbs. Total: {plannedPayload:N0} lbs. IMPORTANTE: No MSFS 2024, clique no botão azul 'CARREGAR A AERONAVE' para aplicar!";
-                }
+                payloadExplanation = $"⚠️ Peso para PAX: {TotalSeatsWeight:N0} lbs ({TotalPaxCount} PAX + Piloto) | Peso para Carga: {TotalCargoWeight:N0} lbs. Total: {plannedPayload:N0} lbs. IMPORTANTE: No MSFS 2024, clique no botão azul 'CARREGAR A AERONAVE' para aplicar!";
             }
             UpdateChecklistItem(2, "👥", "PAYLOAD & PASSAGEIROS", payloadSoftware, payloadSim, payloadOk, payloadExplanation, payloadOk ? "OK" : "DIVERGENTE",
                 cleanPlanned: $"{plannedPayload:N0} lbs ({TotalPaxCount} PAX)",
@@ -742,61 +732,11 @@ namespace FlightCareer.UI.ViewModels
                 cleanSim: !connectionOk ? "--" : $"{FuelQuantity:F1} gal ({FuelQuantity * 6.0:N0} lbs)",
                 toleranceBadge: fuelTolerance);
 
-            // 5. Viabilidade Física de Pista (Algoritmo Aeronave vs Pista)
-            bool runwayOk = true;
-            string runwaySoftware = "Pistas da rota em conformidade";
-            string runwaySim = "Pista compatível";
-            string runwayExplanation = "Comprimento e superfície viáveis para a operação.";
-            string runwayTolerance = "✓ VIÁVEL";
-
-            if (AcceptedMissions.Any())
-            {
-                var destIcaos = AcceptedMissions.Select(m => m.DestinationICAO).Distinct().ToList();
-                var aircraftType = _context.PilotAircrafts
-                    .Include(pa => pa.AircraftType)
-                    .FirstOrDefault(pa => pa.Prefix == HangarAircraftPrefix)?.AircraftType;
-
-                if (aircraftType != null)
-                {
-                    var calc = new RunwayViabilityCalculator();
-                    foreach (var destIcao in destIcaos)
-                    {
-                        var destApt = _context.Airports.FirstOrDefault(a => a.ICAO == destIcao);
-                        if (destApt != null)
-                        {
-                            var runways = _context.Runways.Where(r => r.AirportIdent == destApt.ICAO).ToList();
-                            var viability = calc.CalculateViability(aircraftType, destApt, runways, PilotCategory.Category3_AirTaxi);
-
-                            if (!viability.IsViable)
-                            {
-                                runwayOk = false;
-                                runwaySoftware = $"Requer: {viability.RequiredRunwayFt:N0} FT ({viability.SafetyFactor:F2}x)";
-                                runwaySim = $"Pista {destApt.ICAO}: {viability.AvailableRunwayFt:N0} FT";
-                                runwayExplanation = viability.Reason;
-                                runwayTolerance = "INVIÁVEL";
-                                break;
-                            }
-                            else
-                            {
-                                runwaySoftware = $"Requer: {viability.RequiredRunwayFt:N0} FT";
-                                runwaySim = $"Disp: {viability.AvailableRunwayFt:N0} FT ({viability.BestRunwaySurface})";
-                                runwayExplanation = $"Pista em {destApt.ICAO} ({viability.AvailableRunwayFt:N0} FT) atende ao mínimo operacional de {viability.RequiredRunwayFt:N0} FT com segurança.";
-                            }
-                        }
-                    }
-                }
-            }
-
-            UpdateChecklistItem(4, "🛬", "VIABILIDADE FÍSICA DE PISTA", runwaySoftware, runwaySim, runwayOk, runwayExplanation, runwayOk ? "OK" : "INSUFICIENTE",
-                cleanPlanned: runwaySoftware,
-                cleanSim: runwaySim,
-                toleranceBadge: runwayTolerance);
-
-            bool allChecksPassed = connectionOk && aircraftOk && locationOk && fuelOk && payloadOk && runwayOk;
+            bool allChecksPassed = connectionOk && aircraftOk && locationOk && fuelOk && payloadOk;
             IsGatekeeperAllOk = allChecksPassed;
             CanStartFlight = allChecksPassed;
 
-            int passedCount = (aircraftOk ? 1 : 0) + (locationOk ? 1 : 0) + (payloadOk ? 1 : 0) + (fuelOk ? 1 : 0) + (runwayOk ? 1 : 0);
+            int passedCount = (aircraftOk ? 1 : 0) + (locationOk ? 1 : 0) + (payloadOk ? 1 : 0) + (fuelOk ? 1 : 0);
             if (!connectionOk)
             {
                 GatekeeperSummaryText = "MSFS DESCONECTADO";
@@ -807,7 +747,7 @@ namespace FlightCareer.UI.ViewModels
             }
             else if (allChecksPassed)
             {
-                GatekeeperSummaryText = "5/5 SISTEMAS CONFORMES";
+                GatekeeperSummaryText = "4/4 SISTEMAS CONFORMES";
                 GatekeeperSummaryIcon = "🟢";
                 GatekeeperSummaryBadgeBg = "#0D2B1E";
                 GatekeeperSummaryBadgeBorder = "#1B4D3E";
@@ -815,7 +755,7 @@ namespace FlightCareer.UI.ViewModels
             }
             else
             {
-                GatekeeperSummaryText = $"{passedCount}/5 SINCRONIZADOS";
+                GatekeeperSummaryText = $"{passedCount}/4 SINCRONIZADOS";
                 GatekeeperSummaryIcon = "⚠️";
                 GatekeeperSummaryBadgeBg = "#2D220D";
                 GatekeeperSummaryBadgeBorder = "#5C4408";
@@ -823,16 +763,15 @@ namespace FlightCareer.UI.ViewModels
             }
 
             IsWandBAlreadySynced = payloadOk && fuelOk;
+            CopyWandBButtonText = "📋 COPIAR W&B P/ O SIMULADOR";
             if (IsWandBAlreadySynced)
             {
-                CopyWandBButtonText = "✓ W&B JÁ SINCRONIZADO NO MSFS";
                 CopyWandBButtonBg = "#0D2B1E";
                 CopyWandBButtonBorder = "#1B4D3E";
                 CopyWandBButtonColor = "#00E676";
             }
             else
             {
-                CopyWandBButtonText = "📋 COPIAR W&B P/ O SIMULADOR";
                 CopyWandBButtonBg = "#1F2B37";
                 CopyWandBButtonBorder = "#00E5FF";
                 CopyWandBButtonColor = "#00E5FF";
@@ -867,12 +806,6 @@ namespace FlightCareer.UI.ViewModels
                 WeightStatusText = $"PAYLOAD DIVERGENTE ({reportedSimPayload:F0} lbs)";
                 WeightStatusColor = "#FFB300";
                 GatekeeperBlockedReason = $"Voo bloqueado: Ajuste o Peso e Balanceamento (W&B) no MSFS para {plannedPayload:F0} lbs.";
-            }
-            else if (!runwayOk)
-            {
-                WeightStatusText = "OPERAÇÃO INVIÁVEL NA PISTA DE DESTINO";
-                WeightStatusColor = "#EF4444";
-                GatekeeperBlockedReason = $"Voo bloqueado: {runwayExplanation}";
             }
             else
             {
@@ -915,15 +848,15 @@ Aeronave: {HangarAircraftModel}
 Localização: {HangarAircraftLocation}
 
 [COMO AJUSTAR NO MENU 'MASSA E EQUILÍBRIO' DO MSFS]
-1. ABA 'ASSENTOS':
+1. PASSAGEIROS / PILOTO:
    • Piloto: 170 lbs
    • Passageiro(s): {TotalPaxCount} PAX ({TotalPaxCount * 170:N0} lbs)
-   ↳ TOTAL NA ABA ASSENTOS: {TotalSeatsWeight:N0} lbs ({TotalOccupantsCount} assentos preenchidos)
+   ↳ TOTAL PASSAGEIROS / PILOTO: {TotalSeatsWeight:N0} lbs ({TotalOccupantsCount} ocupantes)
 
-2. ABA 'CARGA':
+2. CARGA / BAGAGEM:
    • Bagagem / Compartimento de Carga: {TotalCargoWeight:N0} lbs
 
-3. ABA 'COMBUSTÍVEL':
+3. COMBUSTÍVEL:
    • Combustível: {HangarAircraftFuel:F1} gal ({fuelLbs:N0} lbs)
 
 ------------------------------------------------

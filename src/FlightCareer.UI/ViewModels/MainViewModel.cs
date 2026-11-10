@@ -510,7 +510,7 @@ namespace FlightCareer.UI.ViewModels
                     _briefingViewModel.HangarAircraftPrefix = active.Prefix;
                     _briefingViewModel.HangarAircraftFuel = active.FuelAmount;
                     _briefingViewModel.HangarAircraftLocation = active.CurrentLocationICAO;
-                    _briefingViewModel.HangarAircraftMtow = (active.AircraftType?.MaxPayloadLbs ?? 500) + 2000.0;
+                    _briefingViewModel.HangarAircraftMtow = AircraftWeightSpecs.GetMtow(active.AircraftType?.Model, active.AircraftType);
                     _briefingViewModel.HangarAircraftCruiseSpeed = active.AircraftType?.CruiseSpeedKts ?? 110.0;
                 }
             }

@@ -6,6 +6,9 @@
              xmlns:gmap="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+    </UserControl.Resources>
     <Border Background="#0B0F14" CornerRadius="10" ClipToBounds="True" BorderBrush="#263545" BorderThickness="1">
         <Grid>
             <gmap:GMapControl x:Name="MainMap" MouseRightButtonDown="MainMap_MouseRightButtonDown"/>
@@ -18,7 +21,8 @@
             
             <!-- Overlay para informações de distância dos waypoints -->
             <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" 
-                    Background="#E6141C24" CornerRadius="6" Padding="10,5" BorderBrush="#263545" BorderThickness="1" IsHitTestVisible="False">
+                    Background="#E6141C24" CornerRadius="6" Padding="10,5" BorderBrush="#263545" BorderThickness="1" IsHitTestVisible="False"
+                    Visibility="{Binding ShowWaypointsOverlay, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisConverter}}">
                 <StackPanel>
                     <TextBlock x:Name="TxtDistance" Text="0.0 NM" FontSize="13.5" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
                     <TextBlock Text="WAYPOINTS ATIVOS" FontSize="10.5" FontWeight="SemiBold" Foreground="#8B9BAE" HorizontalAlignment="Right"/>
@@ -28,7 +32,8 @@
             <!-- Botão para limpar waypoints -->
             <Button VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="10"
                     Content="LIMPAR" Click="BtnClear_Click" FontSize="11" FontWeight="Bold" Padding="10,4"
-                    Background="#1F2B37" Foreground="#8B9BAE" BorderBrush="#263545" BorderThickness="1">
+                    Background="#1F2B37" Foreground="#8B9BAE" BorderBrush="#263545" BorderThickness="1"
+                    Visibility="{Binding ShowWaypointsOverlay, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisConverter}}">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">

@@ -190,9 +190,7 @@ namespace FlightCareer.Application.Services
                 }
 
                 // Cálculo da Taxa de Pouso baseada no MTOW e classificação do aeroporto
-                double mtowLbs = aircraft.AircraftType != null 
-                    ? (aircraft.AircraftType.MaxPayloadLbs * 2.5 + aircraft.AircraftType.FuelTankGallons * 6.0) 
-                    : 2500;
+                double mtowLbs = AircraftWeightSpecs.GetMtow(aircraft.AircraftType?.Model, aircraft.AircraftType);
 
                 double landingFee = CalculateLandingFee(destAirport, mtowLbs);
                 if (landingFee > 0)

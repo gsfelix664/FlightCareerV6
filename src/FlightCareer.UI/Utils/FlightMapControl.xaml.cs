@@ -43,6 +43,7 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty AircraftHeadingProperty = DependencyProperty.Register("AircraftHeading", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty AltitudeProperty = DependencyProperty.Register("Altitude", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty GroundSpeedProperty = DependencyProperty.Register("GroundSpeed", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
+        public static readonly DependencyProperty ShowWaypointsOverlayProperty = DependencyProperty.Register("ShowWaypointsOverlay", typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true));
 
         public System.Collections.IEnumerable? RecordedPath { get => (System.Collections.IEnumerable?)GetValue(RecordedPathProperty); set => SetValue(RecordedPathProperty, value); }
         public System.Collections.IEnumerable? RouteLegs { get => (System.Collections.IEnumerable?)GetValue(RouteLegsProperty); set => SetValue(RouteLegsProperty, value); }
@@ -57,6 +58,7 @@ namespace FlightCareer.UI.Utils
         public double AircraftHeading { get => (double)GetValue(AircraftHeadingProperty); set => SetValue(AircraftHeadingProperty, value); }
         public double Altitude { get => (double)GetValue(AltitudeProperty); set => SetValue(AltitudeProperty, value); }
         public double GroundSpeed { get => (double)GetValue(GroundSpeedProperty); set => SetValue(GroundSpeedProperty, value); }
+        public bool ShowWaypointsOverlay { get => (bool)GetValue(ShowWaypointsOverlayProperty); set => SetValue(ShowWaypointsOverlayProperty, value); }
 
         private static void OnRouteLegsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -156,7 +158,7 @@ namespace FlightCareer.UI.Utils
             
             MainMap.Position = new PointLatLng(0, 0);
             MainMap.MinZoom = 2;
-            MainMap.MaxZoom = 18;
+            MainMap.MaxZoom = 16;
             MainMap.Zoom = 8;
             MainMap.ShowCenter = false;
             MainMap.CanDragMap = true;
@@ -184,14 +186,6 @@ namespace FlightCareer.UI.Utils
             if (d is FlightMapControl map)
             {
                 map.UpdateAircraftPosition();
-                if (map.RouteLegs != null && map.RouteLegs.OfType<object>().Any())
-                {
-                    map.UpdateMultiLegRoute();
-                }
-                else
-                {
-                    map.UpdateDestinationRoute();
-                }
             }
         }
 

@@ -87,6 +87,8 @@ namespace FlightCareer.Infrastructure.Services
                 {
                     progressCallback?.Invoke("Enriquecendo aeroportos com municípios e países do CSV...", 0.70);
                     await EnrichFromCsvAsync(progressCallback);
+                    progressCallback?.Invoke("Normalizando dados aeronáuticos e higienizando municípios...", 0.90);
+                    await NormalizeAirportsInDatabaseAsync(progressCallback);
                     progressCallback?.Invoke("Base de dados global do simulador pronta!", 1.0);
                     return;
                 }
@@ -96,6 +98,7 @@ namespace FlightCareer.Infrastructure.Services
             var runwaySurfaces = await GetRunwaySurfacesAsync(progressCallback);
             await SeedAirportsAsync(progressCallback, runwaySurfaces);
             await SeedRunwaysAsync(progressCallback);
+            await NormalizeAirportsInDatabaseAsync(progressCallback);
         }
 
         private async Task<bool> SeedFromLittleNavmapAsync(string lnmPath, Action<string, double>? progressCallback)
@@ -125,7 +128,33 @@ namespace FlightCareer.Infrastructure.Services
                         COALESCE(ident, icao),
                         COALESCE(name, 'Aeródromo MSFS'),
                         COALESCE(city, ''),
-                        COALESCE(country, region, ''),
+                        CASE 
+                            WHEN ident LIKE 'SB%' OR ident LIKE 'SS%' OR ident LIKE 'SW%' OR ident LIKE 'SD%' OR ident LIKE 'SJ%' OR ident LIKE 'SN%' OR ident LIKE 'SI%' THEN 'BR'
+                            WHEN ident LIKE 'K%' AND length(ident) = 4 THEN 'US'
+                            WHEN (ident LIKE 'C%' OR ident LIKE 'CY%' OR ident LIKE 'CZ%') AND length(ident) = 4 THEN 'CA'
+                            WHEN ident LIKE 'MM%' THEN 'MX'
+                            WHEN ident LIKE 'SA%' THEN 'AR'
+                            WHEN ident LIKE 'SC%' THEN 'CL'
+                            WHEN ident LIKE 'SK%' THEN 'CO'
+                            WHEN ident LIKE 'SP%' THEN 'PE'
+                            WHEN ident LIKE 'SU%' THEN 'UY'
+                            WHEN ident LIKE 'SV%' THEN 'VE'
+                            WHEN ident LIKE 'SG%' THEN 'PY'
+                            WHEN ident LIKE 'SL%' THEN 'BO'
+                            WHEN ident LIKE 'EG%' THEN 'GB'
+                            WHEN ident LIKE 'LF%' THEN 'FR'
+                            WHEN ident LIKE 'ED%' OR ident LIKE 'ET%' THEN 'DE'
+                            WHEN ident LIKE 'LE%' THEN 'ES'
+                            WHEN ident LIKE 'LP%' THEN 'PT'
+                            WHEN ident LIKE 'LI%' THEN 'IT'
+                            WHEN ident LIKE 'EH%' THEN 'NL'
+                            WHEN ident LIKE 'EB%' THEN 'BE'
+                            WHEN ident LIKE 'RJ%' OR ident LIKE 'RO%' THEN 'JP'
+                            WHEN ident LIKE 'Y%' AND length(ident) = 4 THEN 'AU'
+                            WHEN ident LIKE 'NZ%' THEN 'NZ'
+                            WHEN country IS NOT NULL AND length(country) = 2 AND country NOT IN ('SB','SS','SW','SJ','SD','SI','SN') THEN country
+                            ELSE COALESCE(country, region, '')
+                        END,
                         laty,
                         lonx,
                         CAST(altitude AS INTEGER),
@@ -262,13 +291,88 @@ namespace FlightCareer.Infrastructure.Services
                 UPDATE Airports
                 SET 
                     City = CASE WHEN City IS NULL OR City = '' THEN (SELECT municipality FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE City END,
-                    Country = CASE WHEN Country IS NULL OR length(Country) > 2 OR Country = '' THEN (SELECT iso_country FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE Country END,
+                    Country = CASE 
+                        WHEN ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%' THEN 'BR'
+                        WHEN Country IS NULL OR length(Country) > 2 OR Country = '' OR Country IN ('SB','SS','SW','SJ','SD','SI','SN') 
+                            THEN COALESCE((SELECT iso_country FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO), Country) 
+                        ELSE Country 
+                    END,
                     ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END
                 WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO);
                 
                 DROP TABLE IF EXISTS CsvAirports;
             ";
             await updateCmd.ExecuteNonQueryAsync();
+        }
+
+        private async Task NormalizeAirportsInDatabaseAsync(Action<string, double>? progressCallback)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            // 1. Correções SQL imediatas para FIRs e SBWM
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                    UPDATE Airports 
+                    SET Country = 'BR' 
+                    WHERE (ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%')
+                      AND (Country IN ('SB','SS','SW','SJ','SD','SI','SN') OR Country = '' OR Country IS NULL);
+
+                    UPDATE Airports 
+                    SET City = 'Ribeirão Branco', Country = 'BR' 
+                    WHERE ICAO = 'SBWM' AND (City IS NULL OR City = '' OR City = 'SB');
+                ";
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            // 2. Extração inteligente de municípios vazios via AviationDataNormalizer
+            using var selectCmd = connection.CreateCommand();
+            selectCmd.CommandText = "SELECT Id, ICAO, Name, Country FROM Airports WHERE City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN');";
+
+            var pendingUpdates = new List<(string Id, string City, string Country)>();
+            using (var reader = await selectCmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    var id = reader.GetString(0);
+                    var icao = reader.IsDBNull(1) ? "" : reader.GetString(1);
+                    var name = reader.IsDBNull(2) ? "" : reader.GetString(2);
+                    var country = reader.IsDBNull(3) ? "" : reader.GetString(3);
+
+                    if (AviationDataNormalizer.TryExtractCityFromName(name, out var extractedCity))
+                    {
+                        var resolvedCountry = AviationDataNormalizer.ResolveCountryFromIcao(icao, country);
+                        pendingUpdates.Add((id, extractedCity, resolvedCountry));
+                    }
+                }
+            }
+
+            if (pendingUpdates.Count > 0)
+            {
+                using var transaction = connection.BeginTransaction();
+                using var updateCmd = connection.CreateCommand();
+                updateCmd.Transaction = transaction;
+                updateCmd.CommandText = "UPDATE Airports SET City = @city, Country = @country WHERE Id = @id;";
+
+                var pCity = updateCmd.CreateParameter(); pCity.ParameterName = "@city"; updateCmd.Parameters.Add(pCity);
+                var pCountry = updateCmd.CreateParameter(); pCountry.ParameterName = "@country"; updateCmd.Parameters.Add(pCountry);
+                var pId = updateCmd.CreateParameter(); pId.ParameterName = "@id"; updateCmd.Parameters.Add(pId);
+
+                for (int i = 0; i < pendingUpdates.Count; i++)
+                {
+                    var (id, city, country) = pendingUpdates[i];
+                    pCity.Value = city;
+                    pCountry.Value = country;
+                    pId.Value = id;
+                    await updateCmd.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
         }
 
         private async Task<Dictionary<string, List<string>>> GetRunwaySurfacesAsync(Action<string, double>? progressCallback)
@@ -391,6 +495,7 @@ namespace FlightCareer.Infrastructure.Services
                     IsInSimulator = true,
                     MsfsIdent = icao
                 };
+                AviationDataNormalizer.NormalizeAirport(airport);
                 airports.Add(airport);
                 count++;
 
