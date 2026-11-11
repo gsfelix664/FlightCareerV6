@@ -4,162 +4,977 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="900" d:DesignWidth="1400">
-    <Grid Margin="30">
+             d:DesignHeight="950" d:DesignWidth="1440">
+
+    <UserControl.Resources>
+        <!-- Estilo ProgressBar Dark Avionics -->
+        <Style x:Key="AvionicsProgressBar" TargetType="ProgressBar">
+            <Setter Property="Height" Value="6"/>
+            <Setter Property="Background" Value="#1A232E"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#00E5FF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}" CornerRadius="3"/>
+                            <Border x:Name="PART_Track"/>
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="{TemplateBinding Foreground}" CornerRadius="3"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Base para Botões do Alternador de Abas -->
+        <Style x:Key="TabSwitcherButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="38"/>
+            <Setter Property="Padding" Value="18,0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#8B9BAE"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1A2430"/>
+                                <Setter Property="Foreground" Value="#F0F4F8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Base para Chips de Filtro -->
+        <Style x:Key="FilterChipStyle" TargetType="Button">
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Padding" Value="14,0"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Background" Value="#141C24"/>
+            <Setter Property="Foreground" Value="#8B9BAE"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="#263545"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="16" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1F2D3D"/>
+                                <Setter Property="Foreground" Value="#F0F4F8"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#00E5FF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Customizado para ComboBox Dark -->
+        <Style x:Key="AvionicsComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#141C24"/>
+            <Setter Property="Foreground" Value="#F0F4F8"/>
+            <Setter Property="BorderBrush" Value="#263545"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="Height" Value="34"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="25">
         <Grid.RowDefinitions>
+            <!-- Topo: Título + Saldo do Piloto + Alternador de Abas -->
             <RowDefinition Height="Auto"/>
+            <!-- Área Principal das Abas -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- ========================================== -->
+        <!-- HEADER DO MERCADO: TÍTULO, SALDO E ABAS     -->
+        <!-- ========================================== -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Mercado de Usados" FontSize="24" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif"/>
-                    <Border Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" CornerRadius="12" Padding="12,3" Margin="15,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Offers.Count, StringFormat={}{0} aeronaves}" FontSize="12.5" FontWeight="SemiBold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                    </Border>
-                </StackPanel>
-                <TextBlock Text="Catálogo dinâmico de aeronaves à venda com cotação de mercado e inspeção técnica" FontSize="13.5" Foreground="#8B9BAE" Margin="0,4,0,0"/>
-            </StackPanel>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <!-- Campo de Busca de Aeronaves -->
-            <Border Grid.Column="1" Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,8" VerticalAlignment="Center" Width="300">
+            <!-- Linha 1 do Header: Título e Saldo da Empresa -->
+            <Grid Grid.Row="0" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Mercado de Aeronaves" FontSize="26" FontWeight="Black" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif"/>
+                        <Border Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" CornerRadius="12" Padding="12,3" Margin="15,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Offers.Count, StringFormat={}{0} ofertas no mercado}" FontSize="12" FontWeight="SemiBold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Text="Catálogo dinâmico de aeronaves usadas com inspeção pré-compra e venda de frota com avaliação Bluebook" FontSize="13" Foreground="#8B9BAE" Margin="0,4,0,0"/>
+                </StackPanel>
+
+                <!-- Badge de Saldo Disponível do Piloto -->
+                <Border Grid.Column="1" Background="#121820" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="16,8" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="SALDO DA EMPRESA:" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding UserBalance, StringFormat={}${0:N2}}" FontSize="16" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Linha 2 do Header: SWITCHER DE ABAS DE 1º NÍVEL -->
+            <Border Grid.Row="1" Background="#121820" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="4" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Botão 1: Mercado de Usados (Comprar) -->
+                    <Button Content="✈️ MERCADO DE USADOS (COMPRAR)"
+                            Command="{Binding SelectTabCommand}" 
+                            CommandParameter="0">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource TabSwitcherButtonStyle}" TargetType="Button">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTab}" Value="0">
+                                        <Setter Property="Background" Value="#00E5FF"/>
+                                        <Setter Property="Foreground" Value="#0B0F14"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Botão 2: Meus Anúncios / Vender Aeronave -->
+                    <Button Content="🏷️ MEUS ANÚNCIOS / VENDER AERONAVE"
+                            Command="{Binding SelectTabCommand}" 
+                            CommandParameter="1" 
+                            Margin="6,0,0,0">
+                        <Button.Style>
+                            <Style BasedOn="{StaticResource TabSwitcherButtonStyle}" TargetType="Button">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTab}" Value="1">
+                                        <Setter Property="Background" Value="#00E5FF"/>
+                                        <Setter Property="Foreground" Value="#0B0F14"/>
+                                        <Setter Property="FontWeight" Value="Bold"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ============================================================== -->
+        <!-- ABA 1: MERCADO DE USADOS (COMPRAR) - SelectedTab == 0           -->
+        <!-- ============================================================== -->
+        <Grid Grid.Row="1">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedTab}" Value="0">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+
+            <Grid.ColumnDefinitions>
+                <!-- Lado Esquerdo: Lista de Ofertas com Filtros e Ordenação (56%) -->
+                <ColumnDefinition Width="1.35*"/>
+                <!-- Lado Direito: Painel de Inspeção Técnica Pré-Compra (44%) -->
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ======================================== -->
+            <!-- LADO ESQUERDO: LISTA DE OFERTAS          -->
+            <!-- ======================================== -->
+            <Grid Grid.Column="0" Margin="0,0,20,0">
+                <Grid.RowDefinitions>
+                    <!-- Filtros Rápidos, Busca e Ordenação -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- Lista de Cards Compactos -->
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Barra de Ferramentas: Filtros + Busca + Ordenação -->
+                <Grid Grid.Row="0" Margin="0,0,0,14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Linha de Chips de Filtro Rápido -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                        <!-- Chip: TODAS -->
+                        <Button Content="TODAS"
+                                Command="{Binding SetCategoryFilterCommand}" 
+                                CommandParameter="TODAS">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource FilterChipStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="TODAS">
+                                            <Setter Property="Background" Value="#00E5FF"/>
+                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                            <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Chip: MONOMOTOR -->
+                        <Button Content="MONOMOTOR"
+                                Command="{Binding SetCategoryFilterCommand}" 
+                                CommandParameter="MONOMOTOR">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource FilterChipStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="MONOMOTOR">
+                                            <Setter Property="Background" Value="#00E5FF"/>
+                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                            <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Chip: BIMOTOR -->
+                        <Button Content="BIMOTOR"
+                                Command="{Binding SetCategoryFilterCommand}" 
+                                CommandParameter="BIMOTOR">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource FilterChipStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="BIMOTOR">
+                                            <Setter Property="Background" Value="#00E5FF"/>
+                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                            <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Chip: TURBOÉLICE -->
+                        <Button Content="TURBOÉLICE"
+                                Command="{Binding SetCategoryFilterCommand}" 
+                                CommandParameter="TURBOÉLICE">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource FilterChipStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="TURBOÉLICE">
+                                            <Setter Property="Background" Value="#00E5FF"/>
+                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                            <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <!-- Chip: ATÉ $100K -->
+                        <Button Content="ATÉ $100K"
+                                Command="{Binding SetCategoryFilterCommand}" 
+                                CommandParameter="ATÉ $100K">
+                            <Button.Style>
+                                <Style BasedOn="{StaticResource FilterChipStyle}" TargetType="Button">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedCategoryFilter}" Value="ATÉ $100K">
+                                            <Setter Property="Background" Value="#00E5FF"/>
+                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                            <Setter Property="BorderBrush" Value="#00E5FF"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Linha de Busca e Ordenação -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Campo de Busca de Texto -->
+                        <Border Grid.Column="0" Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,6" Margin="0,0,12,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="🔍" FontSize="13" Foreground="#8B9BAE" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBox Grid.Column="1" 
+                                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                                         Background="Transparent" 
+                                         Foreground="#F0F4F8" 
+                                         BorderThickness="0" 
+                                         FontSize="13" 
+                                         VerticalAlignment="Center" 
+                                         CaretBrush="#00E5FF"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Dropdown de Ordenação -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="ORDENAR:" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox ItemsSource="{Binding SortOptions}" 
+                                      SelectedItem="{Binding SelectedSortOption}" 
+                                      Style="{StaticResource AvionicsComboBox}" 
+                                      Width="180"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+
+                <!-- Lista de Cards Compactos de Ofertas -->
+                <ListBox Grid.Row="1" 
+                         ItemsSource="{Binding Offers}" 
+                         SelectedItem="{Binding SelectedOffer}" 
+                         Background="Transparent" 
+                         BorderThickness="0" 
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.CanContentScroll="True"
+                         VirtualizingStackPanel.IsVirtualizing="True"
+                         VirtualizingStackPanel.VirtualizationMode="Recycling"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,0,6,8"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="card" Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="14,12" Cursor="Hand">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Linha 1: Modelo, Prefixo e Badge de Categoria à esquerda; Preço à direita -->
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding BaseType.Model}" FontSize="15" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            <TextBlock Text="{Binding Prefix}" FontSize="13" Foreground="#00E5FF" Margin="10,0,0,0" VerticalAlignment="Center" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="Bold"/>
+                                            
+                                            <!-- Badge de Categoria -->
+                                            <Border Background="#1C2733" BorderBrush="#263545" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding CategoryBadge}" FontSize="10.5" FontWeight="SemiBold" Foreground="#8B9BAE"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <!-- Preço formatado em USD -->
+                                        <TextBlock Grid.Column="1" Text="{Binding SalePrice, StringFormat={}${0:N0}}" FontSize="16" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <!-- Linha 2: Ano, TTAF, Combustível e Badge de Condição Média -->
+                                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <!-- Ano de Fabricação -->
+                                            <Border Background="#18202A" CornerRadius="4" Padding="5,1" Margin="0,0,8,0">
+                                                <TextBlock Text="{Binding YearOfManufacture, StringFormat={}Ano {0}}" FontSize="11" Foreground="#94A3B8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </Border>
+                                            <TextBlock Text="•" Foreground="#526375" Margin="2,0,6,0"/>
+                                            <TextBlock Text="TTAF:" FontSize="11.5" Foreground="#94A3B8" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding AirframeHours, StringFormat={}{0:N0}h}" FontSize="11.5" Foreground="#F0F4F8" Margin="4,0,0,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Text="•" Foreground="#526375" Margin="6,0"/>
+                                            <TextBlock Text="{Binding FuelAmount, StringFormat={}{0:F1} GAL}" FontSize="11.5" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="SemiBold"/>
+                                        </StackPanel>
+
+                                        <!-- Badge de Condição Média com StateColor -->
+                                        <Border Grid.Column="1" Background="#161F2A" BorderBrush="{Binding StateColor}" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding AverageCondition, StringFormat={}{0:F0}%}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding StateColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                <TextBlock Text=" CONDIÇÃO" FontSize="9.5" FontWeight="Bold" Foreground="{Binding StateColor}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                    <Setter TargetName="card" Property="Background" Value="#1C2735"/>
+                                    <Setter TargetName="card" Property="BorderBrush" Value="#00E5FF"/>
+                                    <Setter TargetName="card" Property="BorderThickness" Value="1"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <!-- ========================================================================= -->
+            <!-- LADO DIREITO: PAINEL DE INSPEÇÃO TÉCNICA PRÉ-COMPRA (PRE-BUY INSPECTION) -->
+            <!-- ========================================================================= -->
+            <Border Grid.Column="1" Background="#121820" BorderBrush="#263545" BorderThickness="1" CornerRadius="12" Padding="20">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="🔍" FontSize="13" Foreground="#8B9BAE" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                    <TextBox Grid.Column="1" 
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                             Background="Transparent" 
-                             Foreground="#F0F4F8" 
-                             BorderThickness="0" 
-                             FontSize="13.5" 
-                             VerticalAlignment="Center" 
-                             CaretBrush="#00E5FF"/>
+                    <!-- Estado quando NENHUMA oferta estiver selecionada -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedOffer}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <Path Data="{StaticResource IconPlane}" Fill="#263545" Width="54" Height="54" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,16"/>
+                        <TextBlock Text="NENHUMA AERONAVE SELECIONADA" FontSize="14" FontWeight="Bold" Foreground="#8B9BAE" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Selecione um anúncio no catálogo para analisar o relatório de inspeção pré-compra." FontSize="12" Foreground="#526375" HorizontalAlignment="Center" Margin="0,4,0,0" TextWrapping="Wrap" TextAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Estrutura Vertical Pre-buy (Row 0, Row 1, Row 2) -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedOffer}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+
+                        <Grid.RowDefinitions>
+                            <!-- Row 0 (Auto): Card de Identificação -->
+                            <RowDefinition Height="Auto"/>
+                            <!-- Row 1 (* com ScrollViewer): Relatório dos 4 Subsistemas e Manutenção -->
+                            <RowDefinition Height="*"/>
+                            <!-- Row 2 (Auto): Sticky Footer com Botão de Compra -->
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- =================================================== -->
+                        <!-- ROW 0: CARD DE IDENTIFICAÇÃO                        -->
+                        <!-- =================================================== -->
+                        <Border Grid.Row="0" Background="#161F2A" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="0,0,0,14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Silhueta Vetorial IconPlane -->
+                                <Border Grid.Column="0" Background="#1C2733" CornerRadius="8" Width="48" Height="48" Margin="0,0,14,0" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource IconPlane}" Fill="#00E5FF" Width="26" Height="26" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <!-- Dados da Aeronave: Modelo, Matrícula e Ano -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding SelectedOffer.BaseType.Model}" FontSize="18" FontWeight="Black" Foreground="#F0F4F8" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                        <TextBlock Text="{Binding SelectedOffer.Prefix}" FontSize="14" Foreground="#00E5FF" FontWeight="Bold" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        <TextBlock Text="•" Foreground="#526375" Margin="8,0"/>
+                                        <TextBlock Text="{Binding SelectedOffer.YearOfManufacture, StringFormat={}Fabricação {0}}" FontSize="12.5" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Badge de Estado Geral da Aeronave -->
+                                <Border Grid.Column="2" Background="#121820" BorderBrush="{Binding SelectedOffer.StateColor}" BorderThickness="1" CornerRadius="6" Padding="10,6" VerticalAlignment="Center">
+                                    <StackPanel HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding SelectedOffer.GeneralState}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.StateColor}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding SelectedOffer.AverageCondition, StringFormat={}{0:F0}% MÉDIA}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding SelectedOffer.StateColor}" HorizontalAlignment="Center" Margin="0,2,0,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- =================================================== -->
+                        <!-- ROW 1: RELATÓRIO TÉCNICO E SUBSISTEMAS (* SCROLL)   -->
+                        <!-- =================================================== -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" Padding="0,0,6,0">
+                            <StackPanel>
+                                <TextBlock Text="RELATÓRIO DE INSPEÇÃO PRÉ-COMPRA" FontSize="11.5" FontWeight="Bold" Foreground="#8B9BAE" Margin="0,0,0,10"/>
+
+                                <!-- Subsistema 1: Célula / Fuselagem (Airframe) -->
+                                <Border Background="#161F2A" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="1. CÉLULA / FUSELAGEM (AIRFRAME)" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AirframeCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding SelectedOffer.AirframeCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
+                                        <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8">
+                                            <Run Text="TTAF: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding SelectedOffer.AirframeHours, Mode=OneWay, StringFormat={}{0:N0}h}" FontFamily="JetBrains Mono, Consolas, monospace" Foreground="#F0F4F8"/>
+                                            <Run Text=" • " Foreground="#526375"/>
+                                            <Run Text="{Binding SelectedOffer.StructuralIncidentHistory, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Subsistema 2: Grupo Motopropulsor (Motor & Hélice) -->
+                                <Border Background="#161F2A" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="2. GRUPO MOTOPROPULSOR (MOTOR &amp; HÉLICE)" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.EngineCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding SelectedOffer.EngineCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
+                                        <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8">
+                                            <Run Text="TSMO: " FontWeight="SemiBold"/>
+                                            <Run Text="{Binding SelectedOffer.TsmoHours, Mode=OneWay, StringFormat={}{0:N0}h}" FontFamily="JetBrains Mono, Consolas, monospace" Foreground="#F0F4F8"/>
+                                            <Run Text=" / " Foreground="#526375"/>
+                                            <Run Text="{Binding SelectedOffer.TboHours, Mode=OneWay, StringFormat={}{0:N0}h TBO}" FontFamily="JetBrains Mono, Consolas, monospace" Foreground="#94A3B8"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Subsistema 3: Trem de Pouso & Pneus -->
+                                <Border Background="#161F2A" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,8">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="3. TREM DE POUSO &amp; PNEUS" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.TiresCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding SelectedOffer.TiresCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
+                                        <TextBlock Text="Desgaste moderado, sem vazamento no amortecedor hidráulico" Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Subsistema 4: Aviônicos & Elétrica -->
+                                <Border Background="#161F2A" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <Grid Margin="0,0,0,6">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="4. AVIÔNICOS &amp; ELÉTRICA" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AvionicsCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        </Grid>
+                                        <ProgressBar Value="{Binding SelectedOffer.AvionicsCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
+                                        <TextBlock Text="Rádio COMM/NAV operacionais, barramento DC saudável" Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Box de Manutenção Imediata -->
+                                <Border Background="#161F2A" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,0,0,14">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="⚠️" FontSize="22" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="REVISÃO ESTIMADA PÓS-COMPRA" FontSize="10.5" FontWeight="Bold" Foreground="#FFB300" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            <TextBlock Text="{Binding SelectedOffer.EstimatedPostBuyCost, StringFormat={}${0:N2}}" FontSize="18" FontWeight="Black" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,2"/>
+                                            <TextBlock Text="Valor sugerido para trazer a aeronave a 100% de confiabilidade operacional." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Especificações Técnicas da Aeronave -->
+                                <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                    <StackPanel>
+                                        <TextBlock Text="ESPECIFICAÇÕES DO FABRICANTE" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE" Margin="0,0,0,10"/>
+                                        <UniformGrid Columns="2">
+                                            <StackPanel Margin="0,0,10,8">
+                                                <TextBlock Text="TIPO / MOTORIZAÇÃO" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.Type}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <TextBlock Text="ALCANCE MÁXIMO" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.RangeNM, StringFormat={}{0:N0} NM}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,10,8">
+                                                <TextBlock Text="VEL. CRUZEIRO" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.CruiseSpeedKts, StringFormat={}{0} KTS}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <TextBlock Text="CARGA MÁXIMA" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.MaxPayloadLbs, StringFormat={}{0:N0} LBS}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,10,8">
+                                                <TextBlock Text="CAPACIDADE PAX" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.MaxPax, StringFormat={}{0} PAX}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,0,8">
+                                                <TextBlock Text="PISTA MÍNIMA" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.MinRunwayLength, StringFormat={}{0:N0} FT}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,10,0">
+                                                <TextBlock Text="COMBUSTÍVEL" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.FuelAmount, StringFormat={}{0:F1} GAL}" FontSize="12.5" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0,0,0,0">
+                                                <TextBlock Text="CONSUMO MÉDIO" FontSize="10.5" Foreground="#8B9BAE"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseType.FuelConsumptionGPH, StringFormat={}{0:F1} GPH}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </StackPanel>
+                                        </UniformGrid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <!-- =================================================== -->
+                        <!-- ROW 2: STICKY FOOTER TRAVADO COM BOTÃO DE COMPRA    -->
+                        <!-- =================================================== -->
+                        <Border Grid.Row="2" Background="#121820" BorderBrush="#263545" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+                            <Button Command="{Binding BuyCommand}" 
+                                    Height="50" 
+                                    Background="#00E5FF" 
+                                    Foreground="#0B0F14" 
+                                    FontWeight="Black" 
+                                    FontSize="14" 
+                                    Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <Path Data="{StaticResource IconPlane}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding BuyButtonText}" FontSize="14" FontWeight="Black" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="btnBorder" Property="Background" Value="#33EBFF"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter TargetName="btnBorder" Property="Background" Value="#1C2733"/>
+                                                <Setter Property="Foreground" Value="#526375"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Border>
+                    </Grid>
                 </Grid>
             </Border>
         </Grid>
 
+        <!-- ============================================================== -->
+        <!-- ABA 2: MEUS ANÚNCIOS / VENDER AERONAVE - SelectedTab == 1       -->
+        <!-- ============================================================== -->
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.5*"/>
-                <ColumnDefinition Width="1*"/>
-            </Grid.ColumnDefinitions>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding SelectedTab}" Value="1">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
 
-            <ListBox Grid.Column="0" 
-                     ItemsSource="{Binding Offers}" 
-                     SelectedItem="{Binding SelectedOffer}" 
-                     Background="Transparent" 
-                     BorderThickness="0" 
-                     HorizontalContentAlignment="Stretch"
-                     ScrollViewer.CanContentScroll="True"
-                     VirtualizingStackPanel.IsVirtualizing="True"
-                     VirtualizingStackPanel.VirtualizationMode="Recycling"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Border x:Name="card" Background="{StaticResource CardBackground}" Margin="0,0,0,10" CornerRadius="12" Padding="20">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding BaseType.Model}" FontSize="19" FontWeight="Black" Foreground="White" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding Prefix}" FontSize="15" Foreground="{StaticResource PrimaryBlue}" Margin="15,0,0,0" VerticalAlignment="Bottom" Opacity="0.9" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="Bold"/>
-                                </StackPanel>
-        
-                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                    <TextBlock Text="CONDIÇÃO GERAL: " FontSize="12" Foreground="{StaticResource TextSecondary}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding AverageCondition, StringFormat={}{0:F0}%}" FontSize="12.5" FontWeight="Black" Foreground="{Binding StateColor}"/>
-                                    <TextBlock Text=" • " Foreground="#64748B" Margin="6,0"/>
-                                    <TextBlock Text="{Binding AirframeHours, StringFormat={}{0:N0}h}" FontSize="12" Foreground="White" Opacity="0.85" VerticalAlignment="Center" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                    <TextBlock Text=" • " Foreground="#64748B" Margin="6,0"/>
-                                    <TextBlock Text="{Binding FuelAmount, StringFormat={}{0:F1} GAL}" FontSize="12" Foreground="#F1C40F" VerticalAlignment="Center" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="SemiBold"/>
-                                </StackPanel>
-        
-                                <TextBlock Text="{Binding SalePrice, StringFormat=C}" FontSize="22" FontWeight="Black" Foreground="#2ECC71" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,10,0,0"/>
-                            </StackPanel>
-                        </Border>
-                        <DataTemplate.Triggers>
-                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                <Setter TargetName="card" Property="Background" Value="#2D3033"/>
-                                <Setter TargetName="card" Property="BorderBrush" Value="{StaticResource PrimaryBlue}"/>
-                                <Setter TargetName="card" Property="BorderThickness" Value="1"/>
-                            </DataTrigger>
-                        </DataTemplate.Triggers>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <Grid.RowDefinitions>
+                <!-- Cabeçalho Informativo da Corretora -->
+                <RowDefinition Height="Auto"/>
+                <!-- Lista de Aeronaves da Frota para Venda -->
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-            <Border Grid.Column="1" Background="{StaticResource SurfaceDark}" CornerRadius="15" Margin="20,0,0,0" Padding="25">
-                <StackPanel>
-                    <TextBlock Text="{Binding SelectedOffer.BaseType.Model}" FontSize="24" FontWeight="Bold" Foreground="White" FontFamily="Inter, Segoe UI, sans-serif"/>
-                    <TextBlock Text="{Binding SelectedOffer.Prefix}" FontSize="16" Foreground="{StaticResource PrimaryBlue}" Margin="0,5,0,20" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="Bold"/>
-
-                    <UniformGrid Columns="2" Margin="0,0,0,20">
-                        <StackPanel Margin="0,0,10,10">
-                            <TextBlock Text="TIPO" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.Type}" FontSize="14.5" FontWeight="Bold" Foreground="White"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="TTAF (HORAS TOTAIS)" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.AirframeHours, StringFormat={}{0:N0}h}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,10,10">
-                            <TextBlock Text="ALCANCE" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.RangeNM, StringFormat={}{0:N0} NM}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="VEL. CRUZEIRO" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.CruiseSpeedKts, StringFormat={}{0} KTS}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,10,10">
-                            <TextBlock Text="CARGA MÁX" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.MaxPayloadLbs, StringFormat={}{0:N0} LBS}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="MAX PAX" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.MaxPax, StringFormat={}{0} PAX}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,10,0">
-                            <TextBlock Text="PISTA MÍNIMA" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.BaseType.MinRunwayLength, StringFormat={}{0:N0} FT}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,0">
-                            <TextBlock Text="COMBUSTÍVEL" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                            <TextBlock Text="{Binding SelectedOffer.FuelAmount, StringFormat={}{0:F1} GAL}" FontSize="14.5" FontWeight="Bold" Foreground="#F1C40F" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                        </StackPanel>
-                    </UniformGrid>
-
-                    <StackPanel Margin="0,0,0,20">
-                        <TextBlock Text="CONSUMO" FontSize="11.5" FontWeight="SemiBold" Foreground="{StaticResource TextSecondary}"/>
-                        <TextBlock Text="{Binding SelectedOffer.BaseType.FuelConsumptionGPH, StringFormat={}{0:F1} GPH}" FontSize="14.5" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
+            <!-- Painel Informativo da Corretora -->
+            <Border Grid.Row="0" Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="18,14" Margin="0,0,0,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="CORRETORA AERONÁUTICA • DESINVESTIMENTO DE FROTA" FontSize="11.5" FontWeight="Bold" Foreground="#00E5FF"/>
+                        <TextBlock Text="Avaliação oficial pelo índice Bluebook com liquidação financeira imediata na conta da empresa. Taxa de corretagem padrão de 8% já deduzida no valor líquido." FontSize="12.5" Foreground="#8B9BAE" Margin="0,4,0,0"/>
                     </StackPanel>
+                    <Border Grid.Column="1" Background="#1A2430" BorderBrush="#263545" BorderThickness="1" CornerRadius="8" Padding="12,6" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding PlayerAircraftsForSale.Count, StringFormat={}{0} aeronaves na frota}" FontSize="12" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                    </Border>
+                </Grid>
+            </Border>
 
-                    <Separator Background="#2D3033" Margin="0,0,0,20"/>
-
-                    <TextBlock Text="CONDIÇÃO GERAL" FontSize="12" FontWeight="SemiBold" Margin="0,0,0,6"/>
-                    <ProgressBar Height="8" Value="{Binding SelectedOffer.AverageCondition, Mode=OneWay}" Foreground="{StaticResource PrimaryBlue}" Background="#1A1C1E" BorderThickness="0"/>
-                    <TextBlock Text="{Binding SelectedOffer.GeneralState}" FontSize="12" FontWeight="Bold" Foreground="{Binding SelectedOffer.StateColor}" Margin="0,6,0,0" HorizontalAlignment="Right"/>
-                    
-                    <Button Command="{Binding BuyCommand}" Content="{Binding BuyButtonText}" Height="55" Background="{StaticResource PrimaryBlue}" Foreground="White" FontWeight="Bold" FontSize="15" Margin="0,40,0,0">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="10">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="border" Property="Background" Value="#0086D1"/></Trigger>
-                                    <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.5"/></Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
+            <!-- EMPTY STATE: Quando o jogador não possui aeronaves para venda -->
+            <Border Grid.Row="1" Background="#121820" BorderBrush="#263545" BorderThickness="1" CornerRadius="12" Padding="40">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlayerAircraftsForSale.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Path Data="{StaticResource IconPlane}" Fill="#263545" Width="64" Height="64" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,18"/>
+                    <TextBlock Text="NENHUMA AERONAVE DISPONÍVEL NO HANGAR" FontSize="16" FontWeight="Black" Foreground="#8B9BAE" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Você não possui aeronaves em sua frota no momento para colocar à venda na corretora. Adquira aeronaves no mercado de usados para expandir sua operação." FontSize="13" Foreground="#526375" HorizontalAlignment="Center" Margin="0,6,0,0" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="500"/>
                 </StackPanel>
             </Border>
+
+            <!-- LISTA DE AERONAVES PRÓPRIAS PARA VENDA -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer.Style>
+                    <Style TargetType="ScrollViewer">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PlayerAircraftsForSale.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ScrollViewer.Style>
+
+                <ItemsControl ItemsSource="{Binding PlayerAircraftsForSale}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="#141C24" BorderBrush="#263545" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,0,0,14">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <!-- Cabeçalho do Card: Modelo, Prefixo, Ano, Base e Estado Geral -->
+                                        <RowDefinition Height="Auto"/>
+                                        <!-- Corpo do Card: 4 Subsistemas e Grid Financeiro da Corretora -->
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Linha 1: Identificação da Aeronave Própria -->
+                                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Background="#1C2733" CornerRadius="8" Width="40" Height="40" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                <Path Data="{StaticResource IconPlane}" Fill="#00E5FF" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Model}" FontSize="17" FontWeight="Black" Foreground="#F0F4F8" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                    <TextBlock Text="{Binding Prefix}" FontSize="14" Foreground="#00E5FF" Margin="10,0,0,0" VerticalAlignment="Center" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="Bold"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <Border Background="#18202A" CornerRadius="4" Padding="6,1" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding YearOfManufacture, StringFormat={}Ano {0}}" FontSize="11" Foreground="#94A3B8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    </Border>
+                                                    <Border Background="#18202A" CornerRadius="4" Padding="6,1" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding BaseLocation, StringFormat={}Base: {0}}" FontSize="11" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="SemiBold"/>
+                                                    </Border>
+                                                    <TextBlock Text="•" Foreground="#526375" Margin="2,0,8,0"/>
+                                                    <TextBlock Text="TTAF:" FontSize="11" Foreground="#8B9BAE" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="{Binding AirframeHours, StringFormat={}{0:N0}h}" FontSize="11" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <!-- Badge de Condição Geral -->
+                                        <Border Grid.Column="1" Background="#161F2A" BorderBrush="{Binding StateColor}" BorderThickness="1" CornerRadius="6" Padding="10,6" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding AverageCondition, StringFormat={}{0:F0}%}" FontSize="12.5" FontWeight="Black" Foreground="{Binding StateColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                <TextBlock Text="{Binding GeneralState, StringFormat={} • {0}}" FontSize="11" FontWeight="Bold" Foreground="{Binding StateColor}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Linha 2: Diagnóstico dos 4 Subsistemas e Grid Financeiro da Corretora -->
+                                    <Grid Grid.Row="1">
+                                        <Grid.ColumnDefinitions>
+                                            <!-- Coluna Esquerda: 4 Subsistemas (55%) -->
+                                            <ColumnDefinition Width="1.2*"/>
+                                            <!-- Coluna Direita: Liquidação Financeira e Botão Vender (45%) -->
+                                            <ColumnDefinition Width="1*"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- 4 Subsistemas Modulares -->
+                                        <Border Grid.Column="0" Background="#101720" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,16,0">
+                                            <StackPanel>
+                                                <TextBlock Text="DIAGNÓSTICO TÉCNICO DOS SUBSISTEMAS" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE" Margin="0,0,0,10"/>
+
+                                                <!-- Célula -->
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Célula / Fuselagem" FontSize="11" Foreground="#94A3B8"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding AirframeCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </Grid>
+                                                <ProgressBar Value="{Binding AirframeCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
+
+                                                <!-- Motor -->
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Grupo Motopropulsor" FontSize="11" Foreground="#94A3B8"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding EngineCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </Grid>
+                                                <ProgressBar Value="{Binding EngineCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
+
+                                                <!-- Pneus -->
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Trem de Pouso &amp; Pneus" FontSize="11" Foreground="#94A3B8"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding TiresCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </Grid>
+                                                <ProgressBar Value="{Binding TiresCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
+
+                                                <!-- Aviônicos -->
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="Aviônicos &amp; Sistemas Elétricos" FontSize="11" Foreground="#94A3B8"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding AvionicsCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </Grid>
+                                                <ProgressBar Value="{Binding AvionicsCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Grid Financeiro da Corretora e Botão Vender -->
+                                        <Border Grid.Column="1" Background="#101720" BorderBrush="#263545" BorderThickness="1" CornerRadius="10" Padding="16">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <!-- Parecer Financeiro -->
+                                                    <RowDefinition Height="Auto"/>
+                                                    <!-- Botão de Venda -->
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <StackPanel Grid.Row="0">
+                                                    <TextBlock Text="LIQUIDAÇÃO FINANCEIRA DA CORRETORA" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE" Margin="0,0,0,10"/>
+
+                                                    <!-- Valor Bluebook -->
+                                                    <Grid Margin="0,0,0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="Valor de Tabela Bluebook:" FontSize="12" Foreground="#94A3B8"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding BluebookValue, StringFormat={}${0:N2}}" FontSize="12.5" FontWeight="SemiBold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    </Grid>
+
+                                                    <!-- Taxa de Corretagem -->
+                                                    <Grid Margin="0,0,0,8">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="Taxa de Corretagem (8%):" FontSize="12" Foreground="#94A3B8"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding BrokerFee, StringFormat={}- ${0:N2}}" FontSize="12.5" FontWeight="SemiBold" Foreground="#FF5252" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    </Grid>
+
+                                                    <Separator Background="#263545" Margin="0,0,0,8"/>
+
+                                                    <!-- Valor Líquido -->
+                                                    <Grid Margin="0,0,0,14">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <StackPanel VerticalAlignment="Center">
+                                                            <TextBlock Text="VALOR LÍQUIDO A RECEBER:" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE"/>
+                                                            <TextBlock Text="Crédito imediato no caixa" FontSize="10" Foreground="#526375"/>
+                                                        </StackPanel>
+                                                        <TextBlock Grid.Column="1" Text="{Binding NetValue, StringFormat={}${0:N2}}" FontSize="18" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                    </Grid>
+                                                </StackPanel>
+
+                                                <!-- Botão de Vender Aeronave -->
+                                                <Button Grid.Row="1" 
+                                                        Command="{Binding DataContext.SellAircraftCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                        CommandParameter="{Binding Aircraft}" 
+                                                        Height="44" 
+                                                        Background="#16222F" 
+                                                        BorderBrush="#00E676" 
+                                                        BorderThickness="1" 
+                                                        Foreground="#00E676" 
+                                                        FontWeight="Bold" 
+                                                        FontSize="13" 
+                                                        Cursor="Hand">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border x:Name="btnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                    <TextBlock Text="🏷️" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                    <TextBlock Text="{Binding NetValue, StringFormat={}VENDER AERONAVE POR ${0:N2}}" FontSize="13" FontWeight="Bold" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                                </StackPanel>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter TargetName="btnBorder" Property="Background" Value="#00E676"/>
+                                                                    <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </UserControl>

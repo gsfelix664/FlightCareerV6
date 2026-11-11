@@ -53,17 +53,17 @@
                     <Border Background="{Binding ConnectionModeBg, FallbackValue='#0D2B1E'}" 
                             BorderBrush="{Binding ConnectionModeBorder, FallbackValue='#00E676'}" BorderThickness="1" CornerRadius="4" Padding="10,5" Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ConnectionModeIcon, FallbackValue='🟢'}" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ConnectionModeIcon, FallbackValue='●'}" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding ConnectionModeText, FallbackValue='SIMULADOR CONECTADO'}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding ConnectionModeColor}" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
-                    <Button Content="" Width="36" Height="36" Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" Foreground="#00E5FF" FontSize="14"
+                    <Button Width="36" Height="36" Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" Foreground="#00E5FF"
                             ToolTip="Gerar Novo Número de Voo" Cursor="Hand"
                             Command="{Binding DataContext.ShowBriefingCommand, RelativeSource={RelativeSource AncestorType=Window}}">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Path Data="{StaticResource IconRefresh}" Fill="{TemplateBinding Foreground}" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                             </ControlTemplate>
                         </Button.Template>
@@ -81,64 +81,104 @@
             </Grid.ColumnDefinitions>
 
             <!-- ======================================================== -->
-            <!-- COLUNA 1 (30%): MANIFESTO, ROTAS & W&B INTEGRADO        -->
+            <!-- COLUNA 1 (30%): PLANO DE VOO, MANIFESTO & W&B           -->
             <!-- ======================================================== -->
             <Grid Grid.Column="0" Margin="0,0,10,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/> <!-- 1. Itinerário Dinâmico / Pernas -->
-                    <RowDefinition Height="*"/>    <!-- 2. Cards das Missões Aceitas -->
-                    <RowDefinition Height="Auto"/> <!-- 3. Bloco Unificado de Massa e Centragem (W&B) -->
+                    <RowDefinition Height="*"/>    <!-- 1. Painel Único: PLANO DE VOO & MANIFESTO -->
+                    <RowDefinition Height="Auto"/> <!-- 2. Bloco Unificado de Massa e Centragem (W&B) -->
                 </Grid.RowDefinitions>
 
-                <!-- 1. TIMELINE DE ROTA / PERNAS COMPACTO -->
+                <!-- 1. PAINEL UNIFICADO: PLANO DE VOO & MANIFESTO OPERACIONAL -->
                 <Border Grid.Row="0" Background="#141C24" CornerRadius="8" Padding="12,10" Margin="0,0,0,8" BorderBrush="#263545" BorderThickness="1">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <!-- Cabeçalho do Itinerário -->
-                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                        <!-- Cabeçalho do Painel Unificado -->
+                        <Grid Grid.Row="0" Margin="0,0,0,10">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="🛫 " FontSize="13" VerticalAlignment="Center"/>
-                                <TextBlock Text="ITINERÁRIO DINÂMICO MULTI-LEG" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                <Path Data="{StaticResource IconBriefing}" Fill="#00E5FF" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="PLANO DE VOO &amp; MANIFESTO" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
                             </StackPanel>
                             <TextBlock Text="{Binding RouteLegs.Count, StringFormat='{}{0} PERNAS'}" HorizontalAlignment="Right" FontSize="11.5" FontWeight="Bold" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
                         </Grid>
 
-                        <!-- Lista de Pernas (Legs) -->
-                        <ScrollViewer Grid.Row="1" MaxHeight="145" VerticalScrollBarVisibility="Auto">
+                        <!-- Lista Unificada de Pernas & Contratos -->
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding RouteLegs}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
                                             <StackPanel>
-                                                <!-- Cabeçalho da Perna: LEG X: ORIGEM ➔ DESTINO + NM -->
-                                                <Grid Margin="0,0,0,4">
-                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <!-- Linha Superior: Badge LEG + Rota + Distância/ETE + Botão Ghost Exclusão -->
+                                                <Grid Margin="0,0,0,6">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <!-- [LEG X] + Rota -->
+                                                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                                         <Border Background="#1F2B37" CornerRadius="3" Padding="5,2" Margin="0,0,8,0">
                                                             <TextBlock Text="{Binding LegNumber, StringFormat='LEG {0}'}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                                         </Border>
-                                                        <TextBlock Text="{Binding RouteDisplay}" FontSize="13" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding RouteDisplay}" FontSize="12.5" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                                                     </StackPanel>
-                                                    <TextBlock Text="{Binding DistanceDisplay}" HorizontalAlignment="Right" FontSize="12.5" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+
+                                                    <!-- Distância e ETE -->
+                                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding DistanceDisplay}" FontSize="12" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                        <TextBlock Text=" • " FontSize="11" Foreground="#526375" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding EteFormatted}" FontSize="11.5" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+
+                                                    <!-- Botão Ghost de Exclusão (visível se HasAssociatedMission == true) -->
+                                                    <Button Grid.Column="2" 
+                                                            Command="{Binding DataContext.RemoveMissionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                            CommandParameter="{Binding AssociatedMission}"
+                                                            Visibility="{Binding HasAssociatedMission, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                            Width="22" Height="22" Background="Transparent" BorderBrush="#263545" BorderThickness="1" Cursor="Hand" ToolTip="Cancelar contrato e retornar ao mercado" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="btnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                                                                    <Path x:Name="btnPath" Data="{StaticResource IconClose}" Fill="#64748B" Width="8" Height="8" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="btnBorder" Property="Background" Value="#2E1214"/>
+                                                                        <Setter TargetName="btnBorder" Property="BorderBrush" Value="#EF4444"/>
+                                                                        <Setter TargetName="btnPath" Property="Fill" Value="#EF4444"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
                                                 </Grid>
 
-                                                <!-- Detalhes de Carga a Bordo nesta Perna -->
-                                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                                    <TextBlock Text="A BORDO: " FontSize="11" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                                    <TextBlock Text="{Binding OnboardPax, StringFormat='{}{0} PAX'}" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                    <TextBlock Text=" • " FontSize="11" Foreground="#526375"/>
-                                                    <TextBlock Text="{Binding OnboardCargoLbs, StringFormat='{}{0:N0} LBS CARGA'}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                    <TextBlock Text=" • " FontSize="11" Foreground="#526375"/>
-                                                    <TextBlock Text="{Binding EteFormatted, StringFormat='ETE: {0}'}" FontSize="11" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                </StackPanel>
-
-                                                <!-- Ação ao Pousar no Destino desta Perna -->
-                                                <Border Background="#141C24" CornerRadius="3" Padding="6,3">
-                                                    <TextBlock Text="{Binding ActionSummary}" FontSize="11" FontWeight="SemiBold" Foreground="#00E676" FontFamily="Inter, Segoe UI, sans-serif" TextTrimming="CharacterEllipsis"/>
+                                                <!-- Linha Intermediária: Contrato & Recompensa (visível se HasAssociatedMission == true) -->
+                                                <Border Visibility="{Binding HasAssociatedMission, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,0,5" Background="#141C24" CornerRadius="4" Padding="7,4">
+                                                    <Grid>
+                                                        <TextBlock Text="{Binding MissionTitle}" FontSize="11.5" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,80,0"/>
+                                                        <TextBlock Text="{Binding RewardMoney, StringFormat={}{0:C0}}" HorizontalAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                    </Grid>
                                                 </Border>
+
+                                                <!-- Linha Inferior: Carga & Ação na Escala -->
+                                                <Grid>
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <TextBlock Text="A BORDO: " FontSize="10.5" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding OnboardPax, StringFormat='{}{0} PAX'}" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                        <TextBlock Text=" • " FontSize="10.5" Foreground="#526375" VerticalAlignment="Center"/>
+                                                        <TextBlock Text="{Binding OnboardCargoLbs, StringFormat='{}{0:N0} LBS CARGA'}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                    </StackPanel>
+                                                    <Border HorizontalAlignment="Right" Background="#141C24" CornerRadius="3" Padding="6,2">
+                                                        <TextBlock Text="{Binding ActionSummary}" FontSize="10.5" FontWeight="SemiBold" Foreground="#00E676" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </Grid>
                                             </StackPanel>
                                         </Border>
                                     </DataTemplate>
@@ -148,86 +188,13 @@
                     </Grid>
                 </Border>
 
-                <!-- 2. CARDS DAS MISSÕES ACEITAS NO MANIFESTO (Com botão Ghost de Remoção) -->
-                <Border Grid.Row="1" Background="#141C24" CornerRadius="8" Padding="12,10" Margin="0,0,0,8" BorderBrush="#263545" BorderThickness="1">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <!-- Cabeçalho do Manifesto -->
-                        <Grid Grid.Row="0" Margin="0,0,0,8">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="📦 " FontSize="13" VerticalAlignment="Center"/>
-                                <TextBlock Text="CONTRATOS NO MANIFESTO" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <TextBlock Text="{Binding AcceptedMissions.Count, StringFormat='{}{0} ATIVOS'}" HorizontalAlignment="Right" FontSize="11.5" FontWeight="Bold" Foreground="#8B9BAE" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <!-- Lista de Cards Compactos por Missão com Botão de Exclusão Ghost -->
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding AcceptedMissions}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,0,8">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                </Grid.ColumnDefinitions>
-
-                                                <!-- Detalhes do Contrato -->
-                                                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,3">
-                                                        <TextBlock Text="{Binding DestinationICAO}" FontSize="14" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                        <TextBlock Text=" • " FontSize="11.5" Foreground="#526375" VerticalAlignment="Center"/>
-                                                        <TextBlock Text="{Binding Title}" FontSize="12" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{Binding PassengerCount, StringFormat='{}{0} PAX'}" FontSize="11" FontWeight="SemiBold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                        <TextBlock Text=" • " FontSize="11" Foreground="#526375"/>
-                                                        <TextBlock Text="{Binding PayloadLbs, StringFormat='{}{0:N0} LBS'}" FontSize="11" FontWeight="SemiBold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                        <TextBlock Text=" • " FontSize="11" Foreground="#526375"/>
-                                                        <TextBlock Text="{Binding RewardMoney, StringFormat=C0}" FontSize="11.5" FontWeight="Bold" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                    </StackPanel>
-                                                </StackPanel>
-
-                                                <!-- Botão Outline / Ghost de Remoção de Contrato -->
-                                                <Button Grid.Column="1" Command="{Binding DataContext.RemoveMissionCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                        CommandParameter="{Binding}"
-                                                        Width="26" Height="26" Background="Transparent" BorderBrush="#263545" BorderThickness="1" Cursor="Hand" ToolTip="Remover contrato e retornar ao mercado" VerticalAlignment="Center" Margin="8,0,0,0">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border x:Name="btnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
-                                                                <TextBlock x:Name="btnTxt" Text="✕" FontSize="11" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="btnBorder" Property="Background" Value="#2E1214"/>
-                                                                    <Setter TargetName="btnBorder" Property="BorderBrush" Value="#EF4444"/>
-                                                                    <Setter TargetName="btnTxt" Property="Foreground" Value="#EF4444"/>
-                                                                </Trigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </Border>
-
-                <!-- 3. BLOCO DEDICADO DE MASSA & CENTRAGEM (W&B) E ENVELOPE DE MTOW -->
-                <Border Grid.Row="2" Background="#141C24" CornerRadius="8" Padding="12,10" BorderBrush="#263545" BorderThickness="1">
+                <!-- 2. BLOCO DEDICADO DE MASSA & CENTRAGEM (W&B) E ENVELOPE DE MTOW -->
+                <Border Grid.Row="1" Background="#141C24" CornerRadius="8" Padding="12,10" BorderBrush="#263545" BorderThickness="1">
                     <StackPanel>
                         <!-- Header do W&B com Margem Livre -->
                         <Grid Margin="0,0,0,8">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="⚖️ " FontSize="13" VerticalAlignment="Center"/>
+                                <Path Data="{StaticResource IconScale}" Fill="#00E5FF" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="ENVELOPE DE MASSA &amp; BALANCEAMENTO" FontSize="12.5" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right" Background="{Binding TowMarginBadgeBg}" BorderBrush="{Binding TowMarginBadgeBorder}" BorderThickness="1" CornerRadius="3" Padding="6,2">
@@ -265,8 +232,11 @@
                             <!-- Assentos -->
                             <Border Grid.Column="0" Background="#0B0F14" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="0,0,3,0">
                                 <StackPanel>
-                                    <TextBlock Text="💺 ASSENTOS" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding TotalSeatsWeight, StringFormat={}{0:N0} lbs}" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconSeats}" Fill="#8B9BAE" Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="ASSENTOS" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding TotalSeatsWeight, StringFormat={}{0:N0} lbs}" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,3,0,0"/>
                                     <TextBlock Text="{Binding TotalOccupantsCount, StringFormat='{}{0} ocup.'}" FontSize="11" Foreground="#64748B" FontFamily="Inter, Segoe UI, sans-serif"/>
                                 </StackPanel>
                             </Border>
@@ -274,8 +244,11 @@
                             <!-- Carga / Bagagem -->
                             <Border Grid.Column="1" Background="#0B0F14" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="2,0,2,0">
                                 <StackPanel>
-                                    <TextBlock Text="📦 CARGA" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding TotalCargoWeight, StringFormat={}{0:N0} lbs}" FontSize="13" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconCargo}" Fill="#8B9BAE" Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="CARGA" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding TotalCargoWeight, StringFormat={}{0:N0} lbs}" FontSize="13" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,3,0,0"/>
                                     <TextBlock Text="Bagagem/Pax" FontSize="11" Foreground="#64748B" FontFamily="Inter, Segoe UI, sans-serif"/>
                                 </StackPanel>
                             </Border>
@@ -283,8 +256,11 @@
                             <!-- Combustível -->
                             <Border Grid.Column="2" Background="#0B0F14" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="4" Padding="8,6" Margin="3,0,0,0">
                                 <StackPanel>
-                                    <TextBlock Text="⛽ TANQUES" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                    <TextBlock Text="{Binding FuelQuantity, StringFormat={}{0:F1} gal}" FontSize="13" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,0"/>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Path Data="{StaticResource IconFuel}" Fill="#8B9BAE" Width="11" Height="11" Stretch="Uniform" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="TANQUES" FontSize="11" FontWeight="SemiBold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding FuelQuantity, StringFormat={}{0:F1} gal}" FontSize="13" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,3,0,0"/>
                                     <TextBlock Text="{Binding FuelWeightLbs, StringFormat='{}{0:N0} lbs'}" FontSize="11" Foreground="#64748B" FontFamily="Inter, Segoe UI, sans-serif"/>
                                 </StackPanel>
                             </Border>
@@ -292,8 +268,7 @@
                     </StackPanel>
                 </Border>
             </Grid>
-
-            <!-- ======================================================== -->
+<!-- ======================================================== -->
             <!-- COLUNA 2 (45%): MAPA TÁTICO & NAVEGAÇÃO LIMPO            -->
             <!-- ======================================================== -->
             <Grid Grid.Column="1" Margin="0,0,10,0">
@@ -358,7 +333,7 @@
                         <!-- Cabeçalho Centralizado do Gatekeeper com Badge Consolidada -->
                         <Grid Grid.Row="0" Margin="0,0,0,12">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="🛡️ " FontSize="14" VerticalAlignment="Center"/>
+                                <Path Data="{StaticResource IconShield}" Fill="#00E5FF" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="PRE-FLIGHT GATEKEEPER" FontSize="13" FontWeight="Bold" Foreground="#00E5FF" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>
                             </StackPanel>
                             <Border HorizontalAlignment="Right" Background="{Binding GatekeeperSummaryBadgeBg}" BorderBrush="{Binding GatekeeperSummaryBadgeBorder}" BorderThickness="1" CornerRadius="4" Padding="8,3">
@@ -461,7 +436,7 @@
                                     <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="6">
                                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="🚀 " FontSize="16" VerticalAlignment="Center"
+                                                <Path Data="{StaticResource IconRocket}" Fill="White" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"
                                                            Visibility="{Binding DataContext.IsMonitoring, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                                 <TextBlock Text="{Binding DataContext.StartFlightButtonText, RelativeSource={RelativeSource AncestorType=Window}}" 
                                                            FontSize="15" FontWeight="ExtraBold" Foreground="White" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center"/>

@@ -44,6 +44,7 @@ namespace FlightCareer.UI.Services
 
         public bool IsConnected => _debugMode || _simConnect != null;
         public SimTelemetry CurrentData { get; private set; }
+        public double EngineOilTempF => (CurrentData.EngineOilTemp * 1.8) + 32.0;
 
         public void SetDebugData(SimTelemetry data)
         {
@@ -149,6 +150,9 @@ namespace FlightCareer.UI.Services
                 AddToDef("STRUCTURAL ICE PCT", "Percent");
                 AddToDef("PITOT ICE PCT", "Percent");
                 AddToDef("PRESSURIZATION CABIN ALTITUDE", "Feet");
+
+                // 12. Simulação e Tempo (1 double)
+                AddToDef("SIMULATION RATE", "number");
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 

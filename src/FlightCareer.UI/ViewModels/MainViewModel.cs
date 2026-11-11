@@ -216,7 +216,7 @@ namespace FlightCareer.UI.ViewModels
         public BriefingViewModel Briefing => _briefingViewModel;
         public FinanceViewModel Finance => _financeViewModel;
         public FlightLogsViewModel FlightLogs => _flightLogsViewModel;
-        public string CashDisplay => Balance.ToString("C2");
+        public string CashDisplay => $"$ {Balance:N2}";
         public string RankDisplay => Rank?.ToUpper() ?? "STUDENT";
         public double XpProgress => (TotalHours % 100);
         public string CurrentLocation => $"{CurrentAirportICAO} - {CurrentAirportName}";

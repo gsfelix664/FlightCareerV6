@@ -31,6 +31,43 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _userBalance;
         [ObservableProperty] private string _searchText = string.Empty;
 
+        // Filtros rápidos e Ordenação
+        [ObservableProperty] private string _selectedCategoryFilter = "TODAS";
+        [ObservableProperty] private string _selectedSortOption = "MENOR PREÇO";
+        public IReadOnlyList<string> SortOptions { get; } = new[]
+        {
+            "MENOR PREÇO",
+            "MAIOR CONDIÇÃO",
+            "MENOS HORAS (TTAF)"
+        };
+
+        [RelayCommand]
+        private void SetCategoryFilter(string? category)
+        {
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                SelectedCategoryFilter = category;
+            }
+        }
+
+        [RelayCommand]
+        private void SelectTab(object? parameter)
+        {
+            if (parameter is int idx)
+            {
+                SelectedTab = idx;
+            }
+            else if (parameter != null && int.TryParse(parameter.ToString(), out int parsed))
+            {
+                SelectedTab = parsed;
+            }
+        }
+
+        // Abas: 0 = Comprar, 1 = Vender
+        [ObservableProperty] private int _selectedTab = 0;
+        [ObservableProperty] private ObservableCollection<PlayerAircraftSaleItem> _playerAircraftsForSale = new();
+        [ObservableProperty] private PlayerAircraftSaleItem? _selectedPlayerAircraft;
+
         private List<MarketOffer> _allOffers = new();
 
         public MarketViewModel(AppDbContext context, IPilotRepository pilotRepository)
@@ -44,26 +81,81 @@ namespace FlightCareer.UI.ViewModels
             _currentPilotName = pilotName;
             UserBalance = balance;
             await LoadOffersAsync();
+            if (SelectedTab == 1)
+            {
+                await LoadPlayerAircraftsForSaleAsync();
+            }
         }
 
-        partial void OnSearchTextChanged(string value)
+        partial void OnSearchTextChanged(string value) => ApplyFilter();
+        partial void OnSelectedCategoryFilterChanged(string value) => ApplyFilter();
+        partial void OnSelectedSortOptionChanged(string value) => ApplyFilter();
+
+        partial void OnSelectedTabChanged(int value)
         {
-            ApplyFilter();
+            if (value == 1)
+            {
+                _ = LoadPlayerAircraftsForSaleAsync();
+            }
+        }
+
+        partial void OnSelectedOfferChanged(MarketOffer? value)
+        {
+            OnPropertyChanged(nameof(BuyButtonText));
+        }
+
+        partial void OnSelectedPlayerAircraftChanged(PlayerAircraftSaleItem? value)
+        {
+            OnPropertyChanged(nameof(SellButtonText));
         }
 
         private void ApplyFilter()
         {
             var query = _allOffers.AsEnumerable();
+
+            // 1. Filtro textual
             if (!string.IsNullOrWhiteSpace(SearchText))
             {
                 var term = SearchText.Trim().ToLowerInvariant();
                 query = query.Where(o =>
                     (o.BaseType?.Model != null && o.BaseType.Model.ToLowerInvariant().Contains(term)) ||
                     (o.BaseType?.Type != null && o.BaseType.Type.ToLowerInvariant().Contains(term)) ||
+                    (o.CategoryBadge != null && o.CategoryBadge.ToLowerInvariant().Contains(term)) ||
                     (o.Prefix != null && o.Prefix.ToLowerInvariant().Contains(term)));
             }
 
-            var filtered = query.OrderBy(o => o.SalePrice).ToList();
+            // 2. Filtro rápido de categoria
+            if (!string.IsNullOrWhiteSpace(SelectedCategoryFilter) && SelectedCategoryFilter != "TODAS")
+            {
+                if (SelectedCategoryFilter == "MONOMOTOR")
+                {
+                    query = query.Where(o => o.CategoryBadge.Contains("Monomotor", StringComparison.OrdinalIgnoreCase) ||
+                                             o.CategoryBadge.Contains("STOL", StringComparison.OrdinalIgnoreCase));
+                }
+                else if (SelectedCategoryFilter == "BIMOTOR")
+                {
+                    query = query.Where(o => o.CategoryBadge.Contains("Bimotor", StringComparison.OrdinalIgnoreCase));
+                }
+                else if (SelectedCategoryFilter == "TURBOÉLICE")
+                {
+                    query = query.Where(o => o.CategoryBadge.Contains("Turboélice", StringComparison.OrdinalIgnoreCase) ||
+                                             o.CategoryBadge.Contains("Jato", StringComparison.OrdinalIgnoreCase));
+                }
+                else if (SelectedCategoryFilter == "ATÉ $100K")
+                {
+                    query = query.Where(o => o.SalePrice <= 100000.0);
+                }
+            }
+
+            // 3. Ordenação
+            query = SelectedSortOption switch
+            {
+                "MAIOR CONDIÇÃO" => query.OrderByDescending(o => o.AverageCondition),
+                "MENOS HORAS (TTAF)" => query.OrderBy(o => o.AirframeHours),
+                _ => query.OrderBy(o => o.SalePrice) // Padrão: "MENOR PREÇO"
+            };
+
+            var filtered = query.ToList();
             Offers = new ObservableCollection<MarketOffer>(filtered);
 
             if (SelectedOffer == null || !Offers.Contains(SelectedOffer))
@@ -88,7 +180,6 @@ namespace FlightCareer.UI.ViewModels
 
                     for (int i = 0; i < targetCount; i++)
                     {
-                        // Garante que cada modelo apareça ao menos uma vez antes de repetir
                         var type = (i < shuffledTypes.Count)
                             ? shuffledTypes[i]
                             : aircraftTypes[_random.Next(aircraftTypes.Count)];
@@ -97,8 +188,9 @@ namespace FlightCareer.UI.ViewModels
                         double engine = _random.Next(60, 101);
                         double tires = _random.Next(40, 101);
                         double airframe = _random.Next(70, 101);
+                        double avionics = _random.Next(50, 101);
 
-                        double avg = (engine + tires + airframe) / 3.0;
+                        double avg = (engine + tires + airframe + avionics) / 4.0;
 
                         // Preço: Base * (Condição Média / 100) * Fator de Mercado (0.8 a 1.1)
                         double marketFactor = 0.8 + (_random.NextDouble() * 0.3);
@@ -109,6 +201,19 @@ namespace FlightCareer.UI.ViewModels
                         double currentFuelPrice = FuelPriceService.GetCurrentPrice(type.FuelType);
                         double fuelValue = fuelAmount * currentFuelPrice;
 
+                        int airframeHours = _random.Next(150, 9500);
+                        int year = _random.Next(1978, 2019);
+                        double tbo = (type.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
+                                      type.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 3600.0 : 1800.0;
+                        double tsmo = Math.Round(_random.NextDouble() * Math.Min(tbo, airframeHours % tbo == 0 ? tbo : airframeHours % tbo), 1);
+
+                        string incident = airframe switch
+                        {
+                            < 75 => "Histórico de pouso duro registrado em diário de bordo (reparado)",
+                            < 85 => "Pequeno reparo de bordo de ataque registrado em caderneta",
+                            _ => "Sem histórico de incidentes estruturais"
+                        };
+
                         generatedOffers.Add(new MarketOffer
                         {
                             BaseType = type,
@@ -116,7 +221,13 @@ namespace FlightCareer.UI.ViewModels
                             EngineCondition = engine,
                             TiresCondition = tires,
                             AirframeCondition = airframe,
-                            AirframeHours = _random.Next(100, 8000), // Horas totais da célula
+                            AvionicsCondition = avionics,
+                            AirframeHours = airframeHours,
+                            YearOfManufacture = year,
+                            TboHours = tbo,
+                            TsmoHours = tsmo,
+                            StructuralIncidentHistory = incident,
+                            CategoryBadge = DetermineCategoryBadge(type),
                             FuelAmount = fuelAmount,
                             SalePrice = Math.Round(aircraftValue + fuelValue, 2)
                         });
@@ -134,6 +245,64 @@ namespace FlightCareer.UI.ViewModels
             {
                 IsLoading = false;
             }
+        }
+
+        public async Task LoadPlayerAircraftsForSaleAsync()
+        {
+            try
+            {
+                var pilot = await _context.Pilots
+                    .Include(p => p.Hangar)
+                    .ThenInclude(a => a.AircraftType)
+                    .FirstOrDefaultAsync(p => p.Name == _currentPilotName);
+
+                if (pilot?.Hangar != null)
+                {
+                    var saleItems = pilot.Hangar.Select(a => new PlayerAircraftSaleItem
+                    {
+                        Aircraft = a
+                    }).ToList();
+
+                    PlayerAircraftsForSale = new ObservableCollection<PlayerAircraftSaleItem>(saleItems);
+                    if (SelectedPlayerAircraft == null || !PlayerAircraftsForSale.Contains(SelectedPlayerAircraft))
+                    {
+                        SelectedPlayerAircraft = PlayerAircraftsForSale.FirstOrDefault();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MarketViewModel] Erro ao carregar frota para venda: {ex.Message}");
+            }
+        }
+
+        private string DetermineCategoryBadge(AircraftType type)
+        {
+            var model = type.Model?.ToUpperInvariant() ?? string.Empty;
+            var typeDesc = type.Type?.ToUpperInvariant() ?? string.Empty;
+            var fuel = type.FuelType?.ToUpperInvariant() ?? string.Empty;
+
+            if (fuel.Contains("JET") && (type.CruiseSpeedKts > 320 || model.Contains("CITATION") || model.Contains("A320") || model.Contains("737") || model.Contains("CJ4") || typeDesc.Contains("JET")))
+            {
+                return "Jato";
+            }
+
+            if (typeDesc.Contains("TURBOPROP") || model.Contains("KING AIR") || model.Contains("CARAVAN") || model.Contains("TBM") || model.Contains("PC-12"))
+            {
+                return "Turboélice";
+            }
+
+            if (typeDesc.Contains("MEP") || model.Contains("BARON") || model.Contains("SENECA") || model.Contains("TWIN") || model.Contains("DA62") || model.Contains("DUCHESS"))
+            {
+                return "Bimotor Pistão";
+            }
+
+            if (model.Contains("X-CUB") || model.Contains("SAVANNAH") || model.Contains("STOL") || type.MinRunwayLength < 800)
+            {
+                return "STOL / Utilitário";
+            }
+
+            return "Monomotor Pistão";
         }
 
         private string GeneratePrefix()
@@ -154,6 +323,15 @@ namespace FlightCareer.UI.ViewModels
             }
         }
 
+        public string SellButtonText
+        {
+            get
+            {
+                if (SelectedPlayerAircraft == null) return "SELECIONE UMA AERONAVE DA SUA FROTA";
+                return $"VENDER AERONAVE POR {SelectedPlayerAircraft.NetValue:C2}";
+            }
+        }
+
         [RelayCommand(CanExecute = nameof(CanBuy))]
         private async Task Buy()
         {
@@ -166,7 +344,6 @@ namespace FlightCareer.UI.ViewModels
 
             try
             {
-                // Carregar piloto de forma limpa
                 var pilot = await _context.Pilots
                     .Include(p => p.Hangar)
                     .FirstOrDefaultAsync(p => p.Name == _currentPilotName);
@@ -183,7 +360,7 @@ namespace FlightCareer.UI.ViewModels
                     return;
                 }
 
-                // 1. Deduzir Saldo (O EF detectará a mudança no objeto 'pilot' automaticamente)
+                // 1. Deduzir Saldo
                 pilot.Balance -= SelectedOffer.SalePrice;
                 UserBalance = pilot.Balance;
 
@@ -198,9 +375,11 @@ namespace FlightCareer.UI.ViewModels
                     EngineCondition = SelectedOffer.EngineCondition,
                     TiresCondition = SelectedOffer.TiresCondition,
                     AirframeCondition = SelectedOffer.AirframeCondition,
+                    AvionicsCondition = SelectedOffer.AvionicsCondition,
                     CurrentAirframeHours = SelectedOffer.AirframeHours,
                     FuelAmount = SelectedOffer.FuelAmount,
-                    CurrentLocationICAO = pilot.CurrentAirportICAO
+                    CurrentLocationICAO = pilot.CurrentAirportICAO,
+                    EngineTboRemainingHours = Math.Max(100, SelectedOffer.TboHours - SelectedOffer.TsmoHours)
                 };
                 
                 _context.PilotAircrafts.Add(newAircraft);
@@ -232,6 +411,12 @@ namespace FlightCareer.UI.ViewModels
                 }
                 
                 OnPropertyChanged(nameof(BuyButtonText));
+
+                // Se a aba de venda estiver ativa, atualiza
+                if (SelectedTab == 1)
+                {
+                    await LoadPlayerAircraftsForSaleAsync();
+                }
             }
             catch (Exception ex)
             {
@@ -241,9 +426,108 @@ namespace FlightCareer.UI.ViewModels
 
         private bool CanBuy => SelectedOffer != null && UserBalance >= SelectedOffer.SalePrice;
 
-        partial void OnSelectedOfferChanged(MarketOffer? value)
+        [RelayCommand]
+        public async Task SellAircraft(object? parameter)
         {
-            OnPropertyChanged(nameof(BuyButtonText));
+            PilotAircraft? aircraft = null;
+
+            if (parameter is PlayerAircraftSaleItem item)
+            {
+                aircraft = item.Aircraft;
+            }
+            else if (parameter is PilotAircraft pa)
+            {
+                aircraft = pa;
+            }
+            else if (SelectedPlayerAircraft != null)
+            {
+                aircraft = SelectedPlayerAircraft.Aircraft;
+            }
+
+            if (aircraft == null)
+            {
+                MessageBox.Show("Nenhuma aeronave selecionada para venda.");
+                return;
+            }
+
+            var pilot = await _context.Pilots
+                .Include(p => p.Hangar)
+                .ThenInclude(a => a.AircraftType)
+                .FirstOrDefaultAsync(p => p.Name == _currentPilotName);
+
+            if (pilot == null)
+            {
+                MessageBox.Show("Piloto não encontrado.");
+                return;
+            }
+
+            double avgCondition = (aircraft.EngineCondition + aircraft.TiresCondition + aircraft.AirframeCondition + aircraft.AvionicsCondition) / 4.0;
+            double basePrice = aircraft.AircraftType?.PurchasePrice ?? 0;
+            double grossValue = Math.Round(basePrice * (avgCondition / 100.0) * 0.9, 2);
+            double brokerFee = Math.Round(grossValue * 0.08, 2);
+            double netAmount = Math.Round(grossValue - brokerFee, 2);
+
+            var confirm = MessageBox.Show(
+                $"Confirmar a VENDA da aeronave {aircraft.AircraftType?.Model} ({aircraft.Prefix})?\n\n" +
+                $"• Avaliação Bluebook Bruta: ${grossValue:N2}\n" +
+                $"• Taxa de Corretagem (8%): -${brokerFee:N2}\n" +
+                $"• Valor Líquido a Receber: ${netAmount:N2}\n\n" +
+                $"A aeronave será removida da frota da sua empresa.",
+                "Confirmação de Venda de Aeronave",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes) return;
+
+            try
+            {
+                // Se for a aeronave ativa, desvincula
+                if (pilot.ActiveAircraftId == aircraft.Id)
+                {
+                    pilot.ActiveAircraftId = null;
+                }
+
+                // Creditar saldo líquido
+                pilot.Balance += netAmount;
+                UserBalance = pilot.Balance;
+
+                // Registrar transação financeira de receita
+                _context.FinancialTransactions.Add(new FinancialTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    PilotId = pilot.Id,
+                    Date = DateTime.Now,
+                    Amount = netAmount,
+                    Type = TransactionType.Income,
+                    Category = "Venda de Aeronave",
+                    Description = $"Venda de Aeronave: {aircraft.AircraftType?.Model ?? "Aeronave"} ({aircraft.Prefix})"
+                });
+
+                // Remover do banco
+                var entityToRemove = await _context.PilotAircrafts.FirstOrDefaultAsync(a => a.Id == aircraft.Id);
+                if (entityToRemove != null)
+                {
+                    _context.PilotAircrafts.Remove(entityToRemove);
+                }
+
+                await _context.SaveChangesAsync();
+
+                MessageBox.Show($"Venda concluída com sucesso!\n\nForam creditados ${netAmount:N2} no caixa da sua empresa.", "Venda Realizada", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                await LoadPlayerAircraftsForSaleAsync();
+                OnPropertyChanged(nameof(BuyButtonText));
+                OnPropertyChanged(nameof(SellButtonText));
+
+                // Atualizar MainWindow se estiver aberta
+                if (System.Windows.Application.Current.MainWindow?.DataContext is MainViewModel mainVM)
+                {
+                    await mainVM.InitializeForPilotAsync(pilot.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Falha ao processar a venda: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

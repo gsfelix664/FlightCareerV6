@@ -12,10 +12,18 @@ namespace FlightCareer.UI.Models
         public double EngineCondition { get; set; }
         public double TiresCondition { get; set; }
         public double AirframeCondition { get; set; }
+        public double AvionicsCondition { get; set; } = 100;
         public double AirframeHours { get; set; }
         public double FuelAmount { get; set; }
-        
-        public double AverageCondition => (EngineCondition + TiresCondition + AirframeCondition) / 3.0;
+
+        public int YearOfManufacture { get; set; } = 1995;
+        public double TsmoHours { get; set; } = 450;
+        public double TboHours { get; set; } = 1800;
+        public string StructuralIncidentHistory { get; set; } = "Sem histórico de incidentes estruturais";
+        public string CategoryBadge { get; set; } = "Monomotor Pistão";
+
+        public double AverageCondition => (EngineCondition + TiresCondition + AirframeCondition + AvionicsCondition) / 4.0;
+        public double EstimatedPostBuyCost => Math.Round(Math.Max(0, (100 - AverageCondition) * 120.0), 2);
         
         // Preço baseado no estado (ex: uma aeronave 100% custa o preço cheio, 70% custa proporcional)
         public double SalePrice { get; set; }

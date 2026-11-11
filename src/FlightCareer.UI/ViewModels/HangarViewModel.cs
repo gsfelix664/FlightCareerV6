@@ -156,6 +156,11 @@ namespace FlightCareer.UI.ViewModels
                 _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO FUSELAGEM: {aircraft.Prefix}", SelectedAircraft.RepairCostFuselagem));
                 aircraft.AirframeCondition = SelectedAircraft.TargetAirframeCondition;
             }
+            if (SelectedAircraft.RepairCostAvionicos > 0)
+            {
+                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO AVIÔNICOS: {aircraft.Prefix}", SelectedAircraft.RepairCostAvionicos));
+                aircraft.AvionicsCondition = SelectedAircraft.TargetAvionicsCondition;
+            }
 
             // Combustível
             if (SelectedAircraft.RefuelCost > 0)

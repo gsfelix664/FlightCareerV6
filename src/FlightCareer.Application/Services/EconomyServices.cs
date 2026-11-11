@@ -25,6 +25,11 @@ namespace FlightCareer.Application.Services
                     return Math.Round(unitCost * points, 2);
                 case "PNEUS":
                     return Math.Round(TIRES_COST_PER_POINT * points, 2);
+                case "AVIONICOS":
+                case "AVIÔNICOS":
+                    unitCost = basePrice * 0.001;
+                    if (unitCost < 80) unitCost = 80;
+                    return Math.Round(unitCost * points, 2);
                 default:
                     return 0;
             }

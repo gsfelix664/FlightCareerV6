@@ -72,9 +72,13 @@ namespace FlightCareer.Domain.Entities
         public double PitotIcePct;           // 0 a 100%
         public double CabinAltitude;         // Feet
 
+        // Simulação e Tempo (1 double)
+        public double SimulationRate;        // Taxa de simulação (1.0, 2.0, 4.0, etc.)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;
+        public double EngineOilTempF => (EngineOilTemp * 1.8) + 32.0;
         public bool IsOnGround => OnGround > 0.5;
         public bool IsEngineRunning => EngineRunning > 0.5;
         public bool IsParkingBrakeSet => ParkingBrake > 0.5;

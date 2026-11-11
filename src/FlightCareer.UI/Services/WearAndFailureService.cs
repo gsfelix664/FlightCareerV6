@@ -192,6 +192,7 @@ namespace FlightCareer.UI.Services
                 aircraft.AirframeCondition = 0;
                 aircraft.EngineCondition = 0;
                 aircraft.TiresCondition = 0;
+                aircraft.AvionicsCondition = 0;
                 airframeWearRate = 0;
             }
             else
@@ -217,7 +218,19 @@ namespace FlightCareer.UI.Services
                 aircraft.TiresCondition = Math.Max(0, aircraft.TiresCondition - (tireWearRate * deltaTimeHours));
             }
 
-            // 4. Checagens probabilísticas contínuas e contextuais de falhas
+            // 4. Desgaste dos AVIÔNICOS
+            double avionicsWearRate = 0.2; // Base de ~0.2% de desgaste por hora de voo
+            if (_activeFailures.Contains(FailureType.AlternatorFailure))
+            {
+                avionicsWearRate += 4.5; // Sobretensão transitória e estresse no barramento elétrico
+            }
+            if (data.GForce > 3.0 || data.GForce < -1.0)
+            {
+                avionicsWearRate += 1.0; // Vibrações severas sobre suportes e giroscópios
+            }
+            aircraft.AvionicsCondition = Math.Max(0, aircraft.AvionicsCondition - (avionicsWearRate * deltaTimeHours));
+
+            // 5. Checagens probabilísticas contínuas e contextuais de falhas
             CheckEngineFailures(aircraft, data, deltaTimeHours);
             CheckSystemFailures(aircraft, data, deltaTimeHours);
             CheckTireRollFailures(aircraft, data, deltaTimeHours);

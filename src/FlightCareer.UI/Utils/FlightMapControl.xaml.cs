@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Utils;
+using FlightCareer.UI.ViewModels;
 
 namespace FlightCareer.UI.Utils
 {
@@ -26,6 +27,8 @@ namespace FlightCareer.UI.Utils
         private GMapMarker? _destPinMarker;
         private readonly List<GMapRoute> _multiLegRoutes = new List<GMapRoute>();
         private readonly List<GMapMarker> _multiLegMarkers = new List<GMapMarker>();
+        private readonly List<GMapMarker> _airportMarkers = new List<GMapMarker>();
+        private readonly List<GMapMarker> _missionClusterMarkers = new List<GMapMarker>();
 
         // Dependency Properties
         public static readonly DependencyProperty RecordedPathProperty = DependencyProperty.Register("RecordedPath", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRecordedPathChanged));
@@ -37,13 +40,26 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty OriginIcaoProperty = DependencyProperty.Register("OriginIcao", typeof(string), typeof(FlightMapControl), new PropertyMetadata(string.Empty, OnIcaoChanged));
         public static readonly DependencyProperty DestIcaoProperty = DependencyProperty.Register("DestIcao", typeof(string), typeof(FlightMapControl), new PropertyMetadata(string.Empty, OnIcaoChanged));
         public static readonly DependencyProperty AirportsProperty = DependencyProperty.Register("Airports", typeof(System.Collections.ObjectModel.ObservableCollection<Airport>), typeof(FlightMapControl), new PropertyMetadata(null, OnAirportsChanged));
-        
-        // Novas propriedades de telemetria em tempo real
+
+        // Propriedades de telemetria em tempo real
         public static readonly DependencyProperty IsOnGroundProperty = DependencyProperty.Register("IsOnGround", typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true, OnTelemetryChanged));
         public static readonly DependencyProperty AircraftHeadingProperty = DependencyProperty.Register("AircraftHeading", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty AltitudeProperty = DependencyProperty.Register("Altitude", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty GroundSpeedProperty = DependencyProperty.Register("GroundSpeed", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty ShowWaypointsOverlayProperty = DependencyProperty.Register("ShowWaypointsOverlay", typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true));
+
+        // Propriedades de Clustering e Seleção de Missões pelo Mapa
+        public static readonly DependencyProperty MissionsSourceProperty = DependencyProperty.Register(
+            nameof(MissionsSource),
+            typeof(System.Collections.IEnumerable),
+            typeof(FlightMapControl),
+            new PropertyMetadata(null, OnMissionsSourceChanged));
+
+        public static readonly DependencyProperty SelectedMissionProperty = DependencyProperty.Register(
+            nameof(SelectedMission),
+            typeof(object),
+            typeof(FlightMapControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnSelectedMissionChanged));
 
         public System.Collections.IEnumerable? RecordedPath { get => (System.Collections.IEnumerable?)GetValue(RecordedPathProperty); set => SetValue(RecordedPathProperty, value); }
         public System.Collections.IEnumerable? RouteLegs { get => (System.Collections.IEnumerable?)GetValue(RouteLegsProperty); set => SetValue(RouteLegsProperty, value); }
@@ -59,6 +75,99 @@ namespace FlightCareer.UI.Utils
         public double Altitude { get => (double)GetValue(AltitudeProperty); set => SetValue(AltitudeProperty, value); }
         public double GroundSpeed { get => (double)GetValue(GroundSpeedProperty); set => SetValue(GroundSpeedProperty, value); }
         public bool ShowWaypointsOverlay { get => (bool)GetValue(ShowWaypointsOverlayProperty); set => SetValue(ShowWaypointsOverlayProperty, value); }
+        public System.Collections.IEnumerable? MissionsSource { get => (System.Collections.IEnumerable?)GetValue(MissionsSourceProperty); set => SetValue(MissionsSourceProperty, value); }
+        public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
+
+        public FlightMapControl()
+        {
+            InitializeComponent();
+            InitMap();
+        }
+
+        private void InitMap()
+        {
+            // Configurações de acesso
+            GMap.NET.MapProviders.GMapProvider.UserAgent = "FlightCareerV6/1.0 (WPF; Windows; https://github.com/gsfel/FlightCareerV6)";
+            GMaps.Instance.Mode = AccessMode.ServerAndCache;
+
+            // Camada Noturna Tática Escura (CartoDB Dark Matter / Esri Canvas)
+            MainMap.MapProvider = CartoDbDarkMapProvider.Instance;
+
+            MainMap.Position = new PointLatLng(0, 0);
+            MainMap.MinZoom = 2;
+            MainMap.MaxZoom = 16;
+            MainMap.Zoom = 8;
+            MainMap.ShowCenter = false;
+            MainMap.CanDragMap = true;
+            MainMap.DragButton = MouseButton.Left;
+            MainMap.IgnoreMarkerOnMouseWheel = true;
+
+            // Sincronizar clusters de missões ao alterar o nível de zoom
+            MainMap.OnMapZoomChanged += MainMap_OnMapZoomChanged;
+
+            // Criar marcador da aeronave
+            _aircraftMarker = new GMapMarker(new PointLatLng(0, 0))
+            {
+                ZIndex = 200
+            };
+            MainMap.Markers.Add(_aircraftMarker);
+        }
+
+        private void MainMap_OnMapZoomChanged()
+        {
+            UpdateMissionClusters();
+        }
+
+        private void BtnRecenter_Click(object sender, RoutedEventArgs e)
+        {
+            if (AircraftLat != 0 || AircraftLon != 0)
+            {
+                MainMap.Position = new PointLatLng(AircraftLat, AircraftLon);
+                MainMap.Zoom = 9;
+            }
+        }
+
+        #region Callbacks de Propriedades de Dependência
+
+        private static void OnAircraftPosChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateAircraftPosition();
+            }
+        }
+
+        private static void OnTelemetryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateAircraftPosition();
+            }
+        }
+
+        private static void OnIcaoChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateAircraftPosition();
+                map.UpdateDestinationRoute();
+            }
+        }
+
+        private static void OnDestinationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                if (map.RouteLegs != null && map.RouteLegs.OfType<object>().Any())
+                {
+                    map.UpdateMultiLegRoute();
+                }
+                else
+                {
+                    map.UpdateDestinationRoute();
+                }
+            }
+        }
 
         private static void OnRouteLegsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -79,38 +188,13 @@ namespace FlightCareer.UI.Utils
             UpdateMultiLegRoute();
         }
 
-        private static void OnTelemetryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is FlightMapControl map)
-            {
-                map.UpdateAircraftPosition();
-            }
-        }
-
-        private static void OnIcaoChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is FlightMapControl map)
-            {
-                map.UpdateAircraftPosition();
-                map.UpdateDestinationRoute();
-            }
-        }
-
-        private readonly List<GMapMarker> _airportMarkers = new List<GMapMarker>();
-
-        public FlightMapControl()
-        {
-            InitializeComponent();
-            InitMap();
-        }
-
         private static void OnAirportsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is FlightMapControl map)
             {
                 if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
                     oldColl.CollectionChanged -= map.Airports_CollectionChanged;
-                
+
                 if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
                     newColl.CollectionChanged += map.Airports_CollectionChanged;
 
@@ -123,87 +207,49 @@ namespace FlightCareer.UI.Utils
             UpdateAirportMarkers();
         }
 
-        private void UpdateAirportMarkers()
-        {
-            foreach (var m in _airportMarkers) MainMap.Markers.Remove(m);
-            _airportMarkers.Clear();
-
-            if (Airports == null) return;
-
-            foreach (var airport in Airports)
-            {
-                var marker = new GMapMarker(new PointLatLng(airport.Latitude, airport.Longitude))
-                {
-                    ZIndex = 10,
-                    Shape = new Ellipse
-                    {
-                        Width = 6, Height = 6, Fill = Brushes.Transparent, 
-                        Stroke = Brushes.White, StrokeThickness = 1,
-                        ToolTip = $"{airport.ICAO} - {airport.Name}"
-                    }
-                };
-                _airportMarkers.Add(marker);
-                MainMap.Markers.Add(marker);
-            }
-        }
-
-        private void InitMap()
-        {
-            // Configurações de acesso
-            GMap.NET.MapProviders.GMapProvider.UserAgent = "FlightCareerV6/1.0 (WPF; Windows; https://github.com/gsfel/FlightCareerV6)";
-            GMaps.Instance.Mode = AccessMode.ServerAndCache;
-
-            // Camada Noturna Tática Escura (CartoDB Dark Matter) perfeitamente integrada ao tema Avionics Dark
-            MainMap.MapProvider = CartoDbDarkMapProvider.Instance;
-            
-            MainMap.Position = new PointLatLng(0, 0);
-            MainMap.MinZoom = 2;
-            MainMap.MaxZoom = 16;
-            MainMap.Zoom = 8;
-            MainMap.ShowCenter = false;
-            MainMap.CanDragMap = true;
-            MainMap.DragButton = MouseButton.Left;
-
-            // Criar marcador da aeronave
-            _aircraftMarker = new GMapMarker(new PointLatLng(0, 0))
-            {
-                ZIndex = 100,
-                Shape = new Ellipse
-                {
-                    Width = 14,
-                    Height = 14,
-                    Fill = Brushes.DeepSkyBlue,
-                    Stroke = Brushes.White,
-                    StrokeThickness = 2,
-                    ToolTip = "AERONAVE ATUAL"
-                }
-            };
-            MainMap.Markers.Add(_aircraftMarker);
-        }
-
-        private static void OnAircraftPosChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnMissionsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is FlightMapControl map)
             {
-                map.UpdateAircraftPosition();
+                if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
+                    oldColl.CollectionChanged -= map.Missions_CollectionChanged;
+
+                if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
+                    newColl.CollectionChanged += map.Missions_CollectionChanged;
+
+                map.UpdateMissionClusters();
             }
         }
 
-        private static void OnDestinationChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private void Missions_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            if (d is FlightMapControl map)
+            UpdateMissionClusters();
+        }
+
+        private static void OnSelectedMissionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map && e.NewValue != null)
             {
-                if (map.RouteLegs != null && map.RouteLegs.OfType<object>().Any())
+                var coords = GetMissionCoords(e.NewValue);
+                if (coords.HasValue && (coords.Value.lat != 0 || coords.Value.lon != 0))
                 {
-                    map.UpdateMultiLegRoute();
-                }
-                else
-                {
+                    map.DestLat = coords.Value.lat;
+                    map.DestLon = coords.Value.lon;
+                    map.DestIcao = coords.Value.icao;
                     map.UpdateDestinationRoute();
                 }
             }
         }
 
+        #endregion
+
+        #region Renderização Tática de Aeronave & Rotas
+
+        /// <summary>
+        /// Atualiza a posição da aeronave com visual limpo de cockpit:
+        /// Apenas o aviãozinho vetorial girando no heading (em voo) e o radar ping de rampa (em solo).
+        /// Zero caixas de texto flutuantes.
+        /// </summary>
         private void UpdateAircraftPosition()
         {
             if (_aircraftMarker != null)
@@ -211,17 +257,15 @@ namespace FlightCareer.UI.Utils
                 var pos = new PointLatLng(AircraftLat, AircraftLon);
                 _aircraftMarker.Position = pos;
 
-                var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-
                 if (IsOnGround)
                 {
                     // === MODO SOLO (ON GROUND) ===
-                    // Círculo tático de rampa com radar ping
+                    // Apenas círculo tático de rampa com radar ping
                     var groundIcon = new Grid
                     {
                         Width = 18,
                         Height = 18,
-                        Margin = new Thickness(0, 0, 6, 0)
+                        ToolTip = $"AERONAVE EM SOLO • {OriginIcao}\nPosição: {AircraftLat:F4}, {AircraftLon:F4}"
                     };
                     groundIcon.Children.Add(new Ellipse
                     {
@@ -239,42 +283,19 @@ namespace FlightCareer.UI.Utils
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
                     });
-                    panel.Children.Add(groundIcon);
 
-                    string badgeText = !string.IsNullOrWhiteSpace(OriginIcao) ? $"SOLO • {OriginIcao}" : "SOLO / RAMPA";
-                    if (GroundSpeed > 3.0)
-                    {
-                        badgeText += $" ({GroundSpeed:N0} kt)";
-                    }
-
-                    var border = new Border
-                    {
-                        Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
-                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E676")!,
-                        BorderThickness = new Thickness(1),
-                        CornerRadius = new CornerRadius(4),
-                        Padding = new Thickness(6, 2, 6, 2),
-                        Child = new TextBlock
-                        {
-                            Text = badgeText,
-                            FontSize = 9,
-                            FontWeight = FontWeights.Bold,
-                            Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
-                            FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
-                        }
-                    };
-                    panel.Children.Add(border);
-                    panel.ToolTip = $"AERONAVE EM SOLO | Posição: {AircraftLat:F4}, {AircraftLon:F4}";
+                    _aircraftMarker.ZIndex = 200;
+                    _aircraftMarker.Shape = groundIcon;
                 }
                 else
                 {
                     // === MODO EM VOO (AIRBORNE) ===
-                    // Silhueta vetorial de aeronave com rotação de proa em tempo real
+                    // APENAS a silhueta vetorial da aeronave ciano com rotação de proa em tempo real
                     var planeGrid = new Grid
                     {
                         Width = 28,
                         Height = 28,
-                        Margin = new Thickness(0, 0, 6, 0)
+                        ToolTip = $"EM VOO | ALT: {Altitude:N0} ft | GS: {GroundSpeed:N0} kt | HDG: {AircraftHeading:N0}°"
                     };
 
                     var planeGeom = System.Windows.Media.Geometry.Parse("M 12,2 L 15,9 L 25,13 L 25,15 L 15,14 L 14,21 L 18,23 L 18,25 L 12,24 L 6,25 L 6,23 L 10,21 L 9,14 L -1,15 L -1,13 L 9,9 Z");
@@ -290,32 +311,11 @@ namespace FlightCareer.UI.Utils
                         RenderTransform = new RotateTransform(AircraftHeading)
                     };
                     planeGrid.Children.Add(planePath);
-                    panel.Children.Add(planeGrid);
 
-                    // Badge de Telemetria de Voo Ativo
-                    var flightBorder = new Border
-                    {
-                        Background = (Brush)new BrushConverter().ConvertFromString("#E60B0F14")!,
-                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
-                        BorderThickness = new Thickness(1),
-                        CornerRadius = new CornerRadius(4),
-                        Padding = new Thickness(6, 2, 6, 2),
-                        Child = new TextBlock
-                        {
-                            Text = $"✈️ {Altitude:N0} FT • {GroundSpeed:N0} KT • {AircraftHeading:N0}°",
-                            FontSize = 9,
-                            FontWeight = FontWeights.Bold,
-                            Foreground = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
-                            FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
-                        }
-                    };
-                    panel.Children.Add(flightBorder);
-                    panel.ToolTip = $"EM VOO | ALT: {Altitude:N0} ft | GS: {GroundSpeed:N0} kt | HDG: {AircraftHeading:N0}°";
+                    _aircraftMarker.ZIndex = 200;
+                    _aircraftMarker.Shape = planeGrid;
                 }
 
-                _aircraftMarker.ZIndex = 200;
-                _aircraftMarker.Shape = panel;
-                
                 // Centraliza o mapa se estiver no início
                 if (MainMap.Position.Lat == 0 && MainMap.Position.Lng == 0 && (pos.Lat != 0 || pos.Lng != 0))
                 {
@@ -324,6 +324,10 @@ namespace FlightCareer.UI.Utils
             }
         }
 
+        /// <summary>
+        /// Desenha a rota até o destino selecionado utilizando um arco geodésico curvo (Great-Circle)
+        /// com 20 pontos intermediários interpolados esfericamente e marcador circular sutil.
+        /// </summary>
         private void UpdateDestinationRoute()
         {
             if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
@@ -331,8 +335,11 @@ namespace FlightCareer.UI.Utils
 
             if (DestLat == 0 || DestLon == 0) return;
 
-            // Criar rota geodésica pontilhada em Ciano Aviônica (#00E5FF)
-            var points = new List<PointLatLng> { new PointLatLng(AircraftLat, AircraftLon), new PointLatLng(DestLat, DestLon) };
+            var pStart = new PointLatLng(AircraftLat, AircraftLon);
+            var pEnd = new PointLatLng(DestLat, DestLon);
+
+            // 1. Gerar arco geodésico curvo (Great-Circle) com 20 pontos intermediários
+            var points = GenerateGreatCircleArc(pStart, pEnd, 20);
             _destinationRoute = new GMapRoute(points)
             {
                 Shape = new Path
@@ -345,55 +352,31 @@ namespace FlightCareer.UI.Utils
             };
             MainMap.Markers.Add(_destinationRoute);
 
-            // Criar marcador tático de destino com badge ICAO em Verde Lucro/VFR (#00E676)
-            var destPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-            destPanel.Children.Add(new Ellipse
+            // 2. Marcador circular sutil no destino
+            var destCircle = new Ellipse
             {
-                Width = 10,
-                Height = 10,
+                Width = 9,
+                Height = 9,
                 Fill = (Brush)new BrushConverter().ConvertFromString("#00E676")!, // Verde Lucro / VFR
                 Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
-                StrokeThickness = 2,
-                Margin = new Thickness(0, 0, 4, 0)
-            });
+                StrokeThickness = 1.5,
+                ToolTip = $"DESTINO: {DestIcao}"
+            };
 
-            if (!string.IsNullOrWhiteSpace(DestIcao))
-            {
-                var border = new Border
-                {
-                    Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
-                    BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E676")!,
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(3),
-                    Padding = new Thickness(5, 2, 5, 2),
-                    Child = new TextBlock
-                    {
-                        Text = DestIcao,
-                        FontSize = 10,
-                        FontWeight = FontWeights.Bold,
-                        Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
-                        FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
-                    }
-                };
-                destPanel.Children.Add(border);
-            }
-
-            destPanel.ToolTip = $"DESTINO: {DestIcao}";
-
-            _destinationMarker = new GMapMarker(new PointLatLng(DestLat, DestLon))
+            _destinationMarker = new GMapMarker(pEnd)
             {
                 ZIndex = 110,
-                Shape = destPanel
+                Shape = destCircle
             };
             MainMap.Markers.Add(_destinationMarker);
 
-            // Transição e enquadramento suave (fly-to / pan-zoom)
+            // 3. Transição e enquadramento suave (fly-to / pan-zoom)
             if (AircraftLat != 0 && AircraftLon != 0 && DestLat != 0 && DestLon != 0)
             {
-                double minLat = Math.Min(AircraftLat, DestLat);
-                double maxLat = Math.Max(AircraftLat, DestLat);
-                double minLon = Math.Min(AircraftLon, DestLon);
-                double maxLon = Math.Max(AircraftLon, DestLon);
+                double minLat = points.Min(p => p.Lat);
+                double maxLat = points.Max(p => p.Lat);
+                double minLon = points.Min(p => p.Lng);
+                double maxLon = points.Max(p => p.Lng);
 
                 double latSpan = Math.Max(0.08, maxLat - minLat);
                 double lonSpan = Math.Max(0.08, maxLon - minLon);
@@ -417,42 +400,22 @@ namespace FlightCareer.UI.Utils
             _multiLegMarkers.Clear();
         }
 
-        private GMapMarker CreateWaypointBadge(PointLatLng pos, string text, string hexColor, string tooltip)
+        private GMapMarker CreateWaypointCircle(PointLatLng pos, string hexColor, string tooltip)
         {
-            var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
-            panel.Children.Add(new Ellipse
+            var circle = new Ellipse
             {
-                Width = 9,
-                Height = 9,
+                Width = 8,
+                Height = 8,
                 Fill = (Brush)new BrushConverter().ConvertFromString(hexColor)!,
                 Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
                 StrokeThickness = 1.5,
-                Margin = new Thickness(0, 0, 4, 0)
-            });
-
-            var border = new Border
-            {
-                Background = (Brush)new BrushConverter().ConvertFromString("#E6141C24")!,
-                BorderBrush = (Brush)new BrushConverter().ConvertFromString(hexColor)!,
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(3),
-                Padding = new Thickness(5, 2, 5, 2),
-                Child = new TextBlock
-                {
-                    Text = text,
-                    FontSize = 9,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = (Brush)new BrushConverter().ConvertFromString("#F0F4F8")!,
-                    FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace")
-                }
+                ToolTip = tooltip
             };
-            panel.Children.Add(border);
-            panel.ToolTip = tooltip;
 
             return new GMapMarker(pos)
             {
                 ZIndex = 120,
-                Shape = panel
+                Shape = circle
             };
         }
 
@@ -499,7 +462,6 @@ namespace FlightCareer.UI.Utils
 
                     if (lat0 == 0 && lon0 == 0) continue;
 
-                    // Circuito retangular padrão de tráfego aéreo (~1.2 NM de largura/comprimento)
                     double dLat = 0.018; // ~1.1 NM
                     double dLon = 0.024; // ~1.2 NM
 
@@ -525,19 +487,18 @@ namespace FlightCareer.UI.Utils
                     _multiLegRoutes.Add(tglRoute);
                     MainMap.Markers.Add(tglRoute);
 
-                    var tglBadge = CreateWaypointBadge(
+                    var tglMarker = CreateWaypointCircle(
                         new PointLatLng(lat0 + (dLat * 0.4), lon0 + dLon),
-                        $"LEG {leg.LegNumber} • {leg.OriginICAO} (TGL)",
                         "#FFB300",
-                        $"CIRCUITO DE TRÁFEGO • TOQUE E ARREMETIDA EM {leg.OriginICAO} ({leg.DistanceNM:N0} NM)");
-                    _multiLegMarkers.Add(tglBadge);
-                    MainMap.Markers.Add(tglBadge);
+                        $"CIRCUITO DE TRÁFEGO • {leg.OriginICAO} (TGL) • {leg.DistanceNM:N0} NM");
+                    _multiLegMarkers.Add(tglMarker);
+                    MainMap.Markers.Add(tglMarker);
 
                     plottedIcaos.Add(leg.OriginICAO);
                 }
                 else
                 {
-                    // 2. Perna de Navegação entre Aeródromos Distintos
+                    // 2. Perna de Navegação entre Aeródromos Distintos com Arco Geodésico Curvo
                     var pStart = new PointLatLng(leg.OriginLat, leg.OriginLon);
                     var pEnd = new PointLatLng(leg.DestLat, leg.DestLon);
 
@@ -546,10 +507,10 @@ namespace FlightCareer.UI.Utils
 
                     if (pEnd.Lat == 0 && pEnd.Lng == 0) continue;
 
-                    allRoutePoints.Add(pStart);
-                    allRoutePoints.Add(pEnd);
+                    var arcPoints = GenerateGreatCircleArc(pStart, pEnd, 15);
+                    allRoutePoints.AddRange(arcPoints);
 
-                    var legRoute = new GMapRoute(new List<PointLatLng> { pStart, pEnd })
+                    var legRoute = new GMapRoute(arcPoints)
                     {
                         Shape = new Path
                         {
@@ -564,20 +525,20 @@ namespace FlightCareer.UI.Utils
 
                     if (isFirstLeg && !plottedIcaos.Contains(leg.OriginICAO))
                     {
-                        var originBadge = CreateWaypointBadge(pStart, $"PARTIDA • {leg.OriginICAO}", "#00E676", $"AERÓDROMO DE PARTIDA: {leg.OriginICAO}");
-                        _multiLegMarkers.Add(originBadge);
-                        MainMap.Markers.Add(originBadge);
+                        var originCircle = CreateWaypointCircle(pStart, "#00E676", $"PARTIDA: {leg.OriginICAO}");
+                        _multiLegMarkers.Add(originCircle);
+                        MainMap.Markers.Add(originCircle);
                         plottedIcaos.Add(leg.OriginICAO);
                     }
 
                     string pinColor = isLastLeg ? "#00E676" : "#00E5FF";
-                    string pinLabel = isLastLeg 
-                        ? $"LEG {leg.LegNumber} • {leg.DestinationICAO} (FINAL)" 
-                        : $"LEG {leg.LegNumber} • {leg.DestinationICAO}";
+                    string pinTooltip = isLastLeg 
+                        ? $"DESTINO FINAL: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)"
+                        : $"ESCALA / DESTINO: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)";
 
-                    var destBadge = CreateWaypointBadge(pEnd, pinLabel, pinColor, $"ESCALA / DESTINO: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)");
-                    _multiLegMarkers.Add(destBadge);
-                    MainMap.Markers.Add(destBadge);
+                    var destCircle = CreateWaypointCircle(pEnd, pinColor, pinTooltip);
+                    _multiLegMarkers.Add(destCircle);
+                    MainMap.Markers.Add(destCircle);
                     plottedIcaos.Add(leg.DestinationICAO);
                 }
             }
@@ -604,62 +565,305 @@ namespace FlightCareer.UI.Utils
             }
         }
 
-        private void MainMap_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        #endregion
+
+        #region Clustering Dinâmico de Missões no Mapa
+
+        private void UpdateMissionClusters()
         {
-            var p = e.GetPosition(MainMap);
-            var pos = MainMap.FromLocalToLatLng((int)p.X, (int)p.Y);
-            
-            _waypoints.Add(pos);
-            UpdateWaypointMarkers();
-            UpdateWaypointRoute();
+            foreach (var m in _missionClusterMarkers)
+            {
+                MainMap.Markers.Remove(m);
+            }
+            _missionClusterMarkers.Clear();
+
+            if (MissionsSource == null) return;
+
+            var validMissions = new List<(object Item, PointLatLng Pos, string Icao)>();
+            foreach (var item in MissionsSource)
+            {
+                if (item == null) continue;
+                var coords = GetMissionCoords(item);
+                if (coords.HasValue && (coords.Value.lat != 0 || coords.Value.lon != 0))
+                {
+                    validMissions.Add((item, new PointLatLng(coords.Value.lat, coords.Value.lon), coords.Value.icao));
+                }
+            }
+
+            if (validMissions.Count == 0) return;
+
+            // Agrupamento baseado em proximidade de tela (< 45px) no nível de zoom atual
+            var clusters = new List<MissionCluster>();
+            foreach (var vm in validMissions)
+            {
+                var screenPoint = MainMap.FromLatLngToLocal(vm.Pos);
+                MissionCluster? nearest = null;
+                double minDistance = double.MaxValue;
+
+                foreach (var c in clusters)
+                {
+                    double dx = screenPoint.X - c.ScreenPos.X;
+                    double dy = screenPoint.Y - c.ScreenPos.Y;
+                    double dist = Math.Sqrt(dx * dx + dy * dy);
+                    if (dist < 45.0 && dist < minDistance)
+                    {
+                        minDistance = dist;
+                        nearest = c;
+                    }
+                }
+
+                if (nearest != null)
+                {
+                    nearest.Add(vm, screenPoint);
+                }
+                else
+                {
+                    var newCluster = new MissionCluster();
+                    newCluster.Add(vm, screenPoint);
+                    clusters.Add(newCluster);
+                }
+            }
+
+            // Renderizar marcadores dos clusters
+            foreach (var cluster in clusters)
+            {
+                if (cluster.Missions.Count > 1)
+                {
+                    // Bolha circular com contagem de missões
+                    var clusterBorder = new Border
+                    {
+                        Background = (Brush)new BrushConverter().ConvertFromString("#1F2B37")!,
+                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        BorderThickness = new Thickness(1.5),
+                        CornerRadius = new CornerRadius(12),
+                        Padding = new Thickness(7, 3, 7, 3),
+                        Cursor = Cursors.Hand,
+                        ToolTip = $"{cluster.Missions.Count} missões nesta área (Clique para aproximar)"
+                    };
+
+                    var clusterText = new TextBlock
+                    {
+                        Text = $"[ {cluster.Missions.Count} ]",
+                        Foreground = Brushes.White,
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 10.5,
+                        FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace"),
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+                    clusterBorder.Child = clusterText;
+
+                    var cCenter = cluster.Center;
+                    clusterBorder.MouseLeftButtonUp += (s, e) =>
+                    {
+                        e.Handled = true;
+                        MainMap.Position = cCenter;
+                        MainMap.Zoom += 2;
+                    };
+
+                    var clusterMarker = new GMapMarker(cluster.Center)
+                    {
+                        ZIndex = 115,
+                        Shape = clusterBorder
+                    };
+                    _missionClusterMarkers.Add(clusterMarker);
+                    MainMap.Markers.Add(clusterMarker);
+                }
+                else
+                {
+                    // Pin tático individual com o código DestinationICAO
+                    var single = cluster.Missions[0];
+                    var pinBorder = new Border
+                    {
+                        Background = (Brush)new BrushConverter().ConvertFromString("#E60B0F14")!,
+                        BorderBrush = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        BorderThickness = new Thickness(1.2),
+                        CornerRadius = new CornerRadius(4),
+                        Padding = new Thickness(6, 2, 6, 2),
+                        Cursor = Cursors.Hand,
+                        ToolTip = $"Destino: {single.Icao} (Clique para selecionar missão)"
+                    };
+
+                    var pinStack = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+                    pinStack.Children.Add(new Ellipse
+                    {
+                        Width = 6,
+                        Height = 6,
+                        Fill = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        Margin = new Thickness(0, 0, 4, 0)
+                    });
+                    pinStack.Children.Add(new TextBlock
+                    {
+                        Text = single.Icao,
+                        Foreground = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                        FontWeight = FontWeights.Bold,
+                        FontSize = 10,
+                        FontFamily = new FontFamily("JetBrains Mono, Consolas, monospace"),
+                        VerticalAlignment = VerticalAlignment.Center
+                    });
+                    pinBorder.Child = pinStack;
+
+                    pinBorder.MouseLeftButtonUp += (s, e) =>
+                    {
+                        e.Handled = true;
+                        SelectedMission = single.Item;
+                        DestLat = single.Pos.Lat;
+                        DestLon = single.Pos.Lng;
+                        DestIcao = single.Icao;
+                        UpdateDestinationRoute();
+                    };
+
+                    var pinMarker = new GMapMarker(single.Pos)
+                    {
+                        ZIndex = 112,
+                        Shape = pinBorder
+                    };
+                    _missionClusterMarkers.Add(pinMarker);
+                    MainMap.Markers.Add(pinMarker);
+                }
+            }
         }
 
-        private void UpdateWaypointMarkers()
+        private class MissionCluster
         {
-            // Limpar marcadores de waypoint antigos (mantendo aeronave e rota de destino)
-            var toRemove = MainMap.Markers.Where(m => m != _aircraftMarker && m != _destinationRoute && m != _waypointRoute).ToList();
-            foreach (var m in toRemove) MainMap.Markers.Remove(m);
+            public List<(object Item, PointLatLng Pos, string Icao)> Missions { get; } = new();
+            public PointLatLng Center { get; private set; }
+            public GPoint ScreenPos { get; private set; }
 
-            foreach (var wp in _waypoints)
+            public void Add((object Item, PointLatLng Pos, string Icao) mission, GPoint screenPos)
             {
-                var marker = new GMapMarker(wp)
+                Missions.Add(mission);
+                double avgLat = Missions.Average(m => m.Pos.Lat);
+                double avgLng = Missions.Average(m => m.Pos.Lng);
+                Center = new PointLatLng(avgLat, avgLng);
+
+                long avgX = (long)Missions.Average(m => screenPos.X);
+                long avgY = (long)Missions.Average(m => screenPos.Y);
+                ScreenPos = new GPoint(avgX, avgY);
+            }
+        }
+
+        private static (double lat, double lon, string icao)? GetMissionCoords(object item)
+        {
+            if (item == null) return null;
+
+            if (item is MissionDisplayItem mdi)
+            {
+                return (mdi.DestLat, mdi.DestLon, mdi.DestinationICAO);
+            }
+
+            var propLat = item.GetType().GetProperty("DestLat") ?? item.GetType().GetProperty("DestinationLat");
+            var propLon = item.GetType().GetProperty("DestLon") ?? item.GetType().GetProperty("DestinationLon");
+            var propIcao = item.GetType().GetProperty("DestinationICAO") ?? item.GetType().GetProperty("DestIcao");
+
+            if (propLat != null && propLon != null)
+            {
+                try
                 {
-                    Shape = new Ellipse { Width = 8, Height = 8, Fill = Brushes.Orange, Stroke = Brushes.Black, StrokeThickness = 1 }
+                    double lat = Convert.ToDouble(propLat.GetValue(item));
+                    double lon = Convert.ToDouble(propLon.GetValue(item));
+                    string icao = propIcao?.GetValue(item)?.ToString() ?? string.Empty;
+                    return (lat, lon, icao);
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Cálculo de Arco Geodésico Esférico (Great-Circle)
+
+        /// <summary>
+        /// Gera uma sequência de pontos esfericamente interpolados (Great-Circle / Slerp)
+        /// entre as coordenadas de início e fim, formando um arco geodésico suave em projeções mercator.
+        /// </summary>
+        public static List<PointLatLng> GenerateGreatCircleArc(PointLatLng start, PointLatLng end, int segments = 20)
+        {
+            var points = new List<PointLatLng>();
+            if (segments < 2) segments = 2;
+
+            double lat1 = start.Lat * Math.PI / 180.0;
+            double lon1 = start.Lng * Math.PI / 180.0;
+            double lat2 = end.Lat * Math.PI / 180.0;
+            double lon2 = end.Lng * Math.PI / 180.0;
+
+            double dLat = lat2 - lat1;
+            double dLon = lon2 - lon1;
+
+            double a = Math.Sin(dLat / 2.0) * Math.Sin(dLat / 2.0) +
+                       Math.Cos(lat1) * Math.Cos(lat2) * Math.Sin(dLon / 2.0) * Math.Sin(dLon / 2.0);
+            double d = 2.0 * Math.Asin(Math.Min(1.0, Math.Sqrt(a)));
+
+            if (d < 1e-6)
+            {
+                points.Add(start);
+                points.Add(end);
+                return points;
+            }
+
+            double sinD = Math.Sin(d);
+
+            for (int i = 0; i <= segments; i++)
+            {
+                double f = (double)i / segments;
+                double A = Math.Sin((1.0 - f) * d) / sinD;
+                double B = Math.Sin(f * d) / sinD;
+
+                double x = A * Math.Cos(lat1) * Math.Cos(lon1) + B * Math.Cos(lat2) * Math.Cos(lon2);
+                double y = A * Math.Cos(lat1) * Math.Sin(lon1) + B * Math.Cos(lat2) * Math.Sin(lon2);
+                double z = A * Math.Sin(lat1) + B * Math.Sin(lat2);
+
+                double lat = Math.Atan2(z, Math.Sqrt(x * x + y * y)) * 180.0 / Math.PI;
+                double lon = Math.Atan2(y, x) * 180.0 / Math.PI;
+
+                points.Add(new PointLatLng(lat, lon));
+            }
+
+            return points;
+        }
+
+        #endregion
+
+        #region Aeroportos, Waypoints Manuais e Trajetória Gravada
+
+        private void UpdateAirportMarkers()
+        {
+            foreach (var m in _airportMarkers) MainMap.Markers.Remove(m);
+            _airportMarkers.Clear();
+
+            if (Airports == null) return;
+
+            foreach (var airport in Airports)
+            {
+                var marker = new GMapMarker(new PointLatLng(airport.Latitude, airport.Longitude))
+                {
+                    ZIndex = 10,
+                    Shape = new Ellipse
+                    {
+                        Width = 6,
+                        Height = 6,
+                        Fill = Brushes.Transparent,
+                        Stroke = Brushes.White,
+                        StrokeThickness = 1,
+                        ToolTip = $"{airport.ICAO} - {airport.Name}"
+                    }
                 };
+                _airportMarkers.Add(marker);
                 MainMap.Markers.Add(marker);
             }
-        }
-
-        private void UpdateWaypointRoute()
-        {
-            if (_waypointRoute != null) MainMap.Markers.Remove(_waypointRoute);
-
-            if (_waypoints.Count < 2)
-            {
-                TxtDistance.Text = "0.0 NM";
-                return;
-            }
-
-            _waypointRoute = new GMapRoute(_waypoints)
-            {
-                Shape = new Path { Stroke = Brushes.Orange, StrokeThickness = 2, Opacity = 0.8 }
-            };
-            MainMap.Markers.Add(_waypointRoute);
-
-            // Calcular Distância NM
-            double totalDist = 0;
-            for (int i = 0; i < _waypoints.Count - 1; i++)
-            {
-                totalDist += LocationUtils.CalculateDistance(_waypoints[i].Lat, _waypoints[i].Lng, _waypoints[i + 1].Lat, _waypoints[i + 1].Lng);
-            }
-            TxtDistance.Text = $"{totalDist:F1} NM";
         }
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             _waypoints.Clear();
-            UpdateWaypointMarkers();
-            UpdateWaypointRoute();
+            if (_waypointRoute != null)
+            {
+                MainMap.Markers.Remove(_waypointRoute);
+                _waypointRoute = null;
+            }
+            TxtDistance.Text = "0.0 NM";
         }
 
         private static void OnRecordedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -788,6 +992,8 @@ namespace FlightCareer.UI.Utils
             panel.Children.Add(border);
             return panel;
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -844,7 +1050,6 @@ namespace FlightCareer.UI.Utils
     {
         public static readonly CartoDbDarkMapProvider Instance;
 
-        // Novo GUID e Nome para forçar limpeza de cache de tiles antigos com marca d'água
         private readonly Guid _id = new Guid("B7E20F45-8899-4A1C-99BB-27F389A8E2E5");
         public override Guid Id => _id;
 

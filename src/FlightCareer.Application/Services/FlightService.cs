@@ -35,14 +35,26 @@ namespace FlightCareer.Application.Services
             double finalFuel,
             double distanceNM,
             List<Mission> activeMissions,
-            FlightQualityService qualityService)
+            FlightQualityService qualityService,
+            double engineCondition = 100.0,
+            double tiresCondition = 100.0,
+            double airframeCondition = 100.0,
+            double avionicsCondition = 100.0,
+            int landingsCount = 0,
+            bool isOffFieldLanding = false,
+            double nearestDistance = 0.0,
+            double flightDurationMinutes = 0.0)
         {
+            int durationMinutes = flightDurationMinutes > 0
+                ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
+                : Math.Max(1, (int)(DateTime.Now - startTime).TotalMinutes);
+
             var outcome = new FlightOutcome
             {
                 Origin = originIcao,
                 Destination = destinationIcao,
                 DistanceNM = distanceNM,
-                FlightTimeMinutes = (int)(DateTime.Now - startTime).TotalMinutes,
+                FlightTimeMinutes = durationMinutes,
                 FuelUsed = Math.Max(0, initialFuel - finalFuel)
             };
 
@@ -67,11 +79,17 @@ namespace FlightCareer.Application.Services
                 var destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
                 int airportTier = destAirport?.Tier ?? 1;
 
-                // 1. Atualizar Aeronave
+                // 1. Atualizar Aeronave e Persistência de Danos / Condições
                 aircraft.FuelAmount = finalFuel;
                 aircraft.CurrentLocationICAO = destinationIcao;
                 double hours = outcome.FlightTimeMinutes / 60.0;
                 aircraft.CurrentAirframeHours += hours;
+
+                aircraft.EngineCondition = engineCondition;
+                aircraft.TiresCondition = tiresCondition;
+                aircraft.AirframeCondition = airframeCondition;
+                aircraft.AvionicsCondition = avionicsCondition;
+                aircraft.LandingsCount = landingsCount;
 
                 // Consumo de TBO e Inspeções Regulatórias
                 aircraft.EngineTboRemainingHours = Math.Max(0, aircraft.EngineTboRemainingHours - hours);
@@ -100,6 +118,13 @@ namespace FlightCareer.Application.Services
                 if (isCrash)
                 {
                     // CASO DE CRASH NO POUSO (Impacto violento >= 900 FPM com colapso de trem/célula)
+                    aircraft.EngineCondition = 0;
+                    aircraft.TiresCondition = 0;
+                    aircraft.AirframeCondition = 0;
+                    aircraft.AvionicsCondition = 0;
+                    aircraft.IsInterdicted = true;
+                    aircraft.InterdictionReason = "Aeronave destruída em acidente com colapso estrutural";
+
                     foreach (var mission in activeMissions)
                     {
                         if (mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
@@ -112,6 +137,85 @@ namespace FlightCareer.Application.Services
                     
                     outcome.Success = false;
                     outcome.Message = $"CRASH NO POUSO ({qualityService.TouchdownFPM:F0} FPM)! Aeronave destruída e carga perdida.";
+                    return outcome;
+                }
+
+                // CASO DE POUSO FORÇADO FORA DE PISTA (EMERGÊNCIA)
+                if (isOffFieldLanding)
+                {
+                    // Dano Adicional de Terreno Despreparado
+                    aircraft.TiresCondition = Math.Max(0, aircraft.TiresCondition - 35.0);
+                    aircraft.AirframeCondition = Math.Max(0, aircraft.AirframeCondition - 20.0);
+
+                    // NÃO CONCLUIR MISSÕES: Atualizar OriginICAO para destinationIcao (resgate)
+                    int missionsRemainingOff = 0;
+                    foreach (var mission in activeMissions)
+                    {
+                        mission.OriginICAO = destinationIcao;
+                        var dbMission = await _context.Missions.FindAsync(mission.Id);
+                        if (dbMission != null)
+                        {
+                            dbMission.OriginICAO = destinationIcao;
+                            var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
+                            var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
+                            if (destAirp != null && curAirp != null)
+                            {
+                                double newDist = LocationUtils.CalculateDistance(curAirp.Latitude, curAirp.Longitude, destAirp.Latitude, destAirp.Longitude);
+                                dbMission.DistanceNM = Math.Round(newDist, 0);
+                                mission.DistanceNM = dbMission.DistanceNM;
+                            }
+                        }
+                        missionsRemainingOff++;
+                    }
+
+                    // Custos de Combustível Consumido
+                    double fuelUsedOff = outcome.FuelUsed;
+                    string fuelTypeOff = aircraft.AircraftType?.FuelType ?? "AVGAS";
+                    double fuelPriceOff = FuelPriceService.GetCurrentPrice(fuelTypeOff);
+                    double fuelCostOff = Math.Round(fuelUsedOff * fuelPriceOff, 2);
+
+                    if (fuelCostOff > 0)
+                    {
+                        pilot.Balance -= fuelCostOff;
+                        _context.FinancialTransactions.Add(new FinancialTransaction
+                        {
+                            Id = Guid.NewGuid(),
+                            PilotId = pilot.Id,
+                            Date = DateTime.Now,
+                            Type = TransactionType.Expense,
+                            Category = "Combustível",
+                            Amount = fuelCostOff,
+                            Description = $"Combustível consumido ({fuelUsedOff:F1} GAL {fuelTypeOff} @ {fuelPriceOff:C2}/gal)"
+                        });
+                    }
+
+                    pilot.TotalHours += hours;
+
+                    // Registrar Voo no Logbook
+                    var flightOff = new Flight
+                    {
+                        Id = Guid.NewGuid(),
+                        PilotId = pilot.Id,
+                        OriginICAO = originIcao,
+                        DestinationICAO = destinationIcao,
+                        DurationHours = hours,
+                        DistanceNM = distanceNM,
+                        Date = DateTime.Now,
+                        Revenue = 0,
+                        XP = 0
+                    };
+                    _context.Flights.Add(flightOff);
+
+                    await _context.SaveChangesAsync();
+
+                    outcome.Success = false;
+                    outcome.Revenue = 0;
+                    outcome.FuelCost = fuelCostOff;
+                    outcome.LandingFee = 0;
+                    outcome.XP = 0;
+                    outcome.CompletedMissions = 0;
+                    outcome.RemainingMissions = missionsRemainingOff;
+                    outcome.Message = $"POUSO FORÇADO FORA DE PISTA! Aeronave pousou a {nearestDistance:F1} NM de {destinationIcao}. Carga e passageiros aguardam resgate.";
                     return outcome;
                 }
 

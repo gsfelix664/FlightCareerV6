@@ -73,6 +73,7 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE PilotAircrafts ADD COLUMN IsInterdicted INTEGER DEFAULT 0;",
                 "ALTER TABLE PilotAircrafts ADD COLUMN InterdictionReason TEXT DEFAULT '';",
                 "ALTER TABLE PilotAircrafts ADD COLUMN Configuration TEXT DEFAULT 'Passageiro';",
+                "ALTER TABLE PilotAircrafts ADD COLUMN AvionicsCondition REAL DEFAULT 100.0;",
 
                 "ALTER TABLE Missions ADD COLUMN RequiredTier INTEGER DEFAULT 1;",
                 "ALTER TABLE Missions ADD COLUMN RequiredCategory INTEGER DEFAULT 1;",

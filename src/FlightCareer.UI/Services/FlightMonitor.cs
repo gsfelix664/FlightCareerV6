@@ -21,7 +21,7 @@ namespace FlightCareer.UI.Services
         private readonly WearAndFailureService _wearService;
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
-        private string _currentStatus = "AGUARDANDO PREPARAÇÃO (ENGINES/PB)";
+        private string _currentStatus = "PREPARAÇÃO";
 
         public bool IsMonitoring { get; private set; }
         public bool IsFlightActive { get; private set; }
@@ -30,6 +30,9 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
         private bool _hasTouchedDown;
+        private bool _engineFailureReportedInFlight;
+        private double _simulatedFlightTimeSeconds = 0;
+        private DateTime _lastTick = DateTime.MinValue;
         private DateTime? _startConditionTime;
 
         private PilotAircraft? _aircraft;
@@ -113,12 +116,16 @@ namespace FlightCareer.UI.Services
             IsFlightActive = false;
             _isAirborne = false;
             _hasTouchedDown = false;
+            _engineFailureReportedInFlight = false;
+            _simulatedFlightTimeSeconds = 0;
+            _lastTick = DateTime.MinValue;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             IsMonitoring = true;
 
             OnAlert?.Invoke("SISTEMA INICIALIZADO", "O monitoramento começará automaticamente 10 segundos após você ligar os motores e soltar o freio de estacionamento.", false);
-            OnStatusChanged?.Invoke("AGUARDANDO PREPARAÇÃO (ENGINES/PB)");
+            _currentStatus = "PREPARAÇÃO";
+            OnStatusChanged?.Invoke(_currentStatus);
         }
 
         public void StopMonitoring()
@@ -154,6 +161,7 @@ namespace FlightCareer.UI.Services
                         dbAircraft.EngineCondition = _aircraft.EngineCondition;
                         dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                         dbAircraft.TiresCondition = _aircraft.TiresCondition;
+                        dbAircraft.AvionicsCondition = _aircraft.AvionicsCondition;
                         dbAircraft.LandingsCount = _aircraft.LandingsCount;
                         
                         // 2. Tentar localizar aeroporto mais próximo para salvar nova posição caso tenha se movido
@@ -218,6 +226,7 @@ namespace FlightCareer.UI.Services
                     dbAircraft.EngineCondition = 0;
                     dbAircraft.TiresCondition = 0;
                     dbAircraft.AirframeCondition = 0;
+                    dbAircraft.AvionicsCondition = 0;
                     await context.SaveChangesAsync();
                 }
             }
@@ -263,7 +272,8 @@ namespace FlightCareer.UI.Services
                     if (_startConditionTime == null) 
                     {
                         _startConditionTime = DateTime.Now;
-                        OnStatusChanged?.Invoke("CONDIÇÕES OK - INICIANDO EM 10s");
+                        _currentStatus = "INICIANDO (10s)";
+                        OnStatusChanged?.Invoke(_currentStatus);
                     }
                     
                     if ((DateTime.Now - _startConditionTime.Value).TotalSeconds >= 10)
@@ -276,10 +286,45 @@ namespace FlightCareer.UI.Services
                     if (_startConditionTime != null)
                     {
                         _startConditionTime = null;
-                        OnStatusChanged?.Invoke("AGUARDANDO PREPARAÇÃO (ENGINES/PB)");
+                        _currentStatus = "PREPARAÇÃO";
+                        OnStatusChanged?.Invoke(_currentStatus);
                     }
                 }
                 return;
+            }
+
+            // --- CONTAGEM DE TEMPO DE VOO SIMULADO COM PAUSA E SIM RATE ---
+            DateTime now = DateTime.Now;
+            double dt = _lastTick == DateTime.MinValue ? 0 : (now - _lastTick).TotalSeconds;
+            _lastTick = now;
+
+            if (dt < 0) dt = 0;
+            if (dt > 1.0) dt = 1.0;
+
+            bool isPaused = data.IsEngineRunning && data.GroundSpeed == 0 && data.EngineRPM == 0;
+            if (!isPaused && dt > 0)
+            {
+                double simRate = data.SimulationRate > 0 ? data.SimulationRate : 1.0;
+                _simulatedFlightTimeSeconds += dt * simRate;
+            }
+
+            // --- DETECÇÃO DE FALHA / APAGAMENTO DE MOTOR EM VOO ---
+            if (_isAirborne && !data.IsEngineRunning)
+            {
+                if (!_engineFailureReportedInFlight)
+                {
+                    _engineFailureReportedInFlight = true;
+                    if (_aircraft != null)
+                    {
+                        _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 15.0);
+                    }
+                    OnAlert?.Invoke("PANE CRÍTICA DE MOTOR", "Motor apagou / fundiu em voo por excesso de RPM/temperatura!", true);
+                    _telemetryLogger.LogEvent("ENGINE_SHUTDOWN_INFLIGHT", "Apagamento / quebra de motor em voo");
+                }
+            }
+            else if (data.IsEngineRunning)
+            {
+                _engineFailureReportedInFlight = false;
             }
 
             // --- MONITORAMENTO DE QUALIDADE ---
@@ -318,7 +363,7 @@ namespace FlightCareer.UI.Services
             {
                 _isAirborne = true;
                 _hasTouchedDown = false;
-                _currentStatus = "VOANDO (NO AR)";
+                _currentStatus = "VOANDO";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
 
@@ -335,7 +380,7 @@ namespace FlightCareer.UI.Services
                     _qualityService.RecordTouchdownFpm(touchdownRate);
                     if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
 
-                    _currentStatus = $"POUSO REALIZADO ({_qualityService.TouchdownFPM:F0} FPM) - TAXIANDO";
+                    _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
                     OnStatusChanged?.Invoke(_currentStatus);
                 }
                 else
@@ -345,7 +390,7 @@ namespace FlightCareer.UI.Services
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
                         if (_aircraft != null) _wearService.ProcessLanding(_aircraft, touchdownRate, data.VelocityBodyX);
-                        _currentStatus = $"POUSO REALIZADO ({_qualityService.TouchdownFPM:F0} FPM - BOUNCE) - TAXIANDO";
+                        _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
                 }
@@ -362,7 +407,7 @@ namespace FlightCareer.UI.Services
                 if (_startConditionTime == null)
                 {
                     _startConditionTime = DateTime.Now;
-                    _currentStatus = "POUSO E CORTE DE MOTORES DETECTADOS (ENCERRANDO EM 5s)...";
+                    _currentStatus = "FINALIZANDO (5s)";
                     OnStatusChanged?.Invoke(_currentStatus);
                 }
                 
@@ -383,7 +428,7 @@ namespace FlightCareer.UI.Services
                 if (_groundAbortTime == null)
                 {
                     _groundAbortTime = DateTime.Now;
-                    _currentStatus = "CORTE DE MOTORES EM SOLO DETECTADO (CANCELANDO EM 5s)...";
+                    _currentStatus = "CANCELANDO (5s)";
                     OnStatusChanged?.Invoke(_currentStatus);
                 }
 
@@ -424,6 +469,7 @@ namespace FlightCareer.UI.Services
                     dbAircraft.EngineCondition = _aircraft.EngineCondition;
                     dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                     dbAircraft.TiresCondition = _aircraft.TiresCondition;
+                    dbAircraft.AvionicsCondition = _aircraft.AvionicsCondition;
                     dbAircraft.LandingsCount = _aircraft.LandingsCount;
 
                     // Atualizar também o objeto local para garantir sincronia
@@ -478,17 +524,20 @@ namespace FlightCareer.UI.Services
             IsFlightActive = true;
             _isAirborne = false;
             _hasTouchedDown = false;
+            _engineFailureReportedInFlight = false;
             _simConnect.ResetCrashState();
             _wearService.Reset();
             _qualityService.Reset();
             _startTime = DateTime.Now;
+            _lastTick = DateTime.Now;
+            _simulatedFlightTimeSeconds = 0;
             _initialFuel = data.FuelTotalGallons;
             _distanceTraveled = 0;
             _lastLat = data.Latitude;
             _lastLon = data.Longitude;
             _lastDatabaseUpdate = DateTime.Now;
             _lastWearUpdate = DateTime.Now;
-            _currentStatus = "VOO EM PROGRESSO - GRAVANDO";
+            _currentStatus = "VOO ATIVO";
             OnStatusChanged?.Invoke(_currentStatus);
 
             // Iniciar Gravação Blackbox
@@ -505,11 +554,14 @@ namespace FlightCareer.UI.Services
 
             // Encontrar ICAO de destino (o mais próximo das coordenadas atuais)
             string destinationIcao = _originIcao;
+            double nearestDistance = 0.0;
+            bool isOffFieldLanding = false;
+
             try
             {
                 var lat = data.Latitude;
                 var lon = data.Longitude;
-                double range = 0.5;
+                double range = 1.0;
                 
                 await using var context = await CreateDbContextAsync();
                 var nearbyAirports = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(context.Airports.Where(a => 
@@ -521,9 +573,39 @@ namespace FlightCareer.UI.Services
                     .OrderBy(x => x.Distance)
                     .FirstOrDefault();
 
-                if (nearest != null) destinationIcao = nearest.Airport.ICAO;
+                if (nearest != null)
+                {
+                    destinationIcao = nearest.Airport.ICAO;
+                    nearestDistance = nearest.Distance;
+                    if (nearestDistance > 3.0)
+                    {
+                        isOffFieldLanding = true;
+                    }
+                }
+                else
+                {
+                    var allAirports = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(context.Airports);
+                    var globalNearest = allAirports
+                        .Select(a => new { Airport = a, Distance = LocationUtils.CalculateDistance(lat, lon, a.Latitude, a.Longitude) })
+                        .OrderBy(x => x.Distance)
+                        .FirstOrDefault();
+
+                    if (globalNearest != null)
+                    {
+                        destinationIcao = globalNearest.Airport.ICAO;
+                        nearestDistance = globalNearest.Distance;
+                        isOffFieldLanding = true;
+                    }
+                    else
+                    {
+                        isOffFieldLanding = true;
+                        nearestDistance = 99.0;
+                    }
+                }
             }
             catch { }
+
+            double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
 
             var outcome = await _flightService.ProcessFlightFinishAsync(
                 _pilot.Id,
@@ -535,7 +617,15 @@ namespace FlightCareer.UI.Services
                 data.FuelTotalGallons,
                 _distanceTraveled,
                 _activeMissions,
-                _qualityService
+                _qualityService,
+                _aircraft.EngineCondition,
+                _aircraft.TiresCondition,
+                _aircraft.AirframeCondition,
+                _aircraft.AvionicsCondition,
+                _aircraft.LandingsCount,
+                isOffFieldLanding,
+                nearestDistance,
+                flightDurationMinutes
             );
 
             OnFlightFinished?.Invoke(outcome);

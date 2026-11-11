@@ -1083,3 +1083,141 @@ Ao implementar este plano, o agente executor deve:
 - **Higienização de Código Obsoleto**:
   - Removidos arquivos e dependências de cálculo de viabilidade física de pista (`RunwayViabilityCalculator`, `IRunwayViabilityCalculator`, enum `RunwaySurface`), desvinculando registros de DI no `App.xaml.cs` e restaurando a escala do Gatekeeper para 4/4 sistemas.
 - **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa em todos os projetos da solução (`dotnet build src/FlightCareer.slnx` com 0 erros).
+
+## 2026-11-11 - Ícones Vetoriais SVG/StreamGeometry, Correção de Mojibake e Unificação do Manifesto Multi-Leg
+- **Diagnóstico e Refatoração de UX (Redundância no Briefing)**:
+  - **Problema**: A coluna esquerda do Briefing exibia dois painéis verticais empilhados ("ITINERÁRIO DINÂMICO MULTI-LEG" e "CONTRATOS NO MANIFESTO") que repetiam exatamente os mesmos aeroportos, pesos e passageiros em listas separadas com scrolls concorrentes.
+  - **Resolução**: Unificação em um único componente tático: **"PLANO DE VOO & MANIFESTO OPERACIONAL"**:
+    - Cada card de perna (`FlightLegModel`) consolida os dados operacionais (`[LEG X]`, `Origem ➔ Destino`, Distância, ETE) com os dados comerciais do contrato (`MissionTitle`, Recompensa formatada em verde, Carga a bordo e Resumo de escala).
+    - Botão ghost `[✕]` de cancelamento de contrato integrado diretamente ao card da perna (vinculado a `RemoveMissionCommand` via `AssociatedMission`), permitindo descarte imediato da missão e retorno ao mercado.
+    - Removidos scrolls aninhados em favor de um `ScrollViewer` vertical único e fluido.
+- **Catálogo de Ícones Vetoriais Nativos (`App.xaml`)**:
+  - Implementado conjunto de geometrias vetoriais reutilizáveis em `StreamGeometry` de padrão cockpit/avionics dark mode:
+    - `IconMissions`, `IconBriefing`, `IconMarket`, `IconHangar`, `IconFinance`, `IconBlackbox`, `IconDebug`, `IconOverlay`, `IconLogout`, `IconClose`, `IconPlane`, `IconScale`, `IconShield`, `IconChevronDown`, `IconRefresh`, `IconSeats`, `IconCargo`, `IconFuel`, `IconRocket`.
+  - Substituídos todos os emojis de baixa legibilidade e glifos dependentes de fontes do sistema (`🛫`, `📦`, `⚖️`, `🛡️`, etc.) por caminhos vetoriais nítidos em qualquer DPI.
+- **Eliminação Total de Mojibake e Correção de Encoding (`MainWindow.xaml`)**:
+  - Sanados todos os caracteres corrompidos decorrentes de dupla codificação UTF-8 (`OPERAÃ‡Ã•ES` $\rightarrow$ `OPERAÇÕES`, `Quadro de MissÃµes` $\rightarrow$ `Quadro de Missões`, `â®µ` $\rightarrow$ `IconChevronDown`, `ðŸ–¥ï¸` $\rightarrow$ `IconOverlay`).
+  - Menu lateral padronizado com `Path` vetorial sincronizado ao `Foreground` reativo dos botões.
+  - Botão de acesso rápido ao HUD Overlay no cabeçalho atualizado com vetor limpo.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com 0 erros de compilação (`dotnet build src\FlightCareer.slnx`).
+
+## 2026-11-11 - HUD Overlay Minimalista, Sim Rate/Pausa, Pouso de Emergência e Clustering Tático no Mapa
+- **Refinamento de UX do HUD Overlay (`DebugOverlayWindow`)**:
+  - Limpeza completa do mapa tático: removidos badges textuais de altitude, velocidade e proa que acompanhavam a aeronave; exibição estrita da silhueta vetorial rotacionando com a proa (em voo) ou do círculo de radar ping (em solo).
+  - Remoção de labels de pista/waypoint em excesso, mantendo apenas a rota geodésica e nós limpos.
+  - O bloco de Flaps agora exibe estritamente `FLAPS` (removida a poluição de freio).
+  - Temperatura do óleo convertida e padronizada em Fahrenheit (`°F`), condizente com os mostradores analógicos dos painéis de aeronaves de aviação geral (Cessna 152/172).
+  - Desacoplado o arraste da janela: o arrasto é feito exclusivamente pelo cabeçalho do HUD, permitindo pan e zoom livres sobre o mapa tático via scroll e mouse sem mover a janela.
+- **Fases de Voo Encurtadas**:
+  - Títulos de fase encurtados para caber perfeitamente na interface: `"VOANDO"`, `"PREPARAÇÃO"`, `"INICIANDO (10s)"`, `"VOO ATIVO"`, `"POUSO (FPM)"`, `"FINALIZANDO (5s)"`, `"CANCELANDO (5s)"`.
+- **Contagem Fiel de Horas de Voo (Anti-Pausa e Aceleração de Simulação)**:
+  - Implementado acumulador de tempo de simulação efetivo (`_simulatedFlightTimeSeconds`), integrando delta de tempo ponderado pela taxa de aceleração (`SimulationRate`).
+  - Pausa de simulação (`IS SIMULATION PAUSED`) detectada via SimConnect, interrompendo a contagem de horas e evitando horas fakes ou desgaste indevido de TBO ao pausar o jogo.
+- **Detecção de Apagamento / Pane de Motor em Voo (100% RPM)**:
+  - Detectado desligamento/quebra de motor enquanto a aeronave está no ar (`_isAirborne && !IsEngineRunning`), aplicando degradação severa imediata (`EngineCondition <= 15%`) e disparando alarme crítico de pane.
+- **Pouso de Emergência Fora de Pista (Off-Field Landing)**:
+  - Validação da distância de pouso até a pista homologada mais próxima ($> 3.0\text{ NM}$).
+  - Pousos no mato/terreno não preparado não concluem nem pagam missões (carga fica retida no aeroporto mais próximo aguardando resgate).
+  - Aplicação de danos severos de terreno despreparado nos pneus ($-35\%$) e na fuselagem ($-20\%$).
+- **Clustering Dinâmico e Seleção de Missões pelo Mapa (`FlightMapControl` / `MissionsView`)**:
+  - Altura do viewport do mapa fixada em $340\text{px}$, eliminando variações de tamanho ao alternar contratos.
+  - Implementado agrupamento euclidiano de destinos de missões em bolhas numéricas ciano (`[ N ]`) quando a distância em pixels for $< 45\text{px}$.
+  - Clique no cluster aproxima a câmera (`Zoom += 2`); clique no nó individual seleciona a missão no quadro e desenha o arco geodésico curvo em 20 segmentos (Great-Circle via Haversine).
+  - Botão de mira flutuante (`🎯`) para recentralizar instantaneamente na base/aeronave do jogador.
+
+## 2026-11-11 - Mercado de Usados Avançado (Pre-Buy Inspection), Subsistema de Aviônicos e Venda de Aeronaves
+- **Novo Subsistema de Aviônicos & Elétrica (`AvionicsCondition`)**:
+  - Adicionado o quarto subsistema à entidade `PilotAircraft`: `AvionicsCondition`.
+  - Migração de schema dinâmica automática adicionada em `AppDbContext.EnsureSchemaUpdatedAsync()`.
+  - Simulação de desgaste de aviônicos em `WearAndFailureService` com base em horas de voo e estresse elétrico.
+  - Persistência obrigatória de todos os 4 subsistemas (`EngineCondition`, `TiresCondition`, `AirframeCondition`, `AvionicsCondition`) e `LandingsCount` em `FlightService.ProcessFlightFinishAsync`, `UpdateHangarStateAsync`, `CancelMonitoringAsync` e `HandleTotalLossAsync`.
+- **Reestruturação do Painel de Inspeção Técnica Pré-Compra (`MarketView`)**:
+  - Substituído o espaço vazio da coluna direita por um relatório modular completo de inspeção mecânica:
+    - Card de identificação com silhueta vetorial, prefixo, modelo e ano de fabricação.
+    - 4 diagnósticos modulares com barras de progresso cromáticas e métricas:
+      1. Célula / Fuselagem (TTAF e histórico de incidentes).
+      2. Grupo Motopropulsor (TSMO e TBO).
+      3. Trem de Pouso & Pneus (estado de rolagem e amortecedor).
+      4. Aviônicos & Elétrica (barramentos DC, COMM/NAV e bateria).
+    - Box financeiro com "Custo Estimado de Revisão Pós-Compra".
+    - Sticky Footer com botão de compra travado no rodapé (`[ COMPRAR POR $ XX,XXX.XX ]`).
+- **Catálogo de Ofertas e Filtros no Mercado**:
+  - Cards de aeronaves compactos de alta densidade visual com badge de categoria de motorização (`CategoryBadge`).
+  - Filtros rápidos horizontais em chips (`[TODAS]`, `[MONOMOTOR]`, `[BIMOTOR]`, `[TURBOÉLICE]`, `[ATÉ $100K]`).
+  - Dropdown de ordenação por Menor Preço, Maior Condição e Menos Horas (TTAF).
+- **Módulo de Venda de Aeronaves Próprias (Meus Anúncios)**:
+  - Controle de abas de 1º nível: `[ ✈️ MERCADO DE USADOS (COMPRAR) ]` e `[ 🏷️ MEUS ANÚNCIOS / VENDER AERONAVE ]`.
+  - Avaliação de frota pelo índice Bluebook aeronáutico com base no estado dos 4 subsistemas.
+  - Taxa de comissão da corretora de 8% e cálculo de valor líquido a receber.
+  - Comando atômico de venda: crédito no saldo do piloto, transação financeira de receita e remoção da aeronave do hangar.
+- **Padronização Monetária Global**:
+  - Moeda padronizada estritamente em Dólar Americano (`$`) em todas as threads da aplicação via `CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US")`.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com 0 erros de compilação (`dotnet build src\FlightCareer.slnx`).
+
+
+## 2026-11-11 - Correção de Loop Infinito e Travamento no Briefing Multi-Missão
+- **Diagnóstico da Causa Raiz do Travamento**:
+  - Ao aceitar 2 ou mais contratos de voo (especialmente partindo da mesma base ou com destinos múltiplos), o método `RebuildItineraryAndValidateAsync()` em `BriefingViewModel.cs` entrava em um **loop infinito na UI thread**.
+  - O código utilizava `remainingCrossMissions.RemoveAll(m => m.OriginICAO == currentHop && m.DestinationICAO == nextDest)`. Após processar a primeira missão e avançar `currentHop` para o destino da primeira perna, a busca da segunda missão encontrava uma missão com `OriginICAO == originIcao` (diferente de `currentHop`). A cláusula `RemoveAll` nunca encontrava correspondência, nunca removia a missão da lista, e o `while (remainingCrossMissions.Any())` executava indefinidamente, congelando a aplicação.
+- **Resolução Implementada (`@backend`)**:
+  - Substituição da remoção por predicado falho pela **remoção atômica da instância processada**: `remainingCrossMissions.Remove(nextMission)` e `remainingCrossMissions.Remove(sameDestMission)`.
+  - Adicionada salvaguarda de segurança obrigatória: `safetyGuard++ < 50`, impedindo loops em qualquer cenário futuro.
+  - Implementado algoritmo inteligente que suporta múltiplos contratos para o mesmo destino (compartilhando trecho da rota), escalas técnicas consecutivas e decolagens partindo da base da empresa.
+  - Desacoplado o cálculo de carga e passageiros por card individual (`legPax` e `legCargo` agora exibem os valores exatos daquele contrato em vez de somar toda a frota no card da perna).
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com 0 erros de compilação (`dotnet build src\FlightCareer.slnx`).
+
+## 2026-11-11 - HUD Overlay Minimalista, Sim Rate/Pausa, Pouso de Emergência e Clustering Tático no Mapa
+- **Refinamento de UX do HUD Overlay (`DebugOverlayWindow`)**:
+  - Limpeza completa do mapa tático: removidos badges textuais de altitude, velocidade e proa que acompanhavam a aeronave; exibição estrita da silhueta vetorial rotacionando com a proa (em voo) ou do círculo de radar ping (em solo).
+  - Remoção de labels de pista/waypoint em excesso, mantendo apenas a rota geodésica e nós limpos.
+  - O bloco de Flaps agora exibe estritamente `FLAPS` (removida a poluição de freio).
+  - Temperatura do óleo convertida e padronizada em Fahrenheit (`°F`), condizente com os mostradores analógicos dos painéis de aeronaves de aviação geral (Cessna 152/172).
+  - Desacoplado o arraste da janela: o arrasto é feito exclusivamente pelo cabeçalho do HUD, permitindo pan e zoom livres sobre o mapa tático via scroll e mouse sem mover a janela.
+- **Fases de Voo Encurtadas**:
+  - Títulos de fase encurtados para caber perfeitamente na interface: `"VOANDO"`, `"PREPARAÇÃO"`, `"INICIANDO (10s)"`, `"VOO ATIVO"`, `"POUSO (FPM)"`, `"FINALIZANDO (5s)"`, `"CANCELANDO (5s)"`.
+- **Contagem Fiel de Horas de Voo (Anti-Pausa e Aceleração de Simulação)**:
+  - Implementado acumulador de tempo de simulação efetivo (`_simulatedFlightTimeSeconds`), integrando delta de tempo ponderado pela taxa de aceleração (`SimulationRate`).
+  - Pausa de simulação (`IS SIMULATION PAUSED`) detectada via SimConnect, interrompendo a contagem de horas e evitando horas fakes ou desgaste indevido de TBO ao pausar o jogo.
+- **Detecção de Apagamento / Pane de Motor em Voo (100% RPM)**:
+  - Detectado desligamento/quebra de motor enquanto a aeronave está no ar (`_isAirborne && !IsEngineRunning`), aplicando degradação severa imediata (`EngineCondition <= 15%`) e disparando alarme crítico de pane.
+- **Pouso de Emergência Fora de Pista (Off-Field Landing)**:
+  - Validação da distância de pouso até a pista homologada mais próxima ($> 3.0\text{ NM}$).
+  - Pousos no mato/terreno não preparado não concluem nem pagam missões (carga fica retida no aeroporto mais próximo aguardando resgate).
+  - Aplicação de danos severos de terreno despreparado nos pneus ($-35\%$) e na fuselagem ($-20\%$).
+- **Clustering Dinâmico e Seleção de Missões pelo Mapa (`FlightMapControl` / `MissionsView`)**:
+  - Altura do viewport do mapa fixada em $340\text{px}$, eliminando variações de tamanho ao alternar contratos.
+  - Implementado agrupamento euclidiano de destinos de missões em bolhas numéricas ciano (`[ N ]`) quando a distância em pixels for $< 45\text{px}$.
+  - Clique no cluster aproxima a câmera (`Zoom += 2`); clique no nó individual seleciona a missão no quadro e desenha o arco geodésico curvo em 20 segmentos (Great-Circle via Haversine).
+  - Botão de mira flutuante (`🎯`) para recentralizar instantaneamente na base/aeronave do jogador.
+
+## 2026-11-11 - Mercado de Usados Avançado (Pre-Buy Inspection), Subsistema de Aviônicos e Venda de Aeronaves
+- **Novo Subsistema de Aviônicos & Elétrica (`AvionicsCondition`)**:
+  - Adicionado o quarto subsistema à entidade `PilotAircraft`: `AvionicsCondition`.
+  - Migração de schema dinâmica automática adicionada em `AppDbContext.EnsureSchemaUpdatedAsync()`.
+  - Simulação de desgaste de aviônicos em `WearAndFailureService` com base em horas de voo e estresse elétrico.
+  - Persistência obrigatória de todos os 4 subsistemas (`EngineCondition`, `TiresCondition`, `AirframeCondition`, `AvionicsCondition`) e `LandingsCount` em `FlightService.ProcessFlightFinishAsync`, `UpdateHangarStateAsync`, `CancelMonitoringAsync` e `HandleTotalLossAsync`.
+- **Reestruturação do Painel de Inspeção Técnica Pré-Compra (`MarketView`)**:
+  - Substituído o espaço vazio da coluna direita por um relatório modular completo de inspeção mecânica:
+    - Card de identificação com silhueta vetorial, prefixo, modelo e ano de fabricação.
+    - 4 diagnósticos modulares com barras de progresso cromáticas e métricas:
+      1. Célula / Fuselagem (TTAF e histórico de incidentes).
+      2. Grupo Motopropulsor (TSMO e TBO).
+      3. Trem de Pouso & Pneus (estado de rolagem e amortecedor).
+      4. Aviônicos & Elétrica (barramentos DC, COMM/NAV e bateria).
+    - Box financeiro com "Custo Estimado de Revisão Pós-Compra".
+    - Sticky Footer com botão de compra travado no rodapé (`[ COMPRAR POR $ XX,XXX.XX ]`).
+- **Catálogo de Ofertas e Filtros no Mercado**:
+  - Cards de aeronaves compactos de alta densidade visual com badge de categoria de motorização (`CategoryBadge`).
+  - Filtros rápidos horizontais em chips (`[TODAS]`, `[MONOMOTOR]`, `[BIMOTOR]`, `[TURBOÉLICE]`, `[ATÉ $100K]`).
+  - Dropdown de ordenação por Menor Preço, Maior Condição e Menos Horas (TTAF).
+- **Módulo de Venda de Aeronaves Próprias (Meus Anúncios)**:
+  - Controle de abas de 1º nível: `[ ✈️ MERCADO DE USADOS (COMPRAR) ]` e `[ 🏷️ MEUS ANÚNCIOS / VENDER AERONAVE ]`.
+  - Avaliação de frota pelo índice Bluebook aeronáutico com base no estado dos 4 subsistemas.
+  - Taxa de comissão da corretora de 8% e cálculo de valor líquido a receber.
+  - Comando atômico de venda: crédito no saldo do piloto, transação financeira de receita e remoção da aeronave do hangar.
+- **Padronização Monetária Global**:
+  - Moeda padronizada estritamente em Dólar Americano (`$`) em todas as threads da aplicação via `CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US")`.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com 0 erros de compilação (`dotnet build src\FlightCareer.slnx`).
+
+
+

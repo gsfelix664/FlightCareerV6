@@ -22,11 +22,13 @@ namespace FlightCareer.UI.ViewModels
             TargetEngineCondition = Aircraft.EngineCondition;
             TargetTiresCondition = Aircraft.TiresCondition;
             TargetAirframeCondition = Aircraft.AirframeCondition;
+            TargetAvionicsCondition = Aircraft.AvionicsCondition;
             TargetFuel = Aircraft.FuelAmount;
             
             OnPropertyChanged(nameof(RepairCostMotor));
             OnPropertyChanged(nameof(RepairCostPneus));
             OnPropertyChanged(nameof(RepairCostFuselagem));
+            OnPropertyChanged(nameof(RepairCostAvionicos));
             OnPropertyChanged(nameof(RefuelCost));
             OnPropertyChanged(nameof(TotalOperationCost));
             OnPropertyChanged(nameof(IsInsured));
@@ -68,15 +70,18 @@ namespace FlightCareer.UI.ViewModels
         public double EngineCondition => Aircraft.EngineCondition;
         public double TiresCondition => Aircraft.TiresCondition;
         public double AirframeCondition => Aircraft.AirframeCondition;
+        public double AvionicsCondition => Aircraft.AvionicsCondition;
 
         public SolidColorBrush EngineColor => GetConditionColor(EngineCondition);
         public SolidColorBrush TiresColor => GetConditionColor(TiresCondition);
         public SolidColorBrush AirframeColor => GetConditionColor(AirframeCondition);
+        public SolidColorBrush AvionicsColor => GetConditionColor(AvionicsCondition);
 
         // Sliders de Operação
         [ObservableProperty] private double _targetEngineCondition;
         [ObservableProperty] private double _targetTiresCondition;
         [ObservableProperty] private double _targetAirframeCondition;
+        [ObservableProperty] private double _targetAvionicsCondition;
         [ObservableProperty] private double _targetFuel;
 
         [ObservableProperty] private bool _isActive;
@@ -85,6 +90,7 @@ namespace FlightCareer.UI.ViewModels
         public double RepairCostMotor => MaintenanceService.CalculateRepairCost(PurchasePrice, "MOTOR", Math.Max(0, TargetEngineCondition - EngineCondition));
         public double RepairCostPneus => MaintenanceService.CalculateRepairCost(PurchasePrice, "PNEUS", Math.Max(0, TargetTiresCondition - TiresCondition));
         public double RepairCostFuselagem => MaintenanceService.CalculateRepairCost(PurchasePrice, "FUSELAGEM", Math.Max(0, TargetAirframeCondition - AirframeCondition));
+        public double RepairCostAvionicos => MaintenanceService.CalculateRepairCost(PurchasePrice, "AVIONICOS", Math.Max(0, TargetAvionicsCondition - AvionicsCondition));
         
         public double FuelPricePerGallon => FuelPriceService.GetCurrentPrice(FuelType);
         public double RefuelCost => Math.Max(0, TargetFuel - Aircraft.FuelAmount) * FuelPricePerGallon;
@@ -95,10 +101,10 @@ namespace FlightCareer.UI.ViewModels
         public double InsurancePayout => InsuranceService.CalculatePayout(PurchasePrice);
         public bool IsInsured => Aircraft.InsuranceExpirationDate > DateTime.Now;
 
-        public double TotalOperationCost => RepairCostMotor + RepairCostPneus + RepairCostFuselagem + RefuelCost;
+        public double TotalOperationCost => RepairCostMotor + RepairCostPneus + RepairCostFuselagem + RepairCostAvionicos + RefuelCost;
 
         // Status Tag
-        public bool IsCrashed => EngineCondition <= 0 && TiresCondition <= 0 && AirframeCondition <= 0;
+        public bool IsCrashed => EngineCondition <= 0 && TiresCondition <= 0 && AirframeCondition <= 0 && AvionicsCondition <= 0;
 
         public string StatusText
         {
@@ -134,6 +140,7 @@ namespace FlightCareer.UI.ViewModels
         partial void OnTargetEngineConditionChanged(double value) { if (value < EngineCondition) TargetEngineCondition = EngineCondition; OnPropertyChanged(nameof(RepairCostMotor)); OnPropertyChanged(nameof(TotalOperationCost)); }
         partial void OnTargetTiresConditionChanged(double value) { if (value < TiresCondition) TargetTiresCondition = TiresCondition; OnPropertyChanged(nameof(RepairCostPneus)); OnPropertyChanged(nameof(TotalOperationCost)); }
         partial void OnTargetAirframeConditionChanged(double value) { if (value < AirframeCondition) TargetAirframeCondition = AirframeCondition; OnPropertyChanged(nameof(RepairCostFuselagem)); OnPropertyChanged(nameof(TotalOperationCost)); }
+        partial void OnTargetAvionicsConditionChanged(double value) { if (value < AvionicsCondition) TargetAvionicsCondition = AvionicsCondition; OnPropertyChanged(nameof(RepairCostAvionicos)); OnPropertyChanged(nameof(TotalOperationCost)); }
         partial void OnTargetFuelChanged(double value) { if (value < Aircraft.FuelAmount) TargetFuel = Aircraft.FuelAmount; OnPropertyChanged(nameof(RefuelCost)); OnPropertyChanged(nameof(TotalOperationCost)); }
 
         public void Refresh()

@@ -12,7 +12,7 @@
         FontFamily="Inter, Segoe UI, sans-serif">
 
     <Window.Resources>
-        <!-- Estilo BotÃ£o Menu -->
+        <!-- Estilo Botão Menu -->
         <Style x:Key="NavButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#94A3B8"/>
@@ -149,7 +149,7 @@
             </Setter>
         </Style>
 
-        <!-- Estilo Tabela Densa de MissÃµes (Dark Mode Avionics) -->
+        <!-- Estilo Tabela Densa de Missões (Dark Mode Avionics) -->
         <Style x:Key="MissionsTableDataGrid" TargetType="DataGrid" BasedOn="{StaticResource ModernDataGrid}">
             <Setter Property="RowHeight" Value="50"/>
             <Setter Property="FontSize" Value="13.5"/>
@@ -194,7 +194,7 @@
             </Setter>
         </Style>
 
-        <!-- Estilos de CabeÃ§alho Alinhados para a Tabela de MissÃµes -->
+        <!-- Estilos de Cabeçalho Alinhados para a Tabela de Missões -->
         <Style x:Key="RightAlignedHeader" TargetType="DataGridColumnHeader">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#8B9BAE"/>
@@ -244,13 +244,13 @@
                             <TextBlock Text="{Binding PilotName}" FontSize="17" FontWeight="Bold" Foreground="White"/>
                             <TextBlock Text="{Binding PilotCompanyName}" FontSize="13.5" Foreground="{StaticResource PrimaryBlue}" FontWeight="SemiBold" Margin="0,2,0,0"/>
 
-                            <!-- Badge de HomologaÃ§Ã£o da Empresa com AÃ§Ã£o de EvoluÃ§Ã£o -->
+                            <!-- Badge de Homologação da Empresa com Ação de Evolução -->
                             <Button Command="{Binding PromoteCompanyTierCommand}" Cursor="Hand" Background="Transparent" BorderThickness="0" Padding="0" Margin="0,8,0,8" HorizontalAlignment="Left" ToolTip="Clique para ver requisitos e categoria operacional da empresa">
                                 <Border Background="#161B22" BorderBrush="{Binding CompanyTierColor}" BorderThickness="1" CornerRadius="6" Padding="10,4">
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Ellipse Width="8" Height="8" Fill="{Binding CompanyTierColor}" Margin="0,0,6,0"/>
-                                        <TextBlock Text="{Binding CompanyTierBadge}" FontSize="11.5" FontWeight="Bold" Foreground="White"/>
-                                        <TextBlock Text=" â®µ" FontSize="11.5" Foreground="{Binding CompanyTierColor}" FontWeight="Bold" Margin="4,0,0,0"/>
+                                        <TextBlock Text="{Binding CompanyTierBadge}" FontSize="11.5" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                                        <Path Data="{StaticResource IconChevronDown}" Fill="{Binding CompanyTierColor}" Width="9" Height="9" Stretch="Uniform" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </Border>
                             </Button>
@@ -267,25 +267,69 @@
 
                 <!-- Navigation -->
                 <StackPanel Grid.Row="1">
-                    <TextBlock Text="OPERAÃ‡Ã•ES" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,0,0,10"/>
-                    <Button Content="îœ¡  Quadro de MissÃµes" Style="{StaticResource NavButton}" Command="{Binding ShowMissionsCommand}"/>
-                    <Button Content="îœ–  Briefing de Voo" Style="{StaticResource NavButton}" Command="{Binding ShowBriefingCommand}"/>
+                    <TextBlock Text="OPERAÇÕES" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,0,0,10"/>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowMissionsCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconMissions}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Quadro de Missões" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowBriefingCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconBriefing}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Briefing de Voo" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                     
                     <TextBlock Text="CARREIRA" FontSize="11.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" Margin="15,25,0,10"/>
-                    <Button Content="î´  Mercado de Aeronaves" Style="{StaticResource NavButton}" Command="{Binding ShowMarketCommand}"/>
-                    <Button Content="î»  Hangar / Frota" Style="{StaticResource NavButton}" Command="{Binding ShowHangarCommand}"/>
-                    <Button Content="î‘  Financeiro" Style="{StaticResource NavButton}" Command="{Binding ShowFinanceCommand}"/>
-                    <Button Content="î®  Logs de Voo (Blackbox)" Style="{StaticResource NavButton}" Command="{Binding ShowFlightLogsCommand}"/>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowMarketCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconMarket}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Mercado de Aeronaves" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowHangarCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconHangar}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Hangar / Frota" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowFinanceCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconFinance}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Financeiro" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowFlightLogsCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconBlackbox}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Logs de Voo (Blackbox)" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
 
                     <TextBlock Text="FERRAMENTAS &amp; DEBUG" FontSize="11.5" FontWeight="Bold" Foreground="#64748B" Margin="15,25,0,10"/>
-                    <Button Content="î¨  Debug SimConnect" Style="{StaticResource NavButton}" Command="{Binding ShowDebugCommand}" Foreground="#94A3B8"/>
-                    <Button Content="ðŸ–¥ï¸  HUD Overlay (MSFS)" Style="{StaticResource NavButton}" Command="{Binding ShowOverlayCommand}" Foreground="#00E5FF"/>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowDebugCommand}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconDebug}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Debug SimConnect" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource NavButton}" Command="{Binding ShowOverlayCommand}" Foreground="#00E5FF">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconOverlay}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="HUD OVERLAY (MSFS)" VerticalAlignment="Center" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <!-- Footer -->
                 <StackPanel Grid.Row="2" Margin="10,0,10,20">
-                    <Button Content="îœª  Sair do Perfil" Style="{StaticResource NavButton}" 
-                            Foreground="#94A3B8" Click="Button_Click"/>
+                    <Button Style="{StaticResource NavButton}" Foreground="#94A3B8" Click="Button_Click">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconLogout}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="14" Height="14" Stretch="Uniform" Margin="0,0,12,0"/>
+                            <TextBlock Text="Sair do Perfil" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
@@ -305,12 +349,13 @@
                         <TextBlock Text="{Binding SimStatusText}" FontSize="12.5" FontWeight="Bold" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
                     </StackPanel>
 
-                    <!-- BotÃ£o de Acesso RÃ¡pido ao HUD Overlay Flutuante -->
+                    <!-- Botão de Acesso Rápido ao HUD Overlay Flutuante -->
                     <Button HorizontalAlignment="Right" Command="{Binding ShowOverlayCommand}" 
                             Background="#141C24" BorderBrush="#00E5FF" BorderThickness="1.2" 
                             Padding="14,6" Cursor="Hand">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="ðŸ–¥ï¸  HUD OVERLAY (MSFS)" FontSize="12" FontWeight="Bold" Foreground="#00E5FF"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IconOverlay}" Fill="#00E5FF" Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="HUD OVERLAY (MSFS)" FontSize="12" FontWeight="Bold" Foreground="#00E5FF" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>

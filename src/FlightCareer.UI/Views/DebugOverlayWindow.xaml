@@ -15,8 +15,7 @@
         Background="Transparent"
         ShowInTaskbar="True"
         WindowStartupLocation="Manual"
-        Left="40" Top="80"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        Left="40" Top="80">
 
     <Window.Resources>
         <!-- Estilo dos Rótulos Mini -->
@@ -43,7 +42,7 @@
     </Window.Resources>
 
     <!-- CONTAINER PRINCIPAL GLASS DARK HUD -->
-    <Border Background="#E6070B12" BorderBrush="#00E5FF" BorderThickness="1.2" CornerRadius="8" Margin="4">
+    <Border Background="#E6070B12" BorderBrush="#00E5FF" BorderThickness="1.2" CornerRadius="8" Margin="4" MouseLeftButtonDown="MainBorder_MouseLeftButtonDown">
         <Border.Effect>
             <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="4" Opacity="0.75"/>
         </Border.Effect>
@@ -55,7 +54,7 @@
             </Grid.RowDefinitions>
 
             <!-- 1. BARRA SUPERIOR (HEADER & CONTROLES) -->
-            <Grid Grid.Row="0" Margin="0,0,0,6">
+            <Grid Grid.Row="0" Margin="0,0,0,6" Background="Transparent" MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
@@ -273,15 +272,11 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- FLAPS / PB -->
+                        <!-- FLAPS -->
                         <Border Grid.Column="3" Style="{StaticResource TileCard}" Margin="2,0,0,0">
                             <StackPanel>
-                                <TextBlock Text="FLAP / FREIO" Style="{StaticResource MetricLabel}"/>
-                                <TextBlock Style="{StaticResource MetricValue}" FontSize="11">
-                                    <Run Text="{Binding FlapsPercent, StringFormat={}{0:F0}%}"/>
-                                    <Run Text=" • "/>
-                                    <Run Text="{Binding ParkingBrakeText}" Foreground="{Binding ParkingBrakeColor}"/>
-                                </TextBlock>
+                                <TextBlock Text="FLAPS" Style="{StaticResource MetricLabel}"/>
+                                <TextBlock Text="{Binding FlapsPercent, StringFormat={}{0:F0}%}" Style="{StaticResource MetricValue}" Foreground="#00E5FF"/>
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -322,8 +317,8 @@
 
                                 <!-- Temp Óleo -->
                                 <StackPanel Grid.Column="3">
-                                    <TextBlock Text="ÓLEO (°C)" Style="{StaticResource MetricLabel}"/>
-                                    <TextBlock Text="{Binding EngineOilTemp, StringFormat={}{0:F0}°}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="{Binding EngineOilTempColor}"/>
+                                    <TextBlock Text="ÓLEO (°F)" Style="{StaticResource MetricLabel}"/>
+                                    <TextBlock Text="{Binding EngineOilTempF, StringFormat={}{0:F0}°F}" Style="{StaticResource MetricValue}" FontSize="12" Foreground="{Binding EngineOilTempColor}"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>

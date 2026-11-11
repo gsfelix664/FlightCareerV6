@@ -321,21 +321,37 @@ namespace FlightCareer.UI.ViewModels
                     .ToList();
 
                 string currentHop = originIcao;
+                int safetyGuard = 0;
 
-                while (remainingCrossMissions.Any())
+                while (remainingCrossMissions.Any() && safetyGuard++ < 50)
                 {
-                    // Encontrar missão que decola do aeroporto atual
+                    // 1. Encontrar missão que decola do aeroporto atual
                     var nextMission = remainingCrossMissions.FirstOrDefault(m => m.OriginICAO == currentHop && m.DestinationICAO != currentHop);
 
+                    if (nextMission == null && currentHop != originIcao)
+                    {
+                        // 2. Se currentHop != originIcao, verificar se há outra missão para o mesmo destino
+                        var sameDestMission = remainingCrossMissions.FirstOrDefault(m => m.DestinationICAO == currentHop);
+                        if (sameDestMission != null)
+                        {
+                            legDefinitions.Add((originIcao, currentHop, false, sameDestMission));
+                            remainingCrossMissions.Remove(sameDestMission);
+                            continue;
+                        }
+
+                        // 3. Se não, procurar missão carregada na base
+                        nextMission = remainingCrossMissions.FirstOrDefault(m => m.OriginICAO == originIcao);
+                    }
+
+                    // 4. Fallback se ainda for nulo
                     if (nextMission == null)
                     {
-                        // Se não há missão saindo diretamente de currentHop, pegar a primeira disponível
                         nextMission = remainingCrossMissions.First();
                     }
 
                     string nextDest = nextMission.DestinationICAO;
                     legDefinitions.Add((currentHop, nextDest, false, nextMission));
-                    remainingCrossMissions.RemoveAll(m => (m.OriginICAO == currentHop && m.DestinationICAO == nextDest));
+                    remainingCrossMissions.Remove(nextMission);
 
                     currentHop = nextDest;
                 }
@@ -375,7 +391,10 @@ namespace FlightCareer.UI.ViewModels
                     }
                     if (!def.isTgl)
                     {
-                        summaryHops.Add(def.to);
+                        if (!summaryHops.Any() || summaryHops.Last() != def.to)
+                        {
+                            summaryHops.Add(def.to);
+                        }
                     }
 
                     // Ações e carga nesta perna
@@ -391,20 +410,24 @@ namespace FlightCareer.UI.ViewModels
                     }
                     else
                     {
-                        // Entregas que acontecem especificamente neste destino
-                        var deliveringMissions = AcceptedMissions.Where(m => m.DestinationICAO == def.to && !localMissionsAtOrigin.Contains(m)).ToList();
-                        int deliveringPax = deliveringMissions.Sum(m => m.PassengerCount);
-                        double deliveringCargo = deliveringMissions.Sum(m => m.CargoWeightLbs + m.LuggageWeightLbs);
+                        if (def.mission != null)
+                        {
+                            legPax = def.mission.PassengerCount;
+                            legCargo = def.mission.CargoWeightLbs + def.mission.LuggageWeightLbs;
+                        }
+                        else
+                        {
+                            var deliveringMissions = AcceptedMissions.Where(m => m.DestinationICAO == def.to && !localMissionsAtOrigin.Contains(m)).ToList();
+                            legPax = deliveringMissions.Sum(m => m.PassengerCount);
+                            legCargo = deliveringMissions.Sum(m => m.CargoWeightLbs + m.LuggageWeightLbs);
+                        }
 
-                        legPax = AcceptedMissions.Where(m => !localMissionsAtOrigin.Contains(m)).Sum(m => m.PassengerCount);
-                        legCargo = AcceptedMissions.Where(m => !localMissionsAtOrigin.Contains(m)).Sum(m => m.CargoWeightLbs + m.LuggageWeightLbs);
-
-                        if (deliveringPax > 0 && deliveringCargo > 0)
-                            actionText = $"↳ Desembarque: {deliveringPax} PAX e {deliveringCargo:N0} lbs carga em {def.to}";
-                        else if (deliveringPax > 0)
-                            actionText = $"↳ Desembarque: {deliveringPax} PAX em {def.to}";
-                        else if (deliveringCargo > 0)
-                            actionText = $"↳ Entrega: {deliveringCargo:N0} lbs de carga em {def.to}";
+                        if (legPax > 0 && legCargo > 0)
+                            actionText = $"↳ Desembarque: {legPax} PAX e {legCargo:N0} lbs carga em {def.to}";
+                        else if (legPax > 0)
+                            actionText = $"↳ Desembarque: {legPax} PAX em {def.to}";
+                        else if (legCargo > 0)
+                            actionText = $"↳ Entrega: {legCargo:N0} lbs de carga em {def.to}";
                         else
                             actionText = $"↳ Escala técnica / Trânsito em {def.to}";
                     }
@@ -428,6 +451,9 @@ namespace FlightCareer.UI.ViewModels
                         LegNumber = legIndex++,
                         OriginICAO = def.from,
                         DestinationICAO = def.to,
+                        AssociatedMission = def.mission,
+                        MissionTitle = def.mission?.Title ?? (def.isTgl ? "Instrução Local / TGL" : "Escala Técnica / Translado"),
+                        RewardMoney = (decimal)(def.mission?.RewardMoney ?? 0),
                         OriginMsfsIdent = aptOrigin?.MsfsIdent ?? def.from,
                         DestinationMsfsIdent = aptDest?.MsfsIdent ?? def.to,
                         OriginLat = aptOrigin?.Latitude ?? 0,

@@ -11,16 +11,30 @@
     </UserControl.Resources>
     <Border Background="#0B0F14" CornerRadius="10" ClipToBounds="True" BorderBrush="#263545" BorderThickness="1">
         <Grid>
-            <gmap:GMapControl x:Name="MainMap" MouseRightButtonDown="MainMap_MouseRightButtonDown"/>
+            <!-- Mapa Cartográfico Dark Matter / Esri Avionics -->
+            <gmap:GMapControl x:Name="MainMap"/>
 
             <!-- Atribuição Obrigatória (ESRI/ArcGIS) -->
             <Border VerticalAlignment="Bottom" HorizontalAlignment="Left" 
                     Background="#CC0B0F14" Padding="6,3" Margin="5" CornerRadius="3" IsHitTestVisible="False">
                 <TextBlock Text="© Esri, OpenStreetMap contributors" FontSize="10" Foreground="#8B9BAE" Opacity="0.7"/>
             </Border>
+
+            <!-- Botão de Atalho Tático: Foco na Base / Aeronave -->
+            <Button Click="BtnRecenter_Click" ToolTip="Centralizar na Base / Aeronave"
+                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                    Width="28" Height="28" Background="#CC0B0F14" BorderBrush="#00E5FF" BorderThickness="1" Cursor="Hand">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+                            <TextBlock Text="🎯" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
             
             <!-- Overlay para informações de distância dos waypoints -->
-            <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" 
+            <Border VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10,42,10,10" 
                     Background="#E6141C24" CornerRadius="6" Padding="10,5" BorderBrush="#263545" BorderThickness="1" IsHitTestVisible="False"
                     Visibility="{Binding ShowWaypointsOverlay, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisConverter}}">
                 <StackPanel>

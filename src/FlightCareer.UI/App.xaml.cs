@@ -22,10 +22,12 @@ namespace FlightCareer.UI
 
         protected override async void OnStartup(StartupEventArgs e)
         {
-            // Forçar cultura en-US para garantir que valores monetários apareçam como $ (USD)
+            // Forçar cultura en-US para garantir que valores monetários apareçam como $ (USD) mundialmente
             var culture = new System.Globalization.CultureInfo("en-US");
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
             FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(
                 System.Windows.Markup.XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
 

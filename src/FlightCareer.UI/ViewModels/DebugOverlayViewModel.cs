@@ -73,6 +73,8 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _engineCHT = 0;
         [ObservableProperty] private string _engineChtColor = "#F0F4F8";
         [ObservableProperty] private double _engineOilTemp = 0;
+        [ObservableProperty] private double _engineOilTempF = 0;
+        [ObservableProperty] private string _engineOilTempLabel = "ÓLEO (°F)";
         [ObservableProperty] private string _engineOilTempColor = "#F0F4F8";
         [ObservableProperty] private double _engineOilPressure = 0;
         [ObservableProperty] private string _engineOilPressureColor = "#F0F4F8";
@@ -231,7 +233,8 @@ namespace FlightCareer.UI.ViewModels
                 EngineChtColor = EngineCHT > 230 ? "#FF5252" : (EngineCHT > 210 ? "#FFB300" : "#F0F4F8");
 
                 EngineOilTemp = Math.Round(data.EngineOilTemp, 1);
-                EngineOilTempColor = EngineOilTemp > 110 ? "#FF5252" : (EngineOilTemp > 100 ? "#FFB300" : "#F0F4F8");
+                EngineOilTempF = Math.Round(data.EngineOilTempF, 1);
+                EngineOilTempColor = EngineOilTempF > 245 ? "#FF5252" : (EngineOilTempF > 212 ? "#FFB300" : "#F0F4F8");
 
                 EngineOilPressure = Math.Round(data.EngineOilPressure, 1);
                 EngineOilPressureColor = (IsEngineRunning && EngineOilPressure < 20) ? "#FF5252" : "#F0F4F8";
@@ -304,9 +307,9 @@ namespace FlightCareer.UI.ViewModels
 
         private void UpdateFlightPhaseColor()
         {
-            if (FlightPhase.Contains("VOANDO") || FlightPhase.Contains("NO AR")) FlightPhaseColor = "#00E676";
-            else if (FlightPhase.Contains("POUSO") || FlightPhase.Contains("ENCERRANDO")) FlightPhaseColor = "#00E5FF";
-            else if (FlightPhase.Contains("CANCELAD")) FlightPhaseColor = "#FFB300";
+            if (FlightPhase.Contains("VOANDO") || FlightPhase.Contains("VOO ATIVO") || FlightPhase.Contains("NO AR")) FlightPhaseColor = "#00E676";
+            else if (FlightPhase.Contains("POUSO") || FlightPhase.Contains("FINALIZANDO") || FlightPhase.Contains("ENCERRANDO")) FlightPhaseColor = "#00E5FF";
+            else if (FlightPhase.Contains("CANCEL")) FlightPhaseColor = "#FFB300";
             else FlightPhaseColor = "#8B9BAE";
         }
 

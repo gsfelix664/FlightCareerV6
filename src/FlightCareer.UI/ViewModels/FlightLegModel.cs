@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using FlightCareer.Domain.Entities;
 
 namespace FlightCareer.UI.ViewModels
 {
@@ -24,6 +25,13 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private bool _isOverweight;
         [ObservableProperty] private string _actionSummary = string.Empty;
         [ObservableProperty] private string _eteFormatted = "--";
+
+        [ObservableProperty] private Mission? _associatedMission;
+        [ObservableProperty] private string _missionTitle = string.Empty;
+        [ObservableProperty] private decimal _rewardMoney;
+
+        public bool HasAssociatedMission => AssociatedMission != null;
+        partial void OnAssociatedMissionChanged(Mission? value) => OnPropertyChanged(nameof(HasAssociatedMission));
 
         public string MtowBarColor => IsOverweight ? "#FF3D00" : (MtowPercent > 85 ? "#FFB300" : "#00E676");
         public string DestinationDisplay
