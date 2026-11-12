@@ -78,11 +78,11 @@ namespace FlightCareer.UI.Services
 
         private void OnAircraftFailureTriggered(FailureRecord failure)
         {
-            if (failure.Type == FailureType.EngineIFSD || failure.Type == FailureType.CompressorStall)
+            if (failure.Type == FailureType.EngineIFSD || failure.Type == FailureType.EngineFire)
             {
                 if (_aircraft != null)
                 {
-                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 10.0);
+                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, failure.Type == FailureType.EngineFire ? 0.0 : 10.0);
                 }
                 _engineFailureReportedInFlight = true;
             }

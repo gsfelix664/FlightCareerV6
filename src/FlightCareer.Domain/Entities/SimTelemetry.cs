@@ -48,12 +48,13 @@ namespace FlightCareer.Domain.Entities
         // Alertas de Voo (1 double)
         public double OverspeedWarning;   // 1.0 = true
 
-        // Motor e Propulsão (7 doubles)
+        // Motor e Propulsão (8 doubles)
         public double EngineRPM;
         public double EngineCHT;
         public double EngineOilTemp;
         public double EngineOilPressure;
         public double TurboITT;
+        public double TurboTorque; // TURB ENG MAX TORQUE PERCENT:1 (em %)
         public double EngineN1;
         public double EngineFailed; // 1.0 = falha mecânica real reportada pelo MSFS
 
@@ -64,15 +65,20 @@ namespace FlightCareer.Domain.Entities
         public double AmbientWindVelocity;   // Knots
         public double AmbientWindDirection;  // Degrees
 
-        // Dinâmica Lateral e Comandos do Piloto (4 doubles)
+        // Dinâmica Lateral e Comandos do Piloto (7 doubles)
         public double VelocityBodyX;         // ft/sec (Velocidade lateral do corpo no toque/rolagem)
         public double ThrottlePercent;       // 0 a 100%
         public double MixturePercent;        // 0 a 100%
         public double EngAntiIce;            // 1=On (Carb Heat / Anti-Ice), 0=Off
+        public double FuelPumpSwitch;        // GENERAL ENG FUEL PUMP SWITCH:1 (1=On, 0=Off)
+        public double StarterActive;         // GENERAL ENG STARTER:1 (1=Active, 0=Off)
+        public double ConditionLever;        // TURB ENG CONDITION LEVER POSITION:1 (0 a 100%)
 
-        // Gelo e Pressurização (3 doubles)
+        // Gelo e Pressurização (5 doubles)
         public double StructuralIcePct;      // 0 a 100%
         public double PitotIcePct;           // 0 a 100%
+        public double CarbHeatAvailable;     // CARB HEAT AVAILABLE (1=True, 0=False)
+        public double CarbTemperature;       // RECIP CARBURETOR TEMPERATURE:1 (Celsius)
         public double CabinAltitude;         // Feet
 
         // Simulação e Tempo (1 double)
@@ -94,12 +100,21 @@ namespace FlightCareer.Domain.Entities
         public bool IsWetOrContaminatedSurface => SurfaceCondition >= 1.0;
         public bool IsPrecipitating => AmbientPrecipState > 0.5;
         public bool IsCarbHeatOn => EngAntiIce > 0.5;
+        public bool HasCarbHeat => CarbHeatAvailable > 0.5;
         public double CrosswindComponentKnots
         {
             get
             {
                 double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
                 return Math.Abs(AmbientWindVelocity * Math.Sin(angleDiff));
+            }
+        }
+        public double TailwindComponentKnots
+        {
+            get
+            {
+                double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
+                return -AmbientWindVelocity * Math.Cos(angleDiff);
             }
         }
         public double CrashSequence => 0.0;

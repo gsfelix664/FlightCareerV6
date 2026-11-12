@@ -127,12 +127,13 @@ namespace FlightCareer.UI.Services
                 // 7. Alertas (1 double)
                 AddToDef("OVERSPEED WARNING", "Bool");
 
-                // 8. Motor (7 doubles)
+                // 8. Motor (8 doubles)
                 AddToDef("GENERAL ENG RPM:1", "rpm");
                 AddToDef("RECIP ENG CYLINDER HEAD TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL PRESSURE:1", "psi");
                 AddToDef("TURB ENG ITT:1", "Celsius");
+                AddToDef("TURB ENG MAX TORQUE PERCENT:1", "Percent");
                 AddToDef("TURB ENG N1:1", "Percent");
                 AddToDef("ENG FAILED:1", "Bool");
 
@@ -143,15 +144,20 @@ namespace FlightCareer.UI.Services
                 AddToDef("AMBIENT WIND VELOCITY", "Knots");
                 AddToDef("AMBIENT WIND DIRECTION", "Degrees");
 
-                // 10. Dinâmica Lateral e Comandos do Piloto (4 doubles)
+                // 10. Dinâmica Lateral e Comandos do Piloto (7 doubles)
                 AddToDef("VELOCITY BODY X", "Feet per second");
                 AddToDef("GENERAL ENG THROTTLE LEVER POSITION:1", "Percent");
                 AddToDef("GENERAL ENG MIXTURE LEVER POSITION:1", "Percent");
                 AddToDef("ENG ANTI ICE:1", "Bool");
+                AddToDef("GENERAL ENG FUEL PUMP SWITCH:1", "Bool");
+                AddToDef("GENERAL ENG STARTER:1", "Bool");
+                AddToDef("TURB ENG CONDITION LEVER POSITION:1", "Percent");
 
-                // 11. Gelo e Pressurização (3 doubles)
+                // 11. Gelo e Pressurização (5 doubles)
                 AddToDef("STRUCTURAL ICE PCT", "Percent");
                 AddToDef("PITOT ICE PCT", "Percent");
+                AddToDef("CARB HEAT AVAILABLE", "Bool");
+                AddToDef("RECIP CARBURETOR TEMPERATURE:1", "Celsius");
                 AddToDef("PRESSURIZATION CABIN ALTITUDE", "Feet");
 
                 // 12. Simulação e Tempo (1 double)
