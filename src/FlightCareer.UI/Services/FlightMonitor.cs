@@ -499,6 +499,12 @@ namespace FlightCareer.UI.Services
                     dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                     dbAircraft.TiresCondition = _aircraft.TiresCondition;
                     dbAircraft.AvionicsCondition = _aircraft.AvionicsCondition;
+                    dbAircraft.MagnetosCondition = _aircraft.MagnetosCondition;
+                    dbAircraft.OilCondition = _aircraft.OilCondition;
+                    dbAircraft.HoursUntilNext50hInspection = _aircraft.HoursUntilNext50hInspection;
+                    dbAircraft.HoursUntilNext100hInspection = _aircraft.HoursUntilNext100hInspection;
+                    dbAircraft.HoursUntilNext500hInspection = _aircraft.HoursUntilNext500hInspection;
+                    dbAircraft.EngineTboRemainingHours = _aircraft.EngineTboRemainingHours;
                     dbAircraft.LandingsCount = _aircraft.LandingsCount;
 
                     // Atualizar também o objeto local para garantir sincronia
@@ -655,7 +661,9 @@ namespace FlightCareer.UI.Services
                 _aircraft.LandingsCount,
                 isOffFieldLanding,
                 nearestDistance,
-                flightDurationMinutes
+                flightDurationMinutes,
+                _aircraft.MagnetosCondition,
+                _aircraft.OilCondition
             );
 
             OnFlightFinished?.Invoke(outcome);

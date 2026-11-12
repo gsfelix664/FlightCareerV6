@@ -210,6 +210,7 @@ namespace FlightCareer.UI.ViewModels
             pilot.Balance -= cost;
             var aircraft = SelectedAircraft.Aircraft;
             aircraft.HoursUntilNext50hInspection = 50.0;
+            aircraft.OilCondition = 100.0;
 
             if (aircraft.IsInterdicted && aircraft.InterdictionReason.Contains("50") && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
             {
@@ -258,6 +259,7 @@ namespace FlightCareer.UI.ViewModels
             var aircraft = SelectedAircraft.Aircraft;
             aircraft.HoursUntilNext100hInspection = 100.0;
             aircraft.HoursUntilNext50hInspection = 50.0;
+            aircraft.OilCondition = 100.0;
 
             if (aircraft.IsInterdicted && aircraft.EngineTboRemainingHours > 0)
             {
@@ -271,6 +273,54 @@ namespace FlightCareer.UI.ViewModels
             SelectedAircraft.ResetOperations();
             SelectedAircraft.Refresh();
             MessageBox.Show("Inspeção regulatória de 100 horas concluída com sucesso! Aeronave liberada para voo.");
+        }
+
+        [RelayCommand]
+        private async Task Perform500hInspection()
+        {
+            if (SelectedAircraft == null) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Aeronave destruída!");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = SelectedAircraft.Cost500hInspection;
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! A revisão de 500h (Magnetos & Ignição) custa {cost:C2}.");
+                return;
+            }
+
+            var result = MessageBox.Show($"Deseja realizar a Revisão Preventiva de 500 Horas (Magnetos e Ignição) para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso restaurará a condição dos magnetos para 100% e zerará a contagem da inspeção de 500h.",
+                "Inspeção de 500 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var aircraft = SelectedAircraft.Aircraft;
+            aircraft.HoursUntilNext500hInspection = 500.0;
+            aircraft.MagnetosCondition = 100.0;
+
+            if (aircraft.IsInterdicted && aircraft.InterdictionReason.Contains("500") && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
+            {
+                aircraft.IsInterdicted = false;
+                aircraft.InterdictionReason = string.Empty;
+            }
+
+            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO 500H / MAGNETOS: {aircraft.Prefix}", cost));
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.ResetOperations();
+            SelectedAircraft.Refresh();
+            MessageBox.Show("Inspeção de 500 horas / revisão de magnetos e ignição concluída com sucesso!");
         }
 
         [RelayCommand]
@@ -306,6 +356,7 @@ namespace FlightCareer.UI.ViewModels
             var aircraft = SelectedAircraft.Aircraft;
             aircraft.EngineTboRemainingHours = 1800.0;
             aircraft.EngineCondition = 100.0;
+            aircraft.OilCondition = 100.0;
 
             if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0)
             {

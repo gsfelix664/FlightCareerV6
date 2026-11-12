@@ -19,7 +19,8 @@ namespace FlightCareer.UI.Services
         SparkPlugFouling,      // Encharcamento de velas por táxi prolongado com mistura rica
         CompressorStall,       // Stall de compressor por avanço brusco de potência com vento cruzado
         GearCollapse,          // Colapso estrutural de perna/tesoura de trem por carga lateral no toque
-        CabinDepressurization  // Falha de pressurização / outflow valve em altitude
+        CabinDepressurization, // Falha de pressurização / outflow valve em altitude
+        MagnetoFailure         // Falha de ignição / pane em magneto (Esquerdo ou Direito)
     }
 
     public class FailureRecord
@@ -45,6 +46,7 @@ namespace FlightCareer.UI.Services
         private double _foulingAccumulator = 0;
         private double _lastThrottle = 0;
         private DateTime _lastThrottleCheck = DateTime.MinValue;
+        private double _breakCheckTimerSeconds = 0;
 
         public event Action<FailureRecord>? OnFailureTriggered;
 
@@ -65,6 +67,7 @@ namespace FlightCareer.UI.Services
             _foulingAccumulator = 0;
             _lastThrottle = 0;
             _lastThrottleCheck = DateTime.MinValue;
+            _breakCheckTimerSeconds = 0;
         }
 
         /// <summary>
@@ -119,50 +122,99 @@ namespace FlightCareer.UI.Services
             deltaTimeHours = Math.Clamp(deltaTimeHours, 0.0, 0.005);
             if (deltaTimeHours <= 0) return;
 
-            // 1. Desgaste do MOTOR
-            double engineWearRate;
+            // 1. Desgaste do MOTOR (Taxa Base Green Arc + Fatores de Sobrecarga MSFS 2024)
             bool isJetOrTurbo = data.EngineType == 1.0 || data.EngineType == 5.0;
-            double normalLifeHours = isJetOrTurbo ? 1000 : 100;
-
-            engineWearRate = 100.0 / normalLifeHours;
+            double normalLifeHours = isJetOrTurbo ? 3500.0 : 1800.0;
+            double engineWearRate = 100.0 / normalLifeHours;
 
             if (isJetOrTurbo)
             {
-                if (data.TurboITT > 800)
+                if (data.TurboITT > 800.0)
                 {
-                    double ittExcess = data.TurboITT - 800;
+                    double ittExcess = data.TurboITT - 800.0;
                     engineWearRate += ittExcess * 2.0;
                 }
 
-                if (data.EngineN1 > 100)
+                if (data.EngineN1 > 100.0)
                 {
-                    engineWearRate += (data.EngineN1 - 100) * 10.0;
+                    engineWearRate += (data.EngineN1 - 100.0) * 10.0;
                 }
             }
             else
             {
-                if (data.MaxRPM > 0 && data.EngineRPM > (data.MaxRPM * 1.02))
+                // Over-RPM (Sobretaxa quadrática por excesso de giro)
+                if (data.MaxRPM > 0 && data.EngineRPM > data.MaxRPM)
                 {
-                    engineWearRate += 150.0;
+                    double rpmExcess = data.EngineRPM - data.MaxRPM;
+                    double rpmStress = 50.0 * Math.Pow(rpmExcess / 100.0, 2);
+                    engineWearRate += rpmStress;
                 }
 
-                if (data.EngineCHT > 230)
+                // CHT Overheat (Até 230°C: normal | 230-260°C: 2.5x | >260°C: severo 75 + 10x)
+                if (data.EngineCHT > 260.0)
                 {
-                    engineWearRate += (data.EngineCHT - 230) * 5.0;
+                    engineWearRate += 75.0 + (data.EngineCHT - 260.0) * 10.0;
+                }
+                else if (data.EngineCHT > 230.0)
+                {
+                    engineWearRate += (data.EngineCHT - 230.0) * 2.5;
                 }
 
-                if (data.IsEngineRunning && data.EngineOilPressure < 20)
+                // Baixa Pressão de Óleo (Atrito seco severo quando motor ligado e pressão < 20 PSI)
+                if (data.IsEngineRunning && data.EngineOilPressure < 20.0)
                 {
-                    engineWearRate += 500.0;
+                    double dryFrictionStress = 300.0 * ((20.0 - Math.Max(0, data.EngineOilPressure)) / 20.0);
+                    engineWearRate += dryFrictionStress;
                 }
 
-                if (data.EngineOilTemp > 110)
+                // Alta Temperatura de Óleo (> 110°C)
+                if (data.EngineOilTemp > 110.0)
                 {
-                    engineWearRate += (data.EngineOilTemp - 110) * 10.0;
+                    engineWearRate += (data.EngineOilTemp - 110.0) * 5.0;
                 }
             }
 
             aircraft.EngineCondition = Math.Max(0, aircraft.EngineCondition - (engineWearRate * deltaTimeHours));
+
+            // Desgaste de Magnetos e Ignição (apenas para motores a pistão)
+            if (!isJetOrTurbo)
+            {
+                double magnetoWearRate = 100.0 / 500.0; // 0.20% por hora nominal
+                aircraft.HoursUntilNext500hInspection = Math.Max(-100.0, aircraft.HoursUntilNext500hInspection - deltaTimeHours);
+
+                if (aircraft.HoursUntilNext500hInspection <= 0)
+                {
+                    magnetoWearRate += 1.5; // Sobretaxa por operar com magneto vencido
+                }
+
+                // Abuso de táxi (Spark Plug Fouling): mistura rica com baixo giro no solo
+                if (data.IsOnGround && data.GroundSpeed < 25.0 && data.IsEngineRunning && data.EngineRPM < 1200.0 && data.MixturePercent > 80.0)
+                {
+                    magnetoWearRate += 7.5; // Penaliza táxi longo com mistura rica
+                }
+
+                aircraft.MagnetosCondition = Math.Max(0, aircraft.MagnetosCondition - (magnetoWearRate * deltaTimeHours));
+
+                // Degradação do Óleo e Sistema de Lubrificação (Inspeção de 50h)
+                double oilWearRate = 100.0 / 50.0; // 2.0%/hora nominal
+
+                if (aircraft.HoursUntilNext50hInspection <= 0)
+                {
+                    oilWearRate += 5.0; // Óleo vencido acelera o envelhecimento
+                }
+
+                if (data.EngineOilTemp > 105.0)
+                {
+                    oilWearRate += (data.EngineOilTemp - 105.0) * 0.5; // Oxidação por calor
+                }
+
+                if (data.EngineCHT > 230.0)
+                {
+                    oilWearRate += (data.EngineCHT - 230.0) * 0.2; // Contaminação por blow-by
+                }
+
+                aircraft.OilCondition = Math.Max(0, aircraft.OilCondition - (oilWearRate * deltaTimeHours));
+            }
 
             // 2. Desgaste da FUSELAGEM
             double airframeWearRate = 100.0 / 400.0;
@@ -308,7 +360,7 @@ namespace FlightCareer.UI.Services
                             Title = "CONGELAMENTO DE CARBURADOR (CARB ICING)",
                             Description = "Queda térmica no venturi formou gelo obstrutivo por descida prolongada sem aquecimento de carburador (Carb Heat). O motor apagou por falta de ar de admissão.",
                             IsCritical = true,
-                            SimEventName = "TOGGLE_ENGINE_FAILURE_1"
+                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
                         });
                     }
                 }
@@ -362,7 +414,7 @@ namespace FlightCareer.UI.Services
                                     Title = "STALL DE COMPRESSOR (ENGINE SURGE)",
                                     Description = $"Perda de sustentação aerodinâmica nas palhetas por avanço brusco de manete ({throttleRate:F0}%/s) sob vento cruzado de {data.CrosswindComponentKnots:F0} kts. Reduza a manete imediatamente.",
                                     IsCritical = true,
-                                    SimEventName = "TOGGLE_ENGINE_FAILURE_1"
+                                    SimEventName = "TOGGLE_ENGINE1_FAILURE"
                                 });
                             }
                         }
@@ -370,28 +422,118 @@ namespace FlightCareer.UI.Services
                 }
             }
 
-            // --- C. IFSD GERAL BASEADO NA CURVA DA BANHEIRA ---
+            // --- C. NOVO SISTEMA DE BREAK CHECK (CICLO DE 60 SEGUNDOS) ---
             if (_activeFailures.Contains(FailureType.EngineIFSD)) return;
 
-            double lambdaPerHour;
-            if (data.EngineType == 1.0) lambdaPerHour = 0.000002;      // Jet
-            else if (data.EngineType == 5.0) lambdaPerHour = 0.000005; // Turboprop
-            else lambdaPerHour = 0.00025;                              // Piston
+            // Acumular tempo decorrido enquanto o motor estiver em funcionamento
+            _breakCheckTimerSeconds += deltaTimeHours * 3600.0;
 
-            double multiplier = CalculateDegradationMultiplier(aircraft.EngineCondition, aircraft);
-            double effectiveLambda = lambdaPerHour * multiplier;
-            double probability = effectiveLambda * deltaTimeHours;
-
-            if (_random.NextDouble() < probability)
+            if (_breakCheckTimerSeconds >= 60.0)
             {
-                TriggerFailure(new FailureRecord
+                _breakCheckTimerSeconds = 0.0;
+
+                // Regra de Ouro: Risco ZERO absoluto se a saúde estiver acima de 20%
+                if (aircraft.EngineCondition <= 20.0)
                 {
-                    Type = FailureType.EngineIFSD,
-                    Title = "PANE DE MOTOR #1 (IFSD)",
-                    Description = "Apagamento involuntário em voo (In-Flight Shutdown). Causa: Choque térmico / Microfratura interna por fadiga latente ou contaminação de combustível. Inicie checklist de emergência.",
-                    IsCritical = true,
-                    SimEventName = "TOGGLE_ENGINE_FAILURE_1"
-                });
+                    double chance;
+                    if (aircraft.EngineCondition <= 0.0)
+                    {
+                        chance = 1.00; // 100% quebra imediata
+                    }
+                    else if (aircraft.EngineCondition <= 10.0)
+                    {
+                        // Em 10.0% -> 0.50 (50%), em 0.0% -> 1.00 (100%)
+                        chance = 0.50 + ((10.0 - aircraft.EngineCondition) / 10.0) * 0.50;
+                    }
+                    else // 10.0 < EngineCondition <= 20.0
+                    {
+                        // Em 20.0% -> 0.01 (1%), em 10.0% -> 0.50 (50%)
+                        chance = 0.01 + ((20.0 - aircraft.EngineCondition) / 10.0) * 0.49;
+                    }
+
+                    if (_random.NextDouble() < chance)
+                    {
+                        TriggerFailure(new FailureRecord
+                        {
+                            Type = FailureType.EngineIFSD,
+                            Title = "PANE MECÂNICA CRÍTICA DE MOTOR (BREAK CHECK)",
+                            Description = $"Apagamento catastrófico por degradação mecânica severa ({aircraft.EngineCondition:F1}% de integridade). Motor sofreu colapso estrutural interno por fadiga crítica de componentes. Inicie checklist de emergência e procedimento de pouso forçado.",
+                            IsCritical = true,
+                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                        });
+                    }
+                }
+
+                // Checagem de Falha de Lubrificação / Fusão de Bronzina (apenas para motores a pistão)
+                if (!isJetOrTurbo && !_activeFailures.Contains(FailureType.EngineIFSD))
+                {
+                    if (aircraft.OilCondition <= 20.0)
+                    {
+                        double oilChance;
+                        if (aircraft.OilCondition <= 0.0)
+                        {
+                            oilChance = 1.00;
+                        }
+                        else if (aircraft.OilCondition <= 10.0)
+                        {
+                            // Em 10.0% -> 0.50 (50%), em 0.0% -> 1.00 (100%)
+                            oilChance = 0.50 + ((10.0 - aircraft.OilCondition) / 10.0) * 0.50;
+                        }
+                        else // 10.0 < OilCondition <= 20.0
+                        {
+                            // Em 20.0% -> 0.01 (1%), em 10.0% -> 0.50 (50%)
+                            oilChance = 0.01 + ((20.0 - aircraft.OilCondition) / 10.0) * 0.49;
+                        }
+
+                        if (_random.NextDouble() < oilChance)
+                        {
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.EngineIFSD,
+                                Title = "PANE CRÍTICA DE MOTOR: FUSÃO DE BRONZINA (LUBRIFICAÇÃO)",
+                                Description = $"Travamento mecânico por perda de viscosidade e colapso da película de óleo (Saúde do Óleo: {aircraft.OilCondition:F1}%). O motor fundiu bronzinas de biela e virabrequim.",
+                                IsCritical = true,
+                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                            });
+                        }
+                    }
+                }
+
+                // Checagem de Falha de Magnetos / Ignição (apenas para motores a pistão)
+                if (!isJetOrTurbo && !_activeFailures.Contains(FailureType.MagnetoFailure))
+                {
+                    if (aircraft.MagnetosCondition <= 20.0)
+                    {
+                        double magChance;
+                        if (aircraft.MagnetosCondition <= 0.0)
+                        {
+                            magChance = 1.00;
+                        }
+                        else if (aircraft.MagnetosCondition <= 10.0)
+                        {
+                            // Em 10.0% -> 0.50 (50%), em 0.0% -> 1.00 (100%)
+                            magChance = 0.50 + ((10.0 - aircraft.MagnetosCondition) / 10.0) * 0.50;
+                        }
+                        else // 10.0 < MagnetosCondition <= 20.0
+                        {
+                            // Em 20.0% -> 0.01 (1%), em 10.0% -> 0.50 (50%)
+                            magChance = 0.01 + ((20.0 - aircraft.MagnetosCondition) / 10.0) * 0.49;
+                        }
+
+                        if (_random.NextDouble() < magChance)
+                        {
+                            bool leftFailed = _random.Next(2) == 0;
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.MagnetoFailure,
+                                Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
+                                Description = $"Falha de ignição por desgaste severo (Saúde {aircraft.MagnetosCondition:F1}%). Queda imediata de rotação. Motor operando em contingência no magneto remanescente.",
+                                IsCritical = false,
+                                SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
+                            });
+                        }
+                    }
+                }
             }
         }
 
@@ -641,7 +783,7 @@ namespace FlightCareer.UI.Services
                         Title = "PANE DE MOTOR #1 (IFSD)",
                         Description = "Falha crítica forçada via painel de testes/controle.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ENGINE_FAILURE_1"
+                        SimEventName = "TOGGLE_ENGINE1_FAILURE"
                     });
                     break;
                 case FailureType.CarbIcing:
@@ -651,7 +793,7 @@ namespace FlightCareer.UI.Services
                         Title = "CONGELAMENTO DE CARBURADOR",
                         Description = "Pane forçada de gelo no carburador.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ENGINE_FAILURE_1"
+                        SimEventName = "TOGGLE_ENGINE1_FAILURE"
                     });
                     break;
                 case FailureType.CompressorStall:
@@ -661,7 +803,7 @@ namespace FlightCareer.UI.Services
                         Title = "STALL DE COMPRESSOR",
                         Description = "Stall de compressor forçado.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ENGINE_FAILURE_1"
+                        SimEventName = "TOGGLE_ENGINE1_FAILURE"
                     });
                     break;
                 case FailureType.TireBlowout:
@@ -742,6 +884,17 @@ namespace FlightCareer.UI.Services
                         Description = "Despressurização forçada via painel de testes/controle.",
                         IsCritical = true,
                         SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                    });
+                    break;
+                case FailureType.MagnetoFailure:
+                    bool leftFailed = _random.Next(2) == 0;
+                    TriggerFailure(new FailureRecord
+                    {
+                        Type = FailureType.MagnetoFailure,
+                        Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
+                        Description = "Falha forçada de magneto/ignição via painel de testes/controle.",
+                        IsCritical = false,
+                        SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
                     });
                     break;
             }

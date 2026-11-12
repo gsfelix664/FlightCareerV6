@@ -43,7 +43,9 @@ namespace FlightCareer.Application.Services
             int landingsCount = 0,
             bool isOffFieldLanding = false,
             double nearestDistance = 0.0,
-            double flightDurationMinutes = 0.0)
+            double flightDurationMinutes = 0.0,
+            double? magnetosCondition = null,
+            double? oilCondition = null)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -91,10 +93,20 @@ namespace FlightCareer.Application.Services
                 aircraft.AvionicsCondition = avionicsCondition;
                 aircraft.LandingsCount = landingsCount;
 
+                if (magnetosCondition.HasValue)
+                {
+                    aircraft.MagnetosCondition = magnetosCondition.Value;
+                }
+                if (oilCondition.HasValue)
+                {
+                    aircraft.OilCondition = oilCondition.Value;
+                }
+
                 // Consumo de TBO e Inspeções Regulatórias
                 aircraft.EngineTboRemainingHours = Math.Max(0, aircraft.EngineTboRemainingHours - hours);
                 aircraft.HoursUntilNext50hInspection = Math.Max(0, aircraft.HoursUntilNext50hInspection - hours);
                 aircraft.HoursUntilNext100hInspection = Math.Max(0, aircraft.HoursUntilNext100hInspection - hours);
+                aircraft.HoursUntilNext500hInspection = Math.Max(0, aircraft.HoursUntilNext500hInspection - hours);
 
                 if (aircraft.EngineTboRemainingHours <= 0)
                 {
@@ -122,6 +134,8 @@ namespace FlightCareer.Application.Services
                     aircraft.TiresCondition = 0;
                     aircraft.AirframeCondition = 0;
                     aircraft.AvionicsCondition = 0;
+                    aircraft.MagnetosCondition = 0;
+                    aircraft.OilCondition = 0;
                     aircraft.IsInterdicted = true;
                     aircraft.InterdictionReason = "Aeronave destruída em acidente com colapso estrutural";
 

@@ -265,14 +265,19 @@
                                         ToolTip="Restaura motor a 100% e TBO para 1.800h"/>
                             </Grid>
 
-                            <!-- Inspeção 50 Horas -->
+                            <!-- Inspeção 50 Horas (Troca de Óleo &amp; Lubrificação) -->
                             <Grid Margin="0,0,0,12">
                                 <StackPanel>
-                                    <TextBlock Text="Próxima Inspeção 50h:" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext50hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                    <TextBlock Text="Próxima Inspeção 50h (Troca de Óleo):" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext50hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        <TextBlock Text=" | Saúde do Óleo: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                        <TextBlock Text="{Binding SelectedAircraft.OilCondition, StringFormat={}{0:F0}%}" Foreground="{Binding SelectedAircraft.OilColor}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Center"/>
+                                    </StackPanel>
                                 </StackPanel>
                                 <Button Content="Fazer 50h ($850)" Command="{Binding Perform50hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"/>
+                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"
+                                        ToolTip="Troca de óleo mineral/sintético, substituição de filtro e inspeção de limalhas"/>
                             </Grid>
 
                             <!-- Inspeção 100 Horas -->
@@ -283,6 +288,21 @@
                                 </StackPanel>
                                 <Button Content="Fazer 100h ($2.500)" Command="{Binding Perform100hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
                                         Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"/>
+                            </Grid>
+
+                            <!-- Inspeção 500 Horas (Magnetos & Velas) -->
+                            <Grid Margin="0,0,0,12">
+                                <StackPanel>
+                                    <TextBlock Text="Próxima Inspeção 500h (Magnetos &amp; Velas):" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext500hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                        <TextBlock Text=" | Saúde: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                        <TextBlock Text="{Binding SelectedAircraft.MagnetosCondition, StringFormat={}{0:F0}%}" Foreground="{Binding SelectedAircraft.MagnetosColor}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Button Content="Fazer 500h ($1.450)" Command="{Binding Perform500hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"
+                                        ToolTip="Revisão geral dos magnetos, platinados e troca de velas"/>
                             </Grid>
 
                             <!-- Configuração de Cabine (Pax vs Carga) -->

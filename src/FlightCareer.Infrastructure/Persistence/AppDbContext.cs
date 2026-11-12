@@ -86,6 +86,12 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE PilotAircrafts ADD COLUMN InterdictionReason TEXT DEFAULT '';",
                 "ALTER TABLE PilotAircrafts ADD COLUMN Configuration TEXT DEFAULT 'Passageiro';",
                 "ALTER TABLE PilotAircrafts ADD COLUMN AvionicsCondition REAL DEFAULT 100.0;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN HoursUntilNext500hInspection REAL DEFAULT 500.0;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN MagnetosCondition REAL DEFAULT 100.0;",
+                "ALTER TABLE PilotAircrafts ADD COLUMN OilCondition REAL DEFAULT 100.0;",
+                "ALTER TABLE PilotAircraft ADD COLUMN HoursUntilNext500hInspection REAL DEFAULT 500.0;",
+                "ALTER TABLE PilotAircraft ADD COLUMN MagnetosCondition REAL DEFAULT 100.0;",
+                "ALTER TABLE PilotAircraft ADD COLUMN OilCondition REAL DEFAULT 100.0;",
 
                 "ALTER TABLE Missions ADD COLUMN RequiredTier INTEGER DEFAULT 1;",
                 "ALTER TABLE Missions ADD COLUMN RequiredCategory INTEGER DEFAULT 1;",

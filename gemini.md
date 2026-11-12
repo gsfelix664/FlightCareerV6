@@ -1293,3 +1293,62 @@ Ao implementar este plano, o agente executor deve:
   - Transição de status ajustada para "TÁXI / PÁTIO" após desaceleração de pouso.
   - O corte no solo agora aciona exclusivamente a finalização normal de voo (`FINALIZANDO (5s)`), preservando a integridade real da saúde do motor acumulada durante a rota.
 - **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Alinhamento do Motor de Desgaste de Motor e Break Checks ao MSFS 2024
+- **Calibração de Desgaste Base (Green Arc)**:
+  - Desgaste nominal atrelado diretamente ao TBO padrão do motor: 1.800 horas para motor a pistão (`100.0 / 1800.0` ≈ 0.055%/hora) e 3.500 horas para turboélice/jato (`100.0 / 3500.0`).
+- **Gatilhos Nativos de Sobrecarga (Overstress Factors)**:
+  - **Over-RPM**: Sobretaxa quadrática proporcional ao excesso acima de `MaxRPM`.
+  - **CHT Overheat**: Desgaste neutro até 230°C; progressão moderada de 230°C a 260°C; desgaste exponencial acima de 260°C.
+  - **Pressão de Óleo Baixa**: Desgaste severo por atrito seco se a pressão cair abaixo de 20 PSI com motor ligado.
+  - **Temperatura de Óleo Alta**: Desgaste acelerado se a temperatura do óleo exceder 110°C.
+- **Novo Sistema de Break Check (Ciclo de 60 Segundos)**:
+  - **Risco Zero em Saúde Normal**: Se `EngineCondition > 20.0%`, a probabilidade de falha mecânica espontânea em voo é estritamente **0.0%** (eliminação completa de falhas aleatórias injustas).
+  - **Zona Crítica (<= 20%)**: Avaliação a cada 60 segundos de funcionamento contínuo do motor:
+    - Em 20%: 1% de chance a cada 1 minuto.
+    - Em 10%: 50% de chance a cada 1 minuto.
+    - Em <= 0%: 100% de quebra imediata no minuto.
+    - Interpolação linear contínua nas faixas intermediárias.
+- **Padronização SimConnect**:
+  - Evento de falha de motor unificado exclusivamente no evento oficial do SDK `TOGGLE_ENGINE1_FAILURE`, eliminando duplo disparo de toggle.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Sistema de Desgaste e Falha de Magnetos/Velas (500h), Táxi Incorreto e Break Checks
+- **Modelagem de Dados e Persistência (`PilotAircraft` e SQLite)**:
+  - Adicionados campos `HoursUntilNext500hInspection` (padrão 500h) e `MagnetosCondition` (0-100%).
+  - Migrações dinâmicas DDL em `AppDbContext.EnsureSchemaUpdatedAsync()` com garantia de retrocompatibilidade.
+- **Dinâmica de Desgaste Realista (`WearAndFailureService`)**:
+  - Taxa nominal de consumo de 0,20%/hora de voo (`100.0 / 500.0`) para motores a pistão.
+  - Sobretaxa punitiva de +1,5%/h para aeronaves operando com inspeção de magnetos vencida (`HoursUntilNext500hInspection <= 0`).
+  - Penalidade severa por táxi inadequado (*Spark Plug Fouling*): solo, marcha lenta (< 1.200 RPM) e mistura rica (> 80%) aplicam +7,5%/h de desgaste na ignição (~0,25% a cada 2 minutos de táxi incorreto).
+- **Mecânica de Break Check de Ignição**:
+  - Ciclo de 60 segundos com motor ligado.
+  - Risco zero absoluto (0,0%) enquanto `MagnetosCondition > 20%`.
+  - Zona crítica (<= 20%): 1% de chance em 20%, 50% em 10% e 100% de quebra imediata em <= 0%.
+  - Injeção bilateral via SimConnect: sorteia magneto avariado (50% Left / 50% Right) e seleciona contingência (`MAGNETO1_RIGHT` ou `MAGNETO1_LEFT`), reduzindo RPM em ~120 sem apagar o motor.
+- **Módulo do Hangar e Interface (`HangarViewModel` e `HangarView.xaml`)**:
+  - Exibição de indicador de saúde dos Magnetos & Ignição com barra colorimétrica dinâmica e horas restantes.
+  - Novo comando e botão `Fazer 500h ($1.450)` que debita saldo, registra transação contábil e restaura a saúde e o ciclo para 100% / 500h.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Inspeção de 50 Horas (Troca de Óleo & Lubrificação) e Break Check de Fusão de Bronzina
+- **Modelagem de Lubrificação e Persistência (`PilotAircraft`, `AppDbContext`)**:
+  - Adicionada a propriedade `OilCondition` (0-100%, padrão 100,0%) representando a saúde e viscosidade do óleo lubrificante.
+  - Migração DDL dinâmica em `AppDbContext.EnsureSchemaUpdatedAsync()` com execução resiliente e compatibilidade retroativa.
+- **Dinâmica de Degradação do Óleo (`WearAndFailureService`)**:
+  - Consumo nominal de 2,0%/hora de voo (`100.0 / 50.0`) em motores a pistão.
+  - Sobretaxa punitiva de +5,0%/h por operar com a inspeção de 50h vencida (`HoursUntilNext50hInspection <= 0`).
+  - Oxidação térmica e perda de viscosidade quando a temperatura do óleo excede 105°C: `+ (OilTemp - 105) * 0.5%/h`.
+  - Contaminação de óleo por passagem de gases (blow-by) quando a temperatura das cabeças de cilindro excede 230°C: `+ (CHT - 230) * 0.2%/h`.
+- **Break Check Crítico de Lubrificação (60 Segundos)**:
+  - Risco zero absoluto se `OilCondition > 20,0%`.
+  - Faixa crítica (`OilCondition <= 20,0%`): 1% de chance a 20%, 50% a 10% e 100% de quebra imediata a <= 0%.
+  - Gatilho catastrófico: Pane crítica de motor por fusão de bronzinas de biela/virabrequim (`FailureType.EngineIFSD`, `TOGGLE_ENGINE1_FAILURE`).
+- **Sincronização Contínua e Encerramento de Voo (`FlightMonitor`, `FlightService`)**:
+  - `UpdateHangarStateAsync`: persistência em segundo plano a cada 60s dos novos estados de `MagnetosCondition`, `OilCondition`, `HoursUntilNext50hInspection`, `HoursUntilNext100hInspection`, `HoursUntilNext500hInspection` e `EngineTboRemainingHours`.
+  - `ProcessFlightFinishAsync`: consumo automático de horas da inspeção de 500h (`HoursUntilNext500hInspection - hours`) e salvamento das condições finais no banco.
+  - Zeramento integral de motor, magnetos e óleo em situações de Crash violento.
+- **Interface e Hangar (`PilotAircraftWrapper`, `HangarViewModel`, `HangarView.xaml`)**:
+  - Card de Inspeção de 50h atualizado para exibir horas restantes e saúde do óleo colorimétrica dinâmica.
+  - Execução das ordens de serviço de 50h ($850), 100h ($2.500) e Overhaul restaura `OilCondition = 100,0%`.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.

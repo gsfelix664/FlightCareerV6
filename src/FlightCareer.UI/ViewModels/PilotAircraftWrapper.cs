@@ -35,6 +35,12 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(EngineTboRemainingHours));
             OnPropertyChanged(nameof(HoursUntilNext50hInspection));
             OnPropertyChanged(nameof(HoursUntilNext100hInspection));
+            OnPropertyChanged(nameof(HoursUntilNext500hInspection));
+            OnPropertyChanged(nameof(MagnetosCondition));
+            OnPropertyChanged(nameof(MagnetosColor));
+            OnPropertyChanged(nameof(OilCondition));
+            OnPropertyChanged(nameof(OilColor));
+            OnPropertyChanged(nameof(Cost500hInspection));
             OnPropertyChanged(nameof(IsInterdicted));
             OnPropertyChanged(nameof(InterdictionReason));
             OnPropertyChanged(nameof(Configuration));
@@ -55,6 +61,11 @@ namespace FlightCareer.UI.ViewModels
         public double EngineTboRemainingHours => Math.Round(Aircraft.EngineTboRemainingHours, 1);
         public double HoursUntilNext50hInspection => Math.Round(Aircraft.HoursUntilNext50hInspection, 1);
         public double HoursUntilNext100hInspection => Math.Round(Aircraft.HoursUntilNext100hInspection, 1);
+        public double HoursUntilNext500hInspection => Math.Round(Aircraft.HoursUntilNext500hInspection, 1);
+        public double MagnetosCondition => Math.Round(Aircraft.MagnetosCondition, 1);
+        public SolidColorBrush MagnetosColor => GetConditionColor(MagnetosCondition);
+        public double OilCondition => Math.Round(Aircraft.OilCondition, 1);
+        public SolidColorBrush OilColor => GetConditionColor(OilCondition);
         public bool IsInterdicted => Aircraft.IsInterdicted;
         public string InterdictionReason => Aircraft.InterdictionReason;
         public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
@@ -63,6 +74,7 @@ namespace FlightCareer.UI.ViewModels
         // Custos Regulatórios
         public double Cost50hInspection => 850.0;
         public double Cost100hInspection => 2500.0;
+        public double Cost500hInspection => 1450.0;
         public double CostOverhaul => Math.Max(25000.0, Math.Round(PurchasePrice * 0.20, 2));
         public double CostToggleConfiguration => 1200.0;
 
@@ -112,8 +124,8 @@ namespace FlightCareer.UI.ViewModels
             {
                 if (IsCrashed) return "PERDA TOTAL (CRASH)";
                 if (IsInterdicted) return $"INTERDITADA: {InterdictionReason}";
-                if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30) return "GROUNDED (MANUT. CRÍTICA)";
-                if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70 || HoursUntilNext50hInspection <= 5 || HoursUntilNext100hInspection <= 10 || EngineTboRemainingHours <= 50) return "MANUTENÇÃO NECESSÁRIA";
+                if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30 || MagnetosCondition < 30 || OilCondition < 30) return "GROUNDED (MANUT. CRÍTICA)";
+                if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70 || MagnetosCondition < 70 || OilCondition < 70 || HoursUntilNext50hInspection <= 5 || HoursUntilNext100hInspection <= 10 || HoursUntilNext500hInspection <= 10 || EngineTboRemainingHours <= 50) return "MANUTENÇÃO NECESSÁRIA";
                 return "PRONTA PARA VOO";
             }
         }
