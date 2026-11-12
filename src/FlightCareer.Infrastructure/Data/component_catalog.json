@@ -1,0 +1,254 @@
+{
+  // Catálogo de componentes do FlightCareer V6 (sistema de desgaste e falhas por componente).
+  // Regra central: o desgaste natural consome ~70% ao longo da vida útil (chega a ~30% no fim da vida).
+  // Só abuso (faixas amarela/vermelha), manutenção vencida ou eventos levam abaixo do limiar de pane (20%).
+
+  "hazard": {
+    "threshold": 20.0,          // Acima disto: só desgaste, nunca pane por desgaste
+    "lambdaAtThreshold": 0.02,  // Falhas/hora em 20%  (~2% de chance numa hora de voo)
+    "lambdaAtZero": 2.0         // Falhas/hora em 0%   (~86% de chance numa hora de voo)
+  },
+  "visibility": {
+    "maxHalfWidth": 25.0,       // Faixa máxima exibida: ±25%
+    "growthPerHour": 0.4,       // +2% de incerteza a cada 5 h desde a última inspeção
+    "walkaroundHalfWidth": 10.0,
+    "maxBias": 0.6
+  },
+  "symptomThreshold": 30.0,
+  "overdueMultiplier": 3.0,
+
+  "landing": {
+    "hardLandingFpm": 400.0,
+    "severeLandingFpm": 600.0,
+    "lateralLimitFps": 5.0,
+    "gearDamagePer100Fpm": 1.5,
+    "tireDamagePer100Fpm": 2.0,
+    "gearSevereDamagePer100Fpm": 5.0,
+    "airframeSevereDamagePer100Fpm": 2.0,
+    "gearLateralDamagePerFps": 1.2,
+    "tireLateralDamagePerFps": 1.5,
+    "brakeEnergyLossPerHour": 72.0,
+    "wetSurfaceMultiplier": 1.8
+  },
+
+  // Limites padrão por classe de motor (fase 2: sobrescrever por aeronave via aircrafts.csv)
+  "engineLimits": {
+    "Piston": {
+      "redlineRpm": 2700, "rpmRedMargin": 0.02,
+      "maxCht": 260, "chtCautionMargin": 20,
+      "shockCoolingCaution": 28, "shockCoolingRed": 50,
+      "maxOilTemp": 118, "oilTempCautionMargin": 8,
+      "minOilPressure": 20, "minOilTempForHighPower": 38, "highPowerThrottlePercent": 75,
+      "maxStarterSeconds": 30
+    },
+    "Turboprop": {
+      "maxOilTemp": 110, "oilTempCautionMargin": 10,
+      "minOilPressure": 60, "minOilTempForHighPower": 10, "highPowerThrottlePercent": 85,
+      "maxItt": 805, "ittCautionMargin": 40, "maxStartItt": 1000,
+      "maxTorque": 100, "torqueRedMargin": 5, "maxN1": 101.5,
+      "maxStarterSeconds": 60
+    },
+    "Jet": {
+      "maxOilTemp": 140, "oilTempCautionMargin": 15,
+      "minOilPressure": 25, "minOilTempForHighPower": 0, "highPowerThrottlePercent": 90,
+      "maxItt": 900, "ittCautionMargin": 40, "maxStartItt": 950,
+      "maxTorque": 100, "torqueRedMargin": 5, "maxN1": 101.5,
+      "maxStarterSeconds": 60
+    }
+  },
+
+  "airframeLimits": {
+    "maxG": 3.8,
+    "minG": -1.52,
+    "gCautionFraction": 0.85,
+    "structuralIceCautionPct": 10.0
+  },
+
+  "components": [
+    {
+      "kind": "Engine",
+      "name": "Motor",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 30,
+      "lifeHours": { "Piston": 1800, "Turboprop": 3600, "Jet": 5000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 3,
+      "redLossPerHour": 60,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "failureModes": [
+        { "id": "engine.power_loss", "name": "Perda parcial de potência", "weight": 50, "critical": false,
+          "description": "Desgaste interno reduz a potência disponível. Reduza a carga e pouse no aeródromo mais próximo." },
+        { "id": "engine.rough_running", "name": "Funcionamento irregular", "weight": 30, "critical": false,
+          "description": "Vibração e queda de RPM intermitentes por desgaste de cilindros/válvulas." },
+        { "id": "engine.ifsd", "name": "Apagamento em voo (IFSD)", "weight": 15, "critical": true,
+          "description": "Colapso mecânico interno. Execute o checklist de pane de motor e pouso forçado." },
+        { "id": "engine.fire_fuel_line", "name": "Incêndio por ruptura de linha de combustível", "weight": 5, "critical": true,
+          "description": "Conexão de combustível solta por vibração crônica entrou em ignição. Corte combustível imediatamente!" }
+      ]
+    },
+    {
+      "kind": "Oil",
+      "name": "Óleo e lubrificação",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeHours": { "Piston": 50, "Turboprop": 400, "Jet": 600 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 6,
+      "redLossPerHour": 60,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "failureModes": [
+        { "id": "oil.leak", "name": "Vazamento progressivo de óleo", "weight": 55, "critical": false,
+          "description": "Junta ou mangueira degradada. Pressão de óleo cairá progressivamente." },
+        { "id": "oil.pressure_loss", "name": "Perda de pressão de óleo", "weight": 30, "critical": true,
+          "description": "Válvula reguladora travada ou bomba desgastada. Reduza potência e pouse o quanto antes." },
+        { "id": "oil.bearing_seizure", "name": "Fusão de bronzina", "weight": 15, "critical": true,
+          "description": "Película de óleo colapsou e o motor travou. Pouso forçado." }
+      ]
+    },
+    {
+      "kind": "Ignition",
+      "name": "Ignição / magnetos",
+      "appliesTo": [ "Piston" ],
+      "critical": false,
+      "weight": 10,
+      "lifeHours": { "Piston": 500 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 7.5,
+      "redLossPerHour": 30,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "failureModes": [
+        { "id": "ignition.magneto_left", "name": "Pane no magneto esquerdo", "weight": 40, "critical": false,
+          "description": "Motor operando em contingência no magneto direito." },
+        { "id": "ignition.magneto_right", "name": "Pane no magneto direito", "weight": 40, "critical": false,
+          "description": "Motor operando em contingência no magneto esquerdo." },
+        { "id": "ignition.plug_fouling", "name": "Velas encharcadas", "weight": 20, "critical": false,
+          "description": "Depósito de chumbo nas velas; queda acentuada no cheque de magnetos." }
+      ]
+    },
+    {
+      "kind": "HotSection",
+      "name": "Seção quente",
+      "appliesTo": [ "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeHours": { "Turboprop": 1750, "Jet": 3000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 5,
+      "redLossPerHour": 90,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "failureModes": [
+        { "id": "hotsection.itt_margin_loss", "name": "Perda de margem de ITT", "weight": 60, "critical": false,
+          "description": "Palhetas degradadas: ITT sobe para a mesma potência. Reduza torque." },
+        { "id": "hotsection.flameout", "name": "Apagamento (flameout)", "weight": 30, "critical": true,
+          "description": "Instabilidade na câmara de combustão apagou o motor. Tente a repartida conforme checklist." },
+        { "id": "hotsection.fire", "name": "Incêndio na nacele", "weight": 10, "critical": true,
+          "description": "Ruptura estrutural da câmara de combustão. Corte a Condition Lever e acione o extintor!" }
+      ]
+    },
+    {
+      "kind": "Electrical",
+      "name": "Elétrico (alternador / bateria)",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 8,
+      "lifeHours": { "Piston": 1500, "Turboprop": 2500, "Jet": 3000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 4,
+      "redLossPerHour": 20,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "failureModes": [
+        { "id": "electrical.alternator", "name": "Falha do alternador/gerador", "weight": 60, "critical": false,
+          "description": "Perda de geração elétrica. Barramento alimentado apenas pela bateria; reduza a carga elétrica." },
+        { "id": "electrical.battery", "name": "Bateria fraca", "weight": 25, "critical": false,
+          "description": "Bateria com baixa capacidade; partidas e reserva em pane de gerador comprometidas." },
+        { "id": "electrical.harness_fire", "name": "Curto no chicote elétrico", "weight": 15, "critical": true,
+          "description": "Curto-circuito de alta corrente com fumaça no cofre. Master OFF e pouso imediato." }
+      ]
+    },
+    {
+      "kind": "LandingGear",
+      "name": "Trem de pouso",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeCycles": { "Piston": 5000, "Turboprop": 8000, "Jet": 20000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 0.5,
+      "walkaroundVisible": true,
+      "failureModes": [
+        { "id": "gear.strut_leak", "name": "Amortecedor vazando", "weight": 60, "critical": false,
+          "description": "Amortecedor sem nitrogênio/fluido: pousos mais duros e estresse na estrutura." },
+        { "id": "gear.collapse", "name": "Colapso de perna do trem", "weight": 40, "critical": true,
+          "description": "Fratura de pino mestre/tesoura; a perna do trem recolheu." }
+      ]
+    },
+    {
+      "kind": "Tires",
+      "name": "Pneus",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 6,
+      "lifeCycles": { "Piston": 250, "Turboprop": 300, "Jet": 300 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "failureModes": [
+        { "id": "tires.low_pressure", "name": "Pneu murcho", "weight": 60, "critical": false,
+          "description": "Perda de pressão; tendência direcional na rolagem." },
+        { "id": "tires.blowout", "name": "Estouro de pneu", "weight": 40, "critical": true,
+          "description": "Banda de rodagem/carcaça rompida. Mantenha o eixo com leme." }
+      ]
+    },
+    {
+      "kind": "Brakes",
+      "name": "Freios",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 6,
+      "lifeCycles": { "Piston": 500, "Turboprop": 800, "Jet": 1500 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "failureModes": [
+        { "id": "brakes.fade", "name": "Freio fraco (fading)", "weight": 70, "critical": false,
+          "description": "Pastilhas no fim de vida; distância de parada maior." },
+        { "id": "brakes.one_side", "name": "Perda de freio em um lado", "weight": 30, "critical": true,
+          "description": "Vazamento de fluido em um cilindro; frenagem assimétrica." }
+      ]
+    },
+    {
+      "kind": "Airframe",
+      "name": "Célula / estrutura",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 20,
+      "lifeHours": { "Piston": 10000, "Turboprop": 20000, "Jet": 40000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 5,
+      "redLossPerHour": 300,
+      "hazardScale": 0.5,
+      "walkaroundVisible": true,
+      "failureModes": [
+        { "id": "airframe.flap_jam", "name": "Flap travado", "weight": 40, "critical": false,
+          "description": "Fuso ou trilho do flap travado na posição atual." },
+        { "id": "airframe.static_blockage", "name": "Tomada estática obstruída", "weight": 30, "critical": false,
+          "description": "Altímetro, velocímetro e VSI com indicação não confiável." },
+        { "id": "airframe.structural_crack", "name": "Trinca estrutural", "weight": 30, "critical": true,
+          "description": "Trinca detectada por vibração/ruído. Reduza a velocidade, evite manobras e pouse." }
+      ]
+    }
+  ]
+}

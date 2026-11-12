@@ -62,8 +62,20 @@ namespace FlightCareer.UI
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    await dbContext.Database.EnsureCreatedAsync();
+                    await dbContext.Database.EnsureCreatedAsync();
+
                     await dbContext.EnsureSchemaUpdatedAsync();
+
+                    // Barras de saúde por componente: cria/migra os componentes das aeronaves do hangar
+                    try
+                    {
+                        var provisioner = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>();
+                        await provisioner.EnsureComponentsAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Componentes] Falha ao provisionar componentes: {ex.Message}");
+                    }
 
                     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
                     if (!seeder.IsSeeded())
@@ -131,6 +143,9 @@ namespace FlightCareer.UI
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
             services.AddSingleton<IMarketSimulationService, MarketSimulationService>();
             services.AddSingleton<FlightService>();
+            services.AddSingleton(_ => FlightCareer.Domain.Components.ComponentCatalog.LoadDefault());
+            services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>(sp =>
+                new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
 
             services.AddSingleton<SimConnectService>();
             services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>());

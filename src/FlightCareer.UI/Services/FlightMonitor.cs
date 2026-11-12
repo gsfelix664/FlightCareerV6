@@ -123,7 +123,7 @@ namespace FlightCareer.UI.Services
             _originIcao = pilot.CurrentAirportICAO;
 
             _simConnect.ResetCrashState();
-            _wearService.Reset();
+            _wearService.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
@@ -370,6 +370,8 @@ namespace FlightCareer.UI.Services
             if (_aircraft != null)
             {
                 double deltaHours = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalHours;
+                // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), não tempo de parede
+                deltaHours *= data.SimulationRate > 0 ? data.SimulationRate : 1.0;
                 _wearService.ProcessWear(_aircraft, data, deltaHours);
 
                 // Checar Perda Total
@@ -565,7 +567,7 @@ namespace FlightCareer.UI.Services
             _hasTouchedDown = false;
             _engineFailureReportedInFlight = false;
             _simConnect.ResetCrashState();
-            _wearService.Reset();
+            _wearService.Reset(clearSimState: true);
             _qualityService.Reset();
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;

@@ -64,6 +64,14 @@ namespace FlightCareer.UI.Services
         private double _postMaintFlightMinutes = 0;
         private bool _flightStartOilChecksDone = false;
 
+        // Estado de falhas sem evento nativo no SimConnect (mantidas por enforcement a cada tick)
+        private bool _engineDestroyedByFire = false;
+        private bool _failedMagnetoIsLeft = false;
+        private double _lockedFlapsHandle = 0.0;
+        private bool _observedPressurization = false;
+        private DateTime _lastEnforcementEvent = DateTime.MinValue;
+        private SimTelemetry _lastData;
+
         public event Action<FailureRecord>? OnFailureTriggered;
 
         public IReadOnlyList<FailureRecord> ActiveFailures => _failureHistory.AsReadOnly();
@@ -77,8 +85,25 @@ namespace FlightCareer.UI.Services
             _simConnect = simConnect;
         }
 
-        public void Reset()
+        /// <summary>
+        /// Zera o estado interno de falhas. Com clearSimState = true também desfaz no simulador
+        /// as falhas aplicadas (toggles, fogo e vazamento de óleo), deixando app e MSFS consistentes.
+        /// </summary>
+        public void Reset(bool clearSimState = false)
         {
+            if (clearSimState)
+            {
+                _simConnect.ClearSimFailures();
+                if (_isEngineOnFire || _simConnect.CurrentData.IsEngineOnFire) _simConnect.SetEngineFire(false);
+                if (_oilLeakedPercent > 0 || _simConnect.CurrentData.OilLeakedPercent > 0) _simConnect.SetOilLeakedPercent(0.0);
+            }
+
+            _engineDestroyedByFire = false;
+            _failedMagnetoIsLeft = false;
+            _lockedFlapsHandle = 0.0;
+            _observedPressurization = false;
+            _lastEnforcementEvent = DateTime.MinValue;
+
             _activeFailures.Clear();
             _failureHistory.Clear();
             _foulingAccumulator = 0;
@@ -98,6 +123,18 @@ namespace FlightCareer.UI.Services
             _postMaintFlightMinutes = 0;
             _flightStartOilChecksDone = false;
         }
+
+        /// <summary>
+        /// Converte uma chance por segundo de exposição na chance acumulada no intervalo dt,
+        /// tornando o sorteio independente da frequência de pacotes de telemetria.
+        /// </summary>
+        private static double ChanceOverInterval(double chancePerSecond, double dtSeconds)
+        {
+            if (chancePerSecond <= 0.0 || dtSeconds <= 0.0) return 0.0;
+            return 1.0 - Math.Pow(1.0 - Math.Min(chancePerSecond, 1.0), dtSeconds);
+        }
+
+        private static double NormalizeFlapsHandle(double handle) => handle > 1.0 ? handle / 100.0 : handle;
 
         private double CalculateBreakCheckChance(double condition)
         {
@@ -174,6 +211,7 @@ namespace FlightCareer.UI.Services
             // Proteção contra saltos temporais anormais (clamp entre 0 e ~18 segundos)
             deltaTimeHours = Math.Clamp(deltaTimeHours, 0.0, 0.005);
             if (deltaTimeHours <= 0) return;
+            _lastData = data;
 
             // 1. Desgaste do MOTOR (Taxa Base Green Arc + Fatores de Sobrecarga MSFS 2024)
             bool isJetOrTurbo = data.EngineType == 1.0 || data.EngineType == 5.0;
@@ -240,7 +278,8 @@ namespace FlightCareer.UI.Services
             if (!isJetOrTurbo)
             {
                 double magnetoWearRate = 100.0 / 500.0; // 0.20% por hora nominal
-                aircraft.HoursUntilNext500hInspection = Math.Max(-100.0, aircraft.HoursUntilNext500hInspection - deltaTimeHours);
+                // As horas da inspeção de 500h são descontadas apenas no fechamento do voo (FlightService),
+                // junto com 50h/100h/TBO; descontar aqui também contava as horas em dobro.
 
                 if (aircraft.HoursUntilNext500hInspection <= 0)
                 {
@@ -378,10 +417,63 @@ namespace FlightCareer.UI.Services
             {
                 CheckStartupFailures(aircraft, data, deltaTimeHours);
             }
+            if (!data.IsOnGround && data.Altitude > 8000.0 && data.CabinAltitude < data.Altitude - 3000.0)
+            {
+                _observedPressurization = true; // Cabine bem abaixo da altitude real: aeronave pressurizada
+            }
             CheckEngineFailures(aircraft, data, deltaTimeHours);
             CheckSystemFailures(aircraft, data, deltaTimeHours);
             CheckTireRollFailures(aircraft, data, deltaTimeHours);
             CheckBirdStrikeFailure(aircraft, data, deltaTimeHours);
+
+            // 7. Mantém no simulador as falhas que não têm evento nativo de SimConnect
+            EnforceActiveFailures(data);
+        }
+
+        /// <summary>
+        /// Falhas sem evento nativo de falha no SimConnect são mantidas forçando o estado das chaves/comandos:
+        /// - Magneto: o piloto não pode "consertar" girando a chave de volta para BOTH.
+        /// - Alternador: a chave ALT é mantida desligada.
+        /// - Flaps: a alavanca é mantida na posição em que travou.
+        /// </summary>
+        private void EnforceActiveFailures(SimTelemetry data)
+        {
+            if ((DateTime.Now - _lastEnforcementEvent).TotalSeconds < 2.0) return; // Aguarda o simulador refletir o último comando
+
+            if (_activeFailures.Contains(FailureType.MagnetoFailure) && data.IsEngineRunning && data.StarterActive <= 0.5)
+            {
+                bool failedOn = _failedMagnetoIsLeft ? data.LeftMagneto > 0.5 : data.RightMagneto > 0.5;
+                bool goodOn = _failedMagnetoIsLeft ? data.RightMagneto > 0.5 : data.LeftMagneto > 0.5;
+                if (failedOn && goodOn)
+                {
+                    _simConnect.SendEvent(_failedMagnetoIsLeft ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT");
+                    _lastEnforcementEvent = DateTime.Now;
+                    return;
+                }
+                if (failedOn)
+                {
+                    _simConnect.SendEvent("MAGNETO1_OFF"); // Só o magneto em pane selecionado: motor sem ignição
+                    _lastEnforcementEvent = DateTime.Now;
+                    return;
+                }
+            }
+
+            if (_activeFailures.Contains(FailureType.AlternatorFailure) && data.MasterAlternator > 0.5)
+            {
+                _simConnect.SendEvent("TOGGLE_ALTERNATOR1");
+                _lastEnforcementEvent = DateTime.Now;
+                return;
+            }
+
+            if (_activeFailures.Contains(FailureType.FlapLock))
+            {
+                double current = NormalizeFlapsHandle(data.FlapsHandlePercent);
+                if (Math.Abs(current - _lockedFlapsHandle) > 0.02)
+                {
+                    _simConnect.SendEvent("FLAPS_SET", (uint)Math.Round(Math.Clamp(_lockedFlapsHandle, 0.0, 1.0) * 16383.0));
+                    _lastEnforcementEvent = DateTime.Now;
+                }
+            }
         }
 
         public void ProcessLanding(PilotAircraft aircraft, double touchdownFPM, double lateralSpeedFPS = 0)
@@ -431,6 +523,7 @@ namespace FlightCareer.UI.Services
         /// </summary>
         private void ProcessActiveEngineFire(PilotAircraft aircraft, SimTelemetry data, double deltaTimeHours)
         {
+            if (_engineDestroyedByFire) return;
             if (!_isEngineOnFire && !_activeFailures.Contains(FailureType.EngineFire)) return;
 
             double dtSeconds = deltaTimeHours * 3600.0;
@@ -482,7 +575,11 @@ namespace FlightCareer.UI.Services
                 // Se passar de 90 segundos (janela de 60-120s) sem corte de combustível: destruição total por derretimento
                 if (_activeFireBurnSeconds >= 90.0)
                 {
+                    // O fogo consome o motor e se extingue; o ciclo de fogo é encerrado de vez
+                    // (antes continuava forçando ENG ON FIRE e podia anunciar "fogo extinto com sucesso").
                     _isEngineOnFire = false;
+                    _engineDestroyedByFire = true;
+                    _simConnect.SetEngineFire(false);
                     aircraft.EngineCondition = 0.0; // Penalidade máxima de reparo no SQLite
 
                     if (!_activeFailures.Contains(FailureType.EngineIFSD))
@@ -491,7 +588,7 @@ namespace FlightCareer.UI.Services
                         {
                             Type = FailureType.EngineIFSD,
                             Title = "COLAPSO CATASTRÓFICO: MOTOR DESTRUÍDO PELO FOGO",
-                            Description = "O incêndio no motor #1 não foi contido dentro de 90 segundos (combustível não cortado). O fogo derreteu o bloco/seção quente causando perda total do motor (0%).",
+                            Description = "O incêndio no motor #1 não foi contido dentro de 90 segundos (combustível não cortado). O fogo derreteu o bloco/seção quente causando perda total do motor (0%) e se extinguiu após consumir o compartimento.",
                             IsCritical = true,
                             SimEventName = "TOGGLE_ENGINE1_FAILURE"
                         });
@@ -696,7 +793,7 @@ namespace FlightCareer.UI.Services
                             Title = "ENCHARCAMENTO DE VELAS (LEAD FOULING)",
                             Description = "Depósito de chumbo e fuligem nos eletrodos das velas por táxi prolongado com mistura rica e motor frio. Motor apresentará queda brusca no cheque de magnetos.",
                             IsCritical = false,
-                            SimEventName = "TOGGLE_VACUUM_FAILURE"
+                            SimEventName = ""
                         });
                     }
                 }
@@ -864,13 +961,14 @@ namespace FlightCareer.UI.Services
                     if (magChance > 0.0 && _random.NextDouble() < magChance)
                     {
                         bool leftFailed = _random.Next(2) == 0;
+                        _failedMagnetoIsLeft = leftFailed;
                         TriggerFailure(new FailureRecord
                         {
                             Type = FailureType.MagnetoFailure,
                             Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
                             Description = $"Falha de ignição por desgaste severo (Saúde {aircraft.MagnetosCondition:F1}%). Queda imediata de rotação. Motor operando em contingência no magneto remanescente.",
                             IsCritical = false,
-                            SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
+                            SimEventName = "" // Mantido por EnforceActiveFailures (chave não volta para BOTH)
                         });
                     }
                 }
@@ -1016,7 +1114,7 @@ namespace FlightCareer.UI.Services
 
                     if (data.StarterActive > 0.5 && _primeTimerSeconds >= 6.0)
                     {
-                        double backfireChance = CalculateFireChance(aircraft.EngineCondition, 1.2);
+                        double backfireChance = ChanceOverInterval(CalculateFireChance(aircraft.EngineCondition, 1.2), deltaTimeHours * 3600.0);
                         if (backfireChance > 0.0 && _random.NextDouble() < backfireChance && !_activeFailures.Contains(FailureType.EngineFire))
                         {
                             TriggerFailure(new FailureRecord
@@ -1044,7 +1142,7 @@ namespace FlightCareer.UI.Services
                 {
                     if ((data.ConditionLever > 10.0 && data.EngineN1 < 12.0) || data.TurboITT > 1000.0)
                     {
-                        double hotStartChance = CalculateFireChance(aircraft.EngineCondition, 1.5);
+                        double hotStartChance = ChanceOverInterval(CalculateFireChance(aircraft.EngineCondition, 1.5), deltaTimeHours * 3600.0);
                         if (hotStartChance > 0.0 && _random.NextDouble() < hotStartChance && !_activeFailures.Contains(FailureType.EngineFire))
                         {
                             TriggerFailure(new FailureRecord
@@ -1064,7 +1162,7 @@ namespace FlightCareer.UI.Services
                 {
                     if (data.TailwindComponentKnots > 10.0)
                     {
-                        double tailwindChance = CalculateFireChance(aircraft.EngineCondition, 1.0);
+                        double tailwindChance = ChanceOverInterval(CalculateFireChance(aircraft.EngineCondition, 1.0), deltaTimeHours * 3600.0);
                         if (tailwindChance > 0.0 && _random.NextDouble() < tailwindChance && !_activeFailures.Contains(FailureType.EngineFire))
                         {
                             TriggerFailure(new FailureRecord
@@ -1098,7 +1196,7 @@ namespace FlightCareer.UI.Services
                         Title = "FALHA ELÉTRICA (ALTERNADOR #1)",
                         Description = "Perda de geração elétrica por queima do diodo retificador ou sobretensão. Barramento transferido exclusivamente para a bateria.",
                         IsCritical = false,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = "" // Sem evento nativo; ALT de verdade é mantido desligado por EnforceActiveFailures
                     });
                 }
             }
@@ -1169,13 +1267,14 @@ namespace FlightCareer.UI.Services
                         Title = "TRAVAMENTO DE FLAPS",
                         Description = "Falha mecânica de fuso ou disjuntor atuado nos motores de flap. Hipersustentadores travados na posição.",
                         IsCritical = false,
-                        SimEventName = "FLAPS_UP"
+                        SimEventName = "" // Alavanca mantida na posição travada por EnforceActiveFailures
                     });
                 }
             }
 
             // 6. Despressurização de Cabine (Altitude > 12.000 ft e cabine subindo)
-            if (!_activeFailures.Contains(FailureType.CabinDepressurization) && !data.IsOnGround && data.Altitude > 12000.0 && data.CabinAltitude > 10000.0)
+            // Só faz sentido em aeronave pressurizada: em não pressurizada a altitude de cabine é igual à real
+            if (_observedPressurization && !_activeFailures.Contains(FailureType.CabinDepressurization) && !data.IsOnGround && data.Altitude > 12000.0 && data.CabinAltitude > 10000.0)
             {
                 if (aircraft.AirframeCondition < 65.0)
                 {
@@ -1185,7 +1284,7 @@ namespace FlightCareer.UI.Services
                         Title = "DESPRESSURIZAÇÃO DA CABINE",
                         Description = $"Altitude de cabine anormal ({data.CabinAltitude:F0} ft) por falha de vedação ou válvula outflow travada. Inicie descida imediata para o FL100.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = "" // Sem evento nativo; ALT de verdade é mantido desligado por EnforceActiveFailures
                     });
                 }
             }
@@ -1232,7 +1331,7 @@ namespace FlightCareer.UI.Services
                     Title = "ESTOURO DE PNEU EM ROLAGEM",
                     Description = $"{cause}. Manobra de pista comprometida; mantenha o controle direcional com leme.",
                     IsCritical = true,
-                    SimEventName = "TOGGLE_TIRE_FAILURE"
+                    SimEventName = "" // Sem evento nativo de pneu/trem no SimConnect
                 });
             }
         }
@@ -1300,7 +1399,7 @@ namespace FlightCareer.UI.Services
                     Title = "ESTOURO DE PNEU NO POUSO (BLOWOUT)",
                     Description = $"Deslaminação de carcaça / rompimento de câmara de ar durante o toque com a pista ({touchdownFPM:F0} FPM). Mantenha o eixo e controle direcional.",
                     IsCritical = true,
-                    SimEventName = "TOGGLE_TIRE_FAILURE"
+                    SimEventName = "" // Sem evento nativo de pneu/trem no SimConnect
                 });
             }
         }
@@ -1326,7 +1425,7 @@ namespace FlightCareer.UI.Services
                         Title = "COLAPSO ESTRUTURAL DE TREM DE POUSO",
                         Description = $"Fratura de pino mestre / tesoura de amortecedor por estresse lateral violento ({lateralStress:F1} fps laterais) no pouso com vento cruzado. A perna de trem recolheu no impacto.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_TIRE_FAILURE"
+                        SimEventName = "" // Sem evento nativo de pneu/trem no SimConnect
                     });
                 }
             }
@@ -1375,6 +1474,10 @@ namespace FlightCareer.UI.Services
                 _fireCoolingTimerSeconds = 0.0;
                 _simConnect.SetEngineFire(true);
             }
+            else if (record.Type == FailureType.FlapLock)
+            {
+                _lockedFlapsHandle = NormalizeFlapsHandle(_lastData.FlapsHandlePercent);
+            }
             else if (record.Type == FailureType.OilLeak && _oilLeakedPercent > 0)
             {
                 _simConnect.SetOilLeakedPercent(_oilLeakedPercent);
@@ -1410,7 +1513,7 @@ namespace FlightCareer.UI.Services
                         Title = "ESTOURO DE PNEU",
                         Description = "Estouro forçado via painel de testes/controle.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_TIRE_FAILURE"
+                        SimEventName = "" // Sem evento nativo de pneu/trem no SimConnect
                     });
                     break;
                 case FailureType.GearCollapse:
@@ -1420,7 +1523,7 @@ namespace FlightCareer.UI.Services
                         Title = "COLAPSO DE TREM DE POUSO",
                         Description = "Colapso mecânico forçado da perna do trem.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_TIRE_FAILURE"
+                        SimEventName = "" // Sem evento nativo de pneu/trem no SimConnect
                     });
                     break;
                 case FailureType.AlternatorFailure:
@@ -1430,7 +1533,7 @@ namespace FlightCareer.UI.Services
                         Title = "FALHA DE ALTERNADOR",
                         Description = "Falha elétrica forçada via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = "" // Sem evento nativo; ALT de verdade é mantido desligado por EnforceActiveFailures
                     });
                     break;
                 case FailureType.VacuumFailure:
@@ -1470,7 +1573,7 @@ namespace FlightCareer.UI.Services
                         Title = "TRAVAMENTO DE FLAPS",
                         Description = "Falha mecânica de flap forçada via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = "FLAPS_UP"
+                        SimEventName = "" // Alavanca mantida na posição travada por EnforceActiveFailures
                     });
                     break;
                 case FailureType.CabinDepressurization:
@@ -1480,18 +1583,19 @@ namespace FlightCareer.UI.Services
                         Title = "DESPRESSURIZAÇÃO DA CABINE",
                         Description = "Despressurização forçada via painel de testes/controle.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = "" // Sem evento nativo; ALT de verdade é mantido desligado por EnforceActiveFailures
                     });
                     break;
                 case FailureType.MagnetoFailure:
                     bool leftFailed = _random.Next(2) == 0;
+                    _failedMagnetoIsLeft = leftFailed;
                     TriggerFailure(new FailureRecord
                     {
                         Type = FailureType.MagnetoFailure,
                         Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
                         Description = "Falha forçada de magneto/ignição via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
+                        SimEventName = "" // Mantido por EnforceActiveFailures (chave não volta para BOTH)
                     });
                     break;
                 case FailureType.CarbIcing:

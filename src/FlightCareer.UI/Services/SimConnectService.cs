@@ -1,5 +1,6 @@
 using Microsoft.FlightSimulator.SimConnect;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -12,6 +13,7 @@ namespace FlightCareer.UI.Services
     public enum DATA_REQUESTS { RequestTelemetry }
     public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState }
     public enum EVENTS { FailureEvent, CrashedEvent }
+    public enum GROUPS : uint { Default = 1 }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct SimDoubleValue
@@ -171,6 +173,14 @@ namespace FlightCareer.UI.Services
                 // 12. Simulação e Tempo (1 double)
                 AddToDef("SIMULATION RATE", "number");
 
+                // 13. Estado de Falhas e Chaves para Enforcement (6 doubles)
+                AddToDef("PARTIAL PANEL VACUUM", "Enum");
+                AddToDef("PARTIAL PANEL PITOT", "Enum");
+                AddToDef("PARTIAL PANEL STATIC", "Enum");
+                AddToDef("RECIP ENG LEFT MAGNETO:1", "Bool");
+                AddToDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
+                AddToDef("GENERAL ENG MASTER ALTERNATOR:1", "Bool");
+
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
                 // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
@@ -229,17 +239,82 @@ namespace FlightCareer.UI.Services
             {
                 _simConnect.Dispose();
                 _simConnect = null;
+                _mappedEvents.Clear();
+                _nextEventId = FirstDynamicEventId;
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
         }
 
+        // O SimConnect não permite remapear um mesmo ID de evento cliente: cada evento
+        // do simulador recebe seu próprio ID, mapeado uma única vez por conexão.
+        private const uint FirstDynamicEventId = 1000;
+        private readonly Dictionary<string, uint> _mappedEvents = new(StringComparer.OrdinalIgnoreCase);
+        private uint _nextEventId = FirstDynamicEventId;
+
+        // Eventos de falha do SimConnect que funcionam como toggle (enviar duas vezes = reparar).
+        private static readonly string[] ToggleFailureEvents =
+        {
+            "TOGGLE_ENGINE1_FAILURE",
+            "TOGGLE_VACUUM_FAILURE",
+            "TOGGLE_PITOT_BLOCKAGE",
+            "TOGGLE_STATIC_PORT_BLOCKAGE"
+        };
+
+        public void SendEvent(string eventName, uint data = 0)
+        {
+            if (_simConnect == null || string.IsNullOrWhiteSpace(eventName)) return;
+            try
+            {
+                if (!_mappedEvents.TryGetValue(eventName, out uint id))
+                {
+                    id = _nextEventId++;
+                    _simConnect.MapClientEventToSimEvent((EVENTS)id, eventName);
+                    _mappedEvents[eventName] = id;
+                }
+
+                _simConnect.TransmitClientEvent(SimConnect.SIMCONNECT_OBJECT_ID_USER, (EVENTS)id, data,
+                    (GROUPS)SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SendEvent({eventName}) Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Estado atual de uma falha do tipo toggle no simulador.
+        /// null = o simulador não expõe uma SimVar confiável para esse evento.
+        /// </summary>
+        private bool? IsToggleFailureActive(string eventName) => eventName.ToUpperInvariant() switch
+        {
+            "TOGGLE_ENGINE1_FAILURE" => CurrentData.IsEngineFailed,
+            "TOGGLE_VACUUM_FAILURE" => CurrentData.PartialPanelVacuum > 0.5,
+            "TOGGLE_PITOT_BLOCKAGE" => CurrentData.PartialPanelPitot > 0.5,
+            "TOGGLE_STATIC_PORT_BLOCKAGE" => CurrentData.PartialPanelStatic > 0.5,
+            _ => null
+        };
+
         public void SetFailure(string eventName)
         {
+            // Evita que um segundo TOGGLE repare uma falha que o simulador já reporta como ativa
+            if (IsToggleFailureActive(eventName) == true) return;
+            SendEvent(eventName);
+        }
+
+        /// <summary>
+        /// Desfaz no simulador as falhas toggle que ainda estão ativas (início de um novo voo).
+        /// Só re-envia o toggle quando a SimVar confirma a falha, para não criar uma falha nova.
+        /// </summary>
+        public void ClearSimFailures()
+        {
             if (_simConnect == null) return;
-            _simConnect.MapClientEventToSimEvent(EVENTS.FailureEvent, eventName);
-            
-            _simConnect.TransmitClientEvent(SimConnect.SIMCONNECT_OBJECT_ID_USER, EVENTS.FailureEvent, 1, 
-                (SIMCONNECT_PERIOD)0, (SIMCONNECT_EVENT_FLAG)0);
+            foreach (var eventName in ToggleFailureEvents)
+            {
+                if (IsToggleFailureActive(eventName) == true)
+                {
+                    SendEvent(eventName);
+                }
+            }
         }
 
         public void SetEngineFire(bool isOnFire)

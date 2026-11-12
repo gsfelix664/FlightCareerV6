@@ -16,6 +16,7 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<Mission> Missions { get; set; }
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<MarketListing> MarketListings { get; set; }
+        public DbSet<AircraftComponent> AircraftComponents { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -32,6 +33,16 @@ namespace FlightCareer.Infrastructure.Persistence
                 .HasMany(p => p.Hangar)
                 .WithOne(pa => pa.Pilot)
                 .HasForeignKey(pa => pa.PilotId);
+
+            modelBuilder.Entity<PilotAircraft>()
+                .HasMany(pa => pa.Components)
+                .WithOne(c => c.PilotAircraft)
+                .HasForeignKey(c => c.PilotAircraftId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftComponent>()
+                .HasIndex(c => new { c.PilotAircraftId, c.Kind })
+                .IsUnique();
 
             modelBuilder.Entity<Airport>()
                 .HasIndex(a => a.ICAO)
@@ -144,7 +155,22 @@ namespace FlightCareer.Infrastructure.Persistence
                     FOREIGN KEY (AircraftTypeId) REFERENCES AircraftTypes(Id)
                 );",
                 "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsSold ON MarketListings(IsSold);",
-                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);"
+                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);",
+
+                // Barras de saúde por componente (motor, óleo, ignição/seção quente, elétrico, trem, pneus, freios, célula)
+                @"CREATE TABLE IF NOT EXISTS AircraftComponents (
+                    Id TEXT NOT NULL CONSTRAINT PK_AircraftComponents PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    Kind INTEGER NOT NULL,
+                    Health REAL NOT NULL,
+                    HoursSinceOverhaul REAL NOT NULL,
+                    CyclesSinceOverhaul INTEGER NOT NULL,
+                    LastInspectionAirframeHours REAL NOT NULL,
+                    InspectionPrecision REAL NOT NULL,
+                    InspectionBias REAL NOT NULL,
+                    CONSTRAINT FK_AircraftComponents_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
+                );",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftComponents_PilotAircraftId_Kind ON AircraftComponents(PilotAircraftId, Kind);"
             };
 
             foreach (var stmt in migrationStatements)
