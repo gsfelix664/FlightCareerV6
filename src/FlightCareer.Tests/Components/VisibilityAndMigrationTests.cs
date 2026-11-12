@@ -8,13 +8,13 @@ namespace FlightCareer.Tests.Components
     public class VisibilityAndMigrationTests
     {
         [Fact]
-        public void Catalogo_tem_8_componentes_por_classe_de_motor()
+        public void Catalogo_tem_9_componentes_por_classe_de_motor()
         {
             var piston = Catalog.For(EngineClass.Piston).Select(d => d.Kind).ToList();
             var turboprop = Catalog.For(EngineClass.Turboprop).Select(d => d.Kind).ToList();
 
-            Assert.Equal(8, piston.Count);
-            Assert.Equal(8, turboprop.Count);
+            Assert.Equal(9, piston.Count);
+            Assert.Equal(9, turboprop.Count);
             Assert.Contains(ComponentKind.Ignition, piston);
             Assert.DoesNotContain(ComponentKind.HotSection, piston);
             Assert.Contains(ComponentKind.HotSection, turboprop);
@@ -108,7 +108,7 @@ namespace FlightCareer.Tests.Components
 
             var comps = LegacyComponentMigrator.CreateComponents(aircraft, EngineClass.Piston, Catalog, new FixedRandom(0.5));
 
-            Assert.Equal(8, comps.Count);
+            Assert.Equal(9, comps.Count);
             Assert.All(comps, c => Assert.Equal(aircraft.Id, c.PilotAircraftId));
             Assert.Equal(72.0, comps.Get(ComponentKind.Engine).Health);
             Assert.Equal(500.0, comps.Get(ComponentKind.Engine).HoursSinceOverhaul, 6);

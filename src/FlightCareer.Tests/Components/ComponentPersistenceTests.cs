@@ -51,7 +51,7 @@ namespace FlightCareer.Tests.Components
                 await db.EnsureSchemaUpdatedAsync();
 
                 var provisioner = new AircraftComponentProvisioner(Catalog, new FixedRandom(0.5));
-                Assert.Equal(16, await provisioner.EnsureComponentsAsync(db));
+                Assert.Equal(18, await provisioner.EnsureComponentsAsync(db));
                 Assert.Equal(0, await provisioner.EnsureComponentsAsync(db)); // idempotente
             }
 
@@ -60,7 +60,7 @@ namespace FlightCareer.Tests.Components
                 var piston = await db.PilotAircrafts.Include(a => a.Components).SingleAsync(a => a.Id == pistonId);
                 var turboprop = await db.PilotAircrafts.Include(a => a.Components).SingleAsync(a => a.Id == turbopropId);
 
-                Assert.Equal(8, piston.Components.Count);
+                Assert.Equal(9, piston.Components.Count);
                 Assert.Contains(piston.Components, c => c.Kind == ComponentKind.Ignition && c.Health == 75.0);
                 Assert.Contains(piston.Components, c => c.Kind == ComponentKind.Oil && c.Health == 45.0);
                 Assert.Contains(turboprop.Components, c => c.Kind == ComponentKind.HotSection && c.Health == 95.0);

@@ -1,3 +1,4 @@
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
@@ -18,7 +19,9 @@ namespace FlightCareer.UI.Services
         private readonly SimConnectService _simConnect;
         private readonly FlightService _flightService;
         private readonly IDbContextFactory<Infrastructure.Persistence.AppDbContext> _contextFactory;
-        private readonly WearAndFailureService _wearService;
+        private readonly ComponentFlightSession _failures;
+        private readonly ComponentCatalog _catalog;
+        private readonly IRandomSource _random = new SystemRandomSource();
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
         private string _currentStatus = "PREPARAÇÃO";
@@ -56,19 +59,102 @@ namespace FlightCareer.UI.Services
         public event Action<PilotAircraft>? OnTotalLoss;
         public event Action? OnMonitoringCancelled;
 
-        public WearAndFailureService WearService => _wearService;
+        /// <summary>Desgaste e panes por componente do voo atual.</summary>
+        public ComponentFlightSession Failures => _failures;
 
         [ActivatorUtilitiesConstructor]
         public FlightMonitor(
-            SimConnectService simConnect, 
-            FlightService flightService, 
-            IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory)
+            SimConnectService simConnect,
+            FlightService flightService,
+            IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory,
+            ComponentCatalog catalog)
         {
             _simConnect = simConnect;
             _flightService = flightService;
             _contextFactory = contextFactory;
-            _wearService = new WearAndFailureService(simConnect);
-            _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
+            _catalog = catalog;
+            _failures = new ComponentFlightSession(simConnect, catalog, _random);
+            _failures.OnFailure += OnAircraftFailureTriggered;
+        }
+
+        /// <summary>
+        /// Carrega (ou cria) os componentes da aeronave, aplica reparos/danos feitos fora do voo nas colunas
+        /// antigas (Hangar, crash no pouso) e entrega cópias desanexadas para a sessão de voo.
+        /// </summary>
+        private void LoadFlightComponents(PilotAircraft aircraft)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var dbAircraft = context.PilotAircrafts
+                    .Include(a => a.AircraftType)
+                    .Include(a => a.Components)
+                    .FirstOrDefault(a => a.Id == aircraft.Id);
+
+                if (dbAircraft == null)
+                {
+                    _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
+                    return;
+                }
+
+                var engineClass = _catalog.ResolveEngineClass(dbAircraft.AircraftType);
+                var existingKinds = dbAircraft.Components.Select(c => c.Kind).ToHashSet();
+                var missing = LegacyComponentMigrator.CreateComponents(dbAircraft, engineClass, _catalog, _random)
+                    .Where(c => !existingKinds.Contains(c.Kind))
+                    .ToList();
+                if (missing.Count > 0) context.AircraftComponents.AddRange(missing);
+
+                var all = dbAircraft.Components.Concat(missing).Distinct().ToList();
+                LegacyConditionBridge.ReconcileFromLegacy(dbAircraft, all, _random, _catalog.Visibility);
+                LegacyConditionBridge.WriteToLegacy(dbAircraft, all);
+                context.SaveChanges();
+
+                var copies = all.Select(CloneComponent).ToList();
+                LegacyConditionBridge.WriteToLegacy(aircraft, copies);
+                _failures.Begin(copies, dbAircraft.AircraftType);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Componentes] Falha ao carregar componentes da aeronave: {ex.Message}");
+                _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
+            }
+        }
+
+        private static AircraftComponent CloneComponent(AircraftComponent c) => new()
+        {
+            Id = c.Id,
+            PilotAircraftId = c.PilotAircraftId,
+            Kind = c.Kind,
+            Health = c.Health,
+            HoursSinceOverhaul = c.HoursSinceOverhaul,
+            CyclesSinceOverhaul = c.CyclesSinceOverhaul,
+            LastInspectionAirframeHours = c.LastInspectionAirframeHours,
+            InspectionPrecision = c.InspectionPrecision,
+            InspectionBias = c.InspectionBias
+        };
+
+        /// <summary>Copia o estado dos componentes da sessão para as linhas do banco (no contexto informado).</summary>
+        private async Task SaveComponentsAsync(Infrastructure.Persistence.AppDbContext context)
+        {
+            if (_aircraft == null || _failures.Components.Count == 0) return;
+            var aircraftId = _aircraft.Id;
+            var dbComponents = await context.AircraftComponents.Where(c => c.PilotAircraftId == aircraftId).ToListAsync();
+            foreach (var c in _failures.Components)
+            {
+                var d = dbComponents.FirstOrDefault(x => x.Id == c.Id);
+                if (d == null) continue;
+                d.Health = c.Health;
+                d.HoursSinceOverhaul = c.HoursSinceOverhaul;
+                d.CyclesSinceOverhaul = c.CyclesSinceOverhaul;
+                d.LastInspectionAirframeHours = c.LastInspectionAirframeHours;
+                d.InspectionPrecision = c.InspectionPrecision;
+                d.InspectionBias = c.InspectionBias;
+            }
+        }
+
+        private void SyncLegacyConditions()
+        {
+            if (_aircraft != null) LegacyConditionBridge.WriteToLegacy(_aircraft, _failures.Components);
         }
 
         private Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
@@ -76,22 +162,16 @@ namespace FlightCareer.UI.Services
             return _contextFactory.CreateDbContextAsync();
         }
 
-        private void OnAircraftFailureTriggered(FailureRecord failure)
+        private void OnAircraftFailureTriggered(FlightFailureRecord failure)
         {
-            if (failure.Type == FailureType.EngineIFSD)
-            {
-                if (_aircraft != null)
-                {
-                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 10.0);
-                }
-                _engineFailureReportedInFlight = true;
-            }
-            else if (failure.Type == FailureType.EngineFire && failure.IsCritical)
+            // Panes que o próprio app aplicou no motor não devem ser tratadas como "pane nativa do MSFS"
+            if (failure.Effect is FailureEffect.EngineFailure or FailureEffect.EngineFire)
             {
                 _engineFailureReportedInFlight = true;
             }
             OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
-            _telemetryLogger.LogEvent("PANE_EM_VOO", $"{failure.Title} - {failure.Description}");
+            string tag = failure.Source == "Excedência" ? "EXCEDENCIA" : "PANE_EM_VOO";
+            _telemetryLogger.LogEvent(tag, $"[{failure.Source}] {failure.Title} - {failure.Description}");
         }
 
         public void StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
@@ -123,7 +203,8 @@ namespace FlightCareer.UI.Services
             _originIcao = pilot.CurrentAirportICAO;
 
             _simConnect.ResetCrashState();
-            _wearService.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior
+            LoadFlightComponents(aircraft);
+            _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
@@ -145,7 +226,7 @@ namespace FlightCareer.UI.Services
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
             _simConnect.ResetCrashState();
-            _wearService.Reset();
+            _failures.Reset();
             IsMonitoring = false;
             IsFlightActive = false;
             _startConditionTime = null;
@@ -174,8 +255,11 @@ namespace FlightCareer.UI.Services
                         dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                         dbAircraft.TiresCondition = _aircraft.TiresCondition;
                         dbAircraft.AvionicsCondition = _aircraft.AvionicsCondition;
+                        dbAircraft.MagnetosCondition = _aircraft.MagnetosCondition;
+                        dbAircraft.OilCondition = _aircraft.OilCondition;
                         dbAircraft.LandingsCount = _aircraft.LandingsCount;
-                        
+                        await SaveComponentsAsync(context);
+
                         // 2. Tentar localizar aeroporto mais próximo para salvar nova posição caso tenha se movido
                         string currentIcao = await GetNearestAirportICAO(lastData.Value.Latitude, lastData.Value.Longitude);
                         if (!string.IsNullOrEmpty(currentIcao))
@@ -226,6 +310,18 @@ namespace FlightCareer.UI.Services
             
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
+            _failures.ZeroAll();
+            SyncLegacyConditions();
+            try
+            {
+                await using var componentContext = await CreateDbContextAsync();
+                await SaveComponentsAsync(componentContext);
+                await componentContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving components on total loss: {ex.Message}");
+            }
             StopMonitoring();
             
             // Salvar estado de 0% no banco para garantir que a aeronave está "morta"
@@ -326,10 +422,9 @@ namespace FlightCareer.UI.Services
                 if (!_engineFailureReportedInFlight)
                 {
                     _engineFailureReportedInFlight = true;
-                    if (_aircraft != null)
-                    {
-                        _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 15.0);
-                    }
+                    // Pane do próprio MSFS (não aplicada pelo app): o motor sofreu dano real
+                    _failures.ClampHealth(FlightCareer.Domain.Components.ComponentKind.Engine, 15.0);
+                    SyncLegacyConditions();
                     OnAlert?.Invoke("FALHA MECÂNICA DE MOTOR", "O simulador reportou pane real no motor #1!", true);
                     _telemetryLogger.LogEvent("ENGINE_FAILED_MSFS", "Falha mecânica de motor reportada pelo MSFS");
                 }
@@ -372,7 +467,8 @@ namespace FlightCareer.UI.Services
                 double deltaHours = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalHours;
                 // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), não tempo de parede
                 deltaHours *= data.SimulationRate > 0 ? data.SimulationRate : 1.0;
-                _wearService.ProcessWear(_aircraft, data, deltaHours);
+                _failures.ProcessTick(data, deltaHours);
+                SyncLegacyConditions();
 
                 // Checar Perda Total
                 if (IsFlightActive && _aircraft.EngineCondition <= 0 && _aircraft.TiresCondition <= 0 && _aircraft.AirframeCondition <= 0)
@@ -408,7 +504,7 @@ namespace FlightCareer.UI.Services
                 {
                     _hasTouchedDown = true;
                     _qualityService.RecordTouchdownFpm(touchdownRate);
-                    if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+                    RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
 
                     _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
                     OnStatusChanged?.Invoke(_currentStatus);
@@ -419,7 +515,7 @@ namespace FlightCareer.UI.Services
                     if (data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
-                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, touchdownRate, data.VelocityBodyX);
+                        RegisterLanding(touchdownRate, data, isBounce: true);
                         _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
@@ -452,7 +548,7 @@ namespace FlightCareer.UI.Services
                     {
                         double fpm = Math.Abs(data.VelocityBodyY * 60.0);
                         _qualityService.RecordTouchdownFpm(fpm > 10 ? fpm : Math.Abs(data.VerticalSpeed));
-                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+                        RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
                     }
                     _ = FinalizeFlightAsync(data);
                 }
@@ -487,6 +583,15 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        /// <summary>Toque na pista: ciclo de trem/pneus/freios e dano por impacto. Bounce não conta como novo pouso.</summary>
+        private void RegisterLanding(double touchdownFpm, SimTelemetry data, bool isBounce)
+        {
+            if (_aircraft == null) return;
+            if (!isBounce) _aircraft.LandingsCount++;
+            _failures.ProcessLanding(touchdownFpm, data.VelocityBodyX, data.IsWetOrContaminatedSurface);
+            SyncLegacyConditions();
+        }
+
         private async Task UpdateHangarStateAsync(SimTelemetry data)
         {
             if (_aircraft == null || _pilot == null) return;
@@ -512,6 +617,7 @@ namespace FlightCareer.UI.Services
                     dbAircraft.HoursUntilNext500hInspection = _aircraft.HoursUntilNext500hInspection;
                     dbAircraft.EngineTboRemainingHours = _aircraft.EngineTboRemainingHours;
                     dbAircraft.LandingsCount = _aircraft.LandingsCount;
+                    await SaveComponentsAsync(context);
 
                     // Atualizar também o objeto local para garantir sincronia
                     _aircraft.FuelAmount = dbAircraft.FuelAmount;
@@ -567,7 +673,7 @@ namespace FlightCareer.UI.Services
             _hasTouchedDown = false;
             _engineFailureReportedInFlight = false;
             _simConnect.ResetCrashState();
-            _wearService.Reset(clearSimState: true);
+            _failures.Reset(clearSimState: true);
             _qualityService.Reset();
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
@@ -648,6 +754,19 @@ namespace FlightCareer.UI.Services
 
             double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
             double finalFuel = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+
+            // Componentes primeiro: o FlightService grava as colunas antigas (já sincronizadas) e as horas
+            try
+            {
+                SyncLegacyConditions();
+                await using var componentContext = await CreateDbContextAsync();
+                await SaveComponentsAsync(componentContext);
+                await componentContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving components at flight end: {ex.Message}");
+            }
 
             var outcome = await _flightService.ProcessFlightFinishAsync(
                 _pilot.Id,

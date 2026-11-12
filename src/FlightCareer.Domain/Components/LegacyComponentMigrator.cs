@@ -58,6 +58,7 @@ namespace FlightCareer.Domain.Components
             ComponentKind.Oil => a.OilCondition,
             ComponentKind.Ignition => a.MagnetosCondition,
             ComponentKind.Electrical => a.AvionicsCondition,
+            ComponentKind.Instruments => a.AvionicsCondition,
             ComponentKind.LandingGear => a.AirframeCondition,
             ComponentKind.Tires => a.TiresCondition,
             ComponentKind.Brakes => a.TiresCondition, // Antes pneus e freios eram uma barra só

@@ -33,7 +33,7 @@ namespace FlightCareer.Infrastructure.Services
             int created = 0;
             foreach (var a in aircraft)
             {
-                var engineClass = EngineClassResolver.FromAircraftType(a.AircraftType);
+                var engineClass = _catalog.ResolveEngineClass(a.AircraftType);
                 var existing = a.Components.Select(c => c.Kind).ToHashSet();
 
                 var missing = LegacyComponentMigrator

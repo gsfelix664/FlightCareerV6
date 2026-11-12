@@ -26,7 +26,7 @@ Carreira de aviação para **Microsoft Flight Simulator 2020/2024**: piloto e co
 | `FlightCareer.Domain` | Entidades, value objects, enums e **lógica pura** (sem EF, sem SimConnect, sem WPF) | `Entities/` (`PilotAircraft`, `AircraftComponent`, `SimTelemetry`...), `Components/` (desgaste e falhas novos), `Services/FlightQualityService` |
 | `FlightCareer.Application` | Casos de uso e interfaces | `Services/` (`FlightService`, `MissionGenerator`, `MissionRules`, `HubDataService`, economia, combustível), `Interfaces/` (`IAppDbContext`, `ISimConnectService`...), `DTOs/` |
 | `FlightCareer.Infrastructure` | Persistência e dados | `Persistence/AppDbContext`, `Services/` (`DataSeeder`, `MarketSimulationService`, `AircraftComponentProvisioner`...), `CSV/`, `Data/*.json` |
-| `FlightCareer.UI` | WPF: Views, ViewModels e serviços ligados ao simulador | `Services/SimConnectService`, `Services/FlightMonitor`, `Services/WearAndFailureService` (legado), `App.xaml.cs` (DI e inicialização) |
+| `FlightCareer.UI` | WPF: Views, ViewModels e serviços ligados ao simulador | `Services/SimConnectService`, `Services/FlightMonitor`, `Services/ComponentFlightSession` + `Services/SimFailureActuator` (desgaste e panes no voo), `App.xaml.cs` (DI e inicialização) |
 | `FlightCareer.Tests` | Testes xUnit | `Components/` (desgaste, falhas, saúde oculta, migração SQLite) |
 
 Dependências: `UI → Infrastructure → Application → Domain`. `Tests` referencia `Domain` e `Infrastructure`.
@@ -50,7 +50,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 1. **Antes de começar:** rode `git status` e `git log --oneline -5`. Se houver alterações não commitadas que você não fez, **não as altere nem as descarte**: pergunte ao usuário.
 2. **Uma tarefa = um branch** (`feat/...`, `fix/...`, `refactor/...`). Não commite direto no `main` sem o usuário pedir.
-3. **Arquivos quentes** (alto risco de conflito): `WearAndFailureService.cs`, `FlightMonitor.cs`, `SimConnectService.cs`, `SimTelemetry.cs`, `AppDbContext.cs`, `App.xaml.cs`, `MainViewModel.cs`, `BriefingViewModel.cs`. Mexa só no necessário e registre no CHANGELOG.
+3. **Arquivos quentes** (alto risco de conflito): `ComponentFlightSession.cs`, `SimFailureActuator.cs`, `component_catalog.json`, `FlightMonitor.cs`, `SimConnectService.cs`, `SimTelemetry.cs`, `AppDbContext.cs`, `App.xaml.cs`, `MainViewModel.cs`, `BriefingViewModel.cs`. Mexa só no necessário e registre no CHANGELOG.
 4. **Commits pequenos**, no padrão `tipo(escopo): descrição em português` (ex.: `fix(simconnect): ...`, `feat(components): ...`). Commit e push só quando o usuário pedir.
 5. **Ao terminar:** acrescente uma entrada no fim de `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (Agente)`) e, se mudou arquitetura ou o estado de um sistema, atualize a seção 7 deste arquivo.
 6. Não reescreva o trabalho do outro agente sem motivo técnico; se discordar de uma decisão, explique ao usuário em vez de reverter.
@@ -70,7 +70,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 ### SimConnect
 - **`SimTelemetry` e `AddToDef` precisam ter a mesma ordem.** O struct é lido por posição de memória: **só acrescente campos no fim**, nos dois lugares, com a mesma unidade.
 - **Eventos:** use `SimConnectService.SendEvent(nome, dado)`, que mapeia cada evento uma única vez. Não chame `MapClientEventToSimEvent` de novo com o mesmo ID.
-- **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos de alternador, pneu, trem, flap, magneto ou pressurização: esses efeitos são feitos forçando chaves/comandos a cada tick (`EnforceActiveFailures`) ou só no lado do app.
+- **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos de alternador, pneu, trem, flap, magneto ou pressurização: esses efeitos são feitos forçando chaves/comandos a cada tick (`SimFailureActuator`) ou só no lado do app (`effect: None`).
 - **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
 - **SimVars escritas pelo app:** `ENG ON FIRE:1` (`SetEngineFire`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`SetOilLeakedPercent`).
 - Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
@@ -84,19 +84,24 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ## 7. Estado atual dos sistemas
 
-### Desgaste e falhas — em migração
-- **Em uso no voo (legado):** `FlightCareer.UI/Services/WearAndFailureService.cs`, com colunas em `PilotAircraft` (`EngineCondition`, `OilCondition`, `MagnetosCondition`, `TiresCondition`, `AirframeCondition`, `AvionicsCondition`). Tem break check a cada 60 s (risco por minuto abaixo de 20%), fogo progressivo, vazamento de óleo e as correções de 2026-11-12.
-- **Novo (fase 1 concluída, ainda não ligado ao voo):** `FlightCareer.Domain/Components/`
-  - 8 componentes por aeronave (tabela `AircraftComponents`): Motor, Óleo, Ignição (pistão) **ou** Seção quente (turbina), Elétrico, Trem, Pneus, Freios, Célula.
-  - `WearEngine`: o desgaste natural chega a ~30% no fim da vida útil; 3× com manutenção vencida; faixas verde/amarela/vermelha por parâmetro; pousos; energia de frenagem; registros de excedência.
-  - `FailureEngine`: risco zero acima de 20%; abaixo, `λ = 0,02 · 100^((20−h)/20)` falhas/hora; um sorteio por componente; modo de falha escolhido por peso.
-  - `HealthVisibility`: o jogador vê uma faixa (±2% a cada 5 h desde a inspeção, máximo ±25%); o walkaround estreita para ±10%; a inspeção completa revela o valor exato.
-  - Eventos externos (bird strike, FOD, falha pós-manutenção) ficam **sempre ativos** e independem da saúde — a implementar na fase 2.
-- **Regra:** não adicione novas falhas ao `WearAndFailureService`. Lógica nova de desgaste/falhas vai para `Domain/Components` + catálogo JSON, com testes.
+### Desgaste e falhas — sistema por componentes (fases 1 e 2 concluídas)
+- **Domínio** (`FlightCareer.Domain/Components/`, calibrado em `Infrastructure/Data/component_catalog.json`):
+  - 9 componentes por aeronave (tabela `AircraftComponents`): Motor, Óleo, Ignição (pistão) **ou** Seção quente (turbina), Elétrico, Instrumentos (vácuo/pitot/estática), Trem, Pneus, Freios, Célula.
+  - `WearEngine`: o desgaste natural chega a ~30% no fim da vida útil; 3× com manutenção vencida; faixas verde/amarela/vermelha por parâmetro, com limites **por modelo** (`aircraftOverrides` no catálogo); pousos; energia de frenagem; registros de excedência.
+  - `FailureEngine`: risco zero acima de 20%; abaixo, `λ = 0,02 · 100^((20−h)/20)` falhas/hora; um sorteio por componente; modo de falha escolhido por peso. Cada modo tem `effect` (efeito no MSFS), `damage` e `damageKind`.
+  - `ExternalEventEngine` (sempre ativo, independe da saúde): bird strike, FOD, falha pós-manutenção (2 h ou 3 pousos após o serviço). Um de cada tipo por voo.
+  - `CarbIcingMonitor`: gelo no carburador **recuperável** (apaga em 90 s sem carb heat; 30 s de carb heat liberam o motor).
+  - `HealthVisibility`: faixa exibida (±2% a cada 5 h desde a inspeção, máximo ±25%; walkaround ±10%; inspeção completa = exato). **Ainda não aparece na UI** (fase 3).
+  - `LegacyConditionBridge`: ponte com as colunas antigas (ver abaixo).
+- **Voo** (`FlightCareer.UI/Services/`): `FlightMonitor` → `ComponentFlightSession` (orquestra o tick) → `SimFailureActuator` (eventos do SDK, fogo progressivo, vazamento de óleo, enforcement de magneto/alternador/flaps). O antigo `WearAndFailureService` foi **removido**.
+- **Colunas antigas** de `PilotAircraft` (`EngineCondition`, `OilCondition`, `MagnetosCondition`, `TiresCondition`, `AirframeCondition`, `AvionicsCondition`) continuam existindo porque Hangar, mercado, HUD e `FlightService` ainda as usam. Os componentes são a fonte da verdade:
+  - durante o voo, cada coluna recebe a **menor saúde** do seu grupo (ex.: `TiresCondition` = min(pneus, freios));
+  - no início do voo, mudanças feitas fora dele nas colunas (reparo/inspeção no Hangar, perda total) são aplicadas aos componentes (`ReconcileFromLegacy`).
+- **Regra:** lógica nova de desgaste/falhas vai para `Domain/Components` + catálogo JSON, com testes. Novo efeito no simulador = novo valor em `FailureEffect` + tratamento em `SimFailureActuator`.
+- **Removido na fase 2 (substituído por faixas de estresse e panes por componente):** incêndios de partida por backfire / vento de cauda / starter travado e os gatilhos diretos de vazamento de óleo por óleo frio, superaquecimento e over-RPM. O hot start continua como faixa vermelha da seção quente.
 - **Próximas fases:**
-  2. Ligar `WearEngine`/`FailureEngine` ao `FlightMonitor` no lugar do serviço legado; aplicar os efeitos no simulador; eventos externos; criar componentes ao comprar aeronave ou criar piloto; limites por aeronave no `aircrafts.csv`.
-  3. Hangar com as barras, as faixas ocultas, o walkaround e as inspeções.
-  4. Discrepâncias persistidas, MEL e manutenção com tempo parado.
+  3. Hangar com as barras por componente, as faixas ocultas, o walkaround, as inspeções e o reparo por componente (substituindo a ponte com as colunas antigas).
+  4. Discrepâncias persistidas entre voos, MEL e manutenção com tempo parado. Avaliar aviônicos (disjuntores por aeronave no MSFS 2024).
 
 ### Manutenção
 - Inspeções de 50 h (óleo), 100 h (interdita se vencida), 500 h (magnetos) e overhaul (TBO) no `HangarViewModel`. As horas são descontadas no fim do voo pelo `FlightService`.

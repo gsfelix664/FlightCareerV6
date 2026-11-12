@@ -1218,3 +1218,16 @@
 - Histórico movido para `docs/CHANGELOG.md`: removidas duas seções duplicadas e marcadas com ⚠️ as entradas que o código já superou.
 - Plano de W&B/detecção de aeronave movido para `docs/plans/`, com o checklist reaberto (não estava implementado no código).
 - `.gemini/gemini.md` virou ponteiro para o `gemini.md` da raiz (removida a regra contraditória "zero código direto"); `.antigravity` sem caminho fixo do `dotnet`; `@reviewer`/`@qa` exigem `dotnet build` **e** `dotnet test`.
+
+## 2026-11-12 - Sistema de Saúde por Componente, Fase 2: Integração ao Voo (Claude)
+- `FlightMonitor` passa a usar `ComponentFlightSession` + `SimFailureActuator`; o `WearAndFailureService` foi removido.
+- Novo componente **Instrumentos** (vácuo, pitot, estática), totalizando 9 por aeronave.
+- Cada modo de falha do catálogo ganhou `effect`, `effectValue`, `damage` e `damageKind`. Efeitos reais no MSFS: motor, fogo progressivo, vazamento de óleo, magnetos, alternador, pane elétrica (`TOGGLE_ELECTRICAL_FAILURE`), vácuo, pitot, estática, flaps travados, freio de um lado (estouro de pneu / perda de freio) e hidráulico (trem, só turbinas).
+- Eventos externos sempre ativos (`ExternalEventEngine`): bird strike, FOD, falha pós-manutenção.
+- Gelo no carburador reimplementado como recuperável (`CarbIcingMonitor`).
+- Limites por modelo no catálogo (`aircraftOverrides`): C152 (redline 2550, utilidade +4,4/−1,76 G), aviões de transporte (+2,5/−1,0 G), DA40NG/DA62 como pistão.
+- `SimConnectService`: `PARTIAL PANEL ELECTRICAL` no fim do `SimTelemetry`; toggles sem SimVar de estado (freios, hidráulico) rastreados por sessão e esquecidos no `FlightLoaded`; `ClearFailure` para recuperar o motor.
+- `LegacyConditionBridge`: as colunas antigas recebem a menor saúde de cada grupo durante o voo; reparos/inspeções/perda total feitos fora do voo são aplicados aos componentes no início do próximo voo.
+- Componentes salvos junto com o estado do hangar (a cada 60 s, cancelamento, perda total e fim de voo); aeronaves novas (compra/criação de piloto) recebem componentes no início do primeiro voo.
+- Removidos (substituídos por faixas de estresse e panes por componente): incêndios de partida por backfire, vento de cauda e starter travado; gatilhos diretos de vazamento de óleo.
+- Testes: 63 (catálogo, overrides, eventos externos, carb icing, ponte com colunas antigas). **Não testado no MSFS.**

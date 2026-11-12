@@ -21,6 +21,7 @@ namespace FlightCareer.Domain.Components
         private readonly ComponentCatalog _catalog;
         private readonly EngineClass _engineClass;
         private readonly EngineLimits _limits;
+        private readonly AirframeLimits _airframe;
 
         private double? _previousCht;
         private bool _wasEngineRunning;
@@ -28,10 +29,17 @@ namespace FlightCareer.Domain.Components
         private readonly HashSet<string> _activeRedStressors = new();
 
         public WearEngine(ComponentCatalog catalog, EngineClass engineClass)
+            : this(catalog, engineClass, catalog.LimitsFor(engineClass), catalog.AirframeLimits)
+        {
+        }
+
+        /// <summary>Usa limites específicos da aeronave (ver ComponentCatalog.ResolveLimits).</summary>
+        public WearEngine(ComponentCatalog catalog, EngineClass engineClass, EngineLimits limits, AirframeLimits airframe)
         {
             _catalog = catalog;
             _engineClass = engineClass;
-            _limits = catalog.LimitsFor(engineClass);
+            _limits = limits;
+            _airframe = airframe;
         }
 
         public EngineClass EngineClass => _engineClass;
@@ -155,7 +163,7 @@ namespace FlightCareer.Domain.Components
         private List<Stress> EvaluateStresses(SimTelemetry data, double dtHours)
         {
             var list = new List<Stress>();
-            var a = _catalog.AirframeLimits;
+            var a = _airframe;
             double dtSeconds = dtHours * 3600.0;
 
             // --- Motor de arranque (ciclo de trabalho) ---

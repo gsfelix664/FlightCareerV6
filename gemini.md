@@ -33,6 +33,6 @@ Fluxo: **investigar → planejar → implementar → `@reviewer` → relatório*
 
 ## 3. Pontos de atenção neste momento
 
-- O sistema de desgaste e falhas está em migração. **Não adicione falhas novas ao `WearAndFailureService`**: a lógica nova vai para `src/FlightCareer.Domain/Components/` + `component_catalog.json`, com testes (ver `AGENTS.md` › 7).
+- Desgaste e falhas usam o sistema por componentes (`src/FlightCareer.Domain/Components/` + `component_catalog.json`); o `WearAndFailureService` não existe mais. Lógica nova vai para o domínio, com testes (ver `AGENTS.md` › 7).
 - Para enviar eventos ao simulador use `SimConnectService.SendEvent`. Só use eventos que existem no SDK (lista em `AGENTS.md` › 6).
 - Campos novos em `SimTelemetry` entram **somente no fim** do struct e na mesma posição em `SimConnectService.Connect()`.

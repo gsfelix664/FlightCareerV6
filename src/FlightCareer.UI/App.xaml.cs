@@ -152,7 +152,8 @@ namespace FlightCareer.UI
             services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
                 sp.GetRequiredService<SimConnectService>(),
                 sp.GetRequiredService<FlightService>(),
-                sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
+                sp.GetRequiredService<IDbContextFactory<AppDbContext>>(),
+                sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
             services.AddSingleton<MetarService>(sp => new MetarService(
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 

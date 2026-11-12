@@ -12,7 +12,7 @@ namespace FlightCareer.UI.Services
 {
     public enum DATA_REQUESTS { RequestTelemetry }
     public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState }
-    public enum EVENTS { FailureEvent, CrashedEvent }
+    public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent }
     public enum GROUPS : uint { Default = 1 }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -181,6 +181,9 @@ namespace FlightCareer.UI.Services
                 AddToDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddToDef("GENERAL ENG MASTER ALTERNATOR:1", "Bool");
 
+                // 14. Estado de falha elétrica (1 double)
+                AddToDef("PARTIAL PANEL ELECTRICAL", "Enum");
+
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
                 // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
@@ -192,6 +195,16 @@ namespace FlightCareer.UI.Services
 
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
+
+                // Novo voo carregado no MSFS: o simulador zera as próprias falhas
+                _simConnect.SubscribeToSystemEvent(EVENTS.FlightLoadedEvent, "FlightLoaded");
+                _simConnect.OnRecvEventFilename += (s, e) =>
+                {
+                    if (e.uEventID == (uint)EVENTS.FlightLoadedEvent)
+                    {
+                        _untrackedToggles.Clear();
+                    }
+                };
 
                 _simConnect.OnRecvOpen += (s, e) => {
                     IsCrashed = false;
@@ -241,6 +254,7 @@ namespace FlightCareer.UI.Services
                 _simConnect = null;
                 _mappedEvents.Clear();
                 _nextEventId = FirstDynamicEventId;
+                _untrackedToggles.Clear();
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -257,8 +271,13 @@ namespace FlightCareer.UI.Services
             "TOGGLE_ENGINE1_FAILURE",
             "TOGGLE_VACUUM_FAILURE",
             "TOGGLE_PITOT_BLOCKAGE",
-            "TOGGLE_STATIC_PORT_BLOCKAGE"
+            "TOGGLE_STATIC_PORT_BLOCKAGE",
+            "TOGGLE_ELECTRICAL_FAILURE"
         };
+
+        // Toggles sem SimVar de estado (freios, hidráulico) enviados nesta sessão do simulador.
+        // São desfeitos em ClearSimFailures; esquecidos quando o MSFS carrega um novo voo (FlightLoaded).
+        private readonly HashSet<string> _untrackedToggles = new(StringComparer.OrdinalIgnoreCase);
 
         public void SendEvent(string eventName, uint data = 0)
         {
@@ -291,14 +310,31 @@ namespace FlightCareer.UI.Services
             "TOGGLE_VACUUM_FAILURE" => CurrentData.PartialPanelVacuum > 0.5,
             "TOGGLE_PITOT_BLOCKAGE" => CurrentData.PartialPanelPitot > 0.5,
             "TOGGLE_STATIC_PORT_BLOCKAGE" => CurrentData.PartialPanelStatic > 0.5,
+            "TOGGLE_ELECTRICAL_FAILURE" => CurrentData.PartialPanelElectrical > 0.5,
             _ => null
         };
 
         public void SetFailure(string eventName)
         {
             // Evita que um segundo TOGGLE repare uma falha que o simulador já reporta como ativa
-            if (IsToggleFailureActive(eventName) == true) return;
+            bool? active = IsToggleFailureActive(eventName);
+            if (active == true) return;
+            if (active == null)
+            {
+                if (_untrackedToggles.Contains(eventName)) return; // Já enviado nesta sessão do simulador
+                _untrackedToggles.Add(eventName);
+            }
             SendEvent(eventName);
+        }
+
+        /// <summary>Desfaz uma falha toggle (ex.: motor recuperado após gelo no carburador).</summary>
+        public void ClearFailure(string eventName)
+        {
+            bool? active = IsToggleFailureActive(eventName);
+            if (active == true || (active == null && _untrackedToggles.Remove(eventName)))
+            {
+                SendEvent(eventName);
+            }
         }
 
         /// <summary>
@@ -315,6 +351,12 @@ namespace FlightCareer.UI.Services
                     SendEvent(eventName);
                 }
             }
+
+            foreach (var eventName in _untrackedToggles.ToList())
+            {
+                SendEvent(eventName);
+            }
+            _untrackedToggles.Clear();
         }
 
         public void SetEngineFire(bool isOnFire)

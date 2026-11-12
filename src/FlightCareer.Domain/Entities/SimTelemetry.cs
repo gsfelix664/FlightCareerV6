@@ -94,6 +94,9 @@ namespace FlightCareer.Domain.Entities
         public double RightMagneto;          // RECIP ENG RIGHT MAGNETO:1 (1=On)
         public double MasterAlternator;      // GENERAL ENG MASTER ALTERNATOR:1 (1=On)
 
+        // Estado de falha elétrica (1 double)
+        public double PartialPanelElectrical; // PARTIAL PANEL ELECTRICAL (0=OK, 1=Falha)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;

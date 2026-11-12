@@ -251,9 +251,9 @@ namespace FlightCareer.UI.ViewModels
 
                 // Alertas e Crash
                 OverspeedWarning = data.OverspeedWarning > 0.5;
-                HasActiveFailure = _flightMonitor.WearService.HasFailures;
-                ActiveFailureText = _flightMonitor.WearService.HasFailures 
-                    ? $"⚠️ {_flightMonitor.WearService.LatestFailureSummary.ToUpper()}" 
+                HasActiveFailure = _flightMonitor.Failures.HasFailures;
+                ActiveFailureText = _flightMonitor.Failures.HasFailures 
+                    ? $"⚠️ {_flightMonitor.Failures.LatestFailureSummary.ToUpper()}" 
                     : string.Empty;
 
                 if (_simConnect.IsCrashed)

@@ -26,6 +26,36 @@ namespace FlightCareer.Domain.Components
         public Dictionary<EngineClass, EngineLimits> EngineLimits { get; set; } = new();
         public AirframeLimits AirframeLimits { get; set; } = new();
         public List<ComponentDefinition> Components { get; set; } = new();
+        public ExternalEventSettings ExternalEvents { get; set; } = new();
+        public CarbIcingSettings CarbIcing { get; set; } = new();
+
+        /// <summary>Ajustes por modelo de aeronave (limites e classe do motor), casados por trecho do nome do modelo.</summary>
+        public List<AircraftOverride> AircraftOverrides { get; set; } = new();
+
+        /// <summary>Primeiro override cujo trecho aparece no modelo (sem diferenciar maiúsculas).</summary>
+        public AircraftOverride? FindOverride(string? model)
+        {
+            if (string.IsNullOrWhiteSpace(model)) return null;
+            return AircraftOverrides.FirstOrDefault(o => o.Match.Any(m => model.Contains(m, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        /// <summary>Classe do motor: override do catálogo, senão a heurística por combustível/categoria.</summary>
+        public EngineClass ResolveEngineClass(Entities.AircraftType? type) =>
+            FindOverride(type?.Model)?.EngineClass ?? EngineClassResolver.FromAircraftType(type);
+
+        /// <summary>Limites de motor e célula da aeronave: padrão da classe + overrides do modelo.</summary>
+        public (EngineLimits Engine, AirframeLimits Airframe) ResolveLimits(string? model, EngineClass engineClass)
+        {
+            var engine = LimitsFor(engineClass).Clone();
+            var airframe = AirframeLimits.Clone();
+            var over = FindOverride(model);
+            if (over != null)
+            {
+                LimitOverrides.Apply(engine, over.EngineLimits);
+                LimitOverrides.Apply(airframe, over.AirframeLimits);
+            }
+            return (engine, airframe);
+        }
 
         public ComponentDefinition Get(ComponentKind kind) =>
             Components.FirstOrDefault(c => c.Kind == kind)
@@ -85,6 +115,12 @@ namespace FlightCareer.Domain.Components
                 }
                 if (def.FailureModes.Count == 0)
                     throw new InvalidDataException($"Componente {def.Kind} sem modos de falha.");
+            }
+
+            foreach (var over in AircraftOverrides)
+            {
+                LimitOverrides.Validate<EngineLimits>(over.EngineLimits);
+                LimitOverrides.Validate<AirframeLimits>(over.AirframeLimits);
             }
         }
     }
@@ -153,6 +189,111 @@ namespace FlightCareer.Domain.Components
         public double Weight { get; set; } = 1.0;
         public bool Critical { get; set; }
         public List<EngineClass>? AppliesTo { get; set; }
+
+        /// <summary>Efeito aplicado no simulador quando esta pane acontece.</summary>
+        public FailureEffect Effect { get; set; } = FailureEffect.None;
+
+        /// <summary>Parâmetro do efeito (ex.: taxa de vazamento de óleo em %/min).</summary>
+        public double EffectValue { get; set; }
+
+        /// <summary>Dano imediato (em %) aplicado quando a pane acontece.</summary>
+        public double Damage { get; set; }
+
+        /// <summary>Componente que recebe o dano imediato (padrão: o próprio componente).</summary>
+        public ComponentKind? DamageKind { get; set; }
+    }
+
+    public class AircraftOverride
+    {
+        /// <summary>Trechos do nome do modelo (ex.: "C152", "A320").</summary>
+        public List<string> Match { get; set; } = new();
+        public EngineClass? EngineClass { get; set; }
+        public Dictionary<string, double> EngineLimits { get; set; } = new();
+        public Dictionary<string, double> AirframeLimits { get; set; } = new();
+    }
+
+    /// <summary>Aplica overrides parciais (nome da propriedade → valor) sobre os limites padrão.</summary>
+    public static class LimitOverrides
+    {
+        private const System.Reflection.BindingFlags Flags =
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase;
+
+        public static void Apply<T>(T target, Dictionary<string, double> values) where T : class
+        {
+            foreach (var (name, value) in values)
+                typeof(T).GetProperty(name, Flags)?.SetValue(target, value);
+        }
+
+        public static void Validate<T>(Dictionary<string, double> values)
+        {
+            foreach (var name in values.Keys)
+            {
+                var prop = typeof(T).GetProperty(name, Flags);
+                if (prop == null || prop.PropertyType != typeof(double))
+                    throw new InvalidDataException($"Override inválido: {typeof(T).Name} não tem o limite '{name}'.");
+            }
+        }
+    }
+
+    public class ExternalEventSettings
+    {
+        public BirdStrikeSettings BirdStrike { get; set; } = new();
+        public FodSettings Fod { get; set; } = new();
+        public PostMaintenanceSettings PostMaintenance { get; set; } = new();
+    }
+
+    public class BirdStrikeSettings
+    {
+        public double MaxAltitudeFt { get; set; } = 3500.0;
+        public double MinAirspeedKts { get; set; } = 75.0;
+        /// <summary>Eventos/hora a 100 kt na faixa de altitude (escala com (IAS/100)²).</summary>
+        public double LambdaPerHourAt100Kts { get; set; } = 0.001;
+        public List<ExternalOutcome> Outcomes { get; set; } = new();
+    }
+
+    public class FodSettings
+    {
+        public double MinGroundSpeedKts { get; set; } = 25.0;
+        public double MinThrottlePercent { get; set; } = 65.0;
+        public double LambdaPerHour { get; set; } = 0.002;
+        public double WetMultiplier { get; set; } = 3.0;
+        public List<ExternalOutcome> Outcomes { get; set; } = new();
+    }
+
+    public class PostMaintenanceSettings
+    {
+        /// <summary>Janela após o serviço (horas de uso do componente) com risco de falha de montagem.</summary>
+        public double WindowHours { get; set; } = 2.0;
+        /// <summary>Janela para componentes medidos por ciclos (freios, pneus, trem): pousos desde o serviço.</summary>
+        public int WindowCycles { get; set; } = 3;
+        public double LambdaPerHour { get; set; } = 0.03;
+        public List<ExternalOutcome> Outcomes { get; set; } = new();
+    }
+
+    public class ExternalOutcome
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public ComponentKind Kind { get; set; }
+        public double Weight { get; set; } = 1.0;
+        public double DamageMin { get; set; }
+        public double DamageMax { get; set; }
+        public FailureEffect Effect { get; set; } = FailureEffect.None;
+        public double EffectValue { get; set; }
+        public bool Critical { get; set; }
+        public List<EngineClass>? AppliesTo { get; set; }
+    }
+
+    public class CarbIcingSettings
+    {
+        public double MaxCarbTemperature { get; set; } = 0.0;      // °C no venturi
+        public double MaxThrottlePercent { get; set; } = 45.0;
+        public double MinAmbientTemperature { get; set; } = -5.0;  // Faixa de ar úmido sem precipitação
+        public double MaxAmbientTemperature { get; set; } = 25.0;
+        public double WarningSeconds { get; set; } = 30.0;         // Aviso de gelo formando
+        public double StopSeconds { get; set; } = 90.0;            // Motor apaga
+        public double RecoverySeconds { get; set; } = 30.0;        // Carb heat ligado para recuperar
     }
 
     public class HazardSettings
@@ -205,6 +346,11 @@ namespace FlightCareer.Domain.Components
 
         /// <summary>Multiplicador de desgaste de pneus/freios em pista molhada ou contaminada.</summary>
         public double WetSurfaceMultiplier { get; set; } = 1.8;
+
+        /// <summary>Pouso duro pode trincar o cárter/retentor: chance cresce de 0 em OilLeakMinFpm até OilLeakChanceAt1000Fpm.</summary>
+        public double OilLeakMinFpm { get; set; } = 650.0;
+        public double OilLeakChanceAt1000Fpm { get; set; } = 0.5;
+        public double OilLeakRatePerMin { get; set; } = 3.5;
     }
 
     public class EngineLimits
@@ -234,6 +380,8 @@ namespace FlightCareer.Domain.Components
 
         // Elétrico
         public double MaxStarterSeconds { get; set; } = 30.0;  // Ciclo de trabalho do motor de arranque
+
+        public EngineLimits Clone() => (EngineLimits)MemberwiseClone();
     }
 
     public class AirframeLimits
@@ -242,5 +390,7 @@ namespace FlightCareer.Domain.Components
         public double MinG { get; set; } = -1.52;
         public double GCautionFraction { get; set; } = 0.85;   // Amarelo a partir de 85% do limite
         public double StructuralIceCautionPct { get; set; } = 10.0;
+
+        public AirframeLimits Clone() => (AirframeLimits)MemberwiseClone();
     }
 }

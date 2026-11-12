@@ -41,7 +41,7 @@ namespace FlightCareer.Domain.Components
             string fuel = type.FuelType ?? string.Empty;
             string category = type.Type ?? string.Empty;
 
-            if (ContainsAny(model, "DA62", "DA42", "DA40 NG")) return EngineClass.Piston; // Diesel a Jet A-1
+            if (ContainsAny(model, "DA62", "DA42", "DA40NG", "DA40 NG")) return EngineClass.Piston; // Diesel a Jet A-1
             if (ContainsAny(model, "PC-24", "Citation", "Phenom", "HondaJet", "Vision Jet", "Learjet")) return EngineClass.Jet;
             if (!fuel.Contains("Jet", StringComparison.OrdinalIgnoreCase)) return EngineClass.Piston;
             if (category.Contains("Comercial", StringComparison.OrdinalIgnoreCase)) return EngineClass.Jet;
@@ -67,7 +67,7 @@ namespace FlightCareer.Domain.Components
         public static bool IsInUse(ComponentKind kind, SimTelemetry data) => kind switch
         {
             ComponentKind.Engine or ComponentKind.Oil or ComponentKind.Ignition
-                or ComponentKind.HotSection or ComponentKind.Electrical => data.IsEngineRunning,
+                or ComponentKind.HotSection or ComponentKind.Electrical or ComponentKind.Instruments => data.IsEngineRunning,
             ComponentKind.Airframe => !data.IsOnGround,
             ComponentKind.LandingGear or ComponentKind.Tires or ComponentKind.Brakes => data.IsOnGround && data.GroundSpeed > 5.0,
             _ => false
