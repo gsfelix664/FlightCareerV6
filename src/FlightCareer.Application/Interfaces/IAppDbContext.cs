@@ -20,6 +20,7 @@ namespace FlightCareer.Application.Interfaces
         DbSet<AircraftComponent> AircraftComponents { get; }
 
         DatabaseFacade Database { get; }
+        Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker ChangeTracker { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

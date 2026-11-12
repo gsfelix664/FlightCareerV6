@@ -1,445 +1,495 @@
 <UserControl x:Class="FlightCareer.UI.Views.HangarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             mc:Ignorable="d" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
              d:DesignHeight="900" d:DesignWidth="1400">
     <UserControl.Resources>
-        <!-- Cores do Tema HTML -->
-        <SolidColorBrush x:Key="BgDarker" Color="#0F172A"/>
-        <SolidColorBrush x:Key="BgMain" Color="#1E293B"/>
-        <SolidColorBrush x:Key="CardBg" Color="#334155"/>
-        <SolidColorBrush x:Key="TextMain" Color="#F8FAFC"/>
-        <SolidColorBrush x:Key="TextMuted" Color="#94A3B8"/>
-        <SolidColorBrush x:Key="BorderColor" Color="#475569"/>
-        <SolidColorBrush x:Key="PrimaryBlue" Color="#3B82F6"/>
-        <SolidColorBrush x:Key="SuccessGreen" Color="#22C55E"/>
-        <SolidColorBrush x:Key="DangerRed" Color="#EF4444"/>
-        <SolidColorBrush x:Key="WarningOrange" Color="#F59E0B"/>
+        <!-- Paleta Avionics Dark (igual ao resto do app) -->
+        <SolidColorBrush x:Key="HgBase" Color="#0B0F14"/>
+        <SolidColorBrush x:Key="HgSurface" Color="#141C24"/>
+        <SolidColorBrush x:Key="HgHover" Color="#1F2B37"/>
+        <SolidColorBrush x:Key="HgBorder" Color="#263545"/>
+        <SolidColorBrush x:Key="HgText" Color="#F0F4F8"/>
+        <SolidColorBrush x:Key="HgText2" Color="#8B9BAE"/>
+        <SolidColorBrush x:Key="HgMuted" Color="#526375"/>
+        <SolidColorBrush x:Key="HgCyan" Color="#00E5FF"/>
+        <SolidColorBrush x:Key="HgGreen" Color="#00E676"/>
+        <SolidColorBrush x:Key="HgAmber" Color="#FFB300"/>
+        <SolidColorBrush x:Key="HgRed" Color="#FF5252"/>
+        <FontFamily x:Key="HgMono">JetBrains Mono, Consolas, monospace</FontFamily>
+        <FontFamily x:Key="HgSans">Inter, Segoe UI, sans-serif</FontFamily>
 
-        <!-- Estilo para os Cards -->
-        <Style x:Key="HangarCard" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBg}"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderColor}"/>
+        <Style x:Key="HgCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource HgSurface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource HgBorder}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="25"/>
-            <Setter Property="Margin" Value="0,0,0,20"/>
-            <Setter Property="Effect">
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20,18"/>
+            <Setter Property="Margin" Value="0,0,0,16"/>
+        </Style>
+
+        <Style x:Key="HgCardTitle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource HgText2}"/>
+            <Setter Property="FontFamily" Value="{StaticResource HgSans}"/>
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+
+        <Style x:Key="HgLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource HgText2}"/>
+            <Setter Property="FontFamily" Value="{StaticResource HgSans}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style x:Key="HgValue" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource HgText}"/>
+            <Setter Property="FontFamily" Value="{StaticResource HgMono}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Botões -->
+        <Style x:Key="HgButtonBase" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource HgText}"/>
+            <Setter Property="Background" Value="{StaticResource HgHover}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource HgBorder}"/>
+            <Setter Property="FontFamily" Value="{StaticResource HgSans}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="14,7"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bd" Property="Opacity" Value="0.35"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="HgPrimary" TargetType="Button" BasedOn="{StaticResource HgButtonBase}">
+            <Setter Property="Background" Value="{StaticResource HgCyan}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource HgCyan}"/>
+            <Setter Property="Foreground" Value="{StaticResource HgBase}"/>
+        </Style>
+        <Style x:Key="HgSecondary" TargetType="Button" BasedOn="{StaticResource HgButtonBase}"/>
+        <Style x:Key="HgDanger" TargetType="Button" BasedOn="{StaticResource HgButtonBase}">
+            <Setter Property="Background" Value="{StaticResource HgRed}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource HgRed}"/>
+            <Setter Property="Foreground" Value="{StaticResource HgBase}"/>
+        </Style>
+
+        <!-- Chip de informação do cabeçalho -->
+        <Style x:Key="HgChip" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource HgBase}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource HgBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="0,0,8,8"/>
+        </Style>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource BgMain}">
+    <Grid Background="{StaticResource HgBase}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- SIDEBAR: LISTA DE AERONAVES -->
-        <Grid Grid.Column="0" Background="{StaticResource BgDarker}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- ================= FROTA ================= -->
+        <Border Grid.Column="0" Background="{StaticResource HgSurface}" BorderBrush="{StaticResource HgBorder}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Padding="20">
-                <TextBlock Text="Minha Frota" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextMain}" HorizontalAlignment="Center"/>
-            </Border>
-
-            <ListBox Grid.Row="1" ItemsSource="{Binding Fleet}" SelectedItem="{Binding SelectedAircraft}" Background="Transparent" BorderThickness="0">
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border x:Name="ItemBorder" Padding="15,20" BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Background="Transparent" Cursor="Hand">
-                                        <Grid>
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding Prefix}" Foreground="{StaticResource TextMain}" FontWeight="SemiBold" FontSize="14" Margin="0,0,10,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                <TextBlock Text="-" Foreground="{StaticResource TextMuted}" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding Model}" Foreground="{StaticResource TextMain}" FontSize="13.5" TextTrimming="CharacterEllipsis" MaxWidth="150"/>
-                                            </StackPanel>
-                                            
-                                            <Border Grid.Column="1" Background="{StaticResource SuccessGreen}" CornerRadius="4" Padding="8,3" Margin="10,0,0,0">
-                                                <Border.Style>
-                                                    <Style TargetType="Border">
-                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Border.Style>
-                                                <TextBlock Text="ATIVA" FontSize="11" FontWeight="Bold" Foreground="White" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                            </Border>
-                                        </Grid>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="#1E293B"/>
-                                        </Trigger>
-                                        <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource CardBg}"/>
-                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource PrimaryBlue}"/>
-                                            <Setter TargetName="ItemBorder" Property="BorderThickness" Value="4,0,0,1"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-        </Grid>
-
-        <!-- ÁREA PRINCIPAL -->
-        <Grid Grid.Column="1" Margin="30">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- HEADER DA AERONAVE -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,30">
-                <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Padding="0,0,0,20">
+                <Border Grid.Row="0" BorderBrush="{StaticResource HgBorder}" BorderThickness="0,0,0,1" Padding="18,16">
                     <StackPanel>
-                        <Grid>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding SelectedAircraft.Prefix}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextMain}"/>
-                                <TextBlock Text=" | " FontSize="32" Foreground="{StaticResource BorderColor}" Margin="10,0"/>
-                                <TextBlock Text="{Binding SelectedAircraft.Model}" FontSize="32" FontWeight="SemiBold" Foreground="{StaticResource TextMain}"/>
-                            </StackPanel>
+                        <TextBlock Text="MINHA FROTA" Foreground="{StaticResource HgText}" FontFamily="{StaticResource HgSans}" FontSize="15" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding FleetCountText}" Style="{StaticResource HgLabel}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                <Button Command="{Binding DataContext.OpenFerryWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                        Cursor="Hand" Background="#141C24" BorderBrush="#263545" BorderThickness="1" Padding="12,8" Margin="0,0,10,0"
-                                        ToolTip="Planejar voo de translado ou reposicionar sua aeronave para outro aeródromo">
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="✈  " FontSize="12" Foreground="#00E5FF" VerticalAlignment="Center"/>
-                                        <TextBlock Text="VOO DE TRANSLADO (FERRY)" FontSize="11.5" FontWeight="Bold" Foreground="#F0F4F8" VerticalAlignment="Center" FontFamily="Inter, Segoe UI, sans-serif"/>
-                                    </StackPanel>
-                                </Button>
+                <ListBox Grid.Row="1" ItemsSource="{Binding Fleet}" SelectedItem="{Binding SelectedAircraft}"
+                         Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="item" Padding="16,12" BorderBrush="{StaticResource HgBorder}" BorderThickness="0,0,0,1" Background="Transparent" Cursor="Hand">
+                                            <StackPanel>
+                                                <Grid>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Prefix}" Foreground="{StaticResource HgText}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="14"/>
+                                                        <Border Background="{StaticResource HgBase}" CornerRadius="3" Padding="6,1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="{Binding Location}" Foreground="{StaticResource HgCyan}" FontFamily="{StaticResource HgMono}" FontSize="11"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <Border HorizontalAlignment="Right" Background="{StaticResource HgGreen}" CornerRadius="3" Padding="6,1"
+                                                            Visibility="{Binding IsActive, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="ATIVA" Foreground="{StaticResource HgBase}" FontSize="10" FontWeight="Bold" FontFamily="{StaticResource HgMono}"/>
+                                                    </Border>
+                                                </Grid>
+                                                <TextBlock Text="{Binding Model}" Foreground="{StaticResource HgText2}" FontSize="12.5" TextTrimming="CharacterEllipsis" Margin="0,3,0,6"/>
+                                                <Grid Height="5">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{Binding AirworthinessFill}"/>
+                                                        <ColumnDefinition Width="{Binding AirworthinessEmpty}"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.ColumnSpan="2" Background="{StaticResource HgBase}" CornerRadius="2.5"/>
+                                                    <Border Grid.Column="0" Background="{Binding AirworthinessBrush}" CornerRadius="2.5"/>
+                                                </Grid>
+                                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                                    <Ellipse Width="7" Height="7" Fill="{Binding StatusBrush}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                                    <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" FontSize="10.5" FontWeight="Bold" FontFamily="{StaticResource HgMono}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="item" Property="Background" Value="{StaticResource HgHover}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="item" Property="Background" Value="{StaticResource HgHover}"/>
+                                                <Setter TargetName="item" Property="BorderBrush" Value="{StaticResource HgCyan}"/>
+                                                <Setter TargetName="item" Property="BorderThickness" Value="3,0,0,1"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Grid>
+        </Border>
 
-                                <Button Padding="15,8" Command="{Binding SetActiveCommand}">
-                                    <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
-                                            <Setter Property="Content" Value="Definir como Ativa"/>
-                                            <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                                    <Setter Property="Content" Value="Aeronave Selecionada para Voo"/>
-                                                    <Setter Property="Background" Value="Transparent"/>
-                                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessGreen}"/>
-                                                    <Setter Property="BorderThickness" Value="2"/>
-                                                    <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
-                                                    <Setter Property="IsEnabled" Value="False"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Button.Style>
-                                </Button>
-                            </StackPanel>
-                        </Grid>
+        <!-- ================= AERONAVE SELECIONADA ================= -->
+        <Grid Grid.Column="1" Margin="24,20,24,0" DataContext="{Binding SelectedAircraft}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                        <WrapPanel Margin="0,15,0,0">
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="PAX: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.Aircraft.AircraftType.MaxPax}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="MOTOR: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.Aircraft.AircraftType.EngineType}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="VELOCIDADE: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.Aircraft.AircraftType.CruiseSpeedKts, StringFormat={}{0} KT}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="ALCANCE: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.Aircraft.AircraftType.RangeNM, StringFormat={}{0} NM}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="MTOW: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.MTOW, StringFormat={}{0:N0} LBS}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="COMBUSTÍVEL: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.FuelCapacity, StringFormat={}{0:F0} GAL}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold" Margin="0,0,5,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.FuelType, StringFormat=({0})}" Foreground="{StaticResource TextMuted}" FontSize="12"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="TBO: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.EngineTboRemainingHours, StringFormat={}{0:F0}h}" Foreground="{StaticResource TextMain}" FontSize="13.5" FontWeight="Bold" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{StaticResource BgDarker}" BorderBrush="{StaticResource BorderColor}" BorderThickness="1" CornerRadius="6" Padding="12,6" Margin="0,0,10,0">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="CABINE: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.Configuration}" Foreground="{StaticResource PrimaryBlue}" FontSize="13.5" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{Binding SelectedAircraft.StatusColor}" CornerRadius="6" Padding="12,6">
-                                <TextBlock Text="{Binding SelectedAircraft.StatusText}" Foreground="White" FontSize="12" FontWeight="Bold"/>
-                            </Border>
-                        </WrapPanel>
+            <!-- Cabeçalho -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,14">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Prefix}" Foreground="{StaticResource HgText}" FontFamily="{StaticResource HgMono}" FontSize="26" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding Model}" Foreground="{StaticResource HgText2}" FontFamily="{StaticResource HgSans}" FontSize="20" FontWeight="SemiBold" Margin="14,0,0,0" VerticalAlignment="Bottom"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button Style="{StaticResource HgSecondary}" Margin="0,0,8,0" Content="✈  VOO DE TRANSLADO"
+                                Command="{Binding DataContext.OpenFerryWindowCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                ToolTip="Planejar voo de translado para reposicionar a aeronave"/>
+                        <Button Command="{Binding DataContext.SetActiveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource HgPrimary}">
+                                    <Setter Property="Content" Value="DEFINIR COMO ATIVA"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                            <Setter Property="Content" Value="✓ AERONAVE ATIVA"/>
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="{StaticResource HgGreen}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource HgGreen}"/>
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <WrapPanel Margin="0,12,0,0">
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="LOCAL " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding Location}" Style="{StaticResource HgValue}" Foreground="{StaticResource HgCyan}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="MOTOR " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding EngineClassText}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="CÉLULA " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding AirframeHours, StringFormat={}{0:N1} h}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="POUSOS " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding LandingsCount}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="PAX " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding MaxPax}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="CRUZEIRO " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding CruiseSpeedKts, StringFormat={}{0} kt}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="ALCANCE " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding RangeNM, StringFormat={}{0} nm}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="MTOW " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding MTOW, StringFormat={}{0:N0} lbs}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="CABINE " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding Configuration}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                </WrapPanel>
+
+                <!-- Status -->
+                <Border Background="{StaticResource HgSurface}" BorderBrush="{Binding StatusBrush}" BorderThickness="4,1,1,1" CornerRadius="6" Padding="14,10" Margin="0,4,0,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusBrush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="13" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding StatusDetail}" Foreground="{StaticResource HgText2}" FontSize="12.5" Margin="14,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
             </StackPanel>
 
-            <!-- DASHBOARD GRID -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <UniformGrid Columns="2">
-                    <!-- CARD: MANUTENÇÃO CORRETIVA -->
-                    <Border Style="{StaticResource HangarCard}" Margin="0,0,20,20">
+            <!-- Conteúdo -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,6,0">
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" MinWidth="420"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="2*" MinWidth="300"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- ===== Componentes ===== -->
+                    <Border Grid.Column="0" Style="{StaticResource HgCard}" VerticalAlignment="Top">
                         <StackPanel>
-                            <TextBlock Text="🛠️ Manutenção e Reparos" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
-                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Margin="0,0,0,20"/>
-
-                            <StackPanel Margin="0,0,0,20">
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Motor" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.TargetEngineCondition, StringFormat={}{0:F0}%}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}"/>
-                                </Grid>
-                                <Slider Minimum="0" Maximum="100" Value="{Binding SelectedAircraft.TargetEngineCondition}" Foreground="{StaticResource PrimaryBlue}"/>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,20">
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Fuselagem" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.TargetAirframeCondition, StringFormat={}{0:F0}%}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}"/>
-                                </Grid>
-                                <Slider Minimum="0" Maximum="100" Value="{Binding SelectedAircraft.TargetAirframeCondition}" Foreground="{StaticResource PrimaryBlue}"/>
-                            </StackPanel>
-
-                            <StackPanel Margin="0,0,0,20">
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Pneus" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.TargetTiresCondition, StringFormat={}{0:F0}%}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}"/>
-                                </Grid>
-                                <Slider Minimum="0" Maximum="100" Value="{Binding SelectedAircraft.TargetTiresCondition}" Foreground="{StaticResource PrimaryBlue}"/>
-                            </StackPanel>
-
-                            <Button Content="Aplicar Reparos" Command="{Binding AuthorizeServicesCommand}" Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Height="45" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- CARD: MANUTENÇÃO REGULATÓRIA & TBO -->
-                    <Border Style="{StaticResource HangarCard}" Margin="0,0,0,20">
-                        <StackPanel>
-                            <TextBlock Text="📋 Inspeções Regulatórias &amp; TBO" FontSize="18.5" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
-                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Margin="0,0,0,15"/>
-
-                            <!-- TBO Motor -->
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="TBO Restante do Motor:" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.EngineTboRemainingHours, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                            <Grid Margin="0,0,0,14">
+                                <TextBlock Text="COMPONENTES" Style="{StaticResource HgCardTitle}" Margin="0"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button Style="{StaticResource HgSecondary}" Content="Walkaround" Margin="0,0,8,0"
+                                            Command="{Binding DataContext.WalkaroundCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            IsEnabled="{Binding CanService}"
+                                            ToolTip="Inspeção visual grátis: estima pneus, freios, trem, óleo e célula com ±10%"/>
+                                    <Button Style="{StaticResource HgPrimary}" Content="{Binding RepairAllText}" IsEnabled="{Binding HasRepairs}"
+                                            Command="{Binding DataContext.RepairAllCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 </StackPanel>
-                                <Button Content="Retífica TBO" Command="{Binding PerformOverhaulCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Style="{StaticResource NavButton}" Background="#D97706" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"
-                                        ToolTip="Restaura motor a 100% e TBO para 1.800h"/>
                             </Grid>
 
-                            <!-- Inspeção 50 Horas (Troca de Óleo &amp; Lubrificação) -->
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="Próxima Inspeção 50h (Troca de Óleo):" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                        <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext50hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                        <TextBlock Text=" | Saúde do Óleo: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                        <TextBlock Text="{Binding SelectedAircraft.OilCondition, StringFormat={}{0:F0}%}" Foreground="{Binding SelectedAircraft.OilColor}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Button Content="Fazer 50h ($850)" Command="{Binding Perform50hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"
-                                        ToolTip="Troca de óleo mineral/sintético, substituição de filtro e inspeção de limalhas"/>
-                            </Grid>
-
-                            <!-- Inspeção 100 Horas -->
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="Próxima Inspeção 100h (Obrigatória):" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext100hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                </StackPanel>
-                                <Button Content="Fazer 100h ($2.500)" Command="{Binding Perform100hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"/>
-                            </Grid>
-
-                            <!-- Inspeção 500 Horas (Magnetos & Velas) -->
-                            <Grid Margin="0,0,0,12">
-                                <StackPanel>
-                                    <TextBlock Text="Próxima Inspeção 500h (Magnetos &amp; Velas):" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
-                                        <TextBlock Text="{Binding SelectedAircraft.HoursUntilNext500hInspection, StringFormat={}{0:F1}h restantes}" Foreground="White" FontWeight="Bold" FontSize="14.5" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                        <TextBlock Text=" | Saúde: " Foreground="{StaticResource TextMuted}" FontSize="12.5" FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,0,0"/>
-                                        <TextBlock Text="{Binding SelectedAircraft.MagnetosCondition, StringFormat={}{0:F0}%}" Foreground="{Binding SelectedAircraft.MagnetosColor}" FontWeight="Bold" FontSize="13.5" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Button Content="Fazer 500h ($1.450)" Command="{Binding Perform500hInspectionCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                        Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"
-                                        ToolTip="Revisão geral dos magnetos, platinados e troca de velas"/>
-                            </Grid>
-
-                            <!-- Configuração de Cabine (Pax vs Carga) -->
-                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,5,0,0">
-                                <Grid>
+                            <!-- Resumo -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="{StaticResource HgBase}" CornerRadius="6" Padding="12,8" Margin="0,0,6,0"
+                                        ToolTip="Pior componente crítico: decide alertas e risco de pane">
                                     <StackPanel>
-                                        <TextBlock Text="Configuração da Cabine:" Foreground="{StaticResource TextMuted}" FontSize="12" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding SelectedAircraft.Configuration}" Foreground="{StaticResource PrimaryBlue}" FontWeight="Bold" FontSize="14.5"/>
+                                        <TextBlock Text="AERONAVEGABILIDADE" Style="{StaticResource HgLabel}" FontSize="10.5" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding AirworthinessText}" Style="{StaticResource HgValue}" FontSize="18" Foreground="{Binding AirworthinessBrush}"/>
                                     </StackPanel>
-                                    <Button Content="Converter ($1.200)" Command="{Binding ToggleConfigurationCommand}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                                            Style="{StaticResource NavButton}" Background="#374151" Foreground="White" Height="36" Padding="14,0" FontSize="12.5" FontWeight="Bold"/>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- CARD: ABASTECIMENTO -->
-                    <Border Style="{StaticResource HangarCard}" Margin="0,0,20,20">
-                        <StackPanel>
-                            <TextBlock Text="⛽ Abastecimento" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
-                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Margin="0,0,0,20"/>
-
-                            <Grid Margin="0,0,0,10">
-                                <TextBlock Text="Combustível:" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.FuelType}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
-                            <Grid Margin="0,0,0,10">
-                                <TextBlock Text="Preço por Galão:" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.FuelPricePerGallon, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
-                            <Grid Margin="0,0,0,20">
-                                <TextBlock Text="Nível Atual:" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.Aircraft.FuelAmount, StringFormat={}{0:F1} gal}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
-
-                            <StackPanel Margin="0,20,0,0">
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Abastecer até:" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                                    <TextBlock Text="{Binding SelectedAircraft.TargetFuel, StringFormat={}{0:F1} gal}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}"/>
-                                </Grid>
-                                <Slider Minimum="{Binding SelectedAircraft.Aircraft.FuelAmount}" Maximum="{Binding SelectedAircraft.FuelCapacity}" Value="{Binding SelectedAircraft.TargetFuel}" Foreground="{StaticResource PrimaryBlue}"/>
-                            </StackPanel>
-
-                            <TextBlock Text="{Binding SelectedAircraft.RefuelCost, StringFormat={}Custo: {0:C2}}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SuccessGreen}" HorizontalAlignment="Right" Margin="0,20,0,15"/>
-                            
-                            <Button Content="Confirmar Abastecimento" Command="{Binding AuthorizeServicesCommand}" Style="{StaticResource NavButton}" Background="{StaticResource PrimaryBlue}" Height="45" FontWeight="Bold"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- CARD: SEGURO -->
-                    <Border Style="{StaticResource HangarCard}" Margin="0,0,0,20">
-                        <StackPanel>
-                            <TextBlock Text="🛡️ Seguro da Aeronave" FontSize="18" FontWeight="Bold" Foreground="{StaticResource PrimaryBlue}" Margin="0,0,0,15"/>
-                            <Border BorderBrush="{StaticResource BorderColor}" BorderThickness="0,0,0,1" Margin="0,0,0,20"/>
-
-                            <Grid Margin="0,0,0,20">
-                                <TextBlock Text="Status da Apólice:" Foreground="{StaticResource TextMuted}"/>
-                                <Border HorizontalAlignment="Right" CornerRadius="5" Padding="10,5">
-                                    <Border.Style>
-                                        <Style TargetType="Border">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="True">
-                                                    <Setter Property="Background" Value="{StaticResource SuccessGreen}"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="False">
-                                                    <Setter Property="Background" Value="{StaticResource DangerRed}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Border.Style>
-                                    <TextBlock FontSize="12" FontWeight="Bold" Foreground="White">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="True">
-                                                        <Setter Property="Text" Value="ATIVO"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="False">
-                                                        <Setter Property="Text" Value="INATIVO"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                </Border>
+                                <Border Grid.Column="1" Background="{StaticResource HgBase}" CornerRadius="6" Padding="12,8" Margin="6,0,0,0"
+                                        ToolTip="Média ponderada de todos os componentes: decide o valor de mercado">
+                                    <StackPanel>
+                                        <TextBlock Text="CONDIÇÃO GERAL" Style="{StaticResource HgLabel}" FontSize="10.5" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding ConditionText}" Style="{StaticResource HgValue}" FontSize="18"/>
+                                    </StackPanel>
                                 </Border>
                             </Grid>
 
-                            <Grid Margin="0,0,0,10">
-                                <TextBlock Text="Prêmio Mensal:" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.InsurancePremium, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
-                            <Grid Margin="0,0,0,10">
-                                <TextBlock Text="Valor do Casco (Payout):" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.InsurancePayout, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
-                            <Grid Margin="0,0,0,25">
-                                <TextBlock Text="Franquia:" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock Text="{Binding SelectedAircraft.InsuranceDeductible, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Foreground="{StaticResource TextMain}" FontWeight="Bold"/>
-                            </Grid>
+                            <!-- Legenda -->
+                            <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
+                                       Text="Faixa clara = estimativa (ainda não inspecionado). Marcas em 20% e 30%: abaixo de 30% surgem sintomas; abaixo de 20% há risco de pane."/>
 
-                            <Button Command="{Binding BuyInsuranceCommand}" Height="45" FontWeight="Bold">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource NavButton}">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="True">
-                                                <Setter Property="Content" Value="Seguro Contratado"/>
-                                                <Setter Property="Background" Value="Transparent"/>
-                                                <Setter Property="BorderBrush" Value="{StaticResource SuccessGreen}"/>
-                                                <Setter Property="BorderThickness" Value="2"/>
-                                                <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding SelectedAircraft.IsInsured}" Value="False">
-                                                <Setter Property="Content" Value="Contratar Seguro"/>
-                                                <Setter Property="Background" Value="{StaticResource PrimaryBlue}"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <ItemsControl ItemsSource="{Binding Components}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource HgBorder}" BorderThickness="0,1,0,0" Padding="0,10">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                                                    <Grid>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Name}" Foreground="{StaticResource HgText}" FontFamily="{StaticResource HgSans}" FontWeight="SemiBold" FontSize="13"/>
+                                                            <Border Background="{StaticResource HgBase}" CornerRadius="3" Padding="5,0" Margin="8,0,0,0" VerticalAlignment="Center"
+                                                                    Visibility="{Binding IsCritical, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                                                    ToolTip="Componente crítico: entra na aeronavegabilidade">
+                                                                <TextBlock Text="CRÍTICO" Foreground="{StaticResource HgText2}" FontSize="9.5" FontWeight="Bold" FontFamily="{StaticResource HgMono}"/>
+                                                            </Border>
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding RangeText}" HorizontalAlignment="Right" Foreground="{Binding Brush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="13"/>
+                                                    </Grid>
+
+                                                    <!-- Barra com faixa oculta e marcas de 20% / 30% -->
+                                                    <Grid Height="9" Margin="0,6,0,5">
+                                                        <Border Background="{StaticResource HgBase}" CornerRadius="4.5"/>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="{Binding FillWidth}"/>
+                                                                <ColumnDefinition Width="{Binding BandWidth}"/>
+                                                                <ColumnDefinition Width="{Binding EmptyWidth}"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Border Grid.Column="0" Background="{Binding Brush}" CornerRadius="4.5,0,0,4.5"/>
+                                                            <Border Grid.Column="1" Background="{Binding Brush}" Opacity="0.3"/>
+                                                        </Grid>
+                                                        <Grid IsHitTestVisible="False">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="20*"/>
+                                                                <ColumnDefinition Width="10*"/>
+                                                                <ColumnDefinition Width="70*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Border Grid.Column="1" BorderBrush="#99FF5252" BorderThickness="1,0,0,0"/>
+                                                            <Border Grid.Column="2" BorderBrush="#99FFB300" BorderThickness="1,0,0,0"/>
+                                                        </Grid>
+                                                    </Grid>
+
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding LifeText}" Foreground="{Binding LifeBrush}" FontSize="11.5"/>
+                                                        <TextBlock Text="  ·  " Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
+                                                        <TextBlock Text="{Binding VisibilityText}" Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="1" Style="{StaticResource HgSecondary}" VerticalAlignment="Center" MinWidth="140"
+                                                        Content="{Binding RepairButtonText}" IsEnabled="{Binding CanRepair}"
+                                                        Command="{Binding RepairCommand}" CommandParameter="{Binding}"
+                                                        ToolTip="{Binding ServiceName}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
-                </UniformGrid>
+
+                    <!-- ===== Coluna direita ===== -->
+                    <StackPanel Grid.Column="2">
+
+                        <!-- Inspeções -->
+                        <Border Style="{StaticResource HgCard}">
+                            <StackPanel>
+                                <TextBlock Text="INSPEÇÕES E REVISÕES" Style="{StaticResource HgCardTitle}"/>
+
+                                <Grid Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Inspeção de 50 h (óleo)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext50hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush50h}"/>
+                                    </StackPanel>
+                                    <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text50h}" IsEnabled="{Binding CanService}"
+                                            Command="{Binding DataContext.Perform50hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="Troca de óleo e filtro; revela a saúde exata do motor e do óleo"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Inspeção de 100 h (obrigatória)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext100hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush100h}"/>
+                                    </StackPanel>
+                                    <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text100h}" IsEnabled="{Binding CanService}"
+                                            Command="{Binding DataContext.Perform100hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="Inspeção completa: revela a saúde exata de todos os componentes"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,12" Visibility="{Binding IsPiston, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <StackPanel>
+                                        <TextBlock Text="Revisão de 500 h (magnetos e velas)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext500hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush500h}"/>
+                                    </StackPanel>
+                                    <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text500h}" IsEnabled="{Binding CanService}"
+                                            Command="{Binding DataContext.Perform500hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                                </Grid>
+
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="TBO do motor" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding EngineTboRemainingHours, StringFormat={}{0:F0} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding BrushTbo}"/>
+                                    </StackPanel>
+                                    <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding TextOverhaul}" IsEnabled="{Binding CanService}"
+                                            Command="{Binding DataContext.PerformOverhaulCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            ToolTip="{Binding OverhaulTooltip}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Abastecimento -->
+                        <Border Style="{StaticResource HgCard}">
+                            <StackPanel>
+                                <TextBlock Text="ABASTECIMENTO" Style="{StaticResource HgCardTitle}"/>
+                                <Grid Margin="0,0,0,6">
+                                    <TextBlock Text="Nos tanques" Style="{StaticResource HgLabel}"/>
+                                    <TextBlock HorizontalAlignment="Right" Style="{StaticResource HgValue}">
+                                        <Run Text="{Binding FuelAmount, StringFormat={}{0:F1}, Mode=OneWay}"/><Run Text=" / "/><Run Text="{Binding FuelCapacity, StringFormat={}{0:F0} gal, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Margin="0,0,0,10">
+                                    <TextBlock Style="{StaticResource HgLabel}">
+                                        <Run Text="{Binding FuelType, Mode=OneWay}"/><Run Text=" · preço local"/>
+                                    </TextBlock>
+                                    <TextBlock Text="{Binding FuelPricePerGallon, StringFormat={}{0:C2}/gal}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/>
+                                </Grid>
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Abastecer até" Style="{StaticResource HgLabel}"/>
+                                    <TextBlock Text="{Binding TargetFuel, StringFormat={}{0:F1} gal}" HorizontalAlignment="Right" Style="{StaticResource HgValue}" Foreground="{StaticResource HgCyan}"/>
+                                </Grid>
+                                <Slider Minimum="0" Maximum="{Binding FuelCapacity}" Value="{Binding TargetFuel}" Margin="0,0,0,12" IsEnabled="{Binding CanService}"/>
+                                <Button Style="{StaticResource HgPrimary}" HorizontalAlignment="Stretch" Content="{Binding RefuelButtonText}" IsEnabled="{Binding CanRefuel}"
+                                        Command="{Binding DataContext.RefuelCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Seguro -->
+                        <Border Style="{StaticResource HgCard}">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,14">
+                                    <TextBlock Text="SEGURO" Style="{StaticResource HgCardTitle}" Margin="0"/>
+                                    <Border HorizontalAlignment="Right" Background="{Binding InsuranceBrush}" CornerRadius="3" Padding="7,1">
+                                        <TextBlock Text="{Binding InsuranceStatusText}" Foreground="{StaticResource HgBase}" FontSize="10.5" FontWeight="Bold" FontFamily="{StaticResource HgMono}"/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock Text="{Binding InsuranceExpiryText}" Style="{StaticResource HgLabel}" Margin="0,0,0,10"/>
+                                <Grid Margin="0,0,0,4"><TextBlock Text="Prêmio (30 dias)" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsurancePremium, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
+                                <Grid Margin="0,0,0,4"><TextBlock Text="Cobertura (casco)" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsurancePayout, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
+                                <Grid Margin="0,0,0,12"><TextBlock Text="Franquia" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsuranceDeductible, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
+                                <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Stretch" Content="{Binding InsuranceButtonText}" IsEnabled="{Binding CanService}"
+                                        Command="{Binding DataContext.BuyInsuranceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Cabine -->
+                        <Border Style="{StaticResource HgCard}">
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock Text="CONFIGURAÇÃO DA CABINE" Style="{StaticResource HgCardTitle}" Margin="0,0,0,6"/>
+                                    <TextBlock Text="{Binding Configuration}" Style="{StaticResource HgValue}" Foreground="{StaticResource HgCyan}"/>
+                                </StackPanel>
+                                <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding TextToggleConfiguration}" IsEnabled="{Binding CanService}"
+                                        Command="{Binding DataContext.ToggleConfigurationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </ScrollViewer>
 
-            <!-- OVERLAY DE PERDA TOTAL (CRASH) -->
-            <Border Grid.Row="1" Background="#CC0F172A" CornerRadius="12" Visibility="{Binding SelectedAircraft.IsCrashed, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <!-- Perda total -->
+            <Border Grid.Row="1" Background="#E60B0F14" CornerRadius="8"
+                    Visibility="{Binding IsCrashed, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="⚠ PERDA TOTAL DETECTADA" FontSize="36" FontWeight="Black" Foreground="{StaticResource DangerRed}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="A aeronave sofreu danos estruturais irreparáveis. O seguro deve ser acionado." FontSize="16" Foreground="{StaticResource TextMain}" HorizontalAlignment="Center" Margin="0,10,0,30"/>
+                    <TextBlock Text="PERDA TOTAL" FontSize="32" FontWeight="Black" FontFamily="{StaticResource HgMono}" Foreground="{StaticResource HgRed}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="A aeronave sofreu danos irreparáveis. Acione o seguro ou descarte-a." FontSize="14" Foreground="{StaticResource HgText}" HorizontalAlignment="Center" Margin="0,10,0,24"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Button Command="{Binding ClaimInsuranceCommand}" Content="ACIONAR SEGURO" Style="{StaticResource NavButton}" Background="{StaticResource SuccessGreen}" Foreground="White" FontWeight="Bold" Padding="30,15" Margin="0,0,20,0"/>
-                        <Button Command="{Binding ScrapAircraftCommand}" Content="DESCARTAR AERONAVE" Style="{StaticResource NavButton}" Background="{StaticResource DangerRed}" Foreground="White" FontWeight="Bold" Padding="30,15"/>
+                        <Button Style="{StaticResource HgPrimary}" Content="ACIONAR SEGURO" Padding="24,10" Margin="0,0,12,0"
+                                Command="{Binding DataContext.ClaimInsuranceCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        <Button Style="{StaticResource HgDanger}" Content="DESCARTAR AERONAVE" Padding="24,10"
+                                Command="{Binding DataContext.ScrapAircraftCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
+
+            <!-- Hangar vazio -->
+            <TextBlock Grid.RowSpan="2" Text="Nenhuma aeronave no hangar. Compre uma no Mercado." Foreground="{StaticResource HgText2}" FontSize="15"
+                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
         </Grid>
     </Grid>
 </UserControl>

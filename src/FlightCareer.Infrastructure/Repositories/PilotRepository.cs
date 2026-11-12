@@ -18,6 +18,7 @@ namespace FlightCareer.Infrastructure.Repositories
 
         public async Task<Pilot?> GetByIdAsync(Guid id)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             return await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(h => h.AircraftType)
@@ -27,6 +28,7 @@ namespace FlightCareer.Infrastructure.Repositories
 
         public async Task<IEnumerable<Pilot>> GetAllAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             return await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(h => h.AircraftType)

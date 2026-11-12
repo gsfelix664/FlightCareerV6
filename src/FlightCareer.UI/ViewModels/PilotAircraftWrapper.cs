@@ -1,162 +1,163 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Services;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Windows;
 using System.Windows.Media;
 
 namespace FlightCareer.UI.ViewModels
 {
+    /// <summary>
+    /// Aeronave do hangar para a UI: identificação, barras por componente (com saúde oculta),
+    /// status, inspeções, abastecimento e seguro.
+    /// </summary>
     public partial class PilotAircraftWrapper : ObservableObject
     {
-        public PilotAircraft Aircraft { get; }
+        private readonly ComponentCatalog _catalog;
 
-        public PilotAircraftWrapper(PilotAircraft aircraft)
+        public PilotAircraft Aircraft { get; }
+        public EngineClass EngineClass { get; }
+        public ObservableCollection<ComponentRowViewModel> Components { get; } = new();
+
+        public PilotAircraftWrapper(PilotAircraft aircraft, ComponentCatalog catalog, IRelayCommand<ComponentRowViewModel> repairCommand)
         {
             Aircraft = aircraft;
-            ResetOperations();
+            _catalog = catalog;
+            EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
+
+            var order = catalog.Components.Select(d => d.Kind).ToList();
+            foreach (var c in aircraft.Components.OrderBy(c => order.IndexOf(c.Kind)))
+            {
+                var def = catalog.Components.FirstOrDefault(d => d.Kind == c.Kind);
+                if (def == null || !def.AppliesTo.Contains(EngineClass)) continue;
+                Components.Add(new ComponentRowViewModel(c, def, catalog, EngineClass, PurchasePrice, aircraft.CurrentAirframeHours, repairCommand));
+            }
+
+            _targetFuel = aircraft.FuelAmount;
         }
 
-        public void ResetOperations()
-        {
-            TargetEngineCondition = Aircraft.EngineCondition;
-            TargetTiresCondition = Aircraft.TiresCondition;
-            TargetAirframeCondition = Aircraft.AirframeCondition;
-            TargetAvionicsCondition = Aircraft.AvionicsCondition;
-            TargetFuel = Aircraft.FuelAmount;
-            
-            OnPropertyChanged(nameof(RepairCostMotor));
-            OnPropertyChanged(nameof(RepairCostPneus));
-            OnPropertyChanged(nameof(RepairCostFuselagem));
-            OnPropertyChanged(nameof(RepairCostAvionicos));
-            OnPropertyChanged(nameof(RefuelCost));
-            OnPropertyChanged(nameof(TotalOperationCost));
-            OnPropertyChanged(nameof(IsInsured));
-            OnPropertyChanged(nameof(EngineTboRemainingHours));
-            OnPropertyChanged(nameof(HoursUntilNext50hInspection));
-            OnPropertyChanged(nameof(HoursUntilNext100hInspection));
-            OnPropertyChanged(nameof(HoursUntilNext500hInspection));
-            OnPropertyChanged(nameof(MagnetosCondition));
-            OnPropertyChanged(nameof(MagnetosColor));
-            OnPropertyChanged(nameof(OilCondition));
-            OnPropertyChanged(nameof(OilColor));
-            OnPropertyChanged(nameof(Cost500hInspection));
-            OnPropertyChanged(nameof(IsInterdicted));
-            OnPropertyChanged(nameof(InterdictionReason));
-            OnPropertyChanged(nameof(Configuration));
-            OnPropertyChanged(nameof(StatusText));
-            OnPropertyChanged(nameof(StatusColor));
-        }
-
+        // --- Identificação ---
         public string Prefix => Aircraft.Prefix;
         public string Model => Aircraft.AircraftType?.Model ?? "N/A";
         public double PurchasePrice => Aircraft.AircraftType?.PurchasePrice ?? 0;
         public double MTOW => AircraftWeightSpecs.GetMtow(Aircraft.AircraftType?.Model, Aircraft.AircraftType);
-        public double ZFW => AircraftWeightSpecs.GetEmptyWeight(Aircraft.AircraftType?.Model, Aircraft.AircraftType);
         public double FuelCapacity => Aircraft.AircraftType?.FuelTankGallons ?? 0;
-        public double Hobbs => Aircraft.CurrentAirframeHours;
         public string FuelType => Aircraft.AircraftType?.FuelType ?? "AVGAS";
+        public int MaxPax => Aircraft.AircraftType?.MaxPax ?? 0;
+        public int CruiseSpeedKts => Aircraft.AircraftType?.CruiseSpeedKts ?? 0;
+        public int RangeNM => Aircraft.AircraftType?.RangeNM ?? 0;
+        public string Location => string.IsNullOrEmpty(Aircraft.CurrentLocationICAO) ? "—" : Aircraft.CurrentLocationICAO;
+        public double AirframeHours => Aircraft.CurrentAirframeHours;
+        public int LandingsCount => Aircraft.LandingsCount;
+        public bool IsPiston => EngineClass == EngineClass.Piston;
+        public string EngineClassText => EngineClass switch
+        {
+            EngineClass.Piston => "PISTÃO",
+            EngineClass.Turboprop => "TURBOÉLICE",
+            _ => "JATO"
+        };
+        public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
+        public bool IsCargoConfig => Configuration.Contains("Carga");
 
-        // Manutenção Regulatória & TBO
+        [ObservableProperty] private bool _isActive;
+
+        // --- Saúde geral e status ---
+        private AircraftHealthSummary Summary =>
+            AircraftHealthSummary.Compute(Components.Select(r => r.Component), _catalog, EngineClass, Aircraft.CurrentAirframeHours);
+
+        public string AirworthinessText => Summary.DisplayedAirworthiness.ToString();
+        public string ConditionText => Summary.DisplayedCondition.ToString();
+        public double AirworthinessMid => Summary.DisplayedAirworthiness.Mid;
+        public SolidColorBrush AirworthinessBrush => HangarPalette.ForHealth(AirworthinessMid);
+        public GridLength AirworthinessFill => new(Math.Max(0, AirworthinessMid), GridUnitType.Star);
+        public GridLength AirworthinessEmpty => new(Math.Max(0, 100 - AirworthinessMid), GridUnitType.Star);
+
+        private AircraftStatus Status =>
+            AircraftStatusEvaluator.Evaluate(Aircraft, Components.Select(r => r.Component).ToList(), _catalog, EngineClass);
+
+        public AircraftStatusLevel StatusLevel => Status.Level;
+        public string StatusText => Status.Text;
+        public string StatusDetail => Status.Detail;
+        public SolidColorBrush StatusBrush => HangarPalette.ForStatus(Status.Level);
+        public bool IsCrashed => Status.Level == AircraftStatusLevel.Destroyed;
+        public bool CanService => !IsCrashed;
+
+        public double TotalRepairCost => Components.Sum(c => c.RepairCost);
+        public bool HasRepairs => TotalRepairCost > 0;
+        public string RepairAllText => HasRepairs ? $"Reparar tudo · {TotalRepairCost:C0}" : "Nada a reparar";
+
+        // --- Inspeções e TBO ---
         public double EngineTboRemainingHours => Math.Round(Aircraft.EngineTboRemainingHours, 1);
         public double HoursUntilNext50hInspection => Math.Round(Aircraft.HoursUntilNext50hInspection, 1);
         public double HoursUntilNext100hInspection => Math.Round(Aircraft.HoursUntilNext100hInspection, 1);
         public double HoursUntilNext500hInspection => Math.Round(Aircraft.HoursUntilNext500hInspection, 1);
-        public double MagnetosCondition => Math.Round(Aircraft.MagnetosCondition, 1);
-        public SolidColorBrush MagnetosColor => GetConditionColor(MagnetosCondition);
-        public double OilCondition => Math.Round(Aircraft.OilCondition, 1);
-        public SolidColorBrush OilColor => GetConditionColor(OilCondition);
         public bool IsInterdicted => Aircraft.IsInterdicted;
         public string InterdictionReason => Aircraft.InterdictionReason;
-        public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
-        public bool IsCargoConfig => Configuration.Contains("Carga");
 
-        // Custos Regulatórios
+        public SolidColorBrush Brush50h => DueBrush(HoursUntilNext50hInspection, 5);
+        public SolidColorBrush Brush100h => DueBrush(HoursUntilNext100hInspection, 10);
+        public SolidColorBrush Brush500h => DueBrush(HoursUntilNext500hInspection, 10);
+        public SolidColorBrush BrushTbo => DueBrush(EngineTboRemainingHours, 50);
+
+        private static SolidColorBrush DueBrush(double remaining, double warn) =>
+            remaining <= 0 ? HangarPalette.Red : remaining <= warn ? HangarPalette.Amber : HangarPalette.Green;
+
+        public double EngineLifeHours => _catalog.Get(ComponentKind.Engine).LifeHoursFor(EngineClass);
+
         public double Cost50hInspection => 850.0;
         public double Cost100hInspection => 2500.0;
         public double Cost500hInspection => 1450.0;
         public double CostOverhaul => Math.Max(25000.0, Math.Round(PurchasePrice * 0.20, 2));
         public double CostToggleConfiguration => 1200.0;
 
-        // Estado do Heatmap
-        public double EngineCondition => Aircraft.EngineCondition;
-        public double TiresCondition => Aircraft.TiresCondition;
-        public double AirframeCondition => Aircraft.AirframeCondition;
-        public double AvionicsCondition => Aircraft.AvionicsCondition;
+        public string Text50h => $"Fazer 50 h · {Cost50hInspection:C0}";
+        public string Text100h => $"Fazer 100 h · {Cost100hInspection:C0}";
+        public string Text500h => $"Fazer 500 h · {Cost500hInspection:C0}";
+        public string TextOverhaul => $"Retífica · {CostOverhaul:C0}";
+        public string TextToggleConfiguration => $"Converter · {CostToggleConfiguration:C0}";
+        public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";
 
-        public SolidColorBrush EngineColor => GetConditionColor(EngineCondition);
-        public SolidColorBrush TiresColor => GetConditionColor(TiresCondition);
-        public SolidColorBrush AirframeColor => GetConditionColor(AirframeCondition);
-        public SolidColorBrush AvionicsColor => GetConditionColor(AvionicsCondition);
-
-        // Sliders de Operação
-        [ObservableProperty] private double _targetEngineCondition;
-        [ObservableProperty] private double _targetTiresCondition;
-        [ObservableProperty] private double _targetAirframeCondition;
-        [ObservableProperty] private double _targetAvionicsCondition;
+        // --- Abastecimento ---
         [ObservableProperty] private double _targetFuel;
-
-        [ObservableProperty] private bool _isActive;
-
-        // Custos Dinâmicos
-        public double RepairCostMotor => MaintenanceService.CalculateRepairCost(PurchasePrice, "MOTOR", Math.Max(0, TargetEngineCondition - EngineCondition));
-        public double RepairCostPneus => MaintenanceService.CalculateRepairCost(PurchasePrice, "PNEUS", Math.Max(0, TargetTiresCondition - TiresCondition));
-        public double RepairCostFuselagem => MaintenanceService.CalculateRepairCost(PurchasePrice, "FUSELAGEM", Math.Max(0, TargetAirframeCondition - AirframeCondition));
-        public double RepairCostAvionicos => MaintenanceService.CalculateRepairCost(PurchasePrice, "AVIONICOS", Math.Max(0, TargetAvionicsCondition - AvionicsCondition));
-        
+        public double FuelAmount => Aircraft.FuelAmount;
         public double FuelPricePerGallon => FuelPriceService.GetCurrentPrice(FuelType);
-        public double RefuelCost => Math.Max(0, TargetFuel - Aircraft.FuelAmount) * FuelPricePerGallon;
-        
-        // Informações de Seguro
+        public double RefuelGallons => Math.Max(0, TargetFuel - Aircraft.FuelAmount);
+        public double RefuelCost => RefuelGallons * FuelPricePerGallon;
+        public bool CanRefuel => RefuelCost > 0.01 && !IsCrashed;
+        public string RefuelButtonText => CanRefuel ? $"Abastecer {RefuelGallons:F1} gal · {RefuelCost:C0}" : "Ajuste o volume para abastecer";
+
+        partial void OnTargetFuelChanged(double value)
+        {
+            if (value < Aircraft.FuelAmount) { TargetFuel = Aircraft.FuelAmount; return; }
+            OnPropertyChanged(nameof(RefuelGallons));
+            OnPropertyChanged(nameof(RefuelCost));
+            OnPropertyChanged(nameof(CanRefuel));
+            OnPropertyChanged(nameof(RefuelButtonText));
+        }
+
+        // --- Seguro ---
         public double InsurancePremium => InsuranceService.CalculateMonthlyPremium(PurchasePrice);
         public double InsuranceDeductible => InsuranceService.CalculateDeductible(PurchasePrice);
         public double InsurancePayout => InsuranceService.CalculatePayout(PurchasePrice);
         public bool IsInsured => Aircraft.InsuranceExpirationDate > DateTime.Now;
+        public string InsuranceStatusText => IsInsured ? "ATIVO" : "INATIVO";
+        public SolidColorBrush InsuranceBrush => IsInsured ? HangarPalette.Green : HangarPalette.Red;
+        public string InsuranceExpiryText => IsInsured
+            ? $"vence em {Aircraft.InsuranceExpirationDate:dd/MM/yyyy} ({(Aircraft.InsuranceExpirationDate!.Value - DateTime.Now).TotalDays:F0} dias)"
+            : "sem cobertura";
+        public string InsuranceButtonText => IsInsured ? $"Renovar +30 dias · {InsurancePremium:C0}" : $"Contratar 30 dias · {InsurancePremium:C0}";
 
-        public double TotalOperationCost => RepairCostMotor + RepairCostPneus + RepairCostFuselagem + RepairCostAvionicos + RefuelCost;
-
-        // Status Tag
-        public bool IsCrashed => EngineCondition <= 0 && TiresCondition <= 0 && AirframeCondition <= 0 && AvionicsCondition <= 0;
-
-        public string StatusText
-        {
-            get
-            {
-                if (IsCrashed) return "PERDA TOTAL (CRASH)";
-                if (IsInterdicted) return $"INTERDITADA: {InterdictionReason}";
-                if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30 || MagnetosCondition < 30 || OilCondition < 30) return "GROUNDED (MANUT. CRÍTICA)";
-                if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70 || MagnetosCondition < 70 || OilCondition < 70 || HoursUntilNext50hInspection <= 5 || HoursUntilNext100hInspection <= 10 || HoursUntilNext500hInspection <= 10 || EngineTboRemainingHours <= 50) return "MANUTENÇÃO NECESSÁRIA";
-                return "PRONTA PARA VOO";
-            }
-        }
-
-        public SolidColorBrush StatusColor
-        {
-            get
-            {
-                if (IsCrashed) return new SolidColorBrush(Color.FromRgb(0, 0, 0)); // Preto para Perda Total
-                if (IsInterdicted || StatusText.StartsWith("GROUNDED")) return new SolidColorBrush(Color.FromRgb(231, 76, 60)); // Vermelho
-                if (StatusText == "MANUTENÇÃO NECESSÁRIA") return new SolidColorBrush(Color.FromRgb(241, 196, 15)); // Amarelo
-                return new SolidColorBrush(Color.FromRgb(46, 204, 113)); // Verde
-            }
-        }
-
-        private SolidColorBrush GetConditionColor(double value)
-        {
-            if (value < 30) return new SolidColorBrush(Color.FromRgb(231, 76, 60));
-            if (value < 70) return new SolidColorBrush(Color.FromRgb(241, 196, 15));
-            return new SolidColorBrush(Color.FromRgb(46, 204, 113));
-        }
-
-        // Notificações de Reatividade
-        partial void OnTargetEngineConditionChanged(double value) { if (value < EngineCondition) TargetEngineCondition = EngineCondition; OnPropertyChanged(nameof(RepairCostMotor)); OnPropertyChanged(nameof(TotalOperationCost)); }
-        partial void OnTargetTiresConditionChanged(double value) { if (value < TiresCondition) TargetTiresCondition = TiresCondition; OnPropertyChanged(nameof(RepairCostPneus)); OnPropertyChanged(nameof(TotalOperationCost)); }
-        partial void OnTargetAirframeConditionChanged(double value) { if (value < AirframeCondition) TargetAirframeCondition = AirframeCondition; OnPropertyChanged(nameof(RepairCostFuselagem)); OnPropertyChanged(nameof(TotalOperationCost)); }
-        partial void OnTargetAvionicsConditionChanged(double value) { if (value < AvionicsCondition) TargetAvionicsCondition = AvionicsCondition; OnPropertyChanged(nameof(RepairCostAvionicos)); OnPropertyChanged(nameof(TotalOperationCost)); }
-        partial void OnTargetFuelChanged(double value) { if (value < Aircraft.FuelAmount) TargetFuel = Aircraft.FuelAmount; OnPropertyChanged(nameof(RefuelCost)); OnPropertyChanged(nameof(TotalOperationCost)); }
-
+        /// <summary>Recalcula tudo após um serviço ou recarga.</summary>
         public void Refresh()
         {
+            foreach (var row in Components) row.Refresh(Aircraft.CurrentAirframeHours);
+            if (TargetFuel < Aircraft.FuelAmount) TargetFuel = Aircraft.FuelAmount;
             OnPropertyChanged(string.Empty);
         }
     }

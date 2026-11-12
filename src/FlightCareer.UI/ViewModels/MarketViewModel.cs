@@ -257,6 +257,7 @@ namespace FlightCareer.UI.ViewModels
 
         public async Task LoadPlayerAircraftsForSaleAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             try
             {
                 var pilot = await _context.Pilots
@@ -331,6 +332,7 @@ namespace FlightCareer.UI.ViewModels
         [RelayCommand(CanExecute = nameof(CanBuy))]
         private async Task Buy()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             if (SelectedOffer == null) return;
 
             if (SelectedOffer.IsSold)
@@ -403,6 +405,7 @@ namespace FlightCareer.UI.ViewModels
         [RelayCommand]
         public async Task SellAircraft(object? parameter)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             PilotAircraft? aircraft = null;
 
             if (parameter is PlayerAircraftSaleItem item)

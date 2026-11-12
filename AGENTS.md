@@ -77,6 +77,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ### Banco de dados
 - Não há migrations do EF. O banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (lista de `ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes).
+- **Contextos de longa duração (bug real já corrigido uma vez):** `MainViewModel`, `PilotRepository`, `FlightService`, `MissionGenerator`, `MarketViewModel`, `MarketSimulationService` e `FerryFlightViewModel` são singletons com um `AppDbContext` próprio para a sessão inteira. O EF devolve a entidade **em cache** numa nova consulta, então dados gravados por outro contexto ficam invisíveis e um `SaveChanges` posterior **sobrescreve** o banco com valores velhos (inspeções e gastos perdidos). Regras: código novo usa `IDbContextFactory<AppDbContext>` com contexto curto por operação; nos contextos longos existentes, chame `_context.ChangeTracker.Clear()` no início de cada operação que lê para alterar; nunca altere uma entidade carregada por outro contexto esperando que o seu `SaveChanges` a grave (copie os valores para a entidade do seu contexto). Teste de regressão: `FlightPersistenceTests`.
 - Coluna nova = propriedade na entidade **e** `ALTER TABLE ... ADD COLUMN ... DEFAULT ...` nessa lista. Tabela nova = `DbSet` + `CREATE TABLE IF NOT EXISTS` com os mesmos nomes e tipos que o EF geraria. Há um teste que simula um banco antigo (`ComponentPersistenceTests`).
 
 ### MSFS 2024 nativo
@@ -84,14 +85,14 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ## 7. Estado atual dos sistemas
 
-### Desgaste e falhas — sistema por componentes (fases 1 e 2 concluídas)
+### Desgaste e falhas — sistema por componentes (fases 1, 2 e 3 concluídas)
 - **Domínio** (`FlightCareer.Domain/Components/`, calibrado em `Infrastructure/Data/component_catalog.json`):
   - 9 componentes por aeronave (tabela `AircraftComponents`): Motor, Óleo, Ignição (pistão) **ou** Seção quente (turbina), Elétrico, Instrumentos (vácuo/pitot/estática), Trem, Pneus, Freios, Célula.
   - `WearEngine`: o desgaste natural chega a ~30% no fim da vida útil; 3× com manutenção vencida; faixas verde/amarela/vermelha por parâmetro, com limites **por modelo** (`aircraftOverrides` no catálogo); pousos; energia de frenagem; registros de excedência.
   - `FailureEngine`: risco zero acima de 20%; abaixo, `λ = 0,02 · 100^((20−h)/20)` falhas/hora; um sorteio por componente; modo de falha escolhido por peso. Cada modo tem `effect` (efeito no MSFS), `damage` e `damageKind`.
   - `ExternalEventEngine` (sempre ativo, independe da saúde): bird strike, FOD, falha pós-manutenção (2 h ou 3 pousos após o serviço). Um de cada tipo por voo.
   - `CarbIcingMonitor`: gelo no carburador **recuperável** (apaga em 90 s sem carb heat; 30 s de carb heat liberam o motor).
-  - `HealthVisibility`: faixa exibida (±2% a cada 5 h desde a inspeção, máximo ±25%; walkaround ±10%; inspeção completa = exato). **Ainda não aparece na UI** (fase 3).
+  - `HealthVisibility`: faixa exibida (±2% a cada 5 h desde a inspeção, máximo ±25%; walkaround ±10%; inspeção completa = exato). Exibida no Hangar.
   - `LegacyConditionBridge`: ponte com as colunas antigas (ver abaixo).
 - **Voo** (`FlightCareer.UI/Services/`): `FlightMonitor` → `ComponentFlightSession` (orquestra o tick) → `SimFailureActuator` (eventos do SDK, fogo progressivo, vazamento de óleo, enforcement de magneto/alternador/flaps). O antigo `WearAndFailureService` foi **removido**.
 - **Colunas antigas** de `PilotAircraft` (`EngineCondition`, `OilCondition`, `MagnetosCondition`, `TiresCondition`, `AirframeCondition`, `AvionicsCondition`) continuam existindo porque Hangar, mercado, HUD e `FlightService` ainda as usam. Os componentes são a fonte da verdade:
@@ -99,9 +100,8 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - no início do voo, mudanças feitas fora dele nas colunas (reparo/inspeção no Hangar, perda total) são aplicadas aos componentes (`ReconcileFromLegacy`).
 - **Regra:** lógica nova de desgaste/falhas vai para `Domain/Components` + catálogo JSON, com testes. Novo efeito no simulador = novo valor em `FailureEffect` + tratamento em `SimFailureActuator`.
 - **Removido na fase 2 (substituído por faixas de estresse e panes por componente):** incêndios de partida por backfire / vento de cauda / starter travado e os gatilhos diretos de vazamento de óleo por óleo frio, superaquecimento e over-RPM. O hot start continua como faixa vermelha da seção quente.
-- **Próximas fases:**
-  3. Hangar com as barras por componente, as faixas ocultas, o walkaround, as inspeções e o reparo por componente (substituindo a ponte com as colunas antigas).
-  4. Discrepâncias persistidas entre voos, MEL e manutenção com tempo parado. Avaliar aviônicos (disjuntores por aeronave no MSFS 2024).
+- **Hangar (fase 3):** `HangarViewModel` usa `IDbContextFactory` (contexto novo por operação) e opera direto nos componentes via `ComponentMaintenance` (orçamento por componente com `repairCostFactor`/`minFullRepairCost` do catálogo, reparo, inspeções 50 h/100 h/500 h, retífica, walkaround). Status da aeronave por `AircraftStatusEvaluator` (usa a faixa exibida, não o valor real). Confirmações em `Views/ThemedDialog`.
+- **Próxima fase (4):** discrepâncias persistidas entre voos, MEL e manutenção com tempo parado. Avaliar aviônicos (disjuntores por aeronave no MSFS 2024).
 
 ### Manutenção
 - Inspeções de 50 h (óleo), 100 h (interdita se vencida), 500 h (magnetos) e overhaul (TBO) no `HangarViewModel`. As horas são descontadas no fim do voo pelo `FlightService`.

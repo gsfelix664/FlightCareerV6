@@ -69,8 +69,11 @@ namespace FlightCareer.Application.Services
 
             try
             {
+                // Serviço singleton com contexto de longa duração: sem isto, o piloto e a aeronave viriam do
+                // cache do voo anterior e sobrescreveriam reparos, inspeções, abastecimentos e gastos feitos depois.
+                _context.ChangeTracker.Clear();
                 var pilot = await _context.Pilots
-                    .Include(p => p.Hangar)
+                    .Include(p => p.Hangar).ThenInclude(a => a.AircraftType)
                     .FirstOrDefaultAsync(p => p.Id == pilotId);
                 
                 if (pilot == null) throw new Exception("Piloto não encontrado.");

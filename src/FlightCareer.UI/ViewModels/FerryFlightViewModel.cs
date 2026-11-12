@@ -75,6 +75,7 @@ namespace FlightCareer.UI.ViewModels
 
         public async Task LoadCurrentDataAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             _pilot = await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)

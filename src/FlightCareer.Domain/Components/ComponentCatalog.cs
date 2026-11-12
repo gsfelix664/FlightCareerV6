@@ -158,6 +158,15 @@ namespace FlightCareer.Domain.Components
         /// <summary>Se o walkaround do pré-voo consegue estimar este componente.</summary>
         public bool WalkaroundVisible { get; set; }
 
+        /// <summary>Nome do serviço que restaura o componente (ex.: "Troca de pneus").</summary>
+        public string ServiceName { get; set; } = string.Empty;
+
+        /// <summary>Custo de um reparo completo (0 → 100%) como fração do preço da aeronave nova.</summary>
+        public double RepairCostFactor { get; set; }
+
+        /// <summary>Custo mínimo de um reparo completo (0 → 100%), em dólares.</summary>
+        public double MinFullRepairCost { get; set; }
+
         public List<FailureModeDefinition> FailureModes { get; set; } = new();
 
         public double LifeHoursFor(EngineClass cls) => LifeHours.TryGetValue(cls, out var v) ? v : 0.0;

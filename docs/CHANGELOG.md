@@ -1231,3 +1231,19 @@
 - Componentes salvos junto com o estado do hangar (a cada 60 s, cancelamento, perda total e fim de voo); aeronaves novas (compra/criação de piloto) recebem componentes no início do primeiro voo.
 - Removidos (substituídos por faixas de estresse e panes por componente): incêndios de partida por backfire, vento de cauda e starter travado; gatilhos diretos de vazamento de óleo.
 - Testes: 63 (catálogo, overrides, eventos externos, carb icing, ponte com colunas antigas). **Não testado no MSFS.**
+
+## 2026-11-12 - Sistema de Saúde por Componente, Fase 3: Hangar (Claude)
+- `HangarView.xaml` redesenhado no tema Avionics Dark: frota com local, mini-barra de aeronavegabilidade e status; cabeçalho com local, horas de célula, pousos e classe do motor; painel com as barras de todos os componentes (faixa oculta, marcas de 20%/30%, vida útil, inspeção) e reparo por componente com orçamento visível.
+- Ações separadas: reparar componente / reparar tudo, walkaround (grátis), inspeções 50 h, 100 h, 500 h (só pistão), retífica, abastecimento, seguro (com vencimento), conversão de cabine.
+- Domínio: `ComponentMaintenance` (orçamento, reparo, inspeção, walkaround, vida restante) e `AircraftStatusEvaluator` (Pronta / Manutenção próxima / Atenção / Risco de pane / Interditada / Perda total, pela faixa exibida). Catálogo com `serviceName`, `repairCostFactor` e `minFullRepairCost`.
+- `HangarViewModel` com contexto novo por operação (antes um contexto longo deixava dados velhos após o voo); `MainViewModel.RefreshPilotBalanceAsync` relê o saldo.
+- Corrigidos: chip "MOTOR" sempre vazio, aviônicos sem reparo, um botão cobrando reparo + combustível juntos, tooltip de TBO fixo em 1.800 h (retífica agora restaura o TBO da classe do motor).
+- `ThemedDialog` substitui as caixas do Windows no Hangar.
+- 70 testes. **Tela não verificada visualmente (app não executado).**
+
+## 2026-11-12 - Auditoria do Fluxo Completo: Persistência entre Telas (Claude)
+- **Bug crítico corrigido:** vários serviços/telas singleton (`FlightService`, `PilotRepository`, `MainViewModel`, `MissionGenerator`, mercado, translado) mantinham um contexto do EF pela sessão inteira e liam entidades do cache. Consequências: a partir do 2º voo, o `FlightService` sobrescrevia inspeções/reparos/abastecimentos feitos no Hangar e desfazia gastos (saldo antigo); o cabeçalho mostrava saldo/horas antigos após o voo e podia devolver o piloto ao aeroporto de origem; compras no mercado podiam apagar receita de voos. Correção: `ChangeTracker.Clear()` no início das operações desses contextos (e `ChangeTracker` exposto em `IAppDbContext`). Teste de regressão `FlightPersistenceTests` (falha sem a correção).
+- **Aceite/descarregamento de missões** gravava no contexto errado (as missões vêm do contexto do `MissionGenerator`): o manifesto podia sumir ao recarregar e cargas em escala voltavam ao mercado. Agora o estado é copiado para a entidade do contexto do `MainViewModel` (`StageMissionStateAsync`).
+- **Homologação de categoria** não gravava saldo nem categoria (piloto vinha do repositório, `SaveChanges` em outro contexto). Agora usa o contexto do `MainViewModel`.
+- `FlightService` passa a carregar o tipo da aeronave: preço do combustível (Avgas × Jet A-1) e taxa de pouso por MTOW estavam usando valores padrão.
+- Excedências de limites não abrem mais caixa modal durante o voo (só blackbox).

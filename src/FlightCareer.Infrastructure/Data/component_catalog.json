@@ -169,6 +169,9 @@
       "redLossPerHour": 60,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
+      "serviceName": "Retífica do motor (overhaul)",
+      "repairCostFactor": 0.2,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 25000,
       "failureModes": [
         { "id": "engine.power_loss", "name": "Perda parcial de potência", "weight": 50, "critical": false, "effect": "None", "damage": 5,
           "description": "Desgaste interno reduz a potência disponível. Reduza a carga e pouse no aeródromo mais próximo." },
@@ -192,6 +195,9 @@
       "redLossPerHour": 60,
       "hazardScale": 1.0,
       "walkaroundVisible": true,
+      "serviceName": "Troca de óleo e filtro",
+      "repairCostFactor": 0.0005,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 250,
       "failureModes": [
         { "id": "oil.leak", "name": "Vazamento progressivo de óleo", "weight": 55, "critical": false, "effect": "OilLeak", "effectValue": 1.5,
           "description": "Junta ou mangueira degradada. Pressão de óleo cairá progressivamente." },
@@ -213,6 +219,9 @@
       "redLossPerHour": 30,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
+      "serviceName": "Revisão de magnetos e velas",
+      "repairCostFactor": 0.004,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1450,
       "failureModes": [
         { "id": "ignition.magneto_left", "name": "Pane no magneto esquerdo", "weight": 40, "critical": false, "effect": "MagnetoLeft",
           "description": "Motor operando em contingência no magneto direito." },
@@ -234,6 +243,9 @@
       "redLossPerHour": 90,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
+      "serviceName": "Inspeção da seção quente (HSI)",
+      "repairCostFactor": 0.08,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 60000,
       "failureModes": [
         { "id": "hotsection.itt_margin_loss", "name": "Perda de margem de ITT", "weight": 60, "critical": false, "effect": "None", "damage": 5,
           "description": "Palhetas degradadas: ITT sobe para a mesma potência. Reduza torque." },
@@ -255,6 +267,9 @@
       "redLossPerHour": 20,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
+      "serviceName": "Revisão do alternador e bateria",
+      "repairCostFactor": 0.005,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1500,
       "failureModes": [
         { "id": "electrical.alternator", "name": "Falha do alternador/gerador", "weight": 60, "critical": false, "effect": "AlternatorOff",
           "description": "Perda de geração elétrica. Barramento alimentado apenas pela bateria; reduza a carga elétrica." },
@@ -276,6 +291,9 @@
       "redLossPerHour": 0,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
+      "serviceName": "Revisão de vácuo e pitot-estática",
+      "repairCostFactor": 0.004,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1200,
       "failureModes": [
         { "id": "instruments.vacuum_pump", "name": "Pane na bomba de vácuo", "weight": 45, "critical": false, "effect": "VacuumFailure",
           "appliesTo": [ "Piston" ],
@@ -298,6 +316,9 @@
       "redLossPerHour": 0,
       "hazardScale": 0.5,
       "walkaroundVisible": true,
+      "serviceName": "Revisão do trem de pouso",
+      "repairCostFactor": 0.02,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 4000,
       "failureModes": [
         { "id": "gear.strut_leak", "name": "Amortecedor vazando", "weight": 50, "critical": false, "effect": "None", "damage": 5,
           "description": "Amortecedor sem nitrogênio/fluido: pousos mais duros e estresse na estrutura." },
@@ -320,6 +341,9 @@
       "redLossPerHour": 0,
       "hazardScale": 1.0,
       "walkaroundVisible": true,
+      "serviceName": "Troca de pneus",
+      "repairCostFactor": 0.0008,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 800,
       "failureModes": [
         { "id": "tires.low_pressure", "name": "Pneu murcho", "weight": 60, "critical": false, "effect": "None", "damage": 10,
           "description": "Perda de pressão; tendência direcional na rolagem." },
@@ -339,6 +363,9 @@
       "redLossPerHour": 0,
       "hazardScale": 1.0,
       "walkaroundVisible": true,
+      "serviceName": "Troca de pastilhas e discos",
+      "repairCostFactor": 0.001,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 600,
       "failureModes": [
         { "id": "brakes.fade", "name": "Freio fraco (fading)", "weight": 70, "critical": false, "effect": "None", "damage": 5,
           "description": "Pastilhas no fim de vida; distância de parada maior." },
@@ -358,6 +385,9 @@
       "redLossPerHour": 300,
       "hazardScale": 0.5,
       "walkaroundVisible": true,
+      "serviceName": "Reparo estrutural",
+      "repairCostFactor": 0.05,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 5000,
       "failureModes": [
         { "id": "airframe.flap_jam", "name": "Flap travado", "weight": 55, "critical": false, "effect": "FlapJam",
           "description": "Fuso ou trilho do flap travado na posição atual." },

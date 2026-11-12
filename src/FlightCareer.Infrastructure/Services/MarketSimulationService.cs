@@ -61,6 +61,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task EnsureMarketInitializedAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -98,6 +99,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task ProcessSimulationTicksAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -299,6 +301,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message, PilotAircraft? Aircraft)> BuyMarketListingAsync(Guid marketListingId, string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -426,6 +429,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message, MarketListing? Listing)> ListPlayerAircraftAsync(Guid playerAircraftId, string pilotName, double askingPrice)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -510,6 +514,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message)> CancelPlayerListingAsync(Guid marketListingId, string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {

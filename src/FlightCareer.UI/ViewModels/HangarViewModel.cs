@@ -1,32 +1,40 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
-using FlightCareer.Domain.Repositories;
 using FlightCareer.Infrastructure.Persistence;
-using FlightCareer.Infrastructure.Services;
+using FlightCareer.UI.Views;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace FlightCareer.UI.ViewModels
 {
+    /// <summary>
+    /// Hangar: frota, barras por componente, reparos, inspeções, walkaround, abastecimento e seguro.
+    /// Cada operação usa um contexto novo do banco (dados sempre atuais, sem entidades presas em cache)
+    /// e grava os componentes e as colunas antigas sincronizadas (mercado/HUD/FlightService ainda as leem).
+    /// </summary>
     public partial class HangarViewModel : ObservableObject
     {
-        private readonly AppDbContext _context;
-        private readonly IPilotRepository _pilotRepository;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        private readonly ComponentCatalog _catalog;
+        private readonly IRandomSource _random = new SystemRandomSource();
         private Guid _pilotId;
 
         [ObservableProperty] private ObservableCollection<PilotAircraftWrapper> _fleet = new();
         [ObservableProperty] private PilotAircraftWrapper? _selectedAircraft;
         [ObservableProperty] private bool _isMonitoring;
 
-        public HangarViewModel(AppDbContext context, IPilotRepository pilotRepository)
+        public string FleetCountText => Fleet.Count == 1 ? "1 aeronave" : $"{Fleet.Count} aeronaves";
+
+        public HangarViewModel(IDbContextFactory<AppDbContext> contextFactory, ComponentCatalog catalog)
         {
-            _context = context;
-            _pilotRepository = pilotRepository;
+            _contextFactory = contextFactory;
+            _catalog = catalog;
         }
 
         public async Task InitializeAsync(Guid pilotId)
@@ -35,32 +43,424 @@ namespace FlightCareer.UI.ViewModels
             await LoadFleetAsync();
         }
 
-        public async Task LoadFleetAsync()
+        public async Task LoadFleetAsync(Guid? keepSelection = null)
         {
-            var pilot = await _context.Pilots
-                .Include(p => p.Hangar)
-                .ThenInclude(a => a.AircraftType)
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var pilot = await context.Pilots
+                .Include(p => p.Hangar).ThenInclude(a => a.AircraftType)
+                .Include(p => p.Hangar).ThenInclude(a => a.Components)
                 .FirstOrDefaultAsync(p => p.Id == _pilotId);
+            if (pilot == null) return;
 
-            if (pilot != null)
+            // Aeronaves novas (compra / criação de piloto) recebem componentes; danos gravados fora do voo
+            // (ex.: crash no pouso pelo FlightService) são aplicados às barras.
+            bool changed = false;
+            foreach (var aircraft in pilot.Hangar)
             {
-                var wrappedFleet = pilot.Hangar.Select(a => new PilotAircraftWrapper(a)).ToList();
-                
-                var activeId = pilot.ActiveAircraftId;
-                foreach (var wrapper in wrappedFleet)
+                var engineClass = _catalog.ResolveEngineClass(aircraft.AircraftType);
+                var existing = aircraft.Components.Select(c => c.Kind).ToHashSet();
+                var missing = LegacyComponentMigrator.CreateComponents(aircraft, engineClass, _catalog, _random)
+                    .Where(c => !existing.Contains(c.Kind)).ToList();
+                if (missing.Count > 0)
                 {
-                    wrapper.IsActive = wrapper.Aircraft.Id == activeId;
+                    context.AircraftComponents.AddRange(missing);
+                    foreach (var m in missing) if (!aircraft.Components.Contains(m)) aircraft.Components.Add(m);
+                    changed = true;
                 }
+                if (LegacyConditionBridge.ReconcileFromLegacy(aircraft, aircraft.Components, _random, _catalog.Visibility) > 0) changed = true;
+                LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
+            }
+            if (changed || context.ChangeTracker.HasChanges()) await context.SaveChangesAsync();
 
-                Fleet = new ObservableCollection<PilotAircraftWrapper>(wrappedFleet);
-                SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == activeId) ?? Fleet.FirstOrDefault();
+            var repair = RepairComponentCommand;
+            var wrapped = pilot.Hangar
+                .OrderBy(a => a.Prefix)
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .ToList();
+
+            Fleet = new ObservableCollection<PilotAircraftWrapper>(wrapped);
+            OnPropertyChanged(nameof(FleetCountText));
+            var selectId = keepSelection ?? SelectedAircraft?.Aircraft.Id ?? pilot.ActiveAircraftId;
+            SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == selectId) ?? Fleet.FirstOrDefault();
+        }
+
+        // ------------------------------------------------------------------ Infraestrutura de serviços
+
+        private bool CanOperate(bool allowCrashed = false)
+        {
+            if (SelectedAircraft == null) return false;
+            if (IsMonitoring)
+            {
+                ThemedDialog.Info("Voo em andamento", "Serviços do hangar não podem ser feitos durante um voo.", DialogKind.Warning);
+                return false;
+            }
+            if (!allowCrashed && SelectedAircraft.IsCrashed)
+            {
+                ThemedDialog.Info("Perda total", "Esta aeronave foi destruída. Acione o seguro ou descarte-a.", DialogKind.Danger);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Executa um serviço pago: confirma, confere saldo, aplica sobre a aeronave e componentes de um contexto novo,
+        /// registra a transação, sincroniza as colunas antigas, salva e recarrega a frota.
+        /// </summary>
+        private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
+            Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null)
+        {
+            if (SelectedAircraft == null) return false;
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+
+            if (!ThemedDialog.Confirm(title, $"{message}\n\nCusto: {cost:C2}", "Autorizar", kind)) return false;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var pilot = await context.Pilots.FindAsync(_pilotId);
+            var aircraft = await context.PilotAircrafts
+                .Include(a => a.AircraftType)
+                .Include(a => a.Components)
+                .FirstOrDefaultAsync(a => a.Id == aircraftId);
+            if (pilot == null || aircraft == null) return false;
+
+            if (pilot.Balance < cost)
+            {
+                ThemedDialog.Info("Saldo insuficiente", $"Este serviço custa {cost:C2} e o saldo atual é {pilot.Balance:C2}.", DialogKind.Danger);
+                return false;
+            }
+
+            pilot.Balance -= cost;
+            apply(aircraft, aircraft.Components);
+            LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
+
+            if (cost > 0)
+            {
+                context.FinancialTransactions.Add(new FinancialTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    PilotId = pilot.Id,
+                    Date = DateTime.Now,
+                    Category = category,
+                    Description = $"{transactionDescription}: {aircraft.Prefix}",
+                    Amount = cost,
+                    Type = TransactionType.Expense
+                });
+            }
+
+            await context.SaveChangesAsync();
+            await LoadFleetAsync(aircraftId);
+            await RefreshMainBalanceAsync();
+
+            if (successMessage != null) ThemedDialog.Info(title, successMessage, DialogKind.Success);
+            return true;
+        }
+
+        private static async Task RefreshMainBalanceAsync()
+        {
+            try
+            {
+                if (System.Windows.Application.Current?.MainWindow?.DataContext is MainViewModel main)
+                    await main.RefreshPilotBalanceAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Hangar] Falha ao atualizar saldo: {ex.Message}");
             }
         }
 
-        partial void OnSelectedAircraftChanged(PilotAircraftWrapper? value)
+        private double Hours(PilotAircraft a) => a.CurrentAirframeHours;
+        private AircraftComponent? Find(List<AircraftComponent> list, ComponentKind kind) => list.FirstOrDefault(c => c.Kind == kind);
+
+        private void RepairKind(PilotAircraft aircraft, List<AircraftComponent> components, ComponentKind kind)
         {
-            value?.ResetOperations();
+            var c = Find(components, kind);
+            if (c != null) ComponentMaintenance.Repair(c, Hours(aircraft), _random, _catalog.Visibility);
         }
+
+        /// <summary>Efeitos regulatórios de reparar certos componentes (contadores das inspeções e TBO).</summary>
+        private void ApplyRegulatoryReset(PilotAircraft aircraft, ComponentKind kind)
+        {
+            var engineClass = _catalog.ResolveEngineClass(aircraft.AircraftType);
+            switch (kind)
+            {
+                case ComponentKind.Engine:
+                    aircraft.EngineTboRemainingHours = _catalog.Get(ComponentKind.Engine).LifeHoursFor(engineClass);
+                    break;
+                case ComponentKind.Ignition:
+                    aircraft.HoursUntilNext500hInspection = 500.0;
+                    break;
+            }
+            ClearInterdictionIfResolved(aircraft);
+        }
+
+        private static void ClearInterdictionIfResolved(PilotAircraft aircraft)
+        {
+            if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
+            {
+                aircraft.IsInterdicted = false;
+                aircraft.InterdictionReason = string.Empty;
+            }
+        }
+
+        // ------------------------------------------------------------------ Componentes
+
+        [RelayCommand]
+        private async Task RepairComponent(ComponentRowViewModel? row)
+        {
+            if (row == null || !CanOperate() || !row.CanRepair) return;
+            var kind = row.Kind;
+            string extra = kind == ComponentKind.Engine
+                ? "\nO motor volta a 0 h desde o overhaul e o TBO é restaurado."
+                : string.Empty;
+
+            await RunPaidServiceAsync(
+                row.ServiceName,
+                $"{row.ServiceName} em {SelectedAircraft!.Prefix}: {row.Name.ToLowerInvariant()} de {row.RangeText} para 100%.{extra}",
+                row.RepairCost,
+                row.ServiceName.ToUpperInvariant(),
+                (aircraft, components) =>
+                {
+                    RepairKind(aircraft, components, kind);
+                    ApplyRegulatoryReset(aircraft, kind);
+                },
+                kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
+                successMessage: $"{row.Name} restaurado(a) a 100%.");
+        }
+
+        [RelayCommand]
+        private async Task RepairAll()
+        {
+            if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.HasRepairs) return;
+            var rows = SelectedAircraft.Components.Where(r => r.CanRepair).ToList();
+            string list = string.Join("\n", rows.Select(r => $"• {r.Name}: {r.RangeText} → 100% ({r.RepairCost:C0})"));
+
+            await RunPaidServiceAsync(
+                "Reparar tudo",
+                $"Serviços em {SelectedAircraft.Prefix}:\n{list}",
+                SelectedAircraft.TotalRepairCost,
+                "REPARO COMPLETO",
+                (aircraft, components) =>
+                {
+                    foreach (var r in rows)
+                    {
+                        RepairKind(aircraft, components, r.Kind);
+                        ApplyRegulatoryReset(aircraft, r.Kind);
+                    }
+                },
+                successMessage: "Todos os componentes foram restaurados a 100%.");
+        }
+
+        [RelayCommand]
+        private async Task Walkaround()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var aircraft = await context.PilotAircrafts.Include(a => a.Components).FirstOrDefaultAsync(a => a.Id == aircraftId);
+            if (aircraft == null) return;
+
+            int narrowed = ComponentMaintenance.Walkaround(aircraft.Components, _catalog, aircraft.CurrentAirframeHours, _random);
+            await context.SaveChangesAsync();
+            await LoadFleetAsync(aircraftId);
+
+            ThemedDialog.Info("Walkaround",
+                narrowed > 0
+                    ? $"Inspeção visual concluída: {narrowed} componente(s) estimados com mais precisão (pneus, freios, trem, óleo e célula). Motor e sistemas só são avaliados nas inspeções de oficina."
+                    : "Nada novo a observar: os componentes visíveis por fora já estão com estimativa recente.",
+                DialogKind.Success);
+        }
+
+        // ------------------------------------------------------------------ Inspeções e TBO
+
+        [RelayCommand]
+        private async Task Perform50hInspection()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            await RunPaidServiceAsync(
+                "Inspeção de 50 horas",
+                "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a 100% e o motor tem a saúde medida com exatidão.",
+                SelectedAircraft.Cost50hInspection,
+                "INSPEÇÃO 50H",
+                (aircraft, components) =>
+                {
+                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    ComponentMaintenance.Inspect(components.Where(c => c.Kind is ComponentKind.Engine or ComponentKind.Oil), Hours(aircraft), _random, _catalog.Visibility);
+                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    ClearInterdictionIfResolved(aircraft);
+                },
+                successMessage: "Inspeção de 50 horas concluída.");
+        }
+
+        [RelayCommand]
+        private async Task Perform100hInspection()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            await RunPaidServiceAsync(
+                "Inspeção de 100 horas",
+                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de 100 h e 50 h são zerados. Reparos encontrados são orçados à parte.",
+                SelectedAircraft.Cost100hInspection,
+                "INSPEÇÃO REGULATÓRIA 100H",
+                (aircraft, components) =>
+                {
+                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    ComponentMaintenance.Inspect(components, Hours(aircraft), _random, _catalog.Visibility);
+                    aircraft.HoursUntilNext100hInspection = 100.0;
+                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    ClearInterdictionIfResolved(aircraft);
+                },
+                successMessage: "Inspeção de 100 horas concluída. Veja as barras: agora todos os valores são exatos.");
+        }
+
+        [RelayCommand]
+        private async Task Perform500hInspection()
+        {
+            if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.IsPiston) return;
+            await RunPaidServiceAsync(
+                "Revisão de 500 horas",
+                "Revisão dos magnetos, platinados e troca de velas. A ignição volta a 100%.",
+                SelectedAircraft.Cost500hInspection,
+                "REVISÃO 500H / MAGNETOS",
+                (aircraft, components) =>
+                {
+                    RepairKind(aircraft, components, ComponentKind.Ignition);
+                    ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
+                },
+                successMessage: "Revisão de 500 horas concluída.");
+        }
+
+        [RelayCommand]
+        private async Task PerformOverhaul()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            await RunPaidServiceAsync(
+                "Retífica geral do motor",
+                $"Overhaul completo: motor{(SelectedAircraft.IsPiston ? "" : " e seção quente")} a 100%, óleo trocado e TBO restaurado para {SelectedAircraft.EngineLifeHours:N0} h.",
+                SelectedAircraft.CostOverhaul,
+                "RETÍFICA GERAL / OVERHAUL TBO",
+                (aircraft, components) =>
+                {
+                    RepairKind(aircraft, components, ComponentKind.Engine);
+                    RepairKind(aircraft, components, ComponentKind.HotSection);
+                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
+                },
+                kind: DialogKind.Warning,
+                successMessage: "Overhaul concluído. Motor retificado.");
+        }
+
+        [RelayCommand]
+        private async Task ToggleConfiguration()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            string current = SelectedAircraft.Configuration;
+            string next = current.Contains("Carga") ? "Passageiro" : "Carga (Sem Assentos)";
+            await RunPaidServiceAsync(
+                "Conversão de cabine",
+                $"Converter {SelectedAircraft.Prefix} de '{current}' para '{next}'.",
+                SelectedAircraft.CostToggleConfiguration,
+                $"CONVERSÃO CABINE ({next})",
+                (aircraft, _) => aircraft.Configuration = next,
+                successMessage: $"Cabine convertida para: {next}.");
+        }
+
+        // ------------------------------------------------------------------ Abastecimento e seguro
+
+        [RelayCommand]
+        private async Task Refuel()
+        {
+            if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.CanRefuel) return;
+            double target = SelectedAircraft.TargetFuel;
+            double gallons = SelectedAircraft.RefuelGallons;
+            await RunPaidServiceAsync(
+                "Abastecimento",
+                $"Abastecer {gallons:F1} gal de {SelectedAircraft.FuelType} a {SelectedAircraft.FuelPricePerGallon:C2}/gal.",
+                SelectedAircraft.RefuelCost,
+                $"ABASTECIMENTO ({gallons:F1} GAL)",
+                (aircraft, _) => aircraft.FuelAmount = target,
+                category: "Combustível",
+                successMessage: $"Tanques com {target:F1} gal.");
+        }
+
+        [RelayCommand]
+        private async Task BuyInsurance()
+        {
+            if (!CanOperate() || SelectedAircraft == null) return;
+            await RunPaidServiceAsync(
+                "Seguro aeronáutico",
+                $"Cobertura de 30 dias para {SelectedAircraft.Prefix}.\nFranquia: {SelectedAircraft.InsuranceDeductible:C2}\nCobertura (casco): {SelectedAircraft.InsurancePayout:C2}",
+                SelectedAircraft.InsurancePremium,
+                "CONTRATAÇÃO SEGURO",
+                (aircraft, _) =>
+                {
+                    var baseDate = aircraft.InsuranceExpirationDate > DateTime.Now ? aircraft.InsuranceExpirationDate!.Value : DateTime.Now;
+                    aircraft.InsuranceExpirationDate = baseDate.AddDays(30);
+                },
+                category: "Seguro",
+                successMessage: "Seguro contratado.");
+        }
+
+        [RelayCommand]
+        private async Task ClaimInsurance()
+        {
+            if (SelectedAircraft == null || !SelectedAircraft.IsCrashed || !CanOperate(allowCrashed: true)) return;
+            if (!SelectedAircraft.IsInsured)
+            {
+                ThemedDialog.Info("Sem cobertura", "Esta aeronave não estava segurada no momento do acidente.", DialogKind.Danger);
+                return;
+            }
+
+            double payout = SelectedAircraft.InsurancePayout;
+            double deductible = SelectedAircraft.InsuranceDeductible;
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+            string prefix = SelectedAircraft.Prefix;
+
+            if (!ThemedDialog.Confirm("Acionar seguro",
+                    $"Franquia: -{deductible:C2}\nCobertura: +{payout:C2}\n\nA aeronave será removida da frota.", "Acionar", DialogKind.Warning)) return;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var pilot = await context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+            if (pilot.Balance < deductible)
+            {
+                ThemedDialog.Info("Saldo insuficiente", $"Você precisa de {deductible:C2} para pagar a franquia.", DialogKind.Danger);
+                return;
+            }
+
+            pilot.Balance += payout - deductible;
+            context.FinancialTransactions.Add(new FinancialTransaction { Id = Guid.NewGuid(), PilotId = pilot.Id, Date = DateTime.Now, Category = "Seguro", Description = $"PAGTO FRANQUIA: {prefix}", Amount = deductible, Type = TransactionType.Expense });
+            context.FinancialTransactions.Add(new FinancialTransaction { Id = Guid.NewGuid(), PilotId = pilot.Id, Date = DateTime.Now, Category = "Seguro", Description = $"RECEBIMENTO SEGURO (PERDA TOTAL): {prefix}", Amount = payout, Type = TransactionType.Income });
+
+            var aircraft = await context.PilotAircrafts.FindAsync(aircraftId);
+            if (aircraft != null) context.PilotAircrafts.Remove(aircraft);
+            if (pilot.ActiveAircraftId == aircraftId) pilot.ActiveAircraftId = null;
+
+            await context.SaveChangesAsync();
+            SelectedAircraft = null;
+            await LoadFleetAsync();
+            await RefreshMainBalanceAsync();
+            ThemedDialog.Info("Seguro processado", $"{payout - deductible:C2} creditados (cobertura menos franquia).", DialogKind.Success);
+        }
+
+        [RelayCommand]
+        private async Task ScrapAircraft()
+        {
+            if (SelectedAircraft == null || !SelectedAircraft.IsCrashed || !CanOperate(allowCrashed: true)) return;
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+            if (!ThemedDialog.Confirm("Descartar aeronave",
+                    $"Remover {SelectedAircraft.Prefix} da frota permanentemente? Você não recebe nada por isso.", "Descartar", DialogKind.Danger)) return;
+
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var aircraft = await context.PilotAircrafts.FindAsync(aircraftId);
+            if (aircraft != null) context.PilotAircrafts.Remove(aircraft);
+            var pilot = await context.Pilots.FindAsync(_pilotId);
+            if (pilot != null && pilot.ActiveAircraftId == aircraftId) pilot.ActiveAircraftId = null;
+            await context.SaveChangesAsync();
+
+            SelectedAircraft = null;
+            await LoadFleetAsync();
+        }
+
+        // ------------------------------------------------------------------ Aeronave ativa
 
         [RelayCommand]
         private async Task SetActive()
@@ -68,486 +468,30 @@ namespace FlightCareer.UI.ViewModels
             if (SelectedAircraft == null) return;
             if (IsMonitoring)
             {
-                MessageBox.Show("Você não pode alterar a aeronave ativa durante um voo!");
+                ThemedDialog.Info("Voo em andamento", "Não é possível trocar a aeronave ativa durante um voo.", DialogKind.Warning);
                 return;
             }
 
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot != null)
-            {
-                // SINCRONIA DE LOCALIZAÇÃO: O piloto vai para onde a aeronave está
-                pilot.ActiveAircraftId = SelectedAircraft.Aircraft.Id;
-                pilot.CurrentAirportICAO = SelectedAircraft.Aircraft.CurrentLocationICAO;
-                
-                await _context.SaveChangesAsync();
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+            await using var context = await _contextFactory.CreateDbContextAsync();
+            var pilot = await context.Pilots.FindAsync(_pilotId);
+            var aircraft = await context.PilotAircrafts.FindAsync(aircraftId);
+            if (pilot == null || aircraft == null) return;
 
-                // Atualizar estado visual na coleção
-                foreach (var wrapper in Fleet)
-                {
-                    wrapper.IsActive = wrapper.Aircraft.Id == pilot.ActiveAircraftId;
-                }
-                
-                MessageBox.Show($"{SelectedAircraft.Model} ({SelectedAircraft.Prefix}) definida como ativa.\nSua localização atual agora é {pilot.CurrentAirportICAO}.");
-                
-                // Notificar MainViewModel para recarregar missões (via evento ou refresh direto se possível)
-                if (System.Windows.Application.Current.MainWindow.DataContext is MainViewModel mainVM)
-                {
-                    await mainVM.InitializeForPilotAsync(pilot.Name);
-                }
+            pilot.ActiveAircraftId = aircraftId;
+            pilot.CurrentAirportICAO = aircraft.CurrentLocationICAO; // O piloto vai para onde a aeronave está
+            await context.SaveChangesAsync();
+
+            foreach (var w in Fleet) w.IsActive = w.Aircraft.Id == aircraftId;
+
+            ThemedDialog.Info("Aeronave ativa",
+                $"{SelectedAircraft.Model} ({SelectedAircraft.Prefix}) definida como ativa.\nSua localização agora é {pilot.CurrentAirportICAO}.",
+                DialogKind.Success);
+
+            if (System.Windows.Application.Current.MainWindow.DataContext is MainViewModel mainVM)
+            {
+                await mainVM.InitializeForPilotAsync(pilot.Name);
             }
-        }
-
-        [RelayCommand]
-        private async Task AuthorizeServices()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Esta aeronave sofreu PERDA TOTAL e não pode ser reparada. Acione o seguro ou descarte-a.");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode realizar serviços durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double totalCost = SelectedAircraft.TotalOperationCost;
-
-            if (totalCost <= 0)
-            {
-                MessageBox.Show("Nenhum serviço selecionado ou valores zerados.");
-                return;
-            }
-
-            if (pilot.Balance < totalCost)
-            {
-                MessageBox.Show($"Saldo insuficiente! Você precisa de {totalCost:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja autorizar todos os serviços selecionados por {totalCost:C2}?", 
-                "Confirmação de Orçamento", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            
-            if (result != MessageBoxResult.Yes) return;
-
-            // 1. Deduzir Saldo
-            pilot.Balance -= totalCost;
-
-            // 2. Atualizar Aeronave
-            var aircraft = SelectedAircraft.Aircraft;
-
-            // Reparos
-            if (SelectedAircraft.RepairCostMotor > 0)
-            {
-                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO MOTOR: {aircraft.Prefix}", SelectedAircraft.RepairCostMotor));
-                aircraft.EngineCondition = SelectedAircraft.TargetEngineCondition;
-            }
-            if (SelectedAircraft.RepairCostPneus > 0)
-            {
-                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO PNEUS: {aircraft.Prefix}", SelectedAircraft.RepairCostPneus));
-                aircraft.TiresCondition = SelectedAircraft.TargetTiresCondition;
-            }
-            if (SelectedAircraft.RepairCostFuselagem > 0)
-            {
-                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO FUSELAGEM: {aircraft.Prefix}", SelectedAircraft.RepairCostFuselagem));
-                aircraft.AirframeCondition = SelectedAircraft.TargetAirframeCondition;
-            }
-            if (SelectedAircraft.RepairCostAvionicos > 0)
-            {
-                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO AVIÔNICOS: {aircraft.Prefix}", SelectedAircraft.RepairCostAvionicos));
-                aircraft.AvionicsCondition = SelectedAircraft.TargetAvionicsCondition;
-            }
-
-            // Combustível
-            if (SelectedAircraft.RefuelCost > 0)
-            {
-                double gallons = SelectedAircraft.TargetFuel - aircraft.FuelAmount;
-                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Combustível", $"ABASTECIMENTO: {aircraft.Prefix} ({gallons:F1} GAL)", SelectedAircraft.RefuelCost));
-                aircraft.FuelAmount = SelectedAircraft.TargetFuel;
-            }
-
-            await _context.SaveChangesAsync();
-            
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-
-            MessageBox.Show("Serviços realizados com sucesso! Sua aeronave está pronta.");
-        }
-
-        [RelayCommand]
-        private async Task Perform50hInspection()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Aeronave destruída!");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double cost = SelectedAircraft.Cost50hInspection;
-            if (pilot.Balance < cost)
-            {
-                MessageBox.Show($"Saldo insuficiente! A inspeção de 50h custa {cost:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja realizar a Inspeção Preventiva de 50 Horas para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso revisará filtros, velas e fluidos do motor.",
-                "Inspeção de 50 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= cost;
-            var aircraft = SelectedAircraft.Aircraft;
-            aircraft.HoursUntilNext50hInspection = 50.0;
-            aircraft.OilCondition = 100.0;
-
-            if (aircraft.IsInterdicted && aircraft.InterdictionReason.Contains("50") && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
-            {
-                aircraft.IsInterdicted = false;
-                aircraft.InterdictionReason = string.Empty;
-            }
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO 50H: {aircraft.Prefix}", cost));
-            await _context.SaveChangesAsync();
-
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-            MessageBox.Show("Inspeção de 50 horas concluída com sucesso!");
-        }
-
-        [RelayCommand]
-        private async Task Perform100hInspection()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Aeronave destruída!");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double cost = SelectedAircraft.Cost100hInspection;
-            if (pilot.Balance < cost)
-            {
-                MessageBox.Show($"Saldo insuficiente! A inspeção regulatória de 100h custa {cost:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja realizar a Inspeção Obrigatória de 100 Horas para {SelectedAircraft.Prefix} por {cost:C2}?\n\nEsta inspeção zera tanto a contagem de 100h quanto a de 50h.",
-                "Inspeção de 100 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= cost;
-            var aircraft = SelectedAircraft.Aircraft;
-            aircraft.HoursUntilNext100hInspection = 100.0;
-            aircraft.HoursUntilNext50hInspection = 50.0;
-            aircraft.OilCondition = 100.0;
-
-            if (aircraft.IsInterdicted && aircraft.EngineTboRemainingHours > 0)
-            {
-                aircraft.IsInterdicted = false;
-                aircraft.InterdictionReason = string.Empty;
-            }
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO REGULATÓRIA 100H: {aircraft.Prefix}", cost));
-            await _context.SaveChangesAsync();
-
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-            MessageBox.Show("Inspeção regulatória de 100 horas concluída com sucesso! Aeronave liberada para voo.");
-        }
-
-        [RelayCommand]
-        private async Task Perform500hInspection()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Aeronave destruída!");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double cost = SelectedAircraft.Cost500hInspection;
-            if (pilot.Balance < cost)
-            {
-                MessageBox.Show($"Saldo insuficiente! A revisão de 500h (Magnetos & Ignição) custa {cost:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja realizar a Revisão Preventiva de 500 Horas (Magnetos e Ignição) para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso restaurará a condição dos magnetos para 100% e zerará a contagem da inspeção de 500h.",
-                "Inspeção de 500 Horas", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= cost;
-            var aircraft = SelectedAircraft.Aircraft;
-            aircraft.HoursUntilNext500hInspection = 500.0;
-            aircraft.MagnetosCondition = 100.0;
-
-            if (aircraft.IsInterdicted && aircraft.InterdictionReason.Contains("500") && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
-            {
-                aircraft.IsInterdicted = false;
-                aircraft.InterdictionReason = string.Empty;
-            }
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"INSPEÇÃO 500H / MAGNETOS: {aircraft.Prefix}", cost));
-            await _context.SaveChangesAsync();
-
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-            MessageBox.Show("Inspeção de 500 horas / revisão de magnetos e ignição concluída com sucesso!");
-        }
-
-        [RelayCommand]
-        private async Task PerformOverhaul()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Aeronave destruída!");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode realizar manutenção durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double cost = SelectedAircraft.CostOverhaul;
-            if (pilot.Balance < cost)
-            {
-                MessageBox.Show($"Saldo insuficiente! A retífica geral (Overhaul de TBO) custa {cost:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja realizar o Overhaul Geral do Motor (Retífica de TBO) para {SelectedAircraft.Prefix} por {cost:C2}?\n\nIsso restaura o TBO para 1.800 horas e condição do motor para 100%.",
-                "Overhaul de Motor (TBO)", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= cost;
-            var aircraft = SelectedAircraft.Aircraft;
-            aircraft.EngineTboRemainingHours = 1800.0;
-            aircraft.EngineCondition = 100.0;
-            aircraft.OilCondition = 100.0;
-
-            if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0)
-            {
-                aircraft.IsInterdicted = false;
-                aircraft.InterdictionReason = string.Empty;
-            }
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"RETÍFICA GERAL / OVERHAUL TBO: {aircraft.Prefix}", cost));
-            await _context.SaveChangesAsync();
-
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-            MessageBox.Show("Overhaul concluído com sucesso! Motor retificado e TBO restaurado para 1.800h.");
-        }
-
-        [RelayCommand]
-        private async Task ToggleConfiguration()
-        {
-            if (SelectedAircraft == null) return;
-            if (SelectedAircraft.IsCrashed)
-            {
-                MessageBox.Show("Aeronave destruída!");
-                return;
-            }
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode alterar a configuração durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double cost = SelectedAircraft.CostToggleConfiguration;
-            if (pilot.Balance < cost)
-            {
-                MessageBox.Show($"Saldo insuficiente! A conversão de cabine custa {cost:C2}.");
-                return;
-            }
-
-            string currentConfig = SelectedAircraft.Configuration;
-            string newConfig = currentConfig.Contains("Carga") ? "Passageiro" : "Carga (Sem Assentos)";
-
-            var result = MessageBox.Show($"Deseja converter a aeronave {SelectedAircraft.Prefix} de '{currentConfig}' para '{newConfig}' por {cost:C2}?",
-                "Conversão de Configuração de Cabine", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= cost;
-            var aircraft = SelectedAircraft.Aircraft;
-            aircraft.Configuration = newConfig;
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"CONVERSÃO CABINE ({newConfig}): {aircraft.Prefix}", cost));
-            await _context.SaveChangesAsync();
-
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-            MessageBox.Show($"Aeronave convertida com sucesso para configuração: {newConfig}!");
-        }
-
-        [RelayCommand]
-        private async Task BuyInsurance()
-        {
-            if (SelectedAircraft == null) return;
-            if (IsMonitoring)
-            {
-                MessageBox.Show("Você não pode contratar seguro durante um voo!");
-                return;
-            }
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            double premium = SelectedAircraft.InsurancePremium;
-
-            if (pilot.Balance < premium)
-            {
-                MessageBox.Show($"Saldo insuficiente! O prêmio mensal é de {premium:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja contratar seguro para {SelectedAircraft.Prefix} por 30 dias pelo valor de {premium:C2}?\n\nFranquia: {SelectedAircraft.InsuranceDeductible:C2}\nCobertura: {SelectedAircraft.InsurancePayout:C2}", 
-                "Seguro Aeronáutico", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes) return;
-
-            pilot.Balance -= premium;
-            
-            var aircraft = SelectedAircraft.Aircraft;
-            var baseDate = aircraft.InsuranceExpirationDate > DateTime.Now ? aircraft.InsuranceExpirationDate.Value : DateTime.Now;
-            aircraft.InsuranceExpirationDate = baseDate.AddDays(30);
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Seguro", $"CONTRATAÇÃO SEGURO: {aircraft.Prefix}", premium));
-
-            await _context.SaveChangesAsync();
-            
-            SelectedAircraft.ResetOperations();
-            SelectedAircraft.Refresh();
-
-            MessageBox.Show("Seguro contratado com sucesso!");
-        }
-
-        [RelayCommand]
-        private async Task ClaimInsurance()
-        {
-            if (SelectedAircraft == null || !SelectedAircraft.IsCrashed) return;
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot == null) return;
-
-            if (!SelectedAircraft.IsInsured)
-            {
-                MessageBox.Show("Esta aeronave não estava segurada no momento do acidente. Você não tem direito a cobertura.");
-                return;
-            }
-
-            double payout = SelectedAircraft.InsurancePayout;
-            double deductible = SelectedAircraft.InsuranceDeductible;
-
-            if (pilot.Balance < deductible)
-            {
-                MessageBox.Show($"Você precisa de {deductible:C2} em saldo para pagar a franquia e receber a cobertura de {payout:C2}.");
-                return;
-            }
-
-            var result = MessageBox.Show($"Deseja acionar o seguro?\n\nPagamento de Franquia: -{deductible:C2}\nRecebimento de Cobertura: +{payout:C2}\n\nA aeronave será removida da sua frota.", 
-                "Acionar Seguro", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-            if (result != MessageBoxResult.Yes) return;
-
-            // Processar Financeiro
-            pilot.Balance -= deductible;
-            pilot.Balance += payout;
-
-            _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Seguro", $"PAGTO FRANQUIA: {SelectedAircraft.Prefix}", deductible));
-            _context.FinancialTransactions.Add(new FinancialTransaction
-            {
-                Id = Guid.NewGuid(),
-                PilotId = pilot.Id,
-                Date = DateTime.Now,
-                Description = $"RECEBIMENTO SEGURO (PERDA TOTAL): {SelectedAircraft.Prefix}",
-                Amount = payout,
-                Type = TransactionType.Income,
-                Category = "Seguro"
-            });
-
-            // Remover Aeronave
-            var aircraft = await _context.PilotAircrafts.FindAsync(SelectedAircraft.Aircraft.Id);
-            if (aircraft != null) _context.PilotAircrafts.Remove(aircraft);
-            
-            if (pilot.ActiveAircraftId == SelectedAircraft.Aircraft.Id) pilot.ActiveAircraftId = null;
-
-            await _context.SaveChangesAsync();
-            await LoadFleetAsync();
-
-            MessageBox.Show($"Seguro processado com sucesso! {payout:C2} foram creditados em sua conta.");
-        }
-
-        [RelayCommand]
-        private async Task ScrapAircraft()
-        {
-            if (SelectedAircraft == null || !SelectedAircraft.IsCrashed) return;
-
-            var result = MessageBox.Show($"Deseja realmente DESCARTAR a aeronave {SelectedAircraft.Prefix}?\n\nEla será removida da frota permanentemente e você NÃO receberá nada por isso.", 
-                "Descartar Aeronave", MessageBoxButton.YesNo, MessageBoxImage.Error);
-
-            if (result != MessageBoxResult.Yes) return;
-
-            var aircraft = await _context.PilotAircrafts.FindAsync(SelectedAircraft.Aircraft.Id);
-            if (aircraft != null) _context.PilotAircrafts.Remove(aircraft);
-
-            var pilot = await _context.Pilots.FindAsync(_pilotId);
-            if (pilot != null && pilot.ActiveAircraftId == SelectedAircraft.Aircraft.Id) pilot.ActiveAircraftId = null;
-
-            await _context.SaveChangesAsync();
-            await LoadFleetAsync();
-
-            MessageBox.Show("Aeronave removida da frota.");
-        }
-
-        private FinancialTransaction CreateTransaction(Guid pilotId, string category, string desc, double amount)
-        {
-            return new FinancialTransaction
-            {
-                Id = Guid.NewGuid(),
-                PilotId = pilotId,
-                Date = DateTime.Now,
-                Category = category,
-                Description = desc,
-                Amount = amount,
-                Type = TransactionType.Expense
-            };
         }
     }
 }

@@ -169,7 +169,9 @@ namespace FlightCareer.UI.Services
             {
                 _engineFailureReportedInFlight = true;
             }
-            OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
+            // Excedências vão só para o blackbox: uma caixa modal a cada limite excedido atrapalharia o voo
+            if (failure.Source != "Excedência")
+                OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
             string tag = failure.Source == "Excedência" ? "EXCEDENCIA" : "PANE_EM_VOO";
             _telemetryLogger.LogEvent(tag, $"[{failure.Source}] {failure.Title} - {failure.Description}");
         }

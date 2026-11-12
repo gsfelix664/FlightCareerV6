@@ -588,6 +588,7 @@ namespace FlightCareer.UI.ViewModels
                 }
 
                 AvailableMissions.Add(mission);
+                await StageMissionStateAsync(mission);
                 await _context.SaveChangesAsync();
 
                 try
@@ -773,6 +774,7 @@ namespace FlightCareer.UI.ViewModels
                     _allMissionDisplayItems.Remove(item);
                     mission.IsAccepted = true;
                     mission.PilotId = pilot.Id;
+                    await StageMissionStateAsync(mission);
                 }
             }
 
@@ -784,6 +786,23 @@ namespace FlightCareer.UI.ViewModels
 
             // Redireciona e prepara o Briefing
             ShowBriefingCommand.Execute(null);
+        }
+
+        /// <summary>
+        /// As missões do quadro vêm do contexto do MissionGenerator, não deste. Copia o estado da instância
+        /// exibida para a entidade rastreada aqui; sem isso o SaveChanges deste contexto não gravava
+        /// o aceite/descarregamento (o manifesto sumia ao recarregar).
+        /// </summary>
+        private async Task StageMissionStateAsync(Mission mission)
+        {
+            var db = await _context.Missions.FindAsync(mission.Id);
+            if (db == null || ReferenceEquals(db, mission)) return;
+            db.IsAccepted = mission.IsAccepted;
+            db.PilotId = mission.PilotId;
+            db.OriginICAO = mission.OriginICAO;
+            db.DistanceNM = mission.DistanceNM;
+            db.RewardMoney = mission.RewardMoney;
+            db.ExperienceGain = mission.ExperienceGain;
         }
 
         private async void AcceptMission()
@@ -833,8 +852,9 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task PromoteCompanyTierAsync()
         {
-            var pilots = await _pilotRepository.GetAllAsync();
-            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            // Carregado deste contexto (antes vinha do repositório e o SaveChanges abaixo não gravava saldo nem categoria)
+            _context.ChangeTracker.Clear();
+            var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Name == PilotName);
             if (pilot == null) return;
 
             if (PilotCategory >= PilotCategory.Category5_MajorAirline)
@@ -959,8 +979,26 @@ namespace FlightCareer.UI.ViewModels
             });
         }
 
+        /// <summary>
+        /// Relê o saldo do banco após serviços feitos em outro contexto (Hangar). Recarrega também a entidade
+        /// rastreada por este contexto, para que um SaveChanges posterior não grave um saldo antigo.
+        /// </summary>
+        public async Task RefreshPilotBalanceAsync()
+        {
+            var tracked = _context.Pilots.Local.FirstOrDefault(p => p.Name == PilotName);
+            if (tracked != null)
+            {
+                await _context.Entry(tracked).ReloadAsync();
+                Balance = tracked.Balance;
+                return;
+            }
+            var balance = await _context.Pilots.AsNoTracking().Where(p => p.Name == PilotName).Select(p => (double?)p.Balance).FirstOrDefaultAsync();
+            if (balance.HasValue) Balance = balance.Value;
+        }
+
         public async Task InitializeForPilotAsync(string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             var pilot = await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)
