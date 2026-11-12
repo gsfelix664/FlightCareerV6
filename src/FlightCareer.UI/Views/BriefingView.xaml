@@ -48,15 +48,8 @@
                     </Border>
                 </StackPanel>
 
-                <!-- 3. Status de Conexão com o Simulador e Botão Novo Voo -->
+                <!-- 3. Botão Novo Voo -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Background="{Binding ConnectionModeBg, FallbackValue='#0D2B1E'}" 
-                            BorderBrush="{Binding ConnectionModeBorder, FallbackValue='#00E676'}" BorderThickness="1" CornerRadius="4" Padding="10,5" Margin="0,0,8,0">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding ConnectionModeIcon, FallbackValue='●'}" FontSize="11.5" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ConnectionModeText, FallbackValue='SIMULADOR CONECTADO'}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding ConnectionModeColor}" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
                     <Button Width="36" Height="36" Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" Foreground="#00E5FF"
                             ToolTip="Gerar Novo Número de Voo" Cursor="Hand"
                             Command="{Binding DataContext.ShowBriefingCommand, RelativeSource={RelativeSource AncestorType=Window}}">
@@ -408,23 +401,6 @@
                 <!-- 3. AÇÕES CONTEXTUAIS & BOTÃO MESTRE (Com Respiro de Margem Inferior) -->
                 <Border Grid.Row="2" Background="#141C24" CornerRadius="8" Padding="12,12" Margin="0,0,0,16" BorderBrush="#263545" BorderThickness="1">
                     <StackPanel>
-                        <!-- Botão Contextual de Cópia / Confirmação de Sincronia de W&B -->
-                        <Button Command="{Binding CopyPreFlightWeightsCommand}" Height="36" 
-                                Background="{Binding CopyWandBButtonBg}" 
-                                BorderBrush="{Binding CopyWandBButtonBorder}" 
-                                BorderThickness="1" Cursor="Hand" Margin="0,0,0,10"
-                                ToolTip="Copia os dados de Payload e Combustível para a Área de Transferência">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding CopyWandBButtonText}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding CopyWandBButtonColor}" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-
                         <!-- Botão Mestre de Liberação (Gatekeeper Release Button) -->
                         <Button Command="{Binding DataContext.StartFlightCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 IsEnabled="{Binding CanStartFlightOrCancel}"

@@ -284,6 +284,8 @@ namespace FlightCareer.UI.ViewModels
                 FuelWeightLbs = FuelGallons * 6.0,
                 TotalWeightLbs = TotalWeight,
                 EmptyWeightLbs = EmptyWeight,
+                UnusableFuelGallons = 0,
+                FuelWeightPerGallon = 6.0,
                 MaxGrossWeightLbs = MaxGrossWeight,
                 ZeroFuelWeightLbs = TotalWeight - (FuelGallons * 6.0),
 
@@ -303,6 +305,7 @@ namespace FlightCareer.UI.ViewModels
                 EngineOilPressure = EngineOilPressure,
                 TurboITT = TurboITT,
                 EngineN1 = EngineN1,
+                EngineFailed = 0.0,
 
                 PlaneBank = PlaneBank,
                 PlanePitch = PlanePitch,

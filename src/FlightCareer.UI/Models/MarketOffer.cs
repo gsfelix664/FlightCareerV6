@@ -5,6 +5,7 @@ namespace FlightCareer.UI.Models
 {
     public class MarketOffer
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
         public AircraftType BaseType { get; set; } = null!;
         public string Prefix { get; set; } = string.Empty;
         
@@ -27,6 +28,34 @@ namespace FlightCareer.UI.Models
         
         // Preço baseado no estado (ex: uma aeronave 100% custa o preço cheio, 70% custa proporcional)
         public double SalePrice { get; set; }
+        public double BaseMarketValue { get; set; }
+        public double OriginalAskingPrice { get; set; }
+        public int PriceDropsCount { get; set; }
+        public bool IsSold { get; set; }
+        public DateTime? SoldAtUtc { get; set; }
+        public bool IsPlayerOwned { get; set; }
+        public Guid? PlayerAircraftId { get; set; }
+
+        // Indicadores do Mercado Vivo e Flipping
+        public double DealRatio => BaseMarketValue > 0 && SalePrice > 0 ? (BaseMarketValue / SalePrice) : 1.0;
+        public bool HasPriceDrop => PriceDropsCount > 0 && OriginalAskingPrice > SalePrice;
+        public double PriceDropPercentage => OriginalAskingPrice > 0 ? Math.Round(((OriginalAskingPrice - SalePrice) / OriginalAskingPrice) * 100.0, 1) : 0;
+
+        public string DealBadge => DealRatio switch
+        {
+            >= 1.15 => "BARBADA",
+            >= 1.05 => "OPORTUNIDADE",
+            <= 0.85 => "ÁGIO",
+            _ => "PREÇO JUSTO"
+        };
+
+        public string DealBadgeColor => DealRatio switch
+        {
+            >= 1.15 => "#00E676",
+            >= 1.05 => "#00E5FF",
+            <= 0.85 => "#E74C3C",
+            _ => "#8B9BAE"
+        };
 
         public string GeneralState => AverageCondition switch
         {

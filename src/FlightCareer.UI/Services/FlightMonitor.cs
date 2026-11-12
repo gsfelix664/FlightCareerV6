@@ -78,6 +78,14 @@ namespace FlightCareer.UI.Services
 
         private void OnAircraftFailureTriggered(FailureRecord failure)
         {
+            if (failure.Type == FailureType.EngineIFSD || failure.Type == FailureType.CompressorStall)
+            {
+                if (_aircraft != null)
+                {
+                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 10.0);
+                }
+                _engineFailureReportedInFlight = true;
+            }
             OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
             _telemetryLogger.LogEvent("PANE_EM_VOO", $"{failure.Title} - {failure.Description}");
         }
@@ -157,7 +165,7 @@ namespace FlightCareer.UI.Services
                     var dbAircraft = await context.PilotAircrafts.FindAsync(_aircraft.Id);
                     if (dbAircraft != null)
                     {
-                        dbAircraft.FuelAmount = lastData.Value.FuelTotalGallons;
+                        dbAircraft.FuelAmount = Math.Round(lastData.Value.FuelTotalGallons + lastData.Value.UnusableFuelGallons, 1);
                         dbAircraft.EngineCondition = _aircraft.EngineCondition;
                         dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                         dbAircraft.TiresCondition = _aircraft.TiresCondition;
@@ -308,8 +316,8 @@ namespace FlightCareer.UI.Services
                 _simulatedFlightTimeSeconds += dt * simRate;
             }
 
-            // --- DETECÇÃO DE FALHA / APAGAMENTO DE MOTOR EM VOO ---
-            if (_isAirborne && !data.IsEngineRunning)
+            // --- DETECÇÃO REAL DE FALHA MECÂNICA DO SIMULADOR (ENG FAILED:1) ---
+            if (data.IsEngineFailed)
             {
                 if (!_engineFailureReportedInFlight)
                 {
@@ -318,13 +326,29 @@ namespace FlightCareer.UI.Services
                     {
                         _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 15.0);
                     }
-                    OnAlert?.Invoke("PANE CRÍTICA DE MOTOR", "Motor apagou / fundiu em voo por excesso de RPM/temperatura!", true);
-                    _telemetryLogger.LogEvent("ENGINE_SHUTDOWN_INFLIGHT", "Apagamento / quebra de motor em voo");
+                    OnAlert?.Invoke("FALHA MECÂNICA DE MOTOR", "O simulador reportou pane real no motor #1!", true);
+                    _telemetryLogger.LogEvent("ENGINE_FAILED_MSFS", "Falha mecânica de motor reportada pelo MSFS");
                 }
             }
             else if (data.IsEngineRunning)
             {
                 _engineFailureReportedInFlight = false;
+            }
+
+            // --- DETECÇÃO DE PLANEIO / MOTOR CORTADO EM VOO (TREINAMENTO OU VOLUNTÁRIO) ---
+            if (_isAirborne && !data.IsOnGround && !data.IsEngineRunning)
+            {
+                if (_currentStatus != "VOANDO (PLANANDO / MOTOR CORTADO)")
+                {
+                    _currentStatus = "VOANDO (PLANANDO / MOTOR CORTADO)";
+                    OnStatusChanged?.Invoke(_currentStatus);
+                    _telemetryLogger.LogEvent("ENGINE_CUT_GLIDING", "Voo planado / motor cortado em voo");
+                }
+            }
+            else if (_isAirborne && !data.IsOnGround && data.IsEngineRunning && _currentStatus == "VOANDO (PLANANDO / MOTOR CORTADO)")
+            {
+                _currentStatus = "VOANDO";
+                OnStatusChanged?.Invoke(_currentStatus);
             }
 
             // --- MONITORAMENTO DE QUALIDADE ---
@@ -363,7 +387,7 @@ namespace FlightCareer.UI.Services
             {
                 _isAirborne = true;
                 _hasTouchedDown = false;
-                _currentStatus = "VOANDO";
+                _currentStatus = data.IsEngineRunning ? "VOANDO" : "VOANDO (PLANANDO / MOTOR CORTADO)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
 
@@ -385,12 +409,17 @@ namespace FlightCareer.UI.Services
                 }
                 else
                 {
-                    // Bounce detection: se o impacto subsequente for mais forte
-                    if (touchdownRate > _qualityService.TouchdownFPM)
+                    // Bounce detection: se o impacto subsequente for mais forte (durante a desaceleração de pouso > 35 kts)
+                    if (data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
                         if (_aircraft != null) _wearService.ProcessLanding(_aircraft, touchdownRate, data.VelocityBodyX);
                         _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
+                        OnStatusChanged?.Invoke(_currentStatus);
+                    }
+                    else if (data.GroundSpeed <= 35 && _currentStatus.StartsWith("POUSO") && _startConditionTime == null)
+                    {
+                        _currentStatus = "TÁXI / PÁTIO";
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
                 }
@@ -465,7 +494,7 @@ namespace FlightCareer.UI.Services
 
                 if (dbAircraft != null)
                 {
-                    dbAircraft.FuelAmount = data.FuelTotalGallons;
+                    dbAircraft.FuelAmount = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
                     dbAircraft.EngineCondition = _aircraft.EngineCondition;
                     dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                     dbAircraft.TiresCondition = _aircraft.TiresCondition;
@@ -531,7 +560,7 @@ namespace FlightCareer.UI.Services
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
             _simulatedFlightTimeSeconds = 0;
-            _initialFuel = data.FuelTotalGallons;
+            _initialFuel = data.FuelTotalGallons + data.UnusableFuelGallons;
             _distanceTraveled = 0;
             _lastLat = data.Latitude;
             _lastLon = data.Longitude;
@@ -606,6 +635,7 @@ namespace FlightCareer.UI.Services
             catch { }
 
             double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
+            double finalFuel = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
 
             var outcome = await _flightService.ProcessFlightFinishAsync(
                 _pilot.Id,
@@ -614,7 +644,7 @@ namespace FlightCareer.UI.Services
                 destinationIcao,
                 _startTime,
                 _initialFuel,
-                data.FuelTotalGallons,
+                finalFuel,
                 _distanceTraveled,
                 _activeMissions,
                 _qualityService,

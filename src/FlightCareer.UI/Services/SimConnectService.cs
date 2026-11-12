@@ -102,13 +102,15 @@ namespace FlightCareer.UI.Services
                 AddToDef("BRAKE PARKING POSITION", "Bool");
                 AddToDef("ENGINE TYPE", "number");
 
-                // 4. Combustível e Pesos (6 doubles)
+                // 4. Combustível e Pesos (8 doubles)
                 AddToDef("FUEL TOTAL QUANTITY", "Gallons");
                 AddToDef("FUEL TOTAL CAPACITY", "Gallons");
                 AddToDef("FUEL TOTAL QUANTITY WEIGHT", "Pounds");
                 AddToDef("MAX GROSS WEIGHT", "Pounds");
                 AddToDef("TOTAL WEIGHT", "Pounds");
                 AddToDef("EMPTY WEIGHT", "Pounds");
+                AddToDef("UNUSABLE FUEL TOTAL QUANTITY", "Gallons");
+                AddToDef("FUEL WEIGHT PER GALLON", "Pounds");
 
                 // 5. Atitude e Força G (4 doubles)
                 AddToDef("G FORCE", "GForce");
@@ -125,13 +127,14 @@ namespace FlightCareer.UI.Services
                 // 7. Alertas (1 double)
                 AddToDef("OVERSPEED WARNING", "Bool");
 
-                // 8. Motor (6 doubles)
+                // 8. Motor (7 doubles)
                 AddToDef("GENERAL ENG RPM:1", "rpm");
                 AddToDef("RECIP ENG CYLINDER HEAD TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL PRESSURE:1", "psi");
                 AddToDef("TURB ENG ITT:1", "Celsius");
                 AddToDef("TURB ENG N1:1", "Percent");
+                AddToDef("ENG FAILED:1", "Bool");
 
                 // 9. Condições Ambientais e Atmosféricas (5 doubles)
                 AddToDef("SURFACE CONDITION", "Number");

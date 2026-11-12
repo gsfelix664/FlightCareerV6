@@ -17,8 +17,13 @@ namespace FlightCareer.UI.Models
         
         public double BasePurchasePrice => Aircraft?.AircraftType?.PurchasePrice ?? 0;
         
-        // Avaliação Bluebook: 90% do valor proporcional à condição geral
-        public double GrossValue => Math.Round(BasePurchasePrice * (AverageCondition / 100.0) * 0.9, 2);
+        // Avaliação de Mercado Justo (Bluebook / BaseMarketValue)
+        public double CalculatedBaseValue { get; set; }
+
+        public double GrossValue => CalculatedBaseValue > 0 
+            ? CalculatedBaseValue 
+            : Math.Round(BasePurchasePrice * (AverageCondition / 100.0) * 0.9, 2);
+
         public double BluebookValue => GrossValue;
         public string BaseLocation => string.IsNullOrWhiteSpace(Aircraft?.CurrentLocationICAO) ? "Desconhecida" : Aircraft!.CurrentLocationICAO;
         public int YearOfManufacture => Aircraft != null && Aircraft.PurchaseDate != default && Aircraft.PurchaseDate.Year > 1900 ? Aircraft.PurchaseDate.Year : 2018;
@@ -26,8 +31,13 @@ namespace FlightCareer.UI.Models
         // Taxa de corretagem padrão da corretora aeronáutica (8%)
         public double BrokerFee => Math.Round(GrossValue * 0.08, 2);
         
-        // Valor líquido creditado na conta do piloto
+        // Valor líquido estimado ao vender pelo valor justo
         public double NetValue => Math.Round(GrossValue - BrokerFee, 2);
+
+        // Preço pedido anunciado no Mercado
+        public double AskingPrice { get; set; }
+        public bool IsListed { get; set; }
+        public Guid? ListingId { get; set; }
 
         public string GeneralState => AverageCondition switch
         {

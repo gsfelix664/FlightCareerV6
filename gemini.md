@@ -1221,3 +1221,75 @@ Ao implementar este plano, o agente executor deve:
 
 
 
+
+## 2026-11-12 - Correção do Cálculo de Payload e Combustível Não Utilizável (SimConnect SDK MSFS 2024/2020)
+- **Diagnóstico da Causa Raiz**:
+  - No MSFS SDK, a variável `TOTAL WEIGHT` representa a massa bruta total da aeronave na rampa, que inclui tanto o combustível utilizável quanto o combustível inutilizável (*Unusable Fuel*, 1,5 galões = 9 lbs no C152) e fluidos de motor.
+  - O cálculo anterior do sistema (`reportedSimPayload = TotalWeight - EmptyWeight - fuelWeight`) não deduzia o combustível inutilizável, reportando 179 lbs no software quando o piloto no simulador estava configurado com exatamente 170 lbs.
+- **Implementação do Contrato SimConnect**:
+  - Adicionados os campos `UnusableFuelGallons` e `FuelWeightPerGallon` na struct sequencial `SimTelemetry` (`Pack = 1`).
+  - Mapeadas as SimVars oficiais `UNUSABLE FUEL TOTAL QUANTITY` (Gallons) e `FUEL WEIGHT PER GALLON` (Pounds) em `SimConnectService.cs`.
+- **Refinamento do Gatekeeper e Briefing**:
+  - `BriefingViewModel.cs` atualizado para computar `UnusableFuelWeightLbs = UnusableFuelGallons * FuelWeightPerGallon`.
+  - A dedução no Gatekeeper e no despacho em voo agora desconta o combustível total (utilizável + inutilizável), resultando em precisão exata de 170 lbs (`✓ 100% EXATO`).
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** e compilação limpa com 0 erros (`dotnet build src\FlightCareer.slnx`).
+
+## 2026-11-12 - Sincronização de Combustível Físico Total nos Tanques (MSFS UI vs SimConnect)
+- **Diagnóstico da Causa Raiz**:
+  - No menu "Massa e equilíbrio -> Combustível" do MSFS, o slider e os tanques exibem o volume **físico total** nos tanques (ex: 11,0 galões).
+  - A variável padrão `FUEL TOTAL QUANTITY` da SDK do SimConnect reporta apenas o volume **utilizável** (no C152, deduz ~1,8 galão de combustível não drenável, reportando apenas 9,2 galões).
+  - Isso gerava falsa divergência de -1,9 galão no Pre-Flight Gatekeeper contra o planejado do Hangar.
+- **Implementação e Harmonização**:
+  - `BriefingViewModel.cs` atualizado para computar `FuelQuantity = FuelTotalGallons + UnusableFuelGallons` e `FuelWeightLbs = FuelWeightLbs + UnusableFuelWeightLbs`.
+  - No Gatekeeper, o valor lido do simulador agora reflete exatamente os 11,0 galões da UI do MSFS ($9,2 + 1,8 = 11,0\text{ gal}$), zerando a diferença para `✓ 100% EXATO`.
+  - `FlightMonitor.cs` atualizado para persistir o combustível total físico no Hangar (`FuelTotalGallons + UnusableFuelGallons`) em `UpdateHangarStateAsync`, `CancelMonitoringAsync` e `FinalizeFlightAsync`.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Limpeza Visual da Tela de Briefing (Remoção de Copiar W&B e Badge de Status)
+- **Ajustes de UI no Briefing (`BriefingView.xaml`)**:
+  - Removido o botão "📋 COPIAR W&B P/ O SIMULADOR" da coluna direita de despacho, simplificando o painel de liberação focado no botão mestre de decolagem.
+  - Removido o badge de texto duplicado "SIMULADOR CONECTADO" do canto superior direito do cabeçalho tático, preservando o botão de gerar novo número de voo (`[ ↻ ]`).
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Mercado Vivo Persistente com Simulação Temporal e Mecânica de Aircraft Flipping
+- **Arquitetura de Dados Persistente (`MarketListing`)**:
+  - Criada a entidade `MarketListing` no domínio com controle de ciclo de vida (`ListedAtUtc`, `LastPriceDropAtUtc`, `PriceDropsCount`, `IsSold`, `SoldAtUtc`, `IsPlayerOwned`).
+  - Mapeamento EF Core e DDL dinâmico SQLite em `AppDbContext.EnsureSchemaUpdatedAsync()` com índices dedicados em `IsSold` e `IsPlayerOwned`.
+- **Motor de Simulação Temporal & Economia (`MarketSimulationService`)**:
+  - Geração inicial persistente de 90 a 110 aeronaves procedurais ao abrir o mercado pela primeira vez.
+  - Simulação de ticks temporais em delta-time (`DateTime.UtcNow - LastTickUtc`):
+    - Curva de compra horária por NPCs baseada no `DealRatio` ($\ge 1.15 \to 8\%$/h; $\ge 0.95 \to 2.5\%$/h; $< 0.95 \to 0.3\%$/h), modulada pela liquidez da categoria (Monomotores $1.3\times$, Bimotores $1.0\times$, Turboélices $0.8\times$, Jatos $0.6\times$).
+    - Vendedores impacientes (NPCs) aplicam descontos de $3\%$ a $7\%$ a cada 24h após 72h no mercado (até 3 reduções); aeronaves encalhadas por mais de 15 dias com 3 drops são descartadas.
+    - Reposição automática de estoque mantendo o pool ativo entre 95 e 110 aeronaves.
+    - Manutenção de histórico recente de aeronaves vendidas (itens fantasmas) para sensação de mundo vivo.
+- **Fórmula do Valor Justo de Mercado (`BaseMarketValue`)**:
+  - Ponderação técnica: $0.45 \cdot \text{Motor} + 0.30 \cdot \text{Aviônicos} + 0.25 \cdot \text{Estrutura/Pneus}$, com fator de idade da célula $F_{\text{ano}}$.
+  - Bônus de Overhaul Zero Hora (+12% se motor $\ge 95\%$) e penalidade AOG/Sucata (-25% se qualquer componente crítico $< 25\%$).
+- **Mecânica de Aircraft Flipping**:
+  - O jogador pode anunciar aeronaves da sua frota no mercado aberto para NPCs comprarem (`IsPlayerOwned = true`), concorrendo de igual para igual.
+  - Ao ser arrematada por um NPC, $92\%$ do valor anunciado é creditado no saldo bancário com registro contábil de transação financeira e taxa de $8\%$ da corretora.
+  - Suporte concomitante à liquidação imediata da frota.
+- **Interface e Experiência de Usuário (`MarketView.xaml`)**:
+  - Cards com badges cromáticos de oportunidade (`BARBADA`, `OPORTUNIDADE`, `PREÇO JUSTO`, `ÁGIO`).
+  - Chip de desconto para aeronaves com preço reduzido (`- X.X%`).
+  - Cards fantasmas de aeronaves recentemente vendidas com tag `🔒 VENDIDO` e botão de compra desabilitado.
+  - Painel de inspeção técnica com avaliação Bluebook e cálculo de custo pós-compra.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Otimização Temporal do Mercado Vivo (Cap de 72h e Preservação de Frações de Tempo)
+- **Implementação do Cap Anti-Stall e Anti-Drain**:
+  - `MarketSimulationService.cs` atualizado para limitar o processamento acumulado de ticks horários a no máximo 72 horas (`Math.Min(elapsed.TotalHours, 72)`).
+  - Caso o jogador fique ausente por semanas, `_lastTickUtc` é realinhado para a janela de 72h recentes (`nowUtc.AddHours(-simulationHours)`), evitando travamento da interface e esvaziamento abrupto do mercado.
+  - Substituída a atribuição fixa por `_lastTickUtc = _lastTickUtc.AddHours(simulationHours)`, preservando os minutos quebrados residuais para o próximo ciclo sem drift temporal.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Correção Crítica na Detecção de Apagamento de Motor Pós-Pouso
+- **Diagnóstico da Causa Raiz**:
+  - `FlightMonitor.cs` mantinha a flag `_isAirborne == true` após o pouso durante o táxi e na rampa.
+  - A checagem de corte de motor `if (_isAirborne && !data.IsEngineRunning)` não verificava `!data.IsOnGround`.
+  - Ao desligar os motores intencionalmente no pátio para encerrar o voo, o sistema disparava falso alarme de pane crítica em voo por RPM/temperatura e truncava indevidamente o motor da aeronave para 15,0%.
+- **Implementação e Correção**:
+  - Cláusula de detecção ajustada para exigir estritamente que a aeronave esteja no ar: `if (_isAirborne && !data.IsOnGround && !data.IsEngineRunning)`.
+  - Transição de status ajustada para "TÁXI / PÁTIO" após desaceleração de pouso.
+  - O corte no solo agora aciona exclusivamente a finalização normal de voo (`FINALIZANDO (5s)`), preservando a integridade real da saúde do motor acumulada durante a rota.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.

@@ -30,6 +30,8 @@ namespace FlightCareer.Domain.Entities
         public double MaxGrossWeightLbs;
         public double TotalWeightLbs;
         public double EmptyWeightLbs;
+        public double UnusableFuelGallons;
+        public double FuelWeightPerGallon;
 
         // Atitude e Força G (4 doubles)
         public double GForce;
@@ -46,13 +48,14 @@ namespace FlightCareer.Domain.Entities
         // Alertas de Voo (1 double)
         public double OverspeedWarning;   // 1.0 = true
 
-        // Motor e Propulsão (6 doubles)
+        // Motor e Propulsão (7 doubles)
         public double EngineRPM;
         public double EngineCHT;
         public double EngineOilTemp;
         public double EngineOilPressure;
         public double TurboITT;
         public double EngineN1;
+        public double EngineFailed; // 1.0 = falha mecânica real reportada pelo MSFS
 
         // Condições Ambientais e Atmosféricas (5 doubles)
         public double SurfaceCondition;      // 0=Normal, 1=Wet, 2=Icy, 3=Snow
@@ -81,10 +84,10 @@ namespace FlightCareer.Domain.Entities
         public double EngineOilTempF => (EngineOilTemp * 1.8) + 32.0;
         public bool IsOnGround => OnGround > 0.5;
         public bool IsEngineRunning => EngineRunning > 0.5;
+        public bool IsEngineFailed => EngineFailed > 0.5;
         public bool IsParkingBrakeSet => ParkingBrake > 0.5;
         public bool HasOverspeed => OverspeedWarning > 0.5;
         public double FlapsPercent => FlapsHandlePercent <= 1.0 ? Math.Round(FlapsHandlePercent * 100.0, 1) : Math.Round(FlapsHandlePercent, 1);
-        public double FuelWeightPerGallon => FuelTotalGallons > 0 ? (FuelWeightLbs / FuelTotalGallons) : 6.0;
         public double MaxRPM => (EngineType == 1.0 || EngineType == 5.0) ? 100.0 : 2700.0;
         public double ZeroFuelWeightLbs { get => EmptyWeightLbs; set { } }
 

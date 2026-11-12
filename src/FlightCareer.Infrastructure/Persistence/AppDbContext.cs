@@ -15,6 +15,7 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<PilotAircraft> PilotAircrafts { get; set; }
         public DbSet<Mission> Missions { get; set; }
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
+        public DbSet<MarketListing> MarketListings { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -41,6 +42,17 @@ namespace FlightCareer.Infrastructure.Persistence
 
             modelBuilder.Entity<Mission>()
                 .Ignore(m => m.RequiredTier);
+
+            modelBuilder.Entity<MarketListing>(entity =>
+            {
+                entity.HasOne(m => m.AircraftType)
+                    .WithMany()
+                    .HasForeignKey(m => m.AircraftTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(m => m.IsSold);
+                entity.HasIndex(m => m.IsPlayerOwned);
+            });
 
             base.OnModelCreating(modelBuilder);
         }
@@ -94,7 +106,39 @@ namespace FlightCareer.Infrastructure.Persistence
                 "UPDATE Airports SET City = 'Ribeirão Branco', Country = 'BR' WHERE ICAO = 'SBWM' AND (City IS NULL OR City = '' OR City = 'SB');",
                 "UPDATE Airports SET City = TRIM(SUBSTR(Name, 14)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND Name LIKE 'Aeroporto de %' AND length(Name) > 13;",
                 "UPDATE Airports SET City = TRIM(SUBSTR(Name, 13)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND (Name LIKE 'Aeródromo de %' OR Name LIKE 'Aerodromo de %') AND length(Name) > 12;",
-                "UPDATE Airports SET City = TRIM(SUBSTR(Name, 24)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND Name LIKE 'Aeroporto Municipal de %' AND length(Name) > 23;"
+                "UPDATE Airports SET City = TRIM(SUBSTR(Name, 24)) WHERE (City IS NULL OR City = '' OR City IN ('SB','SS','SW','SJ','SD','SI','SN')) AND Name LIKE 'Aeroporto Municipal de %' AND length(Name) > 23;",
+
+                // Mercado Vivo (MarketListing)
+                @"CREATE TABLE IF NOT EXISTS MarketListings (
+                    Id TEXT PRIMARY KEY,
+                    AircraftTypeId TEXT NOT NULL,
+                    Prefix TEXT NOT NULL,
+                    EngineCondition REAL NOT NULL,
+                    TiresCondition REAL NOT NULL,
+                    AirframeCondition REAL NOT NULL,
+                    AvionicsCondition REAL NOT NULL,
+                    AirframeHours REAL NOT NULL,
+                    YearOfManufacture INTEGER NOT NULL,
+                    TboHours REAL NOT NULL,
+                    TsmoHours REAL NOT NULL,
+                    StructuralIncidentHistory TEXT NOT NULL,
+                    FuelAmount REAL NOT NULL,
+                    BaseMarketValue REAL NOT NULL,
+                    AskingPrice REAL NOT NULL,
+                    OriginalAskingPrice REAL NOT NULL,
+                    PriceDropsCount INTEGER NOT NULL,
+                    ListedAtUtc TEXT NOT NULL,
+                    LastPriceDropAtUtc TEXT NULL,
+                    IsSold INTEGER NOT NULL,
+                    SoldAtUtc TEXT NULL,
+                    IsPlayerOwned INTEGER NOT NULL,
+                    PlayerAircraftId TEXT NULL,
+                    PilotId TEXT NULL,
+                    CategoryBadge TEXT NOT NULL,
+                    FOREIGN KEY (AircraftTypeId) REFERENCES AircraftTypes(Id)
+                );",
+                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsSold ON MarketListings(IsSold);",
+                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);"
             };
 
             foreach (var stmt in migrationStatements)

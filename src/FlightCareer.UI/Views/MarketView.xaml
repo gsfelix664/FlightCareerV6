@@ -386,7 +386,7 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <!-- Linha 1: Modelo, Prefixo e Badge de Categoria à esquerda; Preço à direita -->
+                                    <!-- Linha 1: Modelo, Prefixo, Categoria, DealBadge e PriceDrop à esquerda; Preço e Badge Vendido à direita -->
                                     <Grid Grid.Row="0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*"/>
@@ -401,10 +401,27 @@
                                             <Border Background="#1C2733" BorderBrush="#263545" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding CategoryBadge}" FontSize="10.5" FontWeight="SemiBold" Foreground="#8B9BAE"/>
                                             </Border>
+
+                                            <!-- Badge de Negócio (DealBadge) -->
+                                            <Border Background="#101720" BorderBrush="{Binding DealBadgeColor}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="Índice de oportunidade vs valor justo">
+                                                <TextBlock Text="{Binding DealBadge}" FontSize="10" FontWeight="Bold" Foreground="{Binding DealBadgeColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </Border>
+
+                                            <!-- Badge de Desconto / Vendedor Impaciente -->
+                                            <Border x:Name="priceDropBadge" Background="#3B2608" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="4" Padding="5,1" Margin="6,0,0,0" ToolTip="Preço reduzido pelo vendedor" VerticalAlignment="Center" Visibility="Collapsed">
+                                                <TextBlock Text="{Binding PriceDropPercentage, StringFormat={}- {0}%}" FontSize="10" FontWeight="Bold" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </Border>
                                         </StackPanel>
 
-                                        <!-- Preço formatado em USD -->
-                                        <TextBlock Grid.Column="1" Text="{Binding SalePrice, StringFormat={}${0:N0}}" FontSize="16" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                        <!-- Preço formatado em USD e Badge de Vendido -->
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <!-- Badge VENDIDO -->
+                                            <Border x:Name="soldBadge" Background="#261A1D" BorderBrush="#E74C3C" BorderThickness="1" CornerRadius="4" Padding="7,2" Margin="0,0,8,0" VerticalAlignment="Center" Visibility="Collapsed">
+                                                <TextBlock Text="🔒 VENDIDO" FontSize="11" FontWeight="Black" Foreground="#FF5252" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            </Border>
+
+                                            <TextBlock x:Name="txtSalePrice" Text="{Binding SalePrice, StringFormat={}${0:N0}}" FontSize="16" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                     </Grid>
 
                                     <!-- Linha 2: Ano, TTAF, Combustível e Badge de Condição Média -->
@@ -438,6 +455,14 @@
                             </Border>
 
                             <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding HasPriceDrop}" Value="True">
+                                    <Setter TargetName="priceDropBadge" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSold}" Value="True">
+                                    <Setter TargetName="card" Property="Opacity" Value="0.5"/>
+                                    <Setter TargetName="soldBadge" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="txtSalePrice" Property="Foreground" Value="#8B9BAE"/>
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
                                     <Setter TargetName="card" Property="Background" Value="#1C2735"/>
                                     <Setter TargetName="card" Property="BorderBrush" Value="#00E5FF"/>
@@ -610,6 +635,39 @@
                                     </StackPanel>
                                 </Border>
 
+                                <!-- Box de Avaliação de Mercado e Margem de Oportunidade (Garimpo) -->
+                                <Border Background="#161F2A" BorderBrush="{Binding SelectedOffer.DealBadgeColor}" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <Border Grid.Column="0" Background="#101720" CornerRadius="8" Width="40" Height="40" VerticalAlignment="Center" Margin="0,0,12,0">
+                                            <TextBlock Text="💎" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="AVALIAÇÃO DE MERCADO &amp; GARIMPO" FontSize="11" FontWeight="Bold" Foreground="#8B9BAE"/>
+                                                <Border Background="#101720" BorderBrush="{Binding SelectedOffer.DealBadgeColor}" BorderThickness="1" CornerRadius="4" Padding="6,1" Margin="8,0,0,0">
+                                                    <TextBlock Text="{Binding SelectedOffer.DealBadge}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding SelectedOffer.DealBadgeColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                <TextBlock Text="Valor Justo Bluebook:" FontSize="11" Foreground="#94A3B8"/>
+                                                <TextBlock Text="{Binding SelectedOffer.BaseMarketValue, StringFormat={}${0:N0}}" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8" FontFamily="JetBrains Mono, Consolas, monospace" Margin="6,0,0,0"/>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <TextBlock Text="{Binding SelectedOffer.SalePrice, StringFormat={}${0:N0}}" FontSize="16" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="PREÇO PEDIDO" FontSize="9" FontWeight="Bold" Foreground="#8B9BAE" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+
                                 <!-- Box de Manutenção Imediata -->
                                 <Border Background="#161F2A" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,0,0,14">
                                     <Grid>
@@ -680,12 +738,22 @@
                                     FontWeight="Black" 
                                     FontSize="14" 
                                     Cursor="Hand">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="IsEnabled" Value="True"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding SelectedOffer.IsSold}" Value="True">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="btnBorder" Background="{TemplateBinding Background}" CornerRadius="8">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <Path Data="{StaticResource IconPlane}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
-                                                <TextBlock Text="{Binding BuyButtonText}" FontSize="14" FontWeight="Black" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <Path x:Name="btnIcon" Data="{StaticResource IconPlane}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="18" Height="18" Stretch="Uniform" Margin="0,0,10,0"/>
+                                                <TextBlock x:Name="btnText" Text="{Binding BuyButtonText}" FontSize="14" FontWeight="Black" FontFamily="Inter, Segoe UI, sans-serif"/>
                                             </StackPanel>
                                         </Border>
                                         <ControlTemplate.Triggers>
@@ -695,7 +763,14 @@
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter TargetName="btnBorder" Property="Background" Value="#1C2733"/>
                                                 <Setter Property="Foreground" Value="#526375"/>
+                                                <Setter TargetName="btnIcon" Property="Fill" Value="#526375"/>
                                             </Trigger>
+                                            <DataTrigger Binding="{Binding SelectedOffer.IsSold}" Value="True">
+                                                <Setter TargetName="btnBorder" Property="Background" Value="#2C3E50"/>
+                                                <Setter Property="Foreground" Value="#8B9BAE"/>
+                                                <Setter TargetName="btnIcon" Property="Fill" Value="#8B9BAE"/>
+                                                <Setter TargetName="btnText" Property="Text" Value="AERONAVE VENDIDA (INDISPONÍVEL)"/>
+                                            </DataTrigger>
                                         </ControlTemplate.Triggers>
                                     </ControlTemplate>
                                 </Button.Template>
@@ -801,9 +876,24 @@
                                                 <Path Data="{StaticResource IconPlane}" Fill="#00E5FF" Width="22" Height="22" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <StackPanel VerticalAlignment="Center">
-                                                <StackPanel Orientation="Horizontal">
+                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Model}" FontSize="17" FontWeight="Black" Foreground="#F0F4F8" FontFamily="Inter, Segoe UI, sans-serif"/>
                                                     <TextBlock Text="{Binding Prefix}" FontSize="14" Foreground="#00E5FF" Margin="10,0,0,0" VerticalAlignment="Center" FontFamily="JetBrains Mono, Consolas, monospace" FontWeight="Bold"/>
+
+                                                    <!-- Badge Chamativo: Anunciada no Mercado Vivo -->
+                                                    <Border Background="#0C251C" BorderBrush="#00E676" BorderThickness="1" CornerRadius="6" Padding="8,2" Margin="12,0,0,0" VerticalAlignment="Center">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsListed}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="🟢 ANUNCIADA NO MERCADO VIVO" FontSize="11" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    </Border>
                                                 </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                                     <Border Background="#18202A" CornerRadius="4" Padding="6,1" Margin="0,0,8,0">
@@ -937,35 +1027,135 @@
                                                     </Grid>
                                                 </StackPanel>
 
-                                                <!-- Botão de Vender Aeronave -->
-                                                <Button Grid.Row="1" 
-                                                        Command="{Binding DataContext.SellAircraftCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                        CommandParameter="{Binding Aircraft}" 
-                                                        Height="44" 
-                                                        Background="#16222F" 
-                                                        BorderBrush="#00E676" 
-                                                        BorderThickness="1" 
-                                                        Foreground="#00E676" 
-                                                        FontWeight="Bold" 
-                                                        FontSize="13" 
-                                                        Cursor="Hand">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border x:Name="btnBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
-                                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                                    <TextBlock Text="🏷️" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                                    <TextBlock Text="{Binding NetValue, StringFormat={}VENDER AERONAVE POR ${0:N2}}" FontSize="13" FontWeight="Bold" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                <!-- Ações: Anunciar no Mercado Vivo / Cancelar Anúncio / Liquidação Corretora -->
+                                                <StackPanel Grid.Row="1">
+                                                    <!-- Se Anunciada (IsListed == True): Box de Status + Botão Cancelar Anúncio -->
+                                                    <StackPanel>
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsListed}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+
+                                                        <Border Background="#0C1D18" BorderBrush="#00E676" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0">
+                                                                    <TextBlock Text="OFERTA ATIVA NO MERCADO VIVO" FontSize="10.5" FontWeight="Bold" Foreground="#00E676"/>
+                                                                    <TextBlock Text="Aguardando compradores e propostas de NPCs ou outros pilotos." FontSize="10.5" Foreground="#8B9BAE" Margin="0,2,0,0"/>
                                                                 </StackPanel>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter TargetName="btnBorder" Property="Background" Value="#00E676"/>
-                                                                    <Setter Property="Foreground" Value="#0B0F14"/>
-                                                                </Trigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
-                                                </Button>
+                                                                <TextBlock Grid.Column="1" Text="{Binding AskingPrice, StringFormat={}${0:N0}}" FontSize="15" FontWeight="Black" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </Border>
+
+                                                        <!-- Botão CANCELAR ANÚNCIO -->
+                                                        <Button Command="{Binding DataContext.CancelListingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                CommandParameter="{Binding}"
+                                                                Height="42" 
+                                                                Background="#261A1D" 
+                                                                BorderBrush="#FF5252" 
+                                                                BorderThickness="1" 
+                                                                Foreground="#FF5252" 
+                                                                FontWeight="Bold" 
+                                                                FontSize="12.5" 
+                                                                Cursor="Hand"
+                                                                Margin="0,0,0,8">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border x:Name="btnCancelBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                            <TextBlock Text="🚫" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="CANCELAR ANÚNCIO NO MERCADO" FontSize="12.5" FontWeight="Bold" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="btnCancelBorder" Property="Background" Value="#FF5252"/>
+                                                                            <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </StackPanel>
+
+                                                    <!-- Se NÃO Anunciada (IsListed == False): Botão Primário ANUNCIAR NO MERCADO VIVO -->
+                                                    <StackPanel>
+                                                        <StackPanel.Style>
+                                                            <Style TargetType="StackPanel">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding IsListed}" Value="True">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </StackPanel.Style>
+
+                                                        <Button Command="{Binding DataContext.ListOnMarketCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                                CommandParameter="{Binding}" 
+                                                                Height="44" 
+                                                                Background="#00E5FF" 
+                                                                Foreground="#0B0F14" 
+                                                                FontWeight="Black" 
+                                                                FontSize="13" 
+                                                                Cursor="Hand"
+                                                                Margin="0,0,0,8">
+                                                            <Button.Template>
+                                                                <ControlTemplate TargetType="Button">
+                                                                    <Border x:Name="btnListBorder" Background="{TemplateBinding Background}" CornerRadius="8">
+                                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                            <TextBlock Text="📢" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                            <TextBlock Text="{Binding GrossValue, StringFormat={}ANUNCIAR NO MERCADO VIVO (${0:N0})}" FontSize="13" FontWeight="Black" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                                        </StackPanel>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="btnListBorder" Property="Background" Value="#33EBFF"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Button.Template>
+                                                        </Button>
+                                                    </StackPanel>
+
+                                                    <!-- Botão de Venda Imediata para a Corretora (Disponível em ambos os casos) -->
+                                                    <Button Command="{Binding DataContext.SellAircraftCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                            CommandParameter="{Binding Aircraft}" 
+                                                            Height="38" 
+                                                            Background="#16222F" 
+                                                            BorderBrush="#263545" 
+                                                            BorderThickness="1" 
+                                                            Foreground="#8B9BAE" 
+                                                            FontWeight="SemiBold" 
+                                                            FontSize="12" 
+                                                            Cursor="Hand">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="btnSellBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                                                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                        <TextBlock Text="🏷️" FontSize="12" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding NetValue, StringFormat={}LIQUIDAÇÃO IMEDIATA (CORRETORA -8%): ${0:N2}}" FontSize="11.5" FontWeight="Bold" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                                        <Setter TargetName="btnSellBorder" Property="Background" Value="#00E676"/>
+                                                                        <Setter Property="Foreground" Value="#0B0F14"/>
+                                                                    </Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </StackPanel>
                                             </Grid>
                                         </Border>
                                     </Grid>

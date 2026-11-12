@@ -129,6 +129,7 @@ namespace FlightCareer.UI
             services.AddSingleton<IHubDataService, HubDataService>();
             services.AddSingleton<IMsfsScenerySyncService, MsfsScenerySyncService>();
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
+            services.AddSingleton<IMarketSimulationService, MarketSimulationService>();
             services.AddSingleton<FlightService>();
 
             services.AddSingleton<SimConnectService>();

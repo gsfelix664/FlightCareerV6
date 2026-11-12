@@ -34,6 +34,7 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private string _aircraftTitle = "DESCONHECIDO";
         [ObservableProperty] private double _fuelQuantity;
         [ObservableProperty] private double _fuelWeightLbs;
+        [ObservableProperty] private double _unusableFuelWeightLbs;
         [ObservableProperty] private double _totalWeight;
         [ObservableProperty] private double _emptyWeight;
         [ObservableProperty] private double _latitude;
@@ -188,8 +189,10 @@ namespace FlightCareer.UI.ViewModels
                 System.Windows.Application.Current?.Dispatcher?.Invoke(() =>
                 {
                     AircraftTitle = data.Title;
-                    FuelQuantity = Math.Round(data.FuelTotalGallons, 1);
-                    FuelWeightLbs = Math.Round(data.FuelWeightLbs, 1);
+                    double fuelWeightPerGal = data.FuelWeightPerGallon > 0 ? data.FuelWeightPerGallon : 6.0;
+                    UnusableFuelWeightLbs = Math.Round(data.UnusableFuelGallons * fuelWeightPerGal, 1);
+                    FuelQuantity = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+                    FuelWeightLbs = Math.Round(data.FuelWeightLbs + UnusableFuelWeightLbs, 1);
                     TotalWeight = data.TotalWeightLbs;
                     EmptyWeight = data.EmptyWeightLbs;
                     Latitude = data.Latitude;
@@ -205,7 +208,7 @@ namespace FlightCareer.UI.ViewModels
                         HangarAircraftMtow = Math.Round(data.MaxGrossWeightLbs, 0);
                     }
 
-                    CalculatedTotalWeight = TotalManifestWeight + data.FuelWeightLbs + data.EmptyWeightLbs;
+                    CalculatedTotalWeight = TotalManifestWeight + FuelWeightLbs + data.EmptyWeightLbs;
                     UpdateConnectionStatus();
                     ValidatePreFlightConditions();
 
@@ -579,6 +582,8 @@ namespace FlightCareer.UI.ViewModels
             InitializeChecklistItems();
             UpdateConnectionStatus();
 
+            double fuelWeightPerGal = (FuelQuantity > 0 && FuelWeightLbs > 0) ? (FuelWeightLbs / FuelQuantity) : 6.0;
+
             // CASO 1: MONITORAMENTO EM ANDAMENTO (EM VOO / TÁXI)
             if (IsMonitoring)
             {
@@ -591,7 +596,7 @@ namespace FlightCareer.UI.ViewModels
                 CanStartFlight = true;
                 IsGatekeeperAllOk = true;
 
-                double currentPayload = Math.Max(0, TotalWeight - EmptyWeight - (FuelQuantity * 6.0));
+                double currentPayload = Math.Max(0, TotalWeight - EmptyWeight - (FuelQuantity * fuelWeightPerGal));
 
                 UpdateChecklistItem(0, "✈", "AERONAVE EM OPERAÇÃO",
                     HangarAircraftModel,
@@ -639,7 +644,7 @@ namespace FlightCareer.UI.ViewModels
             bool fuelOk = connectionOk && HangarAircraftFuel > 0 && (Math.Abs(fuelDiff) <= Math.Max(1.0, HangarAircraftFuel * 0.02));
 
             double plannedPayload = TotalManifestWeight;
-            double fuelWeight = FuelWeightLbs > 0 ? FuelWeightLbs : (FuelQuantity * 6.0);
+            double fuelWeight = FuelWeightLbs > 0 ? FuelWeightLbs : (FuelQuantity * fuelWeightPerGal);
             double reportedSimPayload = Math.Max(0, TotalWeight - EmptyWeight - fuelWeight);
             double payloadDiff = reportedSimPayload - plannedPayload;
             bool payloadOk = connectionOk && (Math.Abs(payloadDiff) <= Math.Max(15.0, plannedPayload * 0.02));

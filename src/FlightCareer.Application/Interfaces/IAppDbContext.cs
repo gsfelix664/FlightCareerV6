@@ -16,6 +16,7 @@ namespace FlightCareer.Application.Interfaces
         DbSet<PilotAircraft> PilotAircrafts { get; }
         DbSet<Mission> Missions { get; }
         DbSet<FinancialTransaction> FinancialTransactions { get; }
+        DbSet<MarketListing> MarketListings { get; }
 
         DatabaseFacade Database { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
