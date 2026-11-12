@@ -1500,3 +1500,24 @@ Ao implementar este plano, o agente executor deve:
   - Dinâmica de Energia Cinética ($E_k = \frac{1}{2} m v^2$): a taxa de Poisson ($\lambda = 0.0012 \times (\text{Airspeed} / 100.0)^2$) escala quadraticamente com a velocidade aerodinâmica (~1 evento a cada 600 a 800 horas de voo em baixa altitude).
   - Desfecho: rompimento não contido (*uncontained failure*) da carcaça do compressor com perfuração das linhas de combustível Jet-A1 e óleo, disparando `FailureType.EngineFire` com corte via `TOGGLE_ENGINE1_FAILURE` e destruição imediata do grupo motopropulsor (`EngineCondition = 0.0%`).
 - **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+
+## 2026-11-12 - Ciclo de Incêndio Progressivo (`ENG ON FIRE:1`) e Sistema de Vazamento Progressivo de Óleo (`GENERAL ENG OIL LEAKED PERCENT:1`)
+- **Integração de SimVars Escrevíveis (`SetDataOnSimObject` em `SimConnectService` e `SimTelemetry`)**:
+  - Mapeadas as variáveis nativas do MSFS 2024 `ENG ON FIRE:1` (`Bool`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`Percent`, 0 a 100%) para leitura contínua em `SimTelemetry` e escrita direta via `SimConnect.SetDataOnSimObject` (`SetEngineFire(bool)` e `SetOilLeakedPercent(double)`).
+- **Ciclo de Vida Realista de Fogo no Motor (`ProcessActiveEngineFire` em `WearAndFailureService`)**:
+  - **Fogo $\neq$ Motor Apagado Automaticamente**: Quando `FailureType.EngineFire` é disparado (em qualquer um dos 9 cenários de incêndio), o motor não sofre corte imediato: `ENG ON FIRE:1 = 1` é ativado no MSFS 2024 e o motor continua girando enquanto sofre degradação térmica acelerada (`-0.8%/s`).
+  - **Combate ao Fogo pelo Piloto (Memory Items)**: Se o piloto cortar o combustível (`MixturePercent < 5%` em pistão ou `ConditionLever < 5%` em turboélice/jato) e desligar a bomba de combustível (`FuelPumpSwitch <= 0.5`), após **25 segundos** de resfriamento pelo vento relativo, o sistema escreve **`ENG ON FIRE:1 = 0`** (fogo extinto), preservando a saúde residual do motor e salvando a aeronave de perda total.
+  - **Derretimento Catastrófico por Negligência (90 Segundos)**: Se o piloto ignorar o fogo por **90 segundos** sem cortar o combustível, o fogo destrói o bloco/seção quente por completo, disparando `TOGGLE_ENGINE1_FAILURE` (`FailureType.EngineIFSD`) e aplicando `EngineCondition = 0.0%` no SQLite.
+- **Sistema de Vazamento Progressivo de Óleo (`ProcessOilLeakSystem` em `WearAndFailureService`)**:
+  - Incrementa `GENERAL ENG OIL LEAKED PERCENT:1` de 0 a 100%, fazendo o MSFS 2024 reduzir progressivamente a pressão do óleo (`GENERAL ENG OIL PRESSURE:1`) e elevar a temperatura (`GENERAL ENG OIL TEMPERATURE:1`), dando ao piloto uma janela de decisão para alternar o pouso antes da fusão de bronzina.
+  - **Gatilhos Operacionais e de Telemetria**:
+    1. **Acelerar com Óleo Frio (Cold Oil Overpressure)**: Aplicar potência alta (`RPM > 1500`, `Throttle > 65%` ou decolar) com `EngineOilTemp < 38°C` (100°F) incrementa o vazamento gradualmente por tick e **ativa o Break Check imediato se a saúde do óleo estiver $\le$ 20%**, rompendo o radiador/vedação do filtro.
+    2. **Superaquecimento Crítico Prolongado**: Manter `CHT > 245°C` ou `OilTemp > 115°C` por mais de 60 segundos deforma juntas de silicone/borracha do cárter e tampas de válvulas, gerando vazamento progressivo.
+    3. **Sobrevelocidade (Over-RPM) ou Excesso de Torque**: Operar acima de 102% do RPM máximo ou Torque máximo eleva a pressão da bomba e a vibração mecânica, fissurando mangueiras de alta pressão.
+    4. **Pouso Duro (Hard Landing / Prop Strike)**: Impacto severo no toque (`>= 650 FPM` em `CheckHardLandingOilLeakFailure`) pode trincar o cárter ou romper o retentor frontal do virabrequim.
+  - **Gatilhos de Manutenção, Erro Humano e FOD**:
+    5. **Erro Pós-Manutenção (Primeiros 30 Minutos)**: Nas primeiras 0,5h após inspeção de 50h/100h, pequena chance estocástica de filtro de óleo mal apertado ou anel O-ring duplo iniciar vazamento sob pressão (`+2.0%/min`).
+    6. **Tampa de Abastecimento / Vareta Solta (Walkaround)**: Avaliado após a decolagem quando `OilCondition <= 20%`, soprando óleo pelo bocal a `+0.5% a +1.0%/min`.
+    7. **Fadiga de Mangueiras Flexíveis (Aeroquip) & Válvula Reguladora de Pressão Travada**: Avaliados no Break Check de 60s quando `EngineCondition <= 20%` ou `OilCondition <= 20%`.
+    8. **Detritos na Pista (FOD)**: Durante corrida de pista em alta potência (`GS > 25 kts` e `Throttle > 65%`), chance estocástica de pedras perfurarem o radiador de óleo inferior.

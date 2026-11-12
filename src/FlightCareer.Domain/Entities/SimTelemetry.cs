@@ -48,7 +48,7 @@ namespace FlightCareer.Domain.Entities
         // Alertas de Voo (1 double)
         public double OverspeedWarning;   // 1.0 = true
 
-        // Motor e Propulsão (8 doubles)
+        // Motor e Propulsão (10 doubles)
         public double EngineRPM;
         public double EngineCHT;
         public double EngineOilTemp;
@@ -57,6 +57,8 @@ namespace FlightCareer.Domain.Entities
         public double TurboTorque; // TURB ENG MAX TORQUE PERCENT:1 (em %)
         public double EngineN1;
         public double EngineFailed; // 1.0 = falha mecânica real reportada pelo MSFS
+        public double EngineOnFire; // ENG ON FIRE:1 (1.0 = fogo ativo no motor)
+        public double OilLeakedPercent; // GENERAL ENG OIL LEAKED PERCENT:1 (0 a 100%)
 
         // Condições Ambientais e Atmosféricas (5 doubles)
         public double SurfaceCondition;      // 0=Normal, 1=Wet, 2=Icy, 3=Snow
@@ -91,6 +93,7 @@ namespace FlightCareer.Domain.Entities
         public bool IsOnGround => OnGround > 0.5;
         public bool IsEngineRunning => EngineRunning > 0.5;
         public bool IsEngineFailed => EngineFailed > 0.5;
+        public bool IsEngineOnFire => EngineOnFire > 0.5;
         public bool IsParkingBrakeSet => ParkingBrake > 0.5;
         public bool HasOverspeed => OverspeedWarning > 0.5;
         public double FlapsPercent => FlapsHandlePercent <= 1.0 ? Math.Round(FlapsHandlePercent * 100.0, 1) : Math.Round(FlapsHandlePercent, 1);

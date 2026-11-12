@@ -10,8 +10,14 @@ using FlightCareer.Application.Interfaces;
 namespace FlightCareer.UI.Services
 {
     public enum DATA_REQUESTS { RequestTelemetry }
-    public enum DEFINITIONS { AircraftData }
+    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState }
     public enum EVENTS { FailureEvent, CrashedEvent }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct SimDoubleValue
+    {
+        public double Value;
+    }
 
     public class SimConnectService : ISimConnectService
     {
@@ -127,7 +133,7 @@ namespace FlightCareer.UI.Services
                 // 7. Alertas (1 double)
                 AddToDef("OVERSPEED WARNING", "Bool");
 
-                // 8. Motor (8 doubles)
+                // 8. Motor (10 doubles)
                 AddToDef("GENERAL ENG RPM:1", "rpm");
                 AddToDef("RECIP ENG CYLINDER HEAD TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL TEMPERATURE:1", "Celsius");
@@ -136,6 +142,8 @@ namespace FlightCareer.UI.Services
                 AddToDef("TURB ENG MAX TORQUE PERCENT:1", "Percent");
                 AddToDef("TURB ENG N1:1", "Percent");
                 AddToDef("ENG FAILED:1", "Bool");
+                AddToDef("ENG ON FIRE:1", "Bool");
+                AddToDef("GENERAL ENG OIL LEAKED PERCENT:1", "Percent");
 
                 // 9. Condições Ambientais e Atmosféricas (5 doubles)
                 AddToDef("SURFACE CONDITION", "Number");
@@ -164,6 +172,13 @@ namespace FlightCareer.UI.Services
                 AddToDef("SIMULATION RATE", "number");
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
+
+                // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
+                _simConnect.AddToDataDefinition(DEFINITIONS.EngineFireState, "ENG ON FIRE:1", "Bool", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.EngineFireState);
+
+                _simConnect.AddToDataDefinition(DEFINITIONS.OilLeakState, "GENERAL ENG OIL LEAKED PERCENT:1", "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.OilLeakState);
 
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
@@ -225,6 +240,34 @@ namespace FlightCareer.UI.Services
             
             _simConnect.TransmitClientEvent(SimConnect.SIMCONNECT_OBJECT_ID_USER, EVENTS.FailureEvent, 1, 
                 (SIMCONNECT_PERIOD)0, (SIMCONNECT_EVENT_FLAG)0);
+        }
+
+        public void SetEngineFire(bool isOnFire)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                var val = new SimDoubleValue { Value = isOnFire ? 1.0 : 0.0 };
+                _simConnect.SetDataOnSimObject(DEFINITIONS.EngineFireState, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetEngineFire Error: {ex.Message}");
+            }
+        }
+
+        public void SetOilLeakedPercent(double percent)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                var val = new SimDoubleValue { Value = Math.Clamp(percent, 0.0, 100.0) };
+                _simConnect.SetDataOnSimObject(DEFINITIONS.OilLeakState, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetOilLeakedPercent Error: {ex.Message}");
+            }
         }
 
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)

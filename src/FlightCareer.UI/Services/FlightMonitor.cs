@@ -78,12 +78,16 @@ namespace FlightCareer.UI.Services
 
         private void OnAircraftFailureTriggered(FailureRecord failure)
         {
-            if (failure.Type == FailureType.EngineIFSD || failure.Type == FailureType.EngineFire)
+            if (failure.Type == FailureType.EngineIFSD)
             {
                 if (_aircraft != null)
                 {
-                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, failure.Type == FailureType.EngineFire ? 0.0 : 10.0);
+                    _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 10.0);
                 }
+                _engineFailureReportedInFlight = true;
+            }
+            else if (failure.Type == FailureType.EngineFire && failure.IsCritical)
+            {
                 _engineFailureReportedInFlight = true;
             }
             OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);

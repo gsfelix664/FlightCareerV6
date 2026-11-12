@@ -20,7 +20,8 @@ namespace FlightCareer.UI.Services
         GearCollapse,          // Colapso estrutural de perna/tesoura de trem por carga lateral no toque
         CabinDepressurization, // Falha de pressurização / outflow valve em altitude
         MagnetoFailure,        // Falha de ignição / pane em magneto (Esquerdo ou Direito)
-        CarbIcing              // Congelamento severo de carburador por negligência de Carb Heat em descida
+        CarbIcing,             // Congelamento severo de carburador por negligência de Carb Heat em descida
+        OilLeak                // Vazamento progressivo de óleo (GENERAL ENG OIL LEAKED PERCENT:1)
     }
 
     public class FailureRecord
@@ -50,11 +51,26 @@ namespace FlightCareer.UI.Services
         private double _turboFireTimerSeconds = 0;
         private double _starterStuckTimerSeconds = 0;
 
+        // Estado do Ciclo de Incêndio Progressivo (ENG ON FIRE:1)
+        private bool _isEngineOnFire = false;
+        private double _activeFireBurnSeconds = 0;
+        private double _fireCoolingTimerSeconds = 0;
+
+        // Estado do Sistema de Vazamento Progressivo de Óleo (GENERAL ENG OIL LEAKED PERCENT:1)
+        private double _oilLeakedPercent = 0;
+        private double _lastTransmittedOilLeak = 0;
+        private double _activeOilLeakRatePctPerMin = 0;
+        private double _oilOverheatTimerSeconds = 0;
+        private double _postMaintFlightMinutes = 0;
+        private bool _flightStartOilChecksDone = false;
+
         public event Action<FailureRecord>? OnFailureTriggered;
 
         public IReadOnlyList<FailureRecord> ActiveFailures => _failureHistory.AsReadOnly();
         public bool HasFailures => _failureHistory.Count > 0;
         public string LatestFailureSummary => _failureHistory.LastOrDefault()?.Title ?? string.Empty;
+        public bool IsEngineOnFire => _isEngineOnFire;
+        public double OilLeakedPercent => _oilLeakedPercent;
 
         public WearAndFailureService(SimConnectService simConnect)
         {
@@ -72,6 +88,15 @@ namespace FlightCareer.UI.Services
             _pistonFireTimerSeconds = 0;
             _turboFireTimerSeconds = 0;
             _starterStuckTimerSeconds = 0;
+            _isEngineOnFire = false;
+            _activeFireBurnSeconds = 0;
+            _fireCoolingTimerSeconds = 0;
+            _oilLeakedPercent = 0;
+            _lastTransmittedOilLeak = 0;
+            _activeOilLeakRatePctPerMin = 0;
+            _oilOverheatTimerSeconds = 0;
+            _postMaintFlightMinutes = 0;
+            _flightStartOilChecksDone = false;
         }
 
         private double CalculateBreakCheckChance(double condition)
@@ -336,15 +361,19 @@ namespace FlightCareer.UI.Services
                     {
                         Type = FailureType.EngineFire,
                         Title = "INCÊNDIO ELÉTRICO: TRAVAMENTO DE RELÉ DO STARTER",
-                        Description = "Motor de arranque permaneceu acoplado ao motor ligado. Sobreaquecimento extremo do induzido e cabos de alta amperagem incendiou a fiação do cofre.",
+                        Description = "Motor de arranque permaneceu acoplado ao motor ligado. Sobreaquecimento extremo do induzido e cabos de alta amperagem incendiou a fiação do cofre. Corte combustível e bomba imediatamente!",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                        SimEventName = ""
                     });
                 }
                 _starterStuckTimerSeconds = 0;
             }
 
-            // 5. Checagens probabilísticas contínuas e contextuais de falhas
+            // 5. Ciclo de Incêndio Progressivo (ENG ON FIRE:1) e Vazamento de Óleo (GENERAL ENG OIL LEAKED PERCENT:1)
+            ProcessActiveEngineFire(aircraft, data, deltaTimeHours);
+            ProcessOilLeakSystem(aircraft, data, deltaTimeHours);
+
+            // 6. Checagens probabilísticas contínuas e contextuais de falhas
             if (data.IsOnGround)
             {
                 CheckStartupFailures(aircraft, data, deltaTimeHours);
@@ -380,15 +409,261 @@ namespace FlightCareer.UI.Services
 
             aircraft.TiresCondition = Math.Max(0, aircraft.TiresCondition - tireWear);
 
-            // Avaliar risco de estouro de pneu no pouso e colapso de perna de trem
+            // Avaliar risco de estouro de pneu no pouso, colapso de perna de trem e trinca de cárter/retentor (pouso duro)
             CheckTireLandingFailure(aircraft, safeFpm, lateralStress);
             CheckGearCollapseFailure(aircraft, safeFpm, lateralStress);
+            CheckHardLandingOilLeakFailure(aircraft, safeFpm);
         }
 
         public void ProcessLanding(PilotAircraft aircraft, SimTelemetry data)
         {
             double touchdownFPM = Math.Abs(data.VelocityBodyY) * 60.0;
             ProcessLanding(aircraft, touchdownFPM, data.VelocityBodyX);
+        }
+
+        /// <summary>
+        /// Gerencia o ciclo de vida realista do fogo no motor (ENG ON FIRE:1 no MSFS 2024):
+        /// - Fogo != Motor Apagado Automaticamente: O motor continua girando até o piloto cortar combustível
+        ///   ou até o fogo derreter o bloco após 90 segundos (janela de 60 a 120s).
+        /// - Se o piloto cortar combustível (Mistura/Condition Lever < 5% e Fuel Pump desligada),
+        ///   após 25 segundos de resfriamento pelo vento relativo, seta ENG ON FIRE:1 = 0 (fogo extinto),
+        ///   salvando a aeronave de perda total.
+        /// </summary>
+        private void ProcessActiveEngineFire(PilotAircraft aircraft, SimTelemetry data, double deltaTimeHours)
+        {
+            if (!_isEngineOnFire && !_activeFailures.Contains(FailureType.EngineFire)) return;
+
+            double dtSeconds = deltaTimeHours * 3600.0;
+            bool isJetOrTurbo = data.EngineType == 1.0 || data.EngineType == 5.0;
+
+            // Verifica se o piloto executou o Memory Item de Corte de Combustível e Bomba
+            bool fuelCutOff = (isJetOrTurbo ? data.ConditionLever < 5.0 : data.MixturePercent < 5.0) && data.FuelPumpSwitch <= 0.5;
+
+            if (fuelCutOff)
+            {
+                _fireCoolingTimerSeconds += dtSeconds;
+                // Dano residual reduzido enquanto as chamas perdem alimentação
+                aircraft.EngineCondition = Math.Max(1.0, aircraft.EngineCondition - (0.15 * dtSeconds));
+
+                // Após ~25 segundos de resfriamento pelo vento relativo sem combustível, o fogo se extingue
+                if (_fireCoolingTimerSeconds >= 25.0)
+                {
+                    _isEngineOnFire = false;
+                    _activeFireBurnSeconds = 0;
+                    _fireCoolingTimerSeconds = 0;
+                    _activeFailures.Remove(FailureType.EngineFire);
+                    _simConnect.SetEngineFire(false); // ENG ON FIRE:1 = 0
+
+                    var resolvedRecord = new FailureRecord
+                    {
+                        Type = FailureType.EngineFire,
+                        Title = "INCÊNDIO EXTINTO COM SUCESSO (CORTE DE COMBUSTÍVEL)",
+                        Description = $"O corte de combustível e o resfriamento pelo vento relativo extinguiram as chamas no motor #1! Aeronave salva de perda total (Integridade preservada: {aircraft.EngineCondition:F1}%).",
+                        IsCritical = false,
+                        SimEventName = ""
+                    };
+                    _failureHistory.Add(resolvedRecord);
+                    OnFailureTriggered?.Invoke(resolvedRecord);
+                }
+            }
+            else
+            {
+                // Piloto não cortou o combustível: o fogo consome o motor rapidamente
+                _fireCoolingTimerSeconds = Math.Max(0, _fireCoolingTimerSeconds - (dtSeconds * 0.5));
+                _activeFireBurnSeconds += dtSeconds;
+                aircraft.EngineCondition = Math.Max(0, aircraft.EngineCondition - (0.80 * dtSeconds));
+
+                // Garante que a SimVar ENG ON FIRE:1 permaneça ativa no simulador
+                if (!data.IsEngineOnFire)
+                {
+                    _simConnect.SetEngineFire(true);
+                }
+
+                // Se passar de 90 segundos (janela de 60-120s) sem corte de combustível: destruição total por derretimento
+                if (_activeFireBurnSeconds >= 90.0)
+                {
+                    _isEngineOnFire = false;
+                    aircraft.EngineCondition = 0.0; // Penalidade máxima de reparo no SQLite
+
+                    if (!_activeFailures.Contains(FailureType.EngineIFSD))
+                    {
+                        TriggerFailure(new FailureRecord
+                        {
+                            Type = FailureType.EngineIFSD,
+                            Title = "COLAPSO CATASTRÓFICO: MOTOR DESTRUÍDO PELO FOGO",
+                            Description = "O incêndio no motor #1 não foi contido dentro de 90 segundos (combustível não cortado). O fogo derreteu o bloco/seção quente causando perda total do motor (0%).",
+                            IsCritical = true,
+                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                        });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gerencia o sistema progressivo de vazamento de óleo via SimVar GENERAL ENG OIL LEAKED PERCENT:1 (0 a 100%):
+        /// - Gatilhos Operacionais (por tick): Acelerar com Óleo Frio (< 38°C), Superaquecimento Crítico Prolongado,
+        ///   Sobrevelocidade (Over-RPM) / Excesso de Torque.
+        /// - Gatilhos de Manutenção/Ambientais: Tampa/Vareta Solta no Walkaround, Detritos na Pista (FOD),
+        ///   Filtro Mal Apertado Pós-Revisão (primeiros 30 min), Fadiga de Mangueiras Aeroquip e Válvula Reguladora.
+        /// </summary>
+        private void ProcessOilLeakSystem(PilotAircraft aircraft, SimTelemetry data, double deltaTimeHours)
+        {
+            double dtSeconds = deltaTimeHours * 3600.0;
+            double dtMinutes = dtSeconds / 60.0;
+            bool isJetOrTurbo = data.EngineType == 1.0 || data.EngineType == 5.0;
+
+            // Sincroniza se o próprio MSFS já tiver reportado um percentual maior de vazamento
+            if (data.OilLeakedPercent > _oilLeakedPercent)
+            {
+                _oilLeakedPercent = data.OilLeakedPercent;
+            }
+
+            if (data.IsEngineRunning)
+            {
+                _postMaintFlightMinutes += dtMinutes;
+
+                // 1. Acelerar com Óleo Frio (Cold Oil Overpressure):
+                // Aplicar potência alta (> 1500 RPM ou decolar) enquanto GENERAL ENG OIL TEMPERATURE:1 < 38°C (100°F)
+                bool isColdOilHighPower = data.EngineOilTemp < 38.0 && (data.EngineRPM > 1500.0 || !data.IsOnGround || data.ThrottlePercent > 65.0);
+                if (isColdOilHighPower)
+                {
+                    // Incrementa gradualmente por tick devido aos picos de pressão do óleo viscoso nas vedações
+                    _oilLeakedPercent += 1.8 * dtMinutes;
+
+                    // ATIVA O BREAKCHECK SE A SAÚDE DO ÓLEO ESTIVER ABAIXO DE 20%
+                    if (aircraft.OilCondition <= 20.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                    {
+                        double coldBreakChance = CalculateBreakCheckChance(aircraft.OilCondition);
+                        if (_random.NextDouble() < coldBreakChance)
+                        {
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 4.5);
+                            _oilLeakedPercent = Math.Max(_oilLeakedPercent, 12.0);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO CRÍTICO DE ÓLEO: RUPTURA POR SOBREPRESSÃO A FRIO",
+                                Description = $"Potência elevada aplicada com óleo frio ({data.EngineOilTemp:F1}°C / {data.EngineOilTempF:F0}°F) e saúde do óleo crítica ({aircraft.OilCondition:F1}%). O pico de pressão rompeu o radiador/vedação do filtro!",
+                                IsCritical = true,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+                }
+
+                // 2. Superaquecimento Crítico Prolongado (CHT > 245°C ou Oil Temp > 115°C):
+                // O calor excessivo resseca e deforma juntas de borracha/silicone das tampas de válvulas e cárter
+                if (data.EngineCHT > 245.0 || data.EngineOilTemp > 115.0)
+                {
+                    _oilOverheatTimerSeconds += dtSeconds;
+                    if (_oilOverheatTimerSeconds >= 60.0)
+                    {
+                        _oilLeakedPercent += 1.2 * dtMinutes;
+                        if (_oilLeakedPercent >= 8.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                        {
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 1.5);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO PROGRESSIVO DE ÓLEO (DEFORMAÇÃO TÉRMICA DE JUNTAS)",
+                                Description = $"Superaquecimento prolongado (CHT: {data.EngineCHT:F0}°C / Óleo: {data.EngineOilTemp:F0}°C) ressecou e deformou as juntas de silicone do cárter. Pressão de óleo em queda progressiva.",
+                                IsCritical = false,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    _oilOverheatTimerSeconds = Math.Max(0, _oilOverheatTimerSeconds - (dtSeconds * 0.5));
+                }
+
+                // 3. Sobrevelocidade (Over-RPM) ou Excesso de Torque:
+                // Aumenta drasticamente a pressão da bomba de óleo e vibração mecânica nas mangueiras de alta pressão
+                bool isOverSpeedOrTorque = (data.MaxRPM > 0 && data.EngineRPM > data.MaxRPM * 1.02) || (isJetOrTurbo && data.TurboTorque > 102.0);
+                if (isOverSpeedOrTorque)
+                {
+                    _oilLeakedPercent += 1.6 * dtMinutes;
+                    if (_oilLeakedPercent >= 8.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                    {
+                        _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 1.8);
+                        TriggerFailure(new FailureRecord
+                        {
+                            Type = FailureType.OilLeak,
+                            Title = "VAZAMENTO DE ÓLEO: FISSURA POR EXCESSO DE ROTAÇÃO / TORQUE",
+                            Description = "Excesso de RPM/Torque elevou a pressão da bomba de óleo e a vibração mecânica, fissurando mangueira flexível de alta pressão.",
+                            IsCritical = false,
+                            SimEventName = ""
+                        });
+                    }
+                }
+
+                // 4. Vareta de Óleo ou Tampa de Abastecimento Solta (Oil Cap Loose no Walkaround):
+                // Checado uma única vez na decolagem; sopra óleo para fora a +0.5% a +1.0% por minuto
+                if (!data.IsOnGround && !_flightStartOilChecksDone)
+                {
+                    _flightStartOilChecksDone = true;
+                    // Se o óleo estiver desgastado/negligenciado (<= 20%), chance de falha humana na inspeção pré-voo
+                    if (aircraft.OilCondition <= 20.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                    {
+                        double capLooseChance = CalculateBreakCheckChance(aircraft.OilCondition) * 0.20;
+                        if (_random.NextDouble() < capLooseChance)
+                        {
+                            double leakRate = 0.5 + (_random.NextDouble() * 0.5); // +0.5% a +1.0% por minuto
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, leakRate);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO DE ÓLEO: TAMPA DE ABASTECIMENTO / VARETA SOLTA",
+                                Description = $"Com a pressão interna do cárter em voo, o óleo está sendo soprado pelo bocal de abastecimento (+{leakRate:F1}%/min). Monitore a pressão e temperatura do óleo!",
+                                IsCritical = false,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+                }
+
+                // 5. Ingestão de Objeto Estranho / Detritos na Pista (FOD):
+                // Pedras lançadas pela hélice/trem de pouso em rolagem de alta potência perfurando o radiador de óleo inferior
+                if (data.IsOnGround && data.GroundSpeed > 25.0 && data.ThrottlePercent > 65.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                {
+                    double fodLambda = data.IsWetOrContaminatedSurface ? 0.006 : 0.002;
+                    if (_random.NextDouble() < (fodLambda * deltaTimeHours))
+                    {
+                        _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 2.2);
+                        _oilLeakedPercent = Math.Max(_oilLeakedPercent, 5.0);
+                        TriggerFailure(new FailureRecord
+                        {
+                            Type = FailureType.OilLeak,
+                            Title = "VAZAMENTO DE ÓLEO: RADIADOR PERFURADO POR DETRITO (FOD)",
+                            Description = "Detrito/pedra lançada durante a corrida de pista perfurou a colmeia do radiador de óleo (Oil Cooler) na parte inferior do capô. Vazamento contínuo ativo!",
+                            IsCritical = true,
+                            SimEventName = ""
+                        });
+                    }
+                }
+
+                // Aplica a taxa de vazamento contínuo ativo (se houver furo/tampa solta/mangueira rompida)
+                if (_activeOilLeakRatePctPerMin > 0)
+                {
+                    _oilLeakedPercent += _activeOilLeakRatePctPerMin * dtMinutes;
+                }
+            }
+
+            // Clamp entre 0 e 100% e transmite ao MSFS 2024 via SimConnect
+            _oilLeakedPercent = Math.Clamp(_oilLeakedPercent, 0.0, 100.0);
+            if (_oilLeakedPercent > 0 && (Math.Abs(_oilLeakedPercent - _lastTransmittedOilLeak) >= 0.20 || _oilLeakedPercent >= 100.0))
+            {
+                _simConnect.SetOilLeakedPercent(_oilLeakedPercent);
+                _lastTransmittedOilLeak = _oilLeakedPercent;
+            }
+
+            // À medida que o óleo vaza no simulador, a saúde/nível do sistema de lubrificação cai proporcionalmente,
+            // ativando naturalmente o Break Check de 60s quando atingir <= 20% ( >= 80% de óleo vazado )
+            if (_oilLeakedPercent > 0)
+            {
+                aircraft.OilCondition = Math.Min(aircraft.OilCondition, Math.Max(0.0, 100.0 - _oilLeakedPercent));
+            }
         }
 
         /// <summary>
@@ -483,9 +758,9 @@ namespace FlightCareer.UI.Services
                             {
                                 Type = FailureType.EngineFire,
                                 Title = "INCÊNDIO NO MOTOR EM VOO (RUPTURA DE LINHA DE ÓLEO)",
-                                Description = $"Superaquecimento severo continuado (CHT: {data.EngineCHT:F0}°C, Óleo: {data.EngineOilTemp:F0}°C). O estresse térmico rompeu mangueiras e retentores de óleo sobre o escapamento incandescente, gerando fogo em voo.",
+                                Description = $"Superaquecimento severo continuado (CHT: {data.EngineCHT:F0}°C, Óleo: {data.EngineOilTemp:F0}°C). O estresse térmico rompeu mangueiras e retentores de óleo sobre o escapamento incandescente, gerando fogo em voo. Corte combustível imediatamente!",
                                 IsCritical = true,
-                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                                SimEventName = ""
                             });
                         }
                         _pistonFireTimerSeconds = 0;
@@ -527,9 +802,9 @@ namespace FlightCareer.UI.Services
                             {
                                 Type = FailureType.EngineFire,
                                 Title = "INCÊNDIO DE TURBINA EM VOO (FALHA ESTRUTURAL DE NACELE)",
-                                Description = $"{cause}. Colapso térmico-estrutural da câmara de combustão com vazamento e ignição de combustível Jet-A1 na nacele.",
+                                Description = $"{cause}. Colapso térmico-estrutural da câmara de combustão com vazamento e ignição de combustível Jet-A1 na nacele. Corte a Condition Lever imediatamente!",
                                 IsCritical = true,
-                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                                SimEventName = ""
                             });
                         }
                         _turboFireTimerSeconds = 0;
@@ -600,6 +875,67 @@ namespace FlightCareer.UI.Services
                     }
                 }
 
+                // Gatilhos de Manutenção e Fadiga de Óleo (GENERAL ENG OIL LEAKED PERCENT:1):
+                if (!_activeFailures.Contains(FailureType.OilLeak))
+                {
+                    // 1. Erro na Troca de Óleo / Filtro Mal Apertado (Pós-Manutenção - Primeiros 30 minutos após revisão de 50h/100h)
+                    bool isJustInspected = aircraft.HoursUntilNext50hInspection >= 49.5 || aircraft.HoursUntilNext100hInspection >= 99.5;
+                    if (isJustInspected && _postMaintFlightMinutes <= 30.0)
+                    {
+                        if (_random.NextDouble() < 0.004) // ~11% de chance cumulativa na janela de 30 minutos pós-revisão
+                        {
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 2.0);
+                            _oilLeakedPercent = Math.Max(_oilLeakedPercent, 5.0);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO PÓS-MANUTENÇÃO: FILTRO / ANEL O-RING MAL APERTADO",
+                                Description = "Torque incorreto no filtro de óleo ou anel de vedação duplo após revisão recente. O óleo está vazando sob pressão (+2.0%/min). Alterne para pouso preventivo!",
+                                IsCritical = true,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+
+                    // 2. Fadiga de Mangueiras Flexíveis (Aeroquip Hoses) e Juntas (Saúde do Motor <= 20%)
+                    if (aircraft.EngineCondition <= 20.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                    {
+                        double hoseChance = CalculateBreakCheckChance(aircraft.EngineCondition) * 0.25;
+                        if (hoseChance > 0.0 && _random.NextDouble() < hoseChance)
+                        {
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 2.5);
+                            _oilLeakedPercent = Math.Max(_oilLeakedPercent, 8.0);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO DE ÓLEO: FADIGA DE MANGUEIRA FLEXÍVEL (AEROQUIP)",
+                                Description = $"Fissura por vibração crônica na linha Aeroquip entre o bloco e o radiador de óleo (Motor: {aircraft.EngineCondition:F1}%). Queda progressiva de pressão de óleo!",
+                                IsCritical = true,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+
+                    // 3. Falha na Válvula Reguladora de Pressão (Oil Pressure Relief Valve - Saúde do Óleo <= 20%)
+                    if (aircraft.OilCondition <= 20.0 && !_activeFailures.Contains(FailureType.OilLeak))
+                    {
+                        double reliefValveChance = CalculateBreakCheckChance(aircraft.OilCondition) * 0.30;
+                        if (reliefValveChance > 0.0 && _random.NextDouble() < reliefValveChance)
+                        {
+                            _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 3.0);
+                            _oilLeakedPercent = Math.Max(_oilLeakedPercent, 10.0);
+                            TriggerFailure(new FailureRecord
+                            {
+                                Type = FailureType.OilLeak,
+                                Title = "VAZAMENTO DE ÓLEO: VÁLVULA REGULADORA DE PRESSÃO TRAVADA",
+                                Description = $"Borra e verniz de óleo vencido ({aircraft.OilCondition:F1}%) travaram a válvula de alívio fechada. A sobrepressão rompeu a vedação do circuito!",
+                                IsCritical = true,
+                                SimEventName = ""
+                            });
+                        }
+                    }
+                }
+
                 // Cenário A: Ruptura de Linha de Combustível ou Bico Injetor Solto
                 if (aircraft.EngineCondition <= 20.0 && !_activeFailures.Contains(FailureType.EngineFire))
                 {
@@ -610,9 +946,9 @@ namespace FlightCareer.UI.Services
                         {
                             Type = FailureType.EngineFire,
                             Title = "INCÊNDIO: RUPTURA DE LINHA DE COMBUSTÍVEL / BICO SOLTO",
-                            Description = $"Vibração crônica por desgaste severo ({aircraft.EngineCondition:F1}%) soltou conexão de alta pressão. Combustível pulverizado entrou em ignição no cofre do motor.",
+                            Description = $"Vibração crônica por desgaste severo ({aircraft.EngineCondition:F1}%) soltou conexão de alta pressão. Combustível pulverizado entrou em ignição no cofre do motor. Corte combustível imediatamente!",
                             IsCritical = true,
-                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                            SimEventName = ""
                         });
                     }
                 }
@@ -627,9 +963,9 @@ namespace FlightCareer.UI.Services
                         {
                             Type = FailureType.EngineFire,
                             Title = "INCÊNDIO: RACHADURA NO COLETOR DE ESCAPAMENTO",
-                            Description = "Fissura estrutural no escapamento soprou gases incandescentes a ~800°C sobre mangueiras de combustível e isolamento acústico do motor.",
+                            Description = "Fissura estrutural no escapamento soprou gases incandescentes a ~800°C sobre mangueiras de combustível e isolamento acústico do motor. Corte combustível imediatamente!",
                             IsCritical = true,
-                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                            SimEventName = ""
                         });
                     }
                 }
@@ -644,9 +980,9 @@ namespace FlightCareer.UI.Services
                         {
                             Type = FailureType.EngineFire,
                             Title = "INCÊNDIO ELÉTRICO: CURTO NO CHICOTE DO ALTERNADOR",
-                            Description = $"Curto-circuito de alta corrente no chicote principal do alternador por degradação elétrica ({aircraft.AvionicsCondition:F1}%). Fiação incandescente incendiou o cofre.",
+                            Description = $"Curto-circuito de alta corrente no chicote principal do alternador por degradação elétrica ({aircraft.AvionicsCondition:F1}%). Fiação incandescente incendiou o cofre. Corte combustível imediatamente!",
                             IsCritical = true,
-                            SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                            SimEventName = ""
                         });
                     }
                 }
@@ -687,9 +1023,9 @@ namespace FlightCareer.UI.Services
                             {
                                 Type = FailureType.EngineFire,
                                 Title = "INCÊNDIO NO MOTOR (EXCESSO DE PRIME / RETORNO DE CHAMA)",
-                                Description = "Combustível acumulado no coletor por bomba ligada com mistura rica causou backfire violento e incêndio no capô.",
+                                Description = "Combustível acumulado no coletor por bomba ligada com mistura rica causou backfire violento e incêndio no capô. Corte a mistura e desligue a bomba!",
                                 IsCritical = true,
-                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                                SimEventName = ""
                             });
                             _primeTimerSeconds = 0;
                         }
@@ -715,9 +1051,9 @@ namespace FlightCareer.UI.Services
                             {
                                 Type = FailureType.EngineFire,
                                 Title = "INCÊNDIO DE TURBINA: HOT START SEVERO",
-                                Description = $"Combustível introduzido prematuramente (N1: {data.EngineN1:F1}%) ou ITT acima de 1000°C. Falta de fluxo de ar causou derretimento e fogo na seção quente.",
+                                Description = $"Combustível introduzido prematuramente (N1: {data.EngineN1:F1}%) ou ITT acima de 1000°C. Falta de fluxo de ar causou fogo na seção quente. Corte a Condition Lever!",
                                 IsCritical = true,
-                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                                SimEventName = ""
                             });
                         }
                     }
@@ -735,9 +1071,9 @@ namespace FlightCareer.UI.Services
                             {
                                 Type = FailureType.EngineFire,
                                 Title = "INCÊNDIO POR VENTO DE CAUDA NA PARTIDA",
-                                Description = $"Vento de cauda de {data.TailwindComponentKnots:F0} kts empurrou os gases de exaustão de volta para o interior da turbina, gerando incêndio interno na partida.",
+                                Description = $"Vento de cauda de {data.TailwindComponentKnots:F0} kts empurrou os gases de exaustão de volta para o interior da turbina, gerando incêndio interno na partida. Corte a Condition Lever!",
                                 IsCritical = true,
-                                SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                                SimEventName = ""
                             });
                         }
                     }
@@ -925,9 +1261,9 @@ namespace FlightCareer.UI.Services
                 {
                     Type = FailureType.EngineFire,
                     Title = "INCÊNDIO DE TURBINA: BIRD STRIKE SEVERO (INGESTÃO)",
-                    Description = $"Ingestão de ave de grande porte a {data.Airspeed:F0} kts em baixa altitude ({data.Altitude:F0} ft). O desbalanceamento dinâmico violento rompeu a carcaça do compressor e perfurou linhas de Jet-A1 e óleo, gerando incêndio imediato na nacele.",
+                    Description = $"Ingestão de ave de grande porte a {data.Airspeed:F0} kts em baixa altitude ({data.Altitude:F0} ft). O desbalanceamento dinâmico violento rompeu a carcaça do compressor e perfurou linhas de Jet-A1 e óleo, gerando incêndio imediato na nacele. Corte a Condition Lever!",
                     IsCritical = true,
-                    SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                    SimEventName = ""
                 });
             }
         }
@@ -996,12 +1332,54 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        /// <summary>
+        /// Avalia trinca de cárter ou rompimento do retentor frontal do virabrequim por Pouso Duro / Prop Strike (> 650 FPM).
+        /// </summary>
+        private void CheckHardLandingOilLeakFailure(PilotAircraft aircraft, double touchdownFPM)
+        {
+            if (_activeFailures.Contains(FailureType.OilLeak)) return;
+            if (touchdownFPM < 650.0) return;
+
+            double leakChance = Math.Min(0.85, ((touchdownFPM - 600.0) / 400.0) * 0.55);
+            if (_random.NextDouble() < leakChance)
+            {
+                _oilLeakedPercent = Math.Max(_oilLeakedPercent, 15.0);
+                _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 3.5);
+                _simConnect.SetOilLeakedPercent(_oilLeakedPercent);
+                _lastTransmittedOilLeak = _oilLeakedPercent;
+
+                TriggerFailure(new FailureRecord
+                {
+                    Type = FailureType.OilLeak,
+                    Title = "VAZAMENTO SEVERO DE ÓLEO (POUSO DURO / TRINCA DE CÁRTER)",
+                    Description = $"Impacto severo no toque ({touchdownFPM:F0} FPM) trincou o cárter / rompeu o retentor frontal do virabrequim. Vazamento rápido de óleo ativo!",
+                    IsCritical = true,
+                    SimEventName = ""
+                });
+            }
+        }
+
         public void TriggerFailure(FailureRecord record)
         {
             if (_activeFailures.Contains(record.Type)) return;
 
             _activeFailures.Add(record.Type);
             _failureHistory.Add(record);
+
+            if (record.Type == FailureType.EngineFire)
+            {
+                // No MSFS 2024, Fogo != Motor Apagado Automaticamente:
+                // Ativa ENG ON FIRE:1 = 1 e inicia o cronômetro de 90s (60-120s) para corte de combustível pelo piloto
+                _isEngineOnFire = true;
+                _activeFireBurnSeconds = 0.0;
+                _fireCoolingTimerSeconds = 0.0;
+                _simConnect.SetEngineFire(true);
+            }
+            else if (record.Type == FailureType.OilLeak && _oilLeakedPercent > 0)
+            {
+                _simConnect.SetOilLeakedPercent(_oilLeakedPercent);
+                _lastTransmittedOilLeak = _oilLeakedPercent;
+            }
 
             if (!string.IsNullOrEmpty(record.SimEventName))
             {
@@ -1131,9 +1509,21 @@ namespace FlightCareer.UI.Services
                     {
                         Type = FailureType.EngineFire,
                         Title = "INCÊNDIO NO MOTOR (ENGINE FIRE)",
-                        Description = "Fogo forçado no compartimento do motor.",
+                        Description = "Fogo ativo no compartimento do motor (ENG ON FIRE:1 = 1). Corte combustível e bomba em até 90s para extinguir as chamas!",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ENGINE1_FAILURE"
+                        SimEventName = ""
+                    });
+                    break;
+                case FailureType.OilLeak:
+                    _oilLeakedPercent = Math.Max(_oilLeakedPercent, 15.0);
+                    _activeOilLeakRatePctPerMin = Math.Max(_activeOilLeakRatePctPerMin, 2.5);
+                    TriggerFailure(new FailureRecord
+                    {
+                        Type = FailureType.OilLeak,
+                        Title = "VAZAMENTO PROGRESSIVO DE ÓLEO",
+                        Description = "Vazamento progressivo de óleo ativo (GENERAL ENG OIL LEAKED PERCENT:1). Monitore queda de pressão e subida de temperatura.",
+                        IsCritical = true,
+                        SimEventName = ""
                     });
                     break;
             }
