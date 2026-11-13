@@ -1258,3 +1258,8 @@
 - Hangar: card "Panes em aberto" (NO-GO/DIFERIDA, origem, fase, causa, reparo individual ou todas). Status "GROUNDED (PANE)" / "PANE DIFERIDA" sobre o `AircraftStatusEvaluator`.
 - `WearAndFailureService` removido também do lado do `main`.
 - Testes: 96 (mapeamento de panes e migração da tabela `AircraftDefects` em banco antigo). **Não testado no MSFS nem na tela do app após a integração.**
+
+## 2026-11-13 - Plano de peças, sensores e revisões para execução pelo Gemini (Claude)
+- `docs/plans/sensor-inventory.md`: inventário de SimVars do SDK MSFS 2024 por sistema, com dicas de peça (todas candidatas até a validação em voo).
+- `docs/plans/pecas-desgaste-falhas.md`: plano em 5 fases (sensores → peças e desgaste → walkaround/revisões/troca → panes → UI), matriz de aviões A–I e regras do usuário (revisão só inspeciona; revisão vencida só libera trocando todo o pacote).
+- `docs/plans/INSTRUCOES-GEMINI.md` e `docs/reviews/`: protocolo de execução e revisão entre Gemini e Claude.
