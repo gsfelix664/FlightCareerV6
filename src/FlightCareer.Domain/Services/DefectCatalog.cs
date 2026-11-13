@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FlightCareer.Domain.Components;
 
 namespace FlightCareer.Domain.Services
 {
@@ -47,6 +48,10 @@ namespace FlightCareer.Domain.Services
         public const string BrakesWorn = "BRAKES_WORN";
         public const string Pressurization = "PRESSURIZATION";
         public const string OilLeak = "OIL_LEAK";
+        public const string Electrical = "ELECTRICAL";
+        public const string BrakeFailure = "BRAKE_FAILURE";
+        public const string Hydraulic = "HYDRAULIC";
+        public const string Structural = "STRUCTURAL";
 
         private static readonly Dictionary<string, DefectSpec> Specs = new()
         {
@@ -67,7 +72,49 @@ namespace FlightCareer.Domain.Services
             [BrakesWorn] = new(BrakesWorn, "Freios gastos abaixo do limite", true, 600, DefectEnforcement.None),
             [Pressurization] = new(Pressurization, "Sistema de pressurização inoperante", true, 3500, DefectEnforcement.None),
             [OilLeak] = new(OilLeak, "Vazamento de óleo do motor", true, 900, DefectEnforcement.None),
+            [Electrical] = new(Electrical, "Pane elétrica (curto no chicote)", true, 1500, DefectEnforcement.NativeToggle, "TOGGLE_ELECTRICAL_FAILURE"),
+            [BrakeFailure] = new(BrakeFailure, "Sistema de freios inoperante", true, 800, DefectEnforcement.None),
+            [Hydraulic] = new(Hydraulic, "Vazamento hidráulico", true, 2500, DefectEnforcement.None),
+            [Structural] = new(Structural, "Trinca estrutural", true, 6000, DefectEnforcement.None),
         };
+
+        /// <summary>
+        /// Pane do sistema de componentes (efeito no sim + componente + gravidade) → pane persistente.
+        /// null = não gera discrepância (só dano no componente, ex.: perda parcial de potência, velas encharcadas).
+        /// </summary>
+        public static string? CodeFor(FailureEffect effect, ComponentKind? kind, bool critical)
+        {
+            // Pneu estourado usa o efeito de freio de um lado no sim, mas a pane é do pneu
+            if (kind == ComponentKind.Tires && critical) return TireBlowout;
+
+            switch (effect)
+            {
+                case FailureEffect.EngineFailure: return EngineFailure;
+                case FailureEffect.EngineFire: return EngineFire;
+                case FailureEffect.OilLeak: return OilLeak;
+                case FailureEffect.MagnetoLeft: return MagnetoLeft;
+                case FailureEffect.MagnetoRight: return MagnetoRight;
+                case FailureEffect.AlternatorOff: return Alternator;
+                case FailureEffect.ElectricalFailure: return Electrical;
+                case FailureEffect.VacuumFailure: return Vacuum;
+                case FailureEffect.PitotBlockage: return Pitot;
+                case FailureEffect.StaticBlockage: return StaticPort;
+                case FailureEffect.FlapJam: return FlapLock;
+                case FailureEffect.BrakeFailureOneSide:
+                case FailureEffect.BrakeFailureTotal: return BrakeFailure;
+                case FailureEffect.HydraulicFailure: return Hydraulic;
+            }
+
+            // Sem efeito no sim: só as críticas viram discrepância
+            if (!critical) return null;
+            return kind switch
+            {
+                ComponentKind.Engine or ComponentKind.HotSection => EngineDamage,
+                ComponentKind.LandingGear => GearCollapse,
+                ComponentKind.Airframe => Structural,
+                _ => null
+            };
+        }
 
         public static DefectSpec Get(string code) =>
             Specs.TryGetValue(code, out var spec) ? spec : new DefectSpec(code, code, true, 1000, DefectEnforcement.None);

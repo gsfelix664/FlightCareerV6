@@ -1,0 +1,399 @@
+{
+  // Catálogo de componentes do FlightCareer V6 (sistema de desgaste e falhas por componente).
+  // Regra central: o desgaste natural consome ~70% ao longo da vida útil (chega a ~30% no fim da vida).
+  // Só abuso (faixas amarela/vermelha), manutenção vencida ou eventos levam abaixo do limiar de pane (20%).
+  //
+  // "effect" de cada modo de falha = o que acontece no simulador (ver FailureEffect no domínio):
+  //   None, EngineFailure, EngineFire, OilLeak (effectValue = %/min), MagnetoLeft, MagnetoRight,
+  //   AlternatorOff, ElectricalFailure, VacuumFailure, PitotBlockage, StaticBlockage, FlapJam,
+  //   BrakeFailureOneSide, BrakeFailureTotal, HydraulicFailure
+  // "damage" = dano imediato em % quando a pane acontece (no próprio componente ou em "damageKind").
+
+  "hazard": {
+    "threshold": 20.0,          // Acima disto: só desgaste, nunca pane por desgaste
+    "lambdaAtThreshold": 0.02,  // Falhas/hora em 20%  (~2% de chance numa hora de voo)
+    "lambdaAtZero": 2.0         // Falhas/hora em 0%   (~86% de chance numa hora de voo)
+  },
+  "visibility": {
+    "maxHalfWidth": 25.0,       // Faixa máxima exibida: ±25%
+    "growthPerHour": 0.4,       // +2% de incerteza a cada 5 h desde a última inspeção
+    "walkaroundHalfWidth": 10.0,
+    "maxBias": 0.6
+  },
+  "symptomThreshold": 30.0,
+  "overdueMultiplier": 3.0,
+
+  "landing": {
+    "hardLandingFpm": 400.0,
+    "severeLandingFpm": 600.0,
+    "lateralLimitFps": 5.0,
+    "gearDamagePer100Fpm": 1.5,
+    "tireDamagePer100Fpm": 2.0,
+    "gearSevereDamagePer100Fpm": 5.0,
+    "airframeSevereDamagePer100Fpm": 2.0,
+    "gearLateralDamagePerFps": 1.2,
+    "tireLateralDamagePerFps": 1.5,
+    "brakeEnergyLossPerHour": 72.0,
+    "wetSurfaceMultiplier": 1.8,
+    "oilLeakMinFpm": 650.0,           // Pouso duro pode trincar cárter / retentor do virabrequim
+    "oilLeakChanceAt1000Fpm": 0.5,
+    "oilLeakRatePerMin": 3.5
+  },
+
+  // Limites padrão por classe de motor (sobrescritos por modelo em "aircraftOverrides")
+  "engineLimits": {
+    "Piston": {
+      "redlineRpm": 2700, "rpmRedMargin": 0.02,
+      "maxCht": 260, "chtCautionMargin": 20,
+      "shockCoolingCaution": 28, "shockCoolingRed": 50,
+      "maxOilTemp": 118, "oilTempCautionMargin": 8,
+      "minOilPressure": 20, "minOilTempForHighPower": 38, "highPowerThrottlePercent": 75,
+      "maxStarterSeconds": 30
+    },
+    "Turboprop": {
+      "maxOilTemp": 110, "oilTempCautionMargin": 10,
+      "minOilPressure": 60, "minOilTempForHighPower": 10, "highPowerThrottlePercent": 85,
+      "maxItt": 805, "ittCautionMargin": 40, "maxStartItt": 1000,
+      "maxTorque": 100, "torqueRedMargin": 5, "maxN1": 101.5,
+      "maxStarterSeconds": 60
+    },
+    "Jet": {
+      "maxOilTemp": 140, "oilTempCautionMargin": 15,
+      "minOilPressure": 25, "minOilTempForHighPower": 0, "highPowerThrottlePercent": 90,
+      "maxItt": 900, "ittCautionMargin": 40, "maxStartItt": 950,
+      "maxTorque": 100, "torqueRedMargin": 5, "maxN1": 101.5,
+      "maxStarterSeconds": 60
+    }
+  },
+
+  "airframeLimits": {
+    "maxG": 3.8,               // Categoria normal (FAR 23)
+    "minG": -1.52,
+    "gCautionFraction": 0.85,
+    "structuralIceCautionPct": 10.0
+  },
+
+  // Ajustes por modelo (o primeiro "match" encontrado no nome do modelo vence)
+  "aircraftOverrides": [
+    {
+      "match": [ "C152" ],
+      "engineLimits": { "redlineRpm": 2550 },
+      "airframeLimits": { "maxG": 4.4, "minG": -1.76 }   // Categoria utilidade
+    },
+    {
+      "match": [ "A320", "A321", "A310", "A330", "A400M", "737", "747", "787", "ATR 42", "ATR 72" ],
+      "airframeLimits": { "maxG": 2.5, "minG": -1.0 }    // Categoria transporte (FAR 25)
+    },
+    {
+      "match": [ "DA40NG", "DA62" ],
+      "engineClass": "Piston"                             // Diesel abastecido com Jet A-1
+    }
+  ],
+
+  "externalEvents": {
+    // Eventos externos: sempre ativos, independem da saúde, no máximo um de cada tipo por voo.
+    "birdStrike": {
+      "maxAltitudeFt": 3500,
+      "minAirspeedKts": 75,
+      "lambdaPerHourAt100Kts": 0.001,   // ~1 evento a cada 1.000 h abaixo de 3.500 ft a 100 kt
+      "outcomes": [
+        { "id": "bird.engine_damage", "name": "Bird strike: dano no motor", "kind": "Engine", "weight": 45,
+          "damageMin": 15, "damageMax": 40, "effect": "None", "critical": true,
+          "description": "Ingestão de ave com vibração e perda de potência. Reduza a potência ao mínimo necessário e pouse no aeródromo mais próximo." },
+        { "id": "bird.engine_fire", "name": "Bird strike: incêndio no motor", "kind": "Engine", "weight": 5,
+          "appliesTo": [ "Turboprop", "Jet" ], "damageMin": 30, "damageMax": 60, "effect": "EngineFire", "critical": true,
+          "description": "Falha não contida após ingestão de ave grande perfurou linhas de combustível. Corte o combustível imediatamente!" },
+        { "id": "bird.windshield", "name": "Bird strike: para-brisa / bordo de ataque", "kind": "Airframe", "weight": 35,
+          "damageMin": 3, "damageMax": 10, "effect": "None", "critical": false,
+          "description": "Impacto de ave na estrutura. Verifique controlabilidade e reduza a velocidade." },
+        { "id": "bird.pitot", "name": "Bird strike: tubo de pitot", "kind": "Instruments", "weight": 15,
+          "damageMin": 5, "damageMax": 15, "effect": "PitotBlockage", "critical": true,
+          "description": "Ave atingiu o tubo de pitot. Velocímetro não confiável: voe por atitude e potência." }
+      ]
+    },
+    "fod": {
+      "minGroundSpeedKts": 25,
+      "minThrottlePercent": 65,
+      "lambdaPerHour": 0.002,
+      "wetMultiplier": 3.0,
+      "outcomes": [
+        { "id": "fod.tire_cut", "name": "FOD: corte no pneu", "kind": "Tires", "weight": 50,
+          "damageMin": 20, "damageMax": 45, "effect": "None", "critical": false,
+          "description": "Detrito na pista cortou a banda de rodagem. Inspecione o pneu antes do próximo voo." },
+        { "id": "fod.oil_cooler", "name": "FOD: radiador de óleo perfurado", "kind": "Oil", "weight": 30,
+          "appliesTo": [ "Piston", "Turboprop" ], "damageMin": 10, "damageMax": 20, "effect": "OilLeak", "effectValue": 2.2, "critical": true,
+          "description": "Pedra lançada na corrida perfurou o radiador de óleo. Vazamento contínuo: monitore a pressão do óleo." },
+        { "id": "fod.engine_ingestion", "name": "FOD: ingestão no motor", "kind": "Engine", "weight": 20,
+          "appliesTo": [ "Turboprop", "Jet" ], "damageMin": 10, "damageMax": 30, "effect": "None", "critical": true,
+          "description": "Detrito ingerido danificou o compressor. Vibração e ITT elevada para a mesma potência." }
+      ]
+    },
+    "postMaintenance": {
+      "windowHours": 2.0,
+      "windowCycles": 3,               // Freios/pneus/trem: até 3 pousos após o serviço
+      "lambdaPerHour": 0.03,
+      "outcomes": [
+        { "id": "pm.oil_filter", "name": "Pós-manutenção: filtro de óleo mal apertado", "kind": "Oil", "weight": 50,
+          "damageMin": 5, "damageMax": 10, "effect": "OilLeak", "effectValue": 2.0, "critical": true,
+          "description": "Torque incorreto no filtro após a revisão. Óleo vazando sob pressão: pouso preventivo recomendado." },
+        { "id": "pm.loose_connector", "name": "Pós-manutenção: conector do alternador solto", "kind": "Electrical", "weight": 30,
+          "damageMin": 5, "damageMax": 10, "effect": "AlternatorOff", "critical": false,
+          "description": "Conector mal fixado na revisão. Sem geração elétrica: reduza a carga elétrica." },
+        { "id": "pm.brake_air", "name": "Pós-manutenção: ar no sistema de freios", "kind": "Brakes", "weight": 20,
+          "damageMin": 10, "damageMax": 20, "effect": "None", "critical": false,
+          "description": "Sangria de freio malfeita: pedal esponjoso e frenagem fraca." }
+      ]
+    }
+  },
+
+  "carbIcing": {
+    "maxCarbTemperature": 0.0,
+    "maxThrottlePercent": 45.0,
+    "minAmbientTemperature": -5.0,
+    "maxAmbientTemperature": 25.0,
+    "warningSeconds": 30.0,
+    "stopSeconds": 90.0,
+    "recoverySeconds": 30.0
+  },
+
+  "components": [
+    {
+      "kind": "Engine",
+      "name": "Motor",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 30,
+      "lifeHours": { "Piston": 1800, "Turboprop": 3600, "Jet": 5000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 3,
+      "redLossPerHour": 60,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "serviceName": "Retífica do motor (overhaul)",
+      "repairCostFactor": 0.2,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 25000,
+      "failureModes": [
+        { "id": "engine.power_loss", "name": "Perda parcial de potência", "weight": 50, "critical": false, "effect": "None", "damage": 5,
+          "description": "Desgaste interno reduz a potência disponível. Reduza a carga e pouse no aeródromo mais próximo." },
+        { "id": "engine.rough_running", "name": "Funcionamento irregular", "weight": 30, "critical": false, "effect": "None", "damage": 3,
+          "description": "Vibração e queda de RPM intermitentes por desgaste de cilindros/válvulas." },
+        { "id": "engine.ifsd", "name": "Apagamento em voo (IFSD)", "weight": 15, "critical": true, "effect": "EngineFailure", "damage": 10,
+          "description": "Colapso mecânico interno. Execute o checklist de pane de motor e pouso forçado." },
+        { "id": "engine.fire_fuel_line", "name": "Incêndio por ruptura de linha de combustível", "weight": 5, "critical": true, "effect": "EngineFire",
+          "description": "Conexão de combustível solta por vibração crônica entrou em ignição. Corte combustível imediatamente!" }
+      ]
+    },
+    {
+      "kind": "Oil",
+      "name": "Óleo e lubrificação",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeHours": { "Piston": 50, "Turboprop": 400, "Jet": 600 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 6,
+      "redLossPerHour": 60,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "serviceName": "Troca de óleo e filtro",
+      "repairCostFactor": 0.0005,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 250,
+      "failureModes": [
+        { "id": "oil.leak", "name": "Vazamento progressivo de óleo", "weight": 55, "critical": false, "effect": "OilLeak", "effectValue": 1.5,
+          "description": "Junta ou mangueira degradada. Pressão de óleo cairá progressivamente." },
+        { "id": "oil.pressure_loss", "name": "Perda rápida de óleo", "weight": 30, "critical": true, "effect": "OilLeak", "effectValue": 5.0,
+          "description": "Válvula reguladora travada rompeu a vedação do circuito. Reduza potência e pouse o quanto antes." },
+        { "id": "oil.bearing_seizure", "name": "Fusão de bronzina", "weight": 15, "critical": true, "effect": "EngineFailure", "damage": 30, "damageKind": "Engine",
+          "description": "Película de óleo colapsou e o motor travou. Pouso forçado." }
+      ]
+    },
+    {
+      "kind": "Ignition",
+      "name": "Ignição / magnetos",
+      "appliesTo": [ "Piston" ],
+      "critical": false,
+      "weight": 10,
+      "lifeHours": { "Piston": 500 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 7.5,
+      "redLossPerHour": 30,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "serviceName": "Revisão de magnetos e velas",
+      "repairCostFactor": 0.004,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1450,
+      "failureModes": [
+        { "id": "ignition.magneto_left", "name": "Pane no magneto esquerdo", "weight": 40, "critical": false, "effect": "MagnetoLeft",
+          "description": "Motor operando em contingência no magneto direito." },
+        { "id": "ignition.magneto_right", "name": "Pane no magneto direito", "weight": 40, "critical": false, "effect": "MagnetoRight",
+          "description": "Motor operando em contingência no magneto esquerdo." },
+        { "id": "ignition.plug_fouling", "name": "Velas encharcadas", "weight": 20, "critical": false, "effect": "None", "damage": 2,
+          "description": "Depósito de chumbo nas velas; queda acentuada no cheque de magnetos." }
+      ]
+    },
+    {
+      "kind": "HotSection",
+      "name": "Seção quente",
+      "appliesTo": [ "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeHours": { "Turboprop": 1750, "Jet": 3000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 5,
+      "redLossPerHour": 90,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "serviceName": "Inspeção da seção quente (HSI)",
+      "repairCostFactor": 0.08,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 60000,
+      "failureModes": [
+        { "id": "hotsection.itt_margin_loss", "name": "Perda de margem de ITT", "weight": 60, "critical": false, "effect": "None", "damage": 5,
+          "description": "Palhetas degradadas: ITT sobe para a mesma potência. Reduza torque." },
+        { "id": "hotsection.flameout", "name": "Apagamento (flameout)", "weight": 30, "critical": true, "effect": "EngineFailure",
+          "description": "Instabilidade na câmara de combustão apagou o motor. Execute o checklist de pane e pouso." },
+        { "id": "hotsection.fire", "name": "Incêndio na nacele", "weight": 10, "critical": true, "effect": "EngineFire",
+          "description": "Ruptura estrutural da câmara de combustão. Corte a Condition Lever e a bomba de combustível!" }
+      ]
+    },
+    {
+      "kind": "Electrical",
+      "name": "Elétrico (alternador / bateria)",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 8,
+      "lifeHours": { "Piston": 1500, "Turboprop": 2500, "Jet": 3000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 4,
+      "redLossPerHour": 20,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "serviceName": "Revisão do alternador e bateria",
+      "repairCostFactor": 0.005,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1500,
+      "failureModes": [
+        { "id": "electrical.alternator", "name": "Falha do alternador/gerador", "weight": 60, "critical": false, "effect": "AlternatorOff",
+          "description": "Perda de geração elétrica. Barramento alimentado apenas pela bateria; reduza a carga elétrica." },
+        { "id": "electrical.battery", "name": "Bateria fraca", "weight": 25, "critical": false, "effect": "None", "damage": 5,
+          "description": "Bateria com baixa capacidade; partidas e reserva em pane de gerador comprometidas." },
+        { "id": "electrical.harness_fire", "name": "Curto no chicote elétrico", "weight": 15, "critical": true, "effect": "ElectricalFailure", "damage": 20,
+          "description": "Curto-circuito de alta corrente com fumaça. Sistema elétrico perdido: pouso imediato." }
+      ]
+    },
+    {
+      "kind": "Instruments",
+      "name": "Instrumentos (vácuo / pitot / estática)",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 5,
+      "lifeHours": { "Piston": 1000, "Turboprop": 3000, "Jet": 3000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 1.0,
+      "walkaroundVisible": false,
+      "serviceName": "Revisão de vácuo e pitot-estática",
+      "repairCostFactor": 0.004,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 1200,
+      "failureModes": [
+        { "id": "instruments.vacuum_pump", "name": "Pane na bomba de vácuo", "weight": 45, "critical": false, "effect": "VacuumFailure",
+          "appliesTo": [ "Piston" ],
+          "description": "Rotor da bomba de vácuo quebrou. Horizonte artificial e giro direcional perderão a confiabilidade." },
+        { "id": "instruments.pitot", "name": "Tubo de pitot obstruído", "weight": 35, "critical": true, "effect": "PitotBlockage",
+          "description": "Velocímetro não confiável. Voe por atitude e potência." },
+        { "id": "instruments.static", "name": "Tomada estática obstruída", "weight": 20, "critical": false, "effect": "StaticBlockage",
+          "description": "Altímetro, velocímetro e VSI com indicação não confiável." }
+      ]
+    },
+    {
+      "kind": "LandingGear",
+      "name": "Trem de pouso",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 10,
+      "lifeCycles": { "Piston": 5000, "Turboprop": 8000, "Jet": 20000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 0.5,
+      "walkaroundVisible": true,
+      "serviceName": "Revisão do trem de pouso",
+      "repairCostFactor": 0.02,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 4000,
+      "failureModes": [
+        { "id": "gear.strut_leak", "name": "Amortecedor vazando", "weight": 50, "critical": false, "effect": "None", "damage": 5,
+          "description": "Amortecedor sem nitrogênio/fluido: pousos mais duros e estresse na estrutura." },
+        { "id": "gear.hydraulic", "name": "Vazamento hidráulico", "weight": 25, "critical": true, "effect": "HydraulicFailure",
+          "appliesTo": [ "Turboprop", "Jet" ],
+          "description": "Perda de pressão hidráulica: trem e flaps podem exigir extensão alternativa." },
+        { "id": "gear.collapse", "name": "Colapso de perna do trem", "weight": 25, "critical": true, "effect": "None", "damage": 30, "damageKind": "Airframe",
+          "description": "Fratura de pino mestre/tesoura; a perna do trem cedeu." }
+      ]
+    },
+    {
+      "kind": "Tires",
+      "name": "Pneus",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 6,
+      "lifeCycles": { "Piston": 250, "Turboprop": 300, "Jet": 300 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "serviceName": "Troca de pneus",
+      "repairCostFactor": 0.0008,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 800,
+      "failureModes": [
+        { "id": "tires.low_pressure", "name": "Pneu murcho", "weight": 60, "critical": false, "effect": "None", "damage": 10,
+          "description": "Perda de pressão; tendência direcional na rolagem." },
+        { "id": "tires.blowout", "name": "Estouro de pneu", "weight": 40, "critical": true, "effect": "BrakeFailureOneSide", "damage": 40,
+          "description": "Pneu estourado: a roda perdeu a frenagem e a aeronave puxa para um lado. Mantenha o eixo com leme." }
+      ]
+    },
+    {
+      "kind": "Brakes",
+      "name": "Freios",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": false,
+      "weight": 6,
+      "lifeCycles": { "Piston": 500, "Turboprop": 800, "Jet": 1500 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 0,
+      "redLossPerHour": 0,
+      "hazardScale": 1.0,
+      "walkaroundVisible": true,
+      "serviceName": "Troca de pastilhas e discos",
+      "repairCostFactor": 0.001,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 600,
+      "failureModes": [
+        { "id": "brakes.fade", "name": "Freio fraco (fading)", "weight": 70, "critical": false, "effect": "None", "damage": 5,
+          "description": "Pastilhas no fim de vida; distância de parada maior." },
+        { "id": "brakes.one_side", "name": "Perda de freio em um lado", "weight": 30, "critical": true, "effect": "BrakeFailureOneSide",
+          "description": "Vazamento de fluido em um cilindro; frenagem assimétrica." }
+      ]
+    },
+    {
+      "kind": "Airframe",
+      "name": "Célula / estrutura",
+      "appliesTo": [ "Piston", "Turboprop", "Jet" ],
+      "critical": true,
+      "weight": 20,
+      "lifeHours": { "Piston": 10000, "Turboprop": 20000, "Jet": 40000 },
+      "naturalLossOverLife": 70,
+      "yellowLossPerHour": 5,
+      "redLossPerHour": 300,
+      "hazardScale": 0.5,
+      "walkaroundVisible": true,
+      "serviceName": "Reparo estrutural",
+      "repairCostFactor": 0.05,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 5000,
+      "failureModes": [
+        { "id": "airframe.flap_jam", "name": "Flap travado", "weight": 55, "critical": false, "effect": "FlapJam",
+          "description": "Fuso ou trilho do flap travado na posição atual." },
+        { "id": "airframe.structural_crack", "name": "Trinca estrutural", "weight": 45, "critical": true, "effect": "None", "damage": 10,
+          "description": "Trinca detectada por vibração/ruído. Reduza a velocidade, evite manobras e pouse." }
+      ]
+    }
+  ]
+}

@@ -16,7 +16,8 @@ Você atua como **Staff Reviewer e Engenheiro de Qualidade (QA)**. Sua função 
    - Tratamento adequado de erros e ausência de blocos `catch` vazios.
 4. **Cobertura e Testabilidade:**
    - O código entregue é desacoplado o suficiente para ser testado unitariamente?
-   - Foram validados os cenários de build (`dotnet build`) e caminhos críticos?
+   - `dotnet build src/FlightCareer.slnx` passou com 0 erros **e** `dotnet test src/FlightCareer.Tests` passou? Build verde sozinho não é aprovação.
+   - O diff respeita as regras técnicas de `AGENTS.md` › 6 (ordem do `SimTelemetry`, eventos que existem no SDK, migração de schema, probabilidades por tempo)?
 
 ---
 

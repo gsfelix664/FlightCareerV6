@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 namespace FlightCareer.UI.Services
 {
     /// <summary>
-    /// Panes persistentes. Pane nativa: o sim gera, o addon detecta e grava. Pane do addon: sorteada pelo
-    /// WearAndFailureService e gravada aqui. As duas vão para a mesma tabela (AircraftDefects) e só saem pela oficina.
+    /// Panes persistentes (discrepâncias entre voos). Pane nativa: o sim gera, o addon detecta e grava. Pane do addon:
+    /// sorteada pelo sistema de componentes (ComponentFlightSession) e gravada aqui pelo FlightMonitor.
+    /// As duas vão para a mesma tabela (AircraftDefects) e só saem pela oficina.
+    /// No voo, o SimFailureActuator aplica o efeito; este serviço mantém o efeito entre voos e recarregamentos.
     ///
     /// Enquanto houver pane aberta e o voo estiver sendo monitorado, este serviço:
     ///  1. reaplica a pane ao carregar a aeronave (o simulador zera as falhas ao recarregar);
@@ -141,6 +143,7 @@ namespace FlightCareer.UI.Services
             _simConnect.OnFailureStateReceived -= OnFailureState;
             _simConnect.OnMaskedEvent -= OnMaskedEvent;
             _simConnect.SetMaskedEvents(Array.Empty<string>());
+            _simConnect.SetPersistentToggles(Array.Empty<string>());
             _active = false;
         }
 
@@ -246,6 +249,12 @@ namespace FlightCareer.UI.Services
             }
             _simConnect.SetMaskedEvents(masked);
 
+            // Toggles das panes abertas não são desfeitos pelo início de voo (ClearSimFailures)
+            _simConnect.SetPersistentToggles(_openDefects
+                .Select(d => DefectCatalog.Get(d.Code))
+                .Where(s => s.Enforcement == DefectEnforcement.NativeToggle && s.ToggleEvent != null)
+                .Select(s => s.ToggleEvent!));
+
             // Panes reaplicadas por evento nativo TOGGLE_*.
             foreach (var defect in _openDefects)
             {
@@ -342,11 +351,12 @@ namespace FlightCareer.UI.Services
                 if (old.Code == DefectCatalog.EngineFailure)
                 {
                     if (_simConnect.CurrentFailureState is { } st && st.EngineFailed > 0.5)
-                        _simConnect.SetFailure(spec.ToggleEvent);
+                        _simConnect.SendEvent(spec.ToggleEvent);
                 }
                 else if (_togglesApplied.Contains(old.Code))
                 {
-                    _simConnect.SetFailure(spec.ToggleEvent);
+                    // Enviado por este serviço neste carregamento da aeronave: o toggle desfaz
+                    _simConnect.SendEvent(spec.ToggleEvent);
                 }
                 _togglesApplied.Remove(old.Code);
                 OnEnforcementAction?.Invoke($"Pane reparada, removida do simulador: {old.Title}");
@@ -374,7 +384,7 @@ namespace FlightCareer.UI.Services
                         break;
 
                     case DefectCatalog.Alternator when state.AlternatorSwitch > 0.5:
-                        if (ShouldCorrect(defect.Code)) _simConnect.TransmitEvent("ALTERNATOR_OFF");
+                        if (ShouldCorrect(defect.Code)) _simConnect.SendEvent("ALTERNATOR_OFF");
                         break;
 
                     // Motor inoperante: o sim zera a falha ao reiniciar o voo/recarregar a aeronave.
@@ -382,7 +392,8 @@ namespace FlightCareer.UI.Services
                     case DefectCatalog.EngineFailure when state.EngineFailed < 0.5:
                         if (ShouldCorrect(defect.Code, EngineReapplyThrottle))
                         {
-                            _simConnect.SetFailure(DefectCatalog.Get(defect.Code).ToggleEvent!);
+                            // Leitura rápida confirma que não está falhado: o toggle não repara nada
+                            _simConnect.SendEvent(DefectCatalog.Get(defect.Code).ToggleEvent!);
                             _togglesApplied.Add(defect.Code);
                             OnEnforcementAction?.Invoke($"Pane reaplicada no simulador: {defect.Title}");
                         }

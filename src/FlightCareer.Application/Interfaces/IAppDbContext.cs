@@ -17,9 +17,11 @@ namespace FlightCareer.Application.Interfaces
         DbSet<Mission> Missions { get; }
         DbSet<FinancialTransaction> FinancialTransactions { get; }
         DbSet<MarketListing> MarketListings { get; }
+        DbSet<AircraftComponent> AircraftComponents { get; }
         DbSet<AircraftDefect> AircraftDefects { get; }
 
         DatabaseFacade Database { get; }
+        Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker ChangeTracker { get; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     }
 }

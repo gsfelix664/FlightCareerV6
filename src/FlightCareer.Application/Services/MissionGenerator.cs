@@ -32,6 +32,7 @@ namespace FlightCareer.Application.Services
 
         public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             // 1. Limpar missões expiradas (que não foram aceitas)
             var expired = await _context.Missions
                 .Where(m => !m.IsAccepted && m.ExpirationTime < DateTime.Now)

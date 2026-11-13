@@ -21,6 +21,8 @@ namespace FlightCareer.Application.Interfaces
         void Connect();
         void Disconnect();
         void SetFailure(string eventName);
+        void SendEvent(string eventName, uint data = 0);
+        void ClearSimFailures();
         void SetEngineFire(bool isOnFire);
         void SetOilLeakedPercent(double percent);
     }

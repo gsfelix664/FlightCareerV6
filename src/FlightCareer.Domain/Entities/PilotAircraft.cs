@@ -31,5 +31,8 @@ namespace FlightCareer.Domain.Entities
         public bool IsInterdicted { get; set; } = false;               // Aeronave interditada para voo
         public string InterdictionReason { get; set; } = string.Empty; // Motivo da interdição (ex: TBO vencido)
         public string Configuration { get; set; } = "Passageiro";     // "Passageiro", "Carga (Sem Assentos)"
+
+        // Barras de saúde individuais por componente (motor, óleo, pneus, freios...)
+        public List<AircraftComponent> Components { get; set; } = new();
     }
 }
