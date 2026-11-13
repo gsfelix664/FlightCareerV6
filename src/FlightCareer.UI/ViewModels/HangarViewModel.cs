@@ -52,6 +52,17 @@ namespace FlightCareer.UI.ViewModels
                     wrapper.IsActive = wrapper.Aircraft.Id == activeId;
                 }
 
+                // Panes persistentes em aberto (sem tracking: são gravadas por outros contextos durante o voo)
+                var aircraftIds = wrappedFleet.Select(w => w.Aircraft.Id).ToList();
+                var openDefects = await _context.AircraftDefects.AsNoTracking()
+                    .Where(d => aircraftIds.Contains(d.PilotAircraftId) && !d.IsResolved)
+                    .OrderBy(d => d.DetectedAtUtc)
+                    .ToListAsync();
+                foreach (var wrapper in wrappedFleet)
+                {
+                    wrapper.SetOpenDefects(openDefects.Where(d => d.PilotAircraftId == wrapper.Aircraft.Id));
+                }
+
                 Fleet = new ObservableCollection<PilotAircraftWrapper>(wrappedFleet);
                 SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == activeId) ?? Fleet.FirstOrDefault();
             }
@@ -534,6 +545,62 @@ namespace FlightCareer.UI.ViewModels
             await LoadFleetAsync();
 
             MessageBox.Show("Aeronave removida da frota.");
+        }
+
+        [RelayCommand]
+        private Task RepairDefect(AircraftDefect? defect) =>
+            defect == null ? Task.CompletedTask : RepairDefectsAsync(new[] { defect });
+
+        [RelayCommand]
+        private Task RepairAllDefects() =>
+            SelectedAircraft == null ? Task.CompletedTask : RepairDefectsAsync(SelectedAircraft.OpenDefects.ToList());
+
+        /// <summary>Oficina: única forma de fechar uma pane persistente.</summary>
+        private async Task RepairDefectsAsync(System.Collections.Generic.IReadOnlyList<AircraftDefect> defects)
+        {
+            if (SelectedAircraft == null || defects.Count == 0) return;
+            if (SelectedAircraft.IsCrashed)
+            {
+                MessageBox.Show("Esta aeronave sofreu PERDA TOTAL e não pode ser reparada. Acione o seguro ou descarte-a.");
+                return;
+            }
+            if (IsMonitoring)
+            {
+                MessageBox.Show("Você não pode reparar panes durante um voo!");
+                return;
+            }
+
+            var pilot = await _context.Pilots.FindAsync(_pilotId);
+            if (pilot == null) return;
+
+            double cost = defects.Sum(d => d.RepairCost);
+            if (pilot.Balance < cost)
+            {
+                MessageBox.Show($"Saldo insuficiente! O reparo custa {cost:C2}.");
+                return;
+            }
+
+            var lista = string.Join("\n", defects.Select(d => $"• {d.Title} — {d.RepairCost:C2}"));
+            var result = MessageBox.Show($"Autorizar o reparo na oficina de {SelectedAircraft.Prefix}?\n\n{lista}\n\nTotal: {cost:C2}",
+                "Reparo de Panes", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result != MessageBoxResult.Yes) return;
+
+            pilot.Balance -= cost;
+            var ids = defects.Select(d => d.Id).ToList();
+            var dbDefects = await _context.AircraftDefects.Where(d => ids.Contains(d.Id)).ToListAsync();
+            foreach (var d in dbDefects)
+            {
+                d.IsResolved = true;
+                d.ResolvedAtUtc = DateTime.UtcNow;
+                _context.FinancialTransactions.Add(CreateTransaction(pilot.Id, "Manutenção", $"REPARO DE PANE: {d.Title} ({SelectedAircraft.Prefix})", d.RepairCost));
+            }
+            await _context.SaveChangesAsync();
+
+            SelectedAircraft.SetOpenDefects(SelectedAircraft.OpenDefects.Where(d => !ids.Contains(d.Id)).ToList());
+            SelectedAircraft.Refresh();
+            MessageBox.Show(SelectedAircraft.HasOpenDefects
+                ? "Reparo concluído. Ainda há panes em aberto nesta aeronave."
+                : "Reparo concluído. Nenhuma pane em aberto.");
         }
 
         private FinancialTransaction CreateTransaction(Guid pilotId, string category, string desc, double amount)

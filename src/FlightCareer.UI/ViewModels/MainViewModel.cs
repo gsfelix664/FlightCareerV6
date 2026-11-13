@@ -349,7 +349,8 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonColor));
             };
             _flightMonitor.OnAlert += (title, msg, isError) => {
-                System.Windows.Application.Current.Dispatcher.Invoke(() => {
+                // BeginInvoke: o alerta não pode travar o monitor de voo enquanto a janela estiver aberta
+                System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
                     System.Windows.MessageBox.Show(msg, title, System.Windows.MessageBoxButton.OK, isError ? System.Windows.MessageBoxImage.Error : System.Windows.MessageBoxImage.Information);
                 });
             };
@@ -823,7 +824,15 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            _flightMonitor.StartMonitoring(pilot, aircraft, ActiveMissions.ToList());
+            var groundingDefects = _flightMonitor.GetGroundingDefects(aircraft.Id);
+            if (groundingDefects.Count > 0)
+            {
+                var lista = string.Join("\n", groundingDefects.Select(d => $"• {d.Title} ({d.OriginLabel}, {d.DetectedAtUtc.ToLocalTime():dd/MM HH:mm})"));
+                System.Windows.MessageBox.Show($"Voo não autorizado! A aeronave {aircraft.Prefix} tem itens inoperantes:\n\n{lista}\n\nRepare as panes na oficina do Hangar antes de iniciar ou receber por missões.", "Pane em Aberto (NO-GO)", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+
+            if (!_flightMonitor.StartMonitoring(pilot, aircraft, ActiveMissions.ToList())) return;
             IsMonitoring = true;
             _briefingViewModel.IsMonitoring = true;
             _hangarViewModel.IsMonitoring = true;
@@ -992,6 +1001,9 @@ namespace FlightCareer.UI.ViewModels
             {
                 CurrentAirportICAO = pilot.CurrentAirportICAO;
             }
+
+            // Panes abertas da aeronave ativa ficam aplicadas no simulador também fora do voo
+            _flightMonitor.WatchAircraft(activeAircraft);
 
             OnPropertyChanged(nameof(CashDisplay));
             OnPropertyChanged(nameof(RankDisplay));

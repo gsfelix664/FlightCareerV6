@@ -1,4 +1,4 @@
-using FlightCareer.Domain.Entities;
+﻿using FlightCareer.Domain.Entities;
 using FlightCareer.UI.Services;
 using System;
 using System.Collections.Generic;
@@ -31,6 +31,8 @@ namespace FlightCareer.UI.Services
         public bool IsCritical { get; set; }
         public DateTime Timestamp { get; set; } = DateTime.Now;
         public string SimEventName { get; set; } = string.Empty;
+        /// <summary>Código do DefectCatalog quando o tipo sozinho não basta (ex.: lado do magneto).</summary>
+        public string? DefectCode { get; set; }
     }
 
     public class WearAndFailureService
@@ -48,6 +50,9 @@ namespace FlightCareer.UI.Services
         private DateTime _lastThrottleCheck = DateTime.MinValue;
         private double _breakCheckTimerSeconds = 0;
 
+        /// <summary>Desgaste extra (%/h) de um motor com pane crítica que segue funcionando: 15% -> 0% em ~15 min.</summary>
+        public const double DamagedEngineWearRatePerHour = 60.0;
+
         public event Action<FailureRecord>? OnFailureTriggered;
 
         public IReadOnlyList<FailureRecord> ActiveFailures => _failureHistory.AsReadOnly();
@@ -57,6 +62,15 @@ namespace FlightCareer.UI.Services
         public WearAndFailureService(SimConnectService simConnect)
         {
             _simConnect = simConnect;
+        }
+
+        /// <summary>
+        /// Marca uma pane persistente já aberta como ativa, sem disparar de novo.
+        /// Evita sortear outra vez a mesma pane e reenviar um TOGGLE_* que a desligaria no simulador.
+        /// </summary>
+        public void MarkAlreadyActive(FailureType type)
+        {
+            _activeFailures.Add(type);
         }
 
         public void Reset()
@@ -172,6 +186,13 @@ namespace FlightCareer.UI.Services
                 {
                     engineWearRate += (data.EngineOilTemp - 110.0) * 5.0;
                 }
+            }
+
+            // Motor com pane crítica que continua girando (pane ainda não derrubou o motor, ou o piloto o religou):
+            // a saúde não salta para um valor fixo, ela cai rápido e de forma contínua enquanto ele funcionar.
+            if (_activeFailures.Contains(FailureType.EngineIFSD) && data.IsEngineRunning)
+            {
+                engineWearRate += DamagedEngineWearRatePerHour;
             }
 
             aircraft.EngineCondition = Math.Max(0, aircraft.EngineCondition - (engineWearRate * deltaTimeHours));
@@ -382,7 +403,7 @@ namespace FlightCareer.UI.Services
                             Title = "ENCHARCAMENTO DE VELAS (LEAD FOULING)",
                             Description = "Depósito de chumbo e fuligem nos eletrodos das velas por táxi prolongado com mistura rica e motor frio. Motor apresentará queda brusca no cheque de magnetos.",
                             IsCritical = false,
-                            SimEventName = "TOGGLE_VACUUM_FAILURE"
+                            SimEventName = string.Empty // Antes disparava TOGGLE_VACUUM_FAILURE por engano
                         });
                     }
                 }
@@ -529,7 +550,8 @@ namespace FlightCareer.UI.Services
                                 Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
                                 Description = $"Falha de ignição por desgaste severo (Saúde {aircraft.MagnetosCondition:F1}%). Queda imediata de rotação. Motor operando em contingência no magneto remanescente.",
                                 IsCritical = false,
-                                SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
+                                // Mantido pela vigilância contínua (PersistentFailureService), não por evento único
+                                DefectCode = leftFailed ? FlightCareer.Domain.Services.DefectCatalog.MagnetoLeft : FlightCareer.Domain.Services.DefectCatalog.MagnetoRight
                             });
                         }
                     }
@@ -554,7 +576,7 @@ namespace FlightCareer.UI.Services
                         Title = "FALHA ELÉTRICA (ALTERNADOR #1)",
                         Description = "Perda de geração elétrica por queima do diodo retificador ou sobretensão. Barramento transferido exclusivamente para a bateria.",
                         IsCritical = false,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = string.Empty // TOGGLE_ALTERNATOR1_FAILURE não existe no MSFS: alternador mantido desligado pela vigilância
                     });
                 }
             }
@@ -625,7 +647,7 @@ namespace FlightCareer.UI.Services
                         Title = "TRAVAMENTO DE FLAPS",
                         Description = "Falha mecânica de fuso ou disjuntor atuado nos motores de flap. Hipersustentadores travados na posição.",
                         IsCritical = false,
-                        SimEventName = "FLAPS_UP"
+                        SimEventName = string.Empty // Travado na posição atual pela vigilância contínua
                     });
                 }
             }
@@ -641,7 +663,7 @@ namespace FlightCareer.UI.Services
                         Title = "DESPRESSURIZAÇÃO DA CABINE",
                         Description = $"Altitude de cabine anormal ({data.CabinAltitude:F0} ft) por falha de vedação ou válvula outflow travada. Inicie descida imediata para o FL100.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = string.Empty // Sem evento nativo de despressurização (antes usava o do alternador por engano)
                     });
                 }
             }
@@ -833,7 +855,7 @@ namespace FlightCareer.UI.Services
                         Title = "FALHA DE ALTERNADOR",
                         Description = "Falha elétrica forçada via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = string.Empty // TOGGLE_ALTERNATOR1_FAILURE não existe no MSFS: alternador mantido desligado pela vigilância
                     });
                     break;
                 case FailureType.VacuumFailure:
@@ -873,7 +895,7 @@ namespace FlightCareer.UI.Services
                         Title = "TRAVAMENTO DE FLAPS",
                         Description = "Falha mecânica de flap forçada via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = "FLAPS_UP"
+                        SimEventName = string.Empty // Travado na posição atual pela vigilância contínua
                     });
                     break;
                 case FailureType.CabinDepressurization:
@@ -883,7 +905,7 @@ namespace FlightCareer.UI.Services
                         Title = "DESPRESSURIZAÇÃO DA CABINE",
                         Description = "Despressurização forçada via painel de testes/controle.",
                         IsCritical = true,
-                        SimEventName = "TOGGLE_ALTERNATOR1_FAILURE"
+                        SimEventName = string.Empty // Sem evento nativo de despressurização (antes usava o do alternador por engano)
                     });
                     break;
                 case FailureType.MagnetoFailure:
@@ -894,7 +916,8 @@ namespace FlightCareer.UI.Services
                         Title = $"PANE DE IGNIÇÃO: MAGNETO {(leftFailed ? "ESQUERDO" : "DIREITO")}",
                         Description = "Falha forçada de magneto/ignição via painel de testes/controle.",
                         IsCritical = false,
-                        SimEventName = leftFailed ? "MAGNETO1_RIGHT" : "MAGNETO1_LEFT"
+                        // Mantido pela vigilância contínua (PersistentFailureService), não por evento único
+                                DefectCode = leftFailed ? FlightCareer.Domain.Services.DefectCatalog.MagnetoLeft : FlightCareer.Domain.Services.DefectCatalog.MagnetoRight
                     });
                     break;
             }

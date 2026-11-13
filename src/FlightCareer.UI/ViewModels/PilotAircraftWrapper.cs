@@ -66,6 +66,23 @@ namespace FlightCareer.UI.ViewModels
         public SolidColorBrush MagnetosColor => GetConditionColor(MagnetosCondition);
         public double OilCondition => Math.Round(Aircraft.OilCondition, 1);
         public SolidColorBrush OilColor => GetConditionColor(OilCondition);
+        // Panes persistentes em aberto (carregadas pelo HangarViewModel)
+        public System.Collections.ObjectModel.ObservableCollection<AircraftDefect> OpenDefects { get; } = new();
+        public bool HasOpenDefects => OpenDefects.Count > 0;
+        public bool HasGroundingDefects => OpenDefects.Any(d => d.IsGrounding);
+        public double DefectsRepairTotal => OpenDefects.Sum(d => d.RepairCost);
+
+        public void SetOpenDefects(System.Collections.Generic.IEnumerable<AircraftDefect> defects)
+        {
+            OpenDefects.Clear();
+            foreach (var d in defects) OpenDefects.Add(d);
+            OnPropertyChanged(nameof(HasOpenDefects));
+            OnPropertyChanged(nameof(HasGroundingDefects));
+            OnPropertyChanged(nameof(DefectsRepairTotal));
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(StatusColor));
+        }
+
         public bool IsInterdicted => Aircraft.IsInterdicted;
         public string InterdictionReason => Aircraft.InterdictionReason;
         public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
@@ -124,6 +141,8 @@ namespace FlightCareer.UI.ViewModels
             {
                 if (IsCrashed) return "PERDA TOTAL (CRASH)";
                 if (IsInterdicted) return $"INTERDITADA: {InterdictionReason}";
+                if (HasGroundingDefects) return $"GROUNDED (PANE: {OpenDefects.First(d => d.IsGrounding).Title.ToUpper()})";
+                if (HasOpenDefects) return $"PANE DIFERIDA: {OpenDefects.First().Title.ToUpper()}";
                 if (EngineCondition < 30 || TiresCondition < 30 || AirframeCondition < 30 || MagnetosCondition < 30 || OilCondition < 30) return "GROUNDED (MANUT. CRÍTICA)";
                 if (EngineCondition < 70 || TiresCondition < 70 || AirframeCondition < 70 || MagnetosCondition < 70 || OilCondition < 70 || HoursUntilNext50hInspection <= 5 || HoursUntilNext100hInspection <= 10 || HoursUntilNext500hInspection <= 10 || EngineTboRemainingHours <= 50) return "MANUTENÇÃO NECESSÁRIA";
                 return "PRONTA PARA VOO";
@@ -136,7 +155,7 @@ namespace FlightCareer.UI.ViewModels
             {
                 if (IsCrashed) return new SolidColorBrush(Color.FromRgb(0, 0, 0)); // Preto para Perda Total
                 if (IsInterdicted || StatusText.StartsWith("GROUNDED")) return new SolidColorBrush(Color.FromRgb(231, 76, 60)); // Vermelho
-                if (StatusText == "MANUTENÇÃO NECESSÁRIA") return new SolidColorBrush(Color.FromRgb(241, 196, 15)); // Amarelo
+                if (StatusText == "MANUTENÇÃO NECESSÁRIA" || StatusText.StartsWith("PANE DIFERIDA")) return new SolidColorBrush(Color.FromRgb(241, 196, 15)); // Amarelo
                 return new SolidColorBrush(Color.FromRgb(46, 204, 113)); // Verde
             }
         }

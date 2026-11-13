@@ -16,6 +16,7 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<Mission> Missions { get; set; }
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<MarketListing> MarketListings { get; set; }
+        public DbSet<AircraftDefect> AircraftDefects { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -52,6 +53,13 @@ namespace FlightCareer.Infrastructure.Persistence
 
                 entity.HasIndex(m => m.IsSold);
                 entity.HasIndex(m => m.IsPlayerOwned);
+            });
+
+            modelBuilder.Entity<AircraftDefect>(entity =>
+            {
+                entity.Ignore(d => d.OriginLabel);
+                entity.Ignore(d => d.SeverityLabel);
+                entity.HasIndex(d => new { d.PilotAircraftId, d.IsResolved });
             });
 
             base.OnModelCreating(modelBuilder);
@@ -144,7 +152,26 @@ namespace FlightCareer.Infrastructure.Persistence
                     FOREIGN KEY (AircraftTypeId) REFERENCES AircraftTypes(Id)
                 );",
                 "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsSold ON MarketListings(IsSold);",
-                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);"
+                "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);",
+
+                // Panes persistentes (addon + nativas do simulador)
+                @"CREATE TABLE IF NOT EXISTS AircraftDefects (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    Code TEXT NOT NULL,
+                    Origin INTEGER NOT NULL,
+                    Title TEXT NOT NULL,
+                    Description TEXT NOT NULL,
+                    Cause TEXT NOT NULL,
+                    FlightPhase TEXT NOT NULL,
+                    IsGrounding INTEGER NOT NULL,
+                    RepairCost REAL NOT NULL,
+                    Parameter REAL NOT NULL,
+                    DetectedAtUtc TEXT NOT NULL,
+                    IsResolved INTEGER NOT NULL,
+                    ResolvedAtUtc TEXT NULL
+                );",
+                "CREATE INDEX IF NOT EXISTS IX_AircraftDefects_PilotAircraftId_IsResolved ON AircraftDefects(PilotAircraftId, IsResolved);"
             };
 
             foreach (var stmt in migrationStatements)
