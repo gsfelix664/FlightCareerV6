@@ -10,7 +10,7 @@ using FlightCareer.Application.Interfaces;
 namespace FlightCareer.UI.Services
 {
     public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState }
-    public enum DEFINITIONS { AircraftData, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex }
+    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex }
     public enum EVENTS { FailureEvent, CrashedEvent, AircraftLoaded, FlightLoaded }
     public enum GROUPS { MaskedPilotInputs = 1 }
 
@@ -37,8 +37,12 @@ namespace FlightCareer.UI.Services
         public double EngineCombustion;     // GENERAL ENG COMBUSTION:1
     }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    internal struct SingleDouble { public double Value; }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
+    public struct SimDoubleValue
+    {
+        public double Value;
+    }
 
     public class SimConnectService : ISimConnectService
     {
@@ -170,14 +174,17 @@ namespace FlightCareer.UI.Services
                 // 7. Alertas (1 double)
                 AddToDef("OVERSPEED WARNING", "Bool");
 
-                // 8. Motor (7 doubles)
+                // 8. Motor (10 doubles)
                 AddToDef("GENERAL ENG RPM:1", "rpm");
                 AddToDef("RECIP ENG CYLINDER HEAD TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL TEMPERATURE:1", "Celsius");
                 AddToDef("GENERAL ENG OIL PRESSURE:1", "psi");
                 AddToDef("TURB ENG ITT:1", "Celsius");
+                AddToDef("TURB ENG MAX TORQUE PERCENT:1", "Percent");
                 AddToDef("TURB ENG N1:1", "Percent");
                 AddToDef("ENG FAILED:1", "Bool");
+                AddToDef("ENG ON FIRE:1", "Bool");
+                AddToDef("GENERAL ENG OIL LEAKED PERCENT:1", "Percent");
 
                 // 9. Condições Ambientais e Atmosféricas (5 doubles)
                 AddToDef("SURFACE CONDITION", "Number");
@@ -186,15 +193,20 @@ namespace FlightCareer.UI.Services
                 AddToDef("AMBIENT WIND VELOCITY", "Knots");
                 AddToDef("AMBIENT WIND DIRECTION", "Degrees");
 
-                // 10. Dinâmica Lateral e Comandos do Piloto (4 doubles)
+                // 10. Dinâmica Lateral e Comandos do Piloto (7 doubles)
                 AddToDef("VELOCITY BODY X", "Feet per second");
                 AddToDef("GENERAL ENG THROTTLE LEVER POSITION:1", "Percent");
                 AddToDef("GENERAL ENG MIXTURE LEVER POSITION:1", "Percent");
                 AddToDef("ENG ANTI ICE:1", "Bool");
+                AddToDef("GENERAL ENG FUEL PUMP SWITCH:1", "Bool");
+                AddToDef("GENERAL ENG STARTER:1", "Bool");
+                AddToDef("TURB ENG CONDITION LEVER POSITION:1", "Percent");
 
-                // 11. Gelo e Pressurização (3 doubles)
+                // 11. Gelo e Pressurização (5 doubles)
                 AddToDef("STRUCTURAL ICE PCT", "Percent");
                 AddToDef("PITOT ICE PCT", "Percent");
+                AddToDef("CARB HEAT AVAILABLE", "Bool");
+                AddToDef("RECIP CARBURETOR TEMPERATURE:1", "Celsius");
                 AddToDef("PRESSURIZATION CABIN ALTITUDE", "Feet");
 
                 // 12. Simulação e Tempo (1 double)
@@ -223,6 +235,13 @@ namespace FlightCareer.UI.Services
                 AddWriteDef(DEFINITIONS.WriteLeftMagneto, "RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteRightMagneto, "RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteFlapsHandleIndex, "FLAPS HANDLE INDEX", "Number");
+
+                // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
+                _simConnect.AddToDataDefinition(DEFINITIONS.EngineFireState, "ENG ON FIRE:1", "Bool", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.EngineFireState);
+
+                _simConnect.AddToDataDefinition(DEFINITIONS.OilLeakState, "GENERAL ENG OIL LEAKED PERCENT:1", "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+                _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.OilLeakState);
 
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
@@ -293,7 +312,7 @@ namespace FlightCareer.UI.Services
         {
             if (_simConnect == null) return;
             _simConnect.AddToDataDefinition(def, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
-            _simConnect.RegisterDataDefineStruct<SingleDouble>(def);
+            _simConnect.RegisterDataDefineStruct<SimDoubleValue>(def);
         }
 
         public void Disconnect()
@@ -380,11 +399,39 @@ namespace FlightCareer.UI.Services
             if (_simConnect == null) return;
             try
             {
-                _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, new SingleDouble { Value = value });
+                _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, new SimDoubleValue { Value = value });
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[SimConnect] Escrita {def} falhou: {ex.Message}");
+            }
+        }
+
+        public void SetEngineFire(bool isOnFire)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                var val = new SimDoubleValue { Value = isOnFire ? 1.0 : 0.0 };
+                _simConnect.SetDataOnSimObject(DEFINITIONS.EngineFireState, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetEngineFire Error: {ex.Message}");
+            }
+        }
+
+        public void SetOilLeakedPercent(double percent)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                var val = new SimDoubleValue { Value = Math.Clamp(percent, 0.0, 100.0) };
+                _simConnect.SetDataOnSimObject(DEFINITIONS.OilLeakState, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetOilLeakedPercent Error: {ex.Message}");
             }
         }
 

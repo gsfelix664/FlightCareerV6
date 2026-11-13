@@ -21,5 +21,7 @@ namespace FlightCareer.Application.Interfaces
         void Connect();
         void Disconnect();
         void SetFailure(string eventName);
+        void SetEngineFire(bool isOnFire);
+        void SetOilLeakedPercent(double percent);
     }
 }

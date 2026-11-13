@@ -46,6 +46,7 @@ namespace FlightCareer.Domain.Services
         public const string TireBlowout = "TIRE_BLOWOUT";
         public const string BrakesWorn = "BRAKES_WORN";
         public const string Pressurization = "PRESSURIZATION";
+        public const string OilLeak = "OIL_LEAK";
 
         private static readonly Dictionary<string, DefectSpec> Specs = new()
         {
@@ -65,6 +66,7 @@ namespace FlightCareer.Domain.Services
             [TireBlowout] = new(TireBlowout, "Pneu estourado", true, 350, DefectEnforcement.None),
             [BrakesWorn] = new(BrakesWorn, "Freios gastos abaixo do limite", true, 600, DefectEnforcement.None),
             [Pressurization] = new(Pressurization, "Sistema de pressurização inoperante", true, 3500, DefectEnforcement.None),
+            [OilLeak] = new(OilLeak, "Vazamento de óleo do motor", true, 900, DefectEnforcement.None),
         };
 
         public static DefectSpec Get(string code) =>

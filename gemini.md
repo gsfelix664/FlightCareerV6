@@ -1352,3 +1352,172 @@ Ao implementar este plano, o agente executor deve:
   - Card de Inspeção de 50h atualizado para exibir horas restantes e saúde do óleo colorimétrica dinâmica.
   - Execução das ordens de serviço de 50h ($850), 100h ($2.500) e Overhaul restaura `OilCondition = 100,0%`.
 - **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Limpeza de Lógica de Carb Icing e Delegação ao Motor Nativo do MSFS 2024
+- **Remoção do Controle Sintético de Carb Icing (`WearAndFailureService`)**:
+  - Removido o membro `CarbIcing` do enum `FailureType`.
+  - Removido o acumulador `_carbIceAccumulator` e seu respectivo reset no ciclo de voo.
+  - Removida a rotina heurística de congelamento de carburador em `CheckEngineFailures`, preservando a lógica de *Spark Plug Fouling*.
+  - Removido o caso `FailureType.CarbIcing` de `TriggerManualFailure`.
+- **Delegação Integral ao Simulador**:
+  - A física de formação de gelo no carburador, perda gradual de RPM e resposta ao acionamento do aquecimento (`Carb Heat`) passa a ser gerenciada com fidelidade total pelo motor de física e aerodinâmica nativo do Microsoft Flight Simulator 2024.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Limpeza da Lógica de Compressor Stall e Delegação ao Motor Termodinâmico Nativo do MSFS 2024
+- **Remoção do Controle Sintético de Compressor Stall (`WearAndFailureService` e `FlightMonitor`)**:
+  - Removido o membro `CompressorStall` do enum `FailureType`.
+  - Removidos os campos `_lastThrottle` e `_lastThrottleCheck` e seus respectivos resets de ciclo de voo em `Reset()`.
+  - Removido o rastro de avanço de manete (*slam throttle detection*) em `ProcessWear`.
+  - Removida a seção B de lógica heurística de estol de compressor / surge sob vento cruzado em `CheckEngineFailures`.
+  - Removido o caso `FailureType.CompressorStall` de `TriggerManualFailure`.
+  - Ajustado o gatilho em `FlightMonitor.OnAircraftFailureTriggered` para tratar exclusivamente falhas críticas de motor (`EngineIFSD`).
+- **Delegação Integral ao Simulador**:
+  - O comportamento termodinâmico e aerodinâmico de estol de compressor e surge em turbinas e turboélices (incluindo avanço brusco de manete, distorção de fluxo na admissão por vento cruzado e altitude) passa a ser gerenciado de forma nativa e precisa pelo motor termodinâmico do Microsoft Flight Simulator 2024.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Mapeamento de Sobretorque (TurboTorque) e Sobretaxa Quadrática de Desgaste
+- **Mapeamento de Telemetria Nativa (`SimTelemetry` e `SimConnectService`)**:
+  - Adicionado o campo `public double TurboTorque; // TURB ENG MAX TORQUE PERCENT:1 (em %)` em `SimTelemetry.cs` no grupo de Motor e Propulsão (expandindo para 8 doubles).
+  - Registrada a SimVar `TURB ENG MAX TORQUE PERCENT:1` com unidade `"Percent"` em `SimConnectService.cs`.
+  - Mantida integridade e alinhamento sequencial exato de memória entre `SimTelemetry` e as definições do SimConnect SDK.
+- **Dinâmica de Desgaste por Sobretorque (`WearAndFailureService`)**:
+  - Implementada sobretaxa de desgaste quadrático para turbinas e turboélices (`EngineType == 1.0 || EngineType == 5.0`) quando `TurboTorque > 100.0%`.
+  - Fórmula: `engineWearRate += 25.0 * Math.Pow((TurboTorque - 100.0) / 5.0, 2);` modelando o estresse mecânico severo na caixa de redução (gearbox), eixo de transmissão e palhetas de turbina por torque excedente.
+- **Integração com Break Check de 60 Segundos**:
+  - A aceleração do desgaste degrada progressivamente `EngineCondition`.
+  - Ao cruzar a zona crítica (`EngineCondition <= 20%`), o ciclo periódico de 60 segundos do Break Check passa a sortear o apagamento catastrófico `FailureType.EngineIFSD` com disparo do evento `TOGGLE_ENGINE1_FAILURE` no MSFS.
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Implementação de Detecção Inteligente e Realista de Carb Icing (MSFS 2024)
+- **Mapeamento de Telemetria Nativa (`SimTelemetry` e `SimConnectService`)**:
+  - Adicionados os campos `public double CarbHeatAvailable;` (`CARB HEAT AVAILABLE`, unidade `Bool`) e `public double CarbTemperature;` (`RECIP CARBURETOR TEMPERATURE:1`, unidade `Celsius`) ao struct `SimTelemetry` no grupo de Gelo e Pressurização (expandindo para 5 doubles).
+  - Adicionada a propriedade calculada auxiliar `public bool HasCarbHeat => CarbHeatAvailable > 0.5;`.
+  - Registradas as respectivas SimVars no método `RegisterDataDefinitions` de `SimConnectService`, preservando estrita integridade posicional e alinhamento sequencial de memória com o SimConnect SDK.
+- **Detecção Inteligente e Fisiologia do Carburador (`WearAndFailureService`)**:
+  - Adicionado o tipo de falha `FailureType.CarbIcing` com acumulador dedicado `_carbIceTimerSeconds` e reset em início/reinício de ciclo de voo.
+  - **Imunidade Garantida**: Verificação exclusiva para aeronaves a pistão (`!isJetOrTurbo`) que possuam carburador e comando de aquecimento habilitado pelo modelo de voo do MSFS 2024 (`CarbHeatAvailable > 0.5`). Aeronaves a injeção de combustível, turboélices e jatos possuem imunidade nativa garantida (`CarbHeatAvailable == 0`).
+  - **Critérios de Gelo Ativo**: Detecção baseada na telemetria física real do MSFS: temperatura do venturi/carburador <= 0,0°C, baixa potência de motor (`ThrottlePercent < 45.0%`) típica de descidas ou aproximações, em condições de ar úmido (precipitação ativa ou temperatura ambiente entre -5°C e 25°C).
+  - **Janela de Tolerância de 90 Segundos**: Caso o piloto negligencie o acionamento do Carb Heat durante a condição de gelo ativo, o temporizador acumula o tempo. Se persistir por 90 segundos contínuos sem aquecimento (`!IsCarbHeatOn`), o motor sofre apagamento crítico por asfixia (`FailureType.CarbIcing` disparando `TOGGLE_ENGINE1_FAILURE`).
+  - **Recuperação e Degelo Acelerado**: Ao acionar o Carb Heat (`IsCarbHeatOn`) ou restaurar potência com aquecimento do venturi (`CarbTemperature > 2.0°C`), o temporizador de gelo regride a uma taxa acelerada de 2x até zerar completamente, permitindo recuperação total da operação antes do corte.
+  - Suporte a disparo forçado via `TriggerManualFailure(FailureType.CarbIcing)`.
+- **Auditoria Crítica (`@reviewer`)**: Validação de integridade de tipos, ausência de regressões e compilação limpa em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Implementação de Gatilhos de Incêndio na Partida no Solo e Curva Unificada de Break Check
+- **Mapeamento de Telemetria Nativa (`SimTelemetry` e `SimConnectService`)**:
+  - Adicionados 3 novos campos ao struct `SimTelemetry` no grupo `// Dinâmica Lateral e Comandos do Piloto (7 doubles)`:
+    - `public double FuelPumpSwitch;` (`GENERAL ENG FUEL PUMP SWITCH:1`, unidade `Bool`)
+    - `public double StarterActive;` (`GENERAL ENG STARTER:1`, unidade `Bool`)
+    - `public double ConditionLever;` (`TURB ENG CONDITION LEVER POSITION:1`, unidade `Percent`)
+  - Adicionada a propriedade calculada auxiliar `TailwindComponentKnots` calculando a componente de vento de cauda relativa ao proa da aeronave: `-AmbientWindVelocity * Math.Cos((AmbientWindDirection - PlaneHeading) * Math.PI / 180.0)`.
+  - Registradas as 3 novas SimVars em `SimConnectService.RegisterDataDefinitions` na sequência exata, preservando o alinhamento de memória e empacotamento sequencial (`Pack = 1`) com a API nativa do SimConnect SDK.
+- **Curva Unificada de Break Check (`WearAndFailureService`)**:
+  - Implementado o método utilitário privado `CalculateBreakCheckChance(double condition)`:
+    - Risco **ZERO absoluto** se `condition > 20.0%`.
+    - Quebra imediata (100% de probabilidade) se `condition <= 0.0%`.
+    - Curva linear proporcional de 50% a 100% na faixa crítica `[0%, 10%]`: `0.50 + ((10.0 - condition) / 10.0) * 0.50`.
+    - Curva linear proporcional de 1% a 50% na faixa preventiva `(10%, 20%]`: `0.01 + ((20.0 - condition) / 10.0) * 0.49`.
+  - Refatorado o ciclo periódico de 60 segundos do Break Check (`CheckEngineFailures`) para utilizar `CalculateBreakCheckChance` uniformemente para saúde mecânica geral (`EngineCondition`), lubrificação (`OilCondition`) e ignição (`MagnetosCondition`).
+- **Gatilhos de Incêndio na Partida no Solo (`CheckStartupFailures`)**:
+  - Adicionado o novo tipo de falha `FailureType.EngineFire` com suporte a teste manual via `TriggerManualFailure(FailureType.EngineFire)`.
+  - **Gatilho 1: Motor Afogado / Excesso de Prime com Backfire (Pistão - `!isJetOrTurbo`)**:
+    - Monitora o acúmulo de combustível no coletor com bomba ligada (`FuelPumpSwitch > 0.5`) e mistura rica (`MixturePercent > 80%`) com o motor desligado (`!IsEngineRunning`). Temporizador acumula via `_primeTimerSeconds += deltaTimeHours * 3600.0` e dissipa a 0.5x caso contrário.
+    - Se o starter for engajado (`StarterActive > 0.5`) com `_primeTimerSeconds >= 6.0s`, avalia o risco contra `CalculateBreakCheckChance(aircraft.EngineCondition)`. Se sorteado, dispara incêndio catastrófico (`FailureType.EngineFire` com `TOGGLE_ENGINE1_FAILURE`) e reseta o temporizador.
+  - **Gatilho 2: Partida Quente / Hot Start Severo (Turboélice - `EngineType == 5.0`)**:
+    - Durante o engajamento do starter (`StarterActive > 0.5`) ou partida em andamento (`!IsEngineRunning && EngineN1 > 1.0%`).
+    - Detecta introdução prematura de combustível em rotação insuficiente de compressores (`ConditionLever > 10% && EngineN1 < 12%`) ou temperatura entre palhetas crítica (`TurboITT > 1000°C`).
+    - Avalia a falha contra `CalculateBreakCheckChance(aircraft.EngineCondition)`. Se disparado, gera incêndio interno na seção quente (`FailureType.EngineFire`).
+  - **Gatilho 3: Partida com Vento de Cauda Forte (Turboélice - `EngineType == 5.0`)**:
+    - Durante a partida (`StarterActive > 0.5`) sob vento de cauda forte na exaustão (`TailwindComponentKnots > 10.0 kts`).
+    - Avalia a probabilidade proporcional moderada `CalculateBreakCheckChance(aircraft.EngineCondition) * 0.5`. Se acionado, dispara incêndio interno por refluxo térmico dos gases de escapamento para a turbina.
+- **Tratamento de Impacto Crítico no Voo (`FlightMonitor`)**:
+  - No evento `OnAircraftFailureTriggered`, falhas do tipo `EngineFire` degradam imediatamente `EngineCondition` para `0.0%` (perda total por destruição térmica), reportando evento crítico e acionando contingência de pouso/solo.
+- **Auditoria Crítica (`@reviewer`)**: Validação de integridade de tipos, ausência de regressões e compilação limpa em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Implementação de Gatilhos de Incêndio de Motor em Voo por Abuso Operacional
+- **Mapeamento de Acumuladores de Estresse Térmico em Voo (`WearAndFailureService`)**:
+  - Adicionados os campos de rastreamento temporal `_pistonFireTimerSeconds` (para motores a pistão) e `_turboFireTimerSeconds` (para turboélices).
+  - Incluídos os devidos resets desses contadores no ciclo `Reset()`.
+- **Gatilho 1: Superaquecimento Extremo e Óleo Quente em Voo (Motores a Pistão - `!isJetOrTurbo`)**:
+  - Condição em voo (`!data.IsOnGround`): avalia CHT na faixa vermelha (`data.EngineCHT > 245.0°C`) conjuntamente com a Temperatura de Óleo na faixa vermelha (`data.EngineOilTemp > 115.0°C`).
+  - Acumula tempo continuamente enquanto o estresse persistir (`_pistonFireTimerSeconds += deltaTimeHours * 3600.0`); havendo arrefecimento das temperaturas ou retorno ao solo, dissipa gradualmente à taxa de 0.5x.
+  - Janela de tolerância operacional de 45 segundos: se o abuso térmico severo se mantiver acumulado por 45 segundos contínuos (`_pistonFireTimerSeconds >= 45.0s`), dispara a avaliação de Break Check proporcional.
+  - Avaliação estrita via `CalculateBreakCheckChance(aircraft.EngineCondition)`:
+    - **Risco ZERO absoluto** se `aircraft.EngineCondition > 20%`.
+    - Caso sorteado o risco na zona crítica de degradação, aciona `FailureType.EngineFire` com o evento `TOGGLE_ENGINE1_FAILURE`: *"INCÊNDIO NO MOTOR EM VOO (RUPTURA DE LINHA DE ÓLEO)"*, descrevendo o rompimento de mangueiras/retentores sob o escapamento incandescente.
+    - Zera o temporizador `_pistonFireTimerSeconds = 0`.
+- **Gatilho 2: Excesso de Torque/ITT ou Gelo sem Inertial Separator em Voo (Turboélices - `EngineType == 5.0`)**:
+  - Condição em voo (`!data.IsOnGround`):
+    - Subida com sobretorque ou ITT excessiva: `data.VerticalSpeed > 500.0 && (data.TurboTorque > 102.0 || data.TurboITT > 820.0)`.
+    - Operação em atmosfera congelante com formação de gelo estrutural (`data.IsPrecipitating || data.StructuralIcePct > 10.0`) sem o engajamento do separador inercial (`!data.IsCarbHeatOn`) e mantendo alta demanda de potência (`data.TurboTorque > 95.0 || data.TurboITT > 800.0`).
+  - Acumula tempo no temporizador de abuso `_turboFireTimerSeconds`; havendo alívio de potência ou saída de gelo / acionamento do separador, dissipa à taxa de 0.5x.
+  - Janela de tolerância operacional de 45 segundos: após 45 segundos contínuos acumulados de operação abusiva (`_turboFireTimerSeconds >= 45.0s`), avalia `CalculateBreakCheckChance(aircraft.EngineCondition)`.
+  - **Risco ZERO absoluto** garantido para turbinas com saúde acima de 20%.
+  - Se sorteada a falha na faixa degradada, aciona `FailureType.EngineFire` com o evento `TOGGLE_ENGINE1_FAILURE`: *"INCÊNDIO DE TURBINA EM VOO (FALHA ESTRUTURAL DE NACELE)"*, com descrição contextualizada da causa (subida com sobretorque/ITT ou negligência do separador inercial em gelo).
+    - Zera o temporizador `_turboFireTimerSeconds = 0`.
+- **Auditoria Crítica (`@reviewer`)**: Validação de integridade de tipos, blindagem de risco para aeronaves com manutenção regular e compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+## 2026-11-12 - Calibração Realista de Incêndio (FAA/NTSB) e Novos Cenários (Linha de Combustível, Escapamento e Elétrico)
+- **Calibração Estocástica Baseada em Estatísticas da FAA / NTSB (`WearAndFailureService`)**:
+  - Na aviação geral e comercial real, dados da FAA/NTSB comprovam que apenas cerca de 2% a 5% dos colapsos mecânicos graves de motor evoluem para chamas ativas (a imensa maioria resulta em apagamento em voo - IFSD ou travamento mecânico sem fogo).
+  - Implementado o método estocástico unificado `CalculateFireChance(double condition, double riskMultiplier = 1.0)`:
+    - **Regra de Ouro (Blindagem Absoluta)**: Risco estritamente **ZERO (0,0%)** enquanto a condição do componente estiver acima de 20,0%.
+    - Em 20%: ~0,05% de probabilidade.
+    - Em 10%: ~2,5% de probabilidade.
+    - Em 0%: ~5,0% de probabilidade (com teto estrito de 10% para abusos térmicos e elétricos extremos).
+  - Todos os gatilhos pré-existentes de incêndio foram unificados sob a curva realista com multiplicadores ajustados entre 1.0 e 1.5:
+    - Superaquecimento de pistão em voo (`riskMultiplier = 1.2`).
+    - Sobretorque/separador inercial de turbina em voo (`riskMultiplier = 1.2`).
+    - Motor afogado com backfire no solo (`riskMultiplier = 1.2`).
+    - Hot Start severo em turboélice (`riskMultiplier = 1.5`).
+    - Vento de cauda na partida de turboélice (`riskMultiplier = 1.0`).
+- **Implementação dos 3 Novos Cenários de Incêndio (`WearAndFailureService`)**:
+  - **Cenário A: Ruptura de Linha de Combustível ou Bico Injetor Solto**:
+    - Avaliado periodicamente a cada 60 segundos no ciclo do Break Check com motor em funcionamento.
+    - Gatilho restrito a `EngineCondition <= 20,0%` (0% de chance para manutenção saudável).
+    - Probabilidade: `CalculateFireChance(aircraft.EngineCondition, 1.0)`.
+    - Disparo: `FailureType.EngineFire` (*"INCÊNDIO: RUPTURA DE LINHA DE COMBUSTÍVEL / BICO SOLTO"*), detalhando que a vibração crônica por desgaste soltou conexão de alta pressão com ignição de combustível pulverizado no cofre.
+  - **Cenário B: Vazamento no Sistema de Escapamento (Exhaust Manifold Crack)**:
+    - Avaliado a cada 60 segundos no ciclo do Break Check exclusivamente para motores a pistão (`!isJetOrTurbo`).
+    - Gatilho restrito a `EngineCondition <= 20,0%`.
+    - Probabilidade: `CalculateFireChance(aircraft.EngineCondition, 0.8)`.
+    - Disparo: `FailureType.EngineFire` (*"INCÊNDIO: RACHADURA NO COLETOR DE ESCAPAMENTO"*), simulando fissura estrutural no coletor que sopra gases de exaustão a 800°C sobre linhas de combustível e isolamento acústico.
+  - **Cenário C: Curto-Circuito de Alta Amperagem no Alternador / Cabo do Starter**:
+    - Condição base vinculada à saúde elétrica dos aviônicos: **`aircraft.AvionicsCondition <= 20%`** (Risco ZERO se `AvionicsCondition > 20%`).
+    - **Sub-gatilho 1 (Travamento de Relé / Solenoide do Starter Colado)**:
+      - Em `ProcessWear`: Detecta starter engajado (`StarterActive > 0.5`) com motor em rotação ativa (`RPM > 800` ou `N1 > 40%`).
+      - Acumula em `_starterStuckTimerSeconds` e dissipa a 0.5x quando desengajado.
+      - Ao acumular 8 segundos de arrasto contínuo (`_starterStuckTimerSeconds >= 8.0s`), avalia `CalculateFireChance(aircraft.AvionicsCondition, 2.0)`. Se sorteado, dispara `FailureType.EngineFire` (*"INCÊNDIO ELÉTRICO: TRAVAMENTO DE RELÉ DO STARTER"*); caso contrário reinicia a janela para próxima verificação estocástica.
+    - **Sub-gatilho 2 (Curto-Circuito no Chicote do Alternador)**:
+      - Avaliado a cada 60 segundos no Break Check quando `AvionicsCondition <= 20%`.
+      - Probabilidade: `CalculateFireChance(aircraft.AvionicsCondition, 0.8)`.
+      - Disparo: `FailureType.EngineFire` (*"INCÊNDIO ELÉTRICO: CURTO NO CHICOTE DO ALTERNADOR"*), simulando fiação principal incandescente por fadiga elétrica incendiando o compartimento do motor.
+- **Auditoria Crítica (`@reviewer`)**: Validação de build com compilação limpa (0 Erros) em `dotnet build C:\projetos\FlightCareerV6\src\FlightCareer.slnx`.
+
+## 2026-11-12 - Implementação de Bird Strike Severo em Baixa Altitude (Física Pura / Fator Ambiental)
+- **Modelagem Ambiental Externa (`CheckBirdStrikeFailure` em `WearAndFailureService`)**:
+  - Implementada a Opção 1 (Física Pura): evento ambiental externo de ingestão de ave de grande porte (> 2 kg, ex: urubu/ganso), independente da saúde mecânica prévia do motor (`EngineCondition`).
+  - Envelope operacional: exclusivo para aeronaves turboélice (`EngineType == 5.0`), em voo (`!IsOnGround && IsEngineRunning`), em baixa altitude (`Altitude <= 3500.0 ft`) e com velocidade ativa (`Airspeed >= 75.0 kts`).
+  - Dinâmica de Energia Cinética ($E_k = \frac{1}{2} m v^2$): a taxa de Poisson ($\lambda = 0.0012 \times (\text{Airspeed} / 100.0)^2$) escala quadraticamente com a velocidade aerodinâmica (~1 evento a cada 600 a 800 horas de voo em baixa altitude).
+  - Desfecho: rompimento não contido (*uncontained failure*) da carcaça do compressor com perfuração das linhas de combustível Jet-A1 e óleo, disparando `FailureType.EngineFire` com corte via `TOGGLE_ENGINE1_FAILURE` e destruição imediata do grupo motopropulsor (`EngineCondition = 0.0%`).
+- **Auditoria Crítica (`@reviewer`)**: Parecer **APROVADO** com compilação limpa (0 Erros) em `dotnet build src/FlightCareer.slnx`.
+
+
+## 2026-11-12 - Ciclo de Incêndio Progressivo (`ENG ON FIRE:1`) e Sistema de Vazamento Progressivo de Óleo (`GENERAL ENG OIL LEAKED PERCENT:1`)
+- **Integração de SimVars Escrevíveis (`SetDataOnSimObject` em `SimConnectService` e `SimTelemetry`)**:
+  - Mapeadas as variáveis nativas do MSFS 2024 `ENG ON FIRE:1` (`Bool`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`Percent`, 0 a 100%) para leitura contínua em `SimTelemetry` e escrita direta via `SimConnect.SetDataOnSimObject` (`SetEngineFire(bool)` e `SetOilLeakedPercent(double)`).
+- **Ciclo de Vida Realista de Fogo no Motor (`ProcessActiveEngineFire` em `WearAndFailureService`)**:
+  - **Fogo $\neq$ Motor Apagado Automaticamente**: Quando `FailureType.EngineFire` é disparado (em qualquer um dos 9 cenários de incêndio), o motor não sofre corte imediato: `ENG ON FIRE:1 = 1` é ativado no MSFS 2024 e o motor continua girando enquanto sofre degradação térmica acelerada (`-0.8%/s`).
+  - **Combate ao Fogo pelo Piloto (Memory Items)**: Se o piloto cortar o combustível (`MixturePercent < 5%` em pistão ou `ConditionLever < 5%` em turboélice/jato) e desligar a bomba de combustível (`FuelPumpSwitch <= 0.5`), após **25 segundos** de resfriamento pelo vento relativo, o sistema escreve **`ENG ON FIRE:1 = 0`** (fogo extinto), preservando a saúde residual do motor e salvando a aeronave de perda total.
+  - **Derretimento Catastrófico por Negligência (90 Segundos)**: Se o piloto ignorar o fogo por **90 segundos** sem cortar o combustível, o fogo destrói o bloco/seção quente por completo, disparando `TOGGLE_ENGINE1_FAILURE` (`FailureType.EngineIFSD`) e aplicando `EngineCondition = 0.0%` no SQLite.
+- **Sistema de Vazamento Progressivo de Óleo (`ProcessOilLeakSystem` em `WearAndFailureService`)**:
+  - Incrementa `GENERAL ENG OIL LEAKED PERCENT:1` de 0 a 100%, fazendo o MSFS 2024 reduzir progressivamente a pressão do óleo (`GENERAL ENG OIL PRESSURE:1`) e elevar a temperatura (`GENERAL ENG OIL TEMPERATURE:1`), dando ao piloto uma janela de decisão para alternar o pouso antes da fusão de bronzina.
+  - **Gatilhos Operacionais e de Telemetria**:
+    1. **Acelerar com Óleo Frio (Cold Oil Overpressure)**: Aplicar potência alta (`RPM > 1500`, `Throttle > 65%` ou decolar) com `EngineOilTemp < 38°C` (100°F) incrementa o vazamento gradualmente por tick e **ativa o Break Check imediato se a saúde do óleo estiver $\le$ 20%**, rompendo o radiador/vedação do filtro.
+    2. **Superaquecimento Crítico Prolongado**: Manter `CHT > 245°C` ou `OilTemp > 115°C` por mais de 60 segundos deforma juntas de silicone/borracha do cárter e tampas de válvulas, gerando vazamento progressivo.
+    3. **Sobrevelocidade (Over-RPM) ou Excesso de Torque**: Operar acima de 102% do RPM máximo ou Torque máximo eleva a pressão da bomba e a vibração mecânica, fissurando mangueiras de alta pressão.
+    4. **Pouso Duro (Hard Landing / Prop Strike)**: Impacto severo no toque (`>= 650 FPM` em `CheckHardLandingOilLeakFailure`) pode trincar o cárter ou romper o retentor frontal do virabrequim.
+  - **Gatilhos de Manutenção, Erro Humano e FOD**:
+    5. **Erro Pós-Manutenção (Primeiros 30 Minutos)**: Nas primeiras 0,5h após inspeção de 50h/100h, pequena chance estocástica de filtro de óleo mal apertado ou anel O-ring duplo iniciar vazamento sob pressão (`+2.0%/min`).
+    6. **Tampa de Abastecimento / Vareta Solta (Walkaround)**: Avaliado após a decolagem quando `OilCondition <= 20%`, soprando óleo pelo bocal a `+0.5% a +1.0%/min`.
+    7. **Fadiga de Mangueiras Flexíveis (Aeroquip) & Válvula Reguladora de Pressão Travada**: Avaliados no Break Check de 60s quando `EngineCondition <= 20%` ou `OilCondition <= 20%`.
+    8. **Detritos na Pista (FOD)**: Durante corrida de pista em alta potência (`GS > 25 kts` e `Throttle > 65%`), chance estocástica de pedras perfurarem o radiador de óleo inferior.

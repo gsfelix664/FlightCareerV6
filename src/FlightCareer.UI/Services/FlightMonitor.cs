@@ -101,7 +101,9 @@ namespace FlightCareer.UI.Services
             FailureType.GearCollapse => DefectCatalog.GearCollapse,
             FailureType.CabinDepressurization => DefectCatalog.Pressurization,
             FailureType.MagnetoFailure => failure.DefectCode,
-            _ => null // CarbIcing, SparkPlugFouling, CompressorStall: transitórios
+            FailureType.EngineFire => DefectCatalog.EngineFire,
+            FailureType.OilLeak => DefectCatalog.OilLeak,
+            _ => null // CarbIcing, SparkPlugFouling: transitórios
         };
 
         private static FailureType? FailureTypeFor(string code) => code switch
@@ -116,6 +118,8 @@ namespace FlightCareer.UI.Services
             DefectCatalog.GearCollapse => FailureType.GearCollapse,
             DefectCatalog.Pressurization => FailureType.CabinDepressurization,
             DefectCatalog.MagnetoLeft or DefectCatalog.MagnetoRight => FailureType.MagnetoFailure,
+            DefectCatalog.EngineFire => FailureType.EngineFire,
+            DefectCatalog.OilLeak => FailureType.OilLeak,
             _ => null
         };
 
