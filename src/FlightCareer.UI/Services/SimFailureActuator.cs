@@ -15,6 +15,8 @@ namespace FlightCareer.UI.Services
         public ComponentKind? Kind { get; init; }
         public string Source { get; init; } = string.Empty; // Desgaste, Evento externo, Operacional, Excedência
         public DateTime Timestamp { get; init; } = DateTime.Now;
+        /// <summary>false = efeito transitório (ex.: gelo no carburador): não vira pane persistente.</summary>
+        public bool Persistent { get; init; } = true;
     }
 
     /// <summary>
@@ -251,7 +253,9 @@ namespace FlightCareer.UI.Services
 
             if (_active.Contains(FailureEffect.AlternatorOff) && data.MasterAlternator > 0.5)
             {
-                _sim.SendEvent("TOGGLE_ALTERNATOR1");
+                // ALTERNATOR_OFF é idempotente (testado no MSFS 2024); um TOGGLE podia religar a chave
+                // se chegasse junto com a correção do PersistentFailureService
+                _sim.SendEvent("ALTERNATOR_OFF");
                 _lastEnforcement = DateTime.Now;
                 return;
             }

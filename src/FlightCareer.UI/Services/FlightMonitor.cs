@@ -33,7 +33,6 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
         private bool _hasTouchedDown;
-        private bool _engineFailureReportedInFlight;
         private double _simulatedFlightTimeSeconds = 0;
         private DateTime _lastTick = DateTime.MinValue;
         private DateTime? _startConditionTime;
@@ -62,6 +61,11 @@ namespace FlightCareer.UI.Services
         /// <summary>Desgaste e panes por componente do voo atual.</summary>
         public ComponentFlightSession Failures => _failures;
 
+        /// <summary>Panes persistentes (discrepâncias entre voos), addon e nativas.</summary>
+        public PersistentFailureService PersistentFailures => _persistentFailures;
+        private readonly PersistentFailureService _persistentFailures;
+        private PilotAircraft? _watchedAircraft;
+
         [ActivatorUtilitiesConstructor]
         public FlightMonitor(
             SimConnectService simConnect,
@@ -75,6 +79,71 @@ namespace FlightCareer.UI.Services
             _catalog = catalog;
             _failures = new ComponentFlightSession(simConnect, catalog, _random);
             _failures.OnFailure += OnAircraftFailureTriggered;
+
+            _persistentFailures = new PersistentFailureService(simConnect, contextFactory);
+            _persistentFailures.OnDefectRecorded += OnDefectRecorded;
+            _persistentFailures.OnNativeCrash += cause =>
+            {
+                _telemetryLogger.LogEvent("CRASH_FLAG_MSFS", cause);
+                OnAlert?.Invoke("ACIDENTE REPORTADO PELO SIMULADOR", cause, true);
+            };
+            _persistentFailures.OnEnforcementAction += msg => _telemetryLogger.LogEvent("PANE_PERSISTENTE", msg);
+        }
+
+        /// <summary>
+        /// Aeronave ativa do piloto: mesmo fora de um voo monitorado (ex.: NO-GO, voo reiniciado no sim),
+        /// as panes abertas dela continuam aplicadas e vigiadas no simulador.
+        /// </summary>
+        public void WatchAircraft(PilotAircraft? aircraft)
+        {
+            _watchedAircraft = aircraft;
+            if (IsMonitoring) return; // durante o voo o modo completo já está ativo
+            if (aircraft == null) _persistentFailures.Stop();
+            else _persistentFailures.Start(aircraft, () => "SOLO (FORA DE VOO)", detectNative: false);
+        }
+
+        /// <summary>Panes abertas que impedem o voo (NO-GO).</summary>
+        public List<AircraftDefect> GetGroundingDefects(Guid aircraftId) =>
+            _persistentFailures.LoadOpenDefects(aircraftId).Where(d => d.IsGrounding).ToList();
+
+        /// <summary>Pane nativa detectada no simulador: reflete o dano nos componentes.</summary>
+        private void OnDefectRecorded(AircraftDefect defect)
+        {
+            if (defect.Origin != DefectOrigin.Native) return; // panes do addon já foram anunciadas pelo alerta da sessão
+
+            if (_aircraft != null && IsMonitoring)
+            {
+                switch (defect.Code)
+                {
+                    case DefectCatalog.EngineFailure:
+                        _failures.ClampHealth(ComponentKind.Engine, 15.0);
+                        break;
+                    case DefectCatalog.EngineFire:
+                        _failures.ClampHealth(ComponentKind.Engine, 5.0);
+                        Damage(ComponentKind.Airframe, 20.0);
+                        break;
+                    case DefectCatalog.EngineDamage:
+                        _failures.ClampHealth(ComponentKind.Engine, 100.0 - defect.Parameter);
+                        break;
+                    case DefectCatalog.GearDamage:
+                        Damage(ComponentKind.LandingGear, 20.0);
+                        break;
+                    case DefectCatalog.BrakesWorn:
+                        _failures.ClampHealth(ComponentKind.Brakes, 30.0);
+                        break;
+                }
+                SyncLegacyConditions();
+            }
+
+            OnAlert?.Invoke($"PANE DO SIMULADOR: {defect.Title.ToUpper()}",
+                $"{defect.Description} Registrada como defeito {defect.SeverityLabel} até o reparo na oficina.", defect.IsGrounding);
+            _telemetryLogger.LogEvent("PANE_NATIVA_MSFS", $"{defect.Code} - {defect.Cause}");
+        }
+
+        private void Damage(ComponentKind kind, double amount)
+        {
+            var c = _failures.Get(kind);
+            if (c != null) c.Health = Math.Max(0.0, c.Health - amount);
         }
 
         /// <summary>
@@ -164,39 +233,58 @@ namespace FlightCareer.UI.Services
 
         private void OnAircraftFailureTriggered(FlightFailureRecord failure)
         {
-            // Panes que o próprio app aplicou no motor não devem ser tratadas como "pane nativa do MSFS"
-            if (failure.Effect is FailureEffect.EngineFailure or FailureEffect.EngineFire)
-            {
-                _engineFailureReportedInFlight = true;
-            }
-            // Excedências vão só para o blackbox: uma caixa modal a cada limite excedido atrapalharia o voo
-            if (failure.Source != "Excedência")
-                OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
+            // Gravar e registrar ANTES do alerta: nada aqui pode depender da janela do alerta
             string tag = failure.Source == "Excedência" ? "EXCEDENCIA" : "PANE_EM_VOO";
             _telemetryLogger.LogEvent(tag, $"[{failure.Source}] {failure.Title} - {failure.Description}");
+
+            if (failure.Source != "Excedência")
+            {
+                if (!failure.Persistent)
+                {
+                    // Efeito transitório (gelo no carburador): a borda de ENG FAILED que vem a seguir não é pane nativa nova
+                    if (failure.Effect == FailureEffect.EngineFailure) _persistentFailures.ExpectEngineFailureFromAddon();
+                }
+                else if (DefectCatalog.CodeFor(failure.Effect, failure.Kind, failure.IsCritical) is { } code)
+                {
+                    // Discrepância persistente: segue no avião até o reparo na oficina
+                    _persistentFailures.Record(code, DefectOrigin.Addon, $"[{failure.Source}] {failure.Title}",
+                        title: failure.Title, description: failure.Description,
+                        alreadyInjected: failure.Effect != FailureEffect.None);
+                }
+
+                // Excedências vão só para o blackbox: uma caixa modal a cada limite excedido atrapalharia o voo
+                OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
+            }
         }
 
-        public void StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
+        public bool StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
         {
-            if (IsMonitoring) return;
+            if (IsMonitoring) return false;
 
             if (!_simConnect.IsConnected)
             {
                 OnAlert?.Invoke("Erro de Conexão", "O Simulador não está conectado!", true);
-                return;
+                return false;
             }
 
             if (aircraft.IsInterdicted)
             {
                 OnAlert?.Invoke("AERONAVE INTERDITADA", $"Aeronave impedida de voar! Motivo: {aircraft.InterdictionReason}. Efetue a manutenção obrigatória no Hangar.", true);
-                return;
+                return false;
+            }
+
+            var groundingDefects = GetGroundingDefects(aircraft.Id);
+            if (groundingDefects.Count > 0)
+            {
+                OnAlert?.Invoke("PANE EM ABERTO", $"Item inoperante: {string.Join(", ", groundingDefects.Select(d => d.Title))}. Repare na oficina do Hangar.", true);
+                return false;
             }
 
             var prohibitedMission = missions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
             if (prohibitedMission != null)
             {
                 OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa está operando em {pilot.PilotCategory.GetDisplayName()}!", true);
-                return;
+                return false;
             }
 
             _pilot = pilot;
@@ -204,14 +292,16 @@ namespace FlightCareer.UI.Services
             _activeMissions = missions;
             _originIcao = pilot.CurrentAirportICAO;
 
+            // Panes persistentes primeiro: registram os toggles que o início do voo não pode desfazer
+            _persistentFailures.Start(aircraft, () => _currentStatus);
+
             _simConnect.ResetCrashState();
             LoadFlightComponents(aircraft);
-            _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior
+            _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
             _hasTouchedDown = false;
-            _engineFailureReportedInFlight = false;
             _simulatedFlightTimeSeconds = 0;
             _lastTick = DateTime.MinValue;
 
@@ -219,14 +309,28 @@ namespace FlightCareer.UI.Services
             IsMonitoring = true;
 
             OnAlert?.Invoke("SISTEMA INICIALIZADO", "O monitoramento começará automaticamente 10 segundos após você ligar os motores e soltar o freio de estacionamento.", false);
+            var deferred = _persistentFailures.OpenDefects;
+            if (deferred.Count > 0)
+            {
+                OnAlert?.Invoke("PANES DIFERIDAS ATIVAS", $"Voo com itens inoperantes: {string.Join(", ", deferred.Select(d => d.Title))}.", false);
+            }
             _currentStatus = "PREPARAÇÃO";
             OnStatusChanged?.Invoke(_currentStatus);
+            return true;
         }
 
         public void StopMonitoring()
         {
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
+            _persistentFailures.Stop();
+            // Volta ao modo vigia: as panes (inclusive as que surgiram neste voo) seguem aplicadas após o pouso
+            var keepWatching = _aircraft ?? _watchedAircraft;
+            if (keepWatching != null)
+            {
+                _watchedAircraft = keepWatching;
+                _persistentFailures.Start(keepWatching, () => "SOLO (FORA DE VOO)", detectNative: false);
+            }
             _simConnect.ResetCrashState();
             _failures.Reset();
             IsMonitoring = false;
@@ -418,23 +522,8 @@ namespace FlightCareer.UI.Services
                 _simulatedFlightTimeSeconds += dt * simRate;
             }
 
-            // --- DETECÇÃO REAL DE FALHA MECÂNICA DO SIMULADOR (ENG FAILED:1) ---
-            if (data.IsEngineFailed)
-            {
-                if (!_engineFailureReportedInFlight)
-                {
-                    _engineFailureReportedInFlight = true;
-                    // Pane do próprio MSFS (não aplicada pelo app): o motor sofreu dano real
-                    _failures.ClampHealth(FlightCareer.Domain.Components.ComponentKind.Engine, 15.0);
-                    SyncLegacyConditions();
-                    OnAlert?.Invoke("FALHA MECÂNICA DE MOTOR", "O simulador reportou pane real no motor #1!", true);
-                    _telemetryLogger.LogEvent("ENGINE_FAILED_MSFS", "Falha mecânica de motor reportada pelo MSFS");
-                }
-            }
-            else if (data.IsEngineRunning)
-            {
-                _engineFailureReportedInFlight = false;
-            }
+            // Panes nativas do MSFS (ENG FAILED, fogo, dano de motor/flap/trem, freios, vácuo) são detectadas pelo
+            // PersistentFailureService na leitura rápida de panes e tratadas em OnDefectRecorded.
 
             // --- DETECÇÃO DE PLANEIO / MOTOR CORTADO EM VOO (TREINAMENTO OU VOLUNTÁRIO) ---
             if (_isAirborne && !data.IsOnGround && !data.IsEngineRunning)
@@ -673,7 +762,6 @@ namespace FlightCareer.UI.Services
             IsFlightActive = true;
             _isAirborne = false;
             _hasTouchedDown = false;
-            _engineFailureReportedInFlight = false;
             _simConnect.ResetCrashState();
             _failures.Reset(clearSimState: true);
             _qualityService.Reset();

@@ -248,8 +248,62 @@
                         <ColumnDefinition Width="2*" MinWidth="300"/>
                     </Grid.ColumnDefinitions>
 
+                    <StackPanel Grid.Column="0" VerticalAlignment="Top">
+
+                    <!-- ===== Panes em aberto (discrepâncias persistentes) ===== -->
+                    <Border Style="{StaticResource HgCard}" BorderBrush="{StaticResource HgRed}" Margin="0,0,0,16"
+                            Visibility="{Binding HasOpenDefects, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,10">
+                                <TextBlock Text="PANES EM ABERTO" Style="{StaticResource HgCardTitle}" Foreground="{StaticResource HgRed}" Margin="0"/>
+                                <Button Style="{StaticResource HgDanger}" Content="{Binding RepairAllDefectsText}" HorizontalAlignment="Right"
+                                        Command="{Binding DataContext.RepairAllDefectsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"
+                                       Text="Panes ficam no avião entre voos e após reiniciar o simulador. NO-GO impede o voo; DIFERIDA permite voar com o item inoperante."/>
+                            <ItemsControl ItemsSource="{Binding OpenDefects}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource HgBorder}" BorderThickness="0,1,0,0" Padding="0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0" CornerRadius="4" Padding="6,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{StaticResource HgAmber}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsGrounding}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource HgRed}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding SeverityLabel}" Foreground="{StaticResource HgBase}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="10.5"/>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" Style="{StaticResource HgValue}" FontSize="13" TextWrapping="Wrap"/>
+                                                    <TextBlock Style="{StaticResource HgLabel}" FontSize="11" TextWrapping="Wrap">
+                                                        <Run Text="{Binding OriginLabel, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding FlightPhase, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Cause, Mode=OneWay}"/>
+                                                    </TextBlock>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Style="{StaticResource HgSecondary}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                        Content="{Binding RepairCost, StringFormat='Reparar · {0:C0}'}"
+                                                        Command="{Binding DataContext.RepairDefectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
                     <!-- ===== Componentes ===== -->
-                    <Border Grid.Column="0" Style="{StaticResource HgCard}" VerticalAlignment="Top">
+                    <Border Style="{StaticResource HgCard}" VerticalAlignment="Top">
                         <StackPanel>
                             <Grid Margin="0,0,0,14">
                                 <TextBlock Text="COMPONENTES" Style="{StaticResource HgCardTitle}" Margin="0"/>
@@ -352,6 +406,7 @@
                             </ItemsControl>
                         </StackPanel>
                     </Border>
+                    </StackPanel>
 
                     <!-- ===== Coluna direita ===== -->
                     <StackPanel Grid.Column="2">

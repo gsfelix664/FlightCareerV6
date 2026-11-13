@@ -178,7 +178,8 @@ namespace FlightCareer.UI.Services
                         IsCritical = true,
                         Effect = FailureEffect.EngineFailure,
                         Kind = ComponentKind.Engine,
-                        Source = "Operacional"
+                        Source = "Operacional",
+                        Persistent = false // recuperável com carb heat
                     });
                     break;
                 case CarbIcingEvent.Recovered:

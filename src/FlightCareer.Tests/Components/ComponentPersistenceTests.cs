@@ -67,5 +67,41 @@ namespace FlightCareer.Tests.Components
                 Assert.DoesNotContain(turboprop.Components, c => c.Kind == ComponentKind.Ignition);
             }
         }
+
+        [Fact]
+        public async Task Banco_antigo_recebe_tabela_de_panes_persistentes_com_o_mesmo_mapeamento_do_EF()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+            var aircraftId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+                await db.Database.ExecuteSqlRawAsync("DROP TABLE AircraftDefects;");
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.EnsureSchemaUpdatedAsync();
+                await db.EnsureSchemaUpdatedAsync(); // idempotente
+                db.AircraftDefects.Add(new AircraftDefect
+                {
+                    Id = Guid.NewGuid(), PilotAircraftId = aircraftId, Code = "PITOT", Title = "Tubo de pitot obstruído",
+                    Description = "", Cause = "teste", FlightPhase = "CRUZEIRO", IsGrounding = false, RepairCost = 250,
+                    DetectedAtUtc = DateTime.UtcNow
+                });
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                var open = await db.AircraftDefects.Where(d => d.PilotAircraftId == aircraftId && !d.IsResolved).ToListAsync();
+                Assert.Single(open);
+                Assert.Equal("PITOT", open[0].Code);
+                Assert.Null(open[0].ResolvedAtUtc);
+            }
+        }
     }
 }

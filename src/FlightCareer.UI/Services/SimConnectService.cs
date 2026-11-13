@@ -10,10 +10,33 @@ using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry }
-    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState }
-    public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent }
-    public enum GROUPS : uint { Default = 1 }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState }
+    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex }
+    public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
+    public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
+
+    /// <summary>
+    /// Leitura rápida (~5-10 Hz) usada pelas panes persistentes (vigilância + detecção de panes nativas).
+    /// Variáveis validadas no MSFS 2024 (C152) via SimConnect.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SimFailureState
+    {
+        public double LeftMagneto;          // RECIP ENG LEFT MAGNETO:1 (gravável)
+        public double RightMagneto;         // RECIP ENG RIGHT MAGNETO:1 (gravável)
+        public double FlapsHandleIndex;     // FLAPS HANDLE INDEX (gravável)
+        public double AlternatorSwitch;     // GENERAL ENG MASTER ALTERNATOR:1 (somente leitura; corrigir via ALTERNATOR_OFF)
+        public double EngineFailed;         // ENG FAILED:1
+        public double EngineOnFire;         // ENG ON FIRE:1
+        public double EngineDamagePercent;  // GENERAL ENG DAMAGE PERCENT:1
+        public double FlapDamage;           // FLAP DAMAGE BY SPEED
+        public double GearDamage;           // GEAR DAMAGE BY SPEED
+        public double BrakeLeftRemaining;   // BRAKE LEFT WEIGHT REMAINING (%)
+        public double BrakeRightRemaining;  // BRAKE RIGHT WEIGHT REMAINING (%)
+        public double CrashFlag;            // CRASH FLAG
+        public double SuctionPressure;      // SUCTION PRESSURE (inHg)
+        public double EngineCombustion;     // GENERAL ENG COMBUSTION:1
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct SimDoubleValue
@@ -30,6 +53,15 @@ namespace FlightCareer.UI.Services
         public event EventHandler? OnDisconnected;
         public event EventHandler<SimTelemetry>? OnDataReceived;
         public event EventHandler? OnCrashEvent;
+
+        /// <summary>Estado rápido de panes (vigilância + detecção nativa).</summary>
+        public event Action<SimFailureState>? OnFailureStateReceived;
+        /// <summary>Comando do piloto interceptado (mascarado) antes de chegar à aeronave.</summary>
+        public event Action<string, uint>? OnMaskedEvent;
+        /// <summary>O simulador (re)carregou aeronave ou voo: as falhas do sim foram zeradas.</summary>
+        public event Action? OnAircraftReloaded;
+
+        public SimFailureState? CurrentFailureState { get; private set; }
 
         public bool IsCrashed { get; set; } = false;
 
@@ -186,6 +218,28 @@ namespace FlightCareer.UI.Services
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
+                // Estado rápido de panes (vigilância contínua das panes persistentes + panes nativas)
+                AddFailureDef("RECIP ENG LEFT MAGNETO:1", "Bool");
+                AddFailureDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
+                AddFailureDef("FLAPS HANDLE INDEX", "Number");
+                AddFailureDef("GENERAL ENG MASTER ALTERNATOR:1", "Bool");
+                AddFailureDef("ENG FAILED:1", "Bool");
+                AddFailureDef("ENG ON FIRE:1", "Bool");
+                AddFailureDef("GENERAL ENG DAMAGE PERCENT:1", "Percent");
+                AddFailureDef("FLAP DAMAGE BY SPEED", "Bool");
+                AddFailureDef("GEAR DAMAGE BY SPEED", "Bool");
+                AddFailureDef("BRAKE LEFT WEIGHT REMAINING", "Percent");
+                AddFailureDef("BRAKE RIGHT WEIGHT REMAINING", "Percent");
+                AddFailureDef("CRASH FLAG", "Enum");
+                AddFailureDef("SUCTION PRESSURE", "inHg");
+                AddFailureDef("GENERAL ENG COMBUSTION:1", "Bool");
+                _simConnect.RegisterDataDefineStruct<SimFailureState>(DEFINITIONS.FailureState);
+
+                // Escritas diretas (testadas no MSFS 2024: o valor gravado persiste)
+                AddWriteDef(DEFINITIONS.WriteLeftMagneto, "RECIP ENG LEFT MAGNETO:1", "Bool");
+                AddWriteDef(DEFINITIONS.WriteRightMagneto, "RECIP ENG RIGHT MAGNETO:1", "Bool");
+                AddWriteDef(DEFINITIONS.WriteFlapsHandleIndex, "FLAPS HANDLE INDEX", "Number");
+
                 // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
                 _simConnect.AddToDataDefinition(DEFINITIONS.EngineFireState, "ENG ON FIRE:1", "Bool", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.EngineFireState);
@@ -198,17 +252,21 @@ namespace FlightCareer.UI.Services
 
                 // Novo voo carregado no MSFS: o simulador zera as próprias falhas
                 _simConnect.SubscribeToSystemEvent(EVENTS.FlightLoadedEvent, "FlightLoaded");
+                _simConnect.SubscribeToSystemEvent(EVENTS.AircraftLoadedEvent, "AircraftLoaded");
                 _simConnect.OnRecvEventFilename += (s, e) =>
                 {
-                    if (e.uEventID == (uint)EVENTS.FlightLoadedEvent)
+                    if (e.uEventID == (uint)EVENTS.FlightLoadedEvent || e.uEventID == (uint)EVENTS.AircraftLoadedEvent)
                     {
                         _untrackedToggles.Clear();
+                        // Panes persistentes precisam ser reaplicadas depois que a aeronave terminar de carregar
+                        OnAircraftReloaded?.Invoke();
                     }
                 };
 
                 _simConnect.OnRecvOpen += (s, e) => {
                     IsCrashed = false;
                     _reconnectTimer?.Stop();
+                    ApplyMaskedEvents();
                     OnConnected?.Invoke(this, EventArgs.Empty);
                 };
 
@@ -223,6 +281,11 @@ namespace FlightCareer.UI.Services
                         IsCrashed = true;
                         OnCrashEvent?.Invoke(this, EventArgs.Empty);
                     }
+                    else if (e.uEventID >= FirstDynamicEventId && _eventNames.TryGetValue(e.uEventID, out var name))
+                    {
+                        // Só chegam aqui eventos do grupo mascarado: o comando já foi bloqueado pelo SimConnect
+                        OnMaskedEvent?.Invoke(name, e.dwData);
+                    }
                 };
 
                 _simConnect.OnRecvException += (s, e) => {
@@ -233,6 +296,10 @@ namespace FlightCareer.UI.Services
 
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTelemetry, DEFINITIONS.AircraftData,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.CHANGED, 0, 4, 0);
+
+                // A cada 6 frames (~5-10 Hz): rápido o bastante para desfazer um comando do piloto quase na hora
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFailureState, DEFINITIONS.FailureState,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 6, 0);
             }
             catch (Exception ex)
             {
@@ -246,6 +313,18 @@ namespace FlightCareer.UI.Services
             _simConnect?.AddToDataDefinition(DEFINITIONS.AircraftData, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
         }
 
+        private void AddFailureDef(string datum, string unit)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.FailureState, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+        }
+
+        private void AddWriteDef(DEFINITIONS def, string datum, string unit)
+        {
+            if (_simConnect == null) return;
+            _simConnect.AddToDataDefinition(def, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            _simConnect.RegisterDataDefineStruct<SimDoubleValue>(def);
+        }
+
         public void Disconnect()
         {
             if (_simConnect != null)
@@ -253,7 +332,9 @@ namespace FlightCareer.UI.Services
                 _simConnect.Dispose();
                 _simConnect = null;
                 _mappedEvents.Clear();
+                _eventNames.Clear();
                 _nextEventId = FirstDynamicEventId;
+                CurrentFailureState = null;
                 _untrackedToggles.Clear();
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
@@ -263,6 +344,18 @@ namespace FlightCareer.UI.Services
         // do simulador recebe seu próprio ID, mapeado uma única vez por conexão.
         private const uint FirstDynamicEventId = 1000;
         private readonly Dictionary<string, uint> _mappedEvents = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<uint, string> _eventNames = new();
+        private HashSet<string> _maskedEvents = new(StringComparer.OrdinalIgnoreCase);
+
+        private uint GetOrMapEvent(string eventName)
+        {
+            if (_mappedEvents.TryGetValue(eventName, out uint id)) return id;
+            id = _nextEventId++;
+            _simConnect!.MapClientEventToSimEvent((EVENTS)id, eventName);
+            _mappedEvents[eventName] = id;
+            _eventNames[id] = eventName;
+            return id;
+        }
         private uint _nextEventId = FirstDynamicEventId;
 
         // Eventos de falha do SimConnect que funcionam como toggle (enviar duas vezes = reparar).
@@ -284,12 +377,7 @@ namespace FlightCareer.UI.Services
             if (_simConnect == null || string.IsNullOrWhiteSpace(eventName)) return;
             try
             {
-                if (!_mappedEvents.TryGetValue(eventName, out uint id))
-                {
-                    id = _nextEventId++;
-                    _simConnect.MapClientEventToSimEvent((EVENTS)id, eventName);
-                    _mappedEvents[eventName] = id;
-                }
+                uint id = GetOrMapEvent(eventName);
 
                 _simConnect.TransmitClientEvent(SimConnect.SIMCONNECT_OBJECT_ID_USER, (EVENTS)id, data,
                     (GROUPS)SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
@@ -330,6 +418,24 @@ namespace FlightCareer.UI.Services
         /// <summary>Desfaz uma falha toggle (ex.: motor recuperado após gelo no carburador).</summary>
         public void ClearFailure(string eventName)
         {
+            if (_persistentToggles.Contains(eventName)) return; // Pane persistente aberta: só a oficina desfaz
+            ForceClearFailure(eventName);
+        }
+
+        /// <summary>
+        /// Toggles que pertencem a panes persistentes abertas (AircraftDefects). ClearSimFailures e ClearFailure
+        /// não os desfazem: eles só saem quando a pane é reparada na oficina.
+        /// </summary>
+        private HashSet<string> _persistentToggles = new(StringComparer.OrdinalIgnoreCase);
+
+        public void SetPersistentToggles(IEnumerable<string> eventNames)
+        {
+            _persistentToggles = new HashSet<string>(eventNames, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Desfaz um toggle mesmo que pertença a uma pane persistente (pane reparada na oficina).</summary>
+        public void ForceClearFailure(string eventName)
+        {
             bool? active = IsToggleFailureActive(eventName);
             if (active == true || (active == null && _untrackedToggles.Remove(eventName)))
             {
@@ -344,8 +450,10 @@ namespace FlightCareer.UI.Services
         public void ClearSimFailures()
         {
             if (_simConnect == null) return;
+            // Panes persistentes abertas (diferidas, ex.: pitot) continuam aplicadas no voo seguinte
             foreach (var eventName in ToggleFailureEvents)
             {
+                if (_persistentToggles.Contains(eventName)) continue;
                 if (IsToggleFailureActive(eventName) == true)
                 {
                     SendEvent(eventName);
@@ -354,9 +462,59 @@ namespace FlightCareer.UI.Services
 
             foreach (var eventName in _untrackedToggles.ToList())
             {
+                if (_persistentToggles.Contains(eventName)) continue;
                 SendEvent(eventName);
+                _untrackedToggles.Remove(eventName);
             }
-            _untrackedToggles.Clear();
+        }
+
+        /// <summary>
+        /// Define os comandos do piloto que devem ser bloqueados (grupo mascarável de prioridade máxima).
+        /// Nunca incluir aqui um evento que o próprio addon transmite, ou ele também seria bloqueado.
+        /// </summary>
+        public void SetMaskedEvents(IEnumerable<string> eventNames)
+        {
+            var desired = new HashSet<string>(eventNames, StringComparer.OrdinalIgnoreCase);
+            if (desired.SetEquals(_maskedEvents)) return;
+            _maskedEvents = desired;
+            ApplyMaskedEvents();
+        }
+
+        private void ApplyMaskedEvents()
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _simConnect.ClearNotificationGroup(GROUPS.MaskedPilotInputs);
+                if (_maskedEvents.Count == 0) return;
+                foreach (var name in _maskedEvents)
+                {
+                    _simConnect.AddClientEventToNotificationGroup(GROUPS.MaskedPilotInputs, (EVENTS)GetOrMapEvent(name), true);
+                }
+                _simConnect.SetNotificationGroupPriority(GROUPS.MaskedPilotInputs, SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] Falha ao aplicar mascaramento: {ex.Message}");
+            }
+        }
+
+        public void WriteMagneto(bool left, bool on) =>
+            WriteSingle(left ? DEFINITIONS.WriteLeftMagneto : DEFINITIONS.WriteRightMagneto, on ? 1.0 : 0.0);
+
+        public void WriteFlapsHandleIndex(double index) => WriteSingle(DEFINITIONS.WriteFlapsHandleIndex, index);
+
+        private void WriteSingle(DEFINITIONS def, double value)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, new SimDoubleValue { Value = value });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] Escrita {def} falhou: {ex.Message}");
+            }
         }
 
         public void SetEngineFire(bool isOnFire)
@@ -403,10 +561,17 @@ namespace FlightCareer.UI.Services
 
         private void SimConnect_OnRecvSimobjectData(SimConnect sender, SIMCONNECT_RECV_SIMOBJECT_DATA data)
         {
-            if (data.dwData != null && data.dwData.Length > 0 && data.dwData[0] is SimTelemetry telemetry)
+            if (data.dwData == null || data.dwData.Length == 0) return;
+
+            if (data.dwData[0] is SimTelemetry telemetry)
             {
                 CurrentData = telemetry;
                 OnDataReceived?.Invoke(this, telemetry);
+            }
+            else if (data.dwData[0] is SimFailureState failureState)
+            {
+                CurrentFailureState = failureState;
+                OnFailureStateReceived?.Invoke(failureState);
             }
         }
     }

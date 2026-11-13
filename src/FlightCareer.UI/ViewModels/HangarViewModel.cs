@@ -78,6 +78,14 @@ namespace FlightCareer.UI.ViewModels
                 .Select(a => new PilotAircraftWrapper(a, _catalog, repair) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
+            // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
+            var fleetIds = wrapped.Select(w => w.Aircraft.Id).ToList();
+            var openDefects = await context.AircraftDefects.AsNoTracking()
+                .Where(d => fleetIds.Contains(d.PilotAircraftId) && !d.IsResolved)
+                .ToListAsync();
+            foreach (var w in wrapped)
+                w.SetOpenDefects(openDefects.Where(d => d.PilotAircraftId == w.Aircraft.Id).OrderBy(d => d.DetectedAtUtc));
+
             Fleet = new ObservableCollection<PilotAircraftWrapper>(wrapped);
             OnPropertyChanged(nameof(FleetCountText));
             var selectId = keepSelection ?? SelectedAircraft?.Aircraft.Id ?? pilot.ActiveAircraftId;
@@ -107,7 +115,8 @@ namespace FlightCareer.UI.ViewModels
         /// registra a transação, sincroniza as colunas antigas, salva e recarrega a frota.
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
-            Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null)
+            Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
+            Func<AppDbContext, Task>? applyInContext = null)
         {
             if (SelectedAircraft == null) return false;
             var aircraftId = SelectedAircraft.Aircraft.Id;
@@ -130,6 +139,7 @@ namespace FlightCareer.UI.ViewModels
 
             pilot.Balance -= cost;
             apply(aircraft, aircraft.Components);
+            if (applyInContext != null) await applyInContext(context);
             LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
 
             if (cost > 0)
@@ -224,6 +234,52 @@ namespace FlightCareer.UI.ViewModels
                 },
                 kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
                 successMessage: $"{row.Name} restaurado(a) a 100%.");
+        }
+
+        // ------------------------------------------------------------------ Panes persistentes
+
+        [RelayCommand]
+        private async Task RepairDefect(AircraftDefect? defect)
+        {
+            if (defect == null) return;
+            await RepairDefectsAsync(new List<AircraftDefect> { defect });
+        }
+
+        [RelayCommand]
+        private async Task RepairAllDefects()
+        {
+            if (SelectedAircraft == null || !SelectedAircraft.HasOpenDefects) return;
+            await RepairDefectsAsync(SelectedAircraft.OpenDefects.ToList());
+        }
+
+        /// <summary>
+        /// Repara panes persistentes: troca/conserto do item. A barra do componente não muda (o desgaste continua),
+        /// a pane sai do simulador na próxima leitura do vigia (PersistentFailureService) e o NO-GO é liberado.
+        /// </summary>
+        private async Task RepairDefectsAsync(List<AircraftDefect> defects)
+        {
+            if (!CanOperate() || SelectedAircraft == null || defects.Count == 0) return;
+            var ids = defects.Select(d => d.Id).ToHashSet();
+            double total = defects.Sum(d => d.RepairCost);
+            string list = string.Join("\n", defects.Select(d => $"• {d.Title} ({d.OriginLabel}, {d.SeverityLabel}): {d.RepairCost:C0}"));
+
+            await RunPaidServiceAsync(
+                defects.Count == 1 ? "Reparar pane" : "Reparar panes",
+                $"Oficina em {SelectedAircraft.Prefix}:\n{list}",
+                total,
+                defects.Count == 1 ? $"REPARO DE PANE: {defects[0].Title}" : $"REPARO DE {defects.Count} PANES",
+                (_, _) => { },
+                kind: DialogKind.Warning,
+                successMessage: defects.Count == 1 ? $"{defects[0].Title}: reparada." : "Panes reparadas.",
+                applyInContext: async context =>
+                {
+                    var rows = await context.AircraftDefects.Where(d => ids.Contains(d.Id)).ToListAsync();
+                    foreach (var d in rows)
+                    {
+                        d.IsResolved = true;
+                        d.ResolvedAtUtc = DateTime.UtcNow;
+                    }
+                });
         }
 
         [RelayCommand]

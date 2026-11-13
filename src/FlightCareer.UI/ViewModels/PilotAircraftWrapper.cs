@@ -78,8 +78,45 @@ namespace FlightCareer.UI.ViewModels
         public GridLength AirworthinessFill => new(Math.Max(0, AirworthinessMid), GridUnitType.Star);
         public GridLength AirworthinessEmpty => new(Math.Max(0, 100 - AirworthinessMid), GridUnitType.Star);
 
-        private AircraftStatus Status =>
-            AircraftStatusEvaluator.Evaluate(Aircraft, Components.Select(r => r.Component).ToList(), _catalog, EngineClass);
+        private AircraftStatus Status
+        {
+            get
+            {
+                var status = AircraftStatusEvaluator.Evaluate(Aircraft, Components.Select(r => r.Component).ToList(), _catalog, EngineClass);
+                if (status.Level is AircraftStatusLevel.Destroyed or AircraftStatusLevel.Interdicted) return status;
+
+                // Panes persistentes abertas: NO-GO interdita; diferida rebaixa "pronta" para atenção
+                var grounding = OpenDefects.Where(d => d.IsGrounding).ToList();
+                if (grounding.Count > 0)
+                    return new AircraftStatus(AircraftStatusLevel.Interdicted, "GROUNDED (PANE)",
+                        "Item inoperante: " + string.Join(", ", grounding.Select(d => d.Title)) + ". Repare a pane na oficina.");
+                if (OpenDefects.Count > 0 && status.Level is AircraftStatusLevel.Ready or AircraftStatusLevel.MaintenanceDue)
+                    return new AircraftStatus(AircraftStatusLevel.Attention, "PANE DIFERIDA",
+                        "Voo permitido com: " + string.Join(", ", OpenDefects.Select(d => d.Title)) + ".");
+                return status;
+            }
+        }
+
+        // --- Panes persistentes (discrepâncias abertas, addon ou simulador) ---
+        public ObservableCollection<AircraftDefect> OpenDefects { get; } = new();
+        public bool HasOpenDefects => OpenDefects.Count > 0;
+        public bool HasGroundingDefects => OpenDefects.Any(d => d.IsGrounding);
+        public double DefectsRepairTotal => OpenDefects.Sum(d => d.RepairCost);
+        public string RepairAllDefectsText => $"Reparar todas as panes · {DefectsRepairTotal:C0}";
+
+        public void SetOpenDefects(IEnumerable<AircraftDefect> defects)
+        {
+            OpenDefects.Clear();
+            foreach (var d in defects) OpenDefects.Add(d);
+            OnPropertyChanged(nameof(HasOpenDefects));
+            OnPropertyChanged(nameof(HasGroundingDefects));
+            OnPropertyChanged(nameof(DefectsRepairTotal));
+            OnPropertyChanged(nameof(RepairAllDefectsText));
+            OnPropertyChanged(nameof(StatusLevel));
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(StatusDetail));
+            OnPropertyChanged(nameof(StatusBrush));
+        }
 
         public AircraftStatusLevel StatusLevel => Status.Level;
         public string StatusText => Status.Text;

@@ -18,6 +18,7 @@ namespace FlightCareer.Application.Interfaces
         DbSet<FinancialTransaction> FinancialTransactions { get; }
         DbSet<MarketListing> MarketListings { get; }
         DbSet<AircraftComponent> AircraftComponents { get; }
+        DbSet<AircraftDefect> AircraftDefects { get; }
 
         DatabaseFacade Database { get; }
         Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker ChangeTracker { get; }

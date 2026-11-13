@@ -1247,3 +1247,14 @@
 - **Homologação de categoria** não gravava saldo nem categoria (piloto vinha do repositório, `SaveChanges` em outro contexto). Agora usa o contexto do `MainViewModel`.
 - `FlightService` passa a carregar o tipo da aeronave: preço do combustível (Avgas × Jet A-1) e taxa de pouso por MTOW estavam usando valores padrão.
 - Excedências de limites não abrem mais caixa modal durante o voo (só blackbox).
+
+## 2026-11-13 - Integração: Panes Persistentes sobre o Sistema de Componentes (Claude)
+- Merge do `main` (panes persistentes, commit ffd2649) na branch de componentes. O sistema de componentes continua sendo o motor do voo; as panes persistentes viram a camada de **discrepâncias entre voos** (primeira parte da fase 4).
+- `DefectCatalog.CodeFor(effect, kind, critical)` (Domain, com testes) converte a pane do componente em discrepância; novos códigos `ELECTRICAL`, `BRAKE_FAILURE`, `HYDRAULIC`, `STRUCTURAL`. O `FlightMonitor` grava a discrepância antes do alerta.
+- `FlightFailureRecord.Persistent`: gelo no carburador é transitório e avisa o `PersistentFailureService` para não confundir o apagamento com pane nativa.
+- `SimConnectService`: leitura rápida `SimFailureState`, escrita de magnetos/flaps, grupo de comandos mascarados, `AircraftLoaded` (evento de arquivo, junto com `FlightLoaded`) e `SetPersistentToggles` (`ClearSimFailures`/`ClearFailure` preservam os toggles das panes abertas). `SendEvent` passa a guardar o nome de cada ID para identificar comandos bloqueados.
+- `SimFailureActuator`: alternador forçado com `ALTERNATOR_OFF` (idempotente, testado no MSFS 2024) em vez de `TOGGLE_ALTERNATOR1`, que podia religar a chave junto com a correção do vigia.
+- `FlightMonitor`: `StartMonitoring` retorna `bool` e bloqueia NO-GO; modo vigia fora do voo (`WatchAircraft`); detecção nativa de ENG FAILED saiu do tick e foi para o `PersistentFailureService` (motor limitado a 15%, fogo a 5% e −20% célula, dano proporcional, trem −20%, freios a 30%).
+- Hangar: card "Panes em aberto" (NO-GO/DIFERIDA, origem, fase, causa, reparo individual ou todas). Status "GROUNDED (PANE)" / "PANE DIFERIDA" sobre o `AircraftStatusEvaluator`.
+- `WearAndFailureService` removido também do lado do `main`.
+- Testes: 96 (mapeamento de panes e migração da tabela `AircraftDefects` em banco antigo). **Não testado no MSFS nem na tela do app após a integração.**
