@@ -51,6 +51,7 @@ namespace FlightCareer.UI
             ConfigureServices(serviceCollection);
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider.GetRequiredService<SensorFrameReader>();
 
             // 1. Mostrar Splash
             var splash = new SplashWindow();
@@ -148,6 +149,7 @@ namespace FlightCareer.UI
                 new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
 
             services.AddSingleton<SimConnectService>();
+            services.AddSingleton<SensorFrameReader>();
             services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>());
             services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
                 sp.GetRequiredService<SimConnectService>(),

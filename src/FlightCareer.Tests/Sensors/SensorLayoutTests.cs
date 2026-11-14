@@ -144,5 +144,19 @@ namespace FlightCareer.Tests.Sensors
             Assert.Equal(20.25, mapped["k2"]);
             Assert.False(mapped.ContainsKey("k3"));
         }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct SensorBlockDataSpike
+        {
+            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValArray, SizeConst = 256)]
+            public double[] Values;
+        }
+
+        [Fact]
+        public void SensorBlockData_MarshalSize_Is2048Bytes()
+        {
+            int size = System.Runtime.InteropServices.Marshal.SizeOf<SensorBlockDataSpike>();
+            Assert.Equal(2048, size);
+        }
     }
 }

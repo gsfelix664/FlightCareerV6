@@ -47,6 +47,8 @@ namespace FlightCareer.UI.Services
     public class SimConnectService : ISimConnectService
     {
         private SimConnect? _simConnect;
+        internal SimConnect? Raw => _simConnect;
+        internal event Action<SimConnect>? OnSimConnectReady;
         private const int WM_USER_SIMCONNECT = 0x0402;
 
         public event EventHandler? OnConnected;
@@ -268,6 +270,7 @@ namespace FlightCareer.UI.Services
                     _reconnectTimer?.Stop();
                     ApplyMaskedEvents();
                     OnConnected?.Invoke(this, EventArgs.Empty);
+                    OnSimConnectReady?.Invoke(_simConnect);
                 };
 
                 _simConnect.OnRecvQuit += (s, e) => {
