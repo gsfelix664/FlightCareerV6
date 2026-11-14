@@ -129,7 +129,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 ### Sensores (plano de peças, fase 1 — F1.1 a F1.3 concluídas)
 - `Domain/Sensors/`: `SensorRegistry` (catálogo `sensor_registry.json` + `context_registry.json`, paridade testada com `docs/plans/sensor-inventory.md`), `SensorLayout` (expansão por motor, blocos de 256 preenchidos com `SIMULATION RATE`), `SensorCsvFormatter`.
 - `UI/Services/`: `SensorFrameReader` (leitura genérica, IDs 999/1000+, rejeitadas saem do layout), `ContextSnapshotReader` (IDs 2000/2001, strings em `STRING256`), `SensorRecorder` (REC/Marcar no HUD Overlay, CSV + `-context.json` em `%LocalAppData%\FlightCareer\sensor-logs\`).
-- Testado no MSFS (C152, 2026-11-14): leitura a ~0,43 s, valores coerentes, sem crash após o preenchimento até 256. Próxima tarefa: F1.4 (voos de validação, portão 🔒).
+- Testado no MSFS (C152, 2026-11-14): leitura a ~0,43 s, valores coerentes, sem crash após o preenchimento até 256. F1.4 preparada: roteiro `docs/plans/sensor-validation/ROTEIRO.md` e `tools/analyze_sensor_log.py` (só biblioteca padrão; testes em `python -m unittest discover -s tools/tests`). Próximo: o usuário voa a matriz A–I e o revisor aprova os relatórios (portão 🔒).
 
 ## 8. Definição de pronto
 
