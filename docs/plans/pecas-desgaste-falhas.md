@@ -43,7 +43,7 @@ Substitui a regra antiga "o jogador deve desligar o desgaste nativo" e as versõ
    - Pane gerada pelo **addon** (break check abaixo de 30%, mortalidade infantil, eventos externos) → discrepância no Hangar e efeito forçado no sim (já existe).
    - Pane gerada pelo **nativo** (`WEAR AND TEAR IS FAILED:<id>`, `ENG FAILED`, fogo, dano de flap/trem por velocidade, freios, `CRASH FLAG`) → também vira discrepância no Hangar, origem `Native`, e persiste entre voos (o `PersistentFailureService` reaplica depois do reinício, quando o MSFS já esqueceu).
    - A mesma peça não gera duas discrepâncias abertas: se já há uma aberta para ela, a segunda fonte só é registrada no blackbox.
-   - Pane nativa (`IS FAILED`) marca a peça como quebrada (`IsBroken`), como a pane do addon, e limita a saúde dela ao valor do JSON (`nativeFailedHealthCap`). Peça fraca (`IS WEAK`) recebe o dano do JSON (`nativeWeakHealthCap`). Um evento de cada tipo por peça por voo.
+   - Pane nativa (`IS FAILED`) marca a peça como quebrada (`IsBroken`), como a pane do addon, e leva a saúde dela a **0%** (decisão do usuário, 2026-11-14; substitui o limite de 15%): peça quebrada = 0%, e só a troca devolve a 100%. Peça fraca (`IS WEAK`) recebe o dano do JSON (`nativeWeakHealthCap`). Um evento de cada tipo por peça por voo.
 5. **Impacto/pouso duro:** o nativo volta a 100% depois de uma pancada (voo F1.4b: 60,9 ft/s, 11,8 G). O addon detecta pela própria telemetria (pouso duro, perda total do `FlightMonitor`) e aplica dano ou GROUNDED; reiniciar o voo no sim não libera o avião (o `StartMonitoring` bloqueia NO-GO).
 6. **Escrita no nativo:** impossível (as SimVars `WEAR AND TEAR *` são só leitura no SDK). O Hangar e o nativo podem divergir; o efeito das panes do addon é forçado pelos meios que já existem (eventos do SDK e watchdog).
 7. **Persistência pelo simulador (`.FLT`):** fora do caminho crítico. No voo F1.4b o EFB não salvou o `.flt` (é preciso digitar o nome com a extensão entre aspas); só investigar se virar necessidade.
@@ -158,7 +158,7 @@ Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar
 - O executor propõe a tabela com justificativa (manual do fabricante / POH quando houver); o revisor aprova antes do código.
 
 ### F2.3 Motor de desgaste por peça
-- Eventos nativos (regra 0.1.3a): `ApplyNativeWeak(part)` limita a saúde a `nativeWeakHealthCap` e `ApplyNativeFailed(part)` a `nativeFailedHealthCap` + `IsBroken` (só baixam, nunca sobem; um de cada por peça por voo). Testes: peça a 80% fica no limite; peça já abaixo não muda; segundo evento no mesmo voo é ignorado; nível nativo não altera nada.
+- Eventos nativos (regra 0.1.3a): `ApplyNativeWeak(part)` limita a saúde a `nativeWeakHealthCap` e `ApplyNativeFailed(part)` leva a saúde a 0% + `IsBroken` (só baixam, nunca sobem; um de cada por peça por voo). Testes: peça a 80% com fraca fica em 35% e com quebrada fica em 0%; peça já abaixo não muda; segundo evento no mesmo voo é ignorado; nível nativo não altera nada.
 - Overstress nativo (regra 0.1.3): com taxa nativa > limiar, estresse da peça = `min(taxa × nativeRateToLossPerHour, maxNativeLossPerHour)`; senão, estresse dos sensores do addon. Desgaste normal do addon sempre somado. Testes: taxa 0,0015 por 40 s com fator 360.000 = −6% (≈ 540 %/h × 0,0111 h); RPM vermelho do addon (66 %/h) com nativo convertido 540 %/h → usa 540; addon vermelho (66 %/h) com nativo convertido **menor** que 66 (acima do limiar) → usa o nativo; nativo abaixo do limiar ou componente em Observar → addon; taxa acima do teto → teto; taxa reportada com a opção desligada (nível travado em 1,00) → usa a taxa; avião sem wear and tear (taxa 0) → addon; cada trecho de overstress gera uma linha no blackbox com componente, fonte (simulador/addon), duração e perda.
 - `Domain/Parts/PartWearEngine.cs`: `ApplyTick(parts, SensorFrame, dtSimHours)` e `ApplyEvent(...)`.
 - Normal: `100% → ~30%` ao longo da `LifeHours` (ou `LifeCycles`). Estresse: `normal × maior multiplicador ativo` + dano por evento.
@@ -209,11 +209,22 @@ Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar
 
   No JSON: `breakCheck.thresholdHealth = 30`, `breakCheck.intervalSimMinutes = 10`, `breakCheck.maxChance = 1.0` (override por peça permitido). O intervalo é contado em **tempo simulado acumulado** (`SimTimeStep`); o sorteio acontece cada vez que o acumulado passa de 10 min, nunca por pacote de telemetria. O acumulado zera no início de cada voo.
 - Mortalidade infantil: `HoursSinceReplacement < infantHours` → `infantChancePer10Min`.
+- **Peça já quebrada (`IsBroken`) não sorteia** break check até ser trocada (sem pane repetida nem ruído no blackbox). Teste: peça `IsBroken` a 0% por 1 h simulada → nenhum sorteio.
 - Testes: fórmula exata nos pontos da tabela (30 → 0; 29 → 0,0333; 25 → 0,1667; 15 → 0,5; 5 → 0,8333; 0 → 1; 31 e 100 → 0; saúde negativa → 1); Monte Carlo (100 mil, semente fixa) a 29%, 20%, 10% dentro de ±10% da fórmula; 0% quebra em todos os sorteios; 9 min simulados não sorteiam, 10 min sorteiam uma vez, 25 min sorteiam duas; a 16× o número de sorteios por hora simulada é o mesmo que a 1×.
 
 ### F4.2 Efeito da quebra
 - Cada peça tem `BrokenEffect` (`FailureEffect`). Quebra → `SimFailureActuator` aplica o efeito e `PersistentFailureService.Record` grava a discrepância (NO-GO se `BlocksFlightWhenBroken`). Os dois já existem.
 - Peça sem efeito no sim que impede o voo: o revisor escolhe o efeito equivalente (ex.: motor → `TOGGLE_ENGINE1_FAILURE`).
+
+### F4.2b Perda total (decisão do usuário, 2026-11-14)
+- **Saúde 0% não significa avião destruído.** Hoje o `AircraftStatusEvaluator` (`ComponentMaintenance.cs`, motor e célula em 0% → "PERDA TOTAL") e o `FlightMonitor` (motor, pneus e célula em 0% → `HandleTotalLossAsync`) deduzem perda total da saúde: com a regra de pane nativa a 0%, duas panes virariam perda total por engano. Substituir por:
+  1. **Acidente real** (crash confirmado pelo simulador, caminho que já existe em `ComponentFlightSession`): perda total direta, estado explícito na aeronave (`IsTotalLoss` / `TotalLossReason`), sem conta.
+  2. **Perda total econômica:** `custo do reparo > totalLoss.economicThreshold × valor de referência` (JSON, `economicThreshold = 0.70`).
+     - **Custo do reparo** = soma do reparo de todos os componentes/peças até 100% (`ComponentMaintenance.RepairCost`, na Fase 2 preço de troca das peças) + panes abertas (`DefectCatalog.CalculateRepairCost`).
+     - **Valor de referência** = **valor de mercado do avião com todos os componentes a 100%** (ano e horas considerados; `MarketSimulationService.CalculateBaseMarketValue` com as condições a 100%), ou seja, o valor antes do dano. Nunca o valor já derrubado pelo dano (conta circular).
+     - Avaliada no fim do voo e a cada mudança de saúde/pane no Hangar. Ao passar do limite: status "PERDA TOTAL (ECONÔMICA)", oferta de seguro ou descarte (fluxo do Hangar que já existe). O jogador pode reparar mesmo assim, se quiser pagar.
+- **Calibração:** com os `repairCostFactor` atuais o reparo de um pistão inteiro a 0% soma ~0,285 do preço de compra, abaixo de 70% do valor de mercado: a perda econômica nunca dispararia. Recalibrar os fatores (referência: custos reais de retífica, célula, trem) para que só casos graves passem de 70% (fogo, colapso de trem com dano estrutural, motor + célula destruídos). Feito na implementação, aprovado pelo usuário.
+- Lógica pura em `Domain` (`TotalLossEvaluator.Evaluate(repairCost, referenceValue, catalog)`), com testes: reparo 69% → não; 71% → sim; valor de referência ignora o dano (avião com motor a 0% usa o valor a 100%); crash → perda total mesmo com reparo barato; motor e célula a 0% sem crash e reparo < 70% → **não** é perda total.
 
 ### F4.3 🔒 Teste no MSFS (usuário)
 - Comando de debug para quebrar à força: magneto, alternador, bomba de vácuo, motor. Reiniciar o voo no sim → a pane volta. Trocar no Hangar → a pane sai.
