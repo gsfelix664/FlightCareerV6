@@ -1290,3 +1290,14 @@
 - Registro singleton de `SensorFrameReader` em `App.xaml.cs` (diff de 2 linhas).
 - 7 novos testes unitários adicionados em `FlightCareer.Tests/Sensors/SensorLayoutTests.cs` (113 testes passando no total). Não testado no MSFS.
 
+## 2026-11-14 - F1.3 Gravador de validação (Gemini)
+- `SensorCsvFormatter` criado em `FlightCareer.Domain/Sensors/` com formatação RFC 4180/ISO 8601 (`O`), formato `R` invariante, células vazias para chaves ausentes/NaN/infinito, escape de aspas e quebras de linha em marcadores, e sanitização estrita de nomes de arquivos para Windows (`SafeFileName`).
+- 7 testes unitários adicionados em `FlightCareer.Tests/Sensors/SensorCsvFormatterTests.cs` (121 testes passando no total).
+- `ContextSnapshot` criado em `FlightCareer.Domain/Sensors/` e `ContextStringData` (struct ANSI 256 bytes) em `FlightCareer.UI/Services/`.
+- `ContextSnapshotReader` em `FlightCareer.UI/Services/` para consulta única sob demanda de `context_registry.json` via SimConnect (IDs 2000 numéricos e 2001 strings ANSI, com timeout assíncrono de 5 s).
+- `SensorRecorder` em `FlightCareer.UI/Services/` com gravação bufferizada de CSV em `%LocalAppData%/FlightCareer/sensor-logs/`, geração concomitante de metadados em JSON, rotação automática por reconstrução de layout (`-2`, `-3`), e inserção de marcadores sob demanda.
+- Controles de gravação integrados na interface: botões REC/STOP e Marcar evento no `DebugOverlayWindow.xaml` e propriedades observáveis com comandos assíncronos no `DebugOverlayViewModel.cs`.
+- Registro singleton de `ContextSnapshotReader` e `SensorRecorder` em `App.xaml.cs` (diff de 2 linhas). Nenhuma alteração em `SimConnectService.cs`/`SimTelemetry.cs`.
+- Não testado no MSFS.
+
+
