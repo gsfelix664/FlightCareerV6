@@ -58,6 +58,53 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void Registry_EveryUnit_IsKnownSimConnectUnit()
+        {
+            var knownUnits = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "amperes",
+                "bool",
+                "celsius",
+                "degrees",
+                "enum",
+                "feet",
+                "feet per second",
+                "feet per second squared",
+                "foot pound",
+                "gallons",
+                "gforce",
+                "inhg",
+                "kelvin",
+                "knots",
+                "kpa",
+                "mach",
+                "mask",
+                "number",
+                "percent",
+                "percent over 100",
+                "position",
+                "position 32k",
+                "pounds",
+                "pounds per hour",
+                "psf",
+                "psi",
+                "radians",
+                "ratio",
+                "rpm",
+                "string",
+                "volts"
+            };
+
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            foreach (var s in context.Sensors.Concat(sensors.Sensors))
+            {
+                Assert.True(knownUnits.Contains(s.Unit), $"Sensor '{s.Key}' possui unidade não reconhecida pelo SimConnect: '{s.Unit}'.");
+            }
+        }
+
+        [Fact]
         public void Registry_ContainsEverySimVarFromInventory()
         {
             var inventoryPath = FindInventoryPath();
@@ -71,7 +118,7 @@ namespace FlightCareer.Tests.Sensors
             var registeredSimVars = context.Sensors
                 .Concat(sensors.Sensors)
                 .Select(s => s.SimVar)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                .ToHashSet(StringComparer.Ordinal);
 
             var missing = expectedSimVars.Except(registeredSimVars).ToList();
 
@@ -90,7 +137,7 @@ namespace FlightCareer.Tests.Sensors
             var registeredSimVars = context.Sensors
                 .Concat(sensors.Sensors)
                 .Select(s => s.SimVar)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                .ToHashSet(StringComparer.Ordinal);
 
             var extra = registeredSimVars.Except(expectedSimVars).ToList();
 
@@ -175,7 +222,7 @@ namespace FlightCareer.Tests.Sensors
         private static HashSet<string> ExtractSimVarsFromInventory(string inventoryPath)
         {
             var lines = File.ReadAllLines(inventoryPath);
-            var simVars = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var simVars = new HashSet<string>(StringComparer.Ordinal);
 
             int currentSection = 0;
             var sectionHeaderRegex = new Regex(@"^##\s+(\d+)\.", RegexOptions.Compiled);

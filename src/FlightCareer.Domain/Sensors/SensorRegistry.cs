@@ -22,7 +22,7 @@ namespace FlightCareer.Domain.Sensors
             AllowTrailingCommas = true
         };
 
-        public List<SensorDefinition> Sensors { get; set; } = new();
+        public IReadOnlyList<SensorDefinition> Sensors { get; init; } = Array.Empty<SensorDefinition>();
 
         /// <summary>
         /// Valida as regras de negócio do registro de sensores:

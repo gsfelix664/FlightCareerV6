@@ -66,7 +66,7 @@
     {
       "key": "eng-cylinder-health",
       "simVar": "RECIP ENG CYLINDER HEALTH",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "piston",
       "perEngine": true
     },
@@ -101,7 +101,7 @@
     {
       "key": "eng-brake-power-pct",
       "simVar": "RECIP ENG BRAKE POWER PCT",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "piston",
       "perEngine": true
     },
@@ -269,7 +269,7 @@
     {
       "key": "oil-quantity",
       "simVar": "ENG OIL QUANTITY",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "oil",
       "perEngine": true
     },
@@ -283,7 +283,7 @@
     {
       "key": "oil-cooling-flaps-position",
       "simVar": "OIL COOLING FLAPS POSITION",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "oil",
       "perEngine": true
     },
@@ -514,7 +514,7 @@
     {
       "key": "dmg-wear-and-tear-level",
       "simVar": "WEAR AND TEAR LEVEL",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "native-damage",
       "perEngine": false
     },
@@ -535,7 +535,7 @@
     {
       "key": "dmg-wear-and-tear-overstress-factor",
       "simVar": "WEAR AND TEAR OVERSTRESS FACTOR",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "native-damage",
       "perEngine": false
     },
@@ -598,7 +598,7 @@
     {
       "key": "elec-battery-estimated-capacity-pct",
       "simVar": "ELECTRICAL BATTERY ESTIMATED CAPACITY PCT",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "electrical",
       "perEngine": false
     },
@@ -906,14 +906,14 @@
     {
       "key": "brake-left-position",
       "simVar": "BRAKE LEFT POSITION",
-      "unit": "position (0–32k)",
+      "unit": "position 32k",
       "group": "gear",
       "perEngine": false
     },
     {
       "key": "brake-right-position",
       "simVar": "BRAKE RIGHT POSITION",
-      "unit": "position (0–32k)",
+      "unit": "position 32k",
       "group": "gear",
       "perEngine": false
     },
@@ -934,14 +934,14 @@
     {
       "key": "brake-left-weight-remaining",
       "simVar": "BRAKE LEFT WEIGHT REMAINING",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "gear",
       "perEngine": false
     },
     {
       "key": "brake-right-weight-remaining",
       "simVar": "BRAKE RIGHT WEIGHT REMAINING",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "gear",
       "perEngine": false
     },
@@ -1011,7 +1011,7 @@
     {
       "key": "af-wing-flex-pct",
       "simVar": "WING FLEX PCT",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "airframe",
       "perEngine": false
     },
@@ -1074,21 +1074,21 @@
     {
       "key": "af-design-speed-vs0",
       "simVar": "DESIGN SPEED VS0",
-      "unit": "kias",
+      "unit": "knots",
       "group": "airframe",
       "perEngine": false
     },
     {
       "key": "af-design-speed-vs1",
       "simVar": "DESIGN SPEED VS1",
-      "unit": "kias",
+      "unit": "knots",
       "group": "airframe",
       "perEngine": false
     },
     {
       "key": "af-design-speed-vc",
       "simVar": "DESIGN SPEED VC",
-      "unit": "feet per second",
+      "unit": "knots",
       "group": "airframe",
       "perEngine": false
     },
@@ -1123,7 +1123,7 @@
     {
       "key": "af-trailing-edge-flaps-left-right-percent",
       "simVar": "TRAILING EDGE FLAPS LEFT/RIGHT PERCENT",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "airframe",
       "perEngine": false
     },
@@ -1144,14 +1144,14 @@
     {
       "key": "af-aileron-trim-pct",
       "simVar": "AILERON TRIM PCT",
-      "unit": "float",
+      "unit": "percent over 100",
       "group": "airframe",
       "perEngine": false
     },
     {
       "key": "af-rudder-trim-pct",
       "simVar": "RUDDER TRIM PCT",
-      "unit": "float",
+      "unit": "percent over 100",
       "group": "airframe",
       "perEngine": false
     },
@@ -1200,7 +1200,7 @@
     {
       "key": "hyd-system-integrity",
       "simVar": "HYDRAULIC SYSTEM INTEGRITY",
-      "unit": "percent_over_100",
+      "unit": "percent over 100",
       "group": "hydraulic",
       "perEngine": false
     },

@@ -51,12 +51,12 @@ Convenções:
 | `MAX EGT` | celsius | limite do avião |
 | `RECIP ENG TURBINE INLET TEMPERATURE:N` | celsius | turbocompressor (TIT) |
 | `RECIP ENG DETONATING:N` | bool | **cilindros/pistões (detonação)** |
-| `RECIP ENG CYLINDER HEALTH:N` | percent_over_100 | saúde nativa dos cilindros (comparar com a nossa) |
+| `RECIP ENG CYLINDER HEALTH:N` | percent over 100 | saúde nativa dos cilindros (comparar com a nossa) |
 | `RECIP ENG NUM CYLINDERS FAILED:N` | number | cilindro perdido (nativo) |
 | `RECIP MIXTURE RATIO:N` | ratio | detonação, mistura pobre |
 | `GENERAL ENG MIXTURE LEVER POSITION:N` | percent | idem |
 | `GENERAL ENG THROTTLE LEVER POSITION:N` | percent | carga, operação brusca |
-| `RECIP ENG BRAKE POWER PCT:N` | percent_over_100 | % de potência (carga real) |
+| `RECIP ENG BRAKE POWER PCT:N` | percent over 100 | % de potência (carga real) |
 | `RECIP ENG FUEL FLOW:N` | pounds per hour | bomba/injetores |
 | `GENERAL ENG FUEL PRESSURE:N` | psi | bomba de combustível |
 | `RECIP CARBURETOR TEMPERATURE:N` ✅ | celsius | carburador (gelo) |
@@ -81,9 +81,9 @@ Convenções:
 | `GENERAL ENG OIL TEMPERATURE:N` ✅ | celsius | óleo, radiador de óleo |
 | `MAX OIL TEMPERATURE` | celsius | limite do avião |
 | `GENERAL ENG OIL PRESSURE:N` ✅ | psi | bomba de óleo, bronzinas |
-| `ENG OIL QUANTITY:N` | percent_over_100 | nível de óleo |
+| `ENG OIL QUANTITY:N` | percent over 100 | nível de óleo |
 | `GENERAL ENG OIL LEAKED PERCENT:N` ✅ (W ✅) | percent | retentores, juntas |
-| `OIL COOLING FLAPS POSITION:N` | percent_over_100 | radiador de óleo |
+| `OIL COOLING FLAPS POSITION:N` | percent over 100 | radiador de óleo |
 | `WARNING OIL PRESSURE` | bool | alerta do painel |
 
 ## 4. Turbina (turboélice e jato)
@@ -117,7 +117,7 @@ Convenções:
 | `GEAR DAMAGE BY SPEED` ✅, `GEAR SPEED EXCEEDED` | bool | trem |
 | `CRASH FLAG` ✅ | enum | acidente |
 | `PARTIAL PANEL VACUUM/PITOT/STATIC/ELECTRICAL/ENGINE/AIRSPEED/ALTIMETER/ATTITUDE/HEADING/...` | enum | estado de panes do menu do sim |
-| `WEAR AND TEAR LEVEL`, `WEAR AND TEAR IS WEAK`, `WEAR AND TEAR IS FAILED`, `WEAR AND TEAR OVERSTRESS FACTOR` | percent_over_100 / bool | **desgaste nativo do MSFS 2024** (só para detectar se o jogador deixou ligado e avisar) |
+| `WEAR AND TEAR LEVEL`, `WEAR AND TEAR IS WEAK`, `WEAR AND TEAR IS FAILED`, `WEAR AND TEAR OVERSTRESS FACTOR` | percent over 100 / bool | **desgaste nativo do MSFS 2024** (só para detectar se o jogador deixou ligado e avisar) |
 
 ## 6. Elétrico
 
@@ -128,7 +128,7 @@ Convenções:
 | `ELECTRICAL GENALT LOAD:N` | percent | **sobrecarga do alternador** |
 | `ELECTRICAL MAIN BUS VOLTAGE` | volts | regulador de voltagem |
 | `ELECTRICAL BATTERY VOLTAGE`, `ELECTRICAL BATTERY LOAD`, `ELECTRICAL BATTERY LEVEL` | volts / amperes / percent | bateria (descarga profunda) |
-| `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | percent_over_100 | bateria |
+| `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | percent over 100 | bateria |
 | `ELECTRICAL MASTER BATTERY` | bool | uso da bateria |
 | `ELECTRICAL TOTAL LOAD AMPS` | amperes | carga elétrica |
 | `EXTERNAL POWER ON` | bool | GPU (poupa bateria/starter) |
@@ -168,9 +168,9 @@ Convenções:
 | `GEAR POSITION`, `GEAR HANDLE POSITION`, `GEAR TOTAL PCT EXTENDED` | percent | atuador do trem (ciclos) |
 | `GEAR HYDRAULIC PRESSURE` | psf | hidráulico do trem |
 | `GEAR WARNING` | enum | — |
-| `BRAKE LEFT POSITION`, `BRAKE RIGHT POSITION` | position (0–32K) | pastilhas, discos |
+| `BRAKE LEFT POSITION`, `BRAKE RIGHT POSITION` | position 32k | pastilhas, discos |
 | `BRAKE LEFT TEMPERATURE`, `BRAKE RIGHT TEMPERATURE` | kelvin | **discos/pastilhas (superaquecimento)** |
-| `BRAKE LEFT WEIGHT REMAINING`, `BRAKE RIGHT WEIGHT REMAINING` | percent_over_100 | desgaste nativo das pastilhas |
+| `BRAKE LEFT WEIGHT REMAINING`, `BRAKE RIGHT WEIGHT REMAINING` | percent over 100 | desgaste nativo das pastilhas |
 | `BRAKE PARKING POSITION` | bool | — |
 | `ANTISKID BRAKES ACTIVE`, `AUTOBRAKES ACTIVE` | bool | jatos |
 | `NOSEWHEEL MAX STEERING ANGLE`, `GEAR STEER ANGLE PCT` | radians / percent | direção da bequilha |
@@ -181,16 +181,16 @@ Convenções:
 |---|---|---|
 | `G FORCE` ✅, `MAX G FORCE`, `MIN G FORCE` | gforce | estrutura (asa, longarina) |
 | `SEMIBODY LOADFACTOR Y` | number | estrutura |
-| `WING FLEX PCT` | percent_over_100 | estrutura (flexão de asa) |
+| `WING FLEX PCT` | percent over 100 | estrutura (flexão de asa) |
 | `AIRSPEED INDICATED` ✅, `AIRSPEED TRUE`, `AIRSPEED MACH` | knots / mach | estrutura (Vne/Mmo) |
 | `OVERSPEED WARNING` ✅, `AIRSPEED BARBER POLE` | bool / knots | idem |
 | `REFERENCE SPEED MAX IAS`, `REFERENCE SPEED MAX IAS GEAR DOWN`, `MACH MAX OPERATE` | knots / mach | limites do próprio avião |
-| `DESIGN SPEED VS0`, `DESIGN SPEED VS1`, `DESIGN SPEED VC` | kias / feet per second | limites do avião |
+| `DESIGN SPEED VS0`, `DESIGN SPEED VS1`, `DESIGN SPEED VC` | knots | limites do avião |
 | `STALL WARNING` | bool | — |
 | `FLAPS HANDLE INDEX` ✅ (W ✅), `FLAPS HANDLE PERCENT`, `FLAPS CURRENT SPEED LIMITATION` | number / percent / knots | flaps (Vfe por posição) |
-| `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT` | percent_over_100 | assimetria de flap |
+| `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT` | percent over 100 | assimetria de flap |
 | `SPOILERS HANDLE POSITION` | percent | spoilers |
-| `ELEVATOR TRIM POSITION`, `AILERON TRIM PCT`, `RUDDER TRIM PCT` | radians / float | trim (servos) |
+| `ELEVATOR TRIM POSITION`, `AILERON TRIM PCT`, `RUDDER TRIM PCT` | radians / percent over 100 / percent over 100 | trim (servos) |
 | `ACCELERATION BODY X/Y/Z` | feet per second squared | cargas laterais/turbulência |
 | `PRESSURIZATION CABIN ALTITUDE`, `PRESSURIZATION PRESSURE DIFFERENTIAL` | feet / psf | **estrutura pressurizada (ciclos de pressurização)** |
 
@@ -199,7 +199,7 @@ Convenções:
 | SimVar | Unidade | Dica de peça |
 |---|---|---|
 | `HYDRAULIC PRESSURE`, `HYDRAULIC PUMP PRESSURE`, `HYDRAULIC RESERVOIR PERCENT` | psf / psi / percent | bomba hidráulica, reservatório |
-| `HYDRAULIC SYSTEM INTEGRITY` | percent_over_100 | integridade nativa |
+| `HYDRAULIC SYSTEM INTEGRITY` | percent over 100 | integridade nativa |
 | `ENG HYDRAULIC PRESSURE:N`, `ENG HYDRAULIC QUANTITY:N` | psf / percent | bomba acionada pelo motor |
 | `PNEUMATICS ENGINE BLEED AIR PRESSURE:N`, `PNEUMATICS DUCT PRESSURE` | psi | sangria, dutos |
 | `PNEUMATICS PACK STATUS` | bool | packs de ar condicionado |
