@@ -1369,3 +1369,6 @@
 
 ## 2026-11-14 - F1.4b: portão aprovado (Claude)
 - O usuário aprovou as tabelas de `docs/plans/sensor-validation/native-wear-mapping.md`: NO-GO para comandos de voo, combustível e bateria quebrados; piloto automático e flaps quebrados como diferidos; motor (39, 40) e pneus (37, 48) Ativo no overstress, o resto em Observar; teto de 1.000 %/h e limiar provisório de 0,0001 (definitivos após a F1.4c). F2.1 e F2.2 ainda dependem do portão da F1.4 (voos de validação de sensores da matriz A–I). Nenhum código mudou.
+
+## 2026-11-14 - F4.1: break check com curva linear (plano) (Claude)
+- Decisão do usuário: abaixo de 30% de saúde, chance de quebra por sorteio (a cada 10 min simulados) = `clamp((30 − saúde) / 30, 0, 1)`: 3,33% a 29%, 50% a 15%, 100% a 0%. Substitui `pMax · ((30 − h) / 30)^k`; parâmetros no JSON (`breakCheck`), intervalo em tempo simulado acumulado. Testes da F4.1 atualizados no plano. Nenhum código mudou.
