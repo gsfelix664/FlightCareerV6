@@ -54,6 +54,8 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 4. **Commits pequenos**, no padrão `tipo(escopo): descrição em português` (ex.: `fix(simconnect): ...`, `feat(components): ...`). Commit e push só quando o usuário pedir.
 5. **Ao terminar:** acrescente uma entrada no fim de `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (Agente)`) e, se mudou arquitetura ou o estado de um sistema, atualize a seção 7 deste arquivo.
 6. Não reescreva o trabalho do outro agente sem motivo técnico; se discordar de uma decisão, explique ao usuário em vez de reverter.
+7. **Orquestração:** o Claude especifica, revisa e faz o merge; o Gemini implementa num worktree isolado. Fluxo, checklist de revisão e boas práticas em `docs/agents/ORQUESTRACAO.md`; ferramentas em `tools/agents/`.
+8. **Hooks obrigatórios** (uma vez por clone): `git config core.hooksPath "$(pwd)/.githooks"`. Bloqueiam commit/push em `main` e `feat/component-health-system`, mensagem fora do padrão, `push --force` e commit do banco. `FC_ALLOW_PROTECTED=1` libera as branches protegidas e é só do revisor (merge aprovado) ou do usuário. Nunca use `--no-verify`.
 
 ## 5. Convenções de código
 

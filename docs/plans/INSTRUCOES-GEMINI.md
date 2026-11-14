@@ -1,20 +1,24 @@
 # Instruções para o Gemini (Antigravity CLI) — execução do plano de peças
 
 Você é o **executor** do plano `docs/plans/pecas-desgaste-falhas.md`. O **Claude** é o revisor e orquestrador.
-O usuário leva os seus relatórios até o Claude e traz a resposta de volta. Siga este arquivo à risca.
+Normalmente o Claude te chama em modo não interativo (`tools/agents/gemini-task.sh`), num worktree isolado
+(`../FLIGHTCAREERV6-gemini`) com a branch da tarefa já ativa. O fluxo completo está em `docs/agents/ORQUESTRACAO.md`.
+Siga este arquivo à risca.
 
 ## 1. Antes de começar (toda sessão)
 
-1. Leia por completo: `AGENTS.md`, `gemini.md`, `docs/plans/pecas-desgaste-falhas.md`, `docs/plans/sensor-inventory.md`.
-2. Rode `git status` e `git log --oneline -5`. Se houver alterações que não são suas, **pare e pergunte ao usuário**.
+1. Leia por completo: `AGENTS.md`, `gemini.md`, `docs/agents/LICOES.md`, `docs/plans/pecas-desgaste-falhas.md`, `docs/plans/sensor-inventory.md`.
+2. Rode `git status` e `git log --oneline -5`. Se houver alterações que não são suas, **pare**: em modo interativo pergunte ao usuário; em modo não interativo registre no relatório e encerre.
 3. Veja no "Diário de execução" do plano qual é a **próxima tarefa**. Leia em `docs/reviews/` a última revisão do Claude: se ela pediu correções, a próxima tarefa é **corrigir**, não avançar.
 
 ## 2. Branch e commits
 
 - Uma branch por fase, criada a partir de `feat/component-health-system`: `feat/parts-f1`, `feat/parts-f2`, `feat/parts-f3`, `feat/parts-f4`, `feat/parts-f5`.
 - **Um commit por tarefa**: `feat(parts): F1.1 registro de sensores` (tipo, escopo `parts` ou `sensors`, ID da tarefa, descrição em português). Correções pedidas na revisão: `fix(parts): F1.1 ajustes da revisão`.
-- Você **pode** commitar e fazer `git push` da branch da fase.
-- Você **não pode**: commitar ou fazer push no `main` ou na `feat/component-health-system`, fazer merge, `push --force`, `reset --hard`, apagar branches, apagar o banco do usuário ou arquivos que não criou.
+- Você **pode** commitar na branch da fase. Push só em modo interativo e se o usuário pedir; quando o Claude te chama, **não faça push**.
+- Você **não pode**: commitar ou fazer push no `main` ou na `feat/component-health-system`, fazer merge, trocar de branch, `push --force`, `reset --hard`, apagar branches, apagar o banco do usuário ou arquivos que não criou.
+- Hooks do git (`.githooks/`) bloqueiam branch protegida, mensagem fora do padrão e force push. Se um hook bloquear, **corrija a causa**: nunca use `--no-verify` e nunca defina `FC_ALLOW_PROTECTED`.
+- Tarefa grande (> ~300 linhas de diff): divida em commits por subtarefa e avise no relatório.
 
 ## 3. Ciclo de cada tarefa
 

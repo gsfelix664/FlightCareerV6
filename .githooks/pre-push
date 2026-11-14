@@ -1,0 +1,21 @@
+#!/bin/sh
+# Bloqueia push em branches protegidas, push --force e exclusão de branch remota.
+. "$(dirname "$0")/_protected.sh"
+zero=0000000000000000000000000000000000000000
+status=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+  branch=${remote_ref#refs/heads/}
+  if [ "$local_sha" = "$zero" ]; then
+    echo "BLOQUEADO: apagar a branch remota '$branch' não é permitido." >&2
+    status=1; continue
+  fi
+  if is_protected "$branch" && [ "$FC_ALLOW_PROTECTED" != "1" ]; then
+    echo "BLOQUEADO: push em '$branch' só com aprovação do revisor/usuário." >&2
+    status=1; continue
+  fi
+  if [ "$remote_sha" != "$zero" ] && ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+    echo "BLOQUEADO: push --force (histórico reescrito) em '$branch'." >&2
+    status=1
+  fi
+done
+exit $status
