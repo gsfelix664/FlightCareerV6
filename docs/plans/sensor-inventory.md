@@ -124,7 +124,7 @@ Convenções:
 | `PARTIAL PANEL ALTIMETER` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL ATTITUDE` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL HEADING` | enum | estado de panes do menu do sim |
-| `WEAR AND TEAR LEVEL`, `WEAR AND TEAR IS WEAK`, `WEAR AND TEAR IS FAILED`, `WEAR AND TEAR OVERSTRESS FACTOR` | percent over 100 / bool | **desgaste nativo do MSFS 2024** (só para detectar se o jogador deixou ligado e avisar) |
+| `WEAR AND TEAR LEVEL`, `WEAR AND TEAR IS WEAK`, `WEAR AND TEAR IS FAILED`, `WEAR AND TEAR OVERSTRESS FACTOR` | percent over 100 / bool | **desgaste nativo do MSFS 2024, fonte da verdade (plano › 0.1).** ⚠️ Exigem ID de componente (0–49) e são só leitura: a leitura atual sem ID está errada; a F1.4b define um sensor por ID |
 
 ## 6. Elétrico
 

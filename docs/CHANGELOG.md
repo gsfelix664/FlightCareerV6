@@ -1326,3 +1326,8 @@
 - `tools/tests/test_analyze_sensor_log.py`: suite de testes unitários com `unittest` cobrindo colunas constantes e vazias (Não suportado), colunas esperadas com reação (Validado), colunas esperadas sem reação na janela (Revisar), descarte de colunas `pad-*`, mapeamento de sufixos `:n` de motor para o grupo do registro, parse de marcadores com vírgula (RFC 4180), concatenação cronológica de múltiplos arquivos e integridade referencial com o registro. 9 testes passando.
 - Teste de fumaça executado com sucesso sobre os logs reais do Cessna C152 gerando relatório de 186 sensores (66 validados, 8 para revisar e 112 não suportados).
 - Não testado no MSFS (os voos da matriz A–I dependem da execução do usuário no simulador).
+
+## 2026-11-14 - Wear and tear nativo como fonte da verdade (plano) (Claude)
+- Decisão do usuário: o wear and tear do MSFS 2024 fica ligado; o addon aplica no Hangar o delta de cada voo, persiste as quebras nativas e só desgasta/sorteia o que o nativo não cobre, com fallback completo em aviões sem wear and tear. Registrada em `pecas-desgaste-falhas.md` › 0.1, com ajustes em F2.2, F2.3, F4.1 e nos riscos.
+- Nova tarefa F1.4b 🔒 (antes dos voos da matriz e da Fase 2): inventário do wear and tear nativo por componente (as SimVars `WEAR AND TEAR *` exigem ID 0–49 e são só leitura; o registro atual lê sem ID), voos de comparação (reinício, opção desligada, `.FLT`).
+- `AGENTS.md` › 6, `sensor-inventory.md` e `ROTEIRO.md` deixam de mandar desligar o desgaste nativo. Nenhum código mudou.

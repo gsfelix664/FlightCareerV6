@@ -18,10 +18,24 @@ incompleto, o executor pergunta (no relatório de revisão); não improvisa.
 5. **Walkaround** antes do voo, grátis: só peças **visíveis**; as com < 40% ganham **exclamação amarela**.
 6. **Revisão (50 h, 100 h, 500 h, TBO e revisão geral) só inspeciona:** cobra um valor e entrega a lista de peças com < 40%, que ganham **exclamação amarela**. A revisão **não troca nada sozinha**.
 7. **Para liberar uma revisão vencida**, o piloto precisa **trocar todas as peças do pacote** daquela revisão (ex.: 50 h = óleo + filtro). Só então a aeronave é liberada para voo. Trocar as outras peças sinalizadas é opcional.
-8. **< 30%**: começam os **break checks** a cada 10 min de voo (tempo simulado), com chance maior quanto menor a saúde.
+8. **< 30%**: começam os **break checks** a cada 10 min de voo (tempo simulado), com chance maior quanto menor a saúde. **Só no modo fallback** (ver 0.1): com o wear and tear nativo ativo, quem decide a quebra das peças que ele monitora é o MSFS.
 9. **Break check falhou** → peça **vermelha, BROKEN**. Se for peça que impede o voo, o addon envia a pane ao simulador e a mantém (NO-GO): mesmo que a missão seja iniciada, a aeronave não funciona.
 10. **Peça nova:** chance muito baixa de quebrar nas primeiras X horas (mortalidade infantil).
 11. Amarelo só existe quando algo foi **descoberto**. Peça a 25% nunca inspecionada continua verde. Isso é intencional.
+
+## 0.1 Wear and tear nativo do MSFS 2024 é a fonte da verdade (decisão do usuário, 2026-11-14)
+
+Substitui a regra antiga "o jogador deve desligar o desgaste nativo". O jogador **mantém o wear and tear ligado** (padrão do jogo) e o addon **complementa**.
+
+1. **Dono da verdade:** nos componentes que o wear and tear nativo monitora, só o dado dele alimenta o desgaste do Hangar. O addon pode gravar temperaturas e outros sensores desses componentes para log, mas **não** desgasta nem sorteia quebra por eles.
+2. **Delta por voo:** no voo livre o MSFS começa cada voo com o avião novo (a confirmar na F1.4b). No início do voo o addon guarda o nível de cada componente nativo (base); durante o voo aplica no Hangar `base − atual` (incremental, salvo a cada 60 s e no fim). Nível que **sobe** (voo reiniciado, reparo no sim) não credita nada: só move a base. Ex.: motor 100% → 98% no voo 1 = Hangar 100 → 98; voo 2 começa em 100% de novo, cai para 98% = Hangar 98 → 96.
+3. **Quebras:** se o nativo reporta pane/quebra (`WEAR AND TEAR IS FAILED`, `ENG FAILED`, dano por velocidade etc.), o addon registra a discrepância e a mantém entre voos (sistema de panes persistentes que já existe). O addon **não** roda break check para esses componentes.
+4. **Complemento:** o addon só desgasta e só sorteia quebra (break check, mortalidade infantil, eventos externos, envelhecimento por horas/ciclos, manutenção vencida, TBO) no que o nativo **não** monitora nem reporta.
+5. **Fallback:** avião sem wear and tear (aviões de 2020, que o MSFS 2024 desativa, ou `gameplay.cfg` com `inhibitAll`/`inhibitCategory`) → o addon assume tudo, imitando o nativo (mesma escala, break check, quebra).
+6. **Chave anti-trapaça (opcional, configurável):** o addon só funciona em modo carreira se detectar o wear and tear ativo. Como detectar está em aberto (F1.4b): não há SimVar documentada da opção do menu.
+7. **Escala:** alinhar com o nativo (0–1 por componente). Quanto vale 1% nativo no Hangar fica no JSON, por componente (padrão 1:1).
+8. **Desempenho:** o addon não consegue escrever o desgaste de volta (as SimVars `WEAR AND TEAR *` são só leitura). A F1.4b confere se o nativo reduz desempenho; se reduzir, o efeito se perde ao reiniciar o voo.
+9. **Persistência pelo simulador (a investigar):** relatos de usuários dizem que um `.FLT` salvo pelo EFB guarda o wear and tear (texto legível; avatar dentro do avião; às vezes precisa carregar duas vezes). `SimConnect_FlightSave` existe, mas o SDK marca o status como "NO ERROR, NO RESPONSE". Se funcionar, o addon pode salvar/carregar o estado do avião entre voos.
 
 ## 1. Padrões obrigatórios (todas as tarefas)
 
@@ -86,6 +100,15 @@ Script `tools/analyze_sensor_log.py` (Python + pandas): para cada coluna, mín, 
 Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado / Inválido / Não suportado**.
 **Portão:** o revisor aprova. Sensor não validado não entra nas fases seguintes.
 
+### F1.4b 🔒 Inventário do wear and tear nativo (antes dos voos da matriz e de qualquer tarefa da Fase 2)
+Objetivo: saber **o que o wear and tear conta para o addon** — quais componentes ele monitora, quanto desgasta por voo e quando quebra.
+- **Fato do SDK:** `WEAR AND TEAR LEVEL`, `IS WEAK`, `IS FAILED`, `WEAK VALUE`, `OVERSTRESS FACTOR` e `OVERSTRESS DAMAGE RATE` exigem **ID de componente** (0 FUEL TANK … 39 PISTON ENGINE, 40 TURBINE_ENGINE, 41/42 óleo … 49 TAILWHEEL TIRE PRESSURE; lista completa na página "Aircraft Miscellaneous Variables" do SDK 2024) e, opcional, o índice (ex.: motor 2). São só leitura. Também existem `WEAR AND TEAR EXPOSED PARTS LEVEL` / `LOWEST LEVEL` (sem ID). O `sensor_registry.json` atual lê `WEAR AND TEAR *` **sem ID**: corrigir.
+- **Spike:** descobrir a sintaxe que o `AddToDataDefinition` aceita para ID + índice (`WEAR AND TEAR LEVEL:39`? nome? índice do motor?). Testar no MSFS com o C152; o log de `NAME_UNRECOGNIZED` mostra o que for rejeitado.
+- Registrar no inventário e no registro um sensor por (variável × ID) aplicável — grupo novo `native-wear` — e gravar com o `SensorRecorder` (o layout já pagina blocos de 256).
+- **Voos do usuário (C152 primeiro, depois um avião de cada tipo da matriz que ele tiver):** (a) voo com estresse forte (roteiro F1.4); (b) reiniciar o voo e ver se tudo volta a 100%; (c) o mesmo voo curto com a opção de wear and tear do MSFS **desligada**, para achar um sinal que diga se ela está ligada (chave anti-trapaça); (d) se der: salvar um `.FLT` pelo EFB, recarregar e ver se o desgaste volta.
+- Saída: `docs/plans/sensor-validation/native-wear-<modelo>.md` com: componentes que respondem por avião, delta por voo, valor em que `IS WEAK`/`IS FAILED` liga (o usuário observou break check abaixo de ~10%: confirmar), se há perda de desempenho, se reinicia em 100%, como detectar a opção ligada e o resultado do `.FLT`.
+- **Portão:** o revisor e o usuário decidem a tabela "componente nativo → componente/peça do addon" e quais peças ficam com o addon (complemento). Isso alimenta F2.1 e F2.2.
+
 ---
 
 ## FASE 2 — Peças e desgaste (normal × overstress)
@@ -98,10 +121,12 @@ Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado
 - Teste: IDs únicos; cada tipo A–I tem um conjunto coerente (carburado tem carburador, jato não tem magneto etc.).
 
 ### F2.2 🔒 Mapa sensor → estresse → peça
+- **Regra 0.1:** peça coberta pelo wear and tear nativo usa o delta nativo (`nativeComponent` + fator no JSON) e **não** tem regra de estresse do addon; as regras abaixo valem só para as peças do complemento e para o modo fallback.
 - `Infrastructure/Data/wear_rules.json`. Cada regra: `id`, `sensors`, faixas verde/amarela/vermelha (limites por tipo e por modelo, reaproveitando `aircraftOverrides`), `parts` com `multiplierYellow` / `multiplierRed`, ou `damagePerEvent` (toque, partida, ciclo de trem, ciclo de pressurização).
 - O executor propõe a tabela com justificativa (manual do fabricante / POH quando houver); o revisor aprova antes do código.
 
 ### F2.3 Motor de desgaste por peça
+- Dois caminhos: `ApplyNativeDelta(parts, baseLevels, currentLevels)` para as peças cobertas pelo nativo (delta por voo, nível que sobe só move a base) e o desgaste próprio (abaixo) para o complemento e o fallback. Teste: nível 1,00 → 0,98 tira 2 pontos da peça; recarga para 1,00 não devolve nada; peça coberta não recebe desgaste próprio.
 - `Domain/Parts/PartWearEngine.cs`: `ApplyTick(parts, SensorFrame, dtSimHours)` e `ApplyEvent(...)`.
 - Normal: `100% → ~30%` ao longo da `LifeHours` (ou `LifeCycles`). Estresse: `normal × maior multiplicador ativo` + dano por evento.
 - Excedências → blackbox (sem janela modal em voo).
@@ -137,6 +162,7 @@ Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado
 ## FASE 4 — Panes
 
 ### F4.1 Break check
+- **Só para peças do complemento e para o modo fallback.** Peça coberta pelo nativo quebra quando o MSFS reporta (`WEAR AND TEAR IS FAILED` / pane nativa), sem sorteio do addon.
 - `Domain/Parts/BreakCheckEngine.cs`: a cada 10 min simulados com `Health < 30`: `p = pMax · ((30 − h) / 30)^k` (JSON, global com override por peça).
 - Mortalidade infantil: `HoursSinceReplacement < infantHours` → `infantChancePer10Min`.
 - Teste Monte Carlo (100 mil, semente fixa): 29%, 20%, 10%, 0% dentro de ±10% da fórmula; 31% = zero.
@@ -162,7 +188,7 @@ Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado
 
 ## Riscos conhecidos
 1. Nem todo avião simula tudo (bateria, sucção, temperatura de freio). Por isso a validação é por tipo.
-2. O desgaste nativo do MSFS 2024 deve ficar desligado; o app pode ler `WEAR AND TEAR LEVEL` para avisar o jogador.
+2. O wear and tear nativo fica **ligado** (regra 0.1). Riscos: sintaxe do ID de componente no SimConnect, aviões sem suporte (fallback) e não haver sinal confiável de que a opção está ligada (chave anti-trapaça).
 3. Os índices `:N` mudam por avião; nunca assumir 1 motor.
 
 ## Diário de execução

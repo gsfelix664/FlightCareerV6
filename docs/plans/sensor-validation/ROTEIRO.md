@@ -6,7 +6,7 @@ Este documento é o guia de voo para o piloto validar a telemetria do simulador 
 
 ## 1. Preparação Pré-Voo
 
-- [ ] **Desligar o estresse nativo do simulador:** No menu do MSFS, vá em *Opções Gerais / Opções de Assistência > Falhas e Danos* e configure **Danos por Estresse da Aeronave (Aircraft Stress Damage) = DESLIGADO**. O FlightCareer é a fonte de verdade do desgaste estrutural; manter essa opção ligada gera panes duplicadas ou encerramentos abruptos pelo simulador.
+- [ ] **Wear and tear do MSFS ligado** (padrão do jogo; decisão de 2026-11-14, plano › 0.1). O addon lê o desgaste nativo e complementa. Só desligue no voo de comparação da F1.4b.
 - [ ] **Iniciar o FlightCareer e o Simulador:** Conecte o FlightCareer ao MSFS e carregue o voo na posição de pátio (Cold & Dark).
 - [ ] **Ligar gravação de sensores:** No HUD Overlay do FlightCareer, clique no botão **REC** para iniciar o `SensorRecorder`. Confirme que o indicador exibe gravação ativa.
 - [ ] **Localização dos arquivos:** Os dados brutos são gravados em `$env:LOCALAPPDATA\FlightCareer\sensor-logs\` (ou `%LocalAppData%\FlightCareer\sensor-logs\` no cmd) nos formatos `AAAAMMDD-HHMM-<TITULO>.csv` e `...-context.json`.
