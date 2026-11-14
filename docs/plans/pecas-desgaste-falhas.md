@@ -196,9 +196,20 @@ Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar
 
 ### F4.1 Break check
 - Vale para todas as peças (regra 0.1). Pane nativa da mesma peça (`IS FAILED` / pane do sim) também quebra a peça: a que vier primeiro.
-- `Domain/Parts/BreakCheckEngine.cs`: a cada 10 min simulados com `Health < 30`: `p = pMax · ((30 − h) / 30)^k` (JSON, global com override por peça).
+- `Domain/Parts/BreakCheckEngine.cs`: a cada 10 min simulados com `Health < 30`, um sorteio por peça com **curva linear (decisão do usuário, 2026-11-14)**: `p = clamp((30 − h) / 30, 0, 1)` (remap linear inverso). Cada 1% de saúde abaixo de 30% soma ~3,33% de chance por sorteio.
+
+  | Saúde | Chance por sorteio (10 min simulados) |
+  |---|---|
+  | ≥ 30% | 0% (zona segura) |
+  | 29% | 3,33% |
+  | 25% | 16,67% |
+  | 15% | 50,00% |
+  | 5% | 83,33% |
+  | 0% | 100% (quebra garantida) |
+
+  No JSON: `breakCheck.thresholdHealth = 30`, `breakCheck.intervalSimMinutes = 10`, `breakCheck.maxChance = 1.0` (override por peça permitido). O intervalo é contado em **tempo simulado acumulado** (`SimTimeStep`); o sorteio acontece cada vez que o acumulado passa de 10 min, nunca por pacote de telemetria. O acumulado zera no início de cada voo.
 - Mortalidade infantil: `HoursSinceReplacement < infantHours` → `infantChancePer10Min`.
-- Teste Monte Carlo (100 mil, semente fixa): 29%, 20%, 10%, 0% dentro de ±10% da fórmula; 31% = zero.
+- Testes: fórmula exata nos pontos da tabela (30 → 0; 29 → 0,0333; 25 → 0,1667; 15 → 0,5; 5 → 0,8333; 0 → 1; 31 e 100 → 0; saúde negativa → 1); Monte Carlo (100 mil, semente fixa) a 29%, 20%, 10% dentro de ±10% da fórmula; 0% quebra em todos os sorteios; 9 min simulados não sorteiam, 10 min sorteiam uma vez, 25 min sorteiam duas; a 16× o número de sorteios por hora simulada é o mesmo que a 1×.
 
 ### F4.2 Efeito da quebra
 - Cada peça tem `BrokenEffect` (`FailureEffect`). Quebra → `SimFailureActuator` aplica o efeito e `PersistentFailureService.Record` grava a discrepância (NO-GO se `BlocksFlightWhenBroken`). Os dois já existem.
