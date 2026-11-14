@@ -150,6 +150,8 @@ namespace FlightCareer.UI
 
             services.AddSingleton<SimConnectService>();
             services.AddSingleton<SensorFrameReader>();
+            services.AddSingleton<ContextSnapshotReader>();
+            services.AddSingleton<SensorRecorder>();
             services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>());
             services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
                 sp.GetRequiredService<SimConnectService>(),

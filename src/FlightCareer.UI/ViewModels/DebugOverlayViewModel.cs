@@ -14,6 +14,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly SimConnectService _simConnect;
         private readonly FlightMonitor _flightMonitor;
         private readonly HangarViewModel _hangarViewModel;
+        private readonly SensorRecorder _sensorRecorder;
         private readonly AppDbContext? _context;
 
         // --- CONTROLES DE JANELA (HUD OVERLAY) ---
@@ -104,13 +105,24 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private string _crashText = "0 (NORMAL)";
         [ObservableProperty] private string _crashTextColor = "#00E676";
 
+        // --- GRAVADOR DE VALIDAÇÃO DE SENSORES (F1.3) ---
+        [ObservableProperty] private bool _isRecording = false;
+        [ObservableProperty] private string _recordingStatus = "PARADO";
+        [ObservableProperty] private string _markerText = string.Empty;
+
         public event Action? RequestClose;
 
-        public DebugOverlayViewModel(SimConnectService simConnect, FlightMonitor flightMonitor, HangarViewModel hangarViewModel, AppDbContext? context = null)
+        public DebugOverlayViewModel(
+            SimConnectService simConnect,
+            FlightMonitor flightMonitor,
+            HangarViewModel hangarViewModel,
+            SensorRecorder sensorRecorder,
+            AppDbContext? context = null)
         {
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
             _hangarViewModel = hangarViewModel;
+            _sensorRecorder = sensorRecorder;
             _context = context;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
@@ -274,6 +286,16 @@ namespace FlightCareer.UI.ViewModels
                     FlightPhase = _flightMonitor.CurrentStatus;
                     UpdateFlightPhaseColor();
                 }
+
+                if (_sensorRecorder.IsRecording)
+                {
+                    IsRecording = true;
+                    RecordingStatus = $"REC {_sensorRecorder.RowsWritten} lin";
+                }
+                else if (!IsRecording && _sensorRecorder.LastError != null)
+                {
+                    RecordingStatus = $"ERRO: {_sensorRecorder.LastError}";
+                }
             });
         }
 
@@ -363,6 +385,45 @@ namespace FlightCareer.UI.ViewModels
         private void Close()
         {
             RequestClose?.Invoke();
+        }
+
+        [RelayCommand]
+        private async Task ToggleRecording()
+        {
+            if (_sensorRecorder.IsRecording)
+            {
+                _sensorRecorder.Stop();
+                IsRecording = false;
+                RecordingStatus = "PARADO";
+            }
+            else
+            {
+                RecordingStatus = "INICIANDO...";
+                await _sensorRecorder.StartAsync();
+                IsRecording = _sensorRecorder.IsRecording;
+                if (IsRecording)
+                {
+                    RecordingStatus = $"REC {_sensorRecorder.RowsWritten} lin";
+                }
+                else if (_sensorRecorder.LastError != null)
+                {
+                    RecordingStatus = $"ERRO: {_sensorRecorder.LastError}";
+                }
+                else
+                {
+                    RecordingStatus = "PARADO";
+                }
+            }
+        }
+
+        [RelayCommand]
+        private void MarkEvent()
+        {
+            if (!string.IsNullOrWhiteSpace(MarkerText))
+            {
+                _sensorRecorder.Mark(MarkerText);
+                MarkerText = string.Empty;
+            }
         }
     }
 }
