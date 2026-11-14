@@ -169,4 +169,5 @@ Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado
 (O executor acrescenta aqui uma linha por tarefa: ID, data, status, link do relatório de revisão.)
 - F1.1 · 2026-11-14 · PRONTO · [Relatório](docs/reviews/F1.1-relatorio.md) · branch feat/parts-f1
 - F1.2 · 2026-11-14 · PRONTO · [Relatório](docs/reviews/F1.2-relatorio.md) · branch feat/parts-f1
+- F1.2b · 2026-11-14 · PRONTO · [Relatório](docs/reviews/F1.2b-relatorio.md) · branch feat/parts-f1
 - F1.3 · 2026-11-14 · PRONTO · [Relatório](docs/reviews/F1.3-relatorio.md) · branch feat/parts-f1

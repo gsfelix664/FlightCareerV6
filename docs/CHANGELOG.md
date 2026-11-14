@@ -1300,4 +1300,10 @@
 - Registro singleton de `ContextSnapshotReader` e `SensorRecorder` em `App.xaml.cs` (diff de 2 linhas). Nenhuma alteração em `SimConnectService.cs`/`SimTelemetry.cs`.
 - Não testado no MSFS.
 
+## 2026-11-14 - F1.2b Pacote de tamanho fixo e nomes reais de SimVars (Gemini)
+- Preenchimento determinístico de blocos até 256 doubles implementado em `SensorLayout.cs` com constantes `PaddingSimVar`, `PaddingUnit`, `PaddingKeyPrefix` e método `RegistrationSlots(int blockIndex)`.
+- `SensorFrameReader.cs` e `ContextSnapshotReader.cs` atualizados para registrar definições no SimConnect sempre com exatamente 256 datums usando `RegistrationSlots`, evitando exceção `0xc0000005` (access violation) no marshaling nativo do SimConnect gerenciado; slots de preenchimento (`pad-`) ignorados em `_sendIdToSimVar`.
+- Nomes reais de SimVars aplicados em `docs/plans/sensor-inventory.md` e `sensor_registry.json`: `RECIP ENG RIGHT MAGNETO` unificado, 9 variáveis individuais de partial panel (`dmg-partial-panel-<nome>`), remoção de `BREAKER <nome>`, divisão de flaps de bordo de fuga esquerdo/direito e divisão de acelerações no eixo do corpo (X, Y e Z).
+- 4 novos testes unitários adicionados (`RegistrationSlots_PadsToBlockSize`, `RegistrationSlots_FullBlock_HasNoPadding`, `Map_NeverReturnsPaddingKeys` em `SensorLayoutTests.cs` e `Registry_NoSimVarHasPlaceholderOrSlash` em `SensorRegistryTests.cs`), com 125 testes passando no total. Não testado no MSFS.
+
 
