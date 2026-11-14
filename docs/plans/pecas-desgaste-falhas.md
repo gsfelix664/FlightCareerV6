@@ -23,18 +23,27 @@ incompleto, o executor pergunta (no relatório de revisão); não improvisa.
 10. **Peça nova:** chance muito baixa de quebrar nas primeiras X horas (mortalidade infantil).
 11. Amarelo só existe quando algo foi **descoberto**. Peça a 25% nunca inspecionada continua verde. Isso é intencional.
 
-## 0.1 Wear and tear nativo: ligado, como sensor de panes e de estresse; o addon é o motor de desgaste (decisão do usuário, 2026-11-14)
+## 0.1 Wear and tear nativo: ligado; o addon calcula o desgaste e o nativo avisa overstress e eventos (decisão do usuário, 2026-11-14, versão final)
 
-Substitui a regra antiga "o jogador deve desligar o desgaste nativo" e a versão anterior desta seção ("nativo como fonte da verdade do desgaste", descartada depois do voo F1.4b do C152: o nativo zera a cada voo e também depois de um impacto forte, não aceita escrita e, por voo, quase nunca chega a quebrar).
+Substitui a regra antiga "o jogador deve desligar o desgaste nativo" e as versões anteriores desta seção ("nativo como fonte da verdade do desgaste", descartada depois do voo F1.4b do C152: o nativo zera a cada voo e também depois de um impacto forte, não aceita escrita e, por voo, quase nunca chega a quebrar; e "nativo só como fonte de eventos", trocada por esta).
 
 1. **O jogador mantém o wear and tear ligado** (padrão do jogo). O addon funciona igual com ele desligado.
-2. **Motor de desgaste = addon, sozinho.** A saúde das peças no Hangar só muda pelo desgaste do addon (normal + estresse + eventos), acumulado entre voos. O **nível** nativo (`WEAR AND TEAR LEVEL`) não alimenta o Hangar: fica só no log.
-3. **Nativo como sensor de estresse:** `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` diz "este componente está sendo abusado agora, pelos limites do CFG deste avião". É entrada do motor de desgaste do addon (multiplicador de estresse por peça), ao lado dos sensores próprios (CHT, G, pouso…). Vantagens: calibração por avião sem `aircraftOverrides` para cada modelo; é instantânea (reinícios e "consertos" do nativo não atrapalham); continua reportando com a opção desligada (voo F1.4b). Sem ela (avião sem wear and tear), valem só os sensores e limites do addon.
+2. **Quem calcula a % é sempre o addon.** A saúde das peças no Hangar só muda pelo motor de desgaste do addon (sensores próprios: RPM, CHT, EGT, G, razão de toque, frenagem, velocidade com flap/trem, horas e ciclos), acumulada entre voos. O **nível** nativo (`WEAR AND TEAR LEVEL`) nunca entra no Hangar; fica só no log, para calibração (F1.4c).
+3. **Taxas: o addon define tudo; o nativo substitui só o overstress quando acusa (decisão do usuário, versão final).** O addon define para qualquer avião a taxa normal (vida útil de carreira, o mais próxima do real) e a de estresse (sensores próprios). Quando `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` está acima do limiar do componente, a **taxa do nativo** convertida (`taxa × nativeRateToLossPerHour`, teto `maxNativeLossPerHour`) **substitui** a taxa de estresse do addon naquele componente. Regras:
+   - **uma fonte por vez, nunca a soma:** nativo acima do limiar → taxa do nativo; nativo em 0 (ou abaixo do limiar) e addon vendo abuso por um sensor que o nativo não modela (shock cooling, mistura, CHT…) → taxa do addon; o desgaste normal é sempre do addon;
+   - a taxa nativa é usada **sempre que for reportada**, com a opção de wear and tear ligada ou desligada (no voo F1.4b a taxa continuou reportando com a opção desligada); só o nível nativo é ignorado;
+   - **as taxas de estresse do addon são calibradas para o nativo** (F1.4c): o mesmo abuso tem que custar parecido em avião Asobo e de terceiros. Motivo: se o nativo está em overstress, em poucos minutos ele quebra a peça no sim (`IS FAILED` → pane no addon); o desgaste do addon tem que acompanhar, para a % no Hangar chegar perto do mínimo junto com a pane, e não continuar alta;
+   - o fator começa como **conversão pura de unidade** (mesma velocidade do nativo, sem escala, como o usuário pediu); a F1.4c confirma a unidade (integral da taxa no trecho ≈ queda do nível nativo) e o usuário decide se ajusta. Teto por componente no JSON (`maxNativeLossPerHour`) protege contra valores absurdos ou mudança da fórmula num update do MSFS;
+   - componente com status **Ativo** na tabela (`native-wear-mapping.md`) usa o sinal; **Observar** só grava no log;
+   - as SimVars do nativo ficam numa **definição de dados separada** do `SimTelemetry` (nome rejeitado não desloca a telemetria principal), lidas em frequência baixa;
+   - todo overstress nativo vai para o **log detalhado** do voo (blackbox), com componente, início, fim e duração ("overstress detectado pelo simulador: motor, 42 s"), para o piloto saber o que aconteceu.
+   - Avião sem wear and tear ou de terceiros (taxa sempre 0): vale só o addon, com as taxas calibradas.
+3a. **O nativo informa eventos:** quando o wear and tear do MSFS, rodando por conta própria, deixa um componente **fraco** (`WEAR AND TEAR IS WEAK:<id>` 0 → 1) ou **quebrado** (`IS FAILED:<id>` 0 → 1), o addon percebe e aplica **por cima** do desgaste que já fez: fraco = dano de desgaste na peça; quebrado = pane (discrepância). Tabela em `sensor-validation/native-wear-mapping.md`. **Hoje o addon ainda não lê essas flags em voo** (só o `SensorRecorder` grava, com REC ligado): a leitura entra na definição separada da regra 3 e o tratamento na F4.
 4. **Panes: vale a que vier primeiro, das duas fontes.**
    - Pane gerada pelo **addon** (break check abaixo de 30%, mortalidade infantil, eventos externos) → discrepância no Hangar e efeito forçado no sim (já existe).
    - Pane gerada pelo **nativo** (`WEAR AND TEAR IS FAILED:<id>`, `ENG FAILED`, fogo, dano de flap/trem por velocidade, freios, `CRASH FLAG`) → também vira discrepância no Hangar, origem `Native`, e persiste entre voos (o `PersistentFailureService` reaplica depois do reinício, quando o MSFS já esqueceu).
    - A mesma peça não gera duas discrepâncias abertas: se já há uma aberta para ela, a segunda fonte só é registrada no blackbox.
-   - Pane nativa **não** aplica dano extra de desgaste à peça (o desgaste é só do addon); ela marca a peça como quebrada (`IsBroken`), como a pane do addon.
+   - Pane nativa (`IS FAILED`) marca a peça como quebrada (`IsBroken`), como a pane do addon, e limita a saúde dela ao valor do JSON (`nativeFailedHealthCap`). Peça fraca (`IS WEAK`) recebe o dano do JSON (`nativeWeakHealthCap`). Um evento de cada tipo por peça por voo.
 5. **Impacto/pouso duro:** o nativo volta a 100% depois de uma pancada (voo F1.4b: 60,9 ft/s, 11,8 G). O addon detecta pela própria telemetria (pouso duro, perda total do `FlightMonitor`) e aplica dano ou GROUNDED; reiniciar o voo no sim não libera o avião (o `StartMonitoring` bloqueia NO-GO).
 6. **Escrita no nativo:** impossível (as SimVars `WEAR AND TEAR *` são só leitura no SDK). O Hangar e o nativo podem divergir; o efeito das panes do addon é forçado pelos meios que já existem (eventos do SDK e watchdog).
 7. **Persistência pelo simulador (`.FLT`):** fora do caminho crítico. No voo F1.4b o EFB não salvou o `.flt` (é preciso digitar o nome com a extensão entre aspas); só investigar se virar necessidade.
@@ -103,17 +112,38 @@ Saída: `docs/plans/sensor-validation/<tipo>-<modelo>.md`, com tabela **Validado
 **Portão:** o revisor aprova. Sensor não validado não entra nas fases seguintes.
 
 ### F1.4b 🔒 Inventário do wear and tear nativo (antes dos voos da matriz e de qualquer tarefa da Fase 2)
-Objetivo: saber **o que o wear and tear conta para o addon** — quais componentes têm overstress e em que situação, e quais panes ele gera (regra 0.1). Preparação concluída e primeiro voo do C152 feito (ver `sensor-validation/native-wear-C152.md`).
+Objetivo: saber **o que o wear and tear conta para o addon** — em que situação cada componente fica fraco ou quebrado e que pane isso vira (regra 0.1). Preparação concluída e primeiro voo do C152 feito (ver `sensor-validation/native-wear-C152.md`).
 - **Fato do SDK:** `WEAR AND TEAR LEVEL`, `IS WEAK`, `IS FAILED`, `WEAK VALUE`, `OVERSTRESS FACTOR` e `OVERSTRESS DAMAGE RATE` exigem **ID de componente** (0 FUEL TANK … 39 PISTON ENGINE, 40 TURBINE_ENGINE, 41/42 óleo … 49 TAILWHEEL TIRE PRESSURE; lista completa na página "Aircraft Miscellaneous Variables" do SDK 2024) e, opcional, o índice (ex.: motor 2). São só leitura. Também existem `WEAR AND TEAR EXPOSED PARTS LEVEL` / `LOWEST LEVEL` (sem ID). O `sensor_registry.json` atual lê `WEAR AND TEAR *` **sem ID**: corrigir.
 - **Spike:** descobrir a sintaxe que o `AddToDataDefinition` aceita para ID + índice (`WEAR AND TEAR LEVEL:39`? nome? índice do motor?). Testar no MSFS com o C152; o log de `NAME_UNRECOGNIZED` mostra o que for rejeitado.
 - Registrar no inventário e no registro um sensor por (variável × ID) aplicável — grupo novo `native-wear` — e gravar com o `SensorRecorder` (o layout já pagina blocos de 256).
 - **Voos do usuário (C152 primeiro, depois um avião de cada tipo da matriz que ele tiver):** (a) voo com estresse forte (roteiro F1.4); (b) reiniciar o voo e ver se tudo volta a 100%; (c) o mesmo voo curto com a opção de wear and tear do MSFS **desligada**, para achar um sinal que diga se ela está ligada (chave anti-trapaça); (d) se der: salvar um `.FLT` pelo EFB, recarregar e ver se o desgaste volta.
 - Saída: `docs/plans/sensor-validation/native-wear-<modelo>.md` com: componentes que respondem por avião, delta por voo, valor em que `IS WEAK`/`IS FAILED` liga (o usuário observou break check abaixo de ~10%: confirmar), se há perda de desempenho, se reinicia em 100%, como detectar a opção ligada e o resultado do `.FLT`.
-- **Portão:** o revisor e o usuário aprovam a tabela "overstress nativo `<id>` → peça do addon, multiplicador" e "pane nativa → código de discrepância". Isso alimenta F2.1, F2.2 e F4.2.
+- **Portão:** o revisor e o usuário aprovam as tabelas "overstress nativo `<id>` → peça/componente do addon, status e limiar" e "evento nativo `<id>` (fraca/quebrada) → dano ou código de discrepância". Isso alimenta F2.1, F2.2 e F4.2. **Proposta:** `sensor-validation/native-wear-mapping.md` (limites dos eventos aprovados; resto aguardando aprovação). Limiares e fatores definitivos saem da F1.4c.
+
+### F1.4c 🔒 Calibração addon × nativo (o **usuário** voa; o executor prepara o roteiro e o script)
+Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar a **unidade** da taxa nativa e o fator `nativeRateToLossPerHour`; (3) calibrar as taxas do catálogo do addon (aviões **sem** wear and tear) para o mesmo abuso custar parecido com o nativo; (4) decidir quais componentes passam de Observar para Ativo.
+- **Por que precisa de voo:** o nativo não expõe os limites do CFG nem a fórmula. A taxa só é conhecida por medição: em operação normal ela deve ficar em ~0; no abuso, sobe.
+- **Limiar:** por componente, `limiar = max(ruído medido nos trechos normais × 3, 0,0001)`. Ruído = maior taxa vista nos trechos marcados como normais em todos os voos daquele tipo. Se o ruído normal não for ~0 (como pareceu no pneu do C152), o componente fica em Observar até um voo limpo.
+- **Unidade e fator nativo:** em cada trecho de abuso, integrar a taxa nativa no tempo e comparar com a **queda do nível nativo** no mesmo trecho (só quedas; subida = reinício). Se a razão ficar estável (~constante entre trechos), a hipótese "fração do nível por segundo" está confirmada e `nativeRateToLossPerHour = 100 × 3600`. Se não, o componente fica em Observar.
+- **Fator do addon (calibrar o addon para o nativo — decisão do usuário):** comparar a perda que o addon calcula só com os próprios sensores com a perda nativa convertida no mesmo trecho de abuso. Ajustar `redLossPerHour` / `yellowLossPerHour` (e, na Fase 2, `multiplierRed` em `wear_rules.json`) para a razão addon ÷ nativo ficar entre 0,8 e 1,25. Pneus e trem também na **corrida e no pouso normais** (decolagem, pouso de ~300 fpm), em pista **asfaltada** e em **terra**, separadamente.
+- **Roteiro de voo** (novo capítulo em `sensor-validation/ROTEIRO.md`), com REC ligado e marcadores `cal-normal-<trecho>` / `cal-abuso-<componente>`, C152 primeiro em pista asfaltada:
+  1. táxi, decolagem e subida normais; cruzeiro normal 5 min; pouso normal; táxi (base de ruído);
+  2. RPM acima da linha vermelha por 30 s, depois 60 s (motor 39);
+  3. CHT/temperatura do óleo no limite (subida longa em potência máxima e mistura rica errada) (motor 39, óleo 41);
+  4. flap acima da Vfe por 10 s (flaps 5–8);
+  5. curva de 60° e manobra até ~3,5 G (comandos 9–20);
+  6. frenagem forte em velocidade (freios 36, pneus 37);
+  7. pouso firme (~500 fpm) e pouso duro (~700 fpm) (trem 35, pneus 37);
+  8. repetir 1 e 7 em pista de terra;
+  9. **voo longo de overstress** (C152, motor acima da linha vermelha de forma contínua, 15–20 min ou até a pane, em altitude segura): confirmar se `IS WEAK:39` e `IS FAILED:39` ligam, em que nível, depois de quanto tempo, e se o addon (implementação da Fase 2/F4) registrou o evento fraca e a pane. Marcadores `cal-longo-inicio` / `cal-longo-weak` / `cal-longo-pane`.
+  Depois, um avião de cada tipo da matriz que o usuário tiver (prioridade: turboélice, para o 40; bimotor, para o índice do 2º motor; um com freios e hidráulico simulados).
+- **Script:** `tools/analyze_sensor_log.py` ganha `calibration_report`: por componente e trecho marcado, taxa máxima e média, duração em overstress, queda do nível nativo, perda do addon recalculada com o catálogo atual e razão addon ÷ nativo; sugere limiar e fator. Testes em `tools/tests` com logs sintéticos (só biblioteca padrão).
+- **Saída:** `sensor-validation/calibration-<modelo>.md` e a tabela de status/limiar atualizada em `native-wear-mapping.md`.
+- **Portão:** o usuário aprova limiares, fatores e quais componentes ficam Ativo.
 
 ---
 
-## FASE 2 — Peças e desgaste (normal × overstress)
+## FASE 2 — Peças e desgaste (normal × estresse; overstress nativo como acelerador)
 
 ### F2.1 Lista de peças do Hangar
 - `Domain/Parts/PartDefinition.cs` (catálogo): `Id` (ex.: `engine.cylinders`), `Name`, `Group` (agrupador da UI: Motor, Óleo, Ignição, Seção quente, Hélice, Elétrico, Instrumentos, Combustível, Trem, Pneus, Freios, Célula, Hidráulico, Pressurização), `AppliesTo` (tipos A–I / classe de motor / condições como "trem retrátil", "carburado"), `LifeHours`, `LifeCycles?`, `VisibleOnWalkaround`, `BlocksFlightWhenBroken`, `PartPrice`, `LaborHours`.
@@ -123,12 +153,13 @@ Objetivo: saber **o que o wear and tear conta para o addon** — quais component
 - Teste: IDs únicos; cada tipo A–I tem um conjunto coerente (carburado tem carburador, jato não tem magneto etc.).
 
 ### F2.2 🔒 Mapa sensor → estresse → peça
-- **Regra 0.1:** além dos sensores próprios, uma regra pode usar `nativeOverstress: <id>` (taxa `WEAR AND TEAR OVERSTRESS DAMAGE RATE`) como gatilho de estresse; o desgaste continua sendo do addon.
+- **Regra 0.1.3:** além dos sensores próprios, uma regra pode ter `nativeOverstress: <id>` (só componentes Ativo na tabela, com limiar, `nativeRateToLossPerHour` e `maxNativeLossPerHour`). Taxa nativa acima do limiar **substitui** o estresse dos sensores do addon naquele componente; abaixo do limiar, vale o estresse do addon. O nível nativo nunca é usado.
 - `Infrastructure/Data/wear_rules.json`. Cada regra: `id`, `sensors`, faixas verde/amarela/vermelha (limites por tipo e por modelo, reaproveitando `aircraftOverrides`), `parts` com `multiplierYellow` / `multiplierRed`, ou `damagePerEvent` (toque, partida, ciclo de trem, ciclo de pressurização).
 - O executor propõe a tabela com justificativa (manual do fabricante / POH quando houver); o revisor aprova antes do código.
 
 ### F2.3 Motor de desgaste por peça
-- Taxa de overstress nativa > 0 para o `<id>` da regra = faixa de estresse ativa (multiplicador da regra). Teste: overstress do motor ligado 10 min desgasta cilindros ≥ multiplicador × normal; nível nativo voltando a 1,00 não devolve nada (o nível não é lido).
+- Eventos nativos (regra 0.1.3a): `ApplyNativeWeak(part)` limita a saúde a `nativeWeakHealthCap` e `ApplyNativeFailed(part)` a `nativeFailedHealthCap` + `IsBroken` (só baixam, nunca sobem; um de cada por peça por voo). Testes: peça a 80% fica no limite; peça já abaixo não muda; segundo evento no mesmo voo é ignorado; nível nativo não altera nada.
+- Overstress nativo (regra 0.1.3): com taxa nativa > limiar, estresse da peça = `min(taxa × nativeRateToLossPerHour, maxNativeLossPerHour)`; senão, estresse dos sensores do addon. Desgaste normal do addon sempre somado. Testes: taxa 0,0015 por 40 s com fator 360.000 = −6% (≈ 540 %/h × 0,0111 h); RPM vermelho do addon (66 %/h) com nativo convertido 540 %/h → usa 540; addon vermelho (66 %/h) com nativo convertido **menor** que 66 (acima do limiar) → usa o nativo; nativo abaixo do limiar ou componente em Observar → addon; taxa acima do teto → teto; taxa reportada com a opção desligada (nível travado em 1,00) → usa a taxa; avião sem wear and tear (taxa 0) → addon; cada trecho de overstress gera uma linha no blackbox com componente, fonte (simulador/addon), duração e perda.
 - `Domain/Parts/PartWearEngine.cs`: `ApplyTick(parts, SensorFrame, dtSimHours)` e `ApplyEvent(...)`.
 - Normal: `100% → ~30%` ao longo da `LifeHours` (ou `LifeCycles`). Estresse: `normal × maior multiplicador ativo` + dano por evento.
 - Excedências → blackbox (sem janela modal em voo).
@@ -201,3 +232,4 @@ Objetivo: saber **o que o wear and tear conta para o addon** — quais component
 - F1.3 · 2026-11-14 · PRONTO · [Relatório](docs/reviews/F1.3-relatorio.md) · branch feat/parts-f1
 - F1.4 (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4-relatorio.md) · branch feat/parts-f1
 - F1.4b (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4b-relatorio.md) · branch feat/parts-f1
+- F1.4b (tabelas do portão) · 2026-11-14 · PROPOSTA, AGUARDA APROVAÇÃO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md) · branch docs/f1.4b-tabelas-nativo
