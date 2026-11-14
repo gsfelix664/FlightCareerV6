@@ -49,7 +49,7 @@ namespace FlightCareer.Domain.Sensors
                 if (string.IsNullOrWhiteSpace(sensor.SimVar))
                     throw new InvalidDataException($"SimVar da chave '{sensor.Key}' não pode ser vazia.");
 
-                if (sensor.SimVar.Contains(':'))
+                if (sensor.SimVar.Contains(':') && !sensor.SimVar.StartsWith("WEAR AND TEAR", StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException($"SimVar '{sensor.SimVar}' não pode conter ':' (use PerEngine = true em vez de sufixos de índice).");
 
                 if (string.IsNullOrWhiteSpace(sensor.Unit))

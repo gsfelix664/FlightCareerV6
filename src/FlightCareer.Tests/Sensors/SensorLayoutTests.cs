@@ -31,13 +31,14 @@ namespace FlightCareer.Tests.Sensors
         public void Build_OneEngine_HasOneSlotPerSensor()
         {
             var registry = LoadRealRegistry();
-            Assert.Equal(186, registry.Sensors.Count);
+            Assert.Equal(372, registry.Sensors.Count);
 
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 1);
 
-            Assert.Single(layout.Blocks);
-            Assert.Equal(187, layout.Blocks[0].Slots.Count);
-            Assert.Equal(187, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(2, layout.Blocks.Count);
+            Assert.Equal(373, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(256, layout.Blocks[0].Slots.Count);
+            Assert.Equal(117, layout.Blocks[1].Slots.Count);
         }
 
         [Fact]
@@ -46,15 +47,18 @@ namespace FlightCareer.Tests.Sensors
             var registry = LoadRealRegistry();
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 4, blockSize: 256);
 
-            // 1 reservado (SIMULATION RATE) + 108 sensores globais + 78 sensores PerEngine * 4 = 1 + 108 + 312 = 421 slots
-            Assert.Equal(421, layout.Blocks.Sum(b => b.Slots.Count));
-            Assert.Equal(2, layout.Blocks.Count);
+            // 1 reservado (SIMULATION RATE) + 294 sensores globais + 78 sensores PerEngine * 4 = 1 + 294 + 312 = 607 slots
+            Assert.Equal(607, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(3, layout.Blocks.Count);
 
             Assert.Equal(0, layout.Blocks[0].Index);
             Assert.Equal(256, layout.Blocks[0].Slots.Count);
 
             Assert.Equal(1, layout.Blocks[1].Index);
-            Assert.Equal(165, layout.Blocks[1].Slots.Count);
+            Assert.Equal(256, layout.Blocks[1].Slots.Count);
+
+            Assert.Equal(2, layout.Blocks[2].Index);
+            Assert.Equal(95, layout.Blocks[2].Slots.Count);
         }
 
         [Fact]
