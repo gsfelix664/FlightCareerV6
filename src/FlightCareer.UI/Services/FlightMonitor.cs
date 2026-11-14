@@ -512,14 +512,11 @@ namespace FlightCareer.UI.Services
             double dt = _lastTick == DateTime.MinValue ? 0 : (now - _lastTick).TotalSeconds;
             _lastTick = now;
 
-            if (dt < 0) dt = 0;
-            if (dt > 1.0) dt = 1.0;
-
             bool isPaused = data.IsEngineRunning && data.GroundSpeed == 0 && data.EngineRPM == 0;
-            if (!isPaused && dt > 0)
+            if (!isPaused)
             {
-                double simRate = data.SimulationRate > 0 ? data.SimulationRate : 1.0;
-                _simulatedFlightTimeSeconds += dt * simRate;
+                // Salto (pausa/travamento) limitado no tempo real, antes do sim rate (antes cortava em 1 s por pacote)
+                _simulatedFlightTimeSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
             }
 
             // Panes nativas do MSFS (ENG FAILED, fogo, dano de motor/flap/trem, freios, vácuo) são detectadas pelo
@@ -552,12 +549,12 @@ namespace FlightCareer.UI.Services
                 _lastDatabaseUpdate = DateTime.Now;
             }
 
-            // Processar Desgaste e Falhas a cada 1 segundo
+            // Processar Desgaste e Falhas a cada pacote de telemetria
             if (_aircraft != null)
             {
-                double deltaHours = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalHours;
-                // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), não tempo de parede
-                deltaHours *= data.SimulationRate > 0 ? data.SimulationRate : 1.0;
+                double wallSeconds = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalSeconds;
+                // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), com o salto limitado no tempo real
+                double deltaHours = SimTimeStep.ToSimHours(wallSeconds, data.SimulationRate);
                 _failures.ProcessTick(data, deltaHours);
                 SyncLegacyConditions();
 

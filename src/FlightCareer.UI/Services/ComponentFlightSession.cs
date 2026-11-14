@@ -97,7 +97,8 @@ namespace FlightCareer.UI.Services
         public void ProcessTick(SimTelemetry data, double dtHours)
         {
             if (_wear == null || _failures == null || _external == null || _components.Count == 0) return;
-            dtHours = Math.Clamp(dtHours, 0.0, 0.005); // Proteção contra saltos (pausa, travamento)
+            // Pausa/travamento já são limitados no tempo real pelo chamador (SimTimeStep); aqui só a trava de sanidade
+            dtHours = Math.Clamp(dtHours, 0.0, SimTimeStep.MaxSimHoursPerTick);
             if (dtHours <= 0) return;
 
             // 1. Crash real reportado pelo simulador
