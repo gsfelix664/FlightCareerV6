@@ -78,6 +78,8 @@ NATIVE_COMPONENTS: Dict[int, str] = {
 RESTART_JUMP = 0.005
 
 CAL_PREFIXES = ("cal-normal-", "cal-abuso-", "cal-longo-")
+# Marcadores do voo longo que só anotam o momento (fraca/pane): não abrem trecho novo
+CAL_ANNOTATIONS = ("cal-longo-weak", "cal-longo-pane")
 DEFAULT_MIN_THRESHOLD = 0.0001
 NOISE_MULTIPLIER = 3.0
 UNIT_STABLE_MAX_SPREAD = 1.5   # max(razão)/min(razão) entre trechos de abuso
@@ -886,6 +888,8 @@ def calibration_summary(
         if not txt:
             continue
         kind: Optional[str] = None
+        if txt.startswith(CAL_ANNOTATIONS):
+            continue
         for pfx in CAL_PREFIXES:
             if txt.startswith(pfx):
                 kind = pfx.split("-")[1]

@@ -457,6 +457,20 @@ class TestAnalyzeSensorLog(unittest.TestCase):
         self.assertEqual(comp["first_weak_s"], 600)
         self.assertEqual(comp["first_failed_s"], 900)
 
+    def test_calibration_long_flight_annotations_do_not_split(self):
+        """cal-longo-weak e cal-longo-pane só anotam: o trecho cal-longo-inicio continua até o fim e mede 600 s / 900 s."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-is-weak-39": "0", "nw-is-failed-39": "0", "marker": "cal-longo-inicio"},
+            {"utc": "2026-11-14T01:10:00.000Z", "nw-level-39": "0.35", "nw-is-weak-39": "1", "nw-is-failed-39": "0", "marker": "cal-longo-weak"},
+            {"utc": "2026-11-14T01:15:00.000Z", "nw-level-39": "0.15", "nw-is-weak-39": "1", "nw-is-failed-39": "1", "marker": "cal-longo-pane"},
+        ]
+        res = calibration_summary(rows, max_gap=1000.0)
+        self.assertEqual(len(res["segments"]), 1)
+        comp = res["segments"][0]["components"][39]
+        self.assertEqual(comp["first_weak_s"], 600)
+        self.assertEqual(comp["first_failed_s"], 900)
+        self.assertAlmostEqual(comp["level_drop"], 0.85, places=4)
+
     def test_calibration_no_markers(self):
         """sem marcadores cal-* -> has_data False e o render contém 'sem trechos de calibração'."""
         rows = [
