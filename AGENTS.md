@@ -55,7 +55,8 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 5. **Ao terminar:** acrescente uma entrada no fim de `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (Agente)`) e, se mudou arquitetura ou o estado de um sistema, atualize a seção 7 deste arquivo.
 6. Não reescreva o trabalho do outro agente sem motivo técnico; se discordar de uma decisão, explique ao usuário em vez de reverter.
 7. **Orquestração:** o Claude especifica, revisa e faz o merge; o Gemini implementa num worktree isolado. Fluxo, checklist de revisão e boas práticas em `docs/agents/ORQUESTRACAO.md`; ferramentas em `tools/agents/`.
-8. **Hooks obrigatórios** (uma vez por clone): `git config core.hooksPath "$(pwd)/.githooks"`. Bloqueiam commit/push em `main` e `feat/component-health-system`, mensagem fora do padrão, `push --force` e commit do banco. `FC_ALLOW_PROTECTED=1` libera as branches protegidas e é só do revisor (merge aprovado) ou do usuário. Nunca use `--no-verify`.
+8. **Máquina nova:** siga `docs/agents/NOVA-MAQUINA.md` (`tools/agents/install-global.sh` instala as instruções globais do Claude, as ferramentas do Gemini e os hooks).
+9. **Hooks obrigatórios** (uma vez por clone): `git config core.hooksPath "$(pwd)/.githooks"`. Bloqueiam commit/push em `main` e `feat/component-health-system`, mensagem fora do padrão, `push --force` e commit do banco. `FC_ALLOW_PROTECTED=1` libera as branches protegidas e é só do revisor (merge aprovado) ou do usuário. Nunca use `--no-verify`.
 
 ## 5. Convenções de código
 
@@ -76,6 +77,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
 - **SimVars escritas pelo app:** `ENG ON FIRE:1` (`SetEngineFire`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`SetOilLeakedPercent`).
 - Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
+- **SimVar com nome inválido desloca o struct:** o MSFS rejeita o datum (`NAME_UNRECOGNIZED`), o pacote fica menor e todos os campos seguintes chegam na posição errada (e o marshaling lê além do fim do pacote). Já aconteceu com `PARTIAL PANEL STATIC`, que **não existe** (não há SimVar do estado da tomada estática). O log `[SimConnect EXCEPTION]` agora mostra o nome rejeitado; `TelemetryDefinitionTests` confere a contagem de datums × campos.
 
 ### Banco de dados
 - Não há migrations do EF. O banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (lista de `ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes).
@@ -123,6 +125,11 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - Economia e combustível (`EconomyServices`, `FuelPriceService`); mercado vivo de usados com inspeção pré-compra (`MarketSimulationService`).
 - `FlightMonitor`: início/fim automático do voo, touchdown, perda total, pouso de emergência, blackbox (`FlightTelemetryLogger`).
 - Plano pendente de detecção de aeronave e W&B: `docs/plans/simconnect-wb-deteccao-aeronave.md`.
+
+### Sensores (plano de peças, fase 1 — F1.1 a F1.3 concluídas)
+- `Domain/Sensors/`: `SensorRegistry` (catálogo `sensor_registry.json` + `context_registry.json`, paridade testada com `docs/plans/sensor-inventory.md`), `SensorLayout` (expansão por motor, blocos de 256 preenchidos com `SIMULATION RATE`), `SensorCsvFormatter`.
+- `UI/Services/`: `SensorFrameReader` (leitura genérica, IDs 999/1000+, rejeitadas saem do layout), `ContextSnapshotReader` (IDs 2000/2001, strings em `STRING256`), `SensorRecorder` (REC/Marcar no HUD Overlay, CSV + `-context.json` em `%LocalAppData%\FlightCareer\sensor-logs\`).
+- Testado no MSFS (C152, 2026-11-14): leitura a ~0,43 s, valores coerentes, sem crash após o preenchimento até 256. Próxima tarefa: F1.4 (voos de validação, portão 🔒).
 
 ## 8. Definição de pronto
 

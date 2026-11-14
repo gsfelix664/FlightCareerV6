@@ -1307,3 +1307,14 @@
 - 4 novos testes unitários adicionados (`RegistrationSlots_PadsToBlockSize`, `RegistrationSlots_FullBlock_HasNoPadding`, `Map_NeverReturnsPaddingKeys` em `SensorLayoutTests.cs` e `Registry_NoSimVarHasPlaceholderOrSlash` em `SensorRegistryTests.cs`), com 125 testes passando no total. Não testado no MSFS.
 
 
+
+## 2026-11-14 - Telemetria: SimVar inexistente deslocava o SimTelemetry (Claude)
+- Achado no teste real do leitor de sensores (C152): `PARTIAL PANEL STATIC` **não existe** no SDK MSFS 2024 (conferido na página de SimVars de sistema: há 17 `PARTIAL PANEL`, nenhum STATIC). O simulador rejeitava o datum e todos os campos seguintes do `SimTelemetry` chegavam deslocados: `PartialPanelStatic` recebia o magneto esquerdo, `LeftMagneto` o direito, `RightMagneto` a chave do alternador, `MasterAlternator` a pane elétrica e `PartialPanelElectrical` lia além do fim do pacote.
+- Efeito antes da correção: enforcement de magneto e alternador no `SimFailureActuator` e checagem da pane de estática usavam valores errados. As panes persistentes (`SimFailureState`) não eram afetadas.
+- Correção: datum trocado por `PARTIAL PANEL ALTIMETER` na mesma posição (campo renomeado para `PartialPanelAltimeter`); `TOGGLE_STATIC_PORT_BLOCKAGE` passa a ser toggle não rastreado. `[SimConnect EXCEPTION]` agora registra o nome da SimVar rejeitada. SimVar removida do inventário e do `sensor_registry.json`.
+- Teste `TelemetryDefinitionTests`: número de `AddToDef` = campos `double` do `SimTelemetry`, e nenhum nome da lista de inválidos conhecidos. 127 testes. **Não testado no MSFS** (panes de magneto/alternador/estática depois da correção).
+
+## 2026-11-14 - Configuração versionada para outras máquinas (Claude)
+- `tools/agents/global/`: cópia versionada das instruções globais do Claude (`~/.claude/CLAUDE.md`) e das ferramentas `agy-ask.sh`, `agy-task.sh`, `agy-audit.sh`.
+- `tools/agents/install-global.sh`: instala tudo em `~/.claude`, faz backup do que for diferente, ativa os hooks e testa o `agy`. Testado nesta máquina.
+- `docs/agents/NOVA-MAQUINA.md`: passo a passo para clonar, instalar e retomar o trabalho em outra máquina.
