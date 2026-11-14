@@ -1,0 +1,88 @@
+{
+  "01-partida": [
+    "eng-rpm",
+    "eng-starter",
+    "eng-starter-active",
+    "eng-combustion",
+    "turb-n1",
+    "turb-is-igniting",
+    "turb-master-starter-switch",
+    "oil-pressure",
+    "elec-battery-load",
+    "elec-total-load-amps"
+  ],
+  "02-freio-taxi": [
+    "brake-left-position",
+    "brake-right-position"
+  ],
+  "03-decolagem": [
+    "eng-rpm",
+    "turb-n1",
+    "eng-throttle-lever-position",
+    "af-airspeed-indicated",
+    "af-g-force"
+  ],
+  "04a-cruzeiro": [
+    "af-airspeed-indicated",
+    "af-airspeed-true"
+  ],
+  "04b-mistura-pobre": [
+    "eng-mixture-ratio",
+    "eng-mixture-lever-position",
+    "eng-egt"
+  ],
+  "05-shock-cooling": [
+    "eng-throttle-lever-position",
+    "eng-cht",
+    "eng-egt"
+  ],
+  "06-flap-vfe": [
+    "af-flaps-handle-index",
+    "af-flaps-handle-percent",
+    "dmg-flap-damage-by-speed",
+    "dmg-flap-speed-exceeded"
+  ],
+  "07-curva-60": [
+    "af-g-force",
+    "af-max-g-force",
+    "af-wing-flex-pct"
+  ],
+  "08-alternador-off": [
+    "elec-master-alternator",
+    "elec-genalt-bus-voltage",
+    "elec-genalt-bus-amps",
+    "elec-genalt-load",
+    "elec-battery-load"
+  ],
+  "08b-alternador-on": [
+    "elec-master-alternator",
+    "elec-genalt-bus-voltage",
+    "elec-genalt-bus-amps",
+    "elec-genalt-load",
+    "elec-battery-load"
+  ],
+  "09-trem-ciclo": [
+    "gear-handle-position",
+    "gear-position",
+    "gear-total-pct-extended"
+  ],
+  "10a-pouso-normal": [
+    "gear-plane-touchdown-normal-velocity",
+    "gear-contact-point-compression"
+  ],
+  "10b-pouso-firme": [
+    "gear-plane-touchdown-normal-velocity",
+    "gear-contact-point-compression",
+    "af-g-force"
+  ],
+  "11-freio-pouso": [
+    "brake-left-position",
+    "brake-right-position"
+  ],
+  "12-corte": [
+    "eng-combustion",
+    "eng-rpm",
+    "turb-n1",
+    "oil-pressure"
+  ]
+}
