@@ -28,6 +28,10 @@ namespace FlightCareer.Domain.Sensors
         public const string SimulationRateSimVar = "SIMULATION RATE";
         public const string SimulationRateUnit = "number";
 
+        public const string PaddingSimVar = "SIMULATION RATE";
+        public const string PaddingUnit = "number";
+        public const string PaddingKeyPrefix = "pad-";
+
         public int BlockSize { get; }
         public IReadOnlyList<SensorBlock> Blocks { get; }
 
@@ -118,6 +122,34 @@ namespace FlightCareer.Domain.Sensors
             for (int i = 0; i < count; i++)
             {
                 result[block.Slots[i].Key] = values[i];
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Retorna os slots do bloco completados com slots de preenchimento (SIMULATION RATE)
+        /// até atingir BlockSize, garantindo que o buffer do SimConnect tenha tamanho fixo.
+        /// </summary>
+        public IReadOnlyList<SensorSlot> RegistrationSlots(int blockIndex)
+        {
+            if (blockIndex < 0 || blockIndex >= Blocks.Count)
+            {
+                return Array.Empty<SensorSlot>();
+            }
+
+            var block = Blocks[blockIndex];
+            int paddingCount = BlockSize - block.Slots.Count;
+            if (paddingCount <= 0)
+            {
+                return block.Slots;
+            }
+
+            var result = new List<SensorSlot>(BlockSize);
+            result.AddRange(block.Slots);
+            for (int i = 0; i < paddingCount; i++)
+            {
+                result.Add(new SensorSlot($"{PaddingKeyPrefix}{i}", PaddingSimVar, PaddingUnit));
             }
 
             return result;

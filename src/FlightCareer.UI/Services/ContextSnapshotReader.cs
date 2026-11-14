@@ -166,8 +166,11 @@ namespace FlightCareer.UI.Services
                 try
                 {
                     // Registra e requisita numéricos (ID 2000)
+                    var contextBlock = new SensorBlock(0, numericSlots);
+                    var contextLayout = new SensorLayout(new[] { contextBlock }, 256);
+
                     sc.ClearDataDefinition((DEFINITIONS)NumericDefId);
-                    foreach (var slot in numericSlots)
+                    foreach (var slot in contextLayout.RegistrationSlots(0))
                     {
                         sc.AddToDataDefinition((DEFINITIONS)NumericDefId, slot.SimVar, slot.Unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                     }
