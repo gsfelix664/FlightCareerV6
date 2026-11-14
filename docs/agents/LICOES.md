@@ -3,4 +3,5 @@
 Regras curtas tiradas de correções reais pedidas pelo revisor. Uma linha por lição, com a tarefa de origem.
 Se a lição virar regra geral do projeto, o revisor move para `AGENTS.md` e apaga daqui.
 
-- (vazio — a primeira lição entra na primeira revisão CORRIGIR)
+- Não use `git commit --amend` depois do relatório: o hash citado deixa de existir. Correções = commit novo. (F1.1)
+- Unidade de SimVar precisa ser um nome de unidade do SimConnect, sem texto explicativo; em linha com N SimVars e unidades ambíguas, pergunte no relatório. (F1.1)

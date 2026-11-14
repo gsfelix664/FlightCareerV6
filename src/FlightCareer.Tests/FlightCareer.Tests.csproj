@@ -22,6 +22,12 @@
     <None Include="..\FlightCareer.Infrastructure\Data\component_catalog.json" Link="Data\component_catalog.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\context_registry.json" Link="Data\context_registry.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\sensor_registry.json" Link="Data\sensor_registry.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
