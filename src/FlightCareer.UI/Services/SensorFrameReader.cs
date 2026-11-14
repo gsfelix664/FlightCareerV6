@@ -26,10 +26,12 @@ namespace FlightCareer.UI.Services
         private SensorLayout? _layout;
         private int _currentEngineCount = 1;
 
-        private readonly HashSet<string> _rejectedSimVars = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _rejectedSimVars = new(StringComparer.Ordinal);
         private readonly Dictionary<uint, string> _sendIdToSimVar = new();
         private readonly Dictionary<string, double> _currentCycleValues = new(StringComparer.Ordinal);
         private readonly HashSet<int> _blocksReceivedInCycle = new();
+        private bool _rebuildPending;
+        private bool _skipCycleAfterConfig;
         private bool _disposed;
 
         /// <summary>
@@ -37,28 +39,60 @@ namespace FlightCareer.UI.Services
         /// </summary>
         public event Action<SensorFrame>? OnFrame;
 
+        public bool IsEnabled { get; }
         public SensorLayout? CurrentLayout => _layout;
         public int CurrentEngineCount => _currentEngineCount;
-        public IReadOnlyCollection<string> RejectedSimVars => _rejectedSimVars;
+        public IReadOnlyCollection<string> RejectedSimVars
+        {
+            get
+            {
+                lock (_cycleLock)
+                {
+                    return _rejectedSimVars.ToArray();
+                }
+            }
+        }
 
         public SensorFrameReader(SimConnectService simConnectService, SensorRegistry? registry = null)
         {
             _simConnectService = simConnectService ?? throw new ArgumentNullException(nameof(simConnectService));
-            _registry = registry ?? SensorRegistry.LoadDefault("sensor_registry.json");
 
-            _simConnectService.OnSimConnectReady += HandleSimConnectReady;
-            _simConnectService.OnAircraftReloaded += HandleAircraftReloaded;
-            _simConnectService.OnDisconnected += HandleDisconnected;
-
-            if (_simConnectService.Raw != null)
+            if (registry != null)
             {
-                HandleSimConnectReady(_simConnectService.Raw);
+                _registry = registry;
+                IsEnabled = true;
+            }
+            else
+            {
+                try
+                {
+                    _registry = SensorRegistry.LoadDefault("sensor_registry.json");
+                    IsEnabled = true;
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SensorFrameReader] Falha ao carregar sensor_registry.json. Leitor desativado: {ex.Message}");
+                    _registry = new SensorRegistry();
+                    IsEnabled = false;
+                }
+            }
+
+            if (IsEnabled)
+            {
+                _simConnectService.OnSimConnectReady += HandleSimConnectReady;
+                _simConnectService.OnAircraftReloaded += HandleAircraftReloaded;
+                _simConnectService.OnDisconnected += HandleDisconnected;
+
+                if (_simConnectService.Raw != null)
+                {
+                    HandleSimConnectReady(_simConnectService.Raw);
+                }
             }
         }
 
         private void HandleSimConnectReady(SimConnect sc)
         {
-            if (_disposed) return;
+            if (_disposed || !IsEnabled) return;
 
             AttachToSimConnect(sc);
             RequestEngineCount(sc);
@@ -66,7 +100,7 @@ namespace FlightCareer.UI.Services
 
         private void HandleAircraftReloaded()
         {
-            if (_disposed || _currentSimConnect == null) return;
+            if (_disposed || !IsEnabled || _currentSimConnect == null) return;
 
             Debug.WriteLine("[SensorFrameReader] Aeronave recarregada no simulador; solicitando contagem de motores...");
             RequestEngineCount(_currentSimConnect);
@@ -78,6 +112,9 @@ namespace FlightCareer.UI.Services
             {
                 _currentCycleValues.Clear();
                 _blocksReceivedInCycle.Clear();
+                _rebuildPending = false;
+                _skipCycleAfterConfig = false;
+                _sendIdToSimVar.Clear();
             }
 
             DetachFromSimConnect();
@@ -142,6 +179,7 @@ namespace FlightCareer.UI.Services
             {
                 _currentCycleValues.Clear();
                 _blocksReceivedInCycle.Clear();
+                _skipCycleAfterConfig = true;
             }
 
             // Cancela requests e limpa definições de blocos anteriores
@@ -169,7 +207,8 @@ namespace FlightCareer.UI.Services
             }
 
             _layout = layout;
-            _sendIdToSimVar.Clear();
+            // Nota: não limpamos _sendIdToSimVar para que exceções assíncronas
+            // de lotes anteriores ainda em trânsito encontrem seus IDs correspondentes.
 
             Debug.WriteLine($"[SensorFrameReader] Configurando {layout.Blocks.Count} blocos de sensores para {engineCount} motor(es)...");
 
@@ -228,12 +267,30 @@ namespace FlightCareer.UI.Services
 
             if (data.dwData[0] is SensorBlockData blockData)
             {
-                var mapped = _layout.Map(blockIndex, blockData.Values);
+                bool shouldRebuild = false;
+                lock (_cycleLock)
+                {
+                    if (_rebuildPending)
+                    {
+                        _rebuildPending = false;
+                        _currentCycleValues.Clear();
+                        _blocksReceivedInCycle.Clear();
+                        shouldRebuild = true;
+                    }
+                }
+
+                if (shouldRebuild)
+                {
+                    Debug.WriteLine("[SensorFrameReader] Executando reconstrução de layout com variáveis rejeitadas...");
+                    SetupSensorLayout(sender, _currentEngineCount);
+                    return;
+                }
 
                 SensorFrame? frameToEmit = null;
 
                 lock (_cycleLock)
                 {
+                    var mapped = _layout.Map(blockIndex, blockData.Values);
                     foreach (var kvp in mapped)
                     {
                         _currentCycleValues[kvp.Key] = kvp.Value;
@@ -243,21 +300,27 @@ namespace FlightCareer.UI.Services
 
                     if (_blocksReceivedInCycle.Count == _layout.Blocks.Count)
                     {
-                        double simRate = 1.0;
-                        if (_currentCycleValues.TryGetValue("ctx-simulation-rate", out var r))
+                        if (_skipCycleAfterConfig)
                         {
-                            simRate = r;
+                            _skipCycleAfterConfig = false;
+                            _currentCycleValues.Clear();
+                            _blocksReceivedInCycle.Clear();
+                            Debug.WriteLine("[SensorFrameReader] Primeiro ciclo após (re)configuração descartado.");
                         }
-                        else if (_currentCycleValues.TryGetValue("simulation-rate", out var r2))
+                        else
                         {
-                            simRate = r2;
+                            double simRate = 1.0;
+                            if (_currentCycleValues.TryGetValue("ctx-simulation-rate", out var r))
+                            {
+                                simRate = r;
+                            }
+
+                            var snapshot = new Dictionary<string, double>(_currentCycleValues, StringComparer.Ordinal);
+                            frameToEmit = new SensorFrame(snapshot, DateTime.UtcNow, simRate);
+
+                            _currentCycleValues.Clear();
+                            _blocksReceivedInCycle.Clear();
                         }
-
-                        var snapshot = new Dictionary<string, double>(_currentCycleValues, StringComparer.Ordinal);
-                        frameToEmit = new SensorFrame(snapshot, DateTime.UtcNow, simRate);
-
-                        _currentCycleValues.Clear();
-                        _blocksReceivedInCycle.Clear();
                     }
                 }
 
@@ -284,10 +347,13 @@ namespace FlightCareer.UI.Services
 
                 if (simVar != null)
                 {
-                    if (_rejectedSimVars.Add(simVar))
+                    lock (_cycleLock)
                     {
-                        Debug.WriteLine($"[SensorFrameReader] SimVar '{simVar}' adicionada à lista de rejeitadas. Reconfigurando layout sem ela...");
-                        SetupSensorLayout(sender, _currentEngineCount);
+                        if (_rejectedSimVars.Add(simVar))
+                        {
+                            _rebuildPending = true;
+                            Debug.WriteLine($"[SensorFrameReader] SimVar '{simVar}' acumulada nas rejeitadas. Reconstrução pendente.");
+                        }
                     }
                 }
             }
@@ -302,9 +368,12 @@ namespace FlightCareer.UI.Services
             if (_disposed) return;
             _disposed = true;
 
-            _simConnectService.OnSimConnectReady -= HandleSimConnectReady;
-            _simConnectService.OnAircraftReloaded -= HandleAircraftReloaded;
-            _simConnectService.OnDisconnected -= HandleDisconnected;
+            if (IsEnabled)
+            {
+                _simConnectService.OnSimConnectReady -= HandleSimConnectReady;
+                _simConnectService.OnAircraftReloaded -= HandleAircraftReloaded;
+                _simConnectService.OnDisconnected -= HandleDisconnected;
+            }
 
             if (_currentSimConnect != null && _layout != null)
             {

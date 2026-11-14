@@ -16,6 +16,18 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void Build_AlwaysIncludesSimulationRateFirst()
+        {
+            var layout = SensorLayout.Build(Array.Empty<SensorDefinition>(), engineCount: 1);
+
+            Assert.Single(layout.Blocks);
+            var firstSlot = layout.Blocks[0].Slots[0];
+            Assert.Equal("ctx-simulation-rate", firstSlot.Key);
+            Assert.Equal("SIMULATION RATE", firstSlot.SimVar);
+            Assert.Equal("number", firstSlot.Unit);
+        }
+
+        [Fact]
         public void Build_OneEngine_HasOneSlotPerSensor()
         {
             var registry = LoadRealRegistry();
@@ -24,8 +36,8 @@ namespace FlightCareer.Tests.Sensors
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 1);
 
             Assert.Single(layout.Blocks);
-            Assert.Equal(177, layout.Blocks[0].Slots.Count);
-            Assert.Equal(177, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(178, layout.Blocks[0].Slots.Count);
+            Assert.Equal(178, layout.Blocks.Sum(b => b.Slots.Count));
         }
 
         [Fact]
@@ -34,15 +46,15 @@ namespace FlightCareer.Tests.Sensors
             var registry = LoadRealRegistry();
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 4, blockSize: 256);
 
-            // 99 sensores globais + 78 sensores PerEngine * 4 = 99 + 312 = 411 slots
-            Assert.Equal(411, layout.Blocks.Sum(b => b.Slots.Count));
+            // 1 reservado (SIMULATION RATE) + 99 sensores globais + 78 sensores PerEngine * 4 = 1 + 99 + 312 = 412 slots
+            Assert.Equal(412, layout.Blocks.Sum(b => b.Slots.Count));
             Assert.Equal(2, layout.Blocks.Count);
 
             Assert.Equal(0, layout.Blocks[0].Index);
             Assert.Equal(256, layout.Blocks[0].Slots.Count);
 
             Assert.Equal(1, layout.Blocks[1].Index);
-            Assert.Equal(155, layout.Blocks[1].Slots.Count);
+            Assert.Equal(156, layout.Blocks[1].Slots.Count);
         }
 
         [Fact]
@@ -58,19 +70,23 @@ namespace FlightCareer.Tests.Sensors
 
             Assert.Single(layout.Blocks);
             var slots = layout.Blocks[0].Slots;
-            Assert.Equal(3, slots.Count);
+            Assert.Equal(4, slots.Count);
 
-            Assert.Equal("eng-rpm:1", slots[0].Key);
-            Assert.Equal("GENERAL ENG RPM:1", slots[0].SimVar);
-            Assert.Equal("rpm", slots[0].Unit);
+            Assert.Equal("ctx-simulation-rate", slots[0].Key);
+            Assert.Equal("SIMULATION RATE", slots[0].SimVar);
+            Assert.Equal("number", slots[0].Unit);
 
-            Assert.Equal("eng-rpm:2", slots[1].Key);
-            Assert.Equal("GENERAL ENG RPM:2", slots[1].SimVar);
+            Assert.Equal("eng-rpm:1", slots[1].Key);
+            Assert.Equal("GENERAL ENG RPM:1", slots[1].SimVar);
             Assert.Equal("rpm", slots[1].Unit);
 
-            Assert.Equal("fuel-qty", slots[2].Key);
-            Assert.Equal("FUEL TOTAL QUANTITY", slots[2].SimVar);
-            Assert.Equal("gallons", slots[2].Unit);
+            Assert.Equal("eng-rpm:2", slots[2].Key);
+            Assert.Equal("GENERAL ENG RPM:2", slots[2].SimVar);
+            Assert.Equal("rpm", slots[2].Unit);
+
+            Assert.Equal("fuel-qty", slots[3].Key);
+            Assert.Equal("FUEL TOTAL QUANTITY", slots[3].SimVar);
+            Assert.Equal("gallons", slots[3].Unit);
         }
 
         [Fact]
@@ -81,19 +97,22 @@ namespace FlightCareer.Tests.Sensors
                 new("eng-rpm", "GENERAL ENG RPM", "rpm", "engine", PerEngine: true)
             };
 
-            // Menor que 1 deve ser clampado para 1
+            // Menor que 1 deve ser clampado para 1 (1 reservado + 1 perEngine = 2 slots)
             var layoutZero = SensorLayout.Build(sensors, engineCount: 0);
-            Assert.Single(layoutZero.Blocks[0].Slots);
-            Assert.Equal("eng-rpm:1", layoutZero.Blocks[0].Slots[0].Key);
+            Assert.Equal(2, layoutZero.Blocks[0].Slots.Count);
+            Assert.Equal("ctx-simulation-rate", layoutZero.Blocks[0].Slots[0].Key);
+            Assert.Equal("eng-rpm:1", layoutZero.Blocks[0].Slots[1].Key);
 
             var layoutNegative = SensorLayout.Build(sensors, engineCount: -5);
-            Assert.Single(layoutNegative.Blocks[0].Slots);
-            Assert.Equal("eng-rpm:1", layoutNegative.Blocks[0].Slots[0].Key);
+            Assert.Equal(2, layoutNegative.Blocks[0].Slots.Count);
+            Assert.Equal("ctx-simulation-rate", layoutNegative.Blocks[0].Slots[0].Key);
+            Assert.Equal("eng-rpm:1", layoutNegative.Blocks[0].Slots[1].Key);
 
-            // Maior que 16 deve ser clampado para 16
+            // Maior que 16 deve ser clampado para 16 (1 reservado + 16 perEngine = 17 slots)
             var layoutHuge = SensorLayout.Build(sensors, engineCount: 99);
-            Assert.Equal(16, layoutHuge.Blocks[0].Slots.Count);
-            Assert.Equal("eng-rpm:16", layoutHuge.Blocks[0].Slots[15].Key);
+            Assert.Equal(17, layoutHuge.Blocks[0].Slots.Count);
+            Assert.Equal("ctx-simulation-rate", layoutHuge.Blocks[0].Slots[0].Key);
+            Assert.Equal("eng-rpm:16", layoutHuge.Blocks[0].Slots[16].Key);
         }
 
         [Fact]
@@ -107,21 +126,23 @@ namespace FlightCareer.Tests.Sensors
                 new("s4", "SIMVAR 4", "number", "test", false)
             };
 
-            // Bloco de tamanho 2 -> inicialmente 2 blocos (s1,s2) e (s3,s4)
+            // Com o slot reservado ctx-simulation-rate + 4 sensores = 5 slots.
+            // Bloco de tamanho 2 -> inicialmente 3 blocos: (ctx, s1), (s2, s3), (s4)
             var layout = SensorLayout.Build(sensors, engineCount: 1, blockSize: 2);
-            Assert.Equal(2, layout.Blocks.Count);
+            Assert.Equal(3, layout.Blocks.Count);
 
             // Remove SIMVAR 2
             var pruned = layout.Without(new[] { "SIMVAR 2" });
 
-            // Deve sobrar s1, s3, s4 -> 3 slots -> bloco 0 com (s1, s3), bloco 1 com (s4)
+            // Deve sobrar ctx, s1, s3, s4 -> 4 slots -> bloco 0 com (ctx, s1), bloco 1 com (s3, s4)
             Assert.Equal(2, pruned.Blocks.Count);
             Assert.Equal(2, pruned.Blocks[0].Slots.Count);
-            Assert.Equal("s1", pruned.Blocks[0].Slots[0].Key);
-            Assert.Equal("s3", pruned.Blocks[0].Slots[1].Key);
+            Assert.Equal("ctx-simulation-rate", pruned.Blocks[0].Slots[0].Key);
+            Assert.Equal("s1", pruned.Blocks[0].Slots[1].Key);
 
-            Assert.Single(pruned.Blocks[1].Slots);
-            Assert.Equal("s4", pruned.Blocks[1].Slots[0].Key);
+            Assert.Equal(2, pruned.Blocks[1].Slots.Count);
+            Assert.Equal("s3", pruned.Blocks[1].Slots[0].Key);
+            Assert.Equal("s4", pruned.Blocks[1].Slots[1].Key);
             Assert.Equal(1, pruned.Blocks[1].Index);
         }
 
@@ -134,12 +155,14 @@ namespace FlightCareer.Tests.Sensors
                 new("k2", "V2", "number", "grp", false)
             };
 
-            var layout = SensorLayout.Build(sensors, engineCount: 1, blockSize: 2);
-            var values = new double[] { 10.5, 20.25, 999.99 }; // 3 valores para 2 slots
+            // ctx + 2 sensores = 3 slots no bloco (pois blockSize = 3)
+            var layout = SensorLayout.Build(sensors, engineCount: 1, blockSize: 3);
+            var values = new double[] { 1.0, 10.5, 20.25, 999.99 }; // 4 valores para 3 slots
 
             var mapped = layout.Map(blockIndex: 0, values);
 
-            Assert.Equal(2, mapped.Count);
+            Assert.Equal(3, mapped.Count);
+            Assert.Equal(1.0, mapped["ctx-simulation-rate"]);
             Assert.Equal(10.5, mapped["k1"]);
             Assert.Equal(20.25, mapped["k2"]);
             Assert.False(mapped.ContainsKey("k3"));

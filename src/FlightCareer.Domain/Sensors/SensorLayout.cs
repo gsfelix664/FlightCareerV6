@@ -24,6 +24,10 @@ namespace FlightCareer.Domain.Sensors
     /// </summary>
     public sealed class SensorLayout
     {
+        public const string SimulationRateKey = "ctx-simulation-rate";
+        public const string SimulationRateSimVar = "SIMULATION RATE";
+        public const string SimulationRateUnit = "number";
+
         public int BlockSize { get; }
         public IReadOnlyList<SensorBlock> Blocks { get; }
 
@@ -36,37 +40,39 @@ namespace FlightCareer.Domain.Sensors
         /// <summary>
         /// Monta o layout a partir da lista de sensores e da contagem de motores.
         /// Expande sensores PerEngine em :1..:engineCount.
+        /// Sempre inclui o slot reservado ctx-simulation-rate no início do bloco 0.
         /// </summary>
         public static SensorLayout Build(IReadOnlyList<SensorDefinition> sensors, int engineCount, int blockSize = 256)
         {
-            if (sensors == null || sensors.Count == 0)
-            {
-                return new SensorLayout(Array.Empty<SensorBlock>(), blockSize);
-            }
-
             int validBlockSize = blockSize > 0 ? blockSize : 256;
             int clampedEngines = Math.Clamp(engineCount, 1, 16);
 
-            var flatSlots = new List<SensorSlot>();
-
-            foreach (var s in sensors)
+            var flatSlots = new List<SensorSlot>
             {
-                if (s.PerEngine)
+                new(SimulationRateKey, SimulationRateSimVar, SimulationRateUnit)
+            };
+
+            if (sensors != null && sensors.Count > 0)
+            {
+                foreach (var s in sensors)
                 {
-                    for (int eng = 1; eng <= clampedEngines; eng++)
+                    if (s.PerEngine)
+                    {
+                        for (int eng = 1; eng <= clampedEngines; eng++)
+                        {
+                            flatSlots.Add(new SensorSlot(
+                                Key: $"{s.Key}:{eng}",
+                                SimVar: $"{s.SimVar}:{eng}",
+                                Unit: s.Unit));
+                        }
+                    }
+                    else
                     {
                         flatSlots.Add(new SensorSlot(
-                            Key: $"{s.Key}:{eng}",
-                            SimVar: $"{s.SimVar}:{eng}",
+                            Key: s.Key,
+                            SimVar: s.SimVar,
                             Unit: s.Unit));
                     }
-                }
-                else
-                {
-                    flatSlots.Add(new SensorSlot(
-                        Key: s.Key,
-                        SimVar: s.SimVar,
-                        Unit: s.Unit));
                 }
             }
 
@@ -82,7 +88,7 @@ namespace FlightCareer.Domain.Sensors
             if (simVarsComIndice == null)
                 return this;
 
-            var rejectedSet = new HashSet<string>(simVarsComIndice, StringComparer.OrdinalIgnoreCase);
+            var rejectedSet = new HashSet<string>(simVarsComIndice, StringComparer.Ordinal);
             if (rejectedSet.Count == 0)
                 return this;
 
