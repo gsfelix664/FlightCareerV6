@@ -292,9 +292,11 @@ namespace FlightCareer.UI.ViewModels
                     IsRecording = true;
                     RecordingStatus = $"REC {_sensorRecorder.RowsWritten} lin";
                 }
-                else if (!IsRecording && _sensorRecorder.LastError != null)
+                else if (IsRecording || _sensorRecorder.LastError != null)
                 {
-                    RecordingStatus = $"ERRO: {_sensorRecorder.LastError}";
+                    // Gravação parou sozinha (erro de I/O) ou falhou ao iniciar: o botão volta para REC
+                    IsRecording = false;
+                    RecordingStatus = _sensorRecorder.LastError != null ? $"ERRO: {_sensorRecorder.LastError}" : "PARADO";
                 }
             });
         }

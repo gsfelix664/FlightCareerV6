@@ -121,7 +121,7 @@ namespace FlightCareer.UI.Services
                 }
 
                 string safeTitle = SensorCsvFormatter.SafeFileName(rawTitle);
-                string timeStamp = DateTime.UtcNow.ToString("yyyyMMdd-HHmm");
+                string timeStamp = DateTime.Now.ToString("yyyyMMdd-HHmm"); // hora local no nome do arquivo; as linhas usam UTC
                 _baseFilePrefix = $"{timeStamp}-{safeTitle}";
 
                 lock (_fileLock)
@@ -247,8 +247,9 @@ namespace FlightCareer.UI.Services
                     var reg = SensorRegistry.LoadDefault("sensor_registry.json");
                     layout = SensorLayout.Build(reg.Sensors, Math.Max(1, _frameReader.CurrentEngineCount));
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Debug.WriteLine($"[SensorRecorder] Registro de sensores indisponível; gravando sem colunas de sensores: {ex.Message}");
                     layout = new SensorLayout(Array.Empty<SensorBlock>());
                 }
             }
