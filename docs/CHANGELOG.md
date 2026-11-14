@@ -1342,3 +1342,7 @@
 - Teste de fumaça executado com sucesso sobre `%LOCALAPPDATA%\FlightCareer\sensor-logs\20261114-0653-Cessna_C152.csv`: relatório gerado sem erros indicando "sem dados de wear and tear por componente neste log".
 - `docs/plans/sensor-validation/ROTEIRO.md`: adicionada seção 5 com checklist de voos F1.4b (Voo A estresse com desgaste ligado, Passo B reinício do voo com REC ligado para checagem de 100%, Voo C com opção desligada para detecção de chave anti-trapaça e Voo D opcional de persistência via `.FLT`).
 - Não testado no MSFS (aguarda execução dos voos pelo usuário).
+
+## 2026-11-14 - Modelo de desgaste: addon independente, nativo como sensor (plano) (Claude)
+- Primeiro voo da F1.4b (C152) analisado em `docs/plans/sensor-validation/native-wear-C152.md`: sintaxe `WEAR AND TEAR <VAR>:<id>` aceita; overstress do motor acima da linha vermelha (−3,3% em ~40 s); o nativo volta a 100% ao reiniciar o voo **e depois de um impacto forte**; com a opção desligada os níveis travam em 1,00, mas a taxa de overstress continua; `.FLT` não salvou pelo EFB.
+- Decisão do usuário (plano › 0.1 reescrita): wear and tear ligado; o addon é o único motor de desgaste do Hangar; o nativo entra como sensor de estresse (`OVERSTRESS DAMAGE RATE`) e de panes (pane nativa ou do addon vira discrepância, a que vier primeiro). F1.4b, F2.2, F2.3, F4.1, riscos e `AGENTS.md` › 6 ajustados. Nenhum código mudou.
