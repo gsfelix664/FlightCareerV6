@@ -519,13 +519,6 @@
       "perEngine": false
     },
     {
-      "key": "dmg-partial-panel-static",
-      "simVar": "PARTIAL PANEL STATIC",
-      "unit": "enum",
-      "group": "native-damage",
-      "perEngine": false
-    },
-    {
       "key": "dmg-partial-panel-electrical",
       "simVar": "PARTIAL PANEL ELECTRICAL",
       "unit": "enum",

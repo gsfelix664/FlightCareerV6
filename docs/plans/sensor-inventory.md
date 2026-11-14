@@ -118,7 +118,6 @@ Convenções:
 | `CRASH FLAG` ✅ | enum | acidente |
 | `PARTIAL PANEL VACUUM` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL PITOT` | enum | estado de panes do menu do sim |
-| `PARTIAL PANEL STATIC` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL ELECTRICAL` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL ENGINE` | enum | estado de panes do menu do sim |
 | `PARTIAL PANEL AIRSPEED` | enum | estado de panes do menu do sim |

@@ -89,7 +89,7 @@ namespace FlightCareer.Domain.Entities
         // Estado de Falhas e Chaves para Enforcement (6 doubles)
         public double PartialPanelVacuum;    // PARTIAL PANEL VACUUM (0=OK, 1=Falha, 2=Apagado)
         public double PartialPanelPitot;     // PARTIAL PANEL PITOT
-        public double PartialPanelStatic;    // PARTIAL PANEL STATIC
+        public double PartialPanelAltimeter; // PARTIAL PANEL ALTIMETER. Era "PARTIAL PANEL STATIC", que não existe no SDK: o MSFS rejeitava o datum e deslocava todos os campos seguintes (2026-11-14)
         public double LeftMagneto;           // RECIP ENG LEFT MAGNETO:1 (1=On)
         public double RightMagneto;          // RECIP ENG RIGHT MAGNETO:1 (1=On)
         public double MasterAlternator;      // GENERAL ENG MASTER ALTERNATOR:1 (1=On)

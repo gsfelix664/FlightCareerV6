@@ -210,7 +210,9 @@ namespace FlightCareer.UI.Services
                 // 13. Estado de Falhas e Chaves para Enforcement (6 doubles)
                 AddToDef("PARTIAL PANEL VACUUM", "Enum");
                 AddToDef("PARTIAL PANEL PITOT", "Enum");
-                AddToDef("PARTIAL PANEL STATIC", "Enum");
+                // Não existe "PARTIAL PANEL STATIC" no SDK (o estado da tomada estática não é exposto).
+                // Datum rejeitado desloca o struct inteiro: mantenha sempre um nome válido nesta posição.
+                AddToDef("PARTIAL PANEL ALTIMETER", "Enum");
                 AddToDef("RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddToDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddToDef("GENERAL ENG MASTER ALTERNATOR:1", "Bool");
@@ -292,7 +294,8 @@ namespace FlightCareer.UI.Services
                 };
 
                 _simConnect.OnRecvException += (s, e) => {
-                    Debug.WriteLine($"[SimConnect EXCEPTION] ID: {(SIMCONNECT_EXCEPTION)e.dwException}, SendID: {e.dwSendID}, Index: {e.dwIndex}");
+                    string datum = _datumBySendId.TryGetValue(e.dwSendID, out var d) ? $", SimVar: {d}" : string.Empty;
+                    Debug.WriteLine($"[SimConnect EXCEPTION] ID: {(SIMCONNECT_EXCEPTION)e.dwException}, SendID: {e.dwSendID}, Index: {e.dwIndex}{datum}");
                 };
 
                 _simConnect.OnRecvSimobjectData += SimConnect_OnRecvSimobjectData;
@@ -311,14 +314,32 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        // Pacote enviado → SimVar, para dizer no log qual datum o simulador rejeitou (NAME_UNRECOGNIZED).
+        private readonly Dictionary<uint, string> _datumBySendId = new();
+
         private void AddToDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.AircraftData, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
         }
 
         private void AddFailureDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.FailureState, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void TrackDatum(string datum)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _datumBySendId[_simConnect.GetLastSentPacketID()] = datum;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] GetLastSentPacketID falhou para {datum}: {ex.Message}");
+            }
         }
 
         private void AddWriteDef(DEFINITIONS def, string datum, string unit)
@@ -339,6 +360,7 @@ namespace FlightCareer.UI.Services
                 _nextEventId = FirstDynamicEventId;
                 CurrentFailureState = null;
                 _untrackedToggles.Clear();
+                _datumBySendId.Clear();
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -400,7 +422,8 @@ namespace FlightCareer.UI.Services
             "TOGGLE_ENGINE1_FAILURE" => CurrentData.IsEngineFailed,
             "TOGGLE_VACUUM_FAILURE" => CurrentData.PartialPanelVacuum > 0.5,
             "TOGGLE_PITOT_BLOCKAGE" => CurrentData.PartialPanelPitot > 0.5,
-            "TOGGLE_STATIC_PORT_BLOCKAGE" => CurrentData.PartialPanelStatic > 0.5,
+            // Sem SimVar de estado da tomada estática no SDK: tratada como toggle não rastreado (_untrackedToggles)
+            "TOGGLE_STATIC_PORT_BLOCKAGE" => null,
             "TOGGLE_ELECTRICAL_FAILURE" => CurrentData.PartialPanelElectrical > 0.5,
             _ => null
         };
