@@ -16,12 +16,14 @@ if repo_root not in sys.path:
 from tools.analyze_sensor_log import (
     classify,
     column_stats,
+    compute_durations_and_gaps,
     extract_markers,
     extract_sensor_columns,
     load_expectations,
     load_registry,
     load_rows,
     marker_reactions,
+    match_marker_prefix,
 )
 
 
@@ -196,6 +198,67 @@ class TestAnalyzeSensorLog(unittest.TestCase):
                     reg_keys,
                     f"Chave '{k}' citada no prefixo de expectativa '{prefix}' não existe em sensor_registry.json",
                 )
+
+    def test_missing_registry_exits_with_error(self):
+        """Arquivo de registro inexistente deve escrever no stderr e encerrar com código 2."""
+        with self.assertRaises(SystemExit) as cm:
+            load_registry("caminho/inexistente/sensor_registry.json")
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_missing_expectations_exits_with_error(self):
+        """Arquivo de expectativas inexistente deve escrever no stderr e encerrar com código 2."""
+        with self.assertRaises(SystemExit) as cm:
+            load_expectations("caminho/inexistente/sensor_validation_expectations.json")
+        self.assertEqual(cm.exception.code, 2)
+
+    def test_gap_between_files_not_counted_in_duration(self):
+        """Intervalo entre gravações (dt > max_gap) não deve ser contado na duração coberta e deve registrar quebra."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "sim_rate": "1", "eng-rpm:1": "1000"},
+            {"utc": "2026-11-14T01:00:02.000Z", "sim_rate": "1", "eng-rpm:1": "1000"},
+            # Gap de 100 segundos (> max_gap de 5s)
+            {"utc": "2026-11-14T01:01:42.000Z", "sim_rate": "1", "eng-rpm:1": "1200"},
+            {"utc": "2026-11-14T01:01:45.000Z", "sim_rate": "1", "eng-rpm:1": "1200"},
+        ]
+        real_dur, sim_dur, gaps = compute_durations_and_gaps(rows, max_gap=5.0)
+        # Trecho 1: 2s (00 a 02s). Trecho 2: 3s (102 a 105s). Total coberto: 5.0s.
+        self.assertAlmostEqual(real_dur, 5.0, places=2)
+        self.assertAlmostEqual(sim_dur, 5.0, places=2)
+        self.assertEqual(gaps, 1)
+
+    def test_gap_not_weighting_pct_const(self):
+        """Intervalo entre gravações (dt > max_gap) não deve atribuir peso de tempo ao último valor do trecho anterior."""
+        rows = [
+            # Trecho 1: valor 100.0 por 2 segundos (t=0 a t=2)
+            {"utc": "2026-11-14T01:00:00.000Z", "sim_rate": "1", "eng-rpm:1": "100.0"},
+            {"utc": "2026-11-14T01:00:01.000Z", "sim_rate": "1", "eng-rpm:1": "100.0"},
+            {"utc": "2026-11-14T01:00:02.000Z", "sim_rate": "1", "eng-rpm:1": "100.0"},
+            # Gap de 3600 segundos (1 hora)
+            # Trecho 2: valor 200.0 por 2 segundos (t=3602 a t=3604)
+            {"utc": "2026-11-14T02:00:02.000Z", "sim_rate": "1", "eng-rpm:1": "200.0"},
+            {"utc": "2026-11-14T02:00:03.000Z", "sim_rate": "1", "eng-rpm:1": "200.0"},
+            {"utc": "2026-11-14T02:00:04.000Z", "sim_rate": "1", "eng-rpm:1": "200.0"},
+        ]
+        cols = ["eng-rpm:1"]
+        stats = column_stats(rows, cols, max_gap=5.0)
+        # Com o gap descartado (dt=0), ambos os valores duram 2s cada.
+        # pct_const deve ser 50%, e NÃO ~99.9%
+        self.assertAlmostEqual(stats["eng-rpm:1"]["pct_const"], 50.0, places=1)
+
+    def test_unknown_marker_has_no_expectation(self):
+        """Marcador sem prefixo exato do roteiro (ex.: 'taxi' ou 'outro') não casa com expectativa."""
+        expectations = {"02-freio-taxi": ["brake-left-position"]}
+        # 'taxi' não tem prefixo '02-freio-taxi'
+        prefix_taxi = match_marker_prefix("taxi", expectations)
+        self.assertIsNone(prefix_taxi)
+
+        prefix_unknown = match_marker_prefix("marcador-livre", expectations)
+        self.assertIsNone(prefix_unknown)
+
+        # Prefixo exato casa normalmente
+        prefix_exact = match_marker_prefix("02-freio-taxi", expectations)
+        self.assertEqual(prefix_exact, "02-freio-taxi")
+
 
 
 if __name__ == "__main__":

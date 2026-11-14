@@ -15,7 +15,17 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 
+# Raiz padrão do repositório e caminhos de catálogo resolvidos a partir da pasta deste script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+DEFAULT_REGISTRY = os.path.join(
+    DEFAULT_REPO_ROOT, "src", "FlightCareer.Infrastructure", "Data", "sensor_registry.json"
+)
+DEFAULT_EXPECTATIONS = os.path.join(SCRIPT_DIR, "sensor_validation_expectations.json")
+
+
 def parse_iso_utc(utc_str: str) -> Optional[datetime]:
+
     """Converte string ISO 8601 UTC em objeto datetime com fuso UTC."""
     if not utc_str:
         return None
@@ -112,7 +122,11 @@ def extract_sensor_columns(all_columns: List[str]) -> List[str]:
     return sensor_cols
 
 
-def column_stats(rows: List[Dict[str, str]], sensor_columns: List[str]) -> Dict[str, Dict[str, Any]]:
+def column_stats(
+    rows: List[Dict[str, str]],
+    sensor_columns: List[str],
+    max_gap: float = 5.0,
+) -> Dict[str, Dict[str, Any]]:
     """Calcula estatísticas básicas e porcentagem constante ponderada por tempo para cada coluna."""
     stats: Dict[str, Dict[str, Any]] = {}
     n_rows = len(rows)
@@ -126,9 +140,10 @@ def column_stats(rows: List[Dict[str, str]], sensor_columns: List[str]) -> Dict[
     dts: List[float] = [0.0] * n_rows
     for i in range(n_rows - 1):
         delta = parsed_timestamps[i + 1] - parsed_timestamps[i]
-        dts[i] = max(0.0, delta)
-    if n_rows > 1:
-        dts[-1] = dts[-2]
+        if delta > max_gap:
+            dts[i] = 0.0
+        else:
+            dts[i] = max(0.0, delta)
 
     for col in sensor_columns:
         valid_vals: List[float] = []
@@ -189,6 +204,37 @@ def column_stats(rows: List[Dict[str, str]], sensor_columns: List[str]) -> Dict[
     return stats
 
 
+def compute_durations_and_gaps(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Tuple[float, float, int]:
+    """Calcula duração real coberta, duração simulada e número de quebras (dt > max_gap)."""
+    if not rows:
+        return 0.0, 0.0, 0
+
+    real_duration = 0.0
+    sim_duration = 0.0
+    gap_count = 0
+
+    for i in range(len(rows) - 1):
+        dt_curr = parse_iso_utc(rows[i].get("utc", ""))
+        dt_next = parse_iso_utc(rows[i + 1].get("utc", ""))
+        if dt_curr and dt_next:
+            delta = dt_next.timestamp() - dt_curr.timestamp()
+            if delta > max_gap:
+                gap_count += 1
+            elif delta > 0.0:
+                real_duration += delta
+                try:
+                    sim_rate = float(rows[i].get("sim_rate", "1"))
+                except ValueError:
+                    sim_rate = 1.0
+                sim_duration += delta * sim_rate
+
+    return real_duration, sim_duration, gap_count
+
+
+
 def extract_markers(rows: List[Dict[str, str]]) -> List[Dict[str, Any]]:
     """Extrai todas as linhas que contêm texto na coluna marker."""
     markers: List[Dict[str, Any]] = []
@@ -206,18 +252,11 @@ def extract_markers(rows: List[Dict[str, str]]) -> List[Dict[str, Any]]:
 
 
 def match_marker_prefix(marker_text: str, expectations: Dict[str, List[str]]) -> Optional[str]:
-    """Associa o texto do marcador ao prefixo de expectativas correspondente."""
+    """Associa o texto do marcador ao prefixo de expectativas correspondente pelo prefixo exato do roteiro."""
     norm = marker_text.strip().lower()
     for prefix in expectations:
         if norm.startswith(prefix.lower()):
             return prefix
-
-    # Tolerância para marcadores sem prefixo numérico (ex.: 'taxi' -> '02-freio-taxi')
-    for prefix in expectations:
-        parts = prefix.lower().split("-", 1)
-        if len(parts) == 2 and norm.startswith(parts[1]):
-            return prefix
-
     return None
 
 
@@ -315,29 +354,43 @@ def classify(
 
 
 def load_registry(registry_path: str) -> Tuple[Dict[str, str], Set[str]]:
-    """Carrega o sensor_registry.json e retorna mapeamento de key -> group e conjunto de chaves."""
+    """Carrega o sensor_registry.json e retorna mapeamento de key -> group e conjunto de chaves.
+
+    Se o arquivo não existir ou o JSON for inválido, emite mensagem no stderr e encerra com código 2.
+    """
+    if not os.path.isfile(registry_path):
+        sys.stderr.write(f"Erro: arquivo de registro de sensores não encontrado: '{registry_path}'\n")
+        sys.exit(2)
+
     key_to_group: Dict[str, str] = {}
-    if os.path.isfile(registry_path):
-        try:
-            with open(registry_path, "r", encoding="utf-8-sig") as f:
-                data = json.load(f)
-                sensors = data.get("sensors", [])
-                for s in sensors:
-                    key_to_group[s["key"]] = s.get("group", "outro")
-        except Exception as ex:
-            sys.stderr.write(f"Aviso: erro ao carregar sensor_registry.json: {ex}\n")
+    try:
+        with open(registry_path, "r", encoding="utf-8-sig") as f:
+            data = json.load(f)
+            sensors = data.get("sensors", [])
+            for s in sensors:
+                key_to_group[s["key"]] = s.get("group", "outro")
+    except Exception as ex:
+        sys.stderr.write(f"Erro: falha ao carregar JSON do registro de sensores '{registry_path}': {ex}\n")
+        sys.exit(2)
+
     return key_to_group, set(key_to_group.keys())
 
 
 def load_expectations(expectations_path: str) -> Dict[str, List[str]]:
-    """Carrega o sensor_validation_expectations.json."""
-    if os.path.isfile(expectations_path):
-        try:
-            with open(expectations_path, "r", encoding="utf-8-sig") as f:
-                return json.load(f)
-        except Exception as ex:
-            sys.stderr.write(f"Aviso: erro ao carregar expectations: {ex}\n")
-    return {}
+    """Carrega o sensor_validation_expectations.json.
+
+    Se o arquivo não existir ou o JSON for inválido, emite mensagem no stderr e encerra com código 2.
+    """
+    if not os.path.isfile(expectations_path):
+        sys.stderr.write(f"Erro: arquivo de expectativas não encontrado: '{expectations_path}'\n")
+        sys.exit(2)
+
+    try:
+        with open(expectations_path, "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+    except Exception as ex:
+        sys.stderr.write(f"Erro: falha ao carregar JSON de expectativas '{expectations_path}': {ex}\n")
+        sys.exit(2)
 
 
 def format_num(val: Optional[float]) -> str:
@@ -368,6 +421,8 @@ def render_report(
     unmapped_columns: List[str],
     real_duration_sec: float,
     sim_duration_sec: float,
+    gap_count: int = 0,
+    max_gap_sec: float = 5.0,
 ) -> str:
     """Gera o relatório completo em formato Markdown."""
     counts = {"Validado": 0, "Revisar": 0, "Não suportado": 0}
@@ -409,8 +464,9 @@ def render_report(
     lines.append(f"- **ATC Model / Type:** {ctx_atc_model} / {ctx_atc_type}")
     lines.append(f"- **Número de Motores:** {engine_count}")
     lines.append(f"- **Arquivos Analisados:** {files_list}")
-    lines.append(f"- **Duração Real:** {real_dur_str}")
+    lines.append(f"- **Duração Coberta:** {real_dur_str}")
     lines.append(f"- **Duração Simulada (Σ dt × sim_rate):** {sim_dur_str}")
+    lines.append(f"- **Quebras de Gravação (intervalo > {max_gap_sec:.1f}s):** {gap_count}")
     if rejected_simvars:
         lines.append(f"- **SimVars Rejeitadas no SimConnect:** {', '.join(f'`{r}`' for r in rejected_simvars)}")
     else:
@@ -446,7 +502,7 @@ def render_report(
                         reacted_cnt += 1
                 ratio_str = f"{reacted_cnt} / {len(expected_keys)}"
             else:
-                ratio_str = "-"
+                ratio_str = "fora do roteiro (sem expectativa)"
             lines.append(f"| `{m_text}` | `{m_utc}` | {ratio_str} |")
     else:
         lines.append("*Nenhum marcador registrado no log.*")
@@ -512,6 +568,14 @@ def render_report(
 
 
 def main() -> None:
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception as ex:
+        sys.stderr.write(f"Aviso: falha ao reconfigurar encoding para UTF-8: {ex}\n")
+
     parser = argparse.ArgumentParser(
         description="Analisa logs CSV do SensorRecorder e gera relatório de validação por sensor."
     )
@@ -529,13 +593,19 @@ def main() -> None:
         help="Janela em segundos antes x depois dos marcadores para detecção de reação (padrão: 30)",
     )
     parser.add_argument(
+        "--max-gap",
+        type=float,
+        default=5.0,
+        help="Intervalo máximo em segundos entre amostras consecutivas antes de considerar quebra na gravação (padrão: 5.0)",
+    )
+    parser.add_argument(
         "--registry",
-        default="src/FlightCareer.Infrastructure/Data/sensor_registry.json",
+        default=DEFAULT_REGISTRY,
         help="Caminho do sensor_registry.json",
     )
     parser.add_argument(
         "--expectations",
-        default="tools/sensor_validation_expectations.json",
+        default=DEFAULT_EXPECTATIONS,
         help="Caminho do sensor_validation_expectations.json",
     )
 
@@ -570,7 +640,7 @@ def main() -> None:
     unmapped_cols = [c for c in sensor_cols if c.split(":")[0] not in reg_keys]
 
     # Cálculos
-    stats = column_stats(rows, sensor_cols)
+    stats = column_stats(rows, sensor_cols, max_gap=args.max_gap)
     markers = extract_markers(rows)
     reactions = marker_reactions(rows, sensor_cols, markers, args.window, stats)
 
@@ -580,22 +650,8 @@ def main() -> None:
             col, stats[col], reactions.get(col, []), markers, expectations
         )
 
-    # Duração real e simulada
-    first_dt = parse_iso_utc(rows[0].get("utc", ""))
-    last_dt = parse_iso_utc(rows[-1].get("utc", ""))
-    real_duration = (last_dt.timestamp() - first_dt.timestamp()) if (first_dt and last_dt) else 0.0
-
-    sim_duration = 0.0
-    for i in range(len(rows) - 1):
-        dt_curr = parse_iso_utc(rows[i].get("utc", ""))
-        dt_next = parse_iso_utc(rows[i + 1].get("utc", ""))
-        if dt_curr and dt_next:
-            dt_s = max(0.0, dt_next.timestamp() - dt_curr.timestamp())
-            try:
-                sim_rate = float(rows[i].get("sim_rate", "1"))
-            except ValueError:
-                sim_rate = 1.0
-            sim_duration += dt_s * sim_rate
+    # Duração coberta (real) e simulada considerando quebras (dt > max-gap)
+    real_duration, sim_duration, gap_count = compute_durations_and_gaps(rows, args.max_gap)
 
     report_content = render_report(
         ac_type=args.type,
@@ -612,6 +668,8 @@ def main() -> None:
         unmapped_columns=unmapped_cols,
         real_duration_sec=real_duration,
         sim_duration_sec=sim_duration,
+        gap_count=gap_count,
+        max_gap_sec=args.max_gap,
     )
 
     # Grava relatório

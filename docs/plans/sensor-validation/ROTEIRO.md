@@ -9,7 +9,7 @@ Este documento é o guia de voo para o piloto validar a telemetria do simulador 
 - [ ] **Desligar o estresse nativo do simulador:** No menu do MSFS, vá em *Opções Gerais / Opções de Assistência > Falhas e Danos* e configure **Danos por Estresse da Aeronave (Aircraft Stress Damage) = DESLIGADO**. O FlightCareer é a fonte de verdade do desgaste estrutural; manter essa opção ligada gera panes duplicadas ou encerramentos abruptos pelo simulador.
 - [ ] **Iniciar o FlightCareer e o Simulador:** Conecte o FlightCareer ao MSFS e carregue o voo na posição de pátio (Cold & Dark).
 - [ ] **Ligar gravação de sensores:** No HUD Overlay do FlightCareer, clique no botão **REC** para iniciar o `SensorRecorder`. Confirme que o indicador exibe gravação ativa.
-- [ ] **Localização dos arquivos:** Os dados brutos são gravados em `%LocalAppData%\FlightCareer\sensor-logs\` nos formatos `AAAAMMDD-HHMM-<TITULO>.csv` e `...-context.json`.
+- [ ] **Localização dos arquivos:** Os dados brutos são gravados em `$env:LOCALAPPDATA\FlightCareer\sensor-logs\` (ou `%LocalAppData%\FlightCareer\sensor-logs\` no cmd) nos formatos `AAAAMMDD-HHMM-<TITULO>.csv` e `...-context.json`.
 
 ---
 
@@ -121,16 +121,19 @@ Ao atingir cada etapa, clique no botão **Marcar** do HUD Overlay, digite o **te
 
 Após completar o voo de uma aeronave da matriz:
 
-1. Localize os arquivos gerados em `%LocalAppData%\FlightCareer\sensor-logs\`.
+1. Localize o arquivo gerado em `$env:LOCALAPPDATA\FlightCareer\sensor-logs\`.
 2. Execute o script de análise a partir da raiz do repositório:
 
 ```powershell
-python tools/analyze_sensor_log.py --type <TIPO> --model <MODELO> "%LOCALAPPDATA%\FlightCareer\sensor-logs\AAAAMMDD-HHMM-<ARQUIVO>.csv"
+python tools/analyze_sensor_log.py --type <TIPO> --model <MODELO> "$env:LOCALAPPDATA\FlightCareer\sensor-logs\AAAAMMDD-HHMM-<ARQUIVO>.csv"
 ```
 
 *Exemplo para o Cessna 152 (Tipo A):*
 ```powershell
-python tools/analyze_sensor_log.py --type A --model C152 "%LOCALAPPDATA%\FlightCareer\sensor-logs\20261114-0128-Cessna_C152.csv" "%LOCALAPPDATA%\FlightCareer\sensor-logs\20261114-0153-Cessna_C152.csv"
+python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\FlightCareer\sensor-logs\20261114-0653-Cessna_C152.csv"
 ```
+
+> [!IMPORTANT]
+> Passe apenas um arquivo CSV por voo. Junte múltiplos arquivos apenas se forem da **mesma** gravação (por exemplo, arquivos divididos com sufixo). Nunca misture arquivos de voos ou sessões diferentes no mesmo comando.
 
 O relatório em Markdown será gerado automaticamente em `docs/plans/sensor-validation/<TIPO>-<MODELO>.md`.
