@@ -1,0 +1,14 @@
+#!/bin/sh
+. "$(dirname "$0")/_protected.sh"
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if is_protected "$branch" && [ "$FC_ALLOW_PROTECTED" != "1" ]; then
+  echo "BLOQUEADO: commit direto em '$branch' não é permitido." >&2
+  echo "Trabalhe numa branch da tarefa (ex.: feat/parts-f1). Só o revisor faz merge aqui." >&2
+  exit 1
+fi
+# Banco local e arquivos temporários não entram no repositório.
+if git diff --cached --name-only | grep -qiE '(^|/)flightcareer\.db|\.db-(wal|shm)$'; then
+  echo "BLOQUEADO: o banco flightcareer.db não pode ser commitado." >&2
+  exit 1
+fi
+exit 0

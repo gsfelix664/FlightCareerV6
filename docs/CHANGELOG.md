@@ -1263,3 +1263,11 @@
 - `docs/plans/sensor-inventory.md`: inventário de SimVars do SDK MSFS 2024 por sistema, com dicas de peça (todas candidatas até a validação em voo).
 - `docs/plans/pecas-desgaste-falhas.md`: plano em 5 fases (sensores → peças e desgaste → walkaround/revisões/troca → panes → UI), matriz de aviões A–I e regras do usuário (revisão só inspeciona; revisão vencida só libera trocando todo o pacote).
 - `docs/plans/INSTRUCOES-GEMINI.md` e `docs/reviews/`: protocolo de execução e revisão entre Gemini e Claude.
+
+## 2026-11-14 - Orquestração Claude + Gemini com travas no git (Claude)
+- `docs/agents/ORQUESTRACAO.md`: fluxo spec → execução do Gemini → revisão do Claude → merge, checklist de revisão, boas práticas (tarefas pequenas com critérios de aceite, testes como contrato, executor ≠ revisor, máximo de 2 rodadas de correção, contexto enxuto) e economia de tokens.
+- `tools/agents/gemini-task.sh`: roda o Antigravity CLI (`agy -p`, ou `gemini -p`) não interativo numa tarefa, num worktree isolado (`../FLIGHTCAREERV6-gemini`), com log em `.git/agent-logs/` e resumo curto no fim. Prompt em `tools/agents/prompt-executor.md`.
+- `tools/agents/review-pack.sh`: pacote enxuto para revisão (commits, arquivos, arquivos quentes, alertas como `new Random(`/`catch {}`, relatório, build e testes).
+- `.githooks/`: bloqueiam commit/push em `main` e `feat/component-health-system` (liberação `FC_ALLOW_PROTECTED=1`), mensagem fora do padrão, `push --force`, apagar branch remota e commit do banco. Ativar por clone com `git config core.hooksPath "$(pwd)/.githooks"`.
+- `docs/agents/MODELO-SPEC.md` (modelo de spec) e `docs/agents/LICOES.md` (lições das revisões, lidas pelo executor).
+- `INSTRUCOES-GEMINI.md`, `CLAUDE.md` e `AGENTS.md` › 4 atualizados. Hooks testados num repositório descartável; `agy -p` respondeu em modo não interativo. **O ciclo completo com uma tarefa real ainda não foi executado.**
