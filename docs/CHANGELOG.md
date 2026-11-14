@@ -1372,3 +1372,7 @@
 
 ## 2026-11-14 - F4.1: break check com curva linear (plano) (Claude)
 - Decisão do usuário: abaixo de 30% de saúde, chance de quebra por sorteio (a cada 10 min simulados) = `clamp((30 − saúde) / 30, 0, 1)`: 3,33% a 29%, 50% a 15%, 100% a 0%. Substitui `pMax · ((30 − h) / 30)^k`; parâmetros no JSON (`breakCheck`), intervalo em tempo simulado acumulado. Testes da F4.1 atualizados no plano. Nenhum código mudou.
+
+## 2026-11-14 - Pane nativa a 0% e perda total econômica (plano) (Claude)
+- Decisões do usuário: pane nativa (`IS FAILED`) leva a peça a 0% (antes ≤ 15%); peça quebrada não roda break check até a troca; perda total deixa de ser deduzida de saúde 0% e passa a ser acidente real (crash) ou **perda total econômica**: reparo (componentes até 100% + panes abertas) > 70% do valor de mercado do avião com os componentes a 100%.
+- Nova tarefa F4.2b no plano, com testes; achado: com os `repairCostFactor` atuais o reparo total de um pistão soma ~0,285 do preço de compra, então os fatores precisam ser recalibrados na implementação. `native-wear-mapping.md` e `AGENTS.md` › 6 atualizados. Nenhum código mudou.

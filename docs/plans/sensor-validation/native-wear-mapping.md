@@ -47,7 +47,7 @@ Status: **Ativo** = usa a taxa; **Observar** = só log até a F1.4c; **Não usar
 
 1. Gatilho por **borda de subida** (0 → 1), lido junto com as panes nativas que o `PersistentFailureService` já detecta. Um evento de cada tipo por componente por voo.
 2. **Fraca:** a saúde da peça fica no máximo em `nativeWeakHealthCap` = **35%** (proposta). Se já estiver abaixo, nada muda. 35% fica abaixo do limite do walkaround (40%), então a peça visível passa a ganhar a exclamação amarela no próximo walkaround, e acima do início dos break checks (30%). **Não** cria discrepância nem aviso na hora (regra 0.11: amarelo só quando o piloto descobre). Vai para o blackbox.
-3. **Quebrada:** pane com o código da tabela abaixo, origem `Native`, e a saúde da peça fica no máximo em `nativeFailedHealthCap` = **15%** (proposta, abaixo do limiar de pane de 20%), para que reparar a pane sem trocar a peça não deixe uma peça "quebrada a 80%". Marca `IsBroken` quando existir peça (Fase 2).
+3. **Quebrada:** pane com o código da tabela abaixo, origem `Native`, e a saúde da peça vai a **0%** (decisão do usuário, 2026-11-14, no lugar dos 15% aprovados antes): peça quebrada = 0%, só a troca devolve a 100%. Marca `IsBroken` quando existir peça (Fase 2); peça `IsBroken` não roda break check. Saúde 0% **não** é perda total (plano › F4.2b).
 4. **Sem duplicar:** se já há discrepância aberta com o mesmo código (do addon ou de outra leitura nativa, ex.: `ENG FAILED`), o evento vai só para o blackbox.
 5. Pane sem forma de ser mantida no simulador (enforcement `None`): depois que o voo é reiniciado o MSFS esquece a pane, mas ela continua valendo como **NO-GO no Hangar** (o `StartMonitoring` bloqueia).
 6. Os dois limites ficam no JSON (catálogo), não no código.
@@ -82,7 +82,7 @@ Componente sem barra hoje (combustível, piloto automático): até a Fase 2, o e
 
 ## Decisões para o usuário
 
-1. ~~Limites: fraca → no máximo 35%, quebrada → no máximo 15%?~~ **Aprovado pelo usuário em 2026-11-14.**
+1. ~~Limites: fraca → no máximo 35%, quebrada → no máximo 15%?~~ **Aprovado pelo usuário em 2026-11-14**; depois alterado pelo usuário: **quebrada → 0%**.
 2. ~~Comandos, combustível e bateria quebrados valem como NO-GO mesmo sem manter a pane no simulador depois do reinício?~~ **Aprovado.**
 3. ~~Piloto automático e flaps quebrados como diferidos?~~ **Aprovado.**
 4. ~~Tabela 1: motor (39, 40) e pneus (37, 48) Ativo, o resto em Observar até a F1.4c?~~ **Aprovado.**
