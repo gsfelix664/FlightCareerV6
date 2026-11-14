@@ -14,6 +14,11 @@ if repo_root not in sys.path:
     sys.path.insert(0, repo_root)
 
 from tools.analyze_sensor_log import (
+    CAL_PREFIXES,
+    DEFAULT_MIN_THRESHOLD,
+    NOISE_MULTIPLIER,
+    UNIT_STABLE_MAX_SPREAD,
+    calibration_summary,
     classify,
     column_stats,
     compute_durations_and_gaps,
@@ -25,6 +30,7 @@ from tools.analyze_sensor_log import (
     marker_reactions,
     match_marker_prefix,
     native_wear_summary,
+    render_calibration_report,
 )
 
 
@@ -320,6 +326,147 @@ class TestAnalyzeSensorLog(unittest.TestCase):
         self.assertIsNone(comp["failed_utc"])
         self.assertFalse(comp["responded"])
         self.assertTrue(comp["is_idle"])
+
+    def test_calibration_segments_by_markers(self):
+        """marcadores cal-normal-cruzeiro, nota livre, cal-abuso-rpm -> 2 trechos (nota livre ignorado), tipos normal e abuso."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0", "marker": "cal-normal-cruzeiro"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0", "marker": ""},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0", "marker": "nota livre"},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0", "marker": ""},
+            {"utc": "2026-11-14T01:00:40.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.002", "marker": "cal-abuso-rpm"},
+            {"utc": "2026-11-14T01:00:50.000Z", "nw-level-39": "0.98", "nw-overstress-rate-39": "0.002", "marker": ""},
+        ]
+        res = calibration_summary(rows, max_gap=15.0)
+        self.assertTrue(res["has_data"])
+        segments = res["segments"]
+        self.assertEqual(len(segments), 2)
+        self.assertEqual(segments[0]["name"], "cal-normal-cruzeiro")
+        self.assertEqual(segments[0]["kind"], "normal")
+        self.assertAlmostEqual(segments[0]["components"][39]["duration_s"], 30.0, places=2)
+
+        self.assertEqual(segments[1]["name"], "cal-abuso-rpm")
+        self.assertEqual(segments[1]["kind"], "abuso")
+        self.assertAlmostEqual(segments[1]["components"][39]["duration_s"], 10.0, places=2)
+
+    def test_calibration_integral_matches_drop(self):
+        """trecho de abuso com 40 linhas a 1 s, taxa 0,001 constante e nível caindo 0,001 por linha -> rate_integral ≈ 0,039–0,040, level_drop ≈ 0,039, unit_ratio ≈ 1 (±0,05)."""
+        rows = []
+        for i in range(40):
+            marker = "cal-abuso-teste" if i == 0 else ""
+            rows.append({
+                "utc": f"2026-11-14T01:00:{i:02d}.000Z",
+                "nw-level-39": f"{1.0 - 0.001 * i:.5f}",
+                "nw-overstress-rate-39": "0.001",
+                "marker": marker,
+            })
+        res = calibration_summary(rows)
+        self.assertTrue(res["has_data"])
+        seg = res["segments"][0]
+        comp = seg["components"][39]
+        self.assertGreaterEqual(comp["rate_integral"], 0.0389)
+        self.assertLessEqual(comp["rate_integral"], 0.0401)
+        self.assertAlmostEqual(comp["level_drop"], 0.039, places=3)
+        self.assertIsNotNone(comp["unit_ratio"])
+        self.assertAlmostEqual(comp["unit_ratio"], 1.0, delta=0.05)
+
+    def test_calibration_gap_not_integrated(self):
+        """duas linhas separadas por 30 s com max_gap=5 -> esse intervalo não entra em duration_s nem em rate_integral."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.002", "marker": "cal-abuso-gap"},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.002", "marker": ""},
+        ]
+        res = calibration_summary(rows, max_gap=5.0)
+        self.assertTrue(res["has_data"])
+        comp = res["segments"][0]["components"][39]
+        self.assertEqual(comp["duration_s"], 0.0)
+        self.assertEqual(comp["rate_integral"], 0.0)
+
+    def test_calibration_threshold_from_noise(self):
+        """trecho normal com taxa máx 0,0002 -> suggested_threshold == 0,0006; sem trecho normal -> 0,0001; ruído 0,002 -> noisy == True."""
+        rows_with_normal = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0002", "marker": "cal-normal-taxi"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.0001", "marker": ""},
+        ]
+        res1 = calibration_summary(rows_with_normal)
+        self.assertAlmostEqual(res1["components"][39]["suggested_threshold"], 0.0006, places=6)
+        self.assertFalse(res1["components"][39]["noisy"])
+
+        rows_without_normal = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.002", "marker": "cal-abuso-rpm"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.98", "nw-overstress-rate-39": "0.002", "marker": ""},
+        ]
+        res2 = calibration_summary(rows_without_normal)
+        self.assertAlmostEqual(res2["components"][39]["suggested_threshold"], 0.0001, places=6)
+
+        rows_noisy = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.002", "marker": "cal-normal-taxi"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": ""},
+        ]
+        res3 = calibration_summary(rows_noisy)
+        self.assertTrue(res3["components"][39]["noisy"])
+
+    def test_calibration_unit_status(self):
+        """razões 1,0 e 1,2 -> confirmada; 1,0 e 2,0 -> divergente; uma só -> inconclusiva."""
+        rows_conf = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": "cal-abuso-1"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.001", "marker": ""},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.0012", "marker": "cal-abuso-2"},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.98", "nw-overstress-rate-39": "0.0012", "marker": ""},
+        ]
+        res_conf = calibration_summary(rows_conf, max_gap=15.0)
+        self.assertEqual(res_conf["components"][39]["unit_status"], "confirmada")
+
+        rows_div = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": "cal-abuso-1"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.001", "marker": ""},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.002", "marker": "cal-abuso-2"},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.98", "nw-overstress-rate-39": "0.002", "marker": ""},
+        ]
+        res_div = calibration_summary(rows_div, max_gap=15.0)
+        self.assertEqual(res_div["components"][39]["unit_status"], "divergente")
+
+        rows_single = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": "cal-abuso-1"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.001", "marker": ""},
+        ]
+        res_single = calibration_summary(rows_single, max_gap=15.0)
+        self.assertEqual(res_single["components"][39]["unit_status"], "inconclusiva")
+
+    def test_calibration_restart_not_credited(self):
+        """nível 1,00 -> 0,98 -> 1,00 -> 0,99 no trecho -> level_drop == 0,03."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": "cal-abuso-reinicio"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.98", "nw-overstress-rate-39": "0.001", "marker": ""},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "1.00", "nw-overstress-rate-39": "0.001", "marker": ""},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.99", "nw-overstress-rate-39": "0.001", "marker": ""},
+        ]
+        res = calibration_summary(rows)
+        comp = res["segments"][0]["components"][39]
+        self.assertAlmostEqual(comp["level_drop"], 0.03, places=4)
+
+    def test_calibration_weak_failed_time(self):
+        """trecho cal-longo-inicio, nw-is-weak-39 vira 1 aos 600 s e nw-is-failed-39 aos 900 s -> first_weak_s == 600, first_failed_s == 900."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "nw-is-weak-39": "0", "nw-is-failed-39": "0", "marker": "cal-longo-inicio"},
+            {"utc": "2026-11-14T01:10:00.000Z", "nw-level-39": "0.35", "nw-is-weak-39": "1", "nw-is-failed-39": "0", "marker": ""},
+            {"utc": "2026-11-14T01:15:00.000Z", "nw-level-39": "0.15", "nw-is-weak-39": "1", "nw-is-failed-39": "1", "marker": ""},
+        ]
+        res = calibration_summary(rows, max_gap=1000.0)
+        comp = res["segments"][0]["components"][39]
+        self.assertEqual(comp["first_weak_s"], 600)
+        self.assertEqual(comp["first_failed_s"], 900)
+
+    def test_calibration_no_markers(self):
+        """sem marcadores cal-* -> has_data False e o render contém 'sem trechos de calibração'."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00", "marker": "nota normal"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.99", "marker": ""},
+        ]
+        res = calibration_summary(rows)
+        self.assertFalse(res["has_data"])
+        report = render_calibration_report(res, model="C152")
+        self.assertIn("sem trechos de calibração", report.lower())
 
 
 
