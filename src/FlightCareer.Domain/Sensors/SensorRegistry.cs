@@ -49,7 +49,8 @@ namespace FlightCareer.Domain.Sensors
                 if (string.IsNullOrWhiteSpace(sensor.SimVar))
                     throw new InvalidDataException($"SimVar da chave '{sensor.Key}' não pode ser vazia.");
 
-                if (sensor.SimVar.Contains(':'))
+                // Índice fixo na SimVar (ex.: ID de componente do wear and tear) é permitido; sensor por motor recebe o índice do layout
+                if (sensor.PerEngine && sensor.SimVar.Contains(':'))
                     throw new InvalidDataException($"SimVar '{sensor.SimVar}' não pode conter ':' (use PerEngine = true em vez de sufixos de índice).");
 
                 if (string.IsNullOrWhiteSpace(sensor.Unit))

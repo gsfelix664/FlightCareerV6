@@ -191,6 +191,21 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void Validate_FixedIndexOnNonPerEngineSensor_IsAllowed()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "nw-level-28", "simVar": "WEAR AND TEAR LEVEL:28", "unit": "percent over 100", "group": "native-wear", "perEngine": false }
+              ]
+            }
+            """;
+
+            var registry = SensorRegistry.FromJson(json);
+            Assert.Equal("WEAR AND TEAR LEVEL:28", Assert.Single(registry.Sensors).SimVar);
+        }
+
+        [Fact]
         public void Validate_EmptyUnit_Throws()
         {
             const string json = """
@@ -218,6 +233,55 @@ namespace FlightCareer.Tests.Sensors
 
             var ex = Assert.Throws<InvalidDataException>(() => SensorRegistry.FromJson(json));
             Assert.Contains("kebab-case", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Registry_NativeWear_HasFourVarsPerComponentId()
+        {
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+            var nativeWear = sensors.Sensors.Where(s => s.Group == "native-wear").ToList();
+
+            // Deve ter 46 IDs conhecidos (0..14 e 19..49)
+            var expectedIds = Enumerable.Range(0, 15).Concat(Enumerable.Range(19, 31)).ToList();
+            Assert.Equal(46, expectedIds.Count);
+
+            foreach (var id in expectedIds)
+            {
+                var level = nativeWear.FirstOrDefault(s => s.Key == $"nw-level-{id}");
+                var isWeak = nativeWear.FirstOrDefault(s => s.Key == $"nw-is-weak-{id}");
+                var isFailed = nativeWear.FirstOrDefault(s => s.Key == $"nw-is-failed-{id}");
+                var overstress = nativeWear.FirstOrDefault(s => s.Key == $"nw-overstress-rate-{id}");
+
+                Assert.NotNull(level);
+                Assert.Equal($"WEAR AND TEAR LEVEL:{id}", level.SimVar);
+                Assert.Equal("percent over 100", level.Unit);
+
+                Assert.NotNull(isWeak);
+                Assert.Equal($"WEAR AND TEAR IS WEAK:{id}", isWeak.SimVar);
+                Assert.Equal("bool", isWeak.Unit);
+
+                Assert.NotNull(isFailed);
+                Assert.Equal($"WEAR AND TEAR IS FAILED:{id}", isFailed.SimVar);
+                Assert.Equal("bool", isFailed.Unit);
+
+                Assert.NotNull(overstress);
+                Assert.Equal($"WEAR AND TEAR OVERSTRESS DAMAGE RATE:{id}", overstress.SimVar);
+                Assert.Equal("percent over 100", overstress.Unit);
+            }
+
+            // Garante que nenhum ID de 15 a 18 existe
+            for (int missingId = 15; missingId <= 18; missingId++)
+            {
+                Assert.DoesNotContain(nativeWear, s => s.Key.EndsWith($"-{missingId}", StringComparison.Ordinal));
+                Assert.DoesNotContain(nativeWear, s => s.SimVar.EndsWith($":{missingId}", StringComparison.Ordinal));
+            }
+
+            // Confere também as duas expostas
+            Assert.Contains(nativeWear, s => s.Key == "nw-exposed-level" && s.SimVar == "WEAR AND TEAR EXPOSED PARTS LEVEL");
+            Assert.Contains(nativeWear, s => s.Key == "nw-exposed-lowest-level" && s.SimVar == "WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL");
+
+            // Total no grupo native-wear: 46 * 4 + 2 = 186
+            Assert.Equal(186, nativeWear.Count);
         }
 
         private static string FindInventoryPath()
@@ -253,7 +317,7 @@ namespace FlightCareer.Tests.Sensors
                     continue;
                 }
 
-                if (currentSection < 1 || currentSection > 11)
+                if (currentSection < 1 || currentSection > 12)
                     continue;
 
                 if (!line.StartsWith('|') || line.StartsWith("|---") || line.StartsWith("| SimVar"))

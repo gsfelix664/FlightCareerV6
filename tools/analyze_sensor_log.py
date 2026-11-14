@@ -23,6 +23,199 @@ DEFAULT_REGISTRY = os.path.join(
 )
 DEFAULT_EXPECTATIONS = os.path.join(SCRIPT_DIR, "sensor_validation_expectations.json")
 
+NATIVE_COMPONENTS: Dict[int, str] = {
+    0: "FUEL TANK",
+    1: "FUEL PUMP",
+    2: "FUEL VALVE",
+    3: "FUEL JUNCTION",
+    4: "FUEL LINE",
+    5: "FLAPS LEFT",
+    6: "FLAPS RIGHT",
+    7: "FLAPS LEFT CABLE",
+    8: "FLAPS RIGHT CABLE",
+    9: "AILERONS LEFT",
+    10: "AILERONS RIGHT",
+    11: "AILERONS LEFT CABLE",
+    12: "AILERONS RIGHT CABLE",
+    13: "ELEVATOR",
+    14: "ELEVATOR CABLE",
+    19: "RUDDER",
+    20: "RUDDER CABLE",
+    21: "HYDRAULIC RESERVOIR",
+    22: "HYDRAULIC PUMP",
+    23: "HYDRAULIC VALVE",
+    24: "HYDRAULIC ACTUATOR",
+    25: "HYDRAULIC PTU",
+    26: "HYDRAULIC ACCUMULATOR",
+    27: "HYDRAULIC LINE",
+    28: "ELECTRICAL ALTERNATOR",
+    29: "ELECTRICAL BATTERY",
+    30: "ELECTRICAL IDG",
+    31: "ELECTRICAL RAT",
+    32: "ELECTRICAL BUS",
+    33: "ELECTRICAL CIRCUIT",
+    34: "ELECTRICAL RECTIFIERS",
+    35: "LANDING_GEAR",
+    36: "BRAKE",
+    37: "TIRE",
+    38: "TIRE_PRESSURE",
+    39: "PISTON ENGINE",
+    40: "TURBINE_ENGINE",
+    41: "OIL_TANK_INTEGRITY",
+    42: "OIL_TANK_AMOUNT",
+    43: "AUTOPILOT_BANK",
+    44: "AUTOPILOT_PITCH",
+    45: "AUTOPILOT_YAW",
+    46: "GENERAL",
+    47: "TAILWHEEL LANDING GEAR",
+    48: "TAILWHEEL TIRE",
+    49: "TAILWHEEL TIRE PRESSURE",
+}
+
+
+# Subida de nível acima disto conta como reinício/reparo (abaixo é ruído de ponto flutuante)
+RESTART_JUMP = 0.005
+
+
+def native_wear_summary(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Dict[str, Any]:
+    """Calcula o resumo do desgaste nativo (wear and tear) por componente.
+
+    Para cada ID de componente presente no log:
+    - Nível inicial, final e mínimo
+    - Delta do voo (acumula estritamente quedas; subida conta como reinício e move a base sem creditar)
+    - Primeiro UTC e nível quando nw-is-weak vira 1
+    - Primeiro UTC e nível quando nw-is-failed vira 1
+    - Taxa máxima de overstress damage rate
+    """
+    if not rows:
+        return {"has_data": False, "components": {}}
+
+    all_keys: Set[str] = set()
+    for r in rows:
+        all_keys.update(r.keys())
+
+    present_ids = [cid for cid in sorted(NATIVE_COMPONENTS.keys()) if f"nw-level-{cid}" in all_keys]
+
+    if not present_ids:
+        return {"has_data": False, "components": {}}
+
+    components_summary: Dict[int, Dict[str, Any]] = {}
+
+    for cid in present_ids:
+        lvl_key = f"nw-level-{cid}"
+        weak_key = f"nw-is-weak-{cid}"
+        failed_key = f"nw-is-failed-{cid}"
+        ov_key = f"nw-overstress-rate-{cid}"
+
+        valid_levels: List[float] = []
+        initial_lvl: Optional[float] = None
+        final_lvl: Optional[float] = None
+        min_lvl: Optional[float] = None
+        prev_lvl: Optional[float] = None
+        total_drop: float = 0.0
+        restarts: int = 0
+
+        first_weak_utc: Optional[str] = None
+        first_weak_level: Optional[float] = None
+        first_failed_utc: Optional[str] = None
+        first_failed_level: Optional[float] = None
+        max_overstress: float = 0.0
+
+        for r in rows:
+            raw_lvl = r.get(lvl_key, "")
+            current_lvl: Optional[float] = None
+            if raw_lvl is not None and raw_lvl != "":
+                try:
+                    lvl_val = float(raw_lvl)
+                    if not (math.isnan(lvl_val) or math.isinf(lvl_val)):
+                        current_lvl = lvl_val
+                        valid_levels.append(lvl_val)
+                        if initial_lvl is None:
+                            initial_lvl = lvl_val
+                            min_lvl = lvl_val
+                            prev_lvl = lvl_val
+                        else:
+                            min_lvl = min(min_lvl, lvl_val)
+                            diff = lvl_val - prev_lvl
+                            if diff < 0.0:
+                                # Toda queda conta: o desgaste nativo lento é da ordem de 1e-6 por amostra
+                                total_drop += (-diff)
+                            elif diff > RESTART_JUMP:
+                                # Subida grande = voo reiniciado ou reparo no sim: move a base sem creditar
+                                restarts += 1
+                            # Subida pequena (ruído) só move a base
+                            prev_lvl = lvl_val
+                        final_lvl = lvl_val
+                except ValueError:
+                    pass
+
+            # Checa is_weak
+            raw_weak = r.get(weak_key, "")
+            if raw_weak is not None and raw_weak != "":
+                try:
+                    weak_val = float(raw_weak)
+                    is_w = weak_val >= 0.5
+                except ValueError:
+                    is_w = raw_weak.strip().lower() in ("true", "1")
+
+                if is_w and first_weak_utc is None:
+                    first_weak_utc = r.get("utc", "")
+                    first_weak_level = current_lvl if current_lvl is not None else prev_lvl
+
+            # Checa is_failed
+            raw_failed = r.get(failed_key, "")
+            if raw_failed is not None and raw_failed != "":
+                try:
+                    failed_val = float(raw_failed)
+                    is_f = failed_val >= 0.5
+                except ValueError:
+                    is_f = raw_failed.strip().lower() in ("true", "1")
+
+                if is_f and first_failed_utc is None:
+                    first_failed_utc = r.get("utc", "")
+                    first_failed_level = current_lvl if current_lvl is not None else prev_lvl
+
+            # Checa overstress rate
+            raw_ov = r.get(ov_key, "")
+            if raw_ov is not None and raw_ov != "":
+                try:
+                    ov_val = float(raw_ov)
+                    if not (math.isnan(ov_val) or math.isinf(ov_val)):
+                        max_overstress = max(max_overstress, ov_val)
+                except ValueError:
+                    pass
+
+        if not valid_levels:
+            continue
+
+        total_drop = round(total_drop, 6)
+        responded = (total_drop > 1e-5) or (restarts > 0) or (first_weak_utc is not None) or (first_failed_utc is not None) or (max_overstress > 1e-5)
+
+        components_summary[cid] = {
+            "id": cid,
+            "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+            "initial": initial_lvl,
+            "final": final_lvl,
+            "min": min_lvl,
+            "delta": total_drop,
+            "restarts": restarts,
+            "weak_utc": first_weak_utc,
+            "weak_level": first_weak_level,
+            "failed_utc": first_failed_utc,
+            "failed_level": first_failed_level,
+            "max_overstress": max_overstress,
+            "responded": responded,
+            "is_idle": not responded,
+        }
+
+    return {
+        "has_data": len(components_summary) > 0,
+        "components": components_summary,
+    }
+
 
 def parse_iso_utc(utc_str: str) -> Optional[datetime]:
 
@@ -423,6 +616,7 @@ def render_report(
     sim_duration_sec: float,
     gap_count: int = 0,
     max_gap_sec: float = 5.0,
+    nw_summary: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Gera o relatório completo em formato Markdown."""
     counts = {"Validado": 0, "Revisar": 0, "Não suportado": 0}
@@ -481,6 +675,87 @@ def render_report(
     lines.append(f"- **Não suportado:** {counts.get('Não suportado', 0)} ({counts.get('Não suportado', 0) / max(1, total_cols) * 100:.1f}%)")
     lines.append("")
 
+    lines.append("## Wear and tear nativo")
+    lines.append("")
+    if nw_summary is None or not nw_summary.get("has_data", False):
+        lines.append("sem dados de wear and tear por componente neste log")
+        lines.append("")
+    else:
+        components = nw_summary.get("components", {})
+        active_comps = [c for c in components.values() if c["responded"]]
+        idle_comps = [c for c in components.values() if c["is_idle"]]
+
+        lines.append("### Componentes que responderam")
+        lines.append("")
+        if active_comps:
+            lines.append("| ID | Componente | Inicial | Final | Mín | Delta do voo | Reinícios | Weak em (nível) | Failed em (nível) | Overstress máx |")
+            lines.append("|---|---|---|---|---|---|---|---|---|---|")
+            for c in sorted(active_comps, key=lambda x: x["id"]):
+                cid = c["id"]
+                name = c["name"]
+                init_s = format_num(c["initial"])
+                fin_s = format_num(c["final"])
+                min_s = format_num(c["min"])
+                delta_s = format_num(c["delta"])
+                restarts_s = str(c["restarts"])
+
+                if c["weak_level"] is not None:
+                    weak_s = f"{format_num(c['weak_level'])} ({c['weak_utc']})"
+                else:
+                    weak_s = "-"
+
+                if c["failed_level"] is not None:
+                    failed_s = f"{format_num(c['failed_level'])} ({c['failed_utc']})"
+                else:
+                    failed_s = "-"
+
+                ov_s = format_num(c["max_overstress"])
+
+                lines.append(f"| `{cid}` | {name} | {init_s} | {fin_s} | {min_s} | {delta_s} | {restarts_s} | {weak_s} | {failed_s} | {ov_s} |")
+            lines.append("")
+        else:
+            lines.append("*Nenhum componente variou ou atingiu falha durante o voo.*")
+            lines.append("")
+
+        lines.append("### Componentes sem variação (parados em 1.00)")
+        lines.append("")
+        if idle_comps:
+            idle_desc = [f"{c['id']} ({c['name']})" for c in sorted(idle_comps, key=lambda x: x["id"])]
+            lines.append("- " + ", ".join(idle_desc))
+            lines.append("")
+        else:
+            lines.append("*Todos os componentes monitorados registraram variação.*")
+            lines.append("")
+
+        lines.append("### Sintaxe aceita")
+        lines.append("")
+        spike_keys = [
+            ("nwspike-level-39-idx1", "WEAR AND TEAR LEVEL:39:1"),
+            ("nwspike-level-name", "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n"),
+            ("nwspike-weak-value-39", "WEAR AND TEAR WEAK VALUE:39"),
+            ("nwspike-overstress-factor-39", "WEAR AND TEAR OVERSTRESS FACTOR:39"),
+        ]
+        rejected_set = set(rejected_simvars)
+        lines.append("#### Variantes de Spike (ID 39 — Piston Engine)")
+        lines.append("")
+        for k, simvar in spike_keys:
+            status = "❌ Rejeitada (NAME_UNRECOGNIZED)" if simvar in rejected_set else "✅ Aceita pelo SimConnect"
+            lines.append(f"- `{k}` (`{simvar}`): {status}")
+        lines.append("")
+
+        rejected_nw = [r for r in rejected_simvars if r.startswith("WEAR AND TEAR") and not any(r == sv for _, sv in spike_keys)]
+        if rejected_nw:
+            lines.append("#### SimVars de Wear and Tear Padrão Rejeitadas")
+            lines.append("")
+            for r in rejected_nw:
+                lines.append(f"- ❌ `{r}`")
+            lines.append("")
+        else:
+            lines.append("#### SimVars de Wear and Tear Padrão")
+            lines.append("")
+            lines.append("- Todas as SimVars `WEAR AND TEAR <VAR>:<id>` padrão foram aceitas pelo SimConnect (nenhuma rejeitada).")
+            lines.append("")
+
     lines.append("## Marcadores Registrados")
     lines.append("")
     if markers:
@@ -520,6 +795,8 @@ def render_report(
         "instruments",
         "airframe",
         "native-damage",
+        "native-wear",
+        "native-wear-spike",
         "outro",
     ]
 
@@ -653,6 +930,9 @@ def main() -> None:
     # Duração coberta (real) e simulada considerando quebras (dt > max-gap)
     real_duration, sim_duration, gap_count = compute_durations_and_gaps(rows, args.max_gap)
 
+    # Resumo do desgaste nativo por componente
+    nw_summary = native_wear_summary(rows, args.max_gap)
+
     report_content = render_report(
         ac_type=args.type,
         ac_model=args.model,
@@ -670,6 +950,7 @@ def main() -> None:
         sim_duration_sec=sim_duration,
         gap_count=gap_count,
         max_gap_sec=args.max_gap,
+        nw_summary=nw_summary,
     )
 
     # Grava relatório

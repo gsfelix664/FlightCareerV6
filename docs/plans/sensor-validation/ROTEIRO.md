@@ -6,7 +6,7 @@ Este documento é o guia de voo para o piloto validar a telemetria do simulador 
 
 ## 1. Preparação Pré-Voo
 
-- [ ] **Desligar o estresse nativo do simulador:** No menu do MSFS, vá em *Opções Gerais / Opções de Assistência > Falhas e Danos* e configure **Danos por Estresse da Aeronave (Aircraft Stress Damage) = DESLIGADO**. O FlightCareer é a fonte de verdade do desgaste estrutural; manter essa opção ligada gera panes duplicadas ou encerramentos abruptos pelo simulador.
+- [ ] **Wear and tear do MSFS ligado** (padrão do jogo; decisão de 2026-11-14, plano › 0.1). O addon lê o desgaste nativo e complementa. Só desligue no voo de comparação da F1.4b.
 - [ ] **Iniciar o FlightCareer e o Simulador:** Conecte o FlightCareer ao MSFS e carregue o voo na posição de pátio (Cold & Dark).
 - [ ] **Ligar gravação de sensores:** No HUD Overlay do FlightCareer, clique no botão **REC** para iniciar o `SensorRecorder`. Confirme que o indicador exibe gravação ativa.
 - [ ] **Localização dos arquivos:** Os dados brutos são gravados em `$env:LOCALAPPDATA\FlightCareer\sensor-logs\` (ou `%LocalAppData%\FlightCareer\sensor-logs\` no cmd) nos formatos `AAAAMMDD-HHMM-<TITULO>.csv` e `...-context.json`.
@@ -137,3 +137,50 @@ python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\Flig
 > Passe apenas um arquivo CSV por voo. Junte múltiplos arquivos apenas se forem da **mesma** gravação (por exemplo, arquivos divididos com sufixo). Nunca misture arquivos de voos ou sessões diferentes no mesmo comando.
 
 O relatório em Markdown será gerado automaticamente em `docs/plans/sensor-validation/<TIPO>-<MODELO>.md`.
+
+---
+
+## 5. F1.4b — Voos do Wear and Tear Nativo
+
+Esta seção tem como objetivo validar em voo real o comportamento das SimVars `WEAR AND TEAR *` do MSFS 2024, testar as sintaxes de ID do SDK e observar como o simulador persiste o desgaste nativo e se reinicia em 100%.
+
+Execute os passos a seguir preferencialmente no **Cessna C152** primeiro:
+
+### Checklist de Voos (F1.4b)
+
+- [ ] **Voo A — Roteiro Completo com Estresse Forte (Wear and Tear LIGADO):**
+  - **Configuração:** Opção de Wear and Tear ligada no MSFS (padrão).
+  - **Procedimento:** Seguir o roteiro completo dos 12 passos da seção 2, enfatizando estresse nos itens de teste (mistura pobre, shock cooling, flap acima de Vfe, curva 60°, frenagem forte).
+  - **Marcador adicional no corte:** Gravação contínua até o passo 12.
+
+- [ ] **Passo B — Reinício do Voo no Simulador (com REC ligado):**
+  - **Ação:** No final do Voo A (com o motor cortado e a gravação REC **ainda ativa**), reiniciar o voo diretamente pelo menu do simulador (Esc → Reiniciar / Restart).
+  - **Marcador:** Imediatamente após o recarregamento na pista/pátio, clicar em **Marcar** e registrar:
+    - **Marcador:** `nw-reinicio`
+  - **Objetivo:** Registrar se os níveis das SimVars `nw-level-*` voltam a 100% (1.00) ou se preservam o desgaste do voo anterior.
+
+- [ ] **Voo C — Voo Curto com Wear and Tear DESLIGADO:**
+  - **Configuração:** No menu de assistência / opções do MSFS, **desligar** a opção de falhas/wear and tear.
+  - **Procedimento:** Voo curto de ~5 minutos: decolagem, 1 curva de 60° (~2 G) e flap 1 estendido acima da Vfe por 5 segundos.
+  - **Marcador:** Antes de iniciar as manobras de estresse:
+    - **Marcador:** `nw-opcao-desligada`
+  - **Objetivo:** Comparar os dados para identificar se há alguma SimVar ou indicativo que sirva como detecção de opção desligada (chave anti-trapaça).
+
+- [ ] **Voo D (Opcional/Se possível) — Persistência via Arquivo `.FLT` do EFB:**
+  - **Ação:** Após um voo com desgaste, salvar o estado do voo em arquivo `.FLT` pelo EFB do avião (com avatar dentro da aeronave).
+  - **Recarregamento:** Recarregar o voo a partir desse arquivo `.FLT` salvo.
+  - **Marcador:** Com o REC ligado após o carregamento:
+    - **Marcador:** `nw-flt-carregado`
+  - **Objetivo:** Verificar se o MSFS carrega o desgaste persistido no arquivo de situação de voo.
+
+### Comandos de Análise dos Voos F1.4b
+
+Para cada CSV gerado no `$env:LOCALAPPDATA\FlightCareer\sensor-logs\`:
+
+```powershell
+# Voo com estresse e reinício (C152):
+python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\FlightCareer\sensor-logs\AAAAMMDD-HHMM-Cessna_C152.csv" --out docs/plans/sensor-validation/native-wear-C152.md
+
+# Voo com opção desligada:
+python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\FlightCareer\sensor-logs\AAAAMMDD-HHMM-Cessna_C152-desligado.csv" --out docs/plans/sensor-validation/native-wear-C152-desligado.md
+```

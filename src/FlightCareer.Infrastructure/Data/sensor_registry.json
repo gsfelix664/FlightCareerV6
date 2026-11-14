@@ -561,34 +561,6 @@
       "perEngine": false
     },
     {
-      "key": "dmg-wear-and-tear-level",
-      "simVar": "WEAR AND TEAR LEVEL",
-      "unit": "percent over 100",
-      "group": "native-damage",
-      "perEngine": false
-    },
-    {
-      "key": "dmg-wear-and-tear-is-weak",
-      "simVar": "WEAR AND TEAR IS WEAK",
-      "unit": "bool",
-      "group": "native-damage",
-      "perEngine": false
-    },
-    {
-      "key": "dmg-wear-and-tear-is-failed",
-      "simVar": "WEAR AND TEAR IS FAILED",
-      "unit": "bool",
-      "group": "native-damage",
-      "perEngine": false
-    },
-    {
-      "key": "dmg-wear-and-tear-overstress-factor",
-      "simVar": "WEAR AND TEAR OVERSTRESS FACTOR",
-      "unit": "percent over 100",
-      "group": "native-damage",
-      "perEngine": false
-    },
-    {
       "key": "elec-master-alternator",
       "simVar": "GENERAL ENG MASTER ALTERNATOR",
       "unit": "bool",
@@ -1300,6 +1272,1336 @@
       "simVar": "PNEUMATICS PACK STATUS",
       "unit": "bool",
       "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-0",
+      "simVar": "WEAR AND TEAR LEVEL:0",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-0",
+      "simVar": "WEAR AND TEAR IS WEAK:0",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-0",
+      "simVar": "WEAR AND TEAR IS FAILED:0",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-0",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:0",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-1",
+      "simVar": "WEAR AND TEAR LEVEL:1",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-1",
+      "simVar": "WEAR AND TEAR IS WEAK:1",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-1",
+      "simVar": "WEAR AND TEAR IS FAILED:1",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-1",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:1",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-2",
+      "simVar": "WEAR AND TEAR LEVEL:2",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-2",
+      "simVar": "WEAR AND TEAR IS WEAK:2",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-2",
+      "simVar": "WEAR AND TEAR IS FAILED:2",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-2",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:2",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-3",
+      "simVar": "WEAR AND TEAR LEVEL:3",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-3",
+      "simVar": "WEAR AND TEAR IS WEAK:3",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-3",
+      "simVar": "WEAR AND TEAR IS FAILED:3",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-3",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:3",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-4",
+      "simVar": "WEAR AND TEAR LEVEL:4",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-4",
+      "simVar": "WEAR AND TEAR IS WEAK:4",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-4",
+      "simVar": "WEAR AND TEAR IS FAILED:4",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-4",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:4",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-5",
+      "simVar": "WEAR AND TEAR LEVEL:5",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-5",
+      "simVar": "WEAR AND TEAR IS WEAK:5",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-5",
+      "simVar": "WEAR AND TEAR IS FAILED:5",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-5",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:5",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-6",
+      "simVar": "WEAR AND TEAR LEVEL:6",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-6",
+      "simVar": "WEAR AND TEAR IS WEAK:6",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-6",
+      "simVar": "WEAR AND TEAR IS FAILED:6",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-6",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:6",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-7",
+      "simVar": "WEAR AND TEAR LEVEL:7",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-7",
+      "simVar": "WEAR AND TEAR IS WEAK:7",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-7",
+      "simVar": "WEAR AND TEAR IS FAILED:7",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-7",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:7",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-8",
+      "simVar": "WEAR AND TEAR LEVEL:8",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-8",
+      "simVar": "WEAR AND TEAR IS WEAK:8",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-8",
+      "simVar": "WEAR AND TEAR IS FAILED:8",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-8",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:8",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-9",
+      "simVar": "WEAR AND TEAR LEVEL:9",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-9",
+      "simVar": "WEAR AND TEAR IS WEAK:9",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-9",
+      "simVar": "WEAR AND TEAR IS FAILED:9",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-9",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:9",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-10",
+      "simVar": "WEAR AND TEAR LEVEL:10",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-10",
+      "simVar": "WEAR AND TEAR IS WEAK:10",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-10",
+      "simVar": "WEAR AND TEAR IS FAILED:10",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-10",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:10",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-11",
+      "simVar": "WEAR AND TEAR LEVEL:11",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-11",
+      "simVar": "WEAR AND TEAR IS WEAK:11",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-11",
+      "simVar": "WEAR AND TEAR IS FAILED:11",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-11",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:11",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-12",
+      "simVar": "WEAR AND TEAR LEVEL:12",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-12",
+      "simVar": "WEAR AND TEAR IS WEAK:12",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-12",
+      "simVar": "WEAR AND TEAR IS FAILED:12",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-12",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:12",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-13",
+      "simVar": "WEAR AND TEAR LEVEL:13",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-13",
+      "simVar": "WEAR AND TEAR IS WEAK:13",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-13",
+      "simVar": "WEAR AND TEAR IS FAILED:13",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-13",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:13",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-14",
+      "simVar": "WEAR AND TEAR LEVEL:14",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-14",
+      "simVar": "WEAR AND TEAR IS WEAK:14",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-14",
+      "simVar": "WEAR AND TEAR IS FAILED:14",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-14",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:14",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-19",
+      "simVar": "WEAR AND TEAR LEVEL:19",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-19",
+      "simVar": "WEAR AND TEAR IS WEAK:19",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-19",
+      "simVar": "WEAR AND TEAR IS FAILED:19",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-19",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:19",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-20",
+      "simVar": "WEAR AND TEAR LEVEL:20",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-20",
+      "simVar": "WEAR AND TEAR IS WEAK:20",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-20",
+      "simVar": "WEAR AND TEAR IS FAILED:20",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-20",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:20",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-21",
+      "simVar": "WEAR AND TEAR LEVEL:21",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-21",
+      "simVar": "WEAR AND TEAR IS WEAK:21",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-21",
+      "simVar": "WEAR AND TEAR IS FAILED:21",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-21",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:21",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-22",
+      "simVar": "WEAR AND TEAR LEVEL:22",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-22",
+      "simVar": "WEAR AND TEAR IS WEAK:22",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-22",
+      "simVar": "WEAR AND TEAR IS FAILED:22",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-22",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:22",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-23",
+      "simVar": "WEAR AND TEAR LEVEL:23",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-23",
+      "simVar": "WEAR AND TEAR IS WEAK:23",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-23",
+      "simVar": "WEAR AND TEAR IS FAILED:23",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-23",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:23",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-24",
+      "simVar": "WEAR AND TEAR LEVEL:24",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-24",
+      "simVar": "WEAR AND TEAR IS WEAK:24",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-24",
+      "simVar": "WEAR AND TEAR IS FAILED:24",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-24",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:24",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-25",
+      "simVar": "WEAR AND TEAR LEVEL:25",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-25",
+      "simVar": "WEAR AND TEAR IS WEAK:25",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-25",
+      "simVar": "WEAR AND TEAR IS FAILED:25",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-25",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:25",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-26",
+      "simVar": "WEAR AND TEAR LEVEL:26",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-26",
+      "simVar": "WEAR AND TEAR IS WEAK:26",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-26",
+      "simVar": "WEAR AND TEAR IS FAILED:26",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-26",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:26",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-27",
+      "simVar": "WEAR AND TEAR LEVEL:27",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-27",
+      "simVar": "WEAR AND TEAR IS WEAK:27",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-27",
+      "simVar": "WEAR AND TEAR IS FAILED:27",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-27",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:27",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-28",
+      "simVar": "WEAR AND TEAR LEVEL:28",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-28",
+      "simVar": "WEAR AND TEAR IS WEAK:28",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-28",
+      "simVar": "WEAR AND TEAR IS FAILED:28",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-28",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:28",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-29",
+      "simVar": "WEAR AND TEAR LEVEL:29",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-29",
+      "simVar": "WEAR AND TEAR IS WEAK:29",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-29",
+      "simVar": "WEAR AND TEAR IS FAILED:29",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-29",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:29",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-30",
+      "simVar": "WEAR AND TEAR LEVEL:30",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-30",
+      "simVar": "WEAR AND TEAR IS WEAK:30",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-30",
+      "simVar": "WEAR AND TEAR IS FAILED:30",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-30",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:30",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-31",
+      "simVar": "WEAR AND TEAR LEVEL:31",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-31",
+      "simVar": "WEAR AND TEAR IS WEAK:31",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-31",
+      "simVar": "WEAR AND TEAR IS FAILED:31",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-31",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:31",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-32",
+      "simVar": "WEAR AND TEAR LEVEL:32",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-32",
+      "simVar": "WEAR AND TEAR IS WEAK:32",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-32",
+      "simVar": "WEAR AND TEAR IS FAILED:32",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-32",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:32",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-33",
+      "simVar": "WEAR AND TEAR LEVEL:33",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-33",
+      "simVar": "WEAR AND TEAR IS WEAK:33",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-33",
+      "simVar": "WEAR AND TEAR IS FAILED:33",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-33",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:33",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-34",
+      "simVar": "WEAR AND TEAR LEVEL:34",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-34",
+      "simVar": "WEAR AND TEAR IS WEAK:34",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-34",
+      "simVar": "WEAR AND TEAR IS FAILED:34",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-34",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:34",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-35",
+      "simVar": "WEAR AND TEAR LEVEL:35",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-35",
+      "simVar": "WEAR AND TEAR IS WEAK:35",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-35",
+      "simVar": "WEAR AND TEAR IS FAILED:35",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-35",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:35",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-36",
+      "simVar": "WEAR AND TEAR LEVEL:36",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-36",
+      "simVar": "WEAR AND TEAR IS WEAK:36",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-36",
+      "simVar": "WEAR AND TEAR IS FAILED:36",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-36",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:36",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-37",
+      "simVar": "WEAR AND TEAR LEVEL:37",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-37",
+      "simVar": "WEAR AND TEAR IS WEAK:37",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-37",
+      "simVar": "WEAR AND TEAR IS FAILED:37",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-37",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:37",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-38",
+      "simVar": "WEAR AND TEAR LEVEL:38",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-38",
+      "simVar": "WEAR AND TEAR IS WEAK:38",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-38",
+      "simVar": "WEAR AND TEAR IS FAILED:38",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-38",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:38",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-39",
+      "simVar": "WEAR AND TEAR LEVEL:39",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-39",
+      "simVar": "WEAR AND TEAR IS WEAK:39",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-39",
+      "simVar": "WEAR AND TEAR IS FAILED:39",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-39",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:39",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-40",
+      "simVar": "WEAR AND TEAR LEVEL:40",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-40",
+      "simVar": "WEAR AND TEAR IS WEAK:40",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-40",
+      "simVar": "WEAR AND TEAR IS FAILED:40",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-40",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:40",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-41",
+      "simVar": "WEAR AND TEAR LEVEL:41",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-41",
+      "simVar": "WEAR AND TEAR IS WEAK:41",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-41",
+      "simVar": "WEAR AND TEAR IS FAILED:41",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-41",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:41",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-42",
+      "simVar": "WEAR AND TEAR LEVEL:42",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-42",
+      "simVar": "WEAR AND TEAR IS WEAK:42",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-42",
+      "simVar": "WEAR AND TEAR IS FAILED:42",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-42",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:42",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-43",
+      "simVar": "WEAR AND TEAR LEVEL:43",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-43",
+      "simVar": "WEAR AND TEAR IS WEAK:43",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-43",
+      "simVar": "WEAR AND TEAR IS FAILED:43",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-43",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:43",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-44",
+      "simVar": "WEAR AND TEAR LEVEL:44",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-44",
+      "simVar": "WEAR AND TEAR IS WEAK:44",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-44",
+      "simVar": "WEAR AND TEAR IS FAILED:44",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-44",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:44",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-45",
+      "simVar": "WEAR AND TEAR LEVEL:45",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-45",
+      "simVar": "WEAR AND TEAR IS WEAK:45",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-45",
+      "simVar": "WEAR AND TEAR IS FAILED:45",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-45",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:45",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-46",
+      "simVar": "WEAR AND TEAR LEVEL:46",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-46",
+      "simVar": "WEAR AND TEAR IS WEAK:46",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-46",
+      "simVar": "WEAR AND TEAR IS FAILED:46",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-46",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:46",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-47",
+      "simVar": "WEAR AND TEAR LEVEL:47",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-47",
+      "simVar": "WEAR AND TEAR IS WEAK:47",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-47",
+      "simVar": "WEAR AND TEAR IS FAILED:47",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-47",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:47",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-48",
+      "simVar": "WEAR AND TEAR LEVEL:48",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-48",
+      "simVar": "WEAR AND TEAR IS WEAK:48",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-48",
+      "simVar": "WEAR AND TEAR IS FAILED:48",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-48",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:48",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-49",
+      "simVar": "WEAR AND TEAR LEVEL:49",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-49",
+      "simVar": "WEAR AND TEAR IS WEAK:49",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-49",
+      "simVar": "WEAR AND TEAR IS FAILED:49",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-49",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:49",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-exposed-level",
+      "simVar": "WEAR AND TEAR EXPOSED PARTS LEVEL",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-exposed-lowest-level",
+      "simVar": "WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-level-39-idx1",
+      "simVar": "WEAR AND TEAR LEVEL:39:1",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-level-name",
+      "simVar": "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-weak-value-39",
+      "simVar": "WEAR AND TEAR WEAK VALUE:39",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-overstress-factor-39",
+      "simVar": "WEAR AND TEAR OVERSTRESS FACTOR:39",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
       "perEngine": false
     }
   ]

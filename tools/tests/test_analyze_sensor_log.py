@@ -24,6 +24,7 @@ from tools.analyze_sensor_log import (
     load_rows,
     marker_reactions,
     match_marker_prefix,
+    native_wear_summary,
 )
 
 
@@ -258,6 +259,67 @@ class TestAnalyzeSensorLog(unittest.TestCase):
         # Prefixo exato casa normalmente
         prefix_exact = match_marker_prefix("02-freio-taxi", expectations)
         self.assertEqual(prefix_exact, "02-freio-taxi")
+
+    def test_native_wear_delta_counts_only_drops(self):
+        """Delta deve somar apenas quedas sucessivas; subida é reinício, move a base e não credita."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "1.00"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.98"},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "1.00"},  # reinício
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.99"},
+        ]
+        res = native_wear_summary(rows)
+        self.assertTrue(res["has_data"])
+        self.assertIn(39, res["components"])
+        comp = res["components"][39]
+        self.assertAlmostEqual(comp["delta"], 0.03, places=4)
+        self.assertEqual(comp["restarts"], 1)
+        self.assertAlmostEqual(comp["initial"], 1.00, places=4)
+        self.assertAlmostEqual(comp["final"], 0.99, places=4)
+        self.assertAlmostEqual(comp["min"], 0.98, places=4)
+        self.assertTrue(comp["responded"])
+        self.assertFalse(comp["is_idle"])
+
+    def test_native_wear_slow_drops_and_noise(self):
+        """Quedas minúsculas (desgaste lento real ~2e-6 por amostra) somam; subida pequena é ruído, não reinício."""
+        rows = [{"utc": f"2026-11-14T01:00:{i:02d}.000Z", "nw-level-39": repr(1.0 - 2e-6 * i)} for i in range(50)]
+        rows.append({"utc": "2026-11-14T01:00:50.000Z", "nw-level-39": repr(1.0 - 2e-6 * 48)})  # sobe 2e-6: ruído
+        res = native_wear_summary(rows)
+        comp = res["components"][39]
+        self.assertAlmostEqual(comp["delta"], 2e-6 * 49, places=9)
+        self.assertEqual(comp["restarts"], 0)
+
+    def test_native_wear_weak_and_failed_first_time(self):
+        """Grava primeiro timestamp e nível de quando nw-is-weak e nw-is-failed viram 1."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-39": "0.50", "nw-is-weak-39": "0", "nw-is-failed-39": "0"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-39": "0.15", "nw-is-weak-39": "1", "nw-is-failed-39": "0"},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-39": "0.10", "nw-is-weak-39": "1", "nw-is-failed-39": "0"},
+            {"utc": "2026-11-14T01:00:30.000Z", "nw-level-39": "0.05", "nw-is-weak-39": "1", "nw-is-failed-39": "1"},
+        ]
+        res = native_wear_summary(rows)
+        comp = res["components"][39]
+        self.assertEqual(comp["weak_utc"], "2026-11-14T01:00:10.000Z")
+        self.assertAlmostEqual(comp["weak_level"], 0.15, places=4)
+        self.assertEqual(comp["failed_utc"], "2026-11-14T01:00:30.000Z")
+        self.assertAlmostEqual(comp["failed_level"], 0.05, places=4)
+
+    def test_native_wear_silent_component_listed_as_idle(self):
+        """Componente que não variou de nível e não disparou weak/failed fica marcado como idle."""
+        rows = [
+            {"utc": "2026-11-14T01:00:00.000Z", "nw-level-0": "1.00", "nw-is-weak-0": "0", "nw-is-failed-0": "0"},
+            {"utc": "2026-11-14T01:00:10.000Z", "nw-level-0": "1.00", "nw-is-weak-0": "0", "nw-is-failed-0": "0"},
+            {"utc": "2026-11-14T01:00:20.000Z", "nw-level-0": "1.00", "nw-is-weak-0": "0", "nw-is-failed-0": "0"},
+        ]
+        res = native_wear_summary(rows)
+        self.assertTrue(res["has_data"])
+        comp = res["components"][0]
+        self.assertEqual(comp["delta"], 0.0)
+        self.assertEqual(comp["restarts"], 0)
+        self.assertIsNone(comp["weak_utc"])
+        self.assertIsNone(comp["failed_utc"])
+        self.assertFalse(comp["responded"])
+        self.assertTrue(comp["is_idle"])
 
 
 
