@@ -1,6 +1,6 @@
-# F1.4b — Tabelas do portão: wear and tear nativo → addon (PROPOSTA)
+# F1.4b — Tabelas do portão: wear and tear nativo → addon (APROVADA)
 
-**Status:** proposta do revisor (Claude), 2026-11-14, com as decisões do usuário (plano › 0.1, opção B). Limites dos eventos aprovados (2026-11-14); Tabela 1, NO-GO e diferidas aguardando aprovação. Limiares e fatores definitivos saem da F1.4c. Alimenta F2.1, F2.2 e F4.2.
+**Status:** proposta do revisor (Claude), 2026-11-14, com as decisões do usuário (plano › 0.1, opção B). **Aprovada pelo usuário em 2026-11-14** (limites dos eventos, Tabela 1, NO-GO, diferidas, teto e limiar provisório). Limiares e fatores definitivos saem da F1.4c. Alimenta F2.1, F2.2 e F4.2.
 **Base:** `native-wear-C152.md` (único voo medido, em pista de terra e com abuso extremo), `DefectCatalog.cs`, `component_catalog.json`.
 **SDK conferido:** página "Aircraft Misc. Variables" do SDK 2024 (`WEAR AND TEAR LEVEL:39` = `'PISTON_ENGINE'_n`; 1 = intacto, 0 = falhou; só leitura). A lista de IDs 0–49 é a do `sensor-inventory.md` › 12, aceita pelo MSFS no voo do C152. A unidade e a fórmula de `OVERSTRESS DAMAGE RATE` **não** estão documentadas: a conversão abaixo é hipótese a confirmar na F1.4c.
 
@@ -83,10 +83,10 @@ Componente sem barra hoje (combustível, piloto automático): até a Fase 2, o e
 ## Decisões para o usuário
 
 1. ~~Limites: fraca → no máximo 35%, quebrada → no máximo 15%?~~ **Aprovado pelo usuário em 2026-11-14.**
-2. Comandos, combustível e bateria quebrados valem como **NO-GO** mesmo sem conseguirmos manter a pane no simulador depois do reinício?
-3. Piloto automático e flaps quebrados como **diferidos** (permite voar)?
-4. Tabela 1: motor (39, 40) e pneus (37, 48) **Ativo**, o resto em **Observar** até a F1.4c?
-5. Teto inicial de **1.000 %/h** e limiar provisório **0,0001**?
+2. ~~Comandos, combustível e bateria quebrados valem como NO-GO mesmo sem manter a pane no simulador depois do reinício?~~ **Aprovado.**
+3. ~~Piloto automático e flaps quebrados como diferidos?~~ **Aprovado.**
+4. ~~Tabela 1: motor (39, 40) e pneus (37, 48) Ativo, o resto em Observar até a F1.4c?~~ **Aprovado.**
+5. ~~Teto inicial de 1.000 %/h e limiar provisório 0,0001?~~ **Aprovado** (valores definitivos saem da F1.4c).
 
 ## Ainda falta dado de voo (não bloqueia a aprovação)
 - **Hoje o addon não lê `IS WEAK` / `IS FAILED` em voo** (só o `SensorRecorder` grava, com REC ligado). A implementação entra na F4; a confirmação, no voo longo de overstress da F1.4c (item 9).
