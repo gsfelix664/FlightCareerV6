@@ -10,6 +10,7 @@ import csv
 import json
 import math
 import os
+import statistics
 import sys
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -75,6 +76,13 @@ NATIVE_COMPONENTS: Dict[int, str] = {
 
 # Subida de nível acima disto conta como reinício/reparo (abaixo é ruído de ponto flutuante)
 RESTART_JUMP = 0.005
+
+CAL_PREFIXES = ("cal-normal-", "cal-abuso-", "cal-longo-")
+# Marcadores do voo longo que só anotam o momento (fraca/pane): não abrem trecho novo
+CAL_ANNOTATIONS = ("cal-longo-weak", "cal-longo-pane")
+DEFAULT_MIN_THRESHOLD = 0.0001
+NOISE_MULTIPLIER = 3.0
+UNIT_STABLE_MAX_SPREAD = 1.5   # max(razão)/min(razão) entre trechos de abuso
 
 
 def native_wear_summary(
@@ -844,6 +852,350 @@ def render_report(
     return "\n".join(lines)
 
 
+def calibration_summary(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Dict[str, Any]:
+    """Calcula o resumo de calibração addon x nativo a partir de trechos delimitados por marcadores cal-*.
+
+    Trechos: cada marcador cujo texto começa com um de CAL_PREFIXES abre um trecho que vai até o
+    próximo marcador cal-* (exclusive) ou até o fim do log. Marcadores que não são cal-* são ignorados.
+    Nome do trecho = texto do marcador; tipo = 'normal' | 'abuso' | 'longo' pelo prefixo.
+    Para cada trecho e cada <id> com coluna nw-overstress-rate-<id> ou nw-level-<id> no log:
+      - samples, duration_s (soma dos dt entre linhas consecutivas, ignorando dt > max_gap)
+      - rate_max, rate_mean (média ponderada pelo tempo)
+      - rate_integral = soma(taxa_i * dt_i) com dt_i = tempo até a próxima linha (ignorando dt > max_gap)
+      - level_drop = soma só das quedas do nível dentro do trecho (subida = reinício, não credita)
+      - unit_ratio = rate_integral / level_drop  (None se level_drop < 1e-6)
+      - first_weak_s / first_failed_s = segundos desde o início do trecho até nw-is-weak/failed virar 1 (None se não ligou)
+    Por componente (sobre todos os trechos):
+      - noise = maior rate_max entre trechos 'normal' (None se não houver trecho normal)
+      - suggested_threshold = max(noise * NOISE_MULTIPLIER, DEFAULT_MIN_THRESHOLD) (DEFAULT_MIN_THRESHOLD se noise None)
+      - noisy = noise is not None and noise > 0.001   (taxa relevante em operação normal: manter em Observar)
+      - abuse_ratios = unit_ratio dos trechos 'abuso' e 'longo' com valor
+      - unit_status = 'confirmada' se len(abuse_ratios) >= 2 e max/min <= UNIT_STABLE_MAX_SPREAD;
+                      'inconclusiva' se len(abuse_ratios) < 2; 'divergente' caso contrário
+      - unit_ratio_median (mediana de abuse_ratios ou None)
+    Retorno: {"has_data": bool, "segments": [ {name, kind, start_utc, components: {id: {...}}} ],
+              "components": {id: {...}}}
+    """
+    if not rows:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    cal_markers: List[Tuple[int, str, str]] = []
+    for idx, r in enumerate(rows):
+        txt = (r.get("marker") or "").strip()
+        if not txt:
+            continue
+        kind: Optional[str] = None
+        if txt.startswith(CAL_ANNOTATIONS):
+            continue
+        for pfx in CAL_PREFIXES:
+            if txt.startswith(pfx):
+                kind = pfx.split("-")[1]
+                break
+        if kind is not None:
+            cal_markers.append((idx, txt, kind))
+
+    if not cal_markers:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    all_keys: Set[str] = set()
+    for r in rows:
+        all_keys.update(r.keys())
+
+    cids_set: Set[int] = set()
+    for k in all_keys:
+        if k.startswith("nw-overstress-rate-"):
+            try:
+                cids_set.add(int(k.split("-")[-1]))
+            except ValueError:
+                pass
+        elif k.startswith("nw-level-"):
+            try:
+                cids_set.add(int(k.split("-")[-1]))
+            except ValueError:
+                pass
+
+    present_ids = sorted(cids_set)
+    if not present_ids:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    segments: List[Dict[str, Any]] = []
+
+    for m_idx, (start_row_idx, m_name, m_kind) in enumerate(cal_markers):
+        end_row_idx = cal_markers[m_idx + 1][0] if (m_idx + 1 < len(cal_markers)) else len(rows)
+        sub_rows = rows[start_row_idx:end_row_idx]
+        if not sub_rows:
+            continue
+
+        start_utc = sub_rows[0].get("utc", "")
+        start_dt = parse_iso_utc(start_utc)
+        start_ts = start_dt.timestamp() if start_dt else 0.0
+
+        n_sub = len(sub_rows)
+        dts: List[float] = [0.0] * n_sub
+        row_timestamps: List[float] = []
+        for r in sub_rows:
+            dt_obj = parse_iso_utc(r.get("utc", ""))
+            row_timestamps.append(dt_obj.timestamp() if dt_obj else 0.0)
+
+        for i in range(n_sub - 1):
+            delta = row_timestamps[i + 1] - row_timestamps[i]
+            if 0.0 < delta <= max_gap:
+                dts[i] = delta
+            else:
+                dts[i] = 0.0
+
+        duration_s = sum(dts)
+
+        seg_components: Dict[int, Dict[str, Any]] = {}
+        for cid in present_ids:
+            rate_key = f"nw-overstress-rate-{cid}"
+            level_key = f"nw-level-{cid}"
+            weak_key = f"nw-is-weak-{cid}"
+            failed_key = f"nw-is-failed-{cid}"
+
+            samples = 0
+            rate_max = 0.0
+            rate_integral = 0.0
+            level_drop = 0.0
+            prev_lvl: Optional[float] = None
+            first_weak_s: Optional[float] = None
+            first_failed_s: Optional[float] = None
+
+            for i, r in enumerate(sub_rows):
+                raw_rate = r.get(rate_key, "")
+                raw_lvl = r.get(level_key, "")
+
+                has_rate_sample = False
+                val_rate: Optional[float] = None
+                if raw_rate not in (None, ""):
+                    try:
+                        vr = float(raw_rate)
+                        if not (math.isnan(vr) or math.isinf(vr)):
+                            val_rate = vr
+                            has_rate_sample = True
+                    except ValueError:
+                        pass
+
+                has_lvl_sample = False
+                val_lvl: Optional[float] = None
+                if raw_lvl not in (None, ""):
+                    try:
+                        vl = float(raw_lvl)
+                        if not (math.isnan(vl) or math.isinf(vl)):
+                            val_lvl = vl
+                            has_lvl_sample = True
+                    except ValueError:
+                        pass
+
+                if has_rate_sample or has_lvl_sample:
+                    samples += 1
+
+                if val_rate is not None:
+                    rate_max = max(rate_max, val_rate)
+                    rate_integral += val_rate * dts[i]
+
+                if val_lvl is not None:
+                    if prev_lvl is None:
+                        prev_lvl = val_lvl
+                    else:
+                        diff = val_lvl - prev_lvl
+                        if diff < 0.0:
+                            level_drop += (-diff)
+                        prev_lvl = val_lvl
+
+                raw_weak = r.get(weak_key, "")
+                if raw_weak not in (None, "") and first_weak_s is None:
+                    is_w = False
+                    try:
+                        is_w = float(raw_weak) >= 0.5
+                    except ValueError:
+                        is_w = str(raw_weak).strip().lower() in ("true", "1")
+                    if is_w:
+                        t_curr = row_timestamps[i]
+                        first_weak_s = round(t_curr - start_ts, 3)
+
+                raw_failed = r.get(failed_key, "")
+                if raw_failed not in (None, "") and first_failed_s is None:
+                    is_f = False
+                    try:
+                        is_f = float(raw_failed) >= 0.5
+                    except ValueError:
+                        is_f = str(raw_failed).strip().lower() in ("true", "1")
+                    if is_f:
+                        t_curr = row_timestamps[i]
+                        first_failed_s = round(t_curr - start_ts, 3)
+
+            level_drop = round(level_drop, 6)
+            rate_integral = round(rate_integral, 6)
+            rate_mean = (rate_integral / duration_s) if duration_s > 0.0 else 0.0
+            unit_ratio = (rate_integral / level_drop) if level_drop >= 1e-6 else None
+
+            seg_components[cid] = {
+                "id": cid,
+                "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+                "samples": samples,
+                "duration_s": duration_s,
+                "rate_max": rate_max,
+                "rate_mean": rate_mean,
+                "rate_integral": rate_integral,
+                "level_drop": level_drop,
+                "unit_ratio": unit_ratio,
+                "first_weak_s": first_weak_s,
+                "first_failed_s": first_failed_s,
+            }
+
+        segments.append({
+            "name": m_name,
+            "kind": m_kind,
+            "start_utc": start_utc,
+            "components": seg_components,
+        })
+
+    components_summary: Dict[int, Dict[str, Any]] = {}
+    for cid in present_ids:
+        normal_rates: List[float] = []
+        for seg in segments:
+            if seg["kind"] == "normal":
+                normal_rates.append(seg["components"][cid]["rate_max"])
+
+        noise: Optional[float] = max(normal_rates) if normal_rates else None
+        if noise is not None:
+            suggested_threshold = max(noise * NOISE_MULTIPLIER, DEFAULT_MIN_THRESHOLD)
+        else:
+            suggested_threshold = DEFAULT_MIN_THRESHOLD
+
+        noisy = (noise is not None and noise > 0.001)
+
+        abuse_ratios: List[float] = []
+        for seg in segments:
+            if seg["kind"] in ("abuso", "longo"):
+                ur = seg["components"][cid]["unit_ratio"]
+                if ur is not None:
+                    abuse_ratios.append(ur)
+
+        if len(abuse_ratios) >= 2:
+            min_r = min(abuse_ratios)
+            max_r = max(abuse_ratios)
+            if min_r > 0 and (max_r / min_r) <= UNIT_STABLE_MAX_SPREAD:
+                unit_status = "confirmada"
+            else:
+                unit_status = "divergente"
+        else:
+            unit_status = "inconclusiva"
+
+        unit_ratio_median: Optional[float] = (
+            statistics.median(abuse_ratios) if abuse_ratios else None
+        )
+
+        has_response = any(
+            (seg["components"][cid]["rate_max"] > 0.0 or seg["components"][cid]["level_drop"] > 0.0)
+            for seg in segments
+        )
+
+        components_summary[cid] = {
+            "id": cid,
+            "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+            "noise": noise,
+            "suggested_threshold": suggested_threshold,
+            "noisy": noisy,
+            "abuse_ratios": abuse_ratios,
+            "unit_status": unit_status,
+            "unit_ratio_median": unit_ratio_median,
+            "has_response": has_response,
+        }
+
+    return {
+        "has_data": len(segments) > 0,
+        "segments": segments,
+        "components": components_summary,
+    }
+
+
+def render_calibration_report(summary: Dict[str, Any], model: str) -> str:
+    """Renderiza relatório de calibração addon x nativo em Markdown em português."""
+    lines: List[str] = [
+        f"# Relatório de Calibração Addon × Nativo — {model}",
+        "",
+    ]
+
+    if not summary.get("has_data") or not summary.get("segments"):
+        lines.append("Sem trechos de calibração (marcadores cal-*) neste log.")
+        lines.append("")
+        return "\n".join(lines)
+
+    lines.append("> [!NOTE]")
+    lines.append("> Hipótese: taxa = fração do nível por segundo. Razão ≈ 1 confirma; a perda do addon é comparada pelo revisor.")
+    lines.append("")
+
+    components = summary.get("components", {})
+    segments = summary.get("segments", [])
+
+    lines.append("## 1. Resumo por Componente (Limiares e Unidade)")
+    lines.append("")
+    lines.append("| ID | Componente | Ruído Normal | Limiar Sugerido | Ruidoso (noisy) | Status Unidade | Razão Mediana |")
+    lines.append("|---|---|---|---|---|---|---|")
+
+    active_comps = []
+    idle_comps = []
+
+    for cid in sorted(components.keys()):
+        comp = components[cid]
+        if not comp.get("has_response", False):
+            idle_comps.append(f"{comp['name']} ({cid})")
+            continue
+
+        active_comps.append(comp)
+        c_name = comp["name"]
+        noise_str = f"{comp['noise']:.6f}" if comp["noise"] is not None else "-"
+        thresh_str = f"{comp['suggested_threshold']:.6f}"
+        noisy_str = "Sim" if comp["noisy"] else "Não"
+        status_str = comp["unit_status"]
+        median_str = f"{comp['unit_ratio_median']:.4f}" if comp["unit_ratio_median"] is not None else "-"
+
+        lines.append(
+            f"| {cid} | {c_name} | {noise_str} | {thresh_str} | {noisy_str} | {status_str} | {median_str} |"
+        )
+    lines.append("")
+
+    if idle_comps:
+        lines.append(f"**Componentes sem resposta (taxa 0 e sem queda de nível):** {', '.join(idle_comps)}")
+        lines.append("")
+
+    lines.append("## 2. Detalhamento por Trecho Marcado")
+    lines.append("")
+    lines.append("| Trecho | Tipo | ID | Componente | Duração (s) | Taxa Máx | Taxa Média | Integral Taxa | Queda Nível | Razão | 1º Weak (s) | 1º Failed (s) |")
+    lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
+
+    for seg in segments:
+        s_name = seg["name"]
+        s_kind = seg["kind"]
+        seg_comps = seg.get("components", {})
+        for cid in sorted(seg_comps.keys()):
+            sc = seg_comps[cid]
+            if sc["rate_max"] == 0.0 and sc["level_drop"] == 0.0:
+                continue
+
+            c_name = sc["name"]
+            dur_str = f"{sc['duration_s']:.1f}"
+            rmax_str = f"{sc['rate_max']:.6f}"
+            rmean_str = f"{sc['rate_mean']:.6f}"
+            rint_str = f"{sc['rate_integral']:.6f}"
+            ldrop_str = f"{sc['level_drop']:.6f}"
+            ratio_str = f"{sc['unit_ratio']:.4f}" if sc["unit_ratio"] is not None else "-"
+            weak_str = f"{sc['first_weak_s']:.1f}" if sc["first_weak_s"] is not None else "-"
+            failed_str = f"{sc['first_failed_s']:.1f}" if sc["first_failed_s"] is not None else "-"
+
+            lines.append(
+                f"| `{s_name}` | {s_kind} | {cid} | {c_name} | {dur_str} | {rmax_str} | {rmean_str} | {rint_str} | {ldrop_str} | {ratio_str} | {weak_str} | {failed_str} |"
+            )
+
+    lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> None:
     try:
         if hasattr(sys.stdout, "reconfigure"):
@@ -884,6 +1236,15 @@ def main() -> None:
         "--expectations",
         default=DEFAULT_EXPECTATIONS,
         help="Caminho do sensor_validation_expectations.json",
+    )
+    parser.add_argument(
+        "--calibration",
+        action="store_true",
+        help="Gera relatório de calibração addon x nativo a partir dos marcadores cal-*",
+    )
+    parser.add_argument(
+        "--calibration-out",
+        help="Caminho do arquivo Markdown de saída de calibração (padrão: docs/plans/sensor-validation/calibration-<model>.md)",
     )
 
     args = parser.parse_args()
@@ -962,6 +1323,21 @@ def main() -> None:
         f.write(report_content)
 
     print(f"Relatório gerado com sucesso em: {out_path}")
+
+    if args.calibration:
+        cal_summary = calibration_summary(rows, max_gap=args.max_gap)
+        cal_report = render_calibration_report(cal_summary, model=args.model)
+        cal_out_path = args.calibration_out
+        if not cal_out_path:
+            cal_out_path = os.path.join(
+                "docs", "plans", "sensor-validation", f"calibration-{args.model}.md"
+            )
+        cal_out_dir = os.path.dirname(cal_out_path)
+        if cal_out_dir:
+            os.makedirs(cal_out_dir, exist_ok=True)
+        with open(cal_out_path, "w", encoding="utf-8") as f:
+            f.write(cal_report)
+        print(f"Relatório de calibração gerado com sucesso em: {cal_out_path}")
 
 
 if __name__ == "__main__":

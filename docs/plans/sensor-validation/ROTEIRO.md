@@ -184,3 +184,119 @@ python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\Flig
 # Voo com opção desligada:
 python tools/analyze_sensor_log.py --type A --model C152 "$env:LOCALAPPDATA\FlightCareer\sensor-logs\AAAAMMDD-HHMM-Cessna_C152-desligado.csv" --out docs/plans/sensor-validation/native-wear-C152-desligado.md
 ```
+
+---
+
+## 6. F1.4c — Voos de Calibração (addon × nativo)
+
+Este roteiro tem como objetivo:
+1. Obter a base de ruído em operação normal para determinar o **limiar** de overstress de cada componente (`limiar = max(ruído normal × 3, 0.0001)`).
+2. Confirmar a **unidade** da taxa nativa (`integral(taxa·dt) ≈ queda do nível`).
+3. Permitir a calibração das taxas de estresse do catálogo do addon (para aviões sem wear and tear).
+4. Avaliar o comportamento de `IS WEAK` e `IS FAILED` em voo longo de overstress contínuo.
+
+### Preparação Pré-Voo
+
+- [ ] **Wear and tear do MSFS LIGADO:** Opção padrão do simulador ativada (essencial para que as taxas e níveis nativos respondam).
+- [ ] **Aeronave:** Cessna C152 (ou primeiro avião da classe A disponível).
+- [ ] **Pista inicial:** Pista asfaltada (depois os passos 1 e 7 serão repetidos em pista de terra).
+- [ ] **Gravação de sensores:** Clicar em **REC** no HUD Overlay do FlightCareer ao iniciar a sessão. Confirmar gravação ativa em `%LocalAppData%\FlightCareer\sensor-logs\`.
+
+### Checklist dos Passos de Calibração (Pista Asfaltada)
+
+- [ ] **Passo 1 — Operação Normal (Base de Ruído):**
+  - **1a. Táxi normal:**
+    - **Marcador:** `cal-normal-taxi`
+    - **Ação:** Táxi suave com potência baixa, sem frenagens bruscas.
+    - **Duração:** ~30 a 60 segundos.
+  - **1b. Decolagem e subida normais:**
+    - **Marcador:** `cal-normal-decolagem`
+    - **Ação:** Alinhamento, aceleração de decolagem e subida mantendo parâmetros dentro da faixa verde.
+    - **Duração:** Até nivelar em altitude segura.
+  - **1c. Cruzeiro normal:**
+    - **Marcador:** `cal-normal-cruzeiro`
+    - **Ação:** Voo reto e nivelado com RPM e temperaturas estabilizadas na faixa verde.
+    - **Duração:** 5 minutos contínuos.
+  - **1d. Pouso e táxi normais:**
+    - **Marcador:** `cal-normal-pouso`
+    - **Ação:** Aproximação estabilizada, toque suave (~100–200 fpm) e táxi de retorno sem travamento de freios.
+    - **Duração:** Do flare até o término do táxi.
+
+- [ ] **Passo 2 — Overstress de RPM do Motor (ID 39):**
+  - **2a. RPM acima da linha vermelha por 30 s:**
+    - **Marcador:** `cal-abuso-rpm-30s`
+    - **Ação:** Manete de potência no máximo / mergulho leve para ultrapassar a linha vermelha de RPM (~2.600+ RPM no C152).
+    - **Duração:** Sustentar por exatamente 30 segundos; retornar à faixa verde.
+  - **2b. RPM acima da linha vermelha por 60 s:**
+    - **Marcador:** `cal-abuso-rpm-60s`
+    - **Ação:** Repetir a condição de sobre-rotação contínua.
+    - **Duração:** Sustentar por exatamente 60 segundos; retornar à faixa verde.
+
+- [ ] **Passo 3 — Superaquecimento CHT e Óleo (ID 39, 41):**
+  - **Marcador:** `cal-abuso-cht`
+  - **Ação:** Subida longa em potência máxima com velocidade baixa (refrigeração reduzida) e mistura rica incorreta para levar CHT e temperatura do óleo ao topo da faixa / linha vermelha.
+  - **Duração:** Sustentar na faixa de alerta por ~60 segundos antes de restabelecer refrigeração.
+
+- [ ] **Passo 4 — Flap Acima da Vfe (IDs 5–8):**
+  - **Marcador:** `cal-abuso-flap-vfe`
+  - **Ação:** Nivelado, acelerar ligeiramente acima da velocidade máxima de operação de flaps (Vfe) e estender 1 dente de flap.
+  - **Duração:** Sustentar estendido por 10 segundos acima de Vfe; recolher imediatamente.
+
+- [ ] **Passo 5 — Excesso de Fator de Carga G (IDs 9–14, 19, 20):**
+  - **Marcador:** `cal-abuso-g`
+  - **Ação:** Curva de grande inclinação acelerada (60°) ou puxada gradual sustentando ~3,0 a 3,5 G para estressar comandos e célula.
+  - **Duração:** ~15 a 20 segundos de manobra.
+
+- [ ] **Passo 6 — Frenagem Forte em Velocidade (IDs 36, 37):**
+  - **Marcador:** `cal-abuso-frenagem`
+  - **Ação:** Na pista, acelerar até ~25–30 kt e aplicar frenagem máxima contínua nos pedais até a parada quase completa.
+  - **Duração:** Até a desaceleração total (~5 a 8 segundos).
+
+- [ ] **Passo 7 — Pouso Firme e Pouso Duro (IDs 35, 37):**
+  - **7a. Pouso firme:**
+    - **Marcador:** `cal-abuso-pouso-firme`
+    - **Ação:** Toque na pista com razão de descida em torno de ~500 fpm (arredondamento tardio ou reduzido).
+  - **7b. Pouso duro:**
+    - **Marcador:** `cal-abuso-pouso-duro`
+    - **Ação:** Toque deliberadamente mais forte (~700 fpm) sem arredondamento excessivo, mas sem colidir com o solo.
+
+### Checklist de Repetição em Pista de Terra
+
+Repetir os passos 1 (base de ruído de solo) e 7 (impacto) em aeródromo ou pista não pavimentada (terra/grama) para diferenciar o atrito de superfície:
+
+- [ ] **Táxi normal em terra:** `cal-normal-taxi-terra`
+- [ ] **Decolagem normal em terra:** `cal-normal-decolagem-terra`
+- [ ] **Cruzeiro em terra:** `cal-normal-cruzeiro-terra`
+- [ ] **Pouso normal em terra:** `cal-normal-pouso-terra`
+- [ ] **Pouso firme em terra:** `cal-abuso-pouso-firme-terra`
+- [ ] **Pouso duro em terra:** `cal-abuso-pouso-duro-terra`
+
+### Voo Longo de Overstress (Motor Contínuo)
+
+> [!WARNING]
+> **Aviso de Segurança:** Realize este teste em altitude de segurança (pelo menos 3.000–5.000 ft AGL) e próximo a uma pista para pouso planado. O motor pode sofrer falha catastrófica ou apagar em voo quando `IS FAILED` for acionado.
+
+Objetivo: manter o motor (39) continuamente em sobre-rotação/sobre-temperatura por 15 a 20 minutos (ou até quebrar) para identificar se `IS WEAK` e `IS FAILED` disparam no simulador e a que nível de desgaste.
+
+- [ ] **Início do overstress longo:**
+  - **Marcador:** `cal-longo-inicio`
+  - **Ação:** Manter RPM acima da linha vermelha e potência máxima de forma sustentada e contínua.
+- [ ] **Detecção de fraqueza no motor (se houver indicação/queda de rendimento):**
+  - **Marcador:** `cal-longo-weak`
+  - **Ação:** Marcar ao notar engasgo, vibração ou queda de pressão/rendimento.
+- [ ] **Pane total do motor:**
+  - **Marcador:** `cal-longo-pane`
+  - **Ação:** Marcar no momento do corte/falha total do motor; planar e pousar com segurança.
+
+### Comando de Análise de Calibração
+
+Após os voos, execute a análise com a flag `--calibration`:
+
+```powershell
+py -3 tools/analyze_sensor_log.py --type A --model C152 --calibration "$env:LOCALAPPDATA\FlightCareer\sensor-logs\AAAAMMDD-HHMM-<ARQUIVO>.csv"
+```
+
+O script irá gerar:
+1. `docs/plans/sensor-validation/A-C152.md` (relatório padrão de sensores).
+2. `docs/plans/sensor-validation/calibration-C152.md` (relatório estruturado de calibração com limiares sugeridos e confirmação da razão integral/queda).
+

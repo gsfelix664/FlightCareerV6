@@ -233,3 +233,4 @@ Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar
 - F1.4 (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4-relatorio.md) · branch feat/parts-f1
 - F1.4b (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4b-relatorio.md) · branch feat/parts-f1
 - F1.4b (tabelas do portão) · 2026-11-14 · PROPOSTA, AGUARDA APROVAÇÃO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md) · branch docs/f1.4b-tabelas-nativo
+- F1.4c (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4c-relatorio.md) · branch feat/calibracao-f14c
