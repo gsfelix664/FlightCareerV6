@@ -1271,3 +1271,13 @@
 - `.githooks/`: bloqueiam commit/push em `main` e `feat/component-health-system` (liberação `FC_ALLOW_PROTECTED=1`), mensagem fora do padrão, `push --force`, apagar branch remota e commit do banco. Ativar por clone com `git config core.hooksPath "$(pwd)/.githooks"`.
 - `docs/agents/MODELO-SPEC.md` (modelo de spec) e `docs/agents/LICOES.md` (lições das revisões, lidas pelo executor).
 - `INSTRUCOES-GEMINI.md`, `CLAUDE.md` e `AGENTS.md` › 4 atualizados. Hooks testados num repositório descartável; `agy -p` respondeu em modo não interativo. **O ciclo completo com uma tarefa real ainda não foi executado.**
+
+## 2026-11-14 - F1.1 Registro de sensores (Gemini)
+- `SensorDefinition` record criado em `FlightCareer.Domain/Sensors/SensorDefinition.cs`.
+- `SensorRegistry` implementado em `FlightCareer.Domain/Sensors/SensorRegistry.cs` com suporte a `FromJson`, `LoadFromFile`, `LoadDefault(fileName)` e validação estrita (kebab-case, chaves únicas, ausência de ':' em SimVar, preenchimento de unidade e grupo).
+- Catalogadas 202 SimVars únicas do `docs/plans/sensor-inventory.md`:
+  - 25 entradas em `Infrastructure/Data/context_registry.json` (seção 1 do inventário).
+  - 177 entradas em `Infrastructure/Data/sensor_registry.json` (seções 2 a 11 do inventário).
+- Links dos JSONs adicionados em `FlightCareer.Tests.csproj`.
+- Testes abrangentes em `FlightCareer.Tests/Sensors/SensorRegistryTests.cs` (105 testes passando no total, sendo 9 novos testes cobrindo carga real, unicidade global de chaves, integridade de campos e paridade bidirecional exata 100% com o inventário).
+

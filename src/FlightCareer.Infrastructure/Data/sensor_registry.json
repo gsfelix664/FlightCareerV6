@@ -1,0 +1,1243 @@
+{
+  "sensors": [
+    {
+      "key": "eng-rpm",
+      "simVar": "GENERAL ENG RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-reached-rpm",
+      "simVar": "GENERAL ENG MAX REACHED RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-manifold-pressure",
+      "simVar": "RECIP ENG MANIFOLD PRESSURE",
+      "unit": "inhg",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cht",
+      "simVar": "RECIP ENG CYLINDER HEAD TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-cht",
+      "simVar": "RECIP MAX CHT",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": false
+    },
+    {
+      "key": "eng-egt",
+      "simVar": "GENERAL ENG EXHAUST GAS TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-egt",
+      "simVar": "MAX EGT",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": false
+    },
+    {
+      "key": "eng-tit",
+      "simVar": "RECIP ENG TURBINE INLET TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-detonating",
+      "simVar": "RECIP ENG DETONATING",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cylinder-health",
+      "simVar": "RECIP ENG CYLINDER HEALTH",
+      "unit": "percent_over_100",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-num-cylinders-failed",
+      "simVar": "RECIP ENG NUM CYLINDERS FAILED",
+      "unit": "number",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-mixture-ratio",
+      "simVar": "RECIP MIXTURE RATIO",
+      "unit": "ratio",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-mixture-lever-position",
+      "simVar": "GENERAL ENG MIXTURE LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-throttle-lever-position",
+      "simVar": "GENERAL ENG THROTTLE LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-brake-power-pct",
+      "simVar": "RECIP ENG BRAKE POWER PCT",
+      "unit": "percent_over_100",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-fuel-flow",
+      "simVar": "RECIP ENG FUEL FLOW",
+      "unit": "pounds per hour",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-fuel-pressure",
+      "simVar": "GENERAL ENG FUEL PRESSURE",
+      "unit": "psi",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-carb-temperature",
+      "simVar": "RECIP CARBURETOR TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-alternate-air-position",
+      "simVar": "RECIP ENG ALTERNATE AIR POSITION",
+      "unit": "position",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-wastegate-position",
+      "simVar": "RECIP ENG WASTEGATE POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-turbocharger-failed",
+      "simVar": "RECIP ENG TURBOCHARGER FAILED",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cowl-flap-position",
+      "simVar": "RECIP ENG COWL FLAP POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-primer",
+      "simVar": "RECIP ENG PRIMER",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-glow-plug-active",
+      "simVar": "RECIP ENG GLOW PLUG ACTIVE",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-radiator-temperature",
+      "simVar": "RECIP ENG RADIATOR TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-coolant-reservoir-percent",
+      "simVar": "RECIP ENG COOLANT RESERVOIR PERCENT",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-left-magneto",
+      "simVar": "RECIP ENG LEFT MAGNETO",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-right-magneto",
+      "simVar": "RIGHT MAGNETO",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter-torque",
+      "simVar": "RECIP ENG STARTER TORQUE",
+      "unit": "foot pound",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter",
+      "simVar": "GENERAL ENG STARTER",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter-active",
+      "simVar": "GENERAL ENG STARTER ACTIVE",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-combustion",
+      "simVar": "GENERAL ENG COMBUSTION",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-prop-rpm",
+      "simVar": "PROP RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-propeller-lever-position",
+      "simVar": "GENERAL ENG PROPELLER LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-vibration",
+      "simVar": "ENG VIBRATION",
+      "unit": "number",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "oil-temperature",
+      "simVar": "GENERAL ENG OIL TEMPERATURE",
+      "unit": "celsius",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-max-temperature",
+      "simVar": "MAX OIL TEMPERATURE",
+      "unit": "celsius",
+      "group": "oil",
+      "perEngine": false
+    },
+    {
+      "key": "oil-pressure",
+      "simVar": "GENERAL ENG OIL PRESSURE",
+      "unit": "psi",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-quantity",
+      "simVar": "ENG OIL QUANTITY",
+      "unit": "percent_over_100",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-leaked-percent",
+      "simVar": "GENERAL ENG OIL LEAKED PERCENT",
+      "unit": "percent",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-cooling-flaps-position",
+      "simVar": "OIL COOLING FLAPS POSITION",
+      "unit": "percent_over_100",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-warning-pressure",
+      "simVar": "WARNING OIL PRESSURE",
+      "unit": "bool",
+      "group": "oil",
+      "perEngine": false
+    },
+    {
+      "key": "turb-n1",
+      "simVar": "TURB ENG N1",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-n2",
+      "simVar": "TURB ENG N2",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-itt",
+      "simVar": "TURB ENG ITT",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-max-itt",
+      "simVar": "TURB MAX ITT",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "turb-max-torque-percent",
+      "simVar": "TURB ENG MAX TORQUE PERCENT",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-free-turbine-torque",
+      "simVar": "TURB ENG FREE TURBINE TORQUE",
+      "unit": "foot pound",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-eng-torque",
+      "simVar": "ENG TORQUE",
+      "unit": "foot pound",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-fuel-flow-pph",
+      "simVar": "TURB ENG FUEL FLOW PPH",
+      "unit": "pounds per hour",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-is-igniting",
+      "simVar": "TURB ENG IS IGNITING",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-ignition-switch-ex1",
+      "simVar": "TURB ENG IGNITION SWITCH EX1",
+      "unit": "enum",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-master-starter-switch",
+      "simVar": "TURB ENG MASTER STARTER SWITCH",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-condition-lever-position",
+      "simVar": "TURB ENG CONDITION LEVER POSITION",
+      "unit": "enum",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-inlet-temperature",
+      "simVar": "TURB ENG INLET TEMPERATURE",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-vibration",
+      "simVar": "TURB ENG VIBRATION",
+      "unit": "number",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-bleed-air",
+      "simVar": "TURB ENG BLEED AIR",
+      "unit": "psi",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-reverse-nozzle-percent",
+      "simVar": "TURB ENG REVERSE NOZZLE PERCENT",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-reverse-thrust-engaged",
+      "simVar": "GENERAL ENG REVERSE THRUST ENGAGED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-prop-beta",
+      "simVar": "PROP BETA",
+      "unit": "radians",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-prop-feathered",
+      "simVar": "PROP FEATHERED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-apu-pct-rpm",
+      "simVar": "APU PCT RPM",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "turb-apu-on-fire-detected",
+      "simVar": "APU ON FIRE DETECTED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-eng-failed",
+      "simVar": "ENG FAILED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-eng-on-fire",
+      "simVar": "ENG ON FIRE",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-eng-fire-detected",
+      "simVar": "GENERAL ENG FIRE DETECTED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-general-eng-damage-percent",
+      "simVar": "GENERAL ENG DAMAGE PERCENT",
+      "unit": "percent",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-flap-damage-by-speed",
+      "simVar": "FLAP DAMAGE BY SPEED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-flap-speed-exceeded",
+      "simVar": "FLAP SPEED EXCEEDED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-gear-damage-by-speed",
+      "simVar": "GEAR DAMAGE BY SPEED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-gear-speed-exceeded",
+      "simVar": "GEAR SPEED EXCEEDED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-crash-flag",
+      "simVar": "CRASH FLAG",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel",
+      "simVar": "PARTIAL PANEL VACUUM/PITOT/STATIC/ELECTRICAL/ENGINE/AIRSPEED/ALTIMETER/ATTITUDE/HEADING/...",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-wear-and-tear-level",
+      "simVar": "WEAR AND TEAR LEVEL",
+      "unit": "percent_over_100",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-wear-and-tear-is-weak",
+      "simVar": "WEAR AND TEAR IS WEAK",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-wear-and-tear-is-failed",
+      "simVar": "WEAR AND TEAR IS FAILED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-wear-and-tear-overstress-factor",
+      "simVar": "WEAR AND TEAR OVERSTRESS FACTOR",
+      "unit": "percent_over_100",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "elec-master-alternator",
+      "simVar": "GENERAL ENG MASTER ALTERNATOR",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-bus-voltage",
+      "simVar": "ELECTRICAL GENALT BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-bus-amps",
+      "simVar": "ELECTRICAL GENALT BUS AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-load",
+      "simVar": "ELECTRICAL GENALT LOAD",
+      "unit": "percent",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-main-bus-voltage",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-voltage",
+      "simVar": "ELECTRICAL BATTERY VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-load",
+      "simVar": "ELECTRICAL BATTERY LOAD",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-level",
+      "simVar": "ELECTRICAL BATTERY LEVEL",
+      "unit": "percent",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-estimated-capacity-pct",
+      "simVar": "ELECTRICAL BATTERY ESTIMATED CAPACITY PCT",
+      "unit": "percent_over_100",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-master-battery",
+      "simVar": "ELECTRICAL MASTER BATTERY",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-total-load-amps",
+      "simVar": "ELECTRICAL TOTAL LOAD AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-external-power-on",
+      "simVar": "EXTERNAL POWER ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-warning-voltage",
+      "simVar": "WARNING VOLTAGE",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-breaker-named",
+      "simVar": "BREAKER <nome>",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-breaker-pulled",
+      "simVar": "CIRCUIT BREAKER PULLED",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "vac-suction-pressure",
+      "simVar": "SUCTION PRESSURE",
+      "unit": "inhg",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "vac-warning-vacuum",
+      "simVar": "WARNING VACUUM",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-heat",
+      "simVar": "PITOT HEAT",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-heat-switch",
+      "simVar": "PITOT HEAT SWITCH",
+      "unit": "enum",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-ice-pct",
+      "simVar": "PITOT ICE PCT",
+      "unit": "percent",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-alternate-static-source-open",
+      "simVar": "ALTERNATE STATIC SOURCE OPEN",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-structural-ice-pct",
+      "simVar": "STRUCTURAL ICE PCT",
+      "unit": "percent",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-structural-deice-switch",
+      "simVar": "STRUCTURAL DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-prop-deice-switch",
+      "simVar": "PROP DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-windshield-deice-switch",
+      "simVar": "WINDSHIELD DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-eng-anti-ice",
+      "simVar": "ENG ANTI ICE",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": true
+    },
+    {
+      "key": "inst-general-eng-anti-ice-position",
+      "simVar": "GENERAL ENG ANTI ICE POSITION",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-total-quantity",
+      "simVar": "FUEL TOTAL QUANTITY",
+      "unit": "gallons",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-total-quantity-weight",
+      "simVar": "FUEL TOTAL QUANTITY WEIGHT",
+      "unit": "pounds",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-pump-switch",
+      "simVar": "GENERAL ENG FUEL PUMP SWITCH",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-pump-on",
+      "simVar": "GENERAL ENG FUEL PUMP ON",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-pump-active",
+      "simVar": "FUELSYSTEM PUMP ACTIVE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-engine-pressure",
+      "simVar": "FUELSYSTEM ENGINE PRESSURE",
+      "unit": "kpa",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-line-fuel-pressure",
+      "simVar": "FUELSYSTEM LINE FUEL PRESSURE",
+      "unit": "kpa",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-warning",
+      "simVar": "WARNING FUEL",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-recip-eng-available",
+      "simVar": "RECIP ENG FUEL AVAILABLE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-turb-eng-available",
+      "simVar": "TURB ENG FUEL AVAILABLE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "gear-plane-touchdown-normal-velocity",
+      "simVar": "PLANE TOUCHDOWN NORMAL VELOCITY",
+      "unit": "feet per second",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-plane-touchdown-bank-degrees",
+      "simVar": "PLANE TOUCHDOWN BANK DEGREES",
+      "unit": "degrees",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-plane-touchdown-pitch-degrees",
+      "simVar": "PLANE TOUCHDOWN PITCH DEGREES",
+      "unit": "degrees",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-compression",
+      "simVar": "CONTACT POINT COMPRESSION",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": true
+    },
+    {
+      "key": "gear-contact-point-is-skidding",
+      "simVar": "CONTACT POINT IS SKIDDING",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": true
+    },
+    {
+      "key": "gear-is-skidding",
+      "simVar": "GEAR IS SKIDDING",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-skidding-factor",
+      "simVar": "GEAR SKIDDING FACTOR",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-wheel-rpm",
+      "simVar": "WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-left-wheel-rpm",
+      "simVar": "LEFT WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-right-wheel-rpm",
+      "simVar": "RIGHT WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-position",
+      "simVar": "GEAR POSITION",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-handle-position",
+      "simVar": "GEAR HANDLE POSITION",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-total-pct-extended",
+      "simVar": "GEAR TOTAL PCT EXTENDED",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-hydraulic-pressure",
+      "simVar": "GEAR HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-warning",
+      "simVar": "GEAR WARNING",
+      "unit": "enum",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-position",
+      "simVar": "BRAKE LEFT POSITION",
+      "unit": "position (0–32k)",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-position",
+      "simVar": "BRAKE RIGHT POSITION",
+      "unit": "position (0–32k)",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-temperature",
+      "simVar": "BRAKE LEFT TEMPERATURE",
+      "unit": "kelvin",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-temperature",
+      "simVar": "BRAKE RIGHT TEMPERATURE",
+      "unit": "kelvin",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-weight-remaining",
+      "simVar": "BRAKE LEFT WEIGHT REMAINING",
+      "unit": "percent_over_100",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-weight-remaining",
+      "simVar": "BRAKE RIGHT WEIGHT REMAINING",
+      "unit": "percent_over_100",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-parking-position",
+      "simVar": "BRAKE PARKING POSITION",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-antiskid-active",
+      "simVar": "ANTISKID BRAKES ACTIVE",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-autobrakes-active",
+      "simVar": "AUTOBRAKES ACTIVE",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-nosewheel-max-steering-angle",
+      "simVar": "NOSEWHEEL MAX STEERING ANGLE",
+      "unit": "radians",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-steer-angle-pct",
+      "simVar": "GEAR STEER ANGLE PCT",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "af-g-force",
+      "simVar": "G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-max-g-force",
+      "simVar": "MAX G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-min-g-force",
+      "simVar": "MIN G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-semibody-loadfactor-y",
+      "simVar": "SEMIBODY LOADFACTOR Y",
+      "unit": "number",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-wing-flex-pct",
+      "simVar": "WING FLEX PCT",
+      "unit": "percent_over_100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-indicated",
+      "simVar": "AIRSPEED INDICATED",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-true",
+      "simVar": "AIRSPEED TRUE",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-mach",
+      "simVar": "AIRSPEED MACH",
+      "unit": "mach",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-overspeed-warning",
+      "simVar": "OVERSPEED WARNING",
+      "unit": "bool",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-barber-pole",
+      "simVar": "AIRSPEED BARBER POLE",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-ref-speed-max-ias",
+      "simVar": "REFERENCE SPEED MAX IAS",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-ref-speed-max-ias-gear-down",
+      "simVar": "REFERENCE SPEED MAX IAS GEAR DOWN",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-mach-max-operate",
+      "simVar": "MACH MAX OPERATE",
+      "unit": "mach",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vs0",
+      "simVar": "DESIGN SPEED VS0",
+      "unit": "kias",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vs1",
+      "simVar": "DESIGN SPEED VS1",
+      "unit": "kias",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vc",
+      "simVar": "DESIGN SPEED VC",
+      "unit": "feet per second",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-stall-warning",
+      "simVar": "STALL WARNING",
+      "unit": "bool",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-handle-index",
+      "simVar": "FLAPS HANDLE INDEX",
+      "unit": "number",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-handle-percent",
+      "simVar": "FLAPS HANDLE PERCENT",
+      "unit": "percent",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-current-speed-limitation",
+      "simVar": "FLAPS CURRENT SPEED LIMITATION",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-trailing-edge-flaps-left-right-percent",
+      "simVar": "TRAILING EDGE FLAPS LEFT/RIGHT PERCENT",
+      "unit": "percent_over_100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-spoilers-handle-position",
+      "simVar": "SPOILERS HANDLE POSITION",
+      "unit": "percent",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-elevator-trim-position",
+      "simVar": "ELEVATOR TRIM POSITION",
+      "unit": "radians",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-aileron-trim-pct",
+      "simVar": "AILERON TRIM PCT",
+      "unit": "float",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-rudder-trim-pct",
+      "simVar": "RUDDER TRIM PCT",
+      "unit": "float",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-xyz",
+      "simVar": "ACCELERATION BODY X/Y/Z",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-pressurization-cabin-altitude",
+      "simVar": "PRESSURIZATION CABIN ALTITUDE",
+      "unit": "feet",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-pressurization-pressure-differential",
+      "simVar": "PRESSURIZATION PRESSURE DIFFERENTIAL",
+      "unit": "psf",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-pressure",
+      "simVar": "HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-pump-pressure",
+      "simVar": "HYDRAULIC PUMP PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-reservoir-percent",
+      "simVar": "HYDRAULIC RESERVOIR PERCENT",
+      "unit": "percent",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-system-integrity",
+      "simVar": "HYDRAULIC SYSTEM INTEGRITY",
+      "unit": "percent_over_100",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-eng-pressure",
+      "simVar": "ENG HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "hyd-eng-quantity",
+      "simVar": "ENG HYDRAULIC QUANTITY",
+      "unit": "percent",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "pneu-engine-bleed-air-pressure",
+      "simVar": "PNEUMATICS ENGINE BLEED AIR PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "pneu-duct-pressure",
+      "simVar": "PNEUMATICS DUCT PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "pneu-pack-status",
+      "simVar": "PNEUMATICS PACK STATUS",
+      "unit": "bool",
+      "group": "hydraulic",
+      "perEngine": false
+    }
+  ]
+}

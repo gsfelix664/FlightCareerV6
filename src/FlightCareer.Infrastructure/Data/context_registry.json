@@ -1,0 +1,179 @@
+{
+  "sensors": [
+    {
+      "key": "ctx-title",
+      "simVar": "TITLE",
+      "unit": "string",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-atc-model",
+      "simVar": "ATC MODEL",
+      "unit": "string",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-atc-type",
+      "simVar": "ATC TYPE",
+      "unit": "string",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-engine-type",
+      "simVar": "ENGINE TYPE",
+      "unit": "enum",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-number-of-engines",
+      "simVar": "NUMBER OF ENGINES",
+      "unit": "number",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-is-gear-retractable",
+      "simVar": "IS GEAR RETRACTABLE",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-is-gear-floats",
+      "simVar": "IS GEAR FLOATS",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-is-gear-skis",
+      "simVar": "IS GEAR SKIS",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-is-gear-wheels",
+      "simVar": "IS GEAR WHEELS",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-carb-heat-available",
+      "simVar": "CARB HEAT AVAILABLE",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-recip-eng-num-cylinders",
+      "simVar": "RECIP ENG NUM CYLINDERS",
+      "unit": "number",
+      "group": "context",
+      "perEngine": true
+    },
+    {
+      "key": "ctx-flaps-available",
+      "simVar": "FLAPS AVAILABLE",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-flaps-num-handle-positions",
+      "simVar": "FLAPS NUM HANDLE POSITIONS",
+      "unit": "number",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-new-electrical-system",
+      "simVar": "NEW ELECTRICAL SYSTEM",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-new-fuel-system",
+      "simVar": "NEW FUEL SYSTEM",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-sim-on-ground",
+      "simVar": "SIM ON GROUND",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-plane-alt-above-ground",
+      "simVar": "PLANE ALT ABOVE GROUND",
+      "unit": "feet",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-ground-velocity",
+      "simVar": "GROUND VELOCITY",
+      "unit": "knots",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-simulation-rate",
+      "simVar": "SIMULATION RATE",
+      "unit": "number",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-surface-type",
+      "simVar": "SURFACE TYPE",
+      "unit": "enum",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-surface-condition",
+      "simVar": "SURFACE CONDITION",
+      "unit": "enum",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-on-any-runway",
+      "simVar": "ON ANY RUNWAY",
+      "unit": "bool",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-ambient-temperature",
+      "simVar": "AMBIENT TEMPERATURE",
+      "unit": "celsius",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-ambient-precip-state",
+      "simVar": "AMBIENT PRECIP STATE",
+      "unit": "mask",
+      "group": "context",
+      "perEngine": false
+    },
+    {
+      "key": "ctx-total-air-temperature",
+      "simVar": "TOTAL AIR TEMPERATURE",
+      "unit": "celsius",
+      "group": "context",
+      "perEngine": false
+    }
+  ]
+}
