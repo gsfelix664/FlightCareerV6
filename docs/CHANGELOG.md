@@ -1281,3 +1281,12 @@
 - Links dos JSONs adicionados em `FlightCareer.Tests.csproj`.
 - Testes abrangentes em `FlightCareer.Tests/Sensors/SensorRegistryTests.cs` (105 testes passando no total, sendo 9 novos testes cobrindo carga real, unicidade global de chaves, integridade de campos e paridade bidirecional exata 100% com o inventário).
 
+## 2026-11-14 - F1.2 Leitor genérico de sensores (Gemini)
+- `SensorLayout`, `SensorSlot` e `SensorBlock` implementados em `FlightCareer.Domain/Sensors/SensorLayout.cs` com particionamento determinístico de blocos de até 256 doubles, expansão de `:1..:N` para variáveis por motor, expurgo de variáveis rejeitadas (`Without`) e mapeamento chave-valor (`Map`).
+- `SensorFrame` criado em `FlightCareer.Domain/Sensors/SensorFrame.cs` consolidando valores instantâneos, timestamp UTC e taxa de simulação (`SimulationRate`).
+- Spike B0 realizado: struct `SensorBlockData` com array fixo de 256 doubles (`UnmanagedType.ByValArray`) possui tamanho marshalado exato de 2048 bytes (256 * 8) e compila no struct sequencial.
+- Exposição mínima em `SimConnectService.cs` (`Raw` e `OnSimConnectReady` disparado em `OnRecvOpen`) com diff de 3 linhas, preservando intactos todos os structs, enums e fluxos existentes.
+- `SensorFrameReader` implementado em `FlightCareer.UI/Services/SensorFrameReader.cs` com faixa de IDs própria (999 contagem de motores, 1000+ blocos de dados), leitura por ciclo de 30 frames, tratamento de `NAME_UNRECOGNIZED` mapeando `SendID` via `GetLastSentPacketID()` do SDK para eliminar SimVars rejeitadas sem derrubar conexão, e consolidação thread-safe dos blocos no evento `OnFrame`.
+- Registro singleton de `SensorFrameReader` em `App.xaml.cs` (diff de 2 linhas).
+- 7 novos testes unitários adicionados em `FlightCareer.Tests/Sensors/SensorLayoutTests.cs` (113 testes passando no total). Não testado no MSFS.
+
