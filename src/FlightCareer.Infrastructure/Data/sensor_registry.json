@@ -191,7 +191,7 @@
     },
     {
       "key": "eng-right-magneto",
-      "simVar": "RIGHT MAGNETO",
+      "simVar": "RECIP ENG RIGHT MAGNETO",
       "unit": "bool",
       "group": "piston",
       "perEngine": true
@@ -505,8 +505,64 @@
       "perEngine": false
     },
     {
-      "key": "dmg-partial-panel",
-      "simVar": "PARTIAL PANEL VACUUM/PITOT/STATIC/ELECTRICAL/ENGINE/AIRSPEED/ALTIMETER/ATTITUDE/HEADING/...",
+      "key": "dmg-partial-panel-vacuum",
+      "simVar": "PARTIAL PANEL VACUUM",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-pitot",
+      "simVar": "PARTIAL PANEL PITOT",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-static",
+      "simVar": "PARTIAL PANEL STATIC",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-electrical",
+      "simVar": "PARTIAL PANEL ELECTRICAL",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-engine",
+      "simVar": "PARTIAL PANEL ENGINE",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-airspeed",
+      "simVar": "PARTIAL PANEL AIRSPEED",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-altimeter",
+      "simVar": "PARTIAL PANEL ALTIMETER",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-attitude",
+      "simVar": "PARTIAL PANEL ATTITUDE",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-heading",
+      "simVar": "PARTIAL PANEL HEADING",
       "unit": "enum",
       "group": "native-damage",
       "perEngine": false
@@ -626,13 +682,6 @@
     {
       "key": "elec-warning-voltage",
       "simVar": "WARNING VOLTAGE",
-      "unit": "bool",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-breaker-named",
-      "simVar": "BREAKER <nome>",
       "unit": "bool",
       "group": "electrical",
       "perEngine": false
@@ -1121,8 +1170,15 @@
       "perEngine": false
     },
     {
-      "key": "af-trailing-edge-flaps-left-right-percent",
-      "simVar": "TRAILING EDGE FLAPS LEFT/RIGHT PERCENT",
+      "key": "af-trailing-edge-flaps-left-percent",
+      "simVar": "TRAILING EDGE FLAPS LEFT PERCENT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-trailing-edge-flaps-right-percent",
+      "simVar": "TRAILING EDGE FLAPS RIGHT PERCENT",
       "unit": "percent over 100",
       "group": "airframe",
       "perEngine": false
@@ -1156,8 +1212,22 @@
       "perEngine": false
     },
     {
-      "key": "af-acceleration-body-xyz",
-      "simVar": "ACCELERATION BODY X/Y/Z",
+      "key": "af-acceleration-body-x",
+      "simVar": "ACCELERATION BODY X",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-y",
+      "simVar": "ACCELERATION BODY Y",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-z",
+      "simVar": "ACCELERATION BODY Z",
       "unit": "feet per second squared",
       "group": "airframe",
       "perEngine": false
