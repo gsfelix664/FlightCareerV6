@@ -73,6 +73,10 @@ NATIVE_COMPONENTS: Dict[int, str] = {
 }
 
 
+# Subida de nível acima disto conta como reinício/reparo (abaixo é ruído de ponto flutuante)
+RESTART_JUMP = 0.005
+
+
 def native_wear_summary(
     rows: List[Dict[str, str]],
     max_gap: float = 5.0,
@@ -136,10 +140,13 @@ def native_wear_summary(
                         else:
                             min_lvl = min(min_lvl, lvl_val)
                             diff = lvl_val - prev_lvl
-                            if diff < -1e-6:
+                            if diff < 0.0:
+                                # Toda queda conta: o desgaste nativo lento é da ordem de 1e-6 por amostra
                                 total_drop += (-diff)
-                            elif diff > 1e-6:
+                            elif diff > RESTART_JUMP:
+                                # Subida grande = voo reiniciado ou reparo no sim: move a base sem creditar
                                 restarts += 1
+                            # Subida pequena (ruído) só move a base
                             prev_lvl = lvl_val
                         final_lvl = lvl_val
                 except ValueError:
@@ -724,7 +731,7 @@ def render_report(
         lines.append("")
         spike_keys = [
             ("nwspike-level-39-idx1", "WEAR AND TEAR LEVEL:39:1"),
-            ("nwspike-level-name", "WEAR AND TEAR LEVEL:PISTON_ENGINE"),
+            ("nwspike-level-name", "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n"),
             ("nwspike-weak-value-39", "WEAR AND TEAR WEAK VALUE:39"),
             ("nwspike-overstress-factor-39", "WEAR AND TEAR OVERSTRESS FACTOR:39"),
         ]

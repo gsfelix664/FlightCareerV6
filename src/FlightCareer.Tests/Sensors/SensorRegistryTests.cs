@@ -191,6 +191,21 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void Validate_FixedIndexOnNonPerEngineSensor_IsAllowed()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "nw-level-28", "simVar": "WEAR AND TEAR LEVEL:28", "unit": "percent over 100", "group": "native-wear", "perEngine": false }
+              ]
+            }
+            """;
+
+            var registry = SensorRegistry.FromJson(json);
+            Assert.Equal("WEAR AND TEAR LEVEL:28", Assert.Single(registry.Sensors).SimVar);
+        }
+
+        [Fact]
         public void Validate_EmptyUnit_Throws()
         {
             const string json = """

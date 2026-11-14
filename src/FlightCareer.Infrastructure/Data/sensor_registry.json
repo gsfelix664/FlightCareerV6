@@ -2585,7 +2585,7 @@
     },
     {
       "key": "nwspike-level-name",
-      "simVar": "WEAR AND TEAR LEVEL:PISTON_ENGINE",
+      "simVar": "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n",
       "unit": "percent over 100",
       "group": "native-wear-spike",
       "perEngine": false

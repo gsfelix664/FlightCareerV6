@@ -272,7 +272,7 @@ Convenções:
 | SimVar | Unidade | Dica de peça / Componente |
 |---|---|---|
 | `WEAR AND TEAR LEVEL:39:1` | percent over 100 | Spike: ID com índice de motor (:1) |
-| `WEAR AND TEAR LEVEL:PISTON_ENGINE` | percent over 100 | Spike: ID textual por nome |
+| `WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n` | percent over 100 | Spike: componente pelo nome (formato `:'NOME'_n` do SDK) |
 | `WEAR AND TEAR WEAK VALUE:39` | percent over 100 | Spike: weak value float para ID 39 |
 | `WEAR AND TEAR OVERSTRESS FACTOR:39` | percent over 100 | Spike: overstress factor para ID 39 |
 

@@ -280,6 +280,15 @@ class TestAnalyzeSensorLog(unittest.TestCase):
         self.assertTrue(comp["responded"])
         self.assertFalse(comp["is_idle"])
 
+    def test_native_wear_slow_drops_and_noise(self):
+        """Quedas minúsculas (desgaste lento real ~2e-6 por amostra) somam; subida pequena é ruído, não reinício."""
+        rows = [{"utc": f"2026-11-14T01:00:{i:02d}.000Z", "nw-level-39": repr(1.0 - 2e-6 * i)} for i in range(50)]
+        rows.append({"utc": "2026-11-14T01:00:50.000Z", "nw-level-39": repr(1.0 - 2e-6 * 48)})  # sobe 2e-6: ruído
+        res = native_wear_summary(rows)
+        comp = res["components"][39]
+        self.assertAlmostEqual(comp["delta"], 2e-6 * 49, places=9)
+        self.assertEqual(comp["restarts"], 0)
+
     def test_native_wear_weak_and_failed_first_time(self):
         """Grava primeiro timestamp e nível de quando nw-is-weak e nw-is-failed viram 1."""
         rows = [
