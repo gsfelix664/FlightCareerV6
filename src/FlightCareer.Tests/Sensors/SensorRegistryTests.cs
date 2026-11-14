@@ -145,6 +145,21 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void Registry_NoSimVarHasPlaceholderOrSlash()
+        {
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            foreach (var s in context.Sensors.Concat(sensors.Sensors))
+            {
+                Assert.DoesNotContain("/", s.SimVar);
+                Assert.DoesNotContain("<", s.SimVar);
+                Assert.DoesNotContain(">", s.SimVar);
+                Assert.DoesNotContain("...", s.SimVar);
+            }
+        }
+
+        [Fact]
         public void Validate_DuplicateKey_Throws()
         {
             const string json = """

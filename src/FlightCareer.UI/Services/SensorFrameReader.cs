@@ -221,11 +221,11 @@ namespace FlightCareer.UI.Services
                 {
                     sc.ClearDataDefinition(defId);
 
-                    foreach (var slot in block.Slots)
+                    foreach (var slot in layout.RegistrationSlots(block.Index))
                     {
                         sc.AddToDataDefinition(defId, slot.SimVar, slot.Unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                         uint sendId = sc.GetLastSentPacketID();
-                        if (sendId != 0)
+                        if (sendId != 0 && !slot.Key.StartsWith(SensorLayout.PaddingKeyPrefix, StringComparison.Ordinal))
                         {
                             _sendIdToSimVar[sendId] = slot.SimVar;
                         }

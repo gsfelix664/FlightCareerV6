@@ -67,7 +67,7 @@ Convenções:
 | `RECIP ENG PRIMER:N` | bool | primer |
 | `RECIP ENG GLOW PLUG ACTIVE:N` | bool | velas aquecedoras (diesel) |
 | `RECIP ENG RADIATOR TEMPERATURE:N`, `RECIP ENG COOLANT RESERVOIR PERCENT:N` | celsius / percent | arrefecimento líquido (diesel/Rotax) |
-| `RECIP ENG LEFT MAGNETO:N` / `RIGHT MAGNETO:N` ✅ (W ✅) | bool | magnetos |
+| `RECIP ENG LEFT MAGNETO:N`, `RECIP ENG RIGHT MAGNETO:N` ✅ (W ✅) | bool | magnetos |
 | `RECIP ENG STARTER TORQUE:N` | foot pound | motor de partida |
 | `GENERAL ENG STARTER:N` ✅, `GENERAL ENG STARTER ACTIVE:N` | bool | motor de partida (tempo engatado) |
 | `GENERAL ENG COMBUSTION:N` ✅ | bool | motor funcionando |
@@ -116,7 +116,15 @@ Convenções:
 | `FLAP DAMAGE BY SPEED` ✅, `FLAP SPEED EXCEEDED` | bool | flaps |
 | `GEAR DAMAGE BY SPEED` ✅, `GEAR SPEED EXCEEDED` | bool | trem |
 | `CRASH FLAG` ✅ | enum | acidente |
-| `PARTIAL PANEL VACUUM/PITOT/STATIC/ELECTRICAL/ENGINE/AIRSPEED/ALTIMETER/ATTITUDE/HEADING/...` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL VACUUM` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL PITOT` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL STATIC` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ELECTRICAL` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ENGINE` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL AIRSPEED` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ALTIMETER` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ATTITUDE` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL HEADING` | enum | estado de panes do menu do sim |
 | `WEAR AND TEAR LEVEL`, `WEAR AND TEAR IS WEAK`, `WEAR AND TEAR IS FAILED`, `WEAR AND TEAR OVERSTRESS FACTOR` | percent over 100 / bool | **desgaste nativo do MSFS 2024** (só para detectar se o jogador deixou ligado e avisar) |
 
 ## 6. Elétrico
@@ -133,7 +141,7 @@ Convenções:
 | `ELECTRICAL TOTAL LOAD AMPS` | amperes | carga elétrica |
 | `EXTERNAL POWER ON` | bool | GPU (poupa bateria/starter) |
 | `WARNING VOLTAGE` | bool | alerta do painel |
-| `BREAKER <nome>`, `CIRCUIT BREAKER PULLED` | bool | disjuntores (fase futura: aviônicos) |
+| `CIRCUIT BREAKER PULLED` | bool | disjuntores por nome: fase futura (aviônicos) |
 
 ## 7. Vácuo, pitot, estática e gelo
 
@@ -188,10 +196,10 @@ Convenções:
 | `DESIGN SPEED VS0`, `DESIGN SPEED VS1`, `DESIGN SPEED VC` | knots | limites do avião |
 | `STALL WARNING` | bool | — |
 | `FLAPS HANDLE INDEX` ✅ (W ✅), `FLAPS HANDLE PERCENT`, `FLAPS CURRENT SPEED LIMITATION` | number / percent / knots | flaps (Vfe por posição) |
-| `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT` | percent over 100 | assimetria de flap |
+| `TRAILING EDGE FLAPS LEFT PERCENT`, `TRAILING EDGE FLAPS RIGHT PERCENT` | percent over 100 | assimetria de flap |
 | `SPOILERS HANDLE POSITION` | percent | spoilers |
 | `ELEVATOR TRIM POSITION`, `AILERON TRIM PCT`, `RUDDER TRIM PCT` | radians / percent over 100 / percent over 100 | trim (servos) |
-| `ACCELERATION BODY X/Y/Z` | feet per second squared | cargas laterais/turbulência |
+| `ACCELERATION BODY X`, `ACCELERATION BODY Y`, `ACCELERATION BODY Z` | feet per second squared | cargas laterais/turbulência |
 | `PRESSURIZATION CABIN ALTITUDE`, `PRESSURIZATION PRESSURE DIFFERENTIAL` | feet / psf | **estrutura pressurizada (ciclos de pressurização)** |
 
 ## 11. Hidráulico e pneumático (aviões que tiverem)

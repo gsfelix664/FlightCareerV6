@@ -31,13 +31,13 @@ namespace FlightCareer.Tests.Sensors
         public void Build_OneEngine_HasOneSlotPerSensor()
         {
             var registry = LoadRealRegistry();
-            Assert.Equal(177, registry.Sensors.Count);
+            Assert.Equal(187, registry.Sensors.Count);
 
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 1);
 
             Assert.Single(layout.Blocks);
-            Assert.Equal(178, layout.Blocks[0].Slots.Count);
-            Assert.Equal(178, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(188, layout.Blocks[0].Slots.Count);
+            Assert.Equal(188, layout.Blocks.Sum(b => b.Slots.Count));
         }
 
         [Fact]
@@ -46,15 +46,15 @@ namespace FlightCareer.Tests.Sensors
             var registry = LoadRealRegistry();
             var layout = SensorLayout.Build(registry.Sensors, engineCount: 4, blockSize: 256);
 
-            // 1 reservado (SIMULATION RATE) + 99 sensores globais + 78 sensores PerEngine * 4 = 1 + 99 + 312 = 412 slots
-            Assert.Equal(412, layout.Blocks.Sum(b => b.Slots.Count));
+            // 1 reservado (SIMULATION RATE) + 109 sensores globais + 78 sensores PerEngine * 4 = 1 + 109 + 312 = 422 slots
+            Assert.Equal(422, layout.Blocks.Sum(b => b.Slots.Count));
             Assert.Equal(2, layout.Blocks.Count);
 
             Assert.Equal(0, layout.Blocks[0].Index);
             Assert.Equal(256, layout.Blocks[0].Slots.Count);
 
             Assert.Equal(1, layout.Blocks[1].Index);
-            Assert.Equal(156, layout.Blocks[1].Slots.Count);
+            Assert.Equal(166, layout.Blocks[1].Slots.Count);
         }
 
         [Fact]
@@ -180,6 +180,91 @@ namespace FlightCareer.Tests.Sensors
         {
             int size = System.Runtime.InteropServices.Marshal.SizeOf<SensorBlockDataSpike>();
             Assert.Equal(2048, size);
+        }
+
+        [Fact]
+        public void RegistrationSlots_PadsToBlockSize()
+        {
+            var slots = new List<SensorSlot>();
+            for (int i = 0; i < 172; i++)
+            {
+                slots.Add(new SensorSlot($"key-{i}", $"SIMVAR {i}", "number"));
+            }
+
+            var block = new SensorBlock(0, slots);
+            var layout = new SensorLayout(new[] { block }, blockSize: 256);
+
+            var registrationSlots = layout.RegistrationSlots(0);
+
+            Assert.Equal(256, registrationSlots.Count);
+
+            // Primeiros 172 são os originais
+            for (int i = 0; i < 172; i++)
+            {
+                Assert.Equal($"key-{i}", registrationSlots[i].Key);
+                Assert.Equal($"SIMVAR {i}", registrationSlots[i].SimVar);
+                Assert.Equal("number", registrationSlots[i].Unit);
+            }
+
+            // 84 extras com SIMULATION RATE
+            for (int i = 172; i < 256; i++)
+            {
+                int padIndex = i - 172;
+                Assert.Equal($"pad-{padIndex}", registrationSlots[i].Key);
+                Assert.Equal(SensorLayout.PaddingSimVar, registrationSlots[i].SimVar);
+                Assert.Equal("SIMULATION RATE", registrationSlots[i].SimVar);
+                Assert.Equal(SensorLayout.PaddingUnit, registrationSlots[i].Unit);
+                Assert.Equal("number", registrationSlots[i].Unit);
+            }
+        }
+
+        [Fact]
+        public void RegistrationSlots_FullBlock_HasNoPadding()
+        {
+            var slots = new List<SensorSlot>();
+            for (int i = 0; i < 256; i++)
+            {
+                slots.Add(new SensorSlot($"key-{i}", $"SIMVAR {i}", "number"));
+            }
+
+            var block = new SensorBlock(0, slots);
+            var layout = new SensorLayout(new[] { block }, blockSize: 256);
+
+            var registrationSlots = layout.RegistrationSlots(0);
+
+            Assert.Equal(256, registrationSlots.Count);
+            Assert.DoesNotContain(registrationSlots, s => s.Key.StartsWith("pad-", StringComparison.Ordinal));
+            Assert.Equal("key-0", registrationSlots[0].Key);
+            Assert.Equal("key-255", registrationSlots[255].Key);
+        }
+
+        [Fact]
+        public void Map_NeverReturnsPaddingKeys()
+        {
+            var slots = new List<SensorSlot>
+            {
+                new("key-a", "SIMVAR A", "number"),
+                new("key-b", "SIMVAR B", "number")
+            };
+
+            var block = new SensorBlock(0, slots);
+            var layout = new SensorLayout(new[] { block }, blockSize: 256);
+
+            // Simula pacote do SimConnect recebido com 256 valores (incluindo padding no final)
+            var values = new double[256];
+            values[0] = 42.0;
+            values[1] = 84.0;
+            for (int i = 2; i < 256; i++)
+            {
+                values[i] = 1.0;
+            }
+
+            var mapped = layout.Map(0, values);
+
+            Assert.Equal(2, mapped.Count);
+            Assert.Equal(42.0, mapped["key-a"]);
+            Assert.Equal(84.0, mapped["key-b"]);
+            Assert.DoesNotContain(mapped.Keys, k => k.StartsWith("pad-", StringComparison.Ordinal));
         }
     }
 }
