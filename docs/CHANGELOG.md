@@ -1650,3 +1650,14 @@
   - Simulador de 1.000 h de voo típico calibrado e verificado para as 9 classes (A a I), com todos os custos/hora dentro das faixas-alvo.
 - **Testes**:
   - Criados 17 novos testes em `PartWearEngineTests`, `PartBridgeAndMigrationTests`, `PostMaintenanceCorrectionTests` e `PartEconomyBalanceTests`. Total da suíte: 258 testes passando com 100% de sucesso.
+
+## 2026-11-15 - F2.3 Ajustes da revisão rodada 2 (Gemini)
+- **Ativação da Migração no Startup (`App.xaml.cs` e `PartMigrationService`)**:
+  - Integrada chamada `PartMigrationService.MigrateAllPendingAsync(dbContext)` na inicialização de `App.xaml.cs` logo após `EnsurePartsAsync`, com tratamento de exceção registrado.
+  - Implementado teste de integração completo de inicialização e migração com idempotência e remoção de obsoletas virgens em `PartBridgeAndMigrationTests`.
+- **Eliminação de `catch { }` silencioso**:
+  - Exceções ao deserializar `FeaturesJson` em `MarketSimulationService` e `PartMigrationService` registradas com `Debug.WriteLine`.
+- **Calibração de Custos e Recalibração de `economy_targets.json`**:
+  - Adicionado teto de preço por porte da aeronave em `PartPricing.GetClassPartPriceCap` (US$ 30k pistão, US$ 80k turboélice/jato executivo, US$ 55k narrowbody, US$ 110k widebody/cargueiro pesado).
+  - Recalibradas todas as faixas de classes (A a J) em `economy_targets.json` com base nas ordens de grandeza reais (A320neo a US$ 1.941/h, A330 a US$ 3.807/h, 747-8i a US$ 5.084/h, CJ4 a US$ 1.558/h, Baron a US$ 436/h, C152 a US$ 88/h).
+  - Adicionado teste automatizado cobrindo todas as 46 aeronaves capturadas no catálogo (`EconomySimulation_All46CapturedAircraft_FallWithinTargetBands`) com 100% de conformidade. Total da suíte: 260 testes passando.
