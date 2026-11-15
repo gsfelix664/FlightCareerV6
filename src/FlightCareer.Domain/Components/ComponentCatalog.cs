@@ -360,6 +360,27 @@ namespace FlightCareer.Domain.Components
         public double OilLeakMinFpm { get; set; } = 650.0;
         public double OilLeakChanceAt1000Fpm { get; set; } = 0.5;
         public double OilLeakRatePerMin { get; set; } = 3.5;
+
+        // Contato com o solo na leitura rápida (TouchdownDetector). Crash = perda total (plano › F4.2b, acidente real),
+        // detectado pelo addon mesmo com "Desativar Danos de Colisão" marcado no simulador.
+        /// <summary>Razão de descida no contato que já é acidente (fpm).</summary>
+        public double CrashFpm { get; set; } = 1500.0;
+        /// <summary>Inclinação de asa no contato que já é acidente (graus).</summary>
+        public double CrashBankDeg { get; set; } = 30.0;
+        /// <summary>Nariz para baixo no contato (bate a hélice/bequilha) que já é acidente (graus).</summary>
+        public double CrashNoseDownDeg { get; set; } = 15.0;
+        /// <summary>Nariz para cima no contato (cauda) que já é acidente (graus).</summary>
+        public double CrashNoseUpDeg { get; set; } = 30.0;
+        /// <summary>Pico de G no contato que já é acidente.</summary>
+        public double CrashG { get; set; } = 6.0;
+        /// <summary>Janela antes do contato usada para a razão de descida e a atitude (s).</summary>
+        public double ContactWindowBeforeSec { get; set; } = 1.0;
+        /// <summary>Janela depois do contato usada para o pico de G (s); o evento sai quando ela fecha.</summary>
+        public double ContactWindowAfterSec { get; set; } = 0.5;
+        /// <summary>Tempo mínimo no ar para um novo contato contar (filtra o pula-pula do sensor no solo) (s).</summary>
+        public double MinAirborneSec { get; set; } = 0.5;
+        /// <summary>Trecho da leitura rápida gravado no blackbox antes do contato (s).</summary>
+        public double TraceBeforeSec { get; set; } = 2.0;
     }
 
     public class EngineLimits

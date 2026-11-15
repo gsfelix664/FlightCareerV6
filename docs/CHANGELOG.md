@@ -1442,3 +1442,9 @@
 
 ## 2026-11-15 - F1.4c: voo 3 do C152 (Claude)
 - Log `20261115-0905`: flaps no dente 2 a 98 kt (limite 85) geraram taxa nativa 5–8 (até 0,00033) e queda de nível: **os flaps respondem** no C152 (o voo 1 tinha sido inconclusivo). G máximo 4,29 (abaixo do limite de 4,4 G): comandos seguem sem teste. O voo terminou em crash antes do teste longo de motor, então a F4.2c continua **não testada no MSFS**. O seed do catálogo de limites rodou no banco real (46 perfis).
+
+## 2026-11-15 - Leitura rápida de voo e detecção de crash pelo addon (Claude)
+- Bug do voo `20261115-0905`: o C152 bateu a ~4.000 fpm e ficou no chão a 74° de inclinação, mas o addon registrou "pouso de 126 fpm" e seguiu em TÁXI. Causas: crash só pelo aviso do simulador (que não vem com "Desativar Danos de Colisão" marcado) e telemetria a cada **4 s** (o toque era medido segundos depois do contato).
+- `SimConnectService`: telemetria principal a cada 1 s; nova leitura rápida separada (`SimFastFlightState`: no solo, razão de descida, velocidade vertical do corpo, G, arfagem, rolagem, IAS, GS) a cada 2 frames (~20–30 Hz).
+- `Domain/Components/TouchdownDetector`: a cada contato com o solo mede a razão de descida no 1 s anterior, o pico de G até 0,5 s depois e a atitude; classifica **Normal** ou **Crash** (limites em `component_catalog.json` › `landing`: 1.500 fpm, 30° de inclinação, 15° de nariz para baixo, 30° para cima, 6 G). 12 testes, inclusive o crash do voo de hoje.
+- `FlightMonitor`: o toque e o bounce passam a usar a leitura rápida (com recuo para o cálculo antigo se ela parar); crash = alerta "ACIDENTE" e perda total. O blackbox ganha os eventos `TOQUE`, `CRASH_ADDON` e `TOQUE_TRACE` (2 s antes a 0,5 s depois do contato). **Não testado no MSFS.**

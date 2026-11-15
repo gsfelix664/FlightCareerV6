@@ -72,6 +72,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ### SimConnect
 - **`SimTelemetry` e `AddToDef` precisam ter a mesma ordem.** O struct é lido por posição de memória: **só acrescente campos no fim**, nos dois lugares, com a mesma unidade.
+- **Frequências:** telemetria principal (`SimTelemetry`) a cada 1 s; panes (`SimFailureState`) a cada 6 frames; leitura rápida de voo (`SimFastFlightState`, toque/crash/G) a cada 2 frames; sensores genéricos a cada 30 frames. Cada uma numa definição separada.
 - **Eventos:** use `SimConnectService.SendEvent(nome, dado)`, que mapeia cada evento uma única vez. Não chame `MapClientEventToSimEvent` de novo com o mesmo ID.
 - **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos de alternador, pneu, trem, flap, magneto ou pressurização: esses efeitos são feitos forçando chaves/comandos a cada tick (`SimFailureActuator`) ou só no lado do app (`effect: None`).
 - **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
@@ -123,7 +124,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 ### Outros sistemas
 - Missões procedurais por Tier e região (`MissionGenerator`, `MissionRules`, `hubs_data.json`); multi-leg; ferry.
 - Economia e combustível (`EconomyServices`, `FuelPriceService`); mercado vivo de usados com inspeção pré-compra (`MarketSimulationService`).
-- `FlightMonitor`: início/fim automático do voo, touchdown, perda total, pouso de emergência, blackbox (`FlightTelemetryLogger`).
+- `FlightMonitor`: início/fim automático do voo, touchdown, perda total, pouso de emergência, blackbox (`FlightTelemetryLogger`). O toque e o crash são medidos pelo addon na leitura rápida (`Domain/Components/TouchdownDetector`, limites em `component_catalog.json` › `landing`), sem depender do aviso de crash do simulador; não testado no MSFS.
 - Plano pendente de detecção de aeronave e W&B: `docs/plans/simconnect-wb-deteccao-aeronave.md`.
 
 ### Catálogo de limites por aeronave (F2.0a)
