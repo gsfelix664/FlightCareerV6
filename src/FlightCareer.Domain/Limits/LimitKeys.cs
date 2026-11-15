@@ -22,6 +22,7 @@ namespace FlightCareer.Domain.Limits
         public const string Vno = "vno";
         public const string Vle = "vle";
         public const string Vlo = "vlo";
+        public const string Va = "va";
         public const string Mmo = "mmo";
         public const string Vs0 = "vs0";
         public const string Vs1 = "vs1";
@@ -52,6 +53,7 @@ namespace FlightCareer.Domain.Limits
             [Vno] = "knots",
             [Vle] = "knots",
             [Vlo] = "knots",
+            [Va] = "knots",
             [Mmo] = "mach",
             [Vs0] = "knots",
             [Vs1] = "knots",

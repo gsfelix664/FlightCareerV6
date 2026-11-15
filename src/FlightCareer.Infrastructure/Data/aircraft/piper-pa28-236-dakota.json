@@ -5,11 +5,14 @@
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "fixedGear",
+    "autopilot",
+    "carbureted",
     "constantSpeedProp",
-    "carbureted"
+    "fixedGear",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [

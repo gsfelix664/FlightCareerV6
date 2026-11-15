@@ -276,6 +276,21 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 
 ---
 
+## Ideias do Usuário para Fases Seguintes (F2.3+, F3, F4 e Fase 5)
+1. **MEL (Minimum Equipment List):** falhas que não impedem VFR diurno (farol, ILS/VOR) permitem traslado VFR até hub com manutenção mais barata; transponder ou PFD inoperante restringe voos IFR e missões comerciais.
+2. **Inspeção calendárica:** itens como transponder, altímetro/ADC e ELT a cada 24 meses (custo fixo mesmo com a aeronave parada).
+3. **Cascata de energia:** gerador falhado em voo → consumo da bateria em tempo real; quanto pior a saúde da bateria, menos minutos até apagar telas e rádios no simulador.
+4. **Cadeias de causa e efeito:** vazamento hidráulico afeta trem, freios e comandos; filtro hidráulico contaminado acelera em 3× o desgaste das bombas; falha pneumática impede pressurização e obriga descida de emergência; bomba/filtro de combustível gera flutuação de potência ou flameout.
+5. **TBO comercial vs. privado:** após o TBO o jogador pode voar voos privados assumindo risco crescente de falha, mas missões comerciais e fretamentos exigem motor estritamente dentro do TBO.
+6. **Top overhaul vs. major overhaul:** top overhaul substitui cilindros, pistões e válvulas por uma fração do preço e recupera parte da confiabilidade; major overhaul é a retífica completa do bloco.
+7. **Vazamento de óleo em cascata:** desgaste severo em lubrificação ou cilindros (< 30%) injeta gradualmente `GENERAL ENG OIL LEAKED PERCENT` via SimConnect (`SetOilLeakedPercent`), derrubando pressão e elevando temperatura nos instrumentos para forçar redução de potência antes de fundir o motor.
+8. **Cabine e MEL de conforto:** interior gasto reduz satisfação e valor de missões de passageiros; lavatório inoperante restringe missões de longo curso (MEL de cabine).
+9. **Oxigênio de emergência:** O2 inoperante limita altitude máxima de despacho no planejamento de rota.
+10. **Envelhecimento ambiental acelerado:** corrosão acelerada em hubs litorâneos/úmidos, areia e desgaste de filtros em desertos, ressecamento sob frio polar extremo.
+11. **Balanceamento econômico na F2.3:** simulação de custo de manutenção por hora em 1.000 h de voo típicas comparada com faixas por classe de aeronave, garantindo salvaguarda "um sistema só cobra" enquanto componentes legados e peças convivem.
+
+---
+
 ## Riscos conhecidos
 1. Nem todo avião simula tudo (bateria, sucção, temperatura de freio). Por isso a validação é por tipo.
 2. O wear and tear nativo fica **ligado** (regra 0.1). Riscos: índice do 2º motor por SimConnect não confirmado (`:39:1` foi aceito mas não distingue no monomotor); aviões sem wear and tear ficam só com os sensores do addon.
@@ -303,3 +318,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.2 · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.2-relatorio.md) · branch feat/parts-f2.2
 - F2.2 (regras de desgaste, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Relatório](docs/reviews/F2.2-relatorio.md). Pedido do usuário na aprovação: expandir o catálogo (aviônicos, elétrico, superfícies de comando, estrutura, trem e asa detalhados) → tarefa F2.1b.
 - Decisão de UI · 2026-11-15 · Hangar por setor; amarelo só o que a inspeção/walkaround descobriu, vermelho só o quebrado (Fase 5).
+- F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 3) · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b

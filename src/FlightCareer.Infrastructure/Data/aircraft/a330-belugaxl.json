@@ -5,12 +5,30 @@
   "class": "Jet",
   "engineCount": 2,
   "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
     "jet",
     "multiEngine",
-    "retractableGear",
+    "noseWheelSteering",
+    "oxygen",
     "pressurized",
-    "apu",
-    "hydraulicGear"
+    "ptu",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

@@ -1,18 +1,27 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 4,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
   "features": [
-    "piston",
-    "diesel",
-    "multiEngine",
-    "retractableGear",
+    "autopilot",
     "constantSpeedProp",
+    "deIceBoots",
+    "diesel",
+    "fadec",
     "fuelInjected",
+    "glassCockpit",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "propDeIce",
+    "retractableGear",
     "turbocharged",
-    "hydraulicGear"
+    "weatherRadar"
   ],
   "simMatch": {
     "title": [

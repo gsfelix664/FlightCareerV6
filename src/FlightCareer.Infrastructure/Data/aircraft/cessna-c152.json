@@ -1,15 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 4,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
+    "carbureted",
     "fixedGear",
     "fixedPitchProp",
-    "carbureted"
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [
@@ -138,6 +139,14 @@
       "unit": "g",
       "source": "POH",
       "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 104.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (104 KIAS)",
       "notes": null
     }
   ]

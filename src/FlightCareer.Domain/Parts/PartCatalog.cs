@@ -99,6 +99,31 @@ namespace FlightCareer.Domain.Parts
                     throw new InvalidDataException($"Peça '{part.Id}' deve ter LifeSource preenchido com a origem da vida útil.");
                 }
 
+                if (part.RepairCostPctOfAircraft != null)
+                {
+                    if (part.RepairCostPctOfAircraft.Count != 2 ||
+                        part.RepairCostPctOfAircraft[0] < 0 ||
+                        part.RepairCostPctOfAircraft[0] > part.RepairCostPctOfAircraft[1])
+                    {
+                        throw new InvalidDataException($"Peça '{part.Id}' possui RepairCostPctOfAircraft inválido: deve ter 2 elementos [min, max] com 0 <= min <= max.");
+                    }
+                }
+
+                if (part.DowntimeHours != null)
+                {
+                    if (part.DowntimeHours.Count != 2 ||
+                        part.DowntimeHours[0] < 0 ||
+                        part.DowntimeHours[0] > part.DowntimeHours[1])
+                    {
+                        throw new InvalidDataException($"Peça '{part.Id}' possui DowntimeHours inválido: deve ter 2 elementos [min, max] com 0 <= min <= max.");
+                    }
+                }
+
+                if (part.CalendarLifeMonths.HasValue && part.CalendarLifeMonths.Value <= 0)
+                {
+                    throw new InvalidDataException($"Peça '{part.Id}' possui CalendarLifeMonths inválido: deve ser > 0 quando especificado.");
+                }
+
                 if (validSensorKeys != null && part.Sensors != null)
                 {
                     foreach (var s in part.Sensors)
@@ -131,7 +156,11 @@ namespace FlightCareer.Domain.Parts
                 d.Sensors ?? new List<string>(),
                 d.LifeSource,
                 d.PerEngine,
-                d.PriceScalesWithAircraft
+                d.PriceScalesWithAircraft,
+                d.RepairCostPctOfAircraft,
+                d.DowntimeHours,
+                d.FailureEffect,
+                d.CalendarLifeMonths
             )).ToList() ?? new List<PartDefinition>();
 
             return new PartCatalog(parts);
@@ -183,6 +212,10 @@ namespace FlightCareer.Domain.Parts
             public string LifeSource { get; set; } = string.Empty;
             public bool PerEngine { get; set; }
             public bool PriceScalesWithAircraft { get; set; }
+            public List<double>? RepairCostPctOfAircraft { get; set; }
+            public List<double>? DowntimeHours { get; set; }
+            public string? FailureEffect { get; set; }
+            public int? CalendarLifeMonths { get; set; }
         }
 
         private class AppliesToDto

@@ -1,14 +1,27 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Cessna 408 SkyCourier",
   "class": "Turboprop",
   "engineCount": 2,
   "features": [
-    "turboprop",
-    "multiEngine",
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "deIceBoots",
+    "fireProtection",
     "fixedGear",
-    "constantSpeedProp"
+    "fms",
+    "glassCockpit",
+    "iceDetector",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "propDeIce",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [],

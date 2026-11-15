@@ -22,6 +22,15 @@ namespace FlightCareer.Domain.Parts
         public const string Celula = "Célula";
         public const string Hidraulico = "Hidráulico";
         public const string Pressurizacao = "Pressurização";
+        public const string Empenagem = "Empenagem";
+        public const string Asa = "Asa";
+        public const string Fuselagem = "Fuselagem";
+        public const string Avionicos = "Aviônicos";
+        public const string Pneumatico = "Pneumático";
+        public const string Cabine = "Cabine";
+        public const string Oxigenio = "Oxigênio";
+        public const string Fogo = "Proteção contra Fogo";
+        public const string Emergencia = "Emergência";
 
         public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -38,7 +47,16 @@ namespace FlightCareer.Domain.Parts
             Freios,
             Celula,
             Hidraulico,
-            Pressurizacao
+            Pressurizacao,
+            Empenagem,
+            Asa,
+            Fuselagem,
+            Avionicos,
+            Pneumatico,
+            Cabine,
+            Oxigenio,
+            Fogo,
+            Emergencia
         };
     }
 }

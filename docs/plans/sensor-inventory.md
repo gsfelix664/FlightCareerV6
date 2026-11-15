@@ -141,6 +141,7 @@ Convenções:
 | `EXTERNAL POWER ON` | bool | GPU (poupa bateria/starter) |
 | `WARNING VOLTAGE` | bool | alerta do painel |
 | `CIRCUIT BREAKER PULLED` | bool | disjuntores por nome: fase futura (aviônicos) |
+| `AVIONICS MASTER SWITCH` | bool | chave master de aviônicos |
 
 ## 7. Vácuo, pitot, estática e gelo
 
@@ -200,6 +201,8 @@ Convenções:
 | `ELEVATOR TRIM POSITION`, `AILERON TRIM PCT`, `RUDDER TRIM PCT` | radians / percent over 100 / percent over 100 | trim (servos) |
 | `ACCELERATION BODY X`, `ACCELERATION BODY Y`, `ACCELERATION BODY Z` | feet per second squared | cargas laterais/turbulência |
 | `PRESSURIZATION CABIN ALTITUDE`, `PRESSURIZATION PRESSURE DIFFERENTIAL` | feet / psf | **estrutura pressurizada (ciclos de pressurização)** |
+| `ELEVATOR POSITION`, `AILERON POSITION`, `RUDDER POSITION` | position | deflexão de comandos de voo (profundor, aileron, leme) |
+| `AUTOPILOT MASTER` | bool | engate do piloto automático |
 
 ## 11. Hidráulico e pneumático (aviões que tiverem)
 

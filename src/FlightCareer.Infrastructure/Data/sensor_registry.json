@@ -666,6 +666,13 @@
       "perEngine": false
     },
     {
+      "key": "elec-avionics-master-switch",
+      "simVar": "AVIONICS MASTER SWITCH",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
       "key": "vac-suction-pressure",
       "simVar": "SUCTION PRESSURE",
       "unit": "inhg",
@@ -1215,6 +1222,34 @@
       "key": "af-pressurization-pressure-differential",
       "simVar": "PRESSURIZATION PRESSURE DIFFERENTIAL",
       "unit": "psf",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-elevator-position",
+      "simVar": "ELEVATOR POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-aileron-position",
+      "simVar": "AILERON POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-rudder-position",
+      "simVar": "RUDDER POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-autopilot-master",
+      "simVar": "AUTOPILOT MASTER",
+      "unit": "bool",
       "group": "airframe",
       "perEngine": false
     },

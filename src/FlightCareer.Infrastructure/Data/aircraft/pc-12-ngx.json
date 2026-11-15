@@ -5,12 +5,27 @@
   "class": "Turboprop",
   "engineCount": 1,
   "features": [
-    "turboprop",
-    "singleEngine",
-    "retractableGear",
+    "autopilot",
+    "bleedAir",
     "constantSpeedProp",
+    "deIceBoots",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "lavatory",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "pressurized",
-    "hydraulicGear"
+    "propDeIce",
+    "retractableGear",
+    "singleEngine",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

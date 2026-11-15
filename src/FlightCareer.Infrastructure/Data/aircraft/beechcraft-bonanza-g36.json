@@ -1,15 +1,19 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 4,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "retractableGear",
+    "autopilot",
     "constantSpeedProp",
-    "fuelInjected"
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "retractableGear",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [
@@ -106,6 +110,14 @@
       "unit": "knots",
       "source": "POH",
       "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Landing gear extended normal 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 141.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Bonanza G36 POH, Sec. 2 (141 KIAS)",
       "notes": null
     }
   ]

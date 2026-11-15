@@ -5,11 +5,17 @@
   "class": "Piston",
   "engineCount": 1,
   "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "fixedGear",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "piston",
     "singleEngine",
-    "fixedGear",
-    "constantSpeedProp",
-    "fuelInjected",
+    "spoilers",
     "turbocharged"
   ],
   "simMatch": {

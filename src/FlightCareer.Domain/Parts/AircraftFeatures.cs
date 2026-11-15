@@ -40,6 +40,41 @@ namespace FlightCareer.Domain.Parts
         public const string Apu = "apu";
         public const string ElectricHybrid = "electricHybrid";
 
+        // Aviônicos e navegação
+        public const string GlassCockpit = "glassCockpit";
+        public const string Fms = "fms";
+        public const string Autopilot = "autopilot";
+        public const string WeatherRadar = "weatherRadar";
+
+        // Aerodinâmica e superfícies
+        public const string Slats = "slats";
+        public const string Spoilers = "spoilers";
+        public const string ThsTrim = "thsTrim";
+
+        // Sistemas de proteção e trem
+        public const string DeIceBoots = "deIceBoots";
+        public const string BleedAntiIce = "bleedAntiIce";
+        public const string Antiskid = "antiskid";
+        public const string NoseWheelSteering = "noseWheelSteering";
+
+        // Adendos F2.1b Rodada 2: hidráulico, pneumático, propulsão e aviônicos
+        public const string Ptu = "ptu";
+        public const string Rat = "rat";
+        public const string PropDeIce = "propDeIce";
+        public const string Fadec = "fadec";
+        public const string BleedAir = "bleedAir";
+
+        // Adendo 4 F2.1b Rodada 3: Cabine de passageiros, oxigênio, fogo e emergência
+        public const string PassengerCabin = "passengerCabin";
+        public const string Galley = "galley";
+        public const string Lavatory = "lavatory";
+        public const string Oxygen = "oxygen";
+        public const string FireProtection = "fireProtection";
+        public const string Floats = "floats";
+        public const string Skis = "skis";
+        public const string Wipers = "wipers";
+        public const string IceDetector = "iceDetector";
+
         /// <summary>
         /// Todas as características válidas no vocabulário fechado.
         /// </summary>
@@ -62,7 +97,32 @@ namespace FlightCareer.Domain.Parts
             Pressurized,
             HydraulicGear,
             Apu,
-            ElectricHybrid
+            ElectricHybrid,
+            GlassCockpit,
+            Fms,
+            Autopilot,
+            WeatherRadar,
+            Slats,
+            Spoilers,
+            ThsTrim,
+            DeIceBoots,
+            BleedAntiIce,
+            Antiskid,
+            NoseWheelSteering,
+            Ptu,
+            Rat,
+            PropDeIce,
+            Fadec,
+            BleedAir,
+            PassengerCabin,
+            Galley,
+            Lavatory,
+            Oxygen,
+            FireProtection,
+            Floats,
+            Skis,
+            Wipers,
+            IceDetector
         };
 
         /// <summary>
@@ -153,6 +213,80 @@ namespace FlightCareer.Domain.Parts
             if ((set.Contains(Piston) || set.Contains(Turboprop)) && !set.Contains(FixedPitchProp) && !set.Contains(ConstantSpeedProp))
             {
                 throw new InvalidOperationException($"{ctx}: motor a pistão ou turboélice deve definir fixedPitchProp ou constantSpeedProp.");
+            }
+
+            // 9. deIceBoots e bleedAntiIce exclusivos
+            if (set.Contains(DeIceBoots) && set.Contains(BleedAntiIce))
+            {
+                throw new InvalidOperationException($"{ctx}: não pode ter deIceBoots e bleedAntiIce simultaneamente.");
+            }
+
+            // 10. slats apenas em jet ou turboprop
+            if (set.Contains(Slats) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: slats só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 11. thsTrim apenas em jet ou turboprop
+            if (set.Contains(ThsTrim) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: thsTrim só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 12. tailwheel não possui noseWheelSteering
+            if (set.Contains(Tailwheel) && set.Contains(NoseWheelSteering))
+            {
+                throw new InvalidOperationException($"{ctx}: aeronave tailwheel (bequilha de cauda) não possui noseWheelSteering (direção do trem dianteiro).");
+            }
+
+            // 13. ptu apenas em multi-engine jet ou turboprop
+            if (set.Contains(Ptu) && (!set.Contains(MultiEngine) || (!set.Contains(Jet) && !set.Contains(Turboprop))))
+            {
+                throw new InvalidOperationException($"{ctx}: ptu (unidade de transferência de potência hidráulica) só é aplicável a aeronaves multi-motor a jato ou turboélice.");
+            }
+
+            // 14. rat apenas em jet ou turboprop
+            if (set.Contains(Rat) && (!set.Contains(Jet) && !set.Contains(Turboprop)))
+            {
+                throw new InvalidOperationException($"{ctx}: rat (turbina de ar de impacto) só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 15. propDeIce não aplicável a jet e requer hélice
+            if (set.Contains(PropDeIce) && set.Contains(Jet))
+            {
+                throw new InvalidOperationException($"{ctx}: propDeIce (degelo de hélice) não é aplicável a aeronaves a jato (jet).");
+            }
+            if (set.Contains(PropDeIce) && !set.Contains(ConstantSpeedProp) && !set.Contains(FixedPitchProp))
+            {
+                throw new InvalidOperationException($"{ctx}: propDeIce requer configuração de hélice (constantSpeedProp ou fixedPitchProp).");
+            }
+
+            // 16. bleedAir aplicável a jet, turboprop ou aeronave a pistão pressurizada
+            if (set.Contains(BleedAir) && set.Contains(Piston) && !set.Contains(Pressurized))
+            {
+                throw new InvalidOperationException($"{ctx}: bleedAir (sistema pneumático de sangria) só é aplicável a jato, turboélice ou aeronave a pistão pressurizada.");
+            }
+
+            // 17. galley e lavatory requerem passengerCabin
+            if (set.Contains(Galley) && !set.Contains(PassengerCabin))
+            {
+                throw new InvalidOperationException($"{ctx}: galley requer passengerCabin (cabine de passageiros).");
+            }
+            if (set.Contains(Lavatory) && !set.Contains(PassengerCabin))
+            {
+                throw new InvalidOperationException($"{ctx}: lavatory requer passengerCabin (cabine de passageiros).");
+            }
+
+            // 18. floats e skis são mutuamente exclusivos
+            if (set.Contains(Floats) && set.Contains(Skis))
+            {
+                throw new InvalidOperationException($"{ctx}: não pode possuir floats (flutuadores) e skis (esquis) simultaneamente.");
+            }
+
+            // 19. iceDetector apenas em jet ou turboprop
+            if (set.Contains(IceDetector) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: iceDetector só é aplicável a aeronaves a jato ou turboélice.");
             }
         }
     }

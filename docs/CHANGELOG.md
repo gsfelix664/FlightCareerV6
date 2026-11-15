@@ -1543,3 +1543,55 @@
 
 ## 2026-11-15 - Decisão: Hangar por setor (Claude)
 - Plano › Fase 5: o Hangar mostra setores, não a lista de peças; amarelo só o que a inspeção/walkaround descobriu, vermelho só o que está quebrado; o resto fica recolhido. Nenhum código mudou.
+## 2026-11-15 - F2.1b: expansão do catálogo de peças e regras (Gemini)
+- **Expansão do catálogo de peças (`parts_catalog.json`)**:
+  - Catálogo ampliado de 58 para 96 peças, cobrindo detalhadamente superfícies de comando e empenagem (6 peças), trem de pouso estrutural e rodas (5 peças), asa e hipersustentadores/spoilers/degelo (9 peças), fuselagem e anteparas pressurizadas (8 peças), elétrico AC (1 peça) e aviônicos/IFR/telas/FMS/autopilot (9 peças).
+  - Adicionados campos `repairCostPctOfAircraft` ([min, max]), `downtimeHours` ([min, max]) e `failureEffect` a 100% das 96 peças do catálogo com validação estrita.
+- **Novos grupos e vocabulário de características**:
+  - `PartGroup`: adicionados grupos `Empenagem`, `Asa`, `Fuselagem` e `Aviônicos`.
+  - `AircraftFeatures`: adicionadas 11 features funcionais (`glassCockpit`, `fms`, `autopilot`, `weatherRadar`, `slats`, `spoilers`, `thsTrim`, `deIceBoots`, `bleedAntiIce`, `antiskid`, `noseWheelSteering`) com validações de coerência mandatória.
+- **Aeronaves e limite Va (`Data/aircraft/*.json`)**:
+  - Atualizados os 46 arquivos JSON com incremento de `dataVersion` e mapeamento de features funcionais.
+  - Adicionada chave `va` (velocidade de manobra) a `LimitKeys` e preenchida a partir de POH nas aeronaves calibradas.
+- **Ampliação das regras de desgaste (`wear_rules.json`)**:
+  - Adicionadas 12 novas regras operacionais (total de 35 regras): comando brusco acima de Va, ciclos de trim, acúmulo de gelo sem degelo, ciclos de botas pneumáticas, tailstrike, wingtip strike, vento cruzado com carga lateral, curva rápida no táxi, overspeed de speedbrake, ciclos de pressurização de fuselagem, ciclos estruturais de pouso e frenagem de alta energia com antiskid.
+- **Sensores e Inventário**:
+  - Confirmadas no SDK e registradas 5 novas SimVars globais: `ELEVATOR POSITION`, `AILERON POSITION`, `RUDDER POSITION`, `AUTOPILOT MASTER` e `AVIONICS MASTER SWITCH` (total de 378 sensores, paridade 100% com `sensor-inventory.md`).
+- **Testes e verificação**:
+  - Build 0 erros; 219 testes xUnit e 40 testes python aprovados com 100% de sucesso.
+  - Relatório completo submetido para aprovação do usuário em `docs/reviews/F2.1b-relatorio.md`.
+
+## 2026-11-15 - F2.1b Rodada 2: incorporação dos adendos do usuário (Gemini)
+- **Ampliação e unificação do catálogo de peças (`parts_catalog.json`)**:
+  - Incorporados os três adendos do usuário (Elétrico/Aviônicos, Hidráulico/Pneumático/Combustível e Motopropulsor), expandindo o catálogo para 134 peças calibradas (meta 130–180 atendida).
+  - Segregação de subsistemas essenciais: divisão de AHRS/IRS e ADC, acréscimo de standby/ISIS, TCAS/EGPWS, gravadores FDR/CVR/ELT, painel de áudio, bateria standby, geradores IDG e RAT, TRU, iluminação externa, disjuntores/relés, bombas hidráulicas elétricas ACMP, acumuladores de pressão, válvulas seletoras e PTU, válvulas de sangria pneumática, pré-resfriadores, detecção de vazamento pneumático, packs ACM, alívio de pressão, válvulas crossfeed e corte de fogo, trocador FOHE, FQIS, coxins/berço, nacele/carenagem, wastegate, filtro de ar, partida pneumática ATS, FADEC/EEC, bicos injetores e NGV de turbina, excitadores de ignição, mecanismo de passo/embandeiramento, degelo elétrico de hélice, módulo APU e portas de carga.
+  - Todas as 134 peças configuradas com faixas de custo percentual de reparo (`repairCostPctOfAircraft`), horas de hangar (`downtimeHours`) e efeitos de falha funcionais.
+- **Novas características funcionais e grupos (`AircraftFeatures` e `PartGroup`)**:
+  - Adicionado novo grupo `Pneumático` em `PartGroup`.
+  - Adicionadas 5 novas características em `AircraftFeatures`: `ptu`, `rat`, `propDeIce`, `fadec`, `bleedAir` com validações estritas de coerência aeronáutica.
+  - Atualizados os 46 perfis de aeronave em `Data/aircraft/*.json` com bump de `dataVersion` para 3 e mapeamento preciso das novas tecnologias por modelo.
+- **Ampliação do catálogo de regras de desgaste (`wear_rules.json`)**:
+  - Adicionadas 10 novas regras operacionais (totalizando 45 regras): partida com aviônicos ligados, descarga profunda da bateria, sobrecarga contínua de amperagem, piloto automático em turbulência severa, operação de bomba de combustível a seco, operação com pressão hidráulica baixa/deprimida, alta potência com óleo frio, ciclos de degelo de hélice, transientes rápidos de torque na caixa de redução e descompressão rápida de cabine.
+  - 100% das novas regras utilizam exclusivamente sensores existentes e limites físicos coerentes.
+- **Testes e integridade**:
+  - `PartCatalogTests` atualizado para validar a meta de 130–180 peças e coerência das novas features.
+  - `WearRuleCatalogTests` atualizado para validar catálogo de regras >= 40 regras.
+  - 219 testes xUnit em `FlightCareer.Tests` e 40 testes python aprovados com 100% de sucesso.
+
+## 2026-11-15 - F2.1b Rodada 3: incorporação do Adendo 4 (Gemini)
+- **Ampliação do catálogo com Adendo 4 e envelhecimento calendárico (`parts_catalog.json`)**:
+  - Incorporado o Adendo 4 do usuário cobrindo Cabine (assentos, galley, lavatório, entretenimento), Oxigênio (cilindro tripulação, sistema de passageiros, máscaras/reguladores), Proteção contra Fogo (detecção de motor, garrafas extintoras de motor e APU, extintores portáteis de cabine), Emergência e Específicos (escorregadeiras de evacuação, coletes/botes, limpadores de para-brisa, detector de gelo, esquis e flutuadores).
+  - Catálogo ampliado para 151 peças unificadas (meta de 130–180 peças rigorosamente mantida).
+  - Adicionado campo `calendarLifeMonths` em `PartDefinition` e calibrado em todas as peças que sofrem envelhecimento estacionário (baterias, pneus, mangueiras, vedações, garrafas de extintor, cilindros de O2, coletes/escorregadeiras, ELT e lubrificantes).
+- **Novos grupos e vocabulário de características (`PartGroup` e `AircraftFeatures`)**:
+  - Adicionados 4 novos grupos em `PartGroup`: `Cabine`, `Oxigênio`, `Proteção contra Fogo` e `Emergência` (totalizando 23 grupos).
+  - Adicionadas 9 novas features em `AircraftFeatures`: `passengerCabin`, `galley`, `lavatory`, `oxygen`, `fireProtection`, `floats`, `skis`, `wipers`, `iceDetector` com validações de coerência aeronáutica (`galley`/`lavatory` requerem `passengerCabin`; `floats`/`skis` mutuamente exclusivos; `iceDetector` restrito a turboprop/jet).
+  - Atualizados os 46 arquivos de aeronaves em `Data/aircraft/*.json` com bump de `dataVersion` para 4 e mapeamento preciso das características (ex.: DHC-6 Twin Otter com `skis`, `passengerCabin`, `oxygen`, `wipers`; 747-8i com conjunto completo; C152 mantido estritamente enxuto).
+- **Métricas de evento fechadas e documentadas (`WearRuleMetrics`)**:
+  - Criada classe canônica `WearRuleMetrics` com o vocabulário fechado das 26 métricas de evento e estresse operacional suportadas pelo motor de desgaste, com fórmulas de derivação a partir da telemetria e sensores do simulador documentadas para a F2.3.
+  - `WearRuleCatalog` passa a validar que toda regra de evento referencia uma métrica de `WearRuleMetrics.All`.
+- **Testes e verificação**:
+  - `PartCatalogTests` e `WearRuleCatalogTests` atualizados com novos testes cobrindo todos os 23 grupos, peças com vida calendárica, coerência das novas features e métricas fechadas.
+  - Build com 0 erros; 225 testes xUnit e 40 testes python aprovados com 100% de sucesso.
+
+

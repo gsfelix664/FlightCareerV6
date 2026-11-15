@@ -1,19 +1,33 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Cirrus SR22",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "fixedGear",
+    "autopilot",
     "constantSpeedProp",
-    "fuelInjected"
+    "fixedGear",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "va",
+      "value": 140.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cirrus SR22 POH, Sec. 2 (140 KIAS at 3600 lbs)",
+      "notes": null
+    }
+  ]
 }

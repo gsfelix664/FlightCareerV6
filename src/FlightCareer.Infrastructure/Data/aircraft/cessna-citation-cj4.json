@@ -1,15 +1,31 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 4,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
   "engineCount": 2,
   "features": [
+    "antiskid",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
     "jet",
+    "lavatory",
     "multiEngine",
-    "retractableGear",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "pressurized",
-    "hydraulicGear"
+    "retractableGear",
+    "spoilers",
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

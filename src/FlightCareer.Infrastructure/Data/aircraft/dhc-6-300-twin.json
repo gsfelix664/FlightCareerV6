@@ -1,14 +1,23 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 4,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
   "engineCount": 2,
   "features": [
-    "turboprop",
-    "multiEngine",
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "deIceBoots",
     "fixedGear",
-    "constantSpeedProp"
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "propDeIce",
+    "skis",
+    "turboprop",
+    "wipers"
   ],
   "simMatch": {
     "title": [

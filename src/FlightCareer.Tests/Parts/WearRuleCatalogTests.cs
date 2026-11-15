@@ -46,7 +46,7 @@ namespace FlightCareer.Tests.Parts
             Catalog.Validate(PartsCatalog, validSensors);
 
             Assert.NotEmpty(Catalog.Rules);
-            Assert.True(Catalog.Rules.Count >= 15, "Deve conter ao menos 15 regras para cobrir os grupos mínimos.");
+            Assert.True(Catalog.Rules.Count >= 40, "Deve conter ao menos 40 regras após a expansão F2.1b (Rodada 2).");
 
             var defectCodePattern = new Regex("^[A-Z0-9]+(_[A-Z0-9]+)*$", RegexOptions.Compiled);
 
@@ -181,6 +181,10 @@ namespace FlightCareer.Tests.Parts
                 {
                     Assert.Contains("af-g-force", rule.Sensors);
                 }
+                else if (rule.LimitKey == LimitKeys.Va)
+                {
+                    Assert.Contains("af-airspeed-indicated", rule.Sensors);
+                }
             }
         }
 
@@ -249,6 +253,64 @@ namespace FlightCareer.Tests.Parts
             Assert.DoesNotContain(tbmRules, r => r.LimitKey == LimitKeys.ChtMax);
             // NÃO pode conter overspeed de RPM de pistão
             Assert.DoesNotContain(tbmRules, r => r.Id == "piston_rpm_overspeed");
+        }
+
+        [Fact]
+        public void NewRules_F21b_AreValidAndCoverKeyMechanics()
+        {
+            // Regra de comando acima de Va
+            var vaRule = Catalog.Rules.FirstOrDefault(r => r.Id == "control_surface_abrupt_above_va");
+            Assert.NotNull(vaRule);
+            Assert.Equal(WearRuleKind.Continuous, vaRule.Kind);
+            Assert.Equal(LimitKeys.Va, vaRule.LimitKey);
+            Assert.Contains("af-airspeed-indicated", vaRule.Sensors);
+            Assert.Contains("af-elevator-position", vaRule.Sensors);
+
+            // Regra de tailstrike no pouso
+            var tailstrike = Catalog.Rules.FirstOrDefault(r => r.Id == "touchdown_tailstrike");
+            Assert.NotNull(tailstrike);
+            Assert.Equal(WearRuleKind.Event, tailstrike.Kind);
+            Assert.Equal("touchdownPitchDegrees", tailstrike.Metric);
+            Assert.Contains(tailstrike.Bands, b => b.Inspection != null && b.Inspection.DefectCode == "TAILSTRIKE_INSPECTION");
+
+            // Regra de wingtip strike
+            var wingtip = Catalog.Rules.FirstOrDefault(r => r.Id == "touchdown_wingtip_strike");
+            Assert.NotNull(wingtip);
+            Assert.Equal(WearRuleKind.Event, wingtip.Kind);
+            Assert.Equal("touchdownBankDegrees", wingtip.Metric);
+            Assert.Contains(wingtip.Bands, b => b.Inspection != null && b.Inspection.DefectCode == "WINGTIP_STRIKE_INSPECTION");
+
+            // Regra de speedbrake em alta velocidade
+            var speedbrake = Catalog.Rules.FirstOrDefault(r => r.Id == "speedbrake_airspeed_vno_overspeed");
+            Assert.NotNull(speedbrake);
+            Assert.Equal(WearRuleKind.Continuous, speedbrake.Kind);
+            Assert.Equal(LimitKeys.Vno, speedbrake.LimitKey);
+
+            // Regra de ciclos de trim
+            var trim = Catalog.Rules.FirstOrDefault(r => r.Id == "trim_actuator_cycle_stress");
+            Assert.NotNull(trim);
+            Assert.Equal(WearRuleKind.Event, trim.Kind);
+            Assert.Equal("trimCycles", trim.Metric);
+
+            // Regra de frenagem de alta energia
+            var brake = Catalog.Rules.FirstOrDefault(r => r.Id == "brake_high_energy_antiskid");
+            Assert.NotNull(brake);
+            Assert.Equal(WearRuleKind.Event, brake.Kind);
+            Assert.Equal("brakeEnergyMkJ", brake.Metric);
+        }
+
+        [Fact]
+        public void EventRules_AllMetricsBelongToClosedList_WearRuleMetrics()
+        {
+            var eventRules = Catalog.Rules.Where(r => r.Kind == WearRuleKind.Event).ToList();
+            Assert.NotEmpty(eventRules);
+
+            foreach (var rule in eventRules)
+            {
+                Assert.NotNull(rule.Metric);
+                Assert.True(WearRuleMetrics.All.Contains(rule.Metric),
+                    $"Regra de evento '{rule.Id}' possui métrica '{rule.Metric}' fora do vocabulário fechado WearRuleMetrics.All.");
+            }
         }
     }
 }

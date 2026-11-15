@@ -1,14 +1,24 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "C208B",
   "class": "Turboprop",
   "engineCount": 1,
   "features": [
-    "turboprop",
-    "singleEngine",
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "deIceBoots",
     "fixedGear",
-    "constantSpeedProp"
+    "glassCockpit",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "propDeIce",
+    "singleEngine",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [],
