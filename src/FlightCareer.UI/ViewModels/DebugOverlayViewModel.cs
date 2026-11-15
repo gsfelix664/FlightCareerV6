@@ -1,11 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Sensors;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Services;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace FlightCareer.UI.ViewModels
 {
@@ -109,6 +112,19 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private bool _isRecording = false;
         [ObservableProperty] private string _recordingStatus = "PARADO";
         [ObservableProperty] private string _markerText = string.Empty;
+
+        // --- MODO CALIBRAÇÃO (F2.4b-CAL) ---
+        [ObservableProperty] private bool _isCalibrating = false;
+        [ObservableProperty] private string _calibrationStepTitle = string.Empty;
+        [ObservableProperty] private string _calibrationStepText = string.Empty;
+        [ObservableProperty] private string _calibrationTimerText = string.Empty;
+        [ObservableProperty] private bool _canAdvanceStep = false;
+        [ObservableProperty] private string _calibrationCommandOutput = string.Empty;
+        [ObservableProperty] private string _calibrationCsvPath = string.Empty;
+        [ObservableProperty] private bool _hasCalibrationOutput = false;
+        private CalibrationScript? _calibrationScript;
+        private DispatcherTimer? _calibrationTimer;
+        private DateTime _lastCalibrationTick;
 
         public event Action? RequestClose;
 
@@ -500,6 +516,163 @@ namespace FlightCareer.UI.ViewModels
                 _sensorRecorder.Mark(MarkerText);
                 MarkerText = string.Empty;
             }
+        }
+
+        [RelayCommand]
+        private async Task StartCalibration()
+        {
+            if (IsCalibrating) return;
+
+            try
+            {
+                _calibrationScript = CalibrationScript.LoadDefault("calibration_script.json");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[DebugOverlay] Erro ao carregar calibration_script.json: {ex.Message}");
+                return;
+            }
+
+            _sensorRecorder.FrameReader.CalibrationMode = true;
+
+            if (!_sensorRecorder.IsRecording)
+            {
+                await _sensorRecorder.StartAsync();
+            }
+
+            IsCalibrating = true;
+            HasCalibrationOutput = false;
+            CalibrationCommandOutput = string.Empty;
+            CalibrationCsvPath = string.Empty;
+
+            _lastCalibrationTick = DateTime.UtcNow;
+            if (_calibrationTimer == null)
+            {
+                _calibrationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+                _calibrationTimer.Tick += OnCalibrationTimerTick;
+            }
+            _calibrationTimer.Start();
+
+            UpdateCalibrationUi();
+        }
+
+        private void OnCalibrationTimerTick(object? sender, EventArgs e)
+        {
+            if (!IsCalibrating || _calibrationScript == null) return;
+
+            var now = DateTime.UtcNow;
+            double dt = (now - _lastCalibrationTick).TotalSeconds;
+            _lastCalibrationTick = now;
+
+            _calibrationScript.Tick(dt);
+            UpdateCalibrationUi();
+        }
+
+        private void UpdateCalibrationUi()
+        {
+            if (_calibrationScript == null || _calibrationScript.CurrentStep == null)
+            {
+                CalibrationStepTitle = string.Empty;
+                CalibrationStepText = string.Empty;
+                CalibrationTimerText = string.Empty;
+                CanAdvanceStep = false;
+                return;
+            }
+
+            var step = _calibrationScript.CurrentStep;
+            CalibrationStepTitle = $"Passo {_calibrationScript.CurrentIndex + 1}/{_calibrationScript.ActiveSteps.Count}: {step.Id}";
+            CalibrationStepText = step.Text;
+            CanAdvanceStep = _calibrationScript.CanAdvance;
+
+            if (_calibrationScript.TimeRemaining > 0)
+            {
+                CalibrationTimerText = $"{_calibrationScript.ElapsedInCurrentStep:F1}s / mín {step.MinSeconds:F0}s (aguarde {_calibrationScript.TimeRemaining:F1}s)";
+            }
+            else
+            {
+                CalibrationTimerText = $"{_calibrationScript.ElapsedInCurrentStep:F1}s (tempo mínimo cumprido)";
+            }
+        }
+
+        [RelayCommand]
+        private async Task AdvanceCalibrationStep()
+        {
+            if (!IsCalibrating || _calibrationScript == null || !_calibrationScript.CanAdvance) return;
+
+            var current = _calibrationScript.CurrentStep;
+            if (current != null)
+            {
+                _sensorRecorder.Mark($"cal:{current.Id}");
+            }
+
+            _calibrationScript.TryAdvance(out var next);
+
+            if (_calibrationScript.IsCompleted || next?.Id == "end")
+            {
+                if (next?.Id == "end")
+                {
+                    _sensorRecorder.Mark("cal:end");
+                }
+                await FinishCalibrationAsync();
+            }
+            else
+            {
+                UpdateCalibrationUi();
+            }
+        }
+
+        [RelayCommand]
+        private async Task SkipCalibrationStep()
+        {
+            if (!IsCalibrating || _calibrationScript == null) return;
+
+            var current = _calibrationScript.CurrentStep;
+            if (current != null)
+            {
+                _sensorRecorder.Mark($"cal-skip:{current.Id}");
+            }
+
+            var next = _calibrationScript.Skip();
+
+            if (_calibrationScript.IsCompleted || next?.Id == "end")
+            {
+                if (next?.Id == "end")
+                {
+                    _sensorRecorder.Mark("cal:end");
+                }
+                await FinishCalibrationAsync();
+            }
+            else
+            {
+                UpdateCalibrationUi();
+            }
+        }
+
+        [RelayCommand]
+        private void CancelCalibration()
+        {
+            if (!IsCalibrating) return;
+
+            _calibrationTimer?.Stop();
+            _sensorRecorder.FrameReader.CalibrationMode = false;
+            IsCalibrating = false;
+            UpdateCalibrationUi();
+        }
+
+        private async Task FinishCalibrationAsync()
+        {
+            _calibrationTimer?.Stop();
+            string csvPath = _sensorRecorder.CurrentFilePath ?? string.Empty;
+            _sensorRecorder.Stop();
+            _sensorRecorder.FrameReader.CalibrationMode = false;
+
+            IsCalibrating = false;
+            CalibrationCsvPath = csvPath;
+
+            CalibrationCommandOutput = $"python tools/aircraft_limits/calibrate.py \"{csvPath}\" --write";
+            HasCalibrationOutput = true;
+            UpdateCalibrationUi();
+            await Task.CompletedTask;
         }
     }
 }

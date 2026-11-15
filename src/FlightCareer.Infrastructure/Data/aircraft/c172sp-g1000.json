@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "C172SP G1000",
   "class": "Piston",
   "engineCount": 1,
@@ -142,6 +142,46 @@
       "unit": "knots",
       "source": "POH",
       "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (105 KIAS at 2550 lbs)",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecAvionicsCircuitIndex",
+      "value": 3.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecAvionicsBusAmpsIndex",
+      "value": 4.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecMainBusIndex",
+      "value": 1.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60.0,
+      "unit": "amperes",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 7 p. 7-47 (28-volt DC 60-ampere alternator, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     }
   ]

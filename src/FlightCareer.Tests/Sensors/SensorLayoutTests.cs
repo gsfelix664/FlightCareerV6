@@ -31,24 +31,40 @@ namespace FlightCareer.Tests.Sensors
         public void Build_OneEngine_HasOneSlotPerSensor()
         {
             var registry = LoadRealRegistry();
-            Assert.Equal(394, registry.Sensors.Count);
+            Assert.Equal(421, registry.Sensors.Count);
 
-            var layout = SensorLayout.Build(registry.Sensors, engineCount: 1);
+            // Sem calibração: 1 reservado + 401 sensores regulares (18 de varredura são calibrationOnly) = 402 slots
+            var layout = SensorLayout.Build(registry.Sensors, engineCount: 1, includeCalibration: false);
 
             Assert.Equal(2, layout.Blocks.Count);
-            Assert.Equal(395, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(402, layout.Blocks.Sum(b => b.Slots.Count));
             Assert.Equal(256, layout.Blocks[0].Slots.Count);
-            Assert.Equal(139, layout.Blocks[1].Slots.Count);
+            Assert.Equal(146, layout.Blocks[1].Slots.Count);
+        }
+
+        [Fact]
+        public void Build_OneEngine_WithCalibration_IncludesAllSensors()
+        {
+            var registry = LoadRealRegistry();
+            Assert.Equal(421, registry.Sensors.Count);
+
+            // Com calibração: 1 reservado + todos os 421 sensores = 422 slots
+            var layout = SensorLayout.Build(registry.Sensors, engineCount: 1, includeCalibration: true);
+
+            Assert.Equal(2, layout.Blocks.Count);
+            Assert.Equal(422, layout.Blocks.Sum(b => b.Slots.Count));
+            Assert.Equal(256, layout.Blocks[0].Slots.Count);
+            Assert.Equal(166, layout.Blocks[1].Slots.Count);
         }
 
         [Fact]
         public void Build_FourEngines_SplitsIntoBlocksOf256()
         {
             var registry = LoadRealRegistry();
-            var layout = SensorLayout.Build(registry.Sensors, engineCount: 4, blockSize: 256);
+            var layout = SensorLayout.Build(registry.Sensors, engineCount: 4, blockSize: 256, includeCalibration: false);
 
-            // 1 reservado (SIMULATION RATE) + 315 sensores globais + 79 sensores PerEngine * 4 = 1 + 315 + 316 = 632 slots
-            Assert.Equal(632, layout.Blocks.Sum(b => b.Slots.Count));
+            // 1 reservado (SIMULATION RATE) + 322 sensores globais regulares + 79 sensores PerEngine * 4 = 1 + 322 + 316 = 639 slots
+            Assert.Equal(639, layout.Blocks.Sum(b => b.Slots.Count));
             Assert.Equal(3, layout.Blocks.Count);
 
             Assert.Equal(0, layout.Blocks[0].Index);
@@ -58,7 +74,7 @@ namespace FlightCareer.Tests.Sensors
             Assert.Equal(256, layout.Blocks[1].Slots.Count);
 
             Assert.Equal(2, layout.Blocks[2].Index);
-            Assert.Equal(120, layout.Blocks[2].Slots.Count);
+            Assert.Equal(127, layout.Blocks[2].Slots.Count);
         }
 
         [Fact]

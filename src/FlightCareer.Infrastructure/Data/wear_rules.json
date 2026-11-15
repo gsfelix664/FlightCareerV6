@@ -3158,13 +3158,12 @@
       "limitDirection": null,
       "metric": "avionicsMasterStartSpikes",
       "sensors": [
-        "elec-avionics-master-switch",
-        "eng-combustion",
-        "eng-starter-active"
+        "eng-starter",
+        "elec-circuit-on-3"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
-      "source": "estimativa — revisar (referência usuário: POH Starter & Avionics Master Procedures / FAA AC 43.13-1B)",
+      "source": "teste elétrico de solo C172SP G1000 (teste-eletrico-C172.md, log 20261115-1636-C172SP_G1000_Passengers.csv); POH Starter & Avionics Master Procedures / FAA AC 43.13-1B",
       "bands": [
         {
           "name": "Leve (1 partida com aviônicos ligados)",
@@ -3249,13 +3248,12 @@
       "limitDirection": null,
       "metric": "batteryDeepDischargeMinutes",
       "sensors": [
-        "elec-battery-voltage",
-        "elec-battery-load",
-        "elec-master-battery"
+        "elec-master-battery",
+        "elec-bus-voltage-1"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
-      "source": "estimativa — revisar (referência usuário: Concorde / Gill Aircraft Battery Maintenance Manual)",
+      "source": "teste elétrico de solo C172SP G1000 (teste-eletrico-C172.md, log 20261115-1636-C172SP_G1000_Passengers.csv); Concorde / Gill Aircraft Battery Maintenance Manual",
       "bands": [
         {
           "name": "Leve (10 min de descarga profunda)",
@@ -3317,11 +3315,12 @@
       "metric": "electricalOverloadMinutes",
       "sensors": [
         "elec-total-load-amps",
-        "elec-genalt-load"
+        "elec-bus-voltage-1",
+        "eng-starter"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
-      "source": "estimativa — revisar (referência usuário: MIL-STD-704 Aircraft Electric Power Characteristics)",
+      "source": "teste elétrico de solo C172SP G1000 (teste-eletrico-C172.md, log 20261115-1636-C172SP_G1000_Passengers.csv); MIL-STD-704 Aircraft Electric Power Characteristics",
       "bands": [
         {
           "name": "Cautela (5 min de sobrecarga de carga)",

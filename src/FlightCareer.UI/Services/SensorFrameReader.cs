@@ -42,6 +42,25 @@ namespace FlightCareer.UI.Services
         public bool IsEnabled { get; }
         public SensorLayout? CurrentLayout => _layout;
         public int CurrentEngineCount => _currentEngineCount;
+
+        private bool _calibrationMode;
+        /// <summary>
+        /// Quando verdadeiro, ativa a leitura das SimVars de varredura (calibrationOnly) para calibração de aeronave.
+        /// Ao alterar o modo, o layout de leitura do SimConnect é reconstruído.
+        /// </summary>
+        public bool CalibrationMode
+        {
+            get => _calibrationMode;
+            set
+            {
+                if (_calibrationMode == value) return;
+                _calibrationMode = value;
+                if (_currentSimConnect != null)
+                {
+                    SetupSensorLayout(_currentSimConnect, _currentEngineCount);
+                }
+            }
+        }
         public IReadOnlyCollection<string> RejectedSimVars
         {
             get
@@ -200,7 +219,7 @@ namespace FlightCareer.UI.Services
                 }
             }
 
-            var layout = SensorLayout.Build(_registry.Sensors, engineCount, blockSize: 256);
+            var layout = SensorLayout.Build(_registry.Sensors, engineCount, blockSize: 256, includeCalibration: _calibrationMode);
             if (_rejectedSimVars.Count > 0)
             {
                 layout = layout.Without(_rejectedSimVars);

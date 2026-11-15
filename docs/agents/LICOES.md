@@ -10,3 +10,4 @@ Se a lição virar regra geral do projeto, o revisor move para `AGENTS.md` e apa
 - Antes de usar um nome de SimVar, confira na documentação do SDK; nome inexistente não dá erro de compilação, só desloca os dados em voo. (fix PARTIAL PANEL STATIC)
 - 2026-11-15 (F4.2e): SimVar de contagem pode não contar o zero — FLAPS NUM HANDLE POSITIONS conta só os dentes estendidos. Confira o significado com uma captura antes de montar fórmula.
 - 2026-11-15 (F2.4): antes de limpar estado em StopMonitoring, confira quem chama StopMonitoring antes de salvar (FinalizeFlightAsync salva depois); estado que ainda vai ser gravado não pode ser zerado ali.
+- 2026-11-15 (F2.4b-CAL): lista de diagnósticos lida a cada tick precisa ser drenada (entregar e esvaziar), senão a mesma mensagem vai ao blackbox em todo tick. Script Python que imprime símbolos (✅ ❌) precisa forçar UTF-8 na saída: o console do Windows usa cp1252.

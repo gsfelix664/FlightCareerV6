@@ -50,7 +50,36 @@ namespace FlightCareer.Domain.Parts
             _features = features?.ToList() ?? new List<string>();
             _wearEngine.ResetExceedanceTracking();
             _eventDeriver.Reset();
+            _eventDeriver.ConfigureElectrical(BuildElectricalConfig(profile));
             _pausedReported = false;
+        }
+
+        private ElectricalConfig BuildElectricalConfig(AircraftLimitProfile? profile)
+        {
+            if (profile == null) return new ElectricalConfig();
+
+            string cls = profile.Class ?? string.Empty;
+            var voltsLimit = _resolver.Get(profile, cls, LimitKeys.ElecSystemVolts);
+            var avionicsCircuitLimit = _resolver.Get(profile, cls, LimitKeys.ElecAvionicsCircuitIndex);
+            var avionicsBusAmpsLimit = _resolver.Get(profile, cls, LimitKeys.ElecAvionicsBusAmpsIndex);
+            var mainBusLimit = _resolver.Get(profile, cls, LimitKeys.ElecMainBusIndex);
+            var ratedAmpsLimit = _resolver.Get(profile, cls, LimitKeys.AlternatorRatedAmps);
+            var deepDischargeLimit = _resolver.Get(profile, cls, LimitKeys.ElecDeepDischargeVolts);
+
+            var deepDischargeRule = _wearRuleCatalog.Rules.FirstOrDefault(r => r.Metric == WearRuleMetrics.BatteryDeepDischargeMinutes);
+            var overloadRule = _wearRuleCatalog.Rules.FirstOrDefault(r => r.Metric == WearRuleMetrics.ElectricalOverloadMinutes);
+
+            return new ElectricalConfig
+            {
+                SystemVolts = voltsLimit?.Value,
+                AvionicsCircuitIndex = avionicsCircuitLimit != null ? (int)Math.Round(avionicsCircuitLimit.Value) : null,
+                AvionicsBusAmpsIndex = avionicsBusAmpsLimit != null ? (int)Math.Round(avionicsBusAmpsLimit.Value) : null,
+                MainBusIndex = mainBusLimit != null ? (int)Math.Round(mainBusLimit.Value) : null,
+                AlternatorRatedAmps = ratedAmpsLimit?.Value,
+                DeepDischargeVolts = deepDischargeLimit?.Value ?? (voltsLimit != null ? voltsLimit.Value * (22.0 / 28.0) : null),
+                BatteryDeepDischargeThresholds = deepDischargeRule?.Bands.Select(b => b.Threshold).OrderBy(t => t).ToList() ?? new List<double> { 10.0, 25.0, 45.0 },
+                ElectricalOverloadThresholds = overloadRule?.Bands.Select(b => b.Threshold).OrderBy(t => t).ToList() ?? new List<double> { 5.0, 15.0, 30.0 }
+            };
         }
 
         public void Reset()
@@ -120,6 +149,9 @@ namespace FlightCareer.Domain.Parts
                     inspections.AddRange(evResult.Inspections);
                 }
             }
+
+            // Drena: cada diagnóstico sai uma vez por voo (antes era copiado a cada tick para o blackbox)
+            diagnostics.AddRange(_eventDeriver.DrainDiagnostics());
 
             return new PartWearTickResult(exceedances, inspections, diagnostics);
         }

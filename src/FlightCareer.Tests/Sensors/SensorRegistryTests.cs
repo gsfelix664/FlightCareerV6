@@ -317,7 +317,7 @@ namespace FlightCareer.Tests.Sensors
                     continue;
                 }
 
-                if (currentSection < 1 || currentSection > 12)
+                if (currentSection < 1 || currentSection > 13)
                     continue;
 
                 if (!line.StartsWith('|') || line.StartsWith("|---") || line.StartsWith("| SimVar"))

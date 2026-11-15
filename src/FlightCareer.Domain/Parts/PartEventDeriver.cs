@@ -11,7 +11,8 @@ namespace FlightCareer.Domain.Parts
     public sealed record DerivedPartEvent(string MetricKey, double Value, int? EngineIndex);
 
     /// <summary>
-    /// Deriva eventos discretos operacionais (partida de motor, tempo de starter, ciclos de trem, ciclo de voo)
+    /// Deriva eventos discretos operacionais (partida de motor, tempo de starter, ciclos de trem, ciclo de voo,
+    /// picos de tensão em aviônicos, descarga profunda de bateria e sobrecarga elétrica)
     /// a partir das leituras contínuas de SensorFrame e tempo simulado decorrido.
     /// Lógica pura de Domain, sem EF nem SimConnect.
     /// </summary>
@@ -25,6 +26,40 @@ namespace FlightCareer.Domain.Parts
         private bool _wasInAir;
         private bool _flightCycleEmitted;
 
+        // Configuração e estado do subsistema elétrico (F2.4b-CAL)
+        private ElectricalConfig? _electricalConfig;
+        private int _avionicsStartSpikesCount;
+
+        private double _batteryDeepDischargeSec;
+        private double _batteryDeepDischargeOffSec;
+        private readonly HashSet<double> _batteryThresholdsEmitted = new();
+
+        private double _overloadSec;
+        private double _overloadOffSec;
+        private readonly HashSet<double> _overloadThresholdsEmitted = new();
+
+        private readonly List<string> _diagnosticMessages = new();
+        private readonly HashSet<string> _diagnosticKeysReported = new(StringComparer.Ordinal);
+
+        public IReadOnlyList<string> DiagnosticMessages => _diagnosticMessages;
+
+        /// <summary>
+        /// Devolve os diagnósticos ainda não entregues e os remove da fila. As chaves já reportadas
+        /// continuam marcadas, então cada mensagem sai uma vez por voo (até o Reset).
+        /// </summary>
+        public IReadOnlyList<string> DrainDiagnostics()
+        {
+            if (_diagnosticMessages.Count == 0) return Array.Empty<string>();
+            var drained = _diagnosticMessages.ToList();
+            _diagnosticMessages.Clear();
+            return drained;
+        }
+
+        public void ConfigureElectrical(ElectricalConfig? config)
+        {
+            _electricalConfig = config;
+        }
+
         public void Reset()
         {
             _wasCombustion.Clear();
@@ -33,6 +68,18 @@ namespace FlightCareer.Domain.Parts
             _gearWasRetracted = false;
             _wasInAir = false;
             _flightCycleEmitted = false;
+
+            _avionicsStartSpikesCount = 0;
+            _batteryDeepDischargeSec = 0.0;
+            _batteryDeepDischargeOffSec = 0.0;
+            _batteryThresholdsEmitted.Clear();
+
+            _overloadSec = 0.0;
+            _overloadOffSec = 0.0;
+            _overloadThresholdsEmitted.Clear();
+
+            _diagnosticMessages.Clear();
+            _diagnosticKeysReported.Clear();
         }
 
         /// <summary>
@@ -63,6 +110,12 @@ namespace FlightCareer.Domain.Parts
                 _wasCombustion.TryGetValue(eng, out bool prevCombustion);
                 _wasStarter.TryGetValue(eng, out bool prevStarter);
 
+                // Borda 0 -> 1 do starter para qualquer motor: checa partida com aviônicos ligados (Regra 1)
+                if (!prevStarter && curStarter)
+                {
+                    CheckAvionicsStartWithMasterOn(frame, eng, events);
+                }
+
                 // Borda de combustão 0 -> 1 com starter engatado no frame anterior ou no atual
                 if (!prevCombustion && curCombustion && (prevStarter || curStarter))
                 {
@@ -90,12 +143,15 @@ namespace FlightCareer.Domain.Parts
                 _wasStarter[eng] = curStarter;
             }
 
-            // 2. Ciclos de trem de pouso retrátil (recolhido e baixado de novo)
+            // 2. Regras elétricas contínuas (Regra 2: Descarga Profunda, Regra 3: Sobrecarga de Amperagem)
+            CheckBatteryDeepDischarge(frame, dtSimSeconds, events);
+            CheckElectricalOverload(frame, dtSimSeconds, events);
+
+            // 3. Ciclos de trem de pouso retrátil (recolhido e baixado de novo)
             if (isRetractableGear)
             {
                 if (TryGetGearPosition(frame, out double gearPos))
                 {
-                    // msfs: 0 = recolhido (up), 100 = baixado (down); ou alavanca 0=up, 1=down
                     bool isUp = gearPos <= 10.0 || (gearPos <= 0.1 && gearPos >= 0.0);
                     bool isDown = gearPos >= 90.0 || (gearPos >= 0.9 && gearPos <= 1.01);
 
@@ -111,7 +167,7 @@ namespace FlightCareer.Domain.Parts
                 }
             }
 
-            // 3. Ciclo de voo (decolagem até pouso, emitido no primeiro pouso após estar no ar)
+            // 4. Ciclo de voo (decolagem até pouso, emitido no primeiro pouso após estar no ar)
             if (TryGetFlightPhase(frame, out bool onGround))
             {
                 if (!onGround)
@@ -126,6 +182,165 @@ namespace FlightCareer.Domain.Parts
             }
 
             return events;
+        }
+
+        private void CheckAvionicsStartWithMasterOn(SensorFrame frame, int eng, List<DerivedPartEvent> events)
+        {
+            if (_electricalConfig == null || !_electricalConfig.AvionicsCircuitIndex.HasValue || _electricalConfig.AvionicsCircuitIndex.Value <= 0)
+            {
+                ReportDiagnosticOnce("elec-avionics-missing-param",
+                    "Regra 'avionics_start_with_avionics_master_on' desativada: elecAvionicsCircuitIndex ausente no catálogo da aeronave.");
+                return;
+            }
+
+            int circuitIdx = _electricalConfig.AvionicsCircuitIndex.Value;
+            string circuitKey = $"elec-circuit-on-{circuitIdx}";
+
+            if (!frame.Values.TryGetValue(circuitKey, out double circuitOn))
+            {
+                ReportDiagnosticOnce($"elec-circuit-missing-sensor-{circuitIdx}",
+                    $"Regra 'avionics_start_with_avionics_master_on' desativada: SimVar '{circuitKey}' ausente no frame de sensores.");
+                return;
+            }
+
+            if (circuitOn >= 0.5)
+            {
+                _avionicsStartSpikesCount++;
+                events.Add(new DerivedPartEvent(WearRuleMetrics.AvionicsMasterStartSpikes, _avionicsStartSpikesCount, eng));
+            }
+        }
+
+        private void CheckBatteryDeepDischarge(SensorFrame frame, double dtSimSeconds, List<DerivedPartEvent> events)
+        {
+            if (_electricalConfig == null || !_electricalConfig.MainBusIndex.HasValue || _electricalConfig.MainBusIndex.Value <= 0 ||
+                !_electricalConfig.SystemVolts.HasValue || _electricalConfig.SystemVolts.Value <= 0.0)
+            {
+                ReportDiagnosticOnce("elec-deep-discharge-missing-param",
+                    "Regra 'battery_deep_discharge_damage' desativada: elecMainBusIndex ou elecSystemVolts ausente no catálogo da aeronave.");
+                return;
+            }
+
+            int busIdx = _electricalConfig.MainBusIndex.Value;
+            string busKey = $"elec-bus-voltage-{busIdx}";
+
+            if (!frame.Values.TryGetValue("elec-master-battery", out double masterBat) ||
+                !frame.Values.TryGetValue(busKey, out double busVolts))
+            {
+                ReportDiagnosticOnce($"elec-battery-missing-sensor-{busIdx}",
+                    $"Regra 'battery_deep_discharge_damage' desativada: 'elec-master-battery' ou '{busKey}' ausente no frame de sensores.");
+                return;
+            }
+
+            double systemVolts = _electricalConfig.SystemVolts.Value;
+            double deepDischargeVolts = _electricalConfig.DeepDischargeVolts ?? (systemVolts * (22.0 / 28.0));
+
+            bool isDeepDischarge = masterBat >= 0.5 && busVolts >= 1.0 && busVolts <= deepDischargeVolts;
+
+            if (isDeepDischarge)
+            {
+                _batteryDeepDischargeSec += Math.Max(0.0, dtSimSeconds);
+                _batteryDeepDischargeOffSec = 0.0;
+                double accumulatedMinutes = _batteryDeepDischargeSec / 60.0;
+
+                var thresholds = _electricalConfig.BatteryDeepDischargeThresholds ?? new[] { 10.0, 25.0, 45.0 };
+                foreach (var th in thresholds.OrderBy(t => t))
+                {
+                    if (accumulatedMinutes >= th && !_batteryThresholdsEmitted.Contains(th))
+                    {
+                        _batteryThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.BatteryDeepDischargeMinutes, th, null));
+                    }
+                }
+            }
+            else
+            {
+                _batteryDeepDischargeOffSec += Math.Max(0.0, dtSimSeconds);
+                if (_batteryDeepDischargeOffSec >= 10.0)
+                {
+                    _batteryDeepDischargeSec = 0.0;
+                    _batteryThresholdsEmitted.Clear();
+                    _batteryDeepDischargeOffSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckElectricalOverload(SensorFrame frame, double dtSimSeconds, List<DerivedPartEvent> events)
+        {
+            if (_electricalConfig == null || !_electricalConfig.AlternatorRatedAmps.HasValue || _electricalConfig.AlternatorRatedAmps.Value <= 0.0)
+            {
+                ReportDiagnosticOnce("elec-overload-missing-amps",
+                    "Regra 'electrical_system_overload_amps' desativada: alternatorRatedAmps ausente no catálogo da aeronave (capacidade POH necessária).");
+                return;
+            }
+
+            if (!_electricalConfig.MainBusIndex.HasValue || _electricalConfig.MainBusIndex.Value <= 0 ||
+                !_electricalConfig.SystemVolts.HasValue || _electricalConfig.SystemVolts.Value <= 0.0)
+            {
+                ReportDiagnosticOnce("elec-overload-missing-bus",
+                    "Regra 'electrical_system_overload_amps' desativada: elecMainBusIndex ou elecSystemVolts ausente no catálogo da aeronave.");
+                return;
+            }
+
+            int busIdx = _electricalConfig.MainBusIndex.Value;
+            string busKey = $"elec-bus-voltage-{busIdx}";
+
+            if (!frame.Values.TryGetValue("elec-total-load-amps", out double totalLoadAmps) ||
+                !frame.Values.TryGetValue(busKey, out double busVolts))
+            {
+                ReportDiagnosticOnce($"elec-overload-missing-sensor-{busIdx}",
+                    $"Regra 'electrical_system_overload_amps' desativada: 'elec-total-load-amps' ou '{busKey}' ausente no frame de sensores.");
+                return;
+            }
+
+            bool anyStarter = false;
+            for (int eng = 1; eng <= 4; eng++)
+            {
+                if (TryGetEngineValues(frame, eng, out _, out double starterVal) && starterVal > 0.5)
+                {
+                    anyStarter = true;
+                    break;
+                }
+            }
+
+            double systemVolts = _electricalConfig.SystemVolts.Value;
+            double ratedAmps = _electricalConfig.AlternatorRatedAmps.Value;
+
+            bool isOverload = busVolts >= (0.95 * systemVolts) && !anyStarter && (totalLoadAmps > ratedAmps);
+
+            if (isOverload)
+            {
+                _overloadSec += Math.Max(0.0, dtSimSeconds);
+                _overloadOffSec = 0.0;
+                double accumulatedMinutes = _overloadSec / 60.0;
+
+                var thresholds = _electricalConfig.ElectricalOverloadThresholds ?? new[] { 5.0, 15.0, 30.0 };
+                foreach (var th in thresholds.OrderBy(t => t))
+                {
+                    if (accumulatedMinutes >= th && !_overloadThresholdsEmitted.Contains(th))
+                    {
+                        _overloadThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.ElectricalOverloadMinutes, th, null));
+                    }
+                }
+            }
+            else
+            {
+                _overloadOffSec += Math.Max(0.0, dtSimSeconds);
+                if (_overloadOffSec >= 10.0)
+                {
+                    _overloadSec = 0.0;
+                    _overloadThresholdsEmitted.Clear();
+                    _overloadOffSec = 0.0;
+                }
+            }
+        }
+
+        private void ReportDiagnosticOnce(string key, string message)
+        {
+            if (_diagnosticKeysReported.Add(key))
+            {
+                _diagnosticMessages.Add(message);
+            }
         }
 
         private static bool TryGetEngineValues(SensorFrame frame, int eng, out double combustion, out double starter)
