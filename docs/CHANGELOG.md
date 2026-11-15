@@ -1690,3 +1690,12 @@
 
 ## 2026-11-15 - Validação dos sensores novos no C172 G1000 (Claude)
 - Profundor, aileron, piloto automático e trim do profundor validados no MSFS. Master de aviônicos (fica em 1), tensão da bateria (constante) e alternador (0) não funcionam como lidos hoje; leme a confirmar. Detalhes em `docs/plans/sensor-validation/sensores-novos-C172.md`. Nenhum código mudou.
+
+## 2026-11-15 - Spike sensores elétricos MSFS 2024 (Gemini)
+- **Spike de pesquisa elétrica no MSFS 2024**:
+  - Documento `docs/plans/sensor-validation/spike-eletrico-2024.md` detalhando causas-raiz dos valores no C172 G1000, matriz de candidatos com URLs da documentação oficial do SDK 2024, recomendações para as 3 regras mudas (`avionics_start_with_avionics_master_on`, `battery_deep_discharge_damage`, `electrical_system_overload_amps`) e análise de riscos de compatibilidade.
+- **Novos candidatos no registro de sensores (`sensor_registry.json` e `sensor-inventory.md`)**:
+  - Adicionados 16 novos sensores candidatos de medição elétrica em nível de barramento, circuito e índices específicos (`elec-avionics-master-switch-1/2`, `elec-avionics-bus-voltage`, `elec-avionics-bus-amps`, `elec-circuit-switch-on-1/2`, `elec-circuit-on-1/2`, `elec-battery-voltage-1`, `elec-battery-load-1`, `elec-battery-bus-voltage`, `elec-hot-battery-bus-voltage`, `elec-main-bus-voltage-1/2`, `elec-main-bus-amps-1`, `elec-alternator-connection-on-1`).
+  - Mantida paridade estrita testada entre o catálogo JSON e o inventário Markdown; contagens atualizadas em `SensorLayoutTests.cs`.
+- **Roteiro de teste elétrico no C172 G1000 (`ROTEIRO.md`)**:
+  - Adicionada seção 7 com checklist objetivo de teste em solo (motor parado, aviônicos ON/OFF, partida, alternador OFF/ON e deflexão de leme) e tabela com os comportamentos esperados por coluna.

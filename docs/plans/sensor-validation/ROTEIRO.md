@@ -300,3 +300,56 @@ O script irá gerar:
 1. `docs/plans/sensor-validation/A-C152.md` (relatório padrão de sensores).
 2. `docs/plans/sensor-validation/calibration-C152.md` (relatório estruturado de calibração com limiares sugeridos e confirmação da razão integral/queda).
 
+---
+
+## 7. Teste Elétrico e Comandos (C172 G1000)
+
+Roteiro de solo/pátio rápido (~5 minutos) para validar as novas SimVars elétricas (tensão/corrente dos barramentos, carga da bateria, alternador e chaves de aviônicos) e a deflexão de pedais do leme no **Cessna 172SP G1000**.
+
+### Checklist do Teste Elétrico
+
+- [ ] **1. Preparação:** Aeronave no pátio em Cold & Dark. Clicar em **REC** no HUD Overlay do FlightCareer para iniciar a gravação.
+- [ ] **2. Bateria ON com Aviônicos ON (Motor Parado):**
+  - **Ação:** Ligar a chave Master Battery (`BAT`) mantendo o motor desligado. Ligar ambas as chaves de aviônicos (`AVIONICS BUS 1` e `BUS 2`).
+  - **Marcador:** `teste-bateria-avionics-on`
+  - **Duração:** Manter por 2 minutos para registrar descarga da bateria sob carga dos aviônicos.
+- [ ] **3. Aviônicos OFF (30 segundos):**
+  - **Ação:** Desligar ambas as chaves de aviônicos (`AVIONICS BUS 1` e `BUS 2`), mantendo a bateria ligada.
+  - **Marcador:** `teste-avionics-off`
+  - **Duração:** Manter desligado por 30 segundos.
+- [ ] **4. Partida do Motor:**
+  - **Ação:** Religar os aviônicos se necessário pelo checklist, acionar a chave de ignição / starter e estabilizar o motor em marcha lenta (idle).
+  - **Marcador:** `teste-partida`
+  - **Duração:** ~30 segundos até estabilização de RPM e tensão do alternador.
+- [ ] **5. Alternador OFF (60 segundos):**
+  - **Ação:** Desligar a chave `ALT` do Master Switch (deixando `BAT` ligado).
+  - **Marcador:** `teste-alternador-off`
+  - **Duração:** Manter desligado por 60 segundos para registrar a transição de recarga para descarga no barramento principal.
+- [ ] **6. Alternador ON:**
+  - **Ação:** Religar a chave `ALT` do Master Switch.
+  - **Marcador:** `teste-alternador-on`
+  - **Duração:** ~30 segundos para observar retorno de tensão e pico de recarga.
+- [ ] **7. Movimentação dos Pedais do Leme:**
+  - **Ação:** Pressionar o pedal do leme totalmente para a esquerda por 3 segundos, depois totalmente para a direita por 3 segundos, e retornar ao centro.
+  - **Marcador:** `teste-leme`
+- [ ] **8. Finalizar:** Clicar em **REC** no HUD Overlay do FlightCareer para encerrar a gravação do log.
+
+### O que Cada Coluna Deve Mostrar se Estiver Certa
+
+| Coluna | Comportamento Esperado no Teste |
+|---|---|
+| `elec-avionics-bus-voltage` | ~24 V com bateria / ~28 V com motor e alternador ON; **cai para 0,0 V** em `teste-avionics-off`. |
+| `elec-avionics-bus-amps` | Consumo positivo (> 0 A) com aviônicos ligados; **cai para 0,0 A** em `teste-avionics-off`. |
+| `elec-avionics-master-switch-1` / `2` | `1` com chaves de aviônicos ligadas; **`0`** em `teste-avionics-off`. |
+| `elec-circuit-switch-on-1` / `2` | Reflete a posição física das chaves de circuito (`1` ligada, `0` desligada). |
+| `elec-circuit-on-1` / `2` | `1` quando o circuito correspondente estiver energizado e funcionando; `0` se desligado/desenergizado. |
+| `elec-battery-load-1` | **Positivo (> 0 A, ex: +10 a +25 A)** com motor parado ou alternador desligado (bateria suprindo carga); **negativo (< 0 A, ex: -5 a -15 A)** com motor e alternador ON (bateria recebendo corrente de recarga). |
+| `elec-battery-voltage-1` | ~24,0 V a 25,2 V em repouso; cai levemente sob carga do starter; sobe para ~27,5 V a 28,5 V com alternador recarregando. |
+| `elec-battery-bus-voltage` | ~24 V com motor parado; sobe para ~28 V com alternador ON; cai para ~24 V em `teste-alternador-off`. |
+| `elec-hot-battery-bus-voltage` | ~24 V constante (barramento de ligação direta à bateria). |
+| `elec-main-bus-voltage-1` / `2` | ~24 V com bateria; sobe para ~28 V com alternador ativo; cai para ~24 V em `teste-alternador-off`. |
+| `elec-main-bus-amps-1` | Corrente ativa do barramento principal 1 (> 0 A). |
+| `elec-alternator-connection-on-1` | `1` com alternador conectado; **`0`** em `teste-alternador-off`. |
+| `rudder-position` | Varia entre **-1,00** (leme totalmente à esquerda) e **+1,00** (totalmente à direita) em `teste-leme`. |
+
+
