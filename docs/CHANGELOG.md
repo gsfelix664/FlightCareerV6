@@ -1401,3 +1401,24 @@
 - `docs/plans/sensor-validation/F2.0-spike-limites.md`: no MSFS 2024 (Microsoft Store) os aviões oficiais vêm em `.fsarchive` proprietário (nenhum CFG legível), então o CFG só serve para add-ons da Community. As **SimVars de projeto** (`REFERENCE SPEED MAX IAS`, `FLAPS CURRENT SPEED LIMITATION` por dente, `RECIP MAX CHT`, `MAX OIL TEMPERATURE`, `MAX EGT`) são constantes e batem com o POH do C152; `MAX RATED ENGINE RPM` existe no SDK e falta no registro; limite de G não tem SimVar. POH: manuais de `flightsimulator.com/aircraft-manuals/` (sem o C152) e do fabricante.
 - Proposta de formato JSON por aeronave e de montagem das 45 (captura de limites no HUD + `merge_limits.py`).
 - Correção da F1.4c: o limite do flap no dente 1 do C152 é 110 kt (85 kt só nos dentes 2–3); o teste a 114 kt foi inconclusivo e os flaps voltam a Observar. Nenhum código mudou.
+
+## 2026-11-15 - F2.0a: Catálogo fixo de limites por aeronave (dados, banco, resolver e ferramenta de montagem) (Gemini)
+- **Domínio (`FlightCareer.Domain/Limits/`)**:
+  - Implementado vocabulário estrito e fechado em `LimitKeys.cs` com validação de unidades (`rpm`, `celsius`, `psi`, `percent`, `knots`, `mach`, `g`, `fpm`) e suporte a dentes de flaps (`vfe:1`..`vfe:10`).
+  - `LimitSource`: enum com prioridades POH (1), SimVar (2), Cfg (3), NativeOnset (4) e ClassDefault (5).
+  - Records `AircraftLimit` e `AircraftLimitProfile`.
+  - `AircraftLimitResolver`: resolução pura e determinística em memória com fallback ordenado por prioridade de fonte e fallback de classe, além de casamento de perfis por título (1º) e ATC Model (2º) case-insensitive.
+- **Banco de Dados e Persistência**:
+  - Criadas entidades `AircraftLimitProfileEntity` e `AircraftLimitEntity` em `Domain/Entities/`.
+  - Mapeamento em `IAppDbContext` e `AppDbContext`, com migração DDL idempotente em `EnsureSchemaUpdatedAsync` (`AircraftLimitProfiles` e `AircraftLimits`).
+- **Arquivos de Dados e Seed**:
+  - Criados `_schema.json`, `_class_defaults.json` (migrando valores de `engineLimits`) e 46 arquivos individuais de aeronaves em `Infrastructure/Data/aircraft/` (C152 com os limites validados do spike; demais 45 com limites vazios e classes resolvidas).
+  - Atualizado `FlightCareer.Infrastructure.csproj` para copiar `Data\aircraft\*.json` na saída do build.
+  - Implementados `AircraftLimitCatalogLoader` (validação de schema, integridade de referências POH e detecção de colisões simMatch) e `AircraftLimitSeeder` com suporte a `IDbContextFactory` e upsert por `dataVersion`. Integrado ao `DataSeeder.SeedAsync`.
+- **Ferramentas (`tools/aircraft_limits/`)**:
+  - `merge_limits.py`: consolidação de capturas de sensores (`.csv` + `-context.json`), POH (`poh_values.csv`) e mapas de títulos (`title_map.csv`), calculando medianas para SimVars, agrupamento de Vfe por dente de flaps, detecção de início de taxa nativa e garantia de que limites POH nunca são sobrescritos.
+  - `README.md` documentando o processo e parâmetros (`--captures`, `--poh`, `--map`, `--out`, `--dry-run`).
+- **Testes**:
+  - Adicionados testes xUnit em `FlightCareer.Tests/Limits/` (`CatalogTests`, `ResolverTests`, `SeederTests`), cobrindo validação de arquivos, paridade com `aircrafts.csv`, prioridade do resolver, fallback de classe, migração de banco legado e controle de versão no seeder. Total: 154 testes xUnit aprovados.
+  - Adicionados 8 testes unitários Python em `tools/tests/test_merge_limits.py`. Total: 35 testes python aprovados.
+- Não testado no MSFS: execução de capturas em tempo real no simulador (aguarda voos de captura das outras aeronaves).
