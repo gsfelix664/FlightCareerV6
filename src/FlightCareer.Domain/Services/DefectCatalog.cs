@@ -52,6 +52,12 @@ namespace FlightCareer.Domain.Services
         public const string BrakeFailure = "BRAKE_FAILURE";
         public const string Hydraulic = "HYDRAULIC";
         public const string Structural = "STRUCTURAL";
+        // Panes que só o wear and tear nativo gera hoje (native-wear-mapping.md, Tabela 2)
+        public const string Battery = "BATTERY";
+        public const string TireFlat = "TIRE_FLAT";
+        public const string FlightControl = "FLIGHT_CONTROL";
+        public const string FuelSystem = "FUEL_SYSTEM";
+        public const string Autopilot = "AUTOPILOT";
 
         private static readonly Dictionary<string, DefectSpec> Specs = new()
         {
@@ -76,6 +82,11 @@ namespace FlightCareer.Domain.Services
             [BrakeFailure] = new(BrakeFailure, "Sistema de freios inoperante", true, 800, DefectEnforcement.None),
             [Hydraulic] = new(Hydraulic, "Vazamento hidráulico", true, 2500, DefectEnforcement.None),
             [Structural] = new(Structural, "Trinca estrutural", true, 6000, DefectEnforcement.None),
+            [Battery] = new(Battery, "Bateria inoperante", true, 600, DefectEnforcement.None),
+            [TireFlat] = new(TireFlat, "Pneu murcho", true, 200, DefectEnforcement.None),
+            [FlightControl] = new(FlightControl, "Comando de voo danificado", true, 3000, DefectEnforcement.None),
+            [FuelSystem] = new(FuelSystem, "Sistema de combustível inoperante", true, 1500, DefectEnforcement.None),
+            [Autopilot] = new(Autopilot, "Piloto automático inoperante", false, 2000, DefectEnforcement.None),
         };
 
         /// <summary>
