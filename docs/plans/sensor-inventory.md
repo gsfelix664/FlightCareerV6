@@ -44,6 +44,7 @@ Convenções:
 |---|---|---|
 | `GENERAL ENG RPM:N` ✅ | rpm | cilindros, virabrequim (over-RPM) |
 | `GENERAL ENG MAX REACHED RPM:N` | rpm | over-RPM registrado pelo sim |
+| `MAX RATED ENGINE RPM:N` | rpm | limite do avião (RPM máxima nominal; SDK 2024, "Aircraft Engine Variables") |
 | `RECIP ENG MANIFOLD PRESSURE:N` | inHg | cilindros (carga), turbo |
 | `RECIP ENG CYLINDER HEAD TEMPERATURE:N` ✅ | celsius | cilindros, válvulas (superaquecimento, shock cooling) |
 | `RECIP MAX CHT` | celsius | limite do próprio avião |

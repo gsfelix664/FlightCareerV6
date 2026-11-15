@@ -15,6 +15,13 @@
       "perEngine": true
     },
     {
+      "key": "eng-max-rated-rpm",
+      "simVar": "MAX RATED ENGINE RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
       "key": "eng-manifold-pressure",
       "simVar": "RECIP ENG MANIFOLD PRESSURE",
       "unit": "inhg",
