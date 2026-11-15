@@ -1,6 +1,6 @@
 # SPIKE-FALHAS — Falhar o Sistema sem Mexer no Comando do Piloto (MSFS 2024)
 
-**Branch:** docs/spike-falhas-sem-comando · **Commit:** (a gerar) · **Data:** 2026-11-15
+**Branch:** docs/spike-falhas-sem-comando · **Commit:** ba7e26e · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Pesquisar na documentação oficial do SDK do MSFS 2024 (`docs.flightsimulator.com/msfs2024/retail/`) as opções de aplicação de falhas para flaps, alternador/sistema elétrico, magnetos e failures em geral sem mover chaves/comandos do piloto.
