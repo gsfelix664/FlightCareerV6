@@ -2882,37 +2882,6 @@
       "failureEffect": "Indicação travada ou ponteiro oscilante de velocidade/altitude"
     },
     {
-      "id": "avionics.ahrs_adc",
-      "name": "Computador de dados de ar e atitude (AHRS / ADC)",
-      "group": "Aviônicos",
-      "appliesTo": {
-        "any": [
-          "glassCockpit",
-          "autopilot"
-        ]
-      },
-      "perEngine": false,
-      "lifeHours": 8000,
-      "visibleOnWalkaround": false,
-      "blocksFlightWhenBroken": true,
-      "partPrice": 2900,
-      "priceScalesWithAircraft": true,
-      "laborHours": 8.0,
-      "sensors": [
-        "elec-avionics-master-switch"
-      ],
-      "lifeSource": "estimativa — revisar (referência usuário: 8.000 h; custo 0,5–1,4%; hangar 6–14 h)",
-      "repairCostPctOfAircraft": [
-        0.5,
-        1.4
-      ],
-      "downtimeHours": [
-        6.0,
-        14.0
-      ],
-      "failureEffect": "Bandeira vermelha ATT/HDG no PFD ou dados de ar incorretos"
-    },
-    {
       "id": "avionics.weather_radar",
       "name": "Radar meteorológico e antena de varredura",
       "group": "Aviônicos",
@@ -2941,6 +2910,924 @@
         18.0
       ],
       "failureEffect": "Perda de detecção meteorológica de precipitação e células convectivas"
+    },
+    {
+      "id": "avionics.ahrs_irs",
+      "name": "Plataforma inercial e computador de atitude/proa (AHRS / IRS)",
+      "group": "Aviônicos",
+      "appliesTo": {
+        "any": [
+          "glassCockpit",
+          "autopilot"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "partPrice": 15000.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.45,
+        1.0
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Bandeira ATT/HDG no PFD ou perda de alinhamento inercial",
+      "lifeSource": "estimativa — revisar (referência usuário: AHRS/IRS Service Life)"
+    },
+    {
+      "id": "avionics.adc",
+      "name": "Computador digital de dados de ar (Air Data Computer - ADC)",
+      "group": "Aviônicos",
+      "appliesTo": {
+        "any": [
+          "glassCockpit",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 7000.0,
+      "partPrice": 12000.0,
+      "laborHours": 5.0,
+      "repairCostPctOfAircraft": [
+        0.35,
+        0.8
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Perda de airspeed/altitude no PFD ou dados de ar degradados",
+      "lifeSource": "estimativa — revisar (referência usuário: ADC Maintenance Manual)"
+    },
+    {
+      "id": "avionics.standby_instruments",
+      "name": "Instrumento eletrônico de standby integrado (ISIS / reserva)",
+      "group": "Aviônicos",
+      "appliesTo": {
+        "all": [
+          "glassCockpit"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "partPrice": 9000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Apagão da tela do instrumento de reserva integrado",
+      "lifeSource": "estimativa — revisar (referência usuário: Integrated Standby Instrument System)"
+    },
+    {
+      "id": "avionics.tcas_egpws",
+      "name": "Sistema de vigilância TCAS / EGPWS / TAWS",
+      "group": "Aviônicos",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "partPrice": 18000.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.35,
+        0.85
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Inoperância de avisos sonoros e visuais de tráfego e terreno",
+      "lifeSource": "estimativa — revisar (referência usuário: TCAS/EGPWS Avionics Manual)"
+    },
+    {
+      "id": "avionics.flight_recorders_elt",
+      "name": "Gravadores de voo (FDR/CVR) e transmissor localizador (ELT)",
+      "group": "Aviônicos",
+      "appliesTo": {},
+      "lifeHours": 10000.0,
+      "partPrice": 6000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Falha de auto-teste do ELT ou perda de gravação de parâmetros de voo",
+      "lifeSource": "estimativa — revisar (referência usuário: Flight Recorders & ELT Standards)"
+    },
+    {
+      "id": "avionics.audio_panel",
+      "name": "Painel de áudio, caixa de controle e intercomunicador",
+      "group": "Aviônicos",
+      "appliesTo": {},
+      "lifeHours": 8000.0,
+      "partPrice": 3500.0,
+      "laborHours": 3.0,
+      "repairCostPctOfAircraft": [
+        0.1,
+        0.25
+      ],
+      "downtimeHours": [
+        2.0,
+        4.0
+      ],
+      "failureEffect": "Falha de transmissão de áudio nos fones ou seleção de canal COM",
+      "lifeSource": "estimativa — revisar (referência usual: Audio Control Panel Maintenance)"
+    },
+    {
+      "id": "electrical.standby_battery",
+      "name": "Bateria auxiliar / standby de emergência",
+      "group": "Elétrico",
+      "appliesTo": {
+        "any": [
+          "glassCockpit",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 1500.0,
+      "partPrice": 1800.0,
+      "laborHours": 2.0,
+      "repairCostPctOfAircraft": [
+        0.05,
+        0.15
+      ],
+      "downtimeHours": [
+        1.0,
+        2.0
+      ],
+      "failureEffect": "Incapacidade de suprir barramento essencial de emergência",
+      "lifeSource": "estimativa — revisar (referência usuário: Standby Battery Service Life)"
+    },
+    {
+      "id": "electrical.idg",
+      "name": "Gerador de acionamento integrado (IDG / gerador principal)",
+      "group": "Elétrico",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "jet"
+        ]
+      },
+      "lifeHours": 3000.0,
+      "partPrice": 22000.0,
+      "laborHours": 8.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.4,
+        0.9
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Falha de geração AC principal / desconexão do IDG",
+      "lifeSource": "estimativa — revisar (referência usuário: IDG Maintenance Manual)"
+    },
+    {
+      "id": "electrical.rat",
+      "name": "Turbina de ar de impacto (RAT / gerador de emergência)",
+      "group": "Elétrico",
+      "appliesTo": {
+        "all": [
+          "rat"
+        ]
+      },
+      "lifeHours": 10000.0,
+      "partPrice": 25000.0,
+      "laborHours": 8.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        4.0,
+        10.0
+      ],
+      "failureEffect": "Falha de desdobramento ou geração hidráulica/elétrica de emergência",
+      "lifeSource": "estimativa — revisar (referência usuário: Ram Air Turbine Overhaul Manual)"
+    },
+    {
+      "id": "electrical.tru_transformer_rectifier",
+      "name": "Unidade transformadora e retificadora (TRU)",
+      "group": "Elétrico",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "partPrice": 12000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.55
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Perda de conversão AC/DC e isolamento de barramento DC",
+      "lifeSource": "estimativa — revisar (referência usuário: TRU Maintenance Manual)"
+    },
+    {
+      "id": "electrical.external_lighting",
+      "name": "Sistema de iluminação externa (faróis de pouso/táxi, strobes e nav)",
+      "group": "Elétrico",
+      "appliesTo": {},
+      "lifeHours": 1000.0,
+      "partPrice": 800.0,
+      "laborHours": 2.0,
+      "repairCostPctOfAircraft": [
+        0.03,
+        0.08
+      ],
+      "downtimeHours": [
+        1.0,
+        2.0
+      ],
+      "failureEffect": "Queima de farol de pouso ou strobe impedindo operação noturna",
+      "lifeSource": "estimativa — revisar (referência usuário: External Lighting Service Life)"
+    },
+    {
+      "id": "electrical.circuit_breakers_relays",
+      "name": "Painel de disjuntores, contatores e relés de barramento",
+      "group": "Elétrico",
+      "appliesTo": {},
+      "lifeHours": 10000.0,
+      "partPrice": 2500.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.4
+      ],
+      "downtimeHours": [
+        4.0,
+        16.0
+      ],
+      "failureEffect": "Desarme espúrio ou falha de isolamento de barramento elétrico",
+      "lifeSource": "estimativa — revisar (referência usuário: Electrical Contactors & Circuit Breakers)"
+    },
+    {
+      "id": "hydraulic.electric_pump",
+      "name": "Bomba hidráulica acionada por motor elétrico (ACMP / Aux)",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "any": [
+          "hydraulicGear",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 4000.0,
+      "partPrice": 14000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.75
+      ],
+      "downtimeHours": [
+        4.0,
+        10.0
+      ],
+      "failureEffect": "Perda da bomba hidráulica auxiliar de reserva e solo",
+      "lifeSource": "estimativa — revisar (referência usuário: ACMP Hydraulic Pump Overhaul)"
+    },
+    {
+      "id": "hydraulic.accumulators",
+      "name": "Acumuladores hidráulicos de pressão e freio de emergência",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "any": [
+          "hydraulicGear",
+          "jet"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "partPrice": 8000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.2,
+        0.5
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Perda de reserva de pressão para freios de emergência",
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Accumulators Inspection)"
+    },
+    {
+      "id": "hydraulic.filters_valves",
+      "name": "Filtros hidráulicos e válvulas de retenção e seletoras",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "any": [
+          "hydraulicGear",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 1500.0,
+      "partPrice": 3000.0,
+      "laborHours": 3.0,
+      "repairCostPctOfAircraft": [
+        0.08,
+        0.2
+      ],
+      "downtimeHours": [
+        2.0,
+        4.0
+      ],
+      "failureEffect": "Filtro hidráulico colmatado / atuação lenta de atuadores",
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Filters & Valves)"
+    },
+    {
+      "id": "hydraulic.ptu",
+      "name": "Unidade de transferência de potência bidirecional (PTU)",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "all": [
+          "ptu"
+        ]
+      },
+      "lifeHours": 5000.0,
+      "partPrice": 20000.0,
+      "laborHours": 8.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.35,
+        0.8
+      ],
+      "downtimeHours": [
+        6.0,
+        14.0
+      ],
+      "failureEffect": "Inoperância de transferência hidráulica entre sistemas verde e amarelo",
+      "lifeSource": "estimativa — revisar (referência usuário: PTU Component Maintenance Manual)"
+    },
+    {
+      "id": "hydraulic.lines_fittings",
+      "name": "Tubulações rígidas, mangueiras flexíveis e conexões de alta pressão",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "any": [
+          "hydraulicGear",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 3500.0,
+      "partPrice": 4500.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.4
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Microvazamento contínuo de fluido hidráulico",
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Lines & Hoses Service Life)"
+    },
+    {
+      "id": "pneumatic.bleed_valves",
+      "name": "Válvulas reguladoras e de corte de sangria de ar (Bleed Valves)",
+      "group": "Pneumático",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "bleedAir"
+        ]
+      },
+      "lifeHours": 4500.0,
+      "partPrice": 12000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        4.0,
+        10.0
+      ],
+      "failureEffect": "Válvula de sangria presa fechada / BLEED TRIP OFF",
+      "lifeSource": "estimativa — revisar (referência usuário: Engine Bleed Valves Maintenance)"
+    },
+    {
+      "id": "pneumatic.precooler",
+      "name": "Trocador de calor pré-resfriador do ar de sangria (Precooler)",
+      "group": "Pneumático",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "bleedAir"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "partPrice": 15000.0,
+      "laborHours": 8.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.35,
+        0.85
+      ],
+      "downtimeHours": [
+        6.0,
+        14.0
+      ],
+      "failureEffect": "Superaquecimento do duto de sangria / alarme de BLEED OVERHEAT",
+      "lifeSource": "estimativa — revisar (referência usuário: Bleed Air Pre-cooler Overhaul)"
+    },
+    {
+      "id": "pneumatic.ducts_leak_detection",
+      "name": "Dutos pneumáticos e loops de detecção de vazamento e calor",
+      "group": "Pneumático",
+      "appliesTo": {
+        "all": [
+          "bleedAir"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "partPrice": 10000.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.6
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Alarme de vazamento pneumático / BLEED DUCT LEAK",
+      "lifeSource": "estimativa — revisar (referência usuário: Pneumatic Ducts & Leak Detection)"
+    },
+    {
+      "id": "pneumatic.air_cycle_machine",
+      "name": "Máquina de ciclo de ar e unidade de condicionamento (Packs / ACM)",
+      "group": "Pneumático",
+      "appliesTo": {
+        "all": [
+          "pressurized"
+        ],
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 5000.0,
+      "partPrice": 28000.0,
+      "laborHours": 12.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.5,
+        1.2
+      ],
+      "downtimeHours": [
+        8.0,
+        18.0
+      ],
+      "failureEffect": "Desarme de pack de refrigeração / limitação de teto operacional",
+      "lifeSource": "estimativa — revisar (referência usuário: Air Cycle Machine (Packs) Maintenance)"
+    },
+    {
+      "id": "pressurization.safety_relief_valves",
+      "name": "Válvulas de segurança de alívio de pressão diferencial",
+      "group": "Pressurização",
+      "appliesTo": {
+        "all": [
+          "pressurized"
+        ]
+      },
+      "lifeCycles": 10000,
+      "partPrice": 4000.0,
+      "laborHours": 3.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Vazamento residual de ar comprimido ou risco de sobrepressão de cabine",
+      "lifeSource": "estimativa — revisar (referência usuário: Safety Relief Valves Maintenance)"
+    },
+    {
+      "id": "fuel.crossfeed_valve",
+      "name": "Válvula de alimentação cruzada e transferência (Crossfeed Valve)",
+      "group": "Combustível",
+      "appliesTo": {
+        "all": [
+          "multiEngine"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "partPrice": 5000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.4
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Válvula de crossfeed travada na posição aberta ou fechada",
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Crossfeed Valve)"
+    },
+    {
+      "id": "fuel.fire_shutoff_valve",
+      "name": "Válvula de corte emergencial de combustível (Fire Shutoff Valve)",
+      "group": "Combustível",
+      "perEngine": true,
+      "appliesTo": {},
+      "lifeHours": 8000.0,
+      "partPrice": 4000.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Falha de fechamento em emergência ou alarme falso de isolamento de fogo",
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Fire Shutoff Valves)"
+    },
+    {
+      "id": "fuel.fohe",
+      "name": "Trocador de calor combustível/óleo (FOHE)",
+      "group": "Combustível",
+      "perEngine": true,
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 7000.0,
+      "partPrice": 11000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        6.0,
+        14.0
+      ],
+      "failureEffect": "Congelamento de micropartículas de água no combustível em baixas temperaturas",
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel-Oil Heat Exchanger Manual)"
+    },
+    {
+      "id": "fuel.fqis_sensors",
+      "name": "Sensores de quantidade e computador de indicação de combustível (FQIS)",
+      "group": "Combustível",
+      "appliesTo": {},
+      "lifeHours": 5000.0,
+      "partPrice": 3500.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.12,
+        0.3
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Indicação errática ou travada no medidor de quantidade nos tanques",
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Quantity Indicating System)"
+    },
+    {
+      "id": "engine.mounts_trusses",
+      "name": "Coxins e berço estrutural de fixação do motor",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {},
+      "lifeHours": 10000.0,
+      "partPrice": 8000.0,
+      "laborHours": 14.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.4,
+        0.9
+      ],
+      "downtimeHours": [
+        8.0,
+        24.0
+      ],
+      "failureEffect": "Vibração excessiva do motor e desalinhamento estrutural",
+      "lifeSource": "estimativa — revisar (referência usuário: Engine Mounts & Truss Inspection)"
+    },
+    {
+      "id": "engine.cowling_nacelle",
+      "name": "Carenagem e nacele aerodinâmica do motor",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {},
+      "lifeHours": 12000.0,
+      "partPrice": 9000.0,
+      "laborHours": 8.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        6.0,
+        18.0
+      ],
+      "failureEffect": "Trinca em painel de carenagem / arrasto parasita",
+      "lifeSource": "estimativa — revisar (referência usuário: Cowling & Nacelle Maintenance)"
+    },
+    {
+      "id": "engine.wastegate_controller",
+      "name": "Válvula wastegate e atuador de pressão do turbo",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "turbocharged"
+        ]
+      },
+      "lifeHours": 2000.0,
+      "partPrice": 3500.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.2,
+        0.5
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Perda de pressão de sobrealimentação ou overboost",
+      "lifeSource": "estimativa — revisar (referência usuário: Wastegate Controller Overhaul)"
+    },
+    {
+      "id": "engine.air_intake_filter",
+      "name": "Filtro e duto de admissão de ar do motor (inlet screen)",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {},
+      "lifeHours": 1000.0,
+      "partPrice": 600.0,
+      "laborHours": 2.0,
+      "repairCostPctOfAircraft": [
+        0.05,
+        0.15
+      ],
+      "downtimeHours": [
+        1.0,
+        3.0
+      ],
+      "failureEffect": "Obstrução do fluxo de admissão / perda de potência",
+      "lifeSource": "estimativa — revisar (referência usuário: Air Intake Filter Maintenance)"
+    },
+    {
+      "id": "engine.pneumatic_starter",
+      "name": "Motor de partida pneumático (ATS - Air Turbine Starter)",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "jet"
+        ]
+      },
+      "lifeCycles": 3000,
+      "partPrice": 16000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.6
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Falha de partida pneumática / recusa de acionamento",
+      "lifeSource": "estimativa — revisar (referência usuário: Air Turbine Starter Overhaul Manual)"
+    },
+    {
+      "id": "engine.fadec_eec",
+      "name": "FADEC / Módulo eletrônico de controle do motor (EEC)",
+      "group": "Motor",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "fadec"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "partPrice": 24000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.5,
+        1.3
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Degradação para modo manual / flutuação de empuxo",
+      "lifeSource": "estimativa — revisar (referência usuário: FADEC Engine Electronic Controller Manual)"
+    },
+    {
+      "id": "hotsection.fuel_nozzles",
+      "name": "Bicos injetores de combustível da turbina",
+      "group": "Seção quente",
+      "perEngine": true,
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 3000.0,
+      "partPrice": 10000.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.6
+      ],
+      "downtimeHours": [
+        4.0,
+        10.0
+      ],
+      "failureEffect": "Pulverização irregular / ponto quente na câmara de combustão",
+      "lifeSource": "estimativa — revisar (referência usuário: Turbine Fuel Nozzles Maintenance)"
+    },
+    {
+      "id": "hotsection.ngv",
+      "name": "Palhetas-guia de bocal da turbina (NGV - Nozzle Guide Vanes)",
+      "group": "Seção quente",
+      "perEngine": true,
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 5000.0,
+      "partPrice": 32000.0,
+      "laborHours": 18.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.8,
+        1.8
+      ],
+      "downtimeHours": [
+        16.0,
+        48.0
+      ],
+      "failureEffect": "Erosão térmica / perda de rendimento da turbina",
+      "lifeSource": "estimativa — revisar (referência usuário: Nozzle Guide Vanes Overhaul)"
+    },
+    {
+      "id": "hotsection.ignition_exciters",
+      "name": "Caixas excitadoras de ignição da turbina",
+      "group": "Seção quente",
+      "perEngine": true,
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeHours": 4000.0,
+      "partPrice": 5000.0,
+      "laborHours": 3.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Ausência de centelha nos ignitores / falha na partida da turbina",
+      "lifeSource": "estimativa — revisar (referência usuário: Turbine Ignition Exciters Manual)"
+    },
+    {
+      "id": "propeller.pitch_feathering",
+      "name": "Mecanismo de passo variável e embandeiramento da hélice",
+      "group": "Hélice",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "constantSpeedProp"
+        ]
+      },
+      "lifeHours": 3000.0,
+      "partPrice": 8500.0,
+      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.75
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Dificuldade de variação de passo ou falha ao embandeirar",
+      "lifeSource": "estimativa — revisar (referência usuário: Propeller Pitch & Feathering System)"
+    },
+    {
+      "id": "propeller.deice_boots",
+      "name": "Botas e anéis de degelo elétrico da hélice",
+      "group": "Hélice",
+      "perEngine": true,
+      "appliesTo": {
+        "all": [
+          "propDeIce"
+        ]
+      },
+      "lifeHours": 2500.0,
+      "partPrice": 4200.0,
+      "laborHours": 4.0,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Queima de resistência / acúmulo de gelo nas pás da hélice",
+      "lifeSource": "estimativa — revisar (referência usuário: Propeller Electric De-Ice Boots)"
+    },
+    {
+      "id": "engine.apu_core",
+      "name": "Módulo gerador de gás e turbina da APU",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "apu"
+        ]
+      },
+      "lifeHours": 4000.0,
+      "partPrice": 35000.0,
+      "laborHours": 16.0,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.6,
+        1.5
+      ],
+      "downtimeHours": [
+        8.0,
+        24.0
+      ],
+      "failureEffect": "Recusa de partida da APU / perda de potência pneumática auxiliar",
+      "lifeSource": "estimativa — revisar (referência usuário: Auxiliary Power Unit Core Overhaul)"
+    },
+    {
+      "id": "fuselage.cargo_doors_latches",
+      "name": "Portas de carga, travas e sensores de fechamento",
+      "group": "Fuselagem",
+      "appliesTo": {
+        "any": [
+          "multiEngine",
+          "pressurized",
+          "turboprop",
+          "jet"
+        ]
+      },
+      "lifeCycles": 8000,
+      "partPrice": 7000.0,
+      "laborHours": 6.0,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.6
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Alerta DOOR OPEN no solo ou falha no mecanismo de travamento de carga",
+      "lifeSource": "estimativa — revisar (referência usuário: Cargo Doors & Latches Inspection)"
     }
   ]
 }

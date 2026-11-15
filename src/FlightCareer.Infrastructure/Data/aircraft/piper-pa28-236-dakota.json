@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 3,
   "id": "Piper PA28-236 Dakota",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "fixedGear",
-    "constantSpeedProp",
-    "carbureted",
     "autopilot",
-    "noseWheelSteering"
+    "carbureted",
+    "constantSpeedProp",
+    "fixedGear",
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [

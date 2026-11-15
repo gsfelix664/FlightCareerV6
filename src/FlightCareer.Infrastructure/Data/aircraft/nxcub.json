@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 3,
   "id": "NXCub",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "fixedGear",
+    "autopilot",
     "constantSpeedProp",
+    "fixedGear",
     "fuelInjected",
     "glassCockpit",
-    "autopilot",
-    "noseWheelSteering"
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [

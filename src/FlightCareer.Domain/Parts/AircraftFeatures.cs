@@ -57,6 +57,13 @@ namespace FlightCareer.Domain.Parts
         public const string Antiskid = "antiskid";
         public const string NoseWheelSteering = "noseWheelSteering";
 
+        // Adendos F2.1b Rodada 2: hidráulico, pneumático, propulsão e aviônicos
+        public const string Ptu = "ptu";
+        public const string Rat = "rat";
+        public const string PropDeIce = "propDeIce";
+        public const string Fadec = "fadec";
+        public const string BleedAir = "bleedAir";
+
         /// <summary>
         /// Todas as características válidas no vocabulário fechado.
         /// </summary>
@@ -90,7 +97,12 @@ namespace FlightCareer.Domain.Parts
             DeIceBoots,
             BleedAntiIce,
             Antiskid,
-            NoseWheelSteering
+            NoseWheelSteering,
+            Ptu,
+            Rat,
+            PropDeIce,
+            Fadec,
+            BleedAir
         };
 
         /// <summary>
@@ -205,6 +217,34 @@ namespace FlightCareer.Domain.Parts
             if (set.Contains(Tailwheel) && set.Contains(NoseWheelSteering))
             {
                 throw new InvalidOperationException($"{ctx}: aeronave tailwheel (bequilha de cauda) não possui noseWheelSteering (direção do trem dianteiro).");
+            }
+
+            // 13. ptu apenas em multi-engine jet ou turboprop
+            if (set.Contains(Ptu) && (!set.Contains(MultiEngine) || (!set.Contains(Jet) && !set.Contains(Turboprop))))
+            {
+                throw new InvalidOperationException($"{ctx}: ptu (unidade de transferência de potência hidráulica) só é aplicável a aeronaves multi-motor a jato ou turboélice.");
+            }
+
+            // 14. rat apenas em jet ou turboprop
+            if (set.Contains(Rat) && (!set.Contains(Jet) && !set.Contains(Turboprop)))
+            {
+                throw new InvalidOperationException($"{ctx}: rat (turbina de ar de impacto) só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 15. propDeIce não aplicável a jet e requer hélice
+            if (set.Contains(PropDeIce) && set.Contains(Jet))
+            {
+                throw new InvalidOperationException($"{ctx}: propDeIce (degelo de hélice) não é aplicável a aeronaves a jato (jet).");
+            }
+            if (set.Contains(PropDeIce) && !set.Contains(ConstantSpeedProp) && !set.Contains(FixedPitchProp))
+            {
+                throw new InvalidOperationException($"{ctx}: propDeIce requer configuração de hélice (constantSpeedProp ou fixedPitchProp).");
+            }
+
+            // 16. bleedAir aplicável a jet, turboprop ou aeronave a pistão pressurizada
+            if (set.Contains(BleedAir) && set.Contains(Piston) && !set.Contains(Pressurized))
+            {
+                throw new InvalidOperationException($"{ctx}: bleedAir (sistema pneumático de sangria) só é aplicável a jato, turboélice ou aeronave a pistão pressurizada.");
             }
         }
     }

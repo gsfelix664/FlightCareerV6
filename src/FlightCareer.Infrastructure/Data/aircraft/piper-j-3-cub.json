@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 3,
   "id": "Piper J-3 Cub",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
+    "carbureted",
     "fixedGear",
     "fixedPitchProp",
-    "carbureted",
+    "piston",
+    "singleEngine",
     "tailwheel"
   ],
   "simMatch": {

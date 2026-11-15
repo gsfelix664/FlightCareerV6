@@ -26,6 +26,7 @@ namespace FlightCareer.Domain.Parts
         public const string Asa = "Asa";
         public const string Fuselagem = "Fuselagem";
         public const string Avionicos = "Aviônicos";
+        public const string Pneumatico = "Pneumático";
 
         public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -46,7 +47,8 @@ namespace FlightCareer.Domain.Parts
             Empenagem,
             Asa,
             Fuselagem,
-            Avionicos
+            Avionicos,
+            Pneumatico
         };
     }
 }

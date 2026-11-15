@@ -3149,6 +3149,760 @@
           }
         }
       ]
+    },
+    {
+      "id": "avionics_start_with_avionics_master_on",
+      "description": "Partida do motor realizada com chave de aviônicos ligada (picos de tensão de partida)",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "avionicsMasterStartSpikes",
+      "sensors": [
+        "elec-avionics-master-switch",
+        "eng-combustion",
+        "eng-starter-active"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: POH Starter & Avionics Master Procedures / FAA AC 43.13-1B)",
+      "bands": [
+        {
+          "name": "Leve (1 partida com aviônicos ligados)",
+          "threshold": 1.0,
+          "parts": [
+            {
+              "partId": "avionics.glass_displays",
+              "eventDamagePct": 0.8
+            },
+            {
+              "partId": "avionics.com_nav_radios",
+              "eventDamagePct": 0.6
+            },
+            {
+              "partId": "avionics.gps_receiver",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "avionics.fms_computer",
+              "eventDamagePct": 0.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Frequente (3 partidas sucessivas com aviônicos ligados)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "avionics.glass_displays",
+              "eventDamagePct": 2.2
+            },
+            {
+              "partId": "avionics.com_nav_radios",
+              "eventDamagePct": 1.8
+            },
+            {
+              "partId": "avionics.gps_receiver",
+              "eventDamagePct": 1.5
+            },
+            {
+              "partId": "avionics.fms_computer",
+              "eventDamagePct": 1.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Grave (5 partidas com aviônicos ligados)",
+          "threshold": 5.0,
+          "parts": [
+            {
+              "partId": "avionics.glass_displays",
+              "eventDamagePct": 5.0
+            },
+            {
+              "partId": "avionics.com_nav_radios",
+              "eventDamagePct": 4.0
+            },
+            {
+              "partId": "avionics.gps_receiver",
+              "eventDamagePct": 3.5
+            },
+            {
+              "partId": "avionics.fms_computer",
+              "eventDamagePct": 3.5
+            }
+          ],
+          "inspection": {
+            "defectCode": "AVIONICS_VOLTAGE_SPIKE_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "battery_deep_discharge_damage",
+      "description": "Descarga profunda da bateria sob carga elétrica sem geradores ou GPU",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "batteryDeepDischargeMinutes",
+      "sensors": [
+        "elec-battery-voltage",
+        "elec-battery-load",
+        "elec-master-battery"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Concorde / Gill Aircraft Battery Maintenance Manual)",
+      "bands": [
+        {
+          "name": "Leve (10 min de descarga profunda)",
+          "threshold": 10.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "electrical.standby_battery",
+              "eventDamagePct": 0.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Moderada (25 min de descarga profunda)",
+          "threshold": 25.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 1.8
+            },
+            {
+              "partId": "electrical.standby_battery",
+              "eventDamagePct": 1.8
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (45 min de descarga profunda)",
+          "threshold": 45.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 4.5
+            },
+            {
+              "partId": "electrical.standby_battery",
+              "eventDamagePct": 4.5
+            }
+          ],
+          "inspection": {
+            "defectCode": "BATTERY_CAPACITY_INSPECTION",
+            "isGrounding": true,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "electrical_system_overload_amps",
+      "description": "Sobrecarga elétrica contínua de amperagem além da capacidade nominal dos geradores",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "electricalOverloadMinutes",
+      "sensors": [
+        "elec-total-load-amps",
+        "elec-genalt-load"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: MIL-STD-704 Aircraft Electric Power Characteristics)",
+      "bands": [
+        {
+          "name": "Cautela (5 min de sobrecarga de carga)",
+          "threshold": 5.0,
+          "parts": [
+            {
+              "partId": "electrical.alternator",
+              "eventDamagePct": 0.4
+            },
+            {
+              "partId": "electrical.idg",
+              "eventDamagePct": 0.4
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 0.4
+            },
+            {
+              "partId": "electrical.circuit_breakers_relays",
+              "eventDamagePct": 0.2
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Alerta (15 min de sobrecarga de carga)",
+          "threshold": 15.0,
+          "parts": [
+            {
+              "partId": "electrical.alternator",
+              "eventDamagePct": 1.5
+            },
+            {
+              "partId": "electrical.idg",
+              "eventDamagePct": 1.5
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 1.5
+            },
+            {
+              "partId": "electrical.circuit_breakers_relays",
+              "eventDamagePct": 0.8
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Crítico (30 min de sobrecarga severa)",
+          "threshold": 30.0,
+          "parts": [
+            {
+              "partId": "electrical.alternator",
+              "eventDamagePct": 3.5
+            },
+            {
+              "partId": "electrical.idg",
+              "eventDamagePct": 3.5
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 3.5
+            },
+            {
+              "partId": "electrical.circuit_breakers_relays",
+              "eventDamagePct": 1.8
+            }
+          ],
+          "inspection": {
+            "defectCode": "GENERATOR_OVERHEAT_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "autopilot_turbulence_servo_stress",
+      "description": "Piloto automático engajado sob turbulência severa e acelerações verticais anormais",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "turbulenceGExceedanceCycles",
+      "sensors": [
+        "af-autopilot-master",
+        "af-g-force",
+        "af-max-g-force"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Garmin GFC / Collins Autopilot Flight Operations in Severe Turbulence)",
+      "bands": [
+        {
+          "name": "Cautela (10 ciclos de oscilação turbulenta)",
+          "threshold": 10.0,
+          "parts": [
+            {
+              "partId": "avionics.autopilot_servos",
+              "eventDamagePct": 0.35
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Forte (25 ciclos de oscilação turbulenta)",
+          "threshold": 25.0,
+          "parts": [
+            {
+              "partId": "avionics.autopilot_servos",
+              "eventDamagePct": 1.1
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severo (50 ciclos de oscilação turbulenta)",
+          "threshold": 50.0,
+          "parts": [
+            {
+              "partId": "avionics.autopilot_servos",
+              "eventDamagePct": 2.8
+            }
+          ],
+          "inspection": {
+            "defectCode": "AUTOPILOT_SERVO_OVERLOAD_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "fuel_pump_dry_run_empty_tank",
+      "description": "Operação da bomba auxiliar de combustível a seco com tanques vazios",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "dryRunPumpMinutes",
+      "sensors": [
+        "fuel-pump-on",
+        "fuel-pump-switch",
+        "fuel-total-quantity"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Weldon / Airborne Fuel Pump Operation & Maintenance Guide)",
+      "bands": [
+        {
+          "name": "Breve (2 min de bomba a seco)",
+          "threshold": 2.0,
+          "parts": [
+            {
+              "partId": "fuel.aux_pump",
+              "eventDamagePct": 1.0
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Prolongada (5 min de bomba a seco)",
+          "threshold": 5.0,
+          "parts": [
+            {
+              "partId": "fuel.aux_pump",
+              "eventDamagePct": 3.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (10 min de bomba a seco)",
+          "threshold": 10.0,
+          "parts": [
+            {
+              "partId": "fuel.aux_pump",
+              "eventDamagePct": 8.0
+            }
+          ],
+          "inspection": {
+            "defectCode": "FUEL_PUMP_DRY_RUN_INSPECTION",
+            "isGrounding": true,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "hydraulic_low_pressure_stress",
+      "description": "Operação com pressão hidráulica severamente deprimida sob demanda de atuadores",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "lowHydraulicPressureMinutes",
+      "sensors": [
+        "hyd-pressure",
+        "hyd-pump-pressure",
+        "hyd-reservoir-percent"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Hydraulic System Low Pressure Operations)",
+      "bands": [
+        {
+          "name": "Cautela (3 min de pressão hidráulica baixa)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "hydraulic.pump",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "hydraulic.electric_pump",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "hydraulic.filters_valves",
+              "eventDamagePct": 0.25
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Alerta (8 min de pressão hidráulica baixa)",
+          "threshold": 8.0,
+          "parts": [
+            {
+              "partId": "hydraulic.pump",
+              "eventDamagePct": 1.2
+            },
+            {
+              "partId": "hydraulic.electric_pump",
+              "eventDamagePct": 1.2
+            },
+            {
+              "partId": "hydraulic.filters_valves",
+              "eventDamagePct": 0.8
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severo (15 min de cavitação e pressão crítica)",
+          "threshold": 15.0,
+          "parts": [
+            {
+              "partId": "hydraulic.pump",
+              "eventDamagePct": 3.0
+            },
+            {
+              "partId": "hydraulic.electric_pump",
+              "eventDamagePct": 3.0
+            },
+            {
+              "partId": "hydraulic.filters_valves",
+              "eventDamagePct": 2.0
+            }
+          ],
+          "inspection": {
+            "defectCode": "HYDRAULIC_LOW_PRESSURE_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "engine_high_power_cold_oil",
+      "description": "Operação em alta potência com temperatura de óleo abaixo do mínimo operacional",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "highPowerColdOilMinutes",
+      "sensors": [
+        "oil-temperature",
+        "eng-rpm",
+        "turb-eng-torque"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Lycoming Flyer Operations / Pratt & Whitney PT6A Cold Weather Procedures)",
+      "bands": [
+        {
+          "name": "Cautela (1 min em alta potência com óleo frio)",
+          "threshold": 1.0,
+          "parts": [
+            {
+              "partId": "engine.cylinders",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "engine.crankshaft",
+              "eventDamagePct": 0.4
+            },
+            {
+              "partId": "oil.lubricant",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 0.4
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Moderada (3 min com óleo frio)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "engine.cylinders",
+              "eventDamagePct": 1.8
+            },
+            {
+              "partId": "engine.crankshaft",
+              "eventDamagePct": 1.4
+            },
+            {
+              "partId": "oil.lubricant",
+              "eventDamagePct": 1.0
+            },
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 1.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (6 min com óleo frio)",
+          "threshold": 6.0,
+          "parts": [
+            {
+              "partId": "engine.cylinders",
+              "eventDamagePct": 4.5
+            },
+            {
+              "partId": "engine.crankshaft",
+              "eventDamagePct": 3.5
+            },
+            {
+              "partId": "oil.lubricant",
+              "eventDamagePct": 2.5
+            },
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 3.8
+            }
+          ],
+          "inspection": {
+            "defectCode": "COLD_OIL_OVERSTRESS_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "propeller_deice_boot_cycles",
+      "description": "Ciclos de acionamento do degelo elétrico de pás da hélice",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "propDeiceCycles",
+      "sensors": [
+        "inst-prop-deice-switch"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (referência usuário: Hartzell Propeller Ice Protection Manual 180)",
+      "bands": [
+        {
+          "name": "Normal (2 ciclos de degelo de hélice)",
+          "threshold": 2.0,
+          "parts": [
+            {
+              "partId": "propeller.deice_boots",
+              "eventDamagePct": 0.05
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Frequente (6 ciclos de degelo de hélice)",
+          "threshold": 6.0,
+          "parts": [
+            {
+              "partId": "propeller.deice_boots",
+              "eventDamagePct": 0.18
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Intenso (12 ciclos de degelo de hélice)",
+          "threshold": 12.0,
+          "parts": [
+            {
+              "partId": "propeller.deice_boots",
+              "eventDamagePct": 0.45
+            }
+          ],
+          "inspection": null
+        }
+      ]
+    },
+    {
+      "id": "turboprop_rapid_power_lever_movement",
+      "description": "Transientes rápidos de manete de potência e reversão súbita de torque",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "rapidPowerTransientCycles",
+      "sensors": [
+        "turb-eng-torque",
+        "turb-max-torque-percent",
+        "eng-prop-rpm"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {
+        "all": [
+          "turboprop"
+        ]
+      },
+      "source": "estimativa — revisar (referência usuário: Pratt & Whitney Canada PT6A Maintenance Manual - Torque Transients)",
+      "bands": [
+        {
+          "name": "Cautela (3 ciclos bruscos de torque)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "propeller.governor",
+              "eventDamagePct": 0.25
+            },
+            {
+              "partId": "propeller.pitch_feathering",
+              "eventDamagePct": 0.25
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Alerta (8 ciclos bruscos de torque)",
+          "threshold": 8.0,
+          "parts": [
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 1.0
+            },
+            {
+              "partId": "propeller.governor",
+              "eventDamagePct": 0.8
+            },
+            {
+              "partId": "propeller.pitch_feathering",
+              "eventDamagePct": 0.8
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severo (15 ciclos bruscos de torque)",
+          "threshold": 15.0,
+          "parts": [
+            {
+              "partId": "engine.reduction_gearbox",
+              "eventDamagePct": 2.6
+            },
+            {
+              "partId": "propeller.governor",
+              "eventDamagePct": 2.0
+            },
+            {
+              "partId": "propeller.pitch_feathering",
+              "eventDamagePct": 2.0
+            }
+          ],
+          "inspection": {
+            "defectCode": "GEARBOX_TORQUE_SPIKE_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "cabin_rapid_decompression_stress",
+      "description": "Variação súbita da altitude de cabine e descompressão rápida sob alto diferencial de pressão",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "rapidDecompressionDeltaPsf",
+      "sensors": [
+        "af-pressurization-pressure-differential",
+        "af-pressurization-cabin-altitude"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {
+        "all": [
+          "pressurized"
+        ]
+      },
+      "source": "estimativa — revisar (referência usuário: FAR 25.365 Pressurized Compartment Loads / Boeing 737 FCOM)",
+      "bands": [
+        {
+          "name": "Moderada (Variação de 150 psf/s)",
+          "threshold": 150.0,
+          "parts": [
+            {
+              "partId": "pressurization.outflow_valve",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "pressurization.safety_relief_valves",
+              "eventDamagePct": 0.4
+            },
+            {
+              "partId": "fuselage.pressure_bulkheads",
+              "eventDamagePct": 0.6
+            },
+            {
+              "partId": "fuselage.doors_seals",
+              "eventDamagePct": 0.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (Variação de 300 psf/s)",
+          "threshold": 300.0,
+          "parts": [
+            {
+              "partId": "pressurization.outflow_valve",
+              "eventDamagePct": 2.0
+            },
+            {
+              "partId": "pressurization.safety_relief_valves",
+              "eventDamagePct": 1.5
+            },
+            {
+              "partId": "fuselage.pressure_bulkheads",
+              "eventDamagePct": 2.5
+            },
+            {
+              "partId": "fuselage.doors_seals",
+              "eventDamagePct": 2.0
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Crítica (Descompressão descontrolada de 500 psf/s)",
+          "threshold": 500.0,
+          "parts": [
+            {
+              "partId": "pressurization.outflow_valve",
+              "eventDamagePct": 6.0
+            },
+            {
+              "partId": "pressurization.safety_relief_valves",
+              "eventDamagePct": 4.5
+            },
+            {
+              "partId": "fuselage.pressure_bulkheads",
+              "eventDamagePct": 8.0
+            },
+            {
+              "partId": "fuselage.doors_seals",
+              "eventDamagePct": 6.0
+            }
+          ],
+          "inspection": {
+            "defectCode": "RAPID_DECOMPRESSION_INSPECTION",
+            "isGrounding": true,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
     }
   ]
 }

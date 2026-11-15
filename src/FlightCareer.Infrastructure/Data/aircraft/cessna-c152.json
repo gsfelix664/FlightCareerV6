@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 3,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
+    "carbureted",
     "fixedGear",
     "fixedPitchProp",
-    "carbureted",
-    "noseWheelSteering"
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [

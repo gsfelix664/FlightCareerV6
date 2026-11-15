@@ -1,21 +1,22 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 3,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
   "engineCount": 2,
   "features": [
-    "piston",
-    "multiEngine",
-    "retractableGear",
-    "constantSpeedProp",
-    "fuelInjected",
-    "hydraulicGear",
-    "glassCockpit",
     "autopilot",
-    "weatherRadar",
+    "constantSpeedProp",
     "deIceBoots",
-    "noseWheelSteering"
+    "fuelInjected",
+    "glassCockpit",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "piston",
+    "propDeIce",
+    "retractableGear",
+    "weatherRadar"
   ],
   "simMatch": {
     "title": [],

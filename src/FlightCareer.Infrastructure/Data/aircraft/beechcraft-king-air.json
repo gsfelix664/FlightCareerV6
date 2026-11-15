@@ -1,22 +1,24 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 3,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
   "features": [
-    "turboprop",
-    "multiEngine",
-    "retractableGear",
-    "constantSpeedProp",
-    "pressurized",
-    "hydraulicGear",
-    "glassCockpit",
-    "fms",
     "autopilot",
-    "weatherRadar",
+    "bleedAir",
+    "constantSpeedProp",
     "deIceBoots",
-    "noseWheelSteering"
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "turboprop",
+    "weatherRadar"
   ],
   "simMatch": {
     "title": [

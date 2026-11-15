@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 3,
   "id": "C172SP G1000",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
+    "autopilot",
     "fixedGear",
     "fixedPitchProp",
     "fuelInjected",
     "glassCockpit",
-    "autopilot",
-    "noseWheelSteering"
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [

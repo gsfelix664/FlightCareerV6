@@ -1,22 +1,24 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 3,
   "id": "ES30",
   "class": "Turboprop",
   "engineCount": 4,
   "features": [
-    "turboprop",
-    "multiEngine",
-    "retractableGear",
-    "constantSpeedProp",
-    "pressurized",
-    "electricHybrid",
-    "glassCockpit",
-    "fms",
     "autopilot",
-    "weatherRadar",
+    "bleedAir",
+    "constantSpeedProp",
     "deIceBoots",
-    "noseWheelSteering"
+    "electricHybrid",
+    "fms",
+    "glassCockpit",
+    "multiEngine",
+    "noseWheelSteering",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "turboprop",
+    "weatherRadar"
   ],
   "simMatch": {
     "title": [

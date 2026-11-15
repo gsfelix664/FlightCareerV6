@@ -1,18 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 3,
   "id": "Cirrus SR22",
   "class": "Piston",
   "engineCount": 1,
   "features": [
-    "piston",
-    "singleEngine",
-    "fixedGear",
+    "autopilot",
     "constantSpeedProp",
+    "fixedGear",
     "fuelInjected",
     "glassCockpit",
-    "autopilot",
-    "noseWheelSteering"
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
   ],
   "simMatch": {
     "title": [],

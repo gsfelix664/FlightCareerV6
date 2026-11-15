@@ -1,21 +1,22 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 3,
   "id": "Cessna 404 Titan",
   "class": "Piston",
   "engineCount": 2,
   "features": [
-    "piston",
-    "multiEngine",
-    "retractableGear",
-    "constantSpeedProp",
-    "fuelInjected",
-    "turbocharged",
-    "hydraulicGear",
     "autopilot",
-    "weatherRadar",
+    "constantSpeedProp",
     "deIceBoots",
-    "noseWheelSteering"
+    "fuelInjected",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "piston",
+    "propDeIce",
+    "retractableGear",
+    "turbocharged",
+    "weatherRadar"
   ],
   "simMatch": {
     "title": [],
