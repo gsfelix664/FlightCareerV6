@@ -64,6 +64,11 @@ namespace FlightCareer.UI.Services
         // Panes registradas cuja gravação assíncrona ainda não terminou: não podem parecer "reparadas" numa releitura.
         private readonly HashSet<Guid> _unsaved = new();
 
+        private readonly Dictionary<int, bool> _nativeFlapFailedById = new();
+        private bool _nativeFlapFailed;
+        private DateTime? _flapMismatchSince;
+        private DateTime? _lastFlapWrite;
+
         private PilotAircraft? _aircraft;
         private Func<string> _phaseProvider = () => string.Empty;
         private bool _active;
@@ -131,6 +136,10 @@ namespace FlightCareer.UI.Services
             _lastDbSync = DateTime.Now;
             ReleaseResolved(previousOpen);
             _lastCorrection.Clear();
+            _flapMismatchSince = null;
+            _lastFlapWrite = null;
+            _nativeFlapFailedById.Clear();
+            _nativeFlapFailed = false;
             _previous = null;
             _suctionSeenHealthy = false;
             _suctionLowSince = null;
@@ -139,9 +148,9 @@ namespace FlightCareer.UI.Services
 
             _simConnect.OnFailureStateReceived += OnFailureState;
             _simConnect.OnMaskedEvent += OnMaskedEvent;
-            if (_detectNative && _sensorFrames != null)
+            if (_sensorFrames != null)
             {
-                _nativeWear.Reset();
+                if (_detectNative) _nativeWear.Reset();
                 _sensorFrames.OnFrame += OnSensorFrame;
             }
             _active = true;
@@ -157,6 +166,8 @@ namespace FlightCareer.UI.Services
             if (_sensorFrames != null) _sensorFrames.OnFrame -= OnSensorFrame;
             _simConnect.SetMaskedEvents(Array.Empty<string>());
             _simConnect.SetPersistentToggles(Array.Empty<string>());
+            _flapMismatchSince = null;
+            _lastFlapWrite = null;
             _active = false;
         }
 
@@ -293,6 +304,10 @@ namespace FlightCareer.UI.Services
             _previous = null;
             _suctionSeenHealthy = false;
             _suctionLowSince = null;
+            _flapMismatchSince = null;
+            _lastFlapWrite = null;
+            _nativeFlapFailedById.Clear();
+            _nativeFlapFailed = false;
             if (_active) _reapplyAfter = DateTime.Now + ReapplyDelayAfterLoad;
         }
 
@@ -392,8 +407,21 @@ namespace FlightCareer.UI.Services
 
                     case DefectCatalog.FlapLock:
                     case DefectCatalog.FlapDamage:
-                        if (Math.Abs(state.FlapsHandleIndex - defect.Parameter) > 0.1 && ShouldCorrect(defect.Code))
+                        var now = DateTime.Now;
+                        if (Math.Abs(state.FlapsHandleIndex - defect.Parameter) > FlapEnforcementPolicy.PositionTolerance)
+                        {
+                            _flapMismatchSince ??= now;
+                        }
+                        else
+                        {
+                            _flapMismatchSince = null;
+                        }
+
+                        if (FlapEnforcementPolicy.ShouldWrite(state.FlapsHandleIndex, defect.Parameter, _nativeFlapFailed, _flapMismatchSince, _lastFlapWrite, now))
+                        {
+                            _lastFlapWrite = now;
                             _simConnect.WriteFlapsHandleIndex(defect.Parameter);
+                        }
                         break;
 
                     case DefectCatalog.Alternator when state.AlternatorSwitch > 0.5:
@@ -483,7 +511,25 @@ namespace FlightCareer.UI.Services
         /// </summary>
         private void OnSensorFrame(SensorFrame frame)
         {
-            if (!_active || !_detectNative || _aircraft == null) return;
+            if (frame.Values != null)
+            {
+                bool updated = false;
+                for (int id = 5; id <= 8; id++)
+                {
+                    string key = $"{NativeWearFailureMap.SensorKeyPrefix}{id}";
+                    if (frame.Values.TryGetValue(key, out double val) && !double.IsNaN(val))
+                    {
+                        _nativeFlapFailedById[id] = val >= 0.5;
+                        updated = true;
+                    }
+                }
+                if (updated)
+                {
+                    _nativeFlapFailed = _nativeFlapFailedById.Values.Any(f => f);
+                }
+            }
+
+            if (!_active || !_detectNative || _aircraft == null || frame.Values == null) return;
 
             foreach (var e in _nativeWear.Update(frame.Values))
             {

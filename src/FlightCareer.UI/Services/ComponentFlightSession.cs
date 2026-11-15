@@ -49,6 +49,10 @@ namespace FlightCareer.UI.Services
         public bool HasFailures => _history.Any(r => r.Source != "Excedência");
         public string LatestFailureSummary => _history.LastOrDefault(r => r.Source != "Excedência")?.Title ?? string.Empty;
         public bool IsEngineOnFire => _actuator.IsEngineOnFire;
+        public bool CrashApplied => _crashApplied;
+
+        /// <summary>Marca o crash como aplicado sem emitir falhas adicionais (evita perda total ou alertas duplicados).</summary>
+        public void MarkCrashApplied() => _crashApplied = true;
 
         /// <summary>Prepara a sessão para uma aeronave (componentes já carregados e reconciliados).</summary>
         public void Begin(List<AircraftComponent> components, AircraftType? type)
