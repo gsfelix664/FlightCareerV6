@@ -171,7 +171,7 @@
     },
     {
       "id": "engine.turbocharger",
-      "name": "Turbocompressor e wastegate",
+      "name": "Turbocompressor, wastegate e controlador de pressão",
       "group": "Motor",
       "appliesTo": {
         "all": [
@@ -189,6 +189,7 @@
       "sensors": [
         "eng-tit",
         "eng-manifold-pressure",
+        "eng-wastegate-position",
         "eng-turbocharger-failed"
       ],
       "lifeSource": "estimativa — revisar (referência usual: Garrett / Hartzell Engine Tech 1.000 h)",
@@ -1675,7 +1676,7 @@
     {
       "id": "airframe.wing_structure",
       "name": "Longarinas e estrutura alar",
-      "group": "Célula",
+      "group": "Asa",
       "appliesTo": {},
       "perEngine": false,
       "lifeHours": 12000,
@@ -1705,7 +1706,7 @@
     {
       "id": "airframe.flight_controls",
       "name": "Comandos de voo e cabos de acionamento",
-      "group": "Célula",
+      "group": "Empenagem",
       "appliesTo": {},
       "perEngine": false,
       "lifeHours": 4000,
@@ -1738,7 +1739,7 @@
     {
       "id": "airframe.flaps",
       "name": "Trilhos e mecanismo dos flaps",
-      "group": "Célula",
+      "group": "Asa",
       "appliesTo": {},
       "perEngine": false,
       "lifeHours": 3500,
@@ -1801,40 +1802,6 @@
       "calendarLifeMonths": null
     },
     {
-      "id": "hydraulic.reservoir_lines",
-      "name": "Reservatório e linhas hidráulicas",
-      "group": "Hidráulico",
-      "appliesTo": {
-        "all": [
-          "hydraulicGear"
-        ]
-      },
-      "perEngine": false,
-      "lifeHours": 4000,
-      "visibleOnWalkaround": true,
-      "blocksFlightWhenBroken": true,
-      "partPrice": 2200,
-      "priceScalesWithAircraft": true,
-      "laborHours": 8.0,
-      "sensors": [
-        "hyd-reservoir-percent",
-        "hyd-system-integrity",
-        "nw-level-21",
-        "nw-is-failed-21"
-      ],
-      "lifeSource": "estimativa — revisar (referência usual: Aircraft Hydraulic Systems manual)",
-      "repairCostPctOfAircraft": [
-        0.2,
-        0.6
-      ],
-      "downtimeHours": [
-        4.0,
-        12.0
-      ],
-      "failureEffect": "Perda de pressão hidráulica",
-      "calendarLifeMonths": null
-    },
-    {
       "id": "pressurization.outflow_valve",
       "name": "Válvula de fluxo (outflow valve)",
       "group": "Pressurização",
@@ -1865,38 +1832,6 @@
       ],
       "failureEffect": "Perda de capacidade de pressurização",
       "calendarLifeMonths": null
-    },
-    {
-      "id": "pressurization.door_seals",
-      "name": "Vedações de portas e cabine",
-      "group": "Pressurização",
-      "appliesTo": {
-        "all": [
-          "pressurized"
-        ]
-      },
-      "perEngine": false,
-      "lifeHours": 2000,
-      "visibleOnWalkaround": true,
-      "blocksFlightWhenBroken": true,
-      "partPrice": 1800,
-      "priceScalesWithAircraft": true,
-      "laborHours": 4.0,
-      "sensors": [
-        "af-pressurization-cabin-altitude",
-        "af-pressurization-pressure-differential"
-      ],
-      "lifeSource": "estimativa — revisar (referência usual: Manual de manutenção pressurização)",
-      "repairCostPctOfAircraft": [
-        0.3,
-        0.8
-      ],
-      "downtimeHours": [
-        6.0,
-        16.0
-      ],
-      "failureEffect": "Perda de capacidade de pressurização",
-      "calendarLifeMonths": 60
     },
     {
       "id": "empennage.stabilizers",
@@ -2637,7 +2572,8 @@
       "priceScalesWithAircraft": true,
       "laborHours": 10.0,
       "sensors": [
-        "af-pressurization-pressure-differential"
+        "af-pressurization-pressure-differential",
+        "af-pressurization-cabin-altitude"
       ],
       "lifeSource": "estimativa — revisar (referência usuário: 8.000 ciclos; custo 0,4–1,2%; hangar 8–24 h)",
       "repairCostPctOfAircraft": [
@@ -2649,7 +2585,7 @@
         24.0
       ],
       "failureEffect": "Vazamento de pressurização ou alerta de porta destravada em voo",
-      "calendarLifeMonths": null
+      "calendarLifeMonths": 60
     },
     {
       "id": "fuselage.windshield_windows",
@@ -3393,7 +3329,7 @@
     },
     {
       "id": "hydraulic.lines_fittings",
-      "name": "Tubulações rígidas, mangueiras flexíveis e conexões de alta pressão",
+      "name": "Reservatório, tubulações, mangueiras e conexões hidráulicas",
       "group": "Hidráulico",
       "appliesTo": {
         "any": [
@@ -3402,19 +3338,29 @@
           "jet"
         ]
       },
+      "perEngine": false,
       "lifeHours": 3500.0,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
       "partPrice": 4500.0,
-      "laborHours": 6.0,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "hyd-reservoir-percent",
+        "hyd-system-integrity",
+        "nw-level-21",
+        "nw-is-failed-21"
+      ],
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Lines & Hoses Service Life)",
       "repairCostPctOfAircraft": [
         0.15,
-        0.4
+        0.6
       ],
       "downtimeHours": [
         4.0,
         12.0
       ],
-      "failureEffect": "Microvazamento contínuo de fluido hidráulico",
-      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Lines & Hoses Service Life)",
+      "failureEffect": "Microvazamento contínuo ou perda de pressão hidráulica",
       "calendarLifeMonths": 60
     },
     {
@@ -3680,31 +3626,6 @@
       ],
       "failureEffect": "Trinca em painel de carenagem / arrasto parasita",
       "lifeSource": "estimativa — revisar (referência usuário: Cowling & Nacelle Maintenance)",
-      "calendarLifeMonths": null
-    },
-    {
-      "id": "engine.wastegate_controller",
-      "name": "Válvula wastegate e atuador de pressão do turbo",
-      "group": "Motor",
-      "perEngine": true,
-      "appliesTo": {
-        "all": [
-          "turbocharged"
-        ]
-      },
-      "lifeHours": 2000.0,
-      "partPrice": 3500.0,
-      "laborHours": 4.0,
-      "repairCostPctOfAircraft": [
-        0.2,
-        0.5
-      ],
-      "downtimeHours": [
-        3.0,
-        8.0
-      ],
-      "failureEffect": "Perda de pressão de sobrealimentação ou overboost",
-      "lifeSource": "estimativa — revisar (referência usuário: Wastegate Controller Overhaul)",
       "calendarLifeMonths": null
     },
     {

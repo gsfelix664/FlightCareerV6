@@ -1349,7 +1349,7 @@
               "lossPerHourPct": 0.0
             },
             {
-              "partId": "hydraulic.reservoir_lines",
+              "partId": "hydraulic.lines_fittings",
               "multiplier": 1.5,
               "lossPerHourPct": 0.0
             },
@@ -1390,7 +1390,7 @@
               "lossPerHourPct": 2.0
             },
             {
-              "partId": "hydraulic.reservoir_lines",
+              "partId": "hydraulic.lines_fittings",
               "multiplier": 4.0,
               "lossPerHourPct": 1.5
             },
@@ -1431,7 +1431,7 @@
               "lossPerHourPct": 8.0
             },
             {
-              "partId": "hydraulic.reservoir_lines",
+              "partId": "hydraulic.lines_fittings",
               "multiplier": 10.0,
               "lossPerHourPct": 6.0
             },
@@ -1939,7 +1939,7 @@
               "damagePerEventPct": 0.05
             },
             {
-              "partId": "pressurization.door_seals",
+              "partId": "fuselage.doors_seals",
               "damagePerEventPct": 0.08
             }
           ]
@@ -1953,7 +1953,7 @@
               "damagePerEventPct": 0.15
             },
             {
-              "partId": "pressurization.door_seals",
+              "partId": "fuselage.doors_seals",
               "damagePerEventPct": 0.22
             }
           ]
@@ -1967,7 +1967,7 @@
               "damagePerEventPct": 0.35
             },
             {
-              "partId": "pressurization.door_seals",
+              "partId": "fuselage.doors_seals",
               "damagePerEventPct": 0.45
             }
           ],

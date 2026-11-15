@@ -19,7 +19,6 @@ namespace FlightCareer.Domain.Parts
         public const string Trem = "Trem";
         public const string Pneus = "Pneus";
         public const string Freios = "Freios";
-        public const string Celula = "Célula";
         public const string Hidraulico = "Hidráulico";
         public const string Pressurizacao = "Pressurização";
         public const string Empenagem = "Empenagem";
@@ -45,7 +44,6 @@ namespace FlightCareer.Domain.Parts
             Trem,
             Pneus,
             Freios,
-            Celula,
             Hidraulico,
             Pressurizacao,
             Empenagem,
