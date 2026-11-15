@@ -490,7 +490,8 @@ namespace FlightCareer.UI.Services
                 _persistentFailures.Start(keepWatching, () => "SOLO (FORA DE VOO)", detectNative: false);
             }
             _simConnect.ResetCrashState();
-            _parts.Reset();
+            // As peças NÃO são zeradas aqui: FinalizeFlightAsync chama StopMonitoring antes de salvar
+            // (SaveComponentsAsync). O próximo LoadFlightComponents faz Begin/Reset da sessão de peças.
             _failures.PartsDriven = false;
             _failures.PartDamageSink = null;
             _failures.Reset();
