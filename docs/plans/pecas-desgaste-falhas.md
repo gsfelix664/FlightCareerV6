@@ -300,3 +300,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.0b · 2026-11-15 · PRONTO · [Relatório](docs/reviews/F2.0b-relatorio.md) · branch chore/limites-poh-f2.0b
 - F2.1 · 2026-11-15 · PRONTO PARA REVISÃO (RODADA 2) · [Relatório](docs/reviews/F2.1-relatorio.md) · branch feat/parts-f2.1
 - F2.1 (lista de peças, portão) · 2026-11-15 · APROVADO PELO USUÁRIO com 2 correções (pneu dianteiro só triciclo; magnetos NO-GO) · [Relatório](docs/reviews/F2.1-relatorio.md)
+- F2.2 · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.2-relatorio.md) · branch feat/parts-f2.2

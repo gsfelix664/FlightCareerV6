@@ -1510,3 +1510,30 @@
 
 ## 2026-11-15 - F2.1: lista de peças aprovada (Claude)
 - Usuário aprovou as 58 peças do `parts_catalog.json` com duas correções: `tires.nose` só em triciclo (`none: tailwheel`) e magnetos esquerdo/direito como NO-GO (`blocksFlightWhenBroken`), coerente com o `DefectCatalog`. Vidas úteis seguem "estimativa — revisar". Pendência para a F2.3: o provisionador não remove peça que deixou de se aplicar (ex.: `tires.nose` já criado num avião de bequilha) — limpar na migração.
+
+## 2026-11-15 - F2.2 Mapa sensor -> estresse -> peça (proposta de regras e modelo de dados) (Gemini)
+- **Modelo de dados em `Domain/Parts/`**:
+  - Implementadas classes e records `WearRule`, `WearRuleCatalog`, `WearRulePart`, `WearRuleBand`, `WearRuleInspection` e `NativeOverstress`.
+  - Suporte completo a regras contínuas com faixas relativas a limites operacionais (`LimitKeys`), regras de eventos (pouso duro, ciclos), integração com códigos de inspeção (`DefectCode`) e compatibilidade estrita com features (`PartAppliesTo`).
+- **Catálogo de calibração (`Data/wear_rules.json`)**:
+  - Proposta de 28 regras operacionais abrangendo 100% das 58 peças do catálogo (52 NO-GO e 6 não NO-GO).
+  - Cobertura de todas as 15 categorias requeridas: RPM overspeed, CHT alto, shock cooling, EGT/mistura, óleo alta temp e baixa pressão, torque turboprop, ITT turbina/jato, N1 overspeed, flaps Vfe, trem Vle/Vlo, fator G positivo/negativo, sobrevelocidade VNE, pouso duro por touchdownFpm, alta energia de frenagem, duty cycle de starter, ciclos de trem e ciclos de pressurização.
+  - Progressão não linear progressiva com multiplicadores e perdas por hora calibrados para acumular desgaste realístico sem reproduzir a quebra abrupta do simulador nativo.
+- **Validação e Testes xUnit**:
+  - Criado `WearRuleCatalogTests` com 4 novos testes cobrindo validação referencial completa, cobertura NO-GO, regras de motor por classe e filtragem contextual por modelo (C152 vs TBM 930).
+  - 214 testes xUnit aprovados com 0 falhas; build com 0 erros.
+  - Relatório detalhado com tabelas de regras e cálculos de ordem de grandeza submetido em `docs/reviews/F2.2-relatorio.md`.
+
+## 2026-11-15 - F2.2 Ajustes da revisão rodada 2 (Gemini)
+- **Remoção de regras artificiais**:
+  - Eliminadas 6 regras que utilizavam limites incompatíveis (`brake_high_energy`, `electrical_system_overload`, `hydraulic_system_overpressure`, `thrust_reverser_high_speed`, `fuel_system_pressure_stress`, `vacuum_system_low`). Peças de sistemas elétrico, hidráulico, combustível e reversor degradam com a taxa normal de vida útil do catálogo e ciclos operacionais.
+- **Flap dinâmico por dente atual**:
+  - Adicionada constante e convenção dinâmica `VfeCurrent = "vfe:current"` em `LimitKeys.cs` e no modelo `WearRule.cs`, permitindo avaliar a velocidade contra o dente específico estendido (`af-flaps-handle-index`).
+- **Segregação de trem de pouso**:
+  - Separadas as regras `gear_extended_overspeed_vle` (Vle com trem baixado) e `gear_operation_overspeed_vlo` (Vlo durante ciclo de transição).
+- **Limpeza do repositório**:
+  - Removido `tools/generate_wear_rules.py` do repositório.
+- **Testes e integridade física**:
+  - Removido teste antigo de cobertura cega NO-GO; adicionados testes `LimitKeys_VfeCurrent_IsValidAndHasKnotsUnit` e `ContinuousRules_HaveCoherentLimitKeyAndSensors` (validando correlação estrita entre limites operacionais e sensores).
+  - 215 testes xUnit aprovados com 0 falhas; build com 0 erros.
+  - Relatório atualizado em `docs/reviews/F2.2-relatorio.md`.

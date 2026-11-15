@@ -29,6 +29,13 @@ namespace FlightCareer.Domain.Limits
         public const string GLimitNeg = "gLimitNeg";
         public const string MaxTouchdownFpm = "maxTouchdownFpm";
 
+        /// <summary>
+        /// Chave dinâmica que representa o limite estrutural do dente de flap atualmente estendido (Vfe).
+        /// Resolvida dinamicamente em tempo de execução no motor de desgaste (F2.3) a partir da posição do manete/superfície
+        /// de flaps ('af-flaps-handle-index') mapeada para o limite do dente ('vfe:1'..'vfe:n').
+        /// </summary>
+        public const string VfeCurrent = "vfe:current";
+
         private static readonly Dictionary<string, string> FixedUnits = new(StringComparer.Ordinal)
         {
             [RpmRedline] = "rpm",
@@ -50,7 +57,8 @@ namespace FlightCareer.Domain.Limits
             [Vs1] = "knots",
             [GLimitPos] = "g",
             [GLimitNeg] = "g",
-            [MaxTouchdownFpm] = "fpm"
+            [MaxTouchdownFpm] = "fpm",
+            [VfeCurrent] = "knots"
         };
 
         public static bool IsValid(string key)
