@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 2,
   "id": "A330-200",
   "class": "Jet",
   "simMatch": {
@@ -14,72 +14,32 @@
       "key": "mmo",
       "value": 0.86,
       "unit": "mach",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (MMO 0.86 Mach)",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0824-A330-200_(RR).csv)",
       "notes": null
     },
     {
       "key": "vle",
       "value": 250.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (VLE 250 KIAS)",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0824-A330-200_(RR).csv)",
       "notes": null
     },
     {
       "key": "vfe:1",
       "value": 240.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (Config 1 240 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0824-A330-200_(RR).csv)",
       "notes": null
     },
     {
       "key": "vfe:4",
       "value": 180.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (Config Full 180 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vne",
-      "value": 330.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (VMO 330 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vlo",
-      "value": 250.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM / EASA TCDS EASA.A.004 (VLO 250 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "n1MaxPct",
-      "value": 104.0,
-      "unit": "percent",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM (Trent 700 / CF6 N1 104%)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 2.5,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM, Limitations (Clean +2.5g)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Airbus A330 FCOM, Limitations (Clean -1.0g)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0824-A330-200_(RR).csv)",
       "notes": null
     }
   ]

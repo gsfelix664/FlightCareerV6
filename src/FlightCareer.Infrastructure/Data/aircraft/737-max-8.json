@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 2,
   "id": "737 Max 8",
   "class": "Jet",
   "simMatch": {
@@ -16,96 +16,48 @@
       "key": "mmo",
       "value": 0.82,
       "unit": "mach",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM / FAA TCDS A16WE (MMO 0.82 Mach)",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     },
     {
       "key": "vle",
       "value": 320.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (VLE 320 KIAS)",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 250.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (Flaps 2 250 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 250.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (Flaps 5 250 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     },
     {
       "key": "vfe:5",
       "value": 200.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (Flaps 15 200 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     },
     {
       "key": "vfe:8",
       "value": 162.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (Flaps 40 162 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vne",
-      "value": 340.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM / FAA TCDS A16WE (VMO 340 KCAS/KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vlo",
-      "value": 270.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (VLO Extension 270 KIAS, Retraction 235 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vfe:1",
-      "value": 250.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (Flaps 1 250 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "n1MaxPct",
-      "value": 104.0,
-      "unit": "percent",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM (CFM LEAP-1B N1 104%)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 2.5,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM, Limitations (Clean +2.5g)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Boeing 737-8 FCOM, Limitations (Clean -1.0g)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 8 (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
     }
   ]

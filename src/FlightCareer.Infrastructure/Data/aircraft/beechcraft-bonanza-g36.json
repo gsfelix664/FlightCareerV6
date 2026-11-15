@@ -14,26 +14,26 @@
   "limits": [
     {
       "key": "vne",
-      "value": 205.0,
+      "value": 203.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (203 KCAS / 205 KIAS, EASA.IM.A.279)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Never exceed 203 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 238.0,
+      "value": 260.18,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "FAA TCDS E3SO / Continental IO-550-B Maint. Manual (460 °F, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 116.0,
+      "value": 115.74,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "FAA TCDS E3SO / Continental IO-550-B Maint. Manual (240 °F, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
       "notes": null
     },
     {
@@ -62,18 +62,18 @@
     },
     {
       "key": "vfe:1",
-      "value": 154.0,
+      "value": 152.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Flaps 12° Approach, 152 KCAS / 154 KIAS)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps 12° 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 124.0,
+      "value": 122.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Flaps 30° Full Down, 122 KCAS / 124 KIAS)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps normal 122 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
@@ -81,55 +81,23 @@
       "value": 2700.0,
       "unit": "rpm",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71 / EASA.IM.A.279 Issue 03 (Continental IO-550-B, https://www.easa.europa.eu/en/downloads/7204/en)",
-      "notes": null
-    },
-    {
-      "key": "oilPressMin",
-      "value": 30.0,
-      "unit": "psi",
-      "source": "POH",
-      "reference": "FAA TCDS E3SO (Continental IO-550-B min 30 psi, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.5 p. 4 (Continental IO-550-B 2700 rpm, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
       "key": "vno",
-      "value": 167.0,
+      "value": 165.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (165 KCAS / 167 KIAS, EASA.IM.A.279)",
-      "notes": null
-    },
-    {
-      "key": "vlo",
-      "value": 154.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (152 KCAS / 154 KIAS)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (165 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
       "key": "vle",
-      "value": 154.0,
+      "value": 152.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (152 KCAS / 154 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 4.4,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Utility Category)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.76,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Utility Category)",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Landing gear extended normal 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     }
   ]

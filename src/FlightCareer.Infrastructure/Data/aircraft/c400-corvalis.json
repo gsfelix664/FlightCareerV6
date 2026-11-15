@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 2,
   "id": "C400 Corvalis",
   "class": "Piston",
   "simMatch": {
@@ -14,26 +14,26 @@
   "limits": [
     {
       "key": "vne",
-      "value": 230.0,
+      "value": 220.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0800-C400_Corvalis.csv)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 238.0,
+      "value": 226.85,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (460 °F, FAA TCDS A00003SE)",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0800-C400_Corvalis.csv)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 116.0,
+      "value": 115.74,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (240 °F, FAA TCDS A00003SE)",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0800-C400_Corvalis.csv)",
       "notes": null
     },
     {
@@ -62,58 +62,18 @@
     },
     {
       "key": "vfe:1",
-      "value": 127.0,
+      "value": 130.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (Flaps 12° Takeoff, 130 KCAS / 127 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0800-C400_Corvalis.csv)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 117.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (Flaps 40° Landing, 120 KCAS / 117 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "rpmRedline",
-      "value": 2600.0,
-      "unit": "rpm",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 (LC41-550FG) AFM/POH, Sec. 2 (FAA TCDS A00003SE, Continental TSIO-550-C)",
-      "notes": null
-    },
-    {
-      "key": "oilPressMin",
-      "value": 30.0,
-      "unit": "psi",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)",
-      "notes": null
-    },
-    {
-      "key": "vno",
-      "value": 181.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 3.8,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (Normal Category, FAA TCDS A00003SE)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.52,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Cessna/Columbia 400 AFM/POH, Sec. 2 (Normal Category, FAA TCDS A00003SE)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0800-C400_Corvalis.csv)",
       "notes": null
     }
   ]

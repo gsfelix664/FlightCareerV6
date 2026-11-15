@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 2,
   "id": "NXCub",
   "class": "Piston",
   "simMatch": {
@@ -16,24 +16,24 @@
       "key": "vne",
       "value": 145.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (142 KCAS / 145 KIAS)",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 260.0,
+      "value": 260.18,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (500 °F)",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 118.0,
+      "value": 117.96,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (245 °F)",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     },
     {
@@ -64,64 +64,24 @@
       "key": "vfe:1",
       "value": 85.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "CubCrafters CC19 AFM Sec. 2 (Flaps notch 1)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 83.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "CubCrafters CC19 AFM Sec. 2 (Flaps notch 2)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 77.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "CubCrafters CC19 AFM Sec. 2 (Flaps notch 3)",
-      "notes": null
-    },
-    {
-      "key": "rpmRedline",
-      "value": 2700.0,
-      "unit": "rpm",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (Lycoming O-360 / CC393i 2700 RPM)",
-      "notes": null
-    },
-    {
-      "key": "oilPressMin",
-      "value": 25.0,
-      "unit": "psi",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2",
-      "notes": null
-    },
-    {
-      "key": "vno",
-      "value": 120.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (117 KCAS / 120 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 4.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE (Category Normal 2300 lbs)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.52,
-      "unit": "g",
-      "source": "POH",
-      "reference": "FAA TCDS A00053SE (Category Normal 2300 lbs)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0801-NXCub_Aerial_Advertising.csv)",
       "notes": null
     }
   ]

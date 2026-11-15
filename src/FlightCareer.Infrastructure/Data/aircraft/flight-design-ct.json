@@ -17,23 +17,23 @@
       "value": 145.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.A.537 Issue 04, Sec. A.III (269 km/h / 145 kt IAS)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (145 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 135.0,
+      "value": 120.0,
       "unit": "celsius",
       "source": "POH",
-      "reference": "EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2 (Coolant/head max 135 °C)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Coolant/head max 120°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 130.0,
+      "value": 140.0,
       "unit": "celsius",
       "source": "POH",
-      "reference": "EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (140°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -65,7 +65,7 @@
       "value": 100.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Flight Design CTLS AOI / AFM Sec. 2 (Flaps -6°/0°)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 0° 100 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -73,7 +73,7 @@
       "value": 80.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Flight Design CTLS AOI / AFM Sec. 2 (Flaps 15°)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 15° 80 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -81,7 +81,7 @@
       "value": 62.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Flight Design CTLS AOI / AFM Sec. 2 (Flaps 35°)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 30° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -89,7 +89,7 @@
       "value": 62.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Flight Design CTLS AOI / AFM Sec. 2 (Flaps 40°)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 35° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -97,15 +97,15 @@
       "value": 5800.0,
       "unit": "rpm",
       "source": "POH",
-      "reference": "EASA TCDS EASA.A.537 Issue 04 / Rotax 912 ULS EASA.E.121 (5800 RPM max 5 min)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Rotax 912 ULS 5800 rpm max 5 min, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
       "key": "oilPressMin",
-      "value": 12.0,
+      "value": 11.6,
       "unit": "psi",
       "source": "POH",
-      "reference": "EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2 (0.8 bar)",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (0.8 bar / 11.6 psi, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -113,7 +113,7 @@
       "value": 4.0,
       "unit": "g",
       "source": "POH",
-      "reference": "EASA TCDS EASA.A.537 Issue 04 / ASTM F2245",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (+4g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     },
     {
@@ -121,7 +121,7 @@
       "value": -2.0,
       "unit": "g",
       "source": "POH",
-      "reference": "EASA TCDS EASA.A.537 Issue 04 / ASTM F2245",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (-2g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
     }
   ]

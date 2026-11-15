@@ -17,7 +17,7 @@
       "value": 0.77,
       "unit": "mach",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (MMO 0.77 Mach above FL279, FAA TCDS A1WI)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (MMO Mach 0.77, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     },
     {
@@ -25,7 +25,7 @@
       "value": 200.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VLE 200 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     },
     {
@@ -33,7 +33,7 @@
       "value": 200.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 15° 200 KIAS)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VFE 15 Degrees 200 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     },
     {
@@ -41,7 +41,7 @@
       "value": 160.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 35° LAND 160 KIAS)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VFE 35 Degrees 160 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     },
     {
@@ -49,39 +49,15 @@
       "value": 305.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (VMO 305 KIAS up to FL279, FAA TCDS A1WI)",
-      "notes": null
-    },
-    {
-      "key": "vlo",
-      "value": 200.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VMO 305 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     },
     {
       "key": "n1MaxPct",
-      "value": 100.0,
+      "value": 104.4,
       "unit": "percent",
       "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Williams FJ44-4A 100% N1)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 3.6,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.44,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)",
+      "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (Maximum N1 104.4%, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
     }
   ]

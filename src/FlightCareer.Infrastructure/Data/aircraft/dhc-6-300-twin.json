@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 170.0,
+      "value": 166.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (VMO 170 KIAS, FAA TCDS A9EA)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VMO 166 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
@@ -46,10 +46,10 @@
     },
     {
       "key": "vfe:1",
-      "value": 103.0,
+      "value": 100.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 10° 103 KIAS)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° 100 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
@@ -57,23 +57,23 @@
       "value": 93.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 20° 93 KIAS)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° to 37.5° 93 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 93.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 30° 93 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
       "notes": null
     },
     {
       "key": "vfe:4",
       "value": 93.0,
       "unit": "knots",
-      "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 37.5° Full 93 KIAS)",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
       "notes": null
     },
     {
@@ -81,47 +81,23 @@
       "value": 725.0,
       "unit": "celsius",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Max Continuous 725 °C, Takeoff 750 °C)",
-      "notes": null
-    },
-    {
-      "key": "torqueMaxPct",
-      "value": 100.0,
-      "unit": "percent",
-      "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 100% / 50 psi)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (T5 725°C, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
       "key": "n1MaxPct",
-      "value": 101.5,
+      "value": 101.6,
       "unit": "percent",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Ng 101.5%)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (NG 101.6%, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
-      "key": "rpmRedline",
-      "value": 2200.0,
-      "unit": "rpm",
+      "key": "oilPressMin",
+      "value": 40.0,
+      "unit": "psi",
       "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Np propeller 2200 RPM)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 3.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (IDLE Oil Press 40 Min, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     }
   ]

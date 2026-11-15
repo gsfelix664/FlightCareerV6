@@ -17,23 +17,23 @@
       "value": 201.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 105.0,
+      "value": 121.29,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (Coolant max 105 °C, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0809-DA62_Scientific_Research.csv)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 140.0,
+      "value": 115.74,
       "unit": "celsius",
-      "source": "POH",
-      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (https://www.easa.europa.eu/en/downloads/44256/en)",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0809-DA62_Scientific_Research.csv)",
       "notes": null
     },
     {
@@ -65,7 +65,7 @@
       "value": 135.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -73,7 +73,7 @@
       "value": 118.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -81,15 +81,7 @@
       "value": 2300.0,
       "unit": "rpm",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 5 p. 6 (Propeller RPM, Austro Engine E4P, https://www.easa.europa.eu/en/downloads/44256/en)",
-      "notes": null
-    },
-    {
-      "key": "oilPressMin",
-      "value": 21.8,
-      "unit": "psi",
-      "source": "POH",
-      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (1.5 bar, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.5 p. 6 (Austro Engine E4P 2300 rpm, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -97,7 +89,7 @@
       "value": 160.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -105,7 +97,7 @@
       "value": 160.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -113,7 +105,7 @@
       "value": 201.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -121,7 +113,7 @@
       "value": 3.8,
       "unit": "g",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (+3.8g, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -129,7 +121,7 @@
       "value": -1.52,
       "unit": "g",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (-1.52g, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     }
   ]

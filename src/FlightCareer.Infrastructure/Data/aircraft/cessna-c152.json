@@ -33,7 +33,7 @@
       "value": 118.0,
       "unit": "celsius",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 / 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -49,7 +49,7 @@
       "value": 149.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (149 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -65,7 +65,7 @@
       "value": 85.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 (Flaps 20°, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 20° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -105,7 +105,7 @@
       "value": 85.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 (Flaps 30°, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 30° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -121,7 +121,7 @@
       "value": 111.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (111 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -129,7 +129,7 @@
       "value": -1.76,
       "unit": "g",
       "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-6 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     }
   ]

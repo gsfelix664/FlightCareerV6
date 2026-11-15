@@ -17,7 +17,7 @@
       "value": 172.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (172 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -65,7 +65,7 @@
       "value": 110.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O 110 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -73,7 +73,7 @@
       "value": 98.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG 98 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -97,7 +97,7 @@
       "value": 130.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (130 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -105,7 +105,7 @@
       "value": 3.8,
       "unit": "g",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (+3.8g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -113,7 +113,7 @@
       "value": -1.52,
       "unit": "g",
       "source": "POH",
-      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (-1.52g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     }
   ]

@@ -1445,3 +1445,12 @@
 - **Documentação e Análise de Divergências**:
   - Atualizado `docs/plans/sensor-validation/F2.0-limites-capturados.md` com a tabela completa "POH/TCDS e Comparação Sim × POH", respondendo a todos os pontos de conferência abertos (ex.: correção de Vfe errática do 747-8i no sim, identificação dos limites de coolant diesel/Rotax, e ajuste de VMO do A400M de 400 para 300 kt).
   - Atualizado o Diário de Execução em `docs/plans/pecas-desgaste-falhas.md`.
+
+## 2026-11-15 - F2.0b rodada 2: evidências literais e saneamento de POH (Gemini)
+- **Saneamento e evidências literais (`docs/reviews/F2.0b-evidencias.md`)**:
+  - Transcrição literal (via `pdftotext -layout`) de cada valor presente na planilha de POH, com nome de arquivo baixado, página e URL oficial ativa.
+  - Planilha `tools/aircraft_limits/poh_values.csv` filtrada para 84 valores rigorosamente verificados em 11 aeronaves (C152, C172SP Nav III, DA40 NG, DA62, Bonanza G36, Flight Design CTLS, TBM 930, King Air B350 ER, Citation CJ4, DHC-6 Twin Otter, A310).
+  - Removidos valores sem manual em texto aberto disponível nesta rodada (14 modelos mantidos com capturas SimVar limpas).
+  - Alinhamento da Bonanza G36 estritamente com a TCDS EASA.IM.A.279 citada.
+- **Perfis JSON restaurados e reprocessados**:
+  - Base restaurada de `feat/component-health-system` e reprocessada com `merge_limits.py`, garantindo que apenas as 11 aeronaves verificadas recebam limites POH.

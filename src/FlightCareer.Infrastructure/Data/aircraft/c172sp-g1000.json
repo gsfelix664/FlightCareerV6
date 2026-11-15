@@ -17,7 +17,7 @@
       "value": 163.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (163 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -65,7 +65,7 @@
       "value": 110.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10° 110 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -73,7 +73,7 @@
       "value": 85.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20° 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -81,7 +81,7 @@
       "value": 85.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -105,7 +105,7 @@
       "value": 129.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (129 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -113,7 +113,7 @@
       "value": 3.8,
       "unit": "g",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs +3.8g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -121,7 +121,7 @@
       "value": -1.52,
       "unit": "g",
       "source": "POH",
-      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs -1.52g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     }
   ]

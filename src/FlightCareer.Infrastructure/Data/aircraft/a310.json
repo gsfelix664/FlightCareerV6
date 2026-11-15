@@ -16,16 +16,16 @@
       "key": "mmo",
       "value": 0.84,
       "unit": "mach",
-      "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (MMO 0.84 Mach, EASA.A.172)",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0820-A310.csv)",
       "notes": null
     },
     {
       "key": "vle",
-      "value": 250.0,
+      "value": 270.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (VLE 250 KIAS)",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLE 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
@@ -33,7 +33,7 @@
       "value": 245.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Config 1 245 KIAS)",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 0 245 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
@@ -41,7 +41,7 @@
       "value": 210.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Config 2 210 KIAS)",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 15 210 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
@@ -49,7 +49,7 @@
       "value": 195.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Config 3 195 KIAS)",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 20 195 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
@@ -57,47 +57,15 @@
       "value": 180.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Config FULL 180 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vne",
-      "value": 340.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (VMO 340 KIAS, EASA.A.172)",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 20 Flaps 40 180 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
       "key": "vlo",
-      "value": 250.0,
+      "value": 270.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (VLO 250 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "n1MaxPct",
-      "value": 104.0,
-      "unit": "percent",
-      "source": "POH",
-      "reference": "Airbus A310 FCOM (GE CF6-80C2 / PW4152 N1 104%)",
-      "notes": null
-    },
-    {
-      "key": "gLimitPos",
-      "value": 2.5,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Clean +2.5g)",
-      "notes": null
-    },
-    {
-      "key": "gLimitNeg",
-      "value": -1.0,
-      "unit": "g",
-      "source": "POH",
-      "reference": "Airbus A310 FCOM, Limitations (Clean -1.0g)",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLO 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     }
   ]

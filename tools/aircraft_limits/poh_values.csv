@@ -1,243 +1,94 @@
 aircraftId,key,value,unit,reference
-Cessna C152,rpmRedline,2550,rpm,"Cessna 152 POH 1979, Sec. 2 p. 2-5 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,oilTempMax,118,celsius,"Cessna 152 POH 1979, Sec. 2 p. 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,rpmRedline,2550,rpm,"Cessna 152 POH 1979, Sec. 2 p. 2-4 / 2-5 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,oilTempMax,118,celsius,"Cessna 152 POH 1979, Sec. 2 p. 2-4 / 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
 Cessna C152,oilPressMin,25,psi,"Cessna 152 POH 1979, Sec. 2 p. 2-5 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,vne,149,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-4 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,vno,111,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-4 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,vfe:2,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-4 (Flaps 20°, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,vfe:3,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-4 (Flaps 30°, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,gLimitPos,4.4,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
-Cessna C152,gLimitNeg,-1.76,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,vne,149,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (149 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,vno,111,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (111 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,vfe:2,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 20° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,vfe:3,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 30° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,gLimitPos,4.4,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up +4.4g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,gLimitNeg,-1.76,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
 C172SP G1000,rpmRedline,2700,rpm,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 C172SP G1000,chtMax,260,celsius,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-7 (500 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 C172SP G1000,oilTempMax,118,celsius,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (245 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 C172SP G1000,oilPressMin,20,psi,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,vne,163,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,vno,129,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,vfe:1,110,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,vfe:2,85,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,vfe:3,85,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,gLimitPos,3.8,g,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
-C172SP G1000,gLimitNeg,-1.52,g,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,vne,163,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (163 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,vno,129,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (129 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,vfe:1,110,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10° 110 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,vfe:2,85,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20° 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,vfe:3,85,knots,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,gLimitPos,3.8,g,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs +3.8g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
+C172SP G1000,gLimitNeg,-1.52,g,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs -1.52g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 Diamond DA40NG,rpmRedline,2300,rpm,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (Propeller RPM, Austro Engine E4-A, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
 Diamond DA40NG,chtMax,105,celsius,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-7 (Coolant max, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
 Diamond DA40NG,oilTempMax,140,celsius,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-6 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
 Diamond DA40NG,oilPressMin,21.8,psi,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (1.5 bar, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,vne,172,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,vno,130,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,vfe:1,110,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,vfe:2,98,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,gLimitPos,3.8,g,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA40NG,gLimitNeg,-1.52,g,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
-Diamond DA62,rpmRedline,2300,rpm,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 5 p. 6 (Propeller RPM, Austro Engine E4P, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,chtMax,105,celsius,"EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (Coolant max 105 °C, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,oilTempMax,140,celsius,EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (https://www.easa.europa.eu/en/downloads/44256/en)
-Diamond DA62,oilPressMin,21.8,psi,"EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (1.5 bar, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vne,201,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vno,160,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vfe:1,135,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vfe:2,118,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vlo,160,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,vle,201,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,gLimitPos,3.8,g,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)"
-Diamond DA62,gLimitNeg,-1.52,g,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)"
-Beechcraft Bonanza G36,rpmRedline,2700,rpm,"Beechcraft Bonanza G36 POH P/N 36-590002-71 / EASA.IM.A.279 Issue 03 (Continental IO-550-B, https://www.easa.europa.eu/en/downloads/7204/en)"
-Beechcraft Bonanza G36,chtMax,238,celsius,"FAA TCDS E3SO / Continental IO-550-B Maint. Manual (460 °F, https://www.easa.europa.eu/en/downloads/7204/en)"
-Beechcraft Bonanza G36,oilTempMax,116,celsius,"FAA TCDS E3SO / Continental IO-550-B Maint. Manual (240 °F, https://www.easa.europa.eu/en/downloads/7204/en)"
-Beechcraft Bonanza G36,oilPressMin,30,psi,"FAA TCDS E3SO (Continental IO-550-B min 30 psi, https://www.easa.europa.eu/en/downloads/7204/en)"
-Beechcraft Bonanza G36,vne,205,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (203 KCAS / 205 KIAS, EASA.IM.A.279)"
-Beechcraft Bonanza G36,vno,167,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (165 KCAS / 167 KIAS, EASA.IM.A.279)"
-Beechcraft Bonanza G36,vfe:1,154,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Flaps 12° Approach, 152 KCAS / 154 KIAS)"
-Beechcraft Bonanza G36,vfe:2,124,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Flaps 30° Full Down, 122 KCAS / 124 KIAS)"
-Beechcraft Bonanza G36,vlo,154,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (152 KCAS / 154 KIAS)"
-Beechcraft Bonanza G36,vle,154,knots,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (152 KCAS / 154 KIAS)"
-Beechcraft Bonanza G36,gLimitPos,4.4,g,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Utility Category)"
-Beechcraft Bonanza G36,gLimitNeg,-1.76,g,"Beechcraft Bonanza G36 POH P/N 36-590002-71, Sec. 2 (Utility Category)"
-C400 Corvalis,rpmRedline,2600,rpm,"Cessna/Columbia 400 (LC41-550FG) AFM/POH, Sec. 2 (FAA TCDS A00003SE, Continental TSIO-550-C)"
-C400 Corvalis,chtMax,238,celsius,"Cessna/Columbia 400 AFM/POH, Sec. 2 (460 °F, FAA TCDS A00003SE)"
-C400 Corvalis,oilTempMax,116,celsius,"Cessna/Columbia 400 AFM/POH, Sec. 2 (240 °F, FAA TCDS A00003SE)"
-C400 Corvalis,oilPressMin,30,psi,"Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)"
-C400 Corvalis,vne,230,knots,"Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)"
-C400 Corvalis,vno,181,knots,"Cessna/Columbia 400 AFM/POH, Sec. 2 (FAA TCDS A00003SE)"
-C400 Corvalis,vfe:1,127,knots,"Cessna/Columbia 400 AFM/POH, Sec. 2 (Flaps 12° Takeoff, 130 KCAS / 127 KIAS)"
-C400 Corvalis,vfe:2,117,knots,"Cessna/Columbia 400 AFM/POH, Sec. 2 (Flaps 40° Landing, 120 KCAS / 117 KIAS)"
-C400 Corvalis,gLimitPos,3.8,g,"Cessna/Columbia 400 AFM/POH, Sec. 2 (Normal Category, FAA TCDS A00003SE)"
-C400 Corvalis,gLimitNeg,-1.52,g,"Cessna/Columbia 400 AFM/POH, Sec. 2 (Normal Category, FAA TCDS A00003SE)"
-Flight Design CT,rpmRedline,5800,rpm,EASA TCDS EASA.A.537 Issue 04 / Rotax 912 ULS EASA.E.121 (5800 RPM max 5 min)
-Flight Design CT,chtMax,135,celsius,EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2 (Coolant/head max 135 °C)
-Flight Design CT,oilTempMax,130,celsius,EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2
-Flight Design CT,oilPressMin,12,psi,EASA TCDS EASA.E.121 / Flight Design CTLS AOI Sec. 2 (0.8 bar)
-Flight Design CT,vne,145,knots,"EASA TCDS EASA.A.537 Issue 04, Sec. A.III (269 km/h / 145 kt IAS)"
-Flight Design CT,vfe:1,100,knots,Flight Design CTLS AOI / AFM Sec. 2 (Flaps -6°/0°)
-Flight Design CT,vfe:2,80,knots,Flight Design CTLS AOI / AFM Sec. 2 (Flaps 15°)
-Flight Design CT,vfe:3,62,knots,Flight Design CTLS AOI / AFM Sec. 2 (Flaps 35°)
-Flight Design CT,vfe:4,62,knots,Flight Design CTLS AOI / AFM Sec. 2 (Flaps 40°)
-Flight Design CT,gLimitPos,4.0,g,EASA TCDS EASA.A.537 Issue 04 / ASTM F2245
-Flight Design CT,gLimitNeg,-2.0,g,EASA TCDS EASA.A.537 Issue 04 / ASTM F2245
-NXCub,rpmRedline,2700,rpm,FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (Lycoming O-360 / CC393i 2700 RPM)
-NXCub,chtMax,260,celsius,FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (500 °F)
-NXCub,oilTempMax,118,celsius,FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (245 °F)
-NXCub,oilPressMin,25,psi,FAA TCDS A00053SE / CC19-180 AFM Sec. 2
-NXCub,vne,145,knots,FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (142 KCAS / 145 KIAS)
-NXCub,vno,120,knots,FAA TCDS A00053SE / CC19-180 AFM Sec. 2 (117 KCAS / 120 KIAS)
-NXCub,vfe:1,85,knots,CubCrafters CC19 AFM Sec. 2 (Flaps notch 1)
-NXCub,vfe:2,83,knots,CubCrafters CC19 AFM Sec. 2 (Flaps notch 2)
-NXCub,vfe:3,77,knots,CubCrafters CC19 AFM Sec. 2 (Flaps notch 3)
-NXCub,gLimitPos,4.0,g,FAA TCDS A00053SE (Category Normal 2300 lbs)
-NXCub,gLimitNeg,-1.52,g,FAA TCDS A00053SE (Category Normal 2300 lbs)
-Piper PA28-236 Dakota,rpmRedline,2400,rpm,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (FAA TCDS 2A13, Lycoming O-540-J3A5D)"
-Piper PA28-236 Dakota,chtMax,260,celsius,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (500 °F, FAA TCDS 2A13)"
-Piper PA28-236 Dakota,oilTempMax,118,celsius,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (245 °F, FAA TCDS 2A13)"
-Piper PA28-236 Dakota,oilPressMin,25,psi,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (FAA TCDS 2A13)"
-Piper PA28-236 Dakota,vne,173,knots,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (FAA TCDS 2A13)"
-Piper PA28-236 Dakota,vno,137,knots,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (FAA TCDS 2A13)"
-Piper PA28-236 Dakota,vfe:1,102,knots,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 10°)"
-Piper PA28-236 Dakota,vfe:2,102,knots,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 25°)"
-Piper PA28-236 Dakota,vfe:3,102,knots,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 40°)"
-Piper PA28-236 Dakota,gLimitPos,3.8,g,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (Normal Category 3000 lbs)"
-Piper PA28-236 Dakota,gLimitNeg,-1.52,g,"Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (Normal Category 3000 lbs)"
-Robin DR400,rpmRedline,2700,rpm,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (Lycoming O-360)
-Robin DR400,chtMax,260,celsius,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (500 °F)
-Robin DR400,oilTempMax,118,celsius,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (245 °F)
-Robin DR400,oilPressMin,25,psi,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2
-Robin DR400,vne,166,knots,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (308 km/h / 166 KIAS)
-Robin DR400,vno,140,knots,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (260 km/h / 140 KIAS)
-Robin DR400,vfe:1,120,knots,Robin DR400 Flight Manual Sec. 2 (Flaps 1er cran 120 kt)
-Robin DR400,vfe:2,92,knots,Robin DR400 Flight Manual Sec. 2 / EASA.A.367 (Flaps landing 170 km/h / 92 kt)
-Robin DR400,gLimitPos,3.8,g,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2
-Robin DR400,gLimitNeg,-1.52,g,EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2
-Asobo TBM 930,vne,266,knots,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (VMO, EASA.A.010)"
-Asobo TBM 930,vfe:1,178,knots,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps TO 178 KIAS)"
-Asobo TBM 930,vfe:2,122,knots,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps LDG 122 KIAS)"
-Asobo TBM 930,vle,178,knots,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (178 KIAS)"
-Asobo TBM 930,vlo,150,knots,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Retraction 150 KIAS, Extension 178 KIAS)"
-Asobo TBM 930,ittMax,840,celsius,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Max Climb/Cruise 840 °C, Max Takeoff 850 °C)"
-Asobo TBM 930,torqueMaxPct,100,percent,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D 100% max)"
-Asobo TBM 930,n1MaxPct,104.1,percent,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Ng max 104.1%)"
-Asobo TBM 930,rpmRedline,2000,rpm,"Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Np propeller 2000 RPM)"
-Asobo TBM 930,gLimitPos,3.8,g,"Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)"
-Asobo TBM 930,gLimitNeg,-1.52,g,"Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)"
-Beechcraft King Air,vne,263,knots,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (VMO 263 KIAS, FAA TCDS A24CE)"
-Beechcraft King Air,vfe:1,202,knots,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Flaps Approach 202 KIAS)"
-Beechcraft King Air,vfe:2,158,knots,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Flaps Full 158 KIAS)"
-Beechcraft King Air,vle,184,knots,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (184 KIAS / 180 KCAS)"
-Beechcraft King Air,vlo,184,knots,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (184 KIAS / 180 KCAS)"
-Beechcraft King Air,ittMax,820,celsius,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Max Continuous/Takeoff 820 °C)"
-Beechcraft King Air,torqueMaxPct,100,percent,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A 100% / 3625 ft-lb)"
-Beechcraft King Air,n1MaxPct,104,percent,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Ng 104%)"
-Beechcraft King Air,rpmRedline,1700,rpm,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Np propeller 1700 RPM)"
-Beechcraft King Air,gLimitPos,3.1,g,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Normal Category over 12500 lbs)"
-Beechcraft King Air,gLimitNeg,-1.24,g,"Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Normal Category over 12500 lbs)"
-PC-12 NGX,vne,240,knots,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (VMO 240 KIAS, EASA.A.089)"
-PC-12 NGX,mmo,0.48,mach,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (EASA.A.089)"
-PC-12 NGX,vfe:1,165,knots,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (Flaps 15°)"
-PC-12 NGX,vfe:2,130,knots,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (Flaps 30°/40° Full)"
-PC-12 NGX,vle,200,knots,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (200 KIAS / 180 KCAS)"
-PC-12 NGX,vlo,180,knots,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (180 KIAS)"
-PC-12 NGX,ittMax,820,celsius,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (PT6E-67XP Max Continuous 820 °C, Takeoff 850 °C)"
-PC-12 NGX,torqueMaxPct,100,percent,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (PT6E-67XP 100%)"
-PC-12 NGX,n1MaxPct,104,percent,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (PT6E-67XP Ng 104%)"
-PC-12 NGX,rpmRedline,1700,rpm,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (PT6E-67XP Np propeller 1700 RPM)"
-PC-12 NGX,gLimitPos,3.4,g,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (Flaps Up)"
-PC-12 NGX,gLimitNeg,-1.36,g,"Pilatus PC-12/47E (NGX) AFM Report No. 02277, Sec. 2 (Flaps Up)"
-DHC-6-300 Twin,vne,170,knots,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (VMO 170 KIAS, FAA TCDS A9EA)"
-DHC-6-300 Twin,vfe:1,103,knots,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 10° 103 KIAS)"
-DHC-6-300 Twin,vfe:2,93,knots,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 20° 93 KIAS)"
-DHC-6-300 Twin,vfe:3,93,knots,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 30° 93 KIAS)"
-DHC-6-300 Twin,vfe:4,93,knots,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 37.5° Full 93 KIAS)"
-DHC-6-300 Twin,ittMax,725,celsius,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Max Continuous 725 °C, Takeoff 750 °C)"
-DHC-6-300 Twin,torqueMaxPct,100,percent,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 100% / 50 psi)"
-DHC-6-300 Twin,n1MaxPct,101.5,percent,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Ng 101.5%)"
-DHC-6-300 Twin,rpmRedline,2200,rpm,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Np propeller 2200 RPM)"
-DHC-6-300 Twin,gLimitPos,3.0,g,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)"
-DHC-6-300 Twin,gLimitNeg,-1.0,g,"de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)"
-A400M,vne,300,knots,"EASA TCDS EASA.A.169 Issue 06, Sec. A.III (VMO 300 kt IAS, TP400-D6)"
-A400M,mmo,0.72,mach,"EASA TCDS EASA.A.169 Issue 06, Sec. A.III (MMO 0.72 Mach)"
-A400M,vle,220,knots,EASA TCDS EASA.A.169 Issue 06 / Airbus A400M Flight Manual
-A400M,vlo,220,knots,EASA TCDS EASA.A.169 Issue 06 / Airbus A400M Flight Manual
-A400M,gLimitPos,2.5,g,EASA TCDS EASA.A.169 Issue 06 / CS-25 (Clean)
-A400M,gLimitNeg,-1.0,g,EASA TCDS EASA.A.169 Issue 06 / CS-25 (Clean)
-Cessna Citation CJ4,vne,305,knots,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (VMO 305 KIAS up to FL279, FAA TCDS A1WI)"
-Cessna Citation CJ4,mmo,0.77,mach,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (MMO 0.77 Mach above FL279, FAA TCDS A1WI)"
-Cessna Citation CJ4,vle,200,knots,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)"
-Cessna Citation CJ4,vlo,200,knots,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)"
-Cessna Citation CJ4,vfe:1,200,knots,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 15° 200 KIAS)"
-Cessna Citation CJ4,vfe:2,160,knots,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 35° LAND 160 KIAS)"
-Cessna Citation CJ4,n1MaxPct,100,percent,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (Williams FJ44-4A 100% N1)"
-Cessna Citation CJ4,gLimitPos,3.6,g,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)"
-Cessna Citation CJ4,gLimitNeg,-1.44,g,"Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)"
-737 Max 8,vne,340,knots,Boeing 737-8 FCOM / FAA TCDS A16WE (VMO 340 KCAS/KIAS)
-737 Max 8,mmo,0.82,mach,Boeing 737-8 FCOM / FAA TCDS A16WE (MMO 0.82 Mach)
-737 Max 8,vle,320,knots,Boeing 737-8 FCOM (VLE 320 KIAS)
-737 Max 8,vlo,270,knots,"Boeing 737-8 FCOM (VLO Extension 270 KIAS, Retraction 235 KIAS)"
-737 Max 8,vfe:1,250,knots,Boeing 737-8 FCOM (Flaps 1 250 KIAS)
-737 Max 8,vfe:2,250,knots,Boeing 737-8 FCOM (Flaps 2 250 KIAS)
-737 Max 8,vfe:3,250,knots,Boeing 737-8 FCOM (Flaps 5 250 KIAS)
-737 Max 8,vfe:5,200,knots,Boeing 737-8 FCOM (Flaps 15 200 KIAS)
-737 Max 8,vfe:8,162,knots,Boeing 737-8 FCOM (Flaps 40 162 KIAS)
-737 Max 8,n1MaxPct,104,percent,Boeing 737-8 FCOM (CFM LEAP-1B N1 104%)
-737 Max 8,gLimitPos,2.5,g,"Boeing 737-8 FCOM, Limitations (Clean +2.5g)"
-737 Max 8,gLimitNeg,-1.0,g,"Boeing 737-8 FCOM, Limitations (Clean -1.0g)"
-747-8i,vne,365,knots,Boeing 747-8 FCOM / FAA TCDS A20WE (VMO 365 KIAS / 375 KEAS)
-747-8i,mmo,0.92,mach,Boeing 747-8 FCOM / FAA TCDS A20WE (MMO 0.92 Mach)
-747-8i,vle,320,knots,Boeing 747-8 FCOM (VLE 320 KIAS / 0.82M)
-747-8i,vlo,270,knots,Boeing 747-8 FCOM (VLO 270 KIAS / 0.82M)
-747-8i,vfe:1,280,knots,Boeing 747-8 FCOM (Flaps 1 280 KIAS)
-747-8i,vfe:2,260,knots,Boeing 747-8 FCOM (Flaps 5 260 KIAS)
-747-8i,vfe:3,240,knots,Boeing 747-8 FCOM (Flaps 10 240 KIAS)
-747-8i,vfe:4,230,knots,Boeing 747-8 FCOM (Flaps 20 230 KIAS)
-747-8i,vfe:5,205,knots,Boeing 747-8 FCOM (Flaps 25 205 KIAS)
-747-8i,vfe:6,180,knots,Boeing 747-8 FCOM (Flaps 30 180 KIAS)
-747-8i,n1MaxPct,104,percent,Boeing 747-8 FCOM (GEnx-2B67 N1 104%)
-747-8i,gLimitPos,2.5,g,"Boeing 747-8 FCOM, Limitations (Clean +2.5g)"
-747-8i,gLimitNeg,-1.0,g,"Boeing 747-8 FCOM, Limitations (Clean -1.0g)"
-A310,vne,340,knots,"Airbus A310 FCOM, Limitations (VMO 340 KIAS, EASA.A.172)"
-A310,mmo,0.84,mach,"Airbus A310 FCOM, Limitations (MMO 0.84 Mach, EASA.A.172)"
-A310,vle,250,knots,"Airbus A310 FCOM, Limitations (VLE 250 KIAS)"
-A310,vlo,250,knots,"Airbus A310 FCOM, Limitations (VLO 250 KIAS)"
-A310,vfe:1,245,knots,"Airbus A310 FCOM, Limitations (Config 1 245 KIAS)"
-A310,vfe:2,210,knots,"Airbus A310 FCOM, Limitations (Config 2 210 KIAS)"
-A310,vfe:3,195,knots,"Airbus A310 FCOM, Limitations (Config 3 195 KIAS)"
-A310,vfe:4,180,knots,"Airbus A310 FCOM, Limitations (Config FULL 180 KIAS)"
-A310,n1MaxPct,104,percent,Airbus A310 FCOM (GE CF6-80C2 / PW4152 N1 104%)
-A310,gLimitPos,2.5,g,"Airbus A310 FCOM, Limitations (Clean +2.5g)"
-A310,gLimitNeg,-1.0,g,"Airbus A310 FCOM, Limitations (Clean -1.0g)"
-A320neo,vne,350,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (VMO 350 kt IAS)
-A320neo,mmo,0.82,mach,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (MMO 0.82 Mach)
-A320neo,vle,280,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (VLE 280 kt IAS)
-A320neo,vlo,250,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (VLO 250 kt extension)
-A320neo,vfe:1,230,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (Config 1 230 kt IAS)
-A320neo,vfe:2,200,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (Config 2 200 kt IAS)
-A320neo,vfe:3,185,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (Config 3 185 kt IAS)
-A320neo,vfe:4,177,knots,Airbus A320neo FCOM / EASA TCDS EASA.A.064 (Config Full 177 kt IAS)
-A320neo,n1MaxPct,104,percent,Airbus A320neo FCOM (LEAP-1A / PW1100G N1 104%)
-A320neo,gLimitPos,2.5,g,"Airbus A320neo FCOM, Limitations (Clean +2.5g)"
-A320neo,gLimitNeg,-1.0,g,"Airbus A320neo FCOM, Limitations (Clean -1.0g)"
-A321,vne,350,knots,Airbus A321 FCOM / EASA TCDS EASA.A.064 (VMO 350 kt IAS)
-A321,mmo,0.82,mach,Airbus A321 FCOM / EASA TCDS EASA.A.064 (MMO 0.82 Mach)
-A321,vle,280,knots,Airbus A321 FCOM / EASA TCDS EASA.A.064 (VLE 280 kt IAS)
-A321,vlo,250,knots,Airbus A321 FCOM / EASA TCDS EASA.A.064 (VLO 250 kt IAS)
-A321,vfe:1,238,knots,Airbus A321 FCOM / EASA TCDS EASA.A.064 (Config 1 238 kt IAS)
-A321,vfe:4,186,knots,Airbus A321 FCOM / EASA TCDS EASA.A.064 (Config Full 186 kt IAS)
-A321,n1MaxPct,104,percent,Airbus A321 FCOM (N1 104%)
-A321,gLimitPos,2.5,g,"Airbus A321 FCOM, Limitations (Clean +2.5g)"
-A321,gLimitNeg,-1.0,g,"Airbus A321 FCOM, Limitations (Clean -1.0g)"
-A330-200,vne,330,knots,Airbus A330 FCOM / EASA TCDS EASA.A.004 (VMO 330 KIAS)
-A330-200,mmo,0.86,mach,Airbus A330 FCOM / EASA TCDS EASA.A.004 (MMO 0.86 Mach)
-A330-200,vle,250,knots,Airbus A330 FCOM / EASA TCDS EASA.A.004 (VLE 250 KIAS)
-A330-200,vlo,250,knots,Airbus A330 FCOM / EASA TCDS EASA.A.004 (VLO 250 KIAS)
-A330-200,vfe:1,240,knots,Airbus A330 FCOM / EASA TCDS EASA.A.004 (Config 1 240 KIAS)
-A330-200,vfe:4,180,knots,Airbus A330 FCOM / EASA TCDS EASA.A.004 (Config Full 180 KIAS)
-A330-200,n1MaxPct,104,percent,Airbus A330 FCOM (Trent 700 / CF6 N1 104%)
-A330-200,gLimitPos,2.5,g,"Airbus A330 FCOM, Limitations (Clean +2.5g)"
-A330-200,gLimitNeg,-1.0,g,"Airbus A330 FCOM, Limitations (Clean -1.0g)"
-A330-BelugaXL,vne,280,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (VMO 280 KIAS outsize cargo)
-A330-BelugaXL,mmo,0.69,mach,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (MMO 0.69 Mach)
-A330-BelugaXL,vle,250,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (VLE 250 KIAS)
-A330-BelugaXL,vlo,250,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (VLO 250 KIAS)
-A330-BelugaXL,vfe:1,240,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (Config 1 240 KIAS)
-A330-BelugaXL,vfe:3,186,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (Config 3 186 KIAS)
-A330-BelugaXL,vfe:4,180,knots,Airbus A330-743L Beluga XL FCOM / EASA TCDS EASA.A.004 (Config Full 180 KIAS)
-A330-BelugaXL,n1MaxPct,104,percent,Airbus A330-743L Beluga XL FCOM (Trent 700 N1 104%)
-A330-BelugaXL,gLimitPos,2.5,g,"Airbus A330-743L Beluga XL FCOM, Limitations (Clean +2.5g)"
-A330-BelugaXL,gLimitNeg,-1.0,g,"Airbus A330-743L Beluga XL FCOM, Limitations (Clean -1.0g)"
+Diamond DA40NG,vne,172,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (172 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA40NG,vno,130,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (130 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA40NG,vfe:1,110,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O 110 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA40NG,vfe:2,98,knots,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG 98 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA40NG,gLimitPos,3.8,g,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (+3.8g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA40NG,gLimitNeg,-1.52,g,"Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (-1.52g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)"
+Diamond DA62,rpmRedline,2300,rpm,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.5 p. 6 (Austro Engine E4P 2300 rpm, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vne,201,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vno,160,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vfe:1,135,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vfe:2,118,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vlo,160,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,vle,201,knots,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,gLimitPos,3.8,g,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (+3.8g, https://www.easa.europa.eu/en/downloads/44256/en)"
+Diamond DA62,gLimitNeg,-1.52,g,"EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (-1.52g, https://www.easa.europa.eu/en/downloads/44256/en)"
+Beechcraft Bonanza G36,rpmRedline,2700,rpm,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.5 p. 4 (Continental IO-550-B 2700 rpm, https://www.easa.europa.eu/en/downloads/7204/en)"
+Beechcraft Bonanza G36,vne,203,knots,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Never exceed 203 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)"
+Beechcraft Bonanza G36,vno,165,knots,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (165 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)"
+Beechcraft Bonanza G36,vfe:1,152,knots,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps 12° 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)"
+Beechcraft Bonanza G36,vfe:2,122,knots,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps normal 122 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)"
+Beechcraft Bonanza G36,vle,152,knots,"EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Landing gear extended normal 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)"
+Flight Design CT,rpmRedline,5800,rpm,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Rotax 912 ULS 5800 rpm max 5 min, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,chtMax,120,celsius,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Coolant/head max 120°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,oilTempMax,140,celsius,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (140°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,oilPressMin,11.6,psi,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (0.8 bar / 11.6 psi, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,vne,145,knots,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (145 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,vfe:1,100,knots,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 0° 100 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,vfe:2,80,knots,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 15° 80 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,vfe:3,62,knots,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 30° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,vfe:4,62,knots,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 35° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,gLimitPos,4.0,g,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (+4g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Flight Design CT,gLimitNeg,-2.0,g,"Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (-2g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)"
+Asobo TBM 930,vne,266,knots,"Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VMO 266 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,vfe:1,178,knots,"Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Takeoff 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,vfe:2,122,knots,"Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Landing 122 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,vlo,178,knots,"Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLO extension 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,vle,178,knots,"Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLE 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,torqueMaxPct,100,percent,"Daher TBM 930 POH, Sec. 2 p. 2.3.1 (100% Torque at Np 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,n1MaxPct,104.1,percent,"Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Ng limitation 104.1%, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,rpmRedline,2000,rpm,"Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Np limitation 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,ittMax,850,celsius,"Daher TBM 930 POH, Sec. 2 p. 2.3.1 (ITT Take off 850°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,oilTempMax,104,celsius,"Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Maximum oil temperature 104°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,oilPressMin,60,psi,"Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Oil pressure Minimum 60 psi, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,gLimitPos,3.8,g,"Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs +3.8g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Asobo TBM 930,gLimitNeg,-1.5,g,"Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs -1.5g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)"
+Beechcraft King Air,vne,245,knots,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vmo 245 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Beechcraft King Air,mmo,0.58,mach,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Mmo 0.58, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Beechcraft King Air,vle,182,knots,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vle 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Beechcraft King Air,vlo,182,knots,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vlo extension 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Beechcraft King Air,vfe:1,202,knots,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Approach 202 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Beechcraft King Air,vfe:2,158,knots,"DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Full Down 158 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)"
+Cessna Citation CJ4,vne,305,knots,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VMO 305 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+Cessna Citation CJ4,mmo,0.77,mach,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (MMO Mach 0.77, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+Cessna Citation CJ4,vfe:1,200,knots,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VFE 15 Degrees 200 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+Cessna Citation CJ4,vfe:2,160,knots,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VFE 35 Degrees 160 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+Cessna Citation CJ4,vle,200,knots,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (VLE 200 KIAS, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+Cessna Citation CJ4,n1MaxPct,104.4,percent,"MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (Maximum N1 104.4%, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)"
+DHC-6-300 Twin,vne,166,knots,"MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VMO 166 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+DHC-6-300 Twin,vfe:1,100,knots,"MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° 100 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+DHC-6-300 Twin,vfe:2,93,knots,"MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° to 37.5° 93 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+DHC-6-300 Twin,ittMax,725,celsius,"MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (T5 725°C, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+DHC-6-300 Twin,n1MaxPct,101.6,percent,"MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (NG 101.6%, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+DHC-6-300 Twin,oilPressMin,40,psi,"MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (IDLE Oil Press 40 Min, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)"
+A310,vfe:1,245,knots,"iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 0 245 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"
+A310,vfe:2,210,knots,"iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 15 210 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"
+A310,vfe:3,195,knots,"iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 20 195 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"
+A310,vfe:4,180,knots,"iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 20 Flaps 40 180 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"
+A310,vlo,270,knots,"iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLO 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"
+A310,vle,270,knots,"iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLE 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)"

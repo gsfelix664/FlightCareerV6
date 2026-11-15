@@ -17,7 +17,7 @@
       "value": 266.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (VMO, EASA.A.010)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VMO 266 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -41,7 +41,7 @@
       "value": 178.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps TO 178 KIAS)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Takeoff 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -49,7 +49,15 @@
       "value": 122.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps LDG 122 KIAS)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Landing 122 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 178.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLO extension 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -57,23 +65,7 @@
       "value": 178.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (178 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "vlo",
-      "value": 150.0,
-      "unit": "knots",
-      "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Retraction 150 KIAS, Extension 178 KIAS)",
-      "notes": null
-    },
-    {
-      "key": "ittMax",
-      "value": 840.0,
-      "unit": "celsius",
-      "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Max Climb/Cruise 840 °C, Max Takeoff 850 °C)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLE 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -81,7 +73,7 @@
       "value": 100.0,
       "unit": "percent",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D 100% max)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (100% Torque at Np 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -89,7 +81,7 @@
       "value": 104.1,
       "unit": "percent",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Ng max 104.1%)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Ng limitation 104.1%, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -97,7 +89,31 @@
       "value": 2000.0,
       "unit": "rpm",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Np propeller 2000 RPM)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Np limitation 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 850.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (ITT Take off 850°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 104.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Maximum oil temperature 104°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 60.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Oil pressure Minimum 60 psi, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
@@ -105,15 +121,15 @@
       "value": 3.8,
       "unit": "g",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs +3.8g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     },
     {
       "key": "gLimitNeg",
-      "value": -1.52,
+      "value": -1.5,
       "unit": "g",
       "source": "POH",
-      "reference": "Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs -1.5g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
       "notes": null
     }
   ]
