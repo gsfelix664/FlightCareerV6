@@ -34,6 +34,75 @@ namespace FlightCareer.Tests.Parts
             return JsonDocument.Parse(File.ReadAllText(path));
         }
 
+        private static string FindAircraftProfilesDirectory()
+        {
+            string[] candidates =
+            {
+                Path.Combine(AppContext.BaseDirectory, "Data", "aircraft"),
+                Path.Combine(Directory.GetCurrentDirectory(), "src", "FlightCareer.Infrastructure", "Data", "aircraft"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "FlightCareer.Infrastructure", "Data", "aircraft")
+            };
+
+            return candidates.FirstOrDefault(Directory.Exists)
+                ?? throw new DirectoryNotFoundException("Pasta 'Data/aircraft' não encontrada.");
+        }
+
+        private static string FindAircraftsCsvPath()
+        {
+            string[] candidates =
+            {
+                Path.Combine(AppContext.BaseDirectory, "CSV", "aircrafts.csv"),
+                Path.Combine(Directory.GetCurrentDirectory(), "src", "FlightCareer.Infrastructure", "CSV", "aircrafts.csv"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "FlightCareer.Infrastructure", "CSV", "aircrafts.csv")
+            };
+
+            return candidates.FirstOrDefault(File.Exists)
+                ?? throw new FileNotFoundException("Arquivo 'aircrafts.csv' não encontrado.");
+        }
+
+        public static string ResolveAircraftClass(string modelName, string engineClass, int engineCount, IReadOnlyCollection<string> features, double price)
+        {
+            if (string.Equals(engineClass, "Piston", StringComparison.OrdinalIgnoreCase))
+            {
+                if (engineCount > 1) return "E"; // Bimotor pistão (Baron G58, C404 Titan, DA62)
+                if (features.Contains("diesel")) return "D"; // Diesel FADEC monomotor (DA40 NG)
+                if (features.Contains("turbocharged")) return "C"; // Pistão turbo (SR22T, C400 Corvalis, C207T)
+                if (features.Contains("variablePitchProp") || features.Contains("fuelInjected")) return "B"; // Pistão complexo
+                return "A"; // Pistão leve (C152, J-3 Cub, CAP-4, DR400, Dakota)
+            }
+
+            if (string.Equals(engineClass, "Turboprop", StringComparison.OrdinalIgnoreCase))
+            {
+                if (engineCount == 1) return "F"; // Turboélice mono (TBM, PC-12, C208B)
+                if (price >= 100_000_000.0) return "J"; // Cargueiro militar pesado quadrimotor (A400M)
+                return "G"; // Turboélice bi/multimotor regional (King Air, ATR, DHC-6, SkyCourier, ES30)
+            }
+
+            if (string.Equals(engineClass, "Jet", StringComparison.OrdinalIgnoreCase))
+            {
+                // Jato executivo (CJ4, Longitude, PC-24)
+                bool isBizJet = modelName.Contains("Citation") ||
+                                modelName.Contains("PC-24") ||
+                                (price < 50_000_000.0 && !modelName.Contains("A310"));
+
+                if (isBizJet) return "H";
+
+                // Widebody moderno / transporte pesado (> 200M ou 4 motores ou modelos específicos)
+                bool isWidebody = engineCount >= 4 ||
+                                  price >= 200_000_000.0 ||
+                                  modelName.Contains("747") ||
+                                  modelName.Contains("A330") ||
+                                  modelName.Contains("787");
+
+                if (isWidebody) return "J";
+
+                // Linha aérea narrowbody (A320, A321, 737, A310)
+                return "I";
+            }
+
+            return "A";
+        }
+
         [Fact]
         public void EconomySimulation_EachClass_FallsWithinTargetBand()
         {
@@ -50,7 +119,8 @@ namespace FlightCareer.Tests.Parts
                 ("F", new[] { "turboprop", "variablePitchProp", "retractableGear", "tricycleGear", "pressurized", "propDeIce" }, 1, 4_000_000.0),
                 ("G", new[] { "turboprop", "variablePitchProp", "retractableGear", "tricycleGear", "pressurized", "propDeIce" }, 2, 7_500_000.0),
                 ("H", new[] { "jet", "retractableGear", "tricycleGear", "pressurized" }, 2, 9_000_000.0),
-                ("I", new[] { "jet", "retractableGear", "tricycleGear", "pressurized", "passengerCabin", "lavatory", "galley" }, 2, 110_000_000.0)
+                ("I", new[] { "jet", "retractableGear", "tricycleGear", "pressurized", "passengerCabin", "lavatory", "galley" }, 2, 110_000_000.0),
+                ("J", new[] { "antiskid", "apu", "autopilot", "bleedAir", "bleedAntiIce", "fadec", "fireProtection", "fms", "galley", "glassCockpit", "hydraulicGear", "iceDetector", "jet", "lavatory", "multiEngine", "noseWheelSteering", "oxygen", "passengerCabin", "pressurized", "rat", "retractableGear", "slats", "spoilers", "thsTrim", "weatherRadar", "wipers" }, 4, 418_400_000.0)
             };
 
             _output.WriteLine("| Classe | Exemplo | Custo/h Simulado | Faixa Alvo ($/h) | Status |");
@@ -69,6 +139,74 @@ namespace FlightCareer.Tests.Parts
 
                 string status = (simResult.CostPerHour >= minCost && simResult.CostPerHour <= maxCost) ? "OK" : "FORA";
                 _output.WriteLine($"| {classKey} | {example} | ${simResult.CostPerHour:F2}/h | ${minCost:F0} - ${maxCost:F0}/h | {status} |");
+
+                Assert.InRange(simResult.CostPerHour, minCost, maxCost);
+            }
+        }
+
+        [Fact]
+        public void EconomySimulation_All46CapturedAircraft_FallWithinTargetBands()
+        {
+            using var doc = LoadEconomyTargets();
+            var classesEl = doc.RootElement.GetProperty("classes");
+
+            string profilesDir = FindAircraftProfilesDirectory();
+            string csvPath = FindAircraftsCsvPath();
+
+            // 1. Carrega preços do CSV
+            var pricesByModel = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
+            foreach (var line in File.ReadAllLines(csvPath).Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(line)) continue;
+                var cols = line.Split(',');
+                if (cols.Length >= 3 && double.TryParse(cols[2], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double p))
+                {
+                    pricesByModel[cols[0].Trim()] = p;
+                }
+            }
+
+            // 2. Carrega todos os perfis JSON
+            var profileFiles = Directory.GetFiles(profilesDir, "*.json")
+                .Where(f => !Path.GetFileName(f).StartsWith("_"))
+                .OrderBy(f => Path.GetFileName(f))
+                .ToList();
+
+            _output.WriteLine($"\n### Tabela de Balanceamento Econômico de Todas as {profileFiles.Count} Aeronaves Capturadas\n");
+            _output.WriteLine("| # | Modelo | Classe | Motores | Valor Novo ($) | Custo/h Simulado | Faixa Alvo ($/h) | Status |");
+            _output.WriteLine("|---|---|---|---|---|---|---|---|");
+
+            int idx = 1;
+            foreach (var file in profileFiles)
+            {
+                using var pDoc = JsonDocument.Parse(File.ReadAllText(file));
+                var root = pDoc.RootElement;
+
+                string id = root.GetProperty("id").GetString()!;
+                string cls = root.GetProperty("class").GetString()!;
+                int engines = root.GetProperty("engineCount").GetInt32();
+                var features = root.GetProperty("features").EnumerateArray().Select(e => e.GetString()!).ToList();
+
+                // Obter preço novo do CSV (ou fallback)
+                double price = pricesByModel.GetValueOrDefault(id, 1_000_000.0);
+                if (price <= 0 && root.TryGetProperty("simMatch", out var simMatch) && simMatch.TryGetProperty("title", out var titles))
+                {
+                    foreach (var t in titles.EnumerateArray())
+                    {
+                        if (pricesByModel.TryGetValue(t.GetString()!, out price)) break;
+                    }
+                }
+                if (price <= 0) price = 1_000_000.0;
+
+                string classKey = ResolveAircraftClass(id, cls, engines, features, price);
+                var target = classesEl.GetProperty(classKey);
+                double minCost = target.GetProperty("minCostPerHour").GetDouble();
+                double maxCost = target.GetProperty("maxCostPerHour").GetDouble();
+
+                var applicableParts = Catalog.PartsFor(features);
+                var simResult = PartEconomySimulator.Simulate(applicableParts, price, engines, 1000.0);
+
+                string status = (simResult.CostPerHour >= minCost && simResult.CostPerHour <= maxCost) ? "OK" : "FORA";
+                _output.WriteLine($"| {idx++} | {id} | **{classKey}** | {engines}x | ${price:N0} | ${simResult.CostPerHour:F2}/h | ${minCost:F0} - ${maxCost:F0}/h | {status} |");
 
                 Assert.InRange(simResult.CostPerHour, minCost, maxCost);
             }

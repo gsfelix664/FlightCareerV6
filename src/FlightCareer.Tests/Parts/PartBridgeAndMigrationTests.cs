@@ -250,5 +250,122 @@ namespace FlightCareer.Tests.Parts
                 Assert.Equal(0, secondSummary.AircraftMigrated);
             }
         }
+
+        [Fact]
+        public async System.Threading.Tasks.Task Startup_MigrationIntegration_Adjusts100PercentParts_RemovesObsolete_AndIsIdempotent()
+        {
+            await using var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<FlightCareer.Infrastructure.Persistence.AppDbContext>()
+                .UseSqlite(connection).Options;
+
+            var pilotId = Guid.NewGuid();
+            var aircraftId = Guid.NewGuid();
+
+            // Cenário: avião existente com motor a 60% e peças geradas a 100% no provisionamento inicial
+            await using (var db = new FlightCareer.Infrastructure.Persistence.AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+                await db.EnsureSchemaUpdatedAsync();
+
+                var type = new AircraftType { Id = Guid.NewGuid(), Model = "C152", Type = "Geral", FuelType = "Avgas" };
+                db.AircraftTypes.Add(type);
+
+                var pilot = new Pilot { Id = pilotId, Name = "Piloto Hangar" };
+                db.Pilots.Add(pilot);
+
+                var profile = new AircraftLimitProfileEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AircraftTypeModel = "C152",
+                    Class = "A",
+                    DataVersion = 1,
+                    EngineCount = 1,
+                    FeaturesJson = "[\"piston\", \"fixedPitchProp\", \"fixedGear\", \"tricycleGear\", \"carbureted\", \"naturallyAspirated\", \"unpressurized\"]",
+                    SimMatchJson = "{\"TitlePatterns\":[\"C152\"],\"AtcModelPatterns\":[\"C152\"]}"
+                };
+                db.AircraftLimitProfiles.Add(profile);
+
+                var aircraft = new PilotAircraft
+                {
+                    Id = aircraftId,
+                    PilotId = pilotId,
+                    AircraftTypeId = type.Id,
+                    Prefix = "PT-EXP",
+                    CurrentAirframeHours = 350.0,
+                    EngineCondition = 60.0,
+                    AirframeCondition = 80.0,
+                    TiresCondition = 75.0,
+                    AvionicsCondition = 85.0,
+                    PartsMigratedAtUtc = null
+                };
+                db.PilotAircrafts.Add(aircraft);
+
+                // Peça válida criada a 100%
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = Guid.NewGuid(),
+                    PilotAircraftId = aircraftId,
+                    PartId = "engine.cylinders",
+                    EngineIndex = 1,
+                    Health = 100.0,
+                    HoursSinceReplacement = 0.0
+                });
+
+                // Peça obsoleta virgem (que saiu do catálogo)
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = Guid.NewGuid(),
+                    PilotAircraftId = aircraftId,
+                    PartId = "engine.wastegate_controller",
+                    Health = 100.0,
+                    HoursSinceReplacement = 0.0
+                });
+
+                await db.SaveChangesAsync();
+            }
+
+            var migrator = new PartMigrationService(Catalog);
+
+            // Simula a rotina de inicialização do App.xaml.cs chamando MigrateAllPendingAsync
+            await using (var db = new FlightCareer.Infrastructure.Persistence.AppDbContext(options))
+            {
+                int migratedCount = await migrator.MigrateAllPendingAsync(db);
+                Assert.Equal(1, migratedCount);
+            }
+
+            // Verifica o estado persistido no banco pós-inicialização
+            await using (var db = new FlightCareer.Infrastructure.Persistence.AppDbContext(options))
+            {
+                var plane = await db.PilotAircrafts
+                    .Include(a => a.Parts)
+                    .FirstAsync(a => a.Id == aircraftId);
+
+                Assert.NotNull(plane.PartsMigratedAtUtc);
+
+                // Cilindros agora devem estar perto de 60% (57% a 63%)
+                var cyl = plane.Parts.FirstOrDefault(p => p.PartId == "engine.cylinders");
+                Assert.NotNull(cyl);
+                Assert.InRange(cyl.Health, 56.0, 64.0);
+                Assert.True(cyl.HoursSinceReplacement > 0);
+
+                // Peça obsoleta removida
+                Assert.DoesNotContain(plane.Parts, p => p.PartId == "engine.wastegate_controller");
+            }
+
+            // Segunda inicialização não altera nada (idempotente)
+            await using (var db = new FlightCareer.Infrastructure.Persistence.AppDbContext(options))
+            {
+                int secondRun = await migrator.MigrateAllPendingAsync(db);
+                Assert.Equal(0, secondRun);
+
+                var plane = await db.PilotAircrafts
+                    .Include(a => a.Parts)
+                    .FirstAsync(a => a.Id == aircraftId);
+
+                var cyl = plane.Parts.First(p => p.PartId == "engine.cylinders");
+                Assert.InRange(cyl.Health, 56.0, 64.0);
+            }
+        }
     }
 }
