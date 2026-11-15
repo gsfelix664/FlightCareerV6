@@ -27,15 +27,15 @@ Status: **Ativo** = usa a taxa como reserva (regra 1); **Observar** = só log at
 
 | ID | Nativo | Componente | Peça F2.1 (provisória) | Status | Observação |
 |---|---|---|---|---|---|
-| 39 | PISTON_ENGINE | Engine | Motor › cilindros, válvulas | **Ativo** | C152: 0,0013–0,0020 só acima de ~2.600 RPM; ~0 em operação normal. |
+| 39 | PISTON_ENGINE | Engine | Motor › cilindros, válvulas | **Ativo** | C152: 0,0013–0,0020 só acima de ~2.600 RPM; ~0 em operação normal. **F1.4c (aprovado 2026-11-15):** limiar 0,0001 (taxa 0 até 2.600 RPM); Ativo só como reserva/conferência. |
 | 40 | TURBINE_ENGINE | Engine + HotSection | Seção quente › turbina | **Ativo** | Mesma lógica do 39; calibrar no primeiro turboélice. |
-| 37, 48 | TIRE, TAILWHEEL TIRE | Tires | Pneus | **Ativo** | Decisão do usuário: a taxa de 0,0093 na decolagem foi em pista de terra, com velocidade alta e abuso. A F1.4c separa asfalto × terra e normal × abuso. |
-| 35, 47 | LANDING_GEAR, TAILWHEEL GEAR | LandingGear | Trem › amortecedores / bequilha | Observar | Caiu 1,8% na mesma decolagem; ativar se a F1.4c mostrar taxa ~0 em pouso e corrida normais. |
-| 36 | BRAKE | Brakes | Freios | Observar | Parado no C152 (freios não simulados); repetir num avião com freios simulados. |
-| 41 | OIL_TANK_INTEGRITY | Oil | Óleo › cárter/vedação | Observar | Sem overstress no voo; testar com temperatura do óleo no limite. |
+| 37, 48 | TIRE, TAILWHEEL TIRE | Tires | Pneus | Observar | Decisão do usuário: a taxa de 0,0093 na decolagem foi em pista de terra, com velocidade alta e abuso. A F1.4c separa asfalto × terra e normal × abuso. **F1.4c:** volta a Observar (pouso com dano desligado; refazer). |
+| 35, 47 | LANDING_GEAR, TAILWHEEL GEAR | LandingGear | Trem › amortecedores / bequilha | Observar | Caiu 1,8% na mesma decolagem; ativar se a F1.4c mostrar taxa ~0 em pouso e corrida normais. **F1.4c C152:** não respondeu → só addon nesse avião. |
+| 36 | BRAKE | Brakes | Freios | Observar | Parado no C152 (freios não simulados); repetir num avião com freios simulados. **F1.4c C152:** não respondeu → só addon nesse avião. |
+| 41 | OIL_TANK_INTEGRITY | Oil | Óleo › cárter/vedação | Observar | Sem overstress no voo; testar com temperatura do óleo no limite. **F1.4c C152:** não respondeu → só addon nesse avião. |
 | 28–34 | ALTERNATOR, BATTERY, IDG, RAT, BUS, CIRCUIT, RECTIFIERS | Electrical | Elétrico | Observar | Só envelhecimento por tempo no C152. |
-| 5–8 | FLAPS + cabos | Airframe | Célula › flaps | Observar | Testar flap acima da Vfe. |
-| 9–14, 19, 20 | AILERONS, ELEVATOR, RUDDER (+ cabos) | Airframe | Célula › comandos | Observar | Testar excesso de G. |
+| 5–8 | FLAPS + cabos | Airframe | Célula › flaps | Observar | Testar flap acima da Vfe. **F1.4c C152:** não respondeu → só addon nesse avião. |
+| 9–14, 19, 20 | AILERONS, ELEVATOR, RUDDER (+ cabos) | Airframe | Célula › comandos | Observar | Testar excesso de G. **F1.4c C152:** sem taxa a 3,1 G (limite 4,4 G): inconclusivo. |
 | 21–27 | HYDRAULIC * | LandingGear (hidráulico) | Hidráulico | Observar | Parado no C152; repetir num avião hidráulico. |
 | 0–4 | FUEL * | — | Combustível | Observar | Sem barra hoje: entra na F2.1. |
 | 42, 38, 49 | OIL AMOUNT, TIRE PRESSURE | — | — | Não usar | Quantidade/pressão, não estresse. |

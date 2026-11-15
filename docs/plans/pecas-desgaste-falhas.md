@@ -262,3 +262,4 @@ Objetivo (revisado em 2026-11-15, regra 0.1 nova): (1) achar o **limiar** de ove
 - F1.4c (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4c-relatorio.md) · branch feat/calibracao-f14c
 - F1.4b (portão) · 2026-11-14 · APROVADO PELO USUÁRIO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md)
 - F1.4c (C152 asfalto) · 2026-11-15 · PROPOSTA, AGUARDA APROVAÇÃO · [Calibração](docs/plans/sensor-validation/calibration-C152.md) · branch docs/f1.4c-calibracao-c152
+- F1.4c (C152 asfalto, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Calibração](docs/plans/sensor-validation/calibration-C152.md)
