@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
@@ -147,6 +147,30 @@
       "unit": "knots",
       "source": "POH",
       "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (104 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "elecMainBusIndex",
+      "value": 1.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1733-Cessna_C152.csv / cal:alternator-off",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "SimVar",
+      "reference": "20261115-1733-Cessna_C152.csv / cal:alternator-on",
+      "notes": null
+    },
+    {
+      "key": "rpmMaxRated",
+      "value": 2550.0,
+      "unit": "rpm",
+      "source": "SimVar",
+      "reference": "MAX RATED ENGINE RPM:1 (20261115-1733-Cessna_C152.csv)",
       "notes": null
     }
   ]
