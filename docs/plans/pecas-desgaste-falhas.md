@@ -268,7 +268,7 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 
 ## FASE 5 — Interface
 
-- Hangar por grupo → peças. Cada peça: verde / amarelo ! / vermelho BROKEN, data e horas da última troca, botão "Trocar · $".
+- **Hangar por setor (decisão do usuário, 2026-11-15):** a tela mostra os **setores** (Motor, Hélice, Elétrico, Aviônicos, Hidráulico, Pneumático/Pressurização, Combustível, Trem, Asa, Empenagem, Fuselagem, Cabine…), não uma lista de 150+ peças. Cada setor fica verde por padrão; só aparece **em amarelo o que a inspeção ou o walkaround descobriu** (peça < 40%, exclamação) e **em vermelho o que está quebrado** (BROKEN/pane). Ao abrir um setor, só as peças amarelas/vermelhas aparecem em destaque, com data/horas da última troca e o botão "Trocar · $"; as demais ficam recolhidas ("N peças sem achados"). Peça que ninguém inspecionou nunca muda de cor, mesmo gasta (regra 0 › 11).
 - Tela da revisão: lista de achados, pacote obrigatório destacado, seleção do que trocar.
 - Nenhum número de saúde em nenhuma tela. Remover a "faixa estimada" atual.
 - Checklist pré-voo sugerindo o walkaround.
@@ -302,3 +302,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.1 (lista de peças, portão) · 2026-11-15 · APROVADO PELO USUÁRIO com 2 correções (pneu dianteiro só triciclo; magnetos NO-GO) · [Relatório](docs/reviews/F2.1-relatorio.md)
 - F2.2 · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.2-relatorio.md) · branch feat/parts-f2.2
 - F2.2 (regras de desgaste, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Relatório](docs/reviews/F2.2-relatorio.md). Pedido do usuário na aprovação: expandir o catálogo (aviônicos, elétrico, superfícies de comando, estrutura, trem e asa detalhados) → tarefa F2.1b.
+- Decisão de UI · 2026-11-15 · Hangar por setor; amarelo só o que a inspeção/walkaround descobriu, vermelho só o quebrado (Fase 5).

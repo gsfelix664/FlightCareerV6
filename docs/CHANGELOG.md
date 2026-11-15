@@ -1540,3 +1540,6 @@
 
 ## 2026-11-15 - F2.2: regras de desgaste aprovadas (Claude)
 - Usuário aprovou as 23 regras do `wear_rules.json`. Na aprovação pediu a expansão do catálogo de peças (aviônicos/IFR/GPS/FMS/piloto automático, elétrico, superfícies de comando e empenagem, estrutura de fuselagem pressurizada, asa, trem de pouso detalhado), com custo de reparo em % do valor da aeronave e tempo de hangar — tarefa F2.1b. Nenhum código mudou.
+
+## 2026-11-15 - Decisão: Hangar por setor (Claude)
+- Plano › Fase 5: o Hangar mostra setores, não a lista de peças; amarelo só o que a inspeção/walkaround descobriu, vermelho só o que está quebrado; o resto fica recolhido. Nenhum código mudou.
