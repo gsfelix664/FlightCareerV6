@@ -1,6 +1,6 @@
 # F1.4c — Calibração addon × nativo: Cessna C152 (asfalto)
 
-**Data:** 2026-11-15 · **Status:** PROPOSTA, AGUARDA APROVAÇÃO DO USUÁRIO
+**Data:** 2026-11-15 · **Status:** APROVADO PELO USUÁRIO em 2026-11-15 (itens do portão abaixo; pendências de voo continuam abertas)
 **Logs:** `20261115-0600-Cessna_C152.csv` (voo 1, 37 min, 12 trechos) e `20261115-0648-Cessna_C152.csv` (voo 2, 16 min: cruzeiro, RPM 60 s, voo longo até a pane).
 Relatório bruto: `py -3 tools/analyze_sensor_log.py --type A --model C152 --calibration <csv>`.
 
@@ -37,7 +37,7 @@ Relatório bruto: `py -3 tools/analyze_sensor_log.py --type A --model C152 --cal
 Com taxa 0, todos os componentes perdem nível devagar no tempo: ~0,0018 em 753 s (≈ 0,9%/h) na maioria; alternador, bateria, óleo, piloto automático e `GENERAL` 3–4× mais rápido. O script marca isso como "divergente" porque a razão fica 0: **não é erro de unidade**, é envelhecimento por tempo, que o addon não usa (regra 0.1 › 2). Ajuste sugerido no script: taxa 0 com queda pequena e contínua = "desgaste natural".
 
 ## 4. Pendências do portão F1.4c (C152)
-- [ ] Usuário aprova: limiar 39 = 0,0001; motor 39 **Ativo** (taxa só como reserva/conferência, regra 0.1 › 3); flaps, freios, trem e óleo **só addon**; pneu e comandos em Observar.
+- [x] Usuário aprovou (2026-11-15): limiar 39 = 0,0001; motor 39 **Ativo** (taxa só como reserva/conferência, regra 0.1 › 3); flaps, freios, trem e óleo **só addon**; pneu e comandos em Observar.
 - [ ] Repetir pousos firme/duro com dano ligado (pneu 37) e uma puxada > 4,4 G (comandos).
 - [ ] Pista de terra (passos 1 e 7).
 - [x] ~~Fator do addon ÷ nativo~~: descartado (2026-11-15). O addon segue o real (fabricante/SB), não a velocidade do nativo. Este log serve para conferir que o addon acusa o mesmo abuso (RPM > limite) pelos próprios sensores.
