@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Diamond DA62",
   "class": "Piston",
   "simMatch": {
@@ -14,26 +14,26 @@
   "limits": [
     {
       "key": "vne",
-      "value": 205.0,
+      "value": 201.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 121.29,
+      "value": 105.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "RECIP MAX CHT (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (Coolant max 105 °C, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 140.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -62,18 +62,74 @@
     },
     {
       "key": "vfe:1",
-      "value": 136.0,
+      "value": 135.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 119.0,
+      "value": 118.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2300.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 5 p. 6 (Propeller RPM, Austro Engine E4P, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 21.8,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.E.200 / DA62 AFM Sec. 2 (1.5 bar, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 201.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. 6 p. 6 (https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     }
   ]

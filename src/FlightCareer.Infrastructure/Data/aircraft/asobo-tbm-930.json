@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
   "simMatch": {
@@ -16,8 +16,8 @@
       "key": "vne",
       "value": 266.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0813-Asobo_TBM_930_Passengers.csv)",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (VMO, EASA.A.010)",
       "notes": null
     },
     {
@@ -40,16 +40,80 @@
       "key": "vfe:1",
       "value": 178.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0813-Asobo_TBM_930_Passengers.csv)",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps TO 178 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 122.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0813-Asobo_TBM_930_Passengers.csv)",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Flaps LDG 122 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 178.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (178 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 150.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-3 (Retraction 150 KIAS, Extension 178 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 840.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Max Climb/Cruise 840 °C, Max Takeoff 850 °C)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D 100% max)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 104.1,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Ng max 104.1%)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2000.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 p. 2-5 (PT6A-66D Np propeller 2000 RPM)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Daher TBM 930 PIM/POH, Sec. 2 (Flaps Up Normal Category)",
       "notes": null
     }
   ]

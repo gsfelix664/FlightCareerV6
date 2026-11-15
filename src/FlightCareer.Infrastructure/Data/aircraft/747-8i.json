@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "747-8i",
   "class": "Jet",
   "simMatch": {
@@ -16,56 +16,104 @@
       "key": "mmo",
       "value": 0.92,
       "unit": "mach",
-      "source": "SimVar",
-      "reference": "MACH MAX OPERATE (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM / FAA TCDS A20WE (MMO 0.92 Mach)",
       "notes": null
     },
     {
       "key": "vle",
       "value": 320.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (VLE 320 KIAS / 0.82M)",
       "notes": null
     },
     {
       "key": "vfe:1",
-      "value": 245.0,
+      "value": 280.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0818-747-8i-3.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 1 280 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 285.0,
+      "value": 260.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 5 260 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:3",
-      "value": 285.0,
+      "value": 240.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 10 240 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:5",
-      "value": 285.0,
+      "value": 205.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 25 205 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:6",
-      "value": 285.0,
+      "value": 180.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 6 (20261115-0818-747-8i.csv)",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 30 180 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 365.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM / FAA TCDS A20WE (VMO 365 KIAS / 375 KEAS)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 270.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (VLO 270 KIAS / 0.82M)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 230.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (Flaps 20 230 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 104.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM (GEnx-2B67 N1 104%)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM, Limitations (Clean +2.5g)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Boeing 747-8 FCOM, Limitations (Clean -1.0g)",
       "notes": null
     }
   ]

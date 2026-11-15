@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "C172SP G1000",
   "class": "Piston",
   "simMatch": {
@@ -16,24 +16,24 @@
       "key": "vne",
       "value": 163.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 260.18,
+      "value": 260.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "RECIP MAX CHT (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-7 (500 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 118.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (245 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
@@ -64,24 +64,64 @@
       "key": "vfe:1",
       "value": 110.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 85.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20°, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 85.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 20.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 129.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
       "notes": null
     }
   ]

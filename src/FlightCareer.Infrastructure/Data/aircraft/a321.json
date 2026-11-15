@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "A321",
   "class": "Jet",
   "simMatch": {
@@ -12,34 +12,74 @@
   "limits": [
     {
       "key": "mmo",
-      "value": 0.81,
+      "value": 0.82,
       "unit": "mach",
-      "source": "SimVar",
-      "reference": "MACH MAX OPERATE (20261115-0822-A321.csv)",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (MMO 0.82 Mach)",
       "notes": null
     },
     {
       "key": "vle",
-      "value": 250.0,
+      "value": 280.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0822-A321.csv)",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (VLE 280 kt IAS)",
       "notes": null
     },
     {
       "key": "vfe:1",
       "value": 238.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0822-A321.csv)",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (Config 1 238 kt IAS)",
       "notes": null
     },
     {
       "key": "vfe:4",
       "value": 186.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0822-A321.csv)",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (Config Full 186 kt IAS)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 350.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (VMO 350 kt IAS)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM / EASA TCDS EASA.A.064 (VLO 250 kt IAS)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 104.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM (N1 104%)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM, Limitations (Clean +2.5g)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Airbus A321 FCOM, Limitations (Clean -1.0g)",
       "notes": null
     }
   ]

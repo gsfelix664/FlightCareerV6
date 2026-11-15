@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "A400M",
   "class": "Turboprop",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 400.0,
+      "value": 300.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0826-A400M_Cargo.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06, Sec. A.III (VMO 300 kt IAS, TP400-D6)",
       "notes": null
     },
     {
@@ -40,8 +40,8 @@
       "key": "vle",
       "value": 220.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0826-A400M_Cargo.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06 / Airbus A400M Flight Manual",
       "notes": null
     },
     {
@@ -66,6 +66,38 @@
       "unit": "knots",
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.72,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06, Sec. A.III (MMO 0.72 Mach)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 220.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06 / Airbus A400M Flight Manual",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06 / CS-25 (Clean)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.169 Issue 06 / CS-25 (Clean)",
       "notes": null
     }
   ]

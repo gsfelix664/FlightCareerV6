@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
   "simMatch": {
@@ -16,32 +16,72 @@
       "key": "mmo",
       "value": 0.77,
       "unit": "mach",
-      "source": "SimVar",
-      "reference": "MACH MAX OPERATE (20261115-0816-Cessna_Citation_CJ4.csv)",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (MMO 0.77 Mach above FL279, FAA TCDS A1WI)",
       "notes": null
     },
     {
       "key": "vle",
       "value": 200.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0816-Cessna_Citation_CJ4.csv)",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:1",
       "value": 200.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0816-Cessna_Citation_CJ4.csv)",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 15° 200 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 160.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0816-Cessna_Citation_CJ4.csv)",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps 35° LAND 160 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 305.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (VMO 305 KIAS up to FL279, FAA TCDS A1WI)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (200 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 100.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Williams FJ44-4A 100% N1)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.6,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.44,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna Citation CJ4 (525C) AFM, Sec. 2 (Flaps Up, Part 23 Commuter Category)",
       "notes": null
     }
   ]

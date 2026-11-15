@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Robin DR400",
   "class": "Piston",
   "simMatch": {
@@ -16,24 +16,24 @@
       "key": "vne",
       "value": 166.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0804-Robin_DR400.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (308 km/h / 166 KIAS)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 260.18,
+      "value": 260.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "RECIP MAX CHT (20261115-0804-Robin_DR400.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (500 °F)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 118.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0804-Robin_DR400.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (245 °F)",
       "notes": null
     },
     {
@@ -64,16 +64,56 @@
       "key": "vfe:1",
       "value": 120.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0804-Robin_DR400.csv)",
+      "source": "POH",
+      "reference": "Robin DR400 Flight Manual Sec. 2 (Flaps 1er cran 120 kt)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 92.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0804-Robin_DR400.csv)",
+      "source": "POH",
+      "reference": "Robin DR400 Flight Manual Sec. 2 / EASA.A.367 (Flaps landing 170 km/h / 92 kt)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (Lycoming O-360)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 25.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 140.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2 (260 km/h / 140 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.A.367 / Robin DR400 Flight Manual Sec. 2",
       "notes": null
     }
   ]

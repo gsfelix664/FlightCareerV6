@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Diamond DA40NG",
   "class": "Piston",
   "simMatch": {
@@ -14,26 +14,26 @@
   "limits": [
     {
       "key": "vne",
-      "value": 163.0,
+      "value": 172.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 121.29,
+      "value": 105.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "RECIP MAX CHT (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-7 (Coolant max, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 140.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-6 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
@@ -62,18 +62,58 @@
     },
     {
       "key": "vfe:1",
-      "value": 108.0,
+      "value": 110.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 91.0,
+      "value": 98.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2300.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (Propeller RPM, Austro Engine E4-A, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 21.8,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (1.5 bar, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
     }
   ]

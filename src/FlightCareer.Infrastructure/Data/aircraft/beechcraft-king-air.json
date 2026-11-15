@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "simMatch": {
@@ -16,8 +16,8 @@
       "key": "vne",
       "value": 263.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (VMO 263 KIAS, FAA TCDS A24CE)",
       "notes": null
     },
     {
@@ -40,16 +40,80 @@
       "key": "vfe:1",
       "value": 202.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Flaps Approach 202 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 158.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Flaps Full 158 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 184.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (184 KIAS / 180 KCAS)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 184.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (184 KIAS / 180 KCAS)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 820.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Max Continuous/Takeoff 820 °C)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A 100% / 3625 ft-lb)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 104.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Ng 104%)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (PT6A-60A Np propeller 1700 RPM)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.1,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Normal Category over 12500 lbs)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.24,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Beechcraft Super King Air B300 AFM/POH, Sec. 2 (Normal Category over 12500 lbs)",
       "notes": null
     }
   ]

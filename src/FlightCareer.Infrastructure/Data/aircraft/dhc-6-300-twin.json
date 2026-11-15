@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
   "simMatch": {
@@ -16,8 +16,8 @@
       "key": "vne",
       "value": 170.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (VMO 170 KIAS, FAA TCDS A9EA)",
       "notes": null
     },
     {
@@ -48,32 +48,80 @@
       "key": "vfe:1",
       "value": 103.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 10° 103 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 93.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 20° 93 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 93.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 30° 93 KIAS)",
       "notes": null
     },
     {
       "key": "vfe:4",
       "value": 93.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Flaps 37.5° Full 93 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 725.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Max Continuous 725 °C, Takeoff 750 °C)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 100% / 50 psi)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 101.5,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Ng 101.5%)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2200.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (PT6A-27 Np propeller 2200 RPM)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "de Havilland Canada DHC-6 Series 300 AFM, Sec. 2 (Commuter Category)",
       "notes": null
     }
   ]

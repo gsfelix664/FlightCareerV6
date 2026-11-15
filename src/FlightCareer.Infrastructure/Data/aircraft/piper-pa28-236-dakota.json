@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Piper PA28-236 Dakota",
   "class": "Piston",
   "simMatch": {
@@ -16,24 +16,24 @@
       "key": "vne",
       "value": 173.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (FAA TCDS 2A13)",
       "notes": null
     },
     {
       "key": "chtMax",
-      "value": 260.18,
+      "value": 260.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "RECIP MAX CHT (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (500 °F, FAA TCDS 2A13)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 118.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (245 °F, FAA TCDS 2A13)",
       "notes": null
     },
     {
@@ -62,26 +62,66 @@
     },
     {
       "key": "vfe:1",
-      "value": 103.0,
+      "value": 102.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 10°)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 102.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 25°)",
       "notes": null
     },
     {
       "key": "vfe:3",
-      "value": 101.0,
+      "value": 102.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0806-Piper_PA28-236_Dakota_-_Standard.csv)",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (Flaps 40°)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2400.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (FAA TCDS 2A13, Lycoming O-540-J3A5D)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 25.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (FAA TCDS 2A13)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 137.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 p. 2-3 (FAA TCDS 2A13)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (Normal Category 3000 lbs)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Piper PA-28-236 Dakota POH P/N 761 681, Sec. 2 (Normal Category 3000 lbs)",
       "notes": null
     }
   ]
