@@ -1,6 +1,6 @@
 # POH-C152-ALT — Capacidade do alternador do C152 pelo POH
 
-**Branch:** feat/poh-c152-alternador · **Data:** 2026-11-15
+**Branch:** feat/poh-c152-alternador · **Commit:** 0355caa · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Consultar o POH oficial do Cessna 152 (1979) em `https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf`, inspecionando a Seção 7 (Airplane & Systems Descriptions › Electrical System).
