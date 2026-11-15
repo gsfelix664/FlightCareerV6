@@ -59,6 +59,8 @@ namespace FlightCareer.UI.Services
         private readonly Stopwatch _fastClock = Stopwatch.StartNew();
         private DateTime _lastFastSample = DateTime.MinValue;
         private bool _impactCrashHandled;
+        // Perda total em andamento: crash do sim, crash do addon e componentes a 0% podem chegar juntos
+        private bool _totalLossInProgress;
         private static readonly TimeSpan FastStreamTimeout = TimeSpan.FromSeconds(3);
         /// <summary>Leitura rápida chegando: o toque é medido nela; senão, cai no cálculo antigo pela telemetria de 1 s.</summary>
         private bool FastStreamAlive => DateTime.Now - _lastFastSample < FastStreamTimeout;
@@ -322,6 +324,7 @@ namespace FlightCareer.UI.Services
 
             _touchdown.Reset();
             _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnFastFlightReceived += OnFastFlight;
             _simConnect.OnCrashEvent += OnSimConnectCrash;
@@ -465,7 +468,8 @@ namespace FlightCareer.UI.Services
 
         private async Task HandleTotalLossAsync()
         {
-            if (_aircraft == null) return;
+            if (_aircraft == null || _totalLossInProgress) return;
+            _totalLossInProgress = true;
             
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
@@ -873,6 +877,7 @@ namespace FlightCareer.UI.Services
             _qualityService.Reset();
             _touchdown.Reset();
             _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
             _simulatedFlightTimeSeconds = 0;
