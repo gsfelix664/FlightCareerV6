@@ -1468,3 +1468,6 @@
   - Alinhamento da Bonanza G36 estritamente com a TCDS EASA.IM.A.279 citada.
 - **Perfis JSON restaurados e reprocessados**:
   - Base restaurada de `feat/component-health-system` e reprocessada com `merge_limits.py`, garantindo que apenas as 11 aeronaves verificadas recebam limites POH.
+
+## 2026-11-15 - Limites do A320neo e do A321 pelo FCOM (Claude)
+- FCOM Airbus enviado pelo usuário (LIM-AG-SPD): VMO 350 kt, MMO 0,82, Vfe por configuração (A320 230/200/185/177; A321 243/215/195/186), VLE 280, VLO 250, +2,5/−1 g. Evidência em `docs/reviews/F2.0b-evidencias.md`. Nenhum código mudou.
