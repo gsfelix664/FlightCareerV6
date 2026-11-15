@@ -247,6 +247,194 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
+        public async Task Provisioner_MultiEngine_CreatesPerEngineCopies_DA62_Baron_C152_747()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+
+            var pilotId = Guid.NewGuid();
+            var c152Id = Guid.NewGuid();
+            var baronId = Guid.NewGuid();
+            var da62Id = Guid.NewGuid();
+            var b748Id = Guid.NewGuid();
+
+            var c152TypeId = Guid.NewGuid();
+            var baronTypeId = Guid.NewGuid();
+            var da62TypeId = Guid.NewGuid();
+            var b748TypeId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                var pilot = new Pilot { Id = pilotId, Name = "Piloto Frotas" };
+                db.Pilots.Add(pilot);
+
+                // Types
+                db.AircraftTypes.AddRange(
+                    new AircraftType { Id = c152TypeId, Model = "Cessna C152", Type = "Geral", FuelType = "Avgas" },
+                    new AircraftType { Id = baronTypeId, Model = "Beechcraft Baron G58", Type = "Geral", FuelType = "Avgas" },
+                    new AircraftType { Id = da62TypeId, Model = "Diamond DA62", Type = "Geral", FuelType = "JetA" },
+                    new AircraftType { Id = b748TypeId, Model = "747-8i", Type = "Comercial", FuelType = "JetA" }
+                );
+
+                // Aircrafts
+                db.PilotAircrafts.AddRange(
+                    new PilotAircraft { Id = c152Id, PilotId = pilotId, AircraftTypeId = c152TypeId, Prefix = "PT-152" },
+                    new PilotAircraft { Id = baronId, PilotId = pilotId, AircraftTypeId = baronTypeId, Prefix = "PT-G58" },
+                    new PilotAircraft { Id = da62Id, PilotId = pilotId, AircraftTypeId = da62TypeId, Prefix = "PT-D62" },
+                    new PilotAircraft { Id = b748Id, PilotId = pilotId, AircraftTypeId = b748TypeId, Prefix = "PR-748" }
+                );
+
+                // Profiles
+                db.AircraftLimitProfiles.AddRange(
+                    new AircraftLimitProfileEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AircraftTypeModel = "Cessna C152",
+                        Class = "Piston",
+                        DataVersion = 1,
+                        SimMatchJson = "{}",
+                        EngineCount = 1,
+                        FeaturesJson = JsonSerializer.Serialize(new[]
+                        {
+                            AircraftFeatures.Piston,
+                            AircraftFeatures.SingleEngine,
+                            AircraftFeatures.FixedGear,
+                            AircraftFeatures.FixedPitchProp,
+                            AircraftFeatures.Carbureted
+                        })
+                    },
+                    new AircraftLimitProfileEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AircraftTypeModel = "Beechcraft Baron G58",
+                        Class = "Piston",
+                        DataVersion = 1,
+                        SimMatchJson = "{}",
+                        EngineCount = 2,
+                        FeaturesJson = JsonSerializer.Serialize(new[]
+                        {
+                            AircraftFeatures.Piston,
+                            AircraftFeatures.MultiEngine,
+                            AircraftFeatures.RetractableGear,
+                            AircraftFeatures.ConstantSpeedProp,
+                            AircraftFeatures.FuelInjected
+                        })
+                    },
+                    new AircraftLimitProfileEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AircraftTypeModel = "Diamond DA62",
+                        Class = "Piston",
+                        DataVersion = 1,
+                        SimMatchJson = "{}",
+                        EngineCount = 2,
+                        FeaturesJson = JsonSerializer.Serialize(new[]
+                        {
+                            AircraftFeatures.Piston,
+                            AircraftFeatures.Diesel,
+                            AircraftFeatures.MultiEngine,
+                            AircraftFeatures.RetractableGear,
+                            AircraftFeatures.ConstantSpeedProp,
+                            AircraftFeatures.FuelInjected,
+                            AircraftFeatures.Turbocharged
+                        })
+                    },
+                    new AircraftLimitProfileEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        AircraftTypeModel = "747-8i",
+                        Class = "Jet",
+                        DataVersion = 1,
+                        SimMatchJson = "{}",
+                        EngineCount = 4,
+                        FeaturesJson = JsonSerializer.Serialize(new[]
+                        {
+                            AircraftFeatures.Jet,
+                            AircraftFeatures.MultiEngine,
+                            AircraftFeatures.RetractableGear,
+                            AircraftFeatures.Pressurized,
+                            AircraftFeatures.Apu,
+                            AircraftFeatures.HydraulicGear
+                        })
+                    }
+                );
+
+                await db.SaveChangesAsync();
+            }
+
+            var provisioner = new AircraftPartProvisioner(Catalog);
+
+            await using (var db = new AppDbContext(options))
+            {
+                int created = await provisioner.EnsurePartsAsync(db);
+                Assert.True(created > 0);
+
+                var allAircraft = await db.PilotAircrafts
+                    .Include(a => a.AircraftType)
+                    .Include(a => a.Parts)
+                    .ToListAsync();
+
+                // 1. C152 (1 motor)
+                var c152 = allAircraft.Single(a => a.Id == c152Id);
+                var c152Magnetos = c152.Parts.Where(p => p.PartId == "ignition.magneto_left").ToList();
+                Assert.Single(c152Magnetos);
+                Assert.Equal(1, c152Magnetos[0].EngineIndex);
+
+                var c152Airframe = c152.Parts.Where(p => p.PartId == "airframe.wing_structure").ToList();
+                Assert.Single(c152Airframe);
+                Assert.Equal(0, c152Airframe[0].EngineIndex);
+
+                // 2. Baron G58 (2 motores pistão a gasolina)
+                var baron = allAircraft.Single(a => a.Id == baronId);
+                var baronMagnetos = baron.Parts.Where(p => p.PartId == "ignition.magneto_left").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(2, baronMagnetos.Count);
+                Assert.Equal(1, baronMagnetos[0].EngineIndex);
+                Assert.Equal(2, baronMagnetos[1].EngineIndex);
+
+                var baronCylinders = baron.Parts.Where(p => p.PartId == "engine.cylinders").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(2, baronCylinders.Count);
+                Assert.Equal(1, baronCylinders[0].EngineIndex);
+                Assert.Equal(2, baronCylinders[1].EngineIndex);
+
+                // 3. Diamond DA62 (2 motores diesel)
+                var da62 = allAircraft.Single(a => a.Id == da62Id);
+                var da62GlowPlugs = da62.Parts.Where(p => p.PartId == "ignition.glow_plugs").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(2, da62GlowPlugs.Count);
+                Assert.Equal(1, da62GlowPlugs[0].EngineIndex);
+                Assert.Equal(2, da62GlowPlugs[1].EngineIndex);
+
+                var da62Cylinders = da62.Parts.Where(p => p.PartId == "engine.cylinders").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(2, da62Cylinders.Count);
+                Assert.Equal(1, da62Cylinders[0].EngineIndex);
+                Assert.Equal(2, da62Cylinders[1].EngineIndex);
+
+                // DA62 não usa magnetos (diesel)
+                Assert.DoesNotContain(da62.Parts, p => p.PartId == "ignition.magneto_left");
+
+                // 4. Boeing 747-8i (4 motores turbofan)
+                var b748 = allAircraft.Single(a => a.Id == b748Id);
+                var b748Combustors = b748.Parts.Where(p => p.PartId == "hotsection.combustor").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(4, b748Combustors.Count);
+                Assert.Equal(new[] { 1, 2, 3, 4 }, b748Combustors.Select(p => p.EngineIndex));
+
+                var b748Fans = b748.Parts.Where(p => p.PartId == "engine.fan").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(4, b748Fans.Count);
+                Assert.Equal(new[] { 1, 2, 3, 4 }, b748Fans.Select(p => p.EngineIndex));
+
+                var b748Reversers = b748.Parts.Where(p => p.PartId == "engine.thrust_reverser").OrderBy(p => p.EngineIndex).ToList();
+                Assert.Equal(4, b748Reversers.Count);
+                Assert.Equal(new[] { 1, 2, 3, 4 }, b748Reversers.Select(p => p.EngineIndex));
+
+                var b748Airframe = b748.Parts.Where(p => p.PartId == "airframe.wing_structure").ToList();
+                Assert.Single(b748Airframe);
+                Assert.Equal(0, b748Airframe[0].EngineIndex);
+            }
+        }
+
+        [Fact]
         public async Task Schema_OldDatabaseGetsAircraftPartsAndFeaturesColumn()
         {
             await using var connection = new SqliteConnection("Data Source=:memory:");
@@ -292,12 +480,13 @@ namespace FlightCareer.Tests.Parts
                 // EnsureSchemaUpdatedAsync deve recriar a tabela e a coluna idempotentemente
                 await db.EnsureSchemaUpdatedAsync();
 
-                // Verifica se a tabela AircraftParts existe e aceita inserções
-                var part = new AircraftPart
+                // Verifica se a tabela AircraftParts existe e aceita inserções com EngineIndex (incluindo motores 1 e 2 da mesma peça)
+                var partEngine1 = new AircraftPart
                 {
                     Id = Guid.NewGuid(),
                     PilotAircraftId = aircraftId,
                     PartId = "oil.lubricant",
+                    EngineIndex = 1,
                     Health = 100.0,
                     HoursSinceReplacement = 0.0,
                     CyclesSinceReplacement = 0,
@@ -308,13 +497,35 @@ namespace FlightCareer.Tests.Parts
                     IsBroken = false
                 };
 
-                // Testa inserção na tabela recém-criada via EF Core
-                db.AircraftParts.Add(part);
+                var partEngine2 = new AircraftPart
+                {
+                    Id = Guid.NewGuid(),
+                    PilotAircraftId = aircraftId,
+                    PartId = "oil.lubricant",
+                    EngineIndex = 2,
+                    Health = 95.0,
+                    HoursSinceReplacement = 5.0,
+                    CyclesSinceReplacement = 2,
+                    LastReplacedAtUtc = DateTime.UtcNow,
+                    LastReplacedAirframeHours = 5.0,
+                    Flag = PartFlag.None,
+                    FlaggedBy = PartFlagSource.None,
+                    IsBroken = false
+                };
+
+                db.AircraftParts.AddRange(partEngine1, partEngine2);
                 await db.SaveChangesAsync();
 
-                var saved = await db.AircraftParts.SingleAsync(p => p.Id == part.Id);
-                Assert.Equal("oil.lubricant", saved.PartId);
-                Assert.Equal(100.0, saved.Health);
+                var savedParts = await db.AircraftParts
+                    .Where(p => p.PilotAircraftId == aircraftId && p.PartId == "oil.lubricant")
+                    .OrderBy(p => p.EngineIndex)
+                    .ToListAsync();
+
+                Assert.Equal(2, savedParts.Count);
+                Assert.Equal(1, savedParts[0].EngineIndex);
+                Assert.Equal(2, savedParts[1].EngineIndex);
+                Assert.Equal(100.0, savedParts[0].Health);
+                Assert.Equal(95.0, savedParts[1].Health);
             }
         }
     }
