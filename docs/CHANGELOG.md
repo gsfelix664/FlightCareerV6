@@ -1422,3 +1422,6 @@
   - Adicionados testes xUnit em `FlightCareer.Tests/Limits/` (`CatalogTests`, `ResolverTests`, `SeederTests`), cobrindo validação de arquivos, paridade com `aircrafts.csv`, prioridade do resolver, fallback de classe, migração de banco legado e controle de versão no seeder. Total: 154 testes xUnit aprovados.
   - Adicionados 8 testes unitários Python em `tools/tests/test_merge_limits.py`. Total: 35 testes python aprovados.
 - Não testado no MSFS: execução de capturas em tempo real no simulador (aguarda voos de captura das outras aeronaves).
+
+## 2026-11-15 - F2.0a revisada e mesclada (Claude)
+- Revisão APROVADA (`docs/reviews/F2.0a-revisao.md`). Ajustes do revisor: o seed do catálogo de limites passou para o `App.xaml.cs` e roda em toda inicialização (antes só em banco novo), sem derrubar o app se falhar; `merge_limits.py` só grava `mmo` em jato e o `--dry-run` mostra o diff por chave. Não testado com o app no banco real.

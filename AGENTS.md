@@ -126,6 +126,10 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - `FlightMonitor`: início/fim automático do voo, touchdown, perda total, pouso de emergência, blackbox (`FlightTelemetryLogger`).
 - Plano pendente de detecção de aeronave e W&B: `docs/plans/simconnect-wb-deteccao-aeronave.md`.
 
+### Catálogo de limites por aeronave (F2.0a)
+- Um JSON por modelo do `aircrafts.csv` em `Infrastructure/Data/aircraft/` (+ `_schema.json`, `_class_defaults.json`), lido por `AircraftLimitCatalogLoader` e gravado nas tabelas `AircraftLimitProfiles`/`AircraftLimits` pelo `AircraftLimitSeeder` em toda inicialização (upsert por `dataVersion`). `Domain/Limits/AircraftLimitResolver` acha o perfil por `TITLE`/`ATC MODEL` e devolve o limite de maior prioridade (POH → SimVar → Cfg → NativeOnset → ClassDefault).
+- Montagem só no desenvolvimento: capturas com REC no simulador + `tools/aircraft_limits/merge_limits.py` (`poh_values.csv`, `title_map.csv`). Hoje só o C152 tem valores; os outros caem no padrão da classe. **Ainda não usado** pelo desgaste (entra na F2.2).
+
 ### Sensores (plano de peças, fase 1 — F1.1 a F1.3 concluídas)
 - `Domain/Sensors/`: `SensorRegistry` (catálogo `sensor_registry.json` + `context_registry.json`, paridade testada com `docs/plans/sensor-inventory.md`), `SensorLayout` (expansão por motor, blocos de 256 preenchidos com `SIMULATION RATE`), `SensorCsvFormatter`.
 - `UI/Services/`: `SensorFrameReader` (leitura genérica, IDs 999/1000+, rejeitadas saem do layout), `ContextSnapshotReader` (IDs 2000/2001, strings em `STRING256`), `SensorRecorder` (REC/Marcar no HUD Overlay, CSV + `-context.json` em `%LocalAppData%\FlightCareer\sensor-logs\`).
