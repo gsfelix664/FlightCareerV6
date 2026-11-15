@@ -1853,3 +1853,23 @@
   - 327 testes xUnit aprovados; 48 testes Python aprovados.
 - **Não testado no MSFS**:
   - Execução ao vivo com simulador MSFS conectado (validado offline via replay de voo real gravado).
+
+## 2026-11-15 - Eventos de partida antes da ativação do voo (Gemini)
+- **Observação de Eventos no Pré-Voo (`PartFlightTracker.ObservePreflight` e `PartFlightSession.ObservePreflight`)**:
+  - Implementado modo de observação pré-voo que processa exclusivamente `PartEventDeriver.Update` e aplica os eventos derivados resultantes via `PartWearEngine.ApplyEvent` (com filtragem por motor e preservação contínua de estado).
+  - Não executa `ApplyTick`, mantendo horas acumuladas, desgaste natural, regras contínuas e taxas de resfriamento intactas durante a fase de preparação.
+  - Exposição da propriedade `HasPreflightChanges` para indicar se algum evento derivado de pré-voo causou dano, incrementou ciclos ou emitiu inspeções nas peças.
+- **Integração no Ciclo de Vida do Monitor (`FlightMonitor.cs`)**:
+  - No ramo `!IsFlightActive` de `OnSimDataReceived`, relógio próprio de preparação (`_lastPreflightTick`) computa o delta de tempo simulado e invoca `ObservePreflight`, mantendo sincronizadas as barras de componentes e colunas legadas.
+  - Em `CancelMonitoringAsync`, caso o voo seja cancelado na fase de preparação mas com `HasPreflightChanges == true`, o estado das peças é persistido em contexto curto sem alterar combustível, localização ou missões.
+- **Replay Fiel ao Pré-Voo (`FlightReplayer.cs`)**:
+  - No modo `GameLike`, frames recebidos antes da ativação do voo passam por `ObservePreflight`, capturando ciclos de partida (`engineStartCycle`), tempo de starter (`starterSeconds`) e picos elétricos sem antecipar a contagem de horas do voo.
+  - No voo do C152, a partida aos 86,4 s (1,7 s de starter) é computada com fidelidade total e o tempo simulado permanece em 1,105 h.
+- **Filtragem de Excedências Sem Efeito no Blackbox (`PartWearEngine.cs`)**:
+  - `PartWearExceedance` agora só é emitida para o blackbox se a faixa de estresse ativa tiver efeito real na peça (`Multiplier > 1.0` ou `LossPerHourPct > 0.0`) ou inspeção associada.
+  - Suporte ao campo `eventDamagePct` no DTO do catálogo de regras de desgaste.
+- **Testes Automatizados**:
+  - Novos testes unitários e de replay: `Replay_C152Voo_GameLike_ContaPartidaNaPreparacao`, `Tracker_ObservePreflight_NaoAplicaDesgasteNatural_NemHoras`, `Tracker_PartidaNaPreparacao_NaoContaDeNovoNoVoo`, `Tracker_PartidaComAvionicsLigadoNaPreparacao_EmiteSpike` e `ApplyTick_FaixaSemEfeito_NaoRegistraExcedencia`.
+  - 332 testes xUnit aprovados com 0 falhas; 48 testes Python aprovados.
+- **Não testado no MSFS**:
+  - O caminho do `FlightMonitor` ao vivo com o simulador (observação de eventos na preparação e cancelamento com peças modificadas) não foi testado no MSFS.
