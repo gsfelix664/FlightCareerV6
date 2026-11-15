@@ -1636,3 +1636,6 @@
 - Flaps e Magnetos: detalhadas as limitações técnicas da engine do sim (conflito com o solver aerodinâmico e amarrações de Model Behaviors do modelo 3D).
 - Criados documento técnico `docs/plans/spike-falhas-sem-comando.md` com matriz comparativa e roteiro de teste em voo para o C152, e relatório `docs/reviews/SPIKE-FALHAS-relatorio.md`. Nenhum arquivo de código foi alterado.
 
+
+## 2026-11-15 - Botões de teste de falhas no HUD de depuração (Claude)
+- HUD Overlay › "TESTE DE FALHAS (DEPURAÇÃO)": envia qualquer evento do SimConnect com até 5 parâmetros (`SimConnectService.SendEventEx`, `TransmitClientEvent_EX1`), com atalhos para `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE`, `ELECTRICAL_ALTERNATOR_BREAKER_TOGGLE` e `ELECTRICAL_CIRCUIT_TOGGLE`, e liga/desliga a escrita contínua da superfície dos flaps em 50% (`WriteFlapSurfacePercent`). Cada envio grava um marcador `teste-...` no REC. Para validar o spike `docs/plans/spike-falhas-sem-comando.md`. Não testado no MSFS.

@@ -477,6 +477,37 @@
                         </Grid>
                     </Border>
 
+                    <!-- Testes do spike "falhas sem mexer no comando" (depuração) -->
+                    <Border Background="#0F172A" BorderBrush="#334155" BorderThickness="1" CornerRadius="4" Padding="6" Margin="0,6,0,0">
+                        <StackPanel>
+                            <TextBlock Text="TESTE DE FALHAS (DEPURAÇÃO)" FontSize="10" FontWeight="Bold" Foreground="#FFB300" Margin="0,0,0,4"/>
+                            <WrapPanel Margin="0,0,0,4">
+                                <Button Content="Alt → barramento" Command="{Binding PresetAlternatorBusCommand}" FontSize="10" Padding="6,2" Margin="0,0,4,4"
+                                        Background="#1E293B" Foreground="#F8FAFC" BorderBrush="#334155" ToolTip="Preenche ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE (alternador 1, barramento 1)"/>
+                                <Button Content="Alt disjuntor" Command="{Binding PresetAlternatorBreakerCommand}" FontSize="10" Padding="6,2" Margin="0,0,4,4"
+                                        Background="#1E293B" Foreground="#F8FAFC" BorderBrush="#334155" ToolTip="Preenche ELECTRICAL_ALTERNATOR_BREAKER_TOGGLE (alternador 1)"/>
+                                <Button Content="Circuito N" Command="{Binding PresetCircuitCommand}" FontSize="10" Padding="6,2" Margin="0,0,4,4"
+                                        Background="#1E293B" Foreground="#F8FAFC" BorderBrush="#334155" ToolTip="Preenche ELECTRICAL_CIRCUIT_TOGGLE (troque o número para achar o circuito do motor do flap)"/>
+                                <Button Content="Flap superfície 50%" Command="{Binding ToggleFlapSurfaceLockCommand}" FontSize="10" Padding="6,2" Margin="0,0,4,4"
+                                        Background="#1E293B" Foreground="#FF5252" BorderBrush="#334155" ToolTip="Liga/desliga a escrita contínua da superfície dos flaps em 50% (teste de tremor)"/>
+                            </WrapPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="60"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0" Text="{Binding DebugEventName, UpdateSourceTrigger=PropertyChanged}" FontSize="10" Padding="4,2" Margin="0,0,4,0"
+                                         Background="#1E293B" Foreground="#F8FAFC" BorderBrush="#334155" CaretBrush="#00E5FF" ToolTip="Nome do evento do SimConnect"/>
+                                <TextBox Grid.Column="1" Text="{Binding DebugEventParams, UpdateSourceTrigger=PropertyChanged}" FontSize="10" Padding="4,2" Margin="0,0,4,0"
+                                         Background="#1E293B" Foreground="#F8FAFC" BorderBrush="#334155" CaretBrush="#00E5FF" ToolTip="Parâmetros separados por espaço (até 5)"/>
+                                <Button Grid.Column="2" Content="Enviar" Command="{Binding SendDebugEventCommand}" FontSize="10" FontWeight="Bold" Padding="6,2"
+                                        Background="#1E293B" Foreground="#00E5FF" BorderBrush="#334155" ToolTip="Envia o evento (mesmo evento de novo = desfaz, quando é TOGGLE)"/>
+                            </Grid>
+                            <TextBlock Text="{Binding DebugEventStatus}" FontSize="10" Foreground="#94A3B8" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
                 </StackPanel>
             </StackPanel>
         </Grid>

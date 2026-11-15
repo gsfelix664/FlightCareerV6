@@ -11,7 +11,7 @@ using FlightCareer.Application.Interfaces;
 namespace FlightCareer.UI.Services
 {
     public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight }
-    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight }
+    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight, WriteFlapsLeftPercent, WriteFlapsRightPercent }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
     public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
 
@@ -273,6 +273,9 @@ namespace FlightCareer.UI.Services
                 AddWriteDef(DEFINITIONS.WriteLeftMagneto, "RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteRightMagneto, "RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteFlapsHandleIndex, "FLAPS HANDLE INDEX", "Number");
+                // Teste do spike "falhas sem mexer no comando" (botões de depuração do HUD)
+                AddWriteDef(DEFINITIONS.WriteFlapsLeftPercent, "TRAILING EDGE FLAPS LEFT PERCENT", "Percent Over 100");
+                AddWriteDef(DEFINITIONS.WriteFlapsRightPercent, "TRAILING EDGE FLAPS RIGHT PERCENT", "Percent Over 100");
 
                 // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
                 _simConnect.AddToDataDefinition(DEFINITIONS.EngineFireState, "ENG ON FIRE:1", "Bool", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
@@ -452,6 +455,34 @@ namespace FlightCareer.UI.Services
             {
                 Debug.WriteLine($"SimConnect SendEvent({eventName}) Error: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Evento com até 5 parâmetros (TransmitClientEvent_EX1), ex.: ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE.
+        /// Usado pelos botões de teste do HUD de depuração (spike "falhas sem mexer no comando").
+        /// </summary>
+        public void SendEventEx(string eventName, uint p0 = 0, uint p1 = 0, uint p2 = 0, uint p3 = 0, uint p4 = 0)
+        {
+            if (_simConnect == null || string.IsNullOrWhiteSpace(eventName)) return;
+            try
+            {
+                uint id = GetOrMapEvent(eventName);
+                _simConnect.TransmitClientEvent_EX1(SimConnect.SIMCONNECT_OBJECT_ID_USER, (EVENTS)id,
+                    (GROUPS)SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY,
+                    p0, p1, p2, p3, p4);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SendEventEx({eventName}) Error: {ex.Message}");
+            }
+        }
+
+        /// <summary>Teste do spike: força a posição da superfície dos flaps (0..1) sem mexer na alavanca.</summary>
+        public void WriteFlapSurfacePercent(double fraction)
+        {
+            double v = Math.Clamp(fraction, 0.0, 1.0);
+            WriteSingle(DEFINITIONS.WriteFlapsLeftPercent, v);
+            WriteSingle(DEFINITIONS.WriteFlapsRightPercent, v);
         }
 
         /// <summary>
