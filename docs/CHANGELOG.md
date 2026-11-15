@@ -1471,3 +1471,6 @@
 
 ## 2026-11-15 - Limites do A320neo e do A321 pelo FCOM (Claude)
 - FCOM Airbus enviado pelo usuário (LIM-AG-SPD): VMO 350 kt, MMO 0,82, Vfe por configuração (A320 230/200/185/177; A321 243/215/195/186), VLE 280, VLO 250, +2,5/−1 g. Evidência em `docs/reviews/F2.0b-evidencias.md`. Nenhum código mudou.
+
+## 2026-11-15 - Limites do CAP-4 (Paulistinha) (Claude)
+- Manual do Aeroclube de Sorocaba enviado pelo usuário: VNE 119 kt, VNO 73 kt, óleo máx. 107 °C, pressão do óleo mín. 10 psi. Nenhum código mudou.
