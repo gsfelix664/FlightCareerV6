@@ -264,6 +264,39 @@ namespace FlightCareer.Domain.Replay
 
                     if (!isFlightActive)
                     {
+                        if (dtSimHours > 0)
+                        {
+                            var preflightResult = tracker.ObservePreflight(frame, dtSimHours, frame.ReceivedUtc);
+                            if (preflightResult.Inspections.Count > 0)
+                            {
+                                inspections.AddRange(preflightResult.Inspections);
+                            }
+
+                            if (preflightResult.DiagnosticMessages.Count > 0)
+                            {
+                                foreach (var diag in preflightResult.DiagnosticMessages)
+                                {
+                                    if (diagnosticSet.Add(diag))
+                                    {
+                                        diagnostics.Add(diag);
+                                    }
+                                }
+                            }
+
+                            if (tracker.LastDerivedEvents.Count > 0)
+                            {
+                                foreach (var ev in tracker.LastDerivedEvents)
+                                {
+                                    derivedEvents.Add(new ReplayDerivedEventItem(
+                                        frame.ReceivedUtc,
+                                        elapsedSeconds,
+                                        ev.MetricKey,
+                                        ev.Value,
+                                        ev.EngineIndex));
+                                }
+                            }
+                        }
+
                         continue;
                     }
                 }

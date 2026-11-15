@@ -47,6 +47,7 @@ namespace FlightCareer.Domain.Parts
         }
 
         public bool IsActive => _parts.Count > 0;
+        public bool HasPreflightChanges { get; private set; }
         public IReadOnlyList<AircraftPart> Parts => _parts;
         public IReadOnlyList<DerivedPartEvent> LastDerivedEvents { get; private set; } = Array.Empty<DerivedPartEvent>();
 
@@ -64,6 +65,7 @@ namespace FlightCareer.Domain.Parts
             _reportedDiagnostics.Clear();
             _accumulatedSimSeconds = 0.0;
             _chtHistoryByEngine.Clear();
+            HasPreflightChanges = false;
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
@@ -106,6 +108,7 @@ namespace FlightCareer.Domain.Parts
             _reportedDiagnostics.Clear();
             _accumulatedSimSeconds = 0.0;
             _chtHistoryByEngine.Clear();
+            HasPreflightChanges = false;
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
@@ -191,6 +194,89 @@ namespace FlightCareer.Domain.Parts
             }
 
             return new PartWearTickResult(exceedances, inspections, diagnostics);
+        }
+
+        public PartWearTickResult ObservePreflight(SensorFrame? frame, double dtSimHours, DateTime nowUtc)
+        {
+            LastDerivedEvents = Array.Empty<DerivedPartEvent>();
+            if (!IsActive || dtSimHours <= 0)
+            {
+                return new PartWearTickResult(
+                    Array.Empty<PartWearExceedance>(),
+                    Array.Empty<PartWearInspectionEvent>(),
+                    Array.Empty<string>());
+            }
+
+            // Tratamento de frame velho (>5s)
+            if (frame == null || (nowUtc - frame.ReceivedUtc).TotalSeconds > 5.0)
+            {
+                if (!_pausedReported)
+                {
+                    _pausedReported = true;
+                    const string msg = "sensores sem dados; desgaste por peça pausado";
+                    Debug.WriteLine($"[PartFlightTracker] {msg}");
+                    return new PartWearTickResult(
+                        Array.Empty<PartWearExceedance>(),
+                        Array.Empty<PartWearInspectionEvent>(),
+                        new[] { msg });
+                }
+
+                return new PartWearTickResult(
+                    Array.Empty<PartWearExceedance>(),
+                    Array.Empty<PartWearInspectionEvent>(),
+                    Array.Empty<string>());
+            }
+
+            _pausedReported = false;
+
+            double dtSimSeconds = dtSimHours * 3600.0;
+
+            // Roda exclusivamente os eventos operacionais derivados (sem ApplyTick, sem horas, sem regras contínuas)
+            var derivedEvents = _eventDeriver.Update(frame, dtSimSeconds, _features);
+            LastDerivedEvents = derivedEvents;
+
+            var inspections = new List<PartWearInspectionEvent>();
+            var diagnostics = new List<string>();
+
+            double healthBefore = _parts.Sum(p => p.Health);
+            int cyclesBefore = _parts.Sum(p => p.CyclesSinceReplacement);
+
+            foreach (var ev in derivedEvents)
+            {
+                IReadOnlyList<AircraftPart> targetParts = _parts;
+                if (ev.EngineIndex.HasValue)
+                {
+                    targetParts = _parts.Where(p => p.EngineIndex == 0 || p.EngineIndex == ev.EngineIndex.Value).ToList();
+                }
+
+                var evResult = _wearEngine.ApplyEvent(targetParts, ev.MetricKey, ev.Value, _features);
+                if (evResult.Inspections.Count > 0)
+                {
+                    inspections.AddRange(evResult.Inspections);
+                }
+            }
+
+            double healthAfter = _parts.Sum(p => p.Health);
+            int cyclesAfter = _parts.Sum(p => p.CyclesSinceReplacement);
+
+            if (healthAfter < healthBefore - 1e-6 || cyclesAfter > cyclesBefore || inspections.Count > 0)
+            {
+                HasPreflightChanges = true;
+            }
+
+            // Drena diagnósticos únicos
+            foreach (var diag in _eventDeriver.DrainDiagnostics())
+            {
+                if (_reportedDiagnostics.Add(diag))
+                {
+                    diagnostics.Add(diag);
+                }
+            }
+
+            return new PartWearTickResult(
+                Array.Empty<PartWearExceedance>(),
+                inspections,
+                diagnostics);
         }
 
         public PartWearEventResult ProcessTouchdown(
