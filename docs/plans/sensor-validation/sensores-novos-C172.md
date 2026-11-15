@@ -6,7 +6,7 @@ Log `20261115-1534-C172SP_G1000_Passengers.csv` (4 min, REC, marcadores `teste-*
 |---|---|---|---|
 | Posição do profundor | `ELEVATOR POSITION` | −1,00 a +1,00, 100 valores | ✅ válido |
 | Posição do aileron | `AILERON POSITION` | −0,90 a +1,00, 131 valores | ✅ válido |
-| Posição do leme | `RUDDER POSITION` | 0 o voo todo | ⏳ não testado (o usuário não moveu os pedais); validar no próximo voo |
+| Posição do leme | `RUDDER POSITION` | −1,00 a +1,00 no teste elétrico (`teste-eletrico-C172.md`) | ✅ válido |
 | Piloto automático | `AUTOPILOT MASTER` | 0 → 1 → 0 nos marcadores `teste-ap-on/off` | ✅ válido |
 | Trim do profundor | `ELEVATOR TRIM POSITION` | −0,028 a 0,193 (radianos), 71 valores | ✅ válido |
 | Trim de aileron / leme | `AILERON TRIM PCT`, `RUDDER TRIM PCT` | 0 | — o C172 não tem (esperado) |
@@ -15,3 +15,5 @@ Log `20261115-1534-C172SP_G1000_Passengers.csv` (4 min, REC, marcadores `teste-*
 | Alternador | `ELECTRICAL GENALT BUS VOLTAGE/AMPS/LOAD:1` | **0 o voo todo**, com motor girando | ❌ índice/nome errado ou não suportado |
 
 **Consequência:** as regras `avionics_start_with_avionics_master_on`, `battery_deep_discharge_damage` e `electrical_system_overload_amps` ficam **mudas** até achar as SimVars certas no MSFS 2024 (provável: barramentos/circuitos por índice). Comando brusco (profundor/aileron), trim e piloto automático estão prontos para a F2.4.
+
+**Atualização (teste elétrico, 2026-11-15):** ver `teste-eletrico-C172.md`. Aviônicos = `CIRCUIT ON:3` / `ELECTRICAL BUS AMPS:4` neste avião; alternador/bateria pela `ELECTRICAL BUS VOLTAGE:1`; `BATTERY VOLTAGE/LOAD`, `GENALT` e `AVIONICS MASTER SWITCH` não servem no C172 2024.

@@ -1729,3 +1729,7 @@
   - Paridade estrita mantida e validada por `SensorRegistryTests` e `SensorLayoutTests`.
 - **Roteiro de teste atualizado (`ROTEIRO.md`)**:
   - Tabela da seção 7 atualizada com as novas colunas e explicação de identificação de barramentos.
+
+## 2026-11-15 - Teste elétrico de solo do C172 G1000 analisado (Claude)
+- `docs/plans/sensor-validation/teste-eletrico-C172.md`: linha do tempo e resultado das 16 SimVars do spike. Aviônicos detectados por `CIRCUIT ON:3` e `ELECTRICAL BUS AMPS:4`; alternador e descarga pela `ELECTRICAL BUS VOLTAGE:1` (igual nos 5 barramentos); `ELECTRICAL BATTERY VOLTAGE/LOAD:1`, `MAIN BUS`, `GENALT` e `AVIONICS MASTER SWITCH` não atualizam no C172 2024. `RUDDER POSITION` validado.
+- Proposta para as três regras elétricas mudas (índice de circuito por aeronave no catálogo; descarga por tensão do barramento; sobrecarga pela carga total × capacidade do alternador). Nada de código mudou.
