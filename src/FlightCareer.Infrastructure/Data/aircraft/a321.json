@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "A321",
   "class": "Jet",
   "engineCount": 2,
@@ -10,7 +10,17 @@
     "retractableGear",
     "pressurized",
     "apu",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "slats",
+    "spoilers",
+    "bleedAntiIce",
+    "antiskid",
+    "noseWheelSteering",
+    "thsTrim"
   ],
   "simMatch": {
     "title": [

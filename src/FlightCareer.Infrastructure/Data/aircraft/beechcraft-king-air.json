@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
@@ -10,7 +10,13 @@
     "retractableGear",
     "constantSpeedProp",
     "pressurized",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "deIceBoots",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [
@@ -83,6 +89,14 @@
       "unit": "knots",
       "source": "POH",
       "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vlo extension 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 181.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "King Air 350 POH, Sec. 2 (181 KIAS)",
       "notes": null
     }
   ]

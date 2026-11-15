@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft King Air C90GTx",
   "class": "Turboprop",
   "engineCount": 2,
@@ -10,7 +10,13 @@
     "retractableGear",
     "constantSpeedProp",
     "pressurized",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "deIceBoots",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [],

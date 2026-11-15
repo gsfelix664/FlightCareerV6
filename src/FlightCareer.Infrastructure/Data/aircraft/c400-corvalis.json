@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "C400 Corvalis",
   "class": "Piston",
   "engineCount": 1,
@@ -10,7 +10,11 @@
     "fixedGear",
     "constantSpeedProp",
     "fuelInjected",
-    "turbocharged"
+    "turbocharged",
+    "glassCockpit",
+    "autopilot",
+    "spoilers",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [

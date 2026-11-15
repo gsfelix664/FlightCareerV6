@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
   "engineCount": 1,
@@ -10,7 +10,13 @@
     "retractableGear",
     "constantSpeedProp",
     "pressurized",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "deIceBoots",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [
@@ -139,6 +145,14 @@
       "unit": "g",
       "source": "POH",
       "reference": "Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs -1.5g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 158.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 Pilot Operating Handbook, Sec. 2 (158 KIAS)",
       "notes": null
     }
   ]

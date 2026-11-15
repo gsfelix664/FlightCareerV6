@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
@@ -12,7 +12,12 @@
     "constantSpeedProp",
     "fuelInjected",
     "turbocharged",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "autopilot",
+    "weatherRadar",
+    "deIceBoots",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [

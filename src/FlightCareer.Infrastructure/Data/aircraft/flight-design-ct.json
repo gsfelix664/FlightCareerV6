@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Flight Design CT",
   "class": "Piston",
   "engineCount": 1,
@@ -9,7 +9,10 @@
     "singleEngine",
     "fixedGear",
     "fixedPitchProp",
-    "fuelInjected"
+    "fuelInjected",
+    "glassCockpit",
+    "autopilot",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [

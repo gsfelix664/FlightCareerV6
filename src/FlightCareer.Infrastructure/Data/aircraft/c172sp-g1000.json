@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "C172SP G1000",
   "class": "Piston",
   "engineCount": 1,
@@ -9,7 +9,10 @@
     "singleEngine",
     "fixedGear",
     "fixedPitchProp",
-    "fuelInjected"
+    "fuelInjected",
+    "glassCockpit",
+    "autopilot",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [
@@ -130,6 +133,14 @@
       "unit": "g",
       "source": "POH",
       "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs -1.52g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 105.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (105 KIAS at 2550 lbs)",
       "notes": null
     }
   ]

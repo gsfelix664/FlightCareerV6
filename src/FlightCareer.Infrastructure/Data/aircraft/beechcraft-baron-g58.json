@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
   "engineCount": 2,
@@ -10,11 +10,25 @@
     "retractableGear",
     "constantSpeedProp",
     "fuelInjected",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "autopilot",
+    "weatherRadar",
+    "deIceBoots",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "va",
+      "value": 156.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Baron G58 POH, Sec. 2 (156 KIAS)",
+      "notes": null
+    }
+  ]
 }

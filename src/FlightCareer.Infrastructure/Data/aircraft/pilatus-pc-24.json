@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Pilatus PC-24",
   "class": "Jet",
   "engineCount": 2,
@@ -10,7 +10,15 @@
     "retractableGear",
     "pressurized",
     "apu",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "spoilers",
+    "bleedAntiIce",
+    "antiskid",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [],

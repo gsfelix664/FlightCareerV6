@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "ATR 72-600",
   "class": "Turboprop",
   "engineCount": 2,
@@ -10,7 +10,15 @@
     "retractableGear",
     "constantSpeedProp",
     "pressurized",
-    "hydraulicGear"
+    "hydraulicGear",
+    "glassCockpit",
+    "fms",
+    "autopilot",
+    "weatherRadar",
+    "spoilers",
+    "deIceBoots",
+    "antiskid",
+    "noseWheelSteering"
   ],
   "simMatch": {
     "title": [],
