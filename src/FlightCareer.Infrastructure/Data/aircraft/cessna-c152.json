@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "Cessna C152",
   "class": "Piston",
   "simMatch": {
@@ -22,26 +22,26 @@
     },
     {
       "key": "chtMax",
-      "value": 260.2,
+      "value": 260.18,
       "unit": "celsius",
       "source": "SimVar",
-      "reference": "RECIP MAX CHT (MSFS 2024, 2026-11-15)",
+      "reference": "RECIP MAX CHT (20261115-0756-Cessna_C152.csv)",
       "notes": null
     },
     {
       "key": "oilTempMax",
-      "value": 115.7,
+      "value": 115.74,
       "unit": "celsius",
       "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (MSFS 2024, 2026-11-15)",
+      "reference": "MAX OIL TEMPERATURE (20261115-0756-Cessna_C152.csv)",
       "notes": null
     },
     {
       "key": "egtMax",
-      "value": 893.5,
+      "value": 893.52,
       "unit": "celsius",
       "source": "SimVar",
-      "reference": "MAX EGT (MSFS 2024, 2026-11-15)",
+      "reference": "MAX EGT (20261115-0756-Cessna_C152.csv)",
       "notes": null
     },
     {
@@ -82,6 +82,30 @@
       "unit": "rpm",
       "source": "NativeOnset",
       "reference": "calibration-C152.md",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 33.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 40.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0756-Cessna_C152.csv)",
       "notes": null
     }
   ]

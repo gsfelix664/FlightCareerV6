@@ -1,11 +1,64 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "CAP-4",
   "class": "Piston",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "CAP-4"
+    ],
+    "atcModel": [
+      "CAP4"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 120.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 104.63,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 649.07,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 33.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 37.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0805-CAP-4.csv)",
+      "notes": null
+    }
+  ]
 }

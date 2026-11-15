@@ -1,11 +1,88 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "NXCub",
   "class": "Piston",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "NXCub"
+    ],
+    "atcModel": [
+      "CC19"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 145.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 117.96,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 40.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 42.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 83.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 77.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0801-NXCub_Aerial_Advertising.csv)",
+      "notes": null
+    }
+  ]
 }

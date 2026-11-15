@@ -1,11 +1,80 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "Diamond DA62",
   "class": "Piston",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "DA62"
+    ],
+    "atcModel": [
+      "DA62"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 205.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 121.29,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 64.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 70.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 136.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 119.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    }
+  ]
 }

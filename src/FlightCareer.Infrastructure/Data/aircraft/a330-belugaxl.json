@@ -1,11 +1,56 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "A330-BelugaXL",
   "class": "Jet",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "A330-BelugaXL"
+    ],
+    "atcModel": [
+      "Beluga XL"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.69,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 240.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 186.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    }
+  ]
 }

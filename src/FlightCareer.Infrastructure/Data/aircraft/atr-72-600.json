@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "ATR 72-600",
-  "class": "Jet",
+  "class": "Turboprop",
   "simMatch": {
     "title": [],
     "atcModel": []

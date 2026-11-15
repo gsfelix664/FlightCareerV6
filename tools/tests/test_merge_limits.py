@@ -221,5 +221,50 @@ class TestMergeLimits(unittest.TestCase):
         self.assertEqual(data2["dataVersion"], 2)
 
 
+class TestPlausibilityFilters(unittest.TestCase):
+    def _run(self, engine_type, retractable, row):
+        d = tempfile.mkdtemp()
+        try:
+            csv_path = os.path.join(d, "x.csv")
+            with open(csv_path, "w", encoding="utf-8", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=list(row.keys()))
+                w.writeheader()
+                w.writerow(row)
+            ctx = {"Numbers": {"ctx-engine-type": engine_type, "ctx-is-gear-retractable": retractable}}
+            return {c["key"]: c["value"] for c in merge_limits.extract_simvar_candidates_from_csv(csv_path, ctx)}
+        finally:
+            shutil.rmtree(d)
+
+    def test_turbine_drops_egt_oil_cht(self):
+        got = self._run(5, 1, {"eng-max-egt": "440.74", "oil-max-temperature": "60.18", "eng-max-cht": "200", "af-ref-speed-max-ias": "266"})
+        self.assertNotIn("egtMax", got)
+        self.assertNotIn("oilTempMax", got)
+        self.assertNotIn("chtMax", got)
+        self.assertEqual(266, got["vne"])
+
+    def test_jet_drops_vne_and_stall_speeds_keeps_mmo(self):
+        got = self._run(1, 1, {"af-ref-speed-max-ias": "500", "af-design-speed-vs0": "121", "af-mach-max-operate": "0.82", "af-ref-speed-max-ias-gear-down": "250"})
+        self.assertNotIn("vne", got)
+        self.assertNotIn("vs0", got)
+        self.assertEqual(0.82, got["mmo"])
+        self.assertEqual(250, got["vle"])
+
+    def test_vle_above_vne_is_dropped(self):
+        got = self._run(5, 1, {"af-ref-speed-max-ias": "266", "af-ref-speed-max-ias-gear-down": "561.2"})
+        self.assertNotIn("vle", got)
+
+    def test_piston_keeps_engine_temps(self):
+        got = self._run(0, 0, {"eng-max-cht": "260.18", "oil-max-temperature": "115.74", "eng-max-egt": "893.52"})
+        self.assertEqual(260.18, got["chtMax"])
+        self.assertEqual(115.74, got["oilTempMax"])
+
+    def test_atc_model_formats(self):
+        self.assertEqual("C152", merge_limits.extract_atc_model_pattern("ATCCOM.AC_MODEL C152.0.text"))
+        self.assertEqual("CC19", merge_limits.extract_atc_model_pattern("ATCCOM.AC_MODEL_CC19.0.text"))
+        self.assertEqual("PA28", merge_limits.extract_atc_model_pattern("$$:PA28"))
+        self.assertEqual("DA-40 NG", merge_limits.extract_atc_model_pattern("DA-40 NG"))
+        self.assertIsNone(merge_limits.extract_atc_model_pattern(""))
+
+
 if __name__ == "__main__":
     unittest.main()

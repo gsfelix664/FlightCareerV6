@@ -1,11 +1,46 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "A321",
   "class": "Jet",
   "simMatch": {
-    "title": [],
+    "title": [
+      "A321"
+    ],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.81,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0822-A321.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0822-A321.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 238.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0822-A321.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 186.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0822-A321.csv)",
+      "notes": null
+    }
+  ]
 }

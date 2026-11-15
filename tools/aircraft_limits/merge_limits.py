@@ -92,10 +92,45 @@ def load_poh_values(poh_path):
 def extract_atc_model_pattern(raw_text):
     if not raw_text:
         return None
-    match = re.search(r"AC_MODEL\s+(.*?)\.0\.text", raw_text)
+    match = re.search(r"AC_MODEL[\s_]+(.*?)\.0\.text", raw_text)
     if match:
         return match.group(1).strip()
-    return raw_text.strip()
+    text = raw_text.strip()
+    if text.startswith("$$:"):
+        text = text[3:].strip()
+    return text or None
+
+
+def load_title_overrides(map_path):
+    """Colunas opcionais do title_map.csv: titlePattern (padrão gravado no simMatch no lugar do título
+    completo, ex.: sem a pintura) e atcModelPattern ("-" = não gravar ATC MODEL, para códigos repetidos)."""
+    overrides = {}
+    if not map_path or not os.path.exists(map_path):
+        return overrides
+    with open(map_path, mode="r", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            title = (row.get("simTitle") or "").strip()
+            if not title:
+                continue
+            overrides[title] = ((row.get("titlePattern") or "").strip() or None,
+                                (row.get("atcModelPattern") or "").strip() or None)
+    return overrides
+
+
+# Filtros de plausibilidade (capturas de 2026-11-15, 25 aeronaves):
+# - turbinas reportam EGT 440,74 / óleo 60,18 (valores-padrão do sim, não o limite do motor): só pistão;
+# - jatos reportam VNE 500 e VS0/VS1 121/179 iguais em todos os Airbus/Boeing: usar POH;
+# - REFERENCE SPEED MAX IAS GEAR DOWN às vezes vem acima da VNE (Bonanza 352, TBM 561): descartar.
+UNRELIABLE_UNLESS_PISTON = {"egtMax", "oilTempMax", "chtMax"}
+UNRELIABLE_FOR_JETS = {"vne", "vs0", "vs1"}
+MAX_PLAUSIBLE_VLE_KNOTS = 400.0
+
+
+def drop_implausible(candidates):
+    """Remove vle maior que a vne do mesmo avião (ou acima de 400 kt quando não há vne)."""
+    vne = next((c["value"] for c in candidates if c["key"] == "vne"), None)
+    limit = vne if vne is not None else MAX_PLAUSIBLE_VLE_KNOTS
+    return [c for c in candidates if not (c["key"] == "vle" and c["value"] > limit)]
 
 
 def find_json_file_for_aircraft(out_dir, aircraft_id):
@@ -175,12 +210,18 @@ def extract_simvar_candidates_from_csv(csv_path, context):
 
     # Mediana das colunas mapeadas
     engine_type = numbers.get("ctx-engine-type", context.get("ctx-engine-type"))
-    is_jet = engine_type is not None and int(round(float(engine_type))) == 1
+    engine_type = int(round(float(engine_type))) if engine_type is not None else None
+    is_jet = engine_type == 1
+    is_piston = engine_type == 0
 
     for col, (key, unit, ref_name) in SIMVAR_KEY_MAPPING.items():
         if key == "vle" and gear_is_fixed:
             continue
         if key == "mmo" and not is_jet:
+            continue
+        if key in UNRELIABLE_UNLESS_PISTON and not is_piston:
+            continue
+        if key in UNRELIABLE_FOR_JETS and is_jet:
             continue
 
         values = columns_data.get(col, [])
@@ -226,7 +267,7 @@ def extract_simvar_candidates_from_csv(csv_path, context):
             "notes": None
         })
 
-    return candidates
+    return drop_implausible(candidates)
 
 
 def apply_limit_candidates(existing_limits, new_candidates):
@@ -268,6 +309,7 @@ def apply_limit_candidates(existing_limits, new_candidates):
 
 def process_merging(captures_dir, poh_path, map_path, out_dir, dry_run=False):
     title_map = load_title_map(map_path)
+    title_overrides = load_title_overrides(map_path)
     poh_data = load_poh_values(poh_path)
     unmapped_titles = set()
 
@@ -305,12 +347,15 @@ def process_merging(captures_dir, poh_path, map_path, out_dir, dry_run=False):
                     "candidates": []
                 }
 
-            aircraft_updates[aircraft_id]["simMatch_titles"].add(title)
+            title_pattern, atc_override = title_overrides.get(title, (None, None))
+            aircraft_updates[aircraft_id]["simMatch_titles"].add(title_pattern or title)
 
             # ATC Model
             strings = context.get("Strings", {})
             raw_atc = strings.get("ctx-atc-model", context.get("ctx-atc-model", ""))
-            atc_code = extract_atc_model_pattern(raw_atc)
+            atc_code = atc_override if atc_override else extract_atc_model_pattern(raw_atc)
+            if atc_code == "-":
+                atc_code = None
             if atc_code:
                 aircraft_updates[aircraft_id]["simMatch_atc"].add(atc_code)
 

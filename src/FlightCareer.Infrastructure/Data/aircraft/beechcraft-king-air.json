@@ -1,11 +1,56 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "Beechcraft King Air",
-  "class": "Jet",
+  "class": "Turboprop",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "Beechcraft King Air"
+    ],
+    "atcModel": [
+      "B350"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 263.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 78.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 100.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 202.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 158.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    }
+  ]
 }

@@ -1,11 +1,72 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "747-8i",
   "class": "Jet",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "747-8i"
+    ],
+    "atcModel": [
+      "B748"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.92,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 320.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 245.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0818-747-8i-3.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:5",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:6",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 6 (20261115-0818-747-8i.csv)",
+      "notes": null
+    }
+  ]
 }
