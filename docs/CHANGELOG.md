@@ -1510,3 +1510,16 @@
 
 ## 2026-11-15 - F2.1: lista de peças aprovada (Claude)
 - Usuário aprovou as 58 peças do `parts_catalog.json` com duas correções: `tires.nose` só em triciclo (`none: tailwheel`) e magnetos esquerdo/direito como NO-GO (`blocksFlightWhenBroken`), coerente com o `DefectCatalog`. Vidas úteis seguem "estimativa — revisar". Pendência para a F2.3: o provisionador não remove peça que deixou de se aplicar (ex.: `tires.nose` já criado num avião de bequilha) — limpar na migração.
+
+## 2026-11-15 - F2.2 Mapa sensor -> estresse -> peça (proposta de regras e modelo de dados) (Gemini)
+- **Modelo de dados em `Domain/Parts/`**:
+  - Implementadas classes e records `WearRule`, `WearRuleCatalog`, `WearRulePart`, `WearRuleBand`, `WearRuleInspection` e `NativeOverstress`.
+  - Suporte completo a regras contínuas com faixas relativas a limites operacionais (`LimitKeys`), regras de eventos (pouso duro, ciclos), integração com códigos de inspeção (`DefectCode`) e compatibilidade estrita com features (`PartAppliesTo`).
+- **Catálogo de calibração (`Data/wear_rules.json`)**:
+  - Proposta de 28 regras operacionais abrangendo 100% das 58 peças do catálogo (52 NO-GO e 6 não NO-GO).
+  - Cobertura de todas as 15 categorias requeridas: RPM overspeed, CHT alto, shock cooling, EGT/mistura, óleo alta temp e baixa pressão, torque turboprop, ITT turbina/jato, N1 overspeed, flaps Vfe, trem Vle/Vlo, fator G positivo/negativo, sobrevelocidade VNE, pouso duro por touchdownFpm, alta energia de frenagem, duty cycle de starter, ciclos de trem e ciclos de pressurização.
+  - Progressão não linear progressiva com multiplicadores e perdas por hora calibrados para acumular desgaste realístico sem reproduzir a quebra abrupta do simulador nativo.
+- **Validação e Testes xUnit**:
+  - Criado `WearRuleCatalogTests` com 4 novos testes cobrindo validação referencial completa, cobertura NO-GO, regras de motor por classe e filtragem contextual por modelo (C152 vs TBM 930).
+  - 214 testes xUnit aprovados com 0 falhas; build com 0 erros.
+  - Relatório detalhado com tabelas de regras e cálculos de ordem de grandeza submetido em `docs/reviews/F2.2-relatorio.md`.
