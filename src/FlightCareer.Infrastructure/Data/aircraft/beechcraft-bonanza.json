@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "Beechcraft Bonanza",
   "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "piston",
+    "singleEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "fuelInjected"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

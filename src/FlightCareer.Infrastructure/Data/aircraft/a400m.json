@@ -1,8 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 5,
   "id": "A400M",
   "class": "Turboprop",
+  "engineCount": 4,
+  "features": [
+    "turboprop",
+    "multiEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "pressurized",
+    "apu",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "A400M"

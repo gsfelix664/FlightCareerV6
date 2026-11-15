@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 5,
   "id": "ES30",
   "class": "Turboprop",
+  "engineCount": 4,
+  "features": [
+    "turboprop",
+    "multiEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "pressurized",
+    "electricHybrid"
+  ],
   "simMatch": {
     "title": [
       "ES30"

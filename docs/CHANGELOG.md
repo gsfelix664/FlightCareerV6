@@ -1474,3 +1474,36 @@
 
 ## 2026-11-15 - Limites do CAP-4 (Paulistinha) (Claude)
 - Manual do Aeroclube de Sorocaba enviado pelo usuário: VNE 119 kt, VNO 73 kt, óleo máx. 107 °C, pressão do óleo mín. 10 psi. Nenhum código mudou.
+
+## 2026-11-15 - F2.1 Lista de peças do Hangar (catálogo, entidade, banco e provisionamento) (Gemini)
+- **Características técnicas das aeronaves (`features`)**:
+  - Definido vocabulário fechado de 18 características em `Domain/Parts/AircraftFeatures.cs` com validação de coerência lógica estrita.
+  - Atualizados os 46 arquivos `Data/aircraft/*.json` com `features` e incremento de `dataVersion` (25 aeronaves baseadas em capturas de contexto MSFS e 21 em documentação técnica/POH).
+  - Atualizado `_schema.json` e loader/seeder (`AircraftLimitCatalogLoader`, `AircraftLimitSeeder`) para validar e persistir a nova coluna `FeaturesJson`.
+- **Catálogo geral de peças (`Domain/Parts/`, `Data/parts_catalog.json`)**:
+  - Criadas classes `PartDefinition`, `PartAppliesTo`, `PartGroup` e `PartCatalog`.
+  - Elaborada proposta calibrada de 50 peças cobrindo 14 grupos funcionais, com preços base em USD, horas de mão de obra, vidas úteis (horas e ciclos) e referências de sensores do `sensor_registry.json`.
+- **Entidade e banco de dados (`AircraftPart`, `AppDbContext`)**:
+  - Criada entidade `AircraftPart` com saúde oculta (0–100%), rastreamento de horas/ciclos desde a troca e sinalização de suspeita (`PartFlag`, `PartFlagSource`).
+  - Mapeado relacionamento em `PilotAircraft` e `AppDbContext.AircraftParts` com índice único `(PilotAircraftId, PartId)`.
+  - Atualização idempotente do banco em `AppDbContext.EnsureSchemaUpdatedAsync` (`CREATE TABLE IF NOT EXISTS AircraftParts` + `ALTER TABLE AircraftLimitProfiles ADD COLUMN FeaturesJson`).
+- **Provisionador idempotente (`AircraftPartProvisioner`)**:
+  - Implementado provisionamento automático das peças faltantes a 100% no `App.xaml.cs`, sem remoção de peças pré-existentes e com suporte seguro a modelos sem perfil.
+- **Testes xUnit**:
+  - Adicionados 13 testes cobrindo catálogo, coerência dos 46 perfis, regras de inclusão/exclusão de peças por classe e migração de banco legado. Total: 208 testes xUnit e 40 testes unitários python aprovados.
+  - Não testado no MSFS: execução com simulador conectado (desgaste em voo planejado para F2.3).
+
+## 2026-11-15 - F2.1 rodada 2: peças por motor, segregação de turbinas e padronização (Gemini)
+- **Peças por motor (`perEngine`) e contagem de motores (`engineCount`)**:
+  - Adicionada propriedade `PerEngine` em `PartDefinition` e coluna `EngineIndex` (1..N ou 0 para célula) em `AircraftPart`.
+  - Atualizado o índice único da tabela `AircraftParts` para `(PilotAircraftId, PartId, EngineIndex)`.
+  - Adicionado `engineCount` nos 46 perfis `Data/aircraft/*.json` (validado por `_schema.json`, persistido em `AircraftLimitProfiles.EngineCount`).
+  - `AircraftPartProvisioner` cria N cópias de peças com `perEngine: true` de forma idempotente.
+- **Segregação de turbinas vs pistão e novas peças centrais**:
+  - Restringidos itens de pistão (`oil.lubricant`, `oil.filter`, `oil.pump`, `fuel.engine_pump`, `fuel.filter_gascolator`, `electrical.alternator`, `engine.starter`) a `all: [piston]`.
+  - Adicionadas peças de turbina: `engine.compressor`, `engine.reduction_gearbox`, `electrical.starter_generator`, `fuel.fcu`, `engine.fan`, `engine.thrust_reverser`, `oil.turbine_oil`, `oil.turbine_filter` e `oil.turbine_pump` (catálogo expandido para 58 peças).
+- **Padronização de fontes e escala de preços**:
+  - Todas as fontes sem manual aberto nesta rodada padronizadas para `"estimativa — revisar (referência usual: ...)"`.
+  - Adicionado campo `priceScalesWithAircraft` em `PartDefinition` e no catálogo.
+- **Testes e integridade**:
+  - 210 testes xUnit e 40 testes python aprovados com 100% de sucesso. Testes de provisionamento multiquádruplo (Baron G58 com 2 magnetos, C152 com 1, DA62 com 2 glow plugs, 747-8i com 4 seções quentes/fans/reversores).

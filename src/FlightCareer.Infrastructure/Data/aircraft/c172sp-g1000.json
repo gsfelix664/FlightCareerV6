@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 5,
   "id": "C172SP G1000",
   "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "fixedPitchProp",
+    "fuelInjected"
+  ],
   "simMatch": {
     "title": [
       "C172SP G1000"

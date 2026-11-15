@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
+  "engineCount": 2,
+  "features": [
+    "piston",
+    "multiEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "fuelInjected",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

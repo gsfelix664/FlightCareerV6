@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 6,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
+  "engineCount": 2,
+  "features": [
+    "turboprop",
+    "multiEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "pressurized",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "Beechcraft King Air"

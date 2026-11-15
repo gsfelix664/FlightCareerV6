@@ -8,6 +8,8 @@
     "dataVersion",
     "id",
     "class",
+    "engineCount",
+    "features",
     "simMatch",
     "limits"
   ],
@@ -33,6 +35,37 @@
         "Jet",
         "Unknown"
       ]
+    },
+    "engineCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "piston",
+          "turboprop",
+          "jet",
+          "diesel",
+          "turbocharged",
+          "carbureted",
+          "fuelInjected",
+          "fixedPitchProp",
+          "constantSpeedProp",
+          "singleEngine",
+          "multiEngine",
+          "fixedGear",
+          "retractableGear",
+          "tailwheel",
+          "pressurized",
+          "hydraulicGear",
+          "apu",
+          "electricHybrid"
+        ]
+      }
     },
     "simMatch": {
       "type": "object",

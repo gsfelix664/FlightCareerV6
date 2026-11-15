@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "Boeing 787-10 Dreamliner",
   "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "jet",
+    "multiEngine",
+    "retractableGear",
+    "pressurized",
+    "apu",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

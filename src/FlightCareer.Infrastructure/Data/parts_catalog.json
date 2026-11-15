@@ -1,0 +1,1318 @@
+{
+  "parts": [
+    {
+      "id": "engine.cylinders",
+      "name": "Cilindros e pistões",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1800,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 4800,
+      "priceScalesWithAircraft": true,
+      "laborHours": 16.0,
+      "sensors": [
+        "eng-cht",
+        "eng-detonating",
+        "eng-cylinder-health",
+        "eng-rpm",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: TBO Lycoming / Continental 1.800–2.000 h)"
+    },
+    {
+      "id": "engine.crankshaft",
+      "name": "Virabrequim e mancais",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 6500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 24.0,
+      "sensors": [
+        "eng-rpm",
+        "eng-max-reached-rpm",
+        "oil-pressure",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: TBO motor a pistão POH)"
+    },
+    {
+      "id": "engine.valves",
+      "name": "Válvulas de admissão e escape",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1600,
+      "priceScalesWithAircraft": true,
+      "laborHours": 10.0,
+      "sensors": [
+        "eng-cht",
+        "eng-egt",
+        "eng-mixture-ratio"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Revisão de topo / SB Lycoming)"
+    },
+    {
+      "id": "engine.carburetor",
+      "name": "Carburador aeronáutico",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston",
+          "carbureted"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1400,
+      "priceScalesWithAircraft": true,
+      "laborHours": 4.0,
+      "sensors": [
+        "eng-carb-temperature",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual Marvel Schebler MA-3/MA-4)"
+    },
+    {
+      "id": "engine.fuel_injectors",
+      "name": "Bicos injetores e distribuidor",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston",
+          "fuelInjected"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1200,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1800,
+      "priceScalesWithAircraft": true,
+      "laborHours": 5.0,
+      "sensors": [
+        "eng-fuel-flow",
+        "eng-egt",
+        "eng-mixture-ratio"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Continental / Precision Airmotive 1.200 h)"
+    },
+    {
+      "id": "engine.turbocharger",
+      "name": "Turbocompressor e wastegate",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston",
+          "turbocharged"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 4200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "eng-tit",
+        "eng-manifold-pressure",
+        "eng-turbocharger-failed"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Garrett / Hartzell Engine Tech 1.000 h)"
+    },
+    {
+      "id": "engine.starter",
+      "name": "Motor de partida elétrico",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 850,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.5,
+      "sensors": [
+        "eng-starter-active",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Bendix / Sky-Tec 1.500 h)"
+    },
+    {
+      "id": "engine.coolant_system",
+      "name": "Radiador e arrefecimento líquido",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "piston",
+          "diesel"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1200,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1900,
+      "priceScalesWithAircraft": true,
+      "laborHours": 6.0,
+      "sensors": [
+        "eng-radiator-temperature",
+        "eng-coolant-reservoir-percent"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Austro Engine AE300 manual de manutenção)"
+    },
+    {
+      "id": "engine.compressor",
+      "name": "Compressor axial / centrífugo da turbina",
+      "group": "Motor",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 32000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 20.0,
+      "sensors": [
+        "turb-n1",
+        "turb-vibration",
+        "nw-level-40",
+        "nw-is-failed-40"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: P&W PT6 / CFM56 CMM HSI)"
+    },
+    {
+      "id": "engine.reduction_gearbox",
+      "name": "Caixa de redução da hélice (RGB)",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "turboprop"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 18000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 14.0,
+      "sensors": [
+        "eng-prop-rpm",
+        "turb-n1",
+        "eng-vibration"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Pratt & Whitney PT6 RGB CMM)"
+    },
+    {
+      "id": "engine.fan",
+      "name": "Fan frontal do turbofan",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 4000,
+      "lifeCycles": 3000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 45000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 16.0,
+      "sensors": [
+        "turb-n1",
+        "turb-vibration",
+        "nw-is-failed-40"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: CFM56 / GE90 Fan CMM)"
+    },
+    {
+      "id": "engine.thrust_reverser",
+      "name": "Conjunto do reversor de empuxo",
+      "group": "Motor",
+      "appliesTo": {
+        "all": [
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3000,
+      "lifeCycles": 2500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 22000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 10.0,
+      "sensors": [
+        "turb-n1"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: CFM56 / Rohr Thrust Reverser CMM)"
+    },
+    {
+      "id": "oil.lubricant",
+      "name": "Óleo lubrificante do motor (pistão)",
+      "group": "Óleo",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 50,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 180,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.5,
+      "sensors": [
+        "oil-temperature",
+        "oil-pressure",
+        "oil-quantity",
+        "nw-level-41",
+        "nw-is-failed-41"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual de serviço GA inspeção de 50 h)"
+    },
+    {
+      "id": "oil.turbine_oil",
+      "name": "Óleo lubrificante sintético da turbina",
+      "group": "Óleo",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 800,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 350,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.0,
+      "sensors": [
+        "oil-temperature",
+        "oil-pressure",
+        "oil-quantity",
+        "nw-level-41",
+        "nw-is-failed-41"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: MIL-PRF-23699 reposição e análise periódica)"
+    },
+    {
+      "id": "oil.filter",
+      "name": "Filtro de óleo lubrificante (pistão)",
+      "group": "Óleo",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 50,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 45,
+      "priceScalesWithAircraft": false,
+      "laborHours": 0.5,
+      "sensors": [
+        "oil-pressure",
+        "oil-temperature"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual de serviço GA troca a cada 50 h)"
+    },
+    {
+      "id": "oil.turbine_filter",
+      "name": "Filtro de óleo lubrificante da turbina",
+      "group": "Óleo",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 600,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 220,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.0,
+      "sensors": [
+        "oil-pressure",
+        "oil-temperature"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: PT6 / CFM56 CMM filtro principal)"
+    },
+    {
+      "id": "oil.cooler",
+      "name": "Radiador de óleo",
+      "group": "Óleo",
+      "appliesTo": {
+        "any": [
+          "piston",
+          "turboprop"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 1200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 3.0,
+      "sensors": [
+        "oil-temperature",
+        "oil-max-temperature",
+        "oil-cooling-flaps-position"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Stewart Warner Oil Cooler CMM)"
+    },
+    {
+      "id": "oil.pump",
+      "name": "Bomba mecânica de óleo (pistão)",
+      "group": "Óleo",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1800,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "oil-pressure",
+        "oil-warning-pressure",
+        "nw-is-failed-41"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: TBO motor POH)"
+    },
+    {
+      "id": "oil.turbine_pump",
+      "name": "Bomba e módulo de lubrificação da turbina",
+      "group": "Óleo",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 5500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "oil-pressure",
+        "oil-warning-pressure",
+        "nw-is-failed-41"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: PT6 / CFM56 AGB oil pump CMM)"
+    },
+    {
+      "id": "ignition.magneto_left",
+      "name": "Magneto esquerdo",
+      "group": "Ignição",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ],
+        "none": [
+          "diesel"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 1200,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.5,
+      "sensors": [
+        "eng-left-magneto",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Bendix / Slick SB inspeção de 500 h)"
+    },
+    {
+      "id": "ignition.magneto_right",
+      "name": "Magneto direito",
+      "group": "Ignição",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ],
+        "none": [
+          "diesel"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 1200,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.5,
+      "sensors": [
+        "eng-right-magneto",
+        "nw-is-failed-39"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Bendix / Slick SB inspeção de 500 h)"
+    },
+    {
+      "id": "ignition.spark_plugs",
+      "name": "Velas de ignição (jogo)",
+      "group": "Ignição",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ],
+        "none": [
+          "diesel"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 400,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 380,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.0,
+      "sensors": [
+        "eng-rpm",
+        "eng-detonating"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Champion Aerospace manual de manutenção)"
+    },
+    {
+      "id": "ignition.glow_plugs",
+      "name": "Velas aquecedoras (glow plugs)",
+      "group": "Ignição",
+      "appliesTo": {
+        "all": [
+          "piston",
+          "diesel"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 600,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 450,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.0,
+      "sensors": [
+        "eng-glow-plug-active"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Austro Engine AE300)"
+    },
+    {
+      "id": "hotsection.combustor",
+      "name": "Câmara de combustão",
+      "group": "Seção quente",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 28000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 20.0,
+      "sensors": [
+        "turb-itt",
+        "turb-max-itt",
+        "nw-level-40",
+        "nw-is-failed-40"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Pratt & Whitney PT6 / CFM56 HSI manual)"
+    },
+    {
+      "id": "hotsection.turbine_blades",
+      "name": "Palhetas da turbina",
+      "group": "Seção quente",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 35000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 25.0,
+      "sensors": [
+        "turb-n1",
+        "turb-n2",
+        "turb-itt",
+        "turb-vibration",
+        "nw-is-failed-40"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Pratt & Whitney / GE HSI manual)"
+    },
+    {
+      "id": "hotsection.igniters",
+      "name": "Ignitores da turbina",
+      "group": "Seção quente",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1500,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.0,
+      "sensors": [
+        "turb-is-igniting",
+        "turb-ignition-switch-ex1"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Champion Aerospace igniters manual)"
+    },
+    {
+      "id": "propeller.blades",
+      "name": "Pás da hélice",
+      "group": "Hélice",
+      "appliesTo": {
+        "any": [
+          "fixedPitchProp",
+          "constantSpeedProp"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 3200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 4.0,
+      "sensors": [
+        "eng-prop-rpm",
+        "eng-vibration"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: McCauley / Hartzell manual de hélice)"
+    },
+    {
+      "id": "propeller.governor",
+      "name": "Governador de hélice",
+      "group": "Hélice",
+      "appliesTo": {
+        "all": [
+          "constantSpeedProp"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2100,
+      "priceScalesWithAircraft": true,
+      "laborHours": 4.0,
+      "sensors": [
+        "eng-prop-rpm",
+        "eng-propeller-lever-position"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Woodward / McCauley propeller governor manual)"
+    },
+    {
+      "id": "electrical.battery",
+      "name": "Bateria principal de bordo",
+      "group": "Elétrico",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 1200,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 850,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.5,
+      "sensors": [
+        "elec-battery-voltage",
+        "elec-battery-load",
+        "elec-battery-level",
+        "nw-level-29",
+        "nw-is-failed-29"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Gill / Concorde Aircraft Battery CMM)"
+    },
+    {
+      "id": "electrical.alternator",
+      "name": "Alternador do motor (pistão)",
+      "group": "Elétrico",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1800,
+      "priceScalesWithAircraft": false,
+      "laborHours": 3.0,
+      "sensors": [
+        "elec-genalt-bus-voltage",
+        "elec-genalt-bus-amps",
+        "elec-genalt-load",
+        "nw-level-28",
+        "nw-is-failed-28"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Hartzell Engine Tech / Plane-Power CMM)"
+    },
+    {
+      "id": "electrical.starter_generator",
+      "name": "Partida-gerador da turbina (Starter-Generator)",
+      "group": "Elétrico",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 2500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 6500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 4.0,
+      "sensors": [
+        "elec-genalt-bus-voltage",
+        "elec-genalt-bus-amps",
+        "elec-genalt-load",
+        "eng-starter-active",
+        "nw-level-28",
+        "nw-is-failed-28"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: APC / Safran Starter-Generator CMM)"
+    },
+    {
+      "id": "electrical.voltage_regulator",
+      "name": "Regulador de tensão (GCU)",
+      "group": "Elétrico",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 2500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 650,
+      "priceScalesWithAircraft": true,
+      "laborHours": 2.0,
+      "sensors": [
+        "elec-main-bus-voltage",
+        "elec-warning-voltage"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Lamar / Zeftronics GCU manual)"
+    },
+    {
+      "id": "electrical.wiring_harness",
+      "name": "Chicote e barramentos elétricos",
+      "group": "Elétrico",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 6000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 12.0,
+      "sensors": [
+        "elec-total-load-amps",
+        "nw-level-32",
+        "nw-level-33",
+        "nw-is-failed-32"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: FAA AC 43.13-1B Cap. 11 fiação)"
+    },
+    {
+      "id": "electrical.apu_generator",
+      "name": "Geratriz da APU",
+      "group": "Elétrico",
+      "appliesTo": {
+        "all": [
+          "apu"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 12000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "turb-apu-pct-rpm",
+        "turb-apu-on-fire-detected"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Honeywell APU CMM)"
+    },
+    {
+      "id": "instruments.vacuum_pump",
+      "name": "Bomba de vácuo mecânica",
+      "group": "Instrumentos",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 1000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 750,
+      "priceScalesWithAircraft": false,
+      "laborHours": 3.0,
+      "sensors": [
+        "vac-suction-pressure",
+        "vac-warning-vacuum"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Tempest / Rapco SB bomba de vácuo 1.000 h)"
+    },
+    {
+      "id": "instruments.pitot_tube",
+      "name": "Tubo de pitot com aquecimento",
+      "group": "Instrumentos",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 3000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 650,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.0,
+      "sensors": [
+        "inst-pitot-heat",
+        "inst-pitot-ice-pct"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Aerosonic Pitot CMM)"
+    },
+    {
+      "id": "instruments.static_ports",
+      "name": "Tomadas e linhas estáticas",
+      "group": "Instrumentos",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 4000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 350,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.0,
+      "sensors": [
+        "inst-alternate-static-source-open"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Inspeção bienal FAR 91.411)"
+    },
+    {
+      "id": "instruments.gyro_horizon",
+      "name": "Giroscópio / horizonte de atitude",
+      "group": "Instrumentos",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 3.0,
+      "sensors": [
+        "vac-suction-pressure"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Sigma-Tek / Mid-Continent Instruments CMM)"
+    },
+    {
+      "id": "fuel.engine_pump",
+      "name": "Bomba mecânica de combustível (pistão)",
+      "group": "Combustível",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 1800,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1400,
+      "priceScalesWithAircraft": false,
+      "laborHours": 4.0,
+      "sensors": [
+        "eng-fuel-pressure",
+        "nw-level-1",
+        "nw-is-failed-1"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: TBO motor POH)"
+    },
+    {
+      "id": "fuel.fcu",
+      "name": "Unidade de controle de combustível (FCU / HMU)",
+      "group": "Combustível",
+      "appliesTo": {
+        "any": [
+          "turboprop",
+          "jet"
+        ]
+      },
+      "perEngine": true,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 8500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "eng-fuel-flow",
+        "eng-fuel-pressure",
+        "nw-level-1",
+        "nw-is-failed-1"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Woodward / Honeywell FCU CMM)"
+    },
+    {
+      "id": "fuel.aux_pump",
+      "name": "Bomba elétrica auxiliar de combustível",
+      "group": "Combustível",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 1500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 950,
+      "priceScalesWithAircraft": false,
+      "laborHours": 2.5,
+      "sensors": [
+        "fuel-pump-switch",
+        "fuel-pump-on",
+        "nw-is-failed-1"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Weldon / Dukes CMM)"
+    },
+    {
+      "id": "fuel.filter_gascolator",
+      "name": "Filtro e dreno de combustível (gascolator)",
+      "group": "Combustível",
+      "appliesTo": {
+        "all": [
+          "piston"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 220,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.0,
+      "sensors": [
+        "fuel-warning",
+        "nw-level-0"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual de serviço GA limpeza e inspeção 100/500 h)"
+    },
+    {
+      "id": "fuel.selector_valve",
+      "name": "Válvula seletora de combustível",
+      "group": "Combustível",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 3000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 850,
+      "priceScalesWithAircraft": false,
+      "laborHours": 3.0,
+      "sensors": [
+        "nw-level-2",
+        "nw-is-failed-2"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Andair / Cessna Service Manual)"
+    },
+    {
+      "id": "gear.main_struts",
+      "name": "Amortecedores do trem principal",
+      "group": "Trem",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 4000,
+      "lifeCycles": 3000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2800,
+      "priceScalesWithAircraft": true,
+      "laborHours": 6.0,
+      "sensors": [
+        "gear-plane-touchdown-normal-velocity",
+        "gear-contact-point-compression",
+        "nw-level-35",
+        "nw-is-failed-35"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: CMM trem de pouso)"
+    },
+    {
+      "id": "gear.nose_strut",
+      "name": "Amortecedor e tesoura do trem dianteiro",
+      "group": "Trem",
+      "appliesTo": {
+        "none": [
+          "tailwheel"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3500,
+      "lifeCycles": 3000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2100,
+      "priceScalesWithAircraft": true,
+      "laborHours": 5.0,
+      "sensors": [
+        "gear-plane-touchdown-normal-velocity",
+        "gear-nosewheel-max-steering-angle",
+        "nw-level-35"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: CMM trem dianteiro)"
+    },
+    {
+      "id": "gear.tailwheel_assembly",
+      "name": "Conjunto da bequilha de cauda",
+      "group": "Trem",
+      "appliesTo": {
+        "all": [
+          "tailwheel"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3000,
+      "lifeCycles": 2500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1100,
+      "priceScalesWithAircraft": false,
+      "laborHours": 3.0,
+      "sensors": [
+        "gear-plane-touchdown-normal-velocity",
+        "nw-level-47",
+        "nw-is-failed-47"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Scott 3200 Tailwheel manual)"
+    },
+    {
+      "id": "gear.actuator",
+      "name": "Atuadores e travas do trem retrátil",
+      "group": "Trem",
+      "appliesTo": {
+        "all": [
+          "retractableGear"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3000,
+      "lifeCycles": 2500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 4200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "gear-position",
+        "gear-handle-position",
+        "nw-level-35"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: CMM trem retrátil)"
+    },
+    {
+      "id": "tires.main",
+      "name": "Pneus do trem principal (jogo)",
+      "group": "Pneus",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 500,
+      "lifeCycles": 300,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 480,
+      "priceScalesWithAircraft": true,
+      "laborHours": 1.5,
+      "sensors": [
+        "gear-is-skidding",
+        "gear-skidding-factor",
+        "tire-wheel-rpm",
+        "nw-level-37",
+        "nw-is-failed-37"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Goodyear / Michelin Aircraft Tire Care manual)"
+    },
+    {
+      "id": "tires.nose",
+      "name": "Pneu do trem dianteiro / bequilha",
+      "group": "Pneus",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 400,
+      "lifeCycles": 250,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 220,
+      "priceScalesWithAircraft": true,
+      "laborHours": 1.0,
+      "sensors": [
+        "gear-is-skidding",
+        "tire-wheel-rpm",
+        "nw-level-37",
+        "nw-level-48",
+        "nw-is-failed-37"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Goodyear / Michelin Aircraft Tire Care manual)"
+    },
+    {
+      "id": "brakes.pads_discs",
+      "name": "Pastilhas e discos de freio (jogo)",
+      "group": "Freios",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 800,
+      "lifeCycles": 500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 620,
+      "priceScalesWithAircraft": true,
+      "laborHours": 2.5,
+      "sensors": [
+        "brake-left-position",
+        "brake-right-position",
+        "brake-left-temperature",
+        "brake-right-temperature",
+        "nw-level-36",
+        "nw-is-failed-36"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Cleveland Wheels & Brakes manual)"
+    },
+    {
+      "id": "brakes.master_cylinders",
+      "name": "Cilindros mestre e linhas de freio",
+      "group": "Freios",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 2500,
+      "lifeCycles": 2000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 850,
+      "priceScalesWithAircraft": false,
+      "laborHours": 4.0,
+      "sensors": [
+        "brake-parking-position",
+        "nw-level-36"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Cleveland Wheels & Brakes manual)"
+    },
+    {
+      "id": "airframe.wing_structure",
+      "name": "Longarinas e estrutura alar",
+      "group": "Célula",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 12000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 15000,
+      "priceScalesWithAircraft": true,
+      "laborHours": 40.0,
+      "sensors": [
+        "af-g-force",
+        "af-max-g-force",
+        "af-airspeed-indicated",
+        "af-overspeed-warning"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual estrutural da célula Airframe SRM)"
+    },
+    {
+      "id": "airframe.flight_controls",
+      "name": "Comandos de voo e cabos de acionamento",
+      "group": "Célula",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 4000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2600,
+      "priceScalesWithAircraft": true,
+      "laborHours": 12.0,
+      "sensors": [
+        "af-elevator-trim-position",
+        "af-aileron-trim-pct",
+        "af-rudder-trim-pct",
+        "nw-level-9",
+        "nw-level-13",
+        "nw-level-19",
+        "nw-is-failed-9"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Inspeção de comandos de voo 100 h / anual)"
+    },
+    {
+      "id": "airframe.flaps",
+      "name": "Trilhos e mecanismo dos flaps",
+      "group": "Célula",
+      "appliesTo": {},
+      "perEngine": false,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 1900,
+      "priceScalesWithAircraft": true,
+      "laborHours": 6.0,
+      "sensors": [
+        "af-flaps-handle-index",
+        "af-flaps-current-speed-limitation",
+        "nw-level-5",
+        "nw-level-7",
+        "nw-is-failed-5"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Cessna / Piper Service Manual flaps)"
+    },
+    {
+      "id": "hydraulic.pump",
+      "name": "Bomba hidráulica principal",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "all": [
+          "hydraulicGear"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3000,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 3800,
+      "priceScalesWithAircraft": true,
+      "laborHours": 6.0,
+      "sensors": [
+        "hyd-pressure",
+        "hyd-pump-pressure",
+        "nw-level-22",
+        "nw-is-failed-22"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Parker Aerospace Hydraulic Pump CMM)"
+    },
+    {
+      "id": "hydraulic.reservoir_lines",
+      "name": "Reservatório e linhas hidráulicas",
+      "group": "Hidráulico",
+      "appliesTo": {
+        "all": [
+          "hydraulicGear"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 4000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2200,
+      "priceScalesWithAircraft": true,
+      "laborHours": 8.0,
+      "sensors": [
+        "hyd-reservoir-percent",
+        "hyd-system-integrity",
+        "nw-level-21",
+        "nw-is-failed-21"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Aircraft Hydraulic Systems manual)"
+    },
+    {
+      "id": "pressurization.outflow_valve",
+      "name": "Válvula de fluxo (outflow valve)",
+      "group": "Pressurização",
+      "appliesTo": {
+        "all": [
+          "pressurized"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 3500,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 5500,
+      "priceScalesWithAircraft": true,
+      "laborHours": 6.0,
+      "sensors": [
+        "af-pressurization-cabin-altitude",
+        "af-pressurization-pressure-differential"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Honeywell Cabin Pressure Control CMM)"
+    },
+    {
+      "id": "pressurization.door_seals",
+      "name": "Vedações de portas e cabine",
+      "group": "Pressurização",
+      "appliesTo": {
+        "all": [
+          "pressurized"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 2000,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 1800,
+      "priceScalesWithAircraft": true,
+      "laborHours": 4.0,
+      "sensors": [
+        "af-pressurization-cabin-altitude",
+        "af-pressurization-pressure-differential"
+      ],
+      "lifeSource": "estimativa — revisar (referência usual: Manual de manutenção pressurização)"
+    }
+  ]
+}

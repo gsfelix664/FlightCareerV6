@@ -1,8 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 5,
   "id": "Diamond DA40NG",
   "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "piston",
+    "diesel",
+    "singleEngine",
+    "fixedGear",
+    "constantSpeedProp",
+    "fuelInjected",
+    "turbocharged"
+  ],
   "simMatch": {
     "title": [
       "Diamond DA40NG"

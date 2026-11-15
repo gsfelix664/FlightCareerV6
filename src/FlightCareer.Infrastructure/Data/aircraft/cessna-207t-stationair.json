@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "Cessna 207T Stationair",
   "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "constantSpeedProp",
+    "fuelInjected",
+    "turbocharged"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

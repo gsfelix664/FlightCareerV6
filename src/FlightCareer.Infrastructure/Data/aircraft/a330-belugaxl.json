@@ -1,8 +1,17 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 4,
   "id": "A330-BelugaXL",
   "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "jet",
+    "multiEngine",
+    "retractableGear",
+    "pressurized",
+    "apu",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "A330-BelugaXL"
