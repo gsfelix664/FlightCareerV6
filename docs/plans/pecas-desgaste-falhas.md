@@ -294,3 +294,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F1.4b (portão) · 2026-11-14 · APROVADO PELO USUÁRIO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md)
 - F1.4c (C152 asfalto) · 2026-11-15 · PROPOSTA, AGUARDA APROVAÇÃO · [Calibração](docs/plans/sensor-validation/calibration-C152.md) · branch docs/f1.4c-calibracao-c152
 - F1.4c (C152 asfalto, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Calibração](docs/plans/sensor-validation/calibration-C152.md)
+- F2.0a · 2026-11-15 · PRONTO · [Relatório](docs/reviews/F2.0a-relatorio.md) · branch feat/limites-f2.0a
