@@ -110,3 +110,14 @@ Separar peças comuns (acessórios) das específicas de cada tipo de motor. Unif
 5. **TBO comercial vs. privado:** depois do TBO o jogador pode voar privado (chance crescente de falha), mas missões comerciais/fretamento exigem motor dentro do TBO.
 6. **Top overhaul vs. major overhaul:** o top troca só cilindros e válvulas (bem mais barato) e recupera parte da confiabilidade; o major é a revisão geral do bloco.
 7. **Vazamento de óleo em cascata:** lubrificação ou cilindros abaixo de 30% → injetar aos poucos `GENERAL ENG OIL LEAKED PERCENT` (já gravável pelo addon via `SetOilLeakedPercent`): pressão cai e temperatura sobe nos instrumentos do avião, forçando reduzir potência ou cortar o motor antes de fundir (perda total do motor = custo cheio).
+# Adendo 4 (aprovado pelo usuário em 2026-11-15) — rodada 3 da F2.1b
+
+Acrescentar a `docs/plans/pecas-sugestoes-usuario.md` e ao catálogo (unificar, agrupar o que não muda a jogabilidade; regra só com SimVar confirmada no SDK; o resto desgaste normal ou calendário):
+
+1. **Cabine (setor novo "Cabine"):** assentos, galley, lavatório, entretenimento (por zona, só em aviões de passageiros; feature `passengerCabin`, `galley`, `lavatory`). Ideia de jogo (fase seguinte, só registrar): interior gasto reduz satisfação/valor de missões de passageiros; lavatório inoperante restringe missões longas (MEL de cabine).
+2. **Oxigênio:** garrafas da tripulação e dos passageiros, máscaras (pressurizados e aviões com O₂; feature `oxygen`). Ideia (fase seguinte): O₂ inoperante limita a altitude de despacho.
+3. **Detecção e extinção de fogo:** detectores e garrafas extintoras por motor e APU (`perEngine`). Garrafa vencida/descarregada = NO-GO. Calendário (vencimento) além de horas.
+4. **Envelhecimento parado (calendário):** campo novo `calendarLifeMonths` nas peças que envelhecem sem voar (bateria, borrachas/vedações, mangueiras, pneus, garrafas de fogo, O₂, ELT). Fatores ambientais (fase seguinte, só registrar): corrosão em aeroporto litorâneo/úmido, areia em deserto, frio extremo.
+5. **Emergência e específicos de tipo:** escorregadeiras e coletes (jatos de passageiros), flutuadores e esquis (feature `floats`/`skis`; o DHC-6 capturado tem esquis), limpadores de para-brisa, detector de gelo.
+
+Também para a especificação da F2.3 (não desta tarefa): teste de balanceamento por custo de manutenção por hora de voo (simular ~1.000 h típicas por avião e comparar com faixas por classe) e regra "um sistema só cobra" enquanto componentes e peças convivem.
