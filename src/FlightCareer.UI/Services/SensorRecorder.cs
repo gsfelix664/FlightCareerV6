@@ -68,6 +68,8 @@ namespace FlightCareer.UI.Services
             private set { lock (_fileLock) _lastError = value; }
         }
 
+        public SensorFrameReader FrameReader => _frameReader;
+
         public SensorRecorder(SensorFrameReader frameReader, ContextSnapshotReader contextReader)
         {
             _frameReader = frameReader ?? throw new ArgumentNullException(nameof(frameReader));
@@ -245,7 +247,7 @@ namespace FlightCareer.UI.Services
                 try
                 {
                     var reg = SensorRegistry.LoadDefault("sensor_registry.json");
-                    layout = SensorLayout.Build(reg.Sensors, Math.Max(1, _frameReader.CurrentEngineCount));
+                    layout = SensorLayout.Build(reg.Sensors, Math.Max(1, _frameReader.CurrentEngineCount), includeCalibration: _frameReader.CalibrationMode);
                 }
                 catch (Exception ex)
                 {
