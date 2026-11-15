@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "CAP-4",
   "class": "Piston",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 120.0,
+      "value": 119.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0805-CAP-4.csv)",
+      "source": "POH",
+      "reference": "Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.5 (VNE 137 MPH ou 119 KT; imagem enviada pelo usuario em 2026-11-15)",
       "notes": null
     },
     {
@@ -30,10 +30,10 @@
     },
     {
       "key": "oilTempMax",
-      "value": 104.63,
+      "value": 107.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0805-CAP-4.csv)",
+      "source": "POH",
+      "reference": "Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.6 (faixa vermelha acima de 107 C; imagem enviada pelo usuario em 2026-11-15)",
       "notes": null
     },
     {
@@ -58,6 +58,22 @@
       "unit": "knots",
       "source": "SimVar",
       "reference": "DESIGN SPEED VS1 (20261115-0805-CAP-4.csv)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 73.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.5 (VNO 84 MPH ou 73 KT; imagem enviada pelo usuario em 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 10.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.7 (faixa vermelha abaixo de 10 PSI e acima de 60 PSI; imagem enviada pelo usuario em 2026-11-15)",
       "notes": null
     }
   ]

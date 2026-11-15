@@ -112,3 +112,7 @@ A321,vle,280,knots,"Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19),
 A321,vlo,250,knots,"Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD (VLO extension 250 kt / M 0.60; retraction 220 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))"
 A321,gLimitPos,2.5,g,"Airbus FCOM DSC-27-20-10-20 P 5/16, load factor protection (+2.5 g clean; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))"
 A321,gLimitNeg,-1,g,"Airbus FCOM DSC-27-20-10-20 P 5/16, load factor protection (-1 g clean; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))"
+CAP-4,vne,119,knots,"Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.5 (VNE 137 MPH ou 119 KT; imagem enviada pelo usuario em 2026-11-15)"
+CAP-4,vno,73,knots,"Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.5 (VNO 84 MPH ou 73 KT; imagem enviada pelo usuario em 2026-11-15)"
+CAP-4,oilTempMax,107,celsius,"Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.6 (faixa vermelha acima de 107 C; imagem enviada pelo usuario em 2026-11-15)"
+CAP-4,oilPressMin,10,psi,"Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.7 (faixa vermelha abaixo de 10 PSI e acima de 60 PSI; imagem enviada pelo usuario em 2026-11-15)"
