@@ -56,12 +56,14 @@ namespace FlightCareer.Domain.Components
                 TryFire(Fod, lambda, dtHours, fod.Outcomes, components, events);
             }
 
-            // Falha de montagem logo após manutenção: só resultados cujo componente foi revisado há pouco e está em uso
+            // Falha de montagem logo após manutenção: só resultados cujo componente teve serviço real de oficina e está dentro da janela
             var pm = _settings.PostMaintenance;
             var eligible = pm.Outcomes.Where(o =>
             {
                 var c = components.FirstOrDefault(x => x.Kind == o.Kind);
                 if (c == null || !ComponentUsage.IsInUse(o.Kind, data)) return false;
+                // A janela só abre depois de um serviço real feito na oficina (Hangar); avião novo/migrado sem serviço tem LastShopServiceAtUtc null
+                if (!c.LastShopServiceAtUtc.HasValue) return false;
                 // Componentes por ciclos não acumulam horas: "recém-revisado" = poucos pousos desde o serviço
                 return ComponentUsage.IsCycleDriven(o.Kind)
                     ? c.CyclesSinceOverhaul < pm.WindowCycles

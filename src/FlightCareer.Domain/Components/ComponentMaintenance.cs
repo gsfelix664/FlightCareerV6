@@ -33,14 +33,21 @@ namespace FlightCareer.Domain.Components
                 component.HoursSinceOverhaul = 0;
                 component.CyclesSinceOverhaul = 0;
             }
+            component.LastShopServiceAtUtc = DateTime.UtcNow;
+            component.LastShopServiceAirframeHours = airframeHours;
             HealthVisibility.RecordFullInspection(component, airframeHours, random, visibility);
         }
 
         /// <summary>Inspeção completa dos componentes informados (revela a saúde exata, sem reparar).</summary>
         public static void Inspect(IEnumerable<AircraftComponent> components, double airframeHours, IRandomSource random, VisibilitySettings visibility)
         {
+            var now = DateTime.UtcNow;
             foreach (var c in components)
+            {
+                c.LastShopServiceAtUtc = now;
+                c.LastShopServiceAirframeHours = airframeHours;
                 HealthVisibility.RecordFullInspection(c, airframeHours, random, visibility);
+            }
         }
 
         /// <summary>Walkaround do pré-voo: estima os componentes visíveis por fora. Retorna quantos foram estreitados.</summary>

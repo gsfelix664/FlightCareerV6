@@ -32,5 +32,14 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Deslocamento aleatório estável (-0.6 a 0.6) do centro da faixa exibida, sorteado a cada inspeção.</summary>
         public double InspectionBias { get; set; }
+
+        /// <summary>Data UTC do último serviço real em oficina/hangar (reparo ou revisão). Null para aeronave nova/migrada sem serviço.</summary>
+        public DateTime? LastShopServiceAtUtc { get; set; }
+
+        /// <summary>Horas de célula no momento do último serviço de oficina.</summary>
+        public double? LastShopServiceAirframeHours { get; set; }
+
+        /// <summary>Ciclos de célula no momento do último serviço de oficina.</summary>
+        public int? LastShopServiceAirframeCycles { get; set; }
     }
 }
