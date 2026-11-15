@@ -182,6 +182,8 @@ namespace FlightCareer.UI
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>(sp =>
                 new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
             services.AddSingleton(_ => FlightCareer.Domain.Parts.PartCatalog.LoadDefault());
+            services.AddSingleton(_ => FlightCareer.Domain.Parts.WearRuleCatalog.LoadDefault());
+            services.AddSingleton(_ => new FlightCareer.Infrastructure.Services.AircraftLimitCatalogLoader().CreateResolver());
             services.AddSingleton<FlightCareer.Infrastructure.Services.PartMigrationService>(sp =>
                 new FlightCareer.Infrastructure.Services.PartMigrationService(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftPartProvisioner>(sp =>
@@ -197,7 +199,10 @@ namespace FlightCareer.UI
                 sp.GetRequiredService<FlightService>(),
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>(),
                 sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>(),
-                sp.GetRequiredService<SensorFrameReader>()));
+                sp.GetRequiredService<SensorFrameReader>(),
+                sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>(),
+                sp.GetRequiredService<FlightCareer.Domain.Parts.WearRuleCatalog>(),
+                sp.GetRequiredService<FlightCareer.Domain.Limits.AircraftLimitResolver>()));
             services.AddSingleton<MetarService>(sp => new MetarService(
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 

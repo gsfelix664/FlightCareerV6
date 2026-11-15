@@ -1,5 +1,7 @@
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
 using FlightCareer.Application.DTOs;
@@ -26,6 +28,11 @@ namespace FlightCareer.UI.Services
         private readonly IRandomSource _random = new SystemRandomSource();
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
+        private readonly PartCatalog _partCatalog;
+        private readonly WearRuleCatalog _wearRules;
+        private readonly AircraftLimitResolver _limitResolver;
+        private readonly PartFlightSession _parts;
+        private TouchdownEvent? _lastTouchdownEvent;
         private string _currentStatus = "PREPARAÇÃO";
 
         public bool IsMonitoring { get; private set; }
@@ -85,7 +92,10 @@ namespace FlightCareer.UI.Services
             FlightService flightService,
             IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory,
             ComponentCatalog catalog,
-            SensorFrameReader sensorFrames)
+            SensorFrameReader sensorFrames,
+            PartCatalog partCatalog,
+            WearRuleCatalog wearRules,
+            AircraftLimitResolver limitResolver)
         {
             _simConnect = simConnect;
             _flightService = flightService;
@@ -94,6 +104,15 @@ namespace FlightCareer.UI.Services
             _failures = new ComponentFlightSession(simConnect, catalog, _random);
             _failures.OnFailure += OnAircraftFailureTriggered;
             _touchdown = new TouchdownDetector(catalog.Landing);
+
+            _partCatalog = partCatalog;
+            _wearRules = wearRules;
+            _limitResolver = limitResolver;
+            _parts = new PartFlightSession(partCatalog, wearRules, limitResolver);
+            sensorFrames.OnFrame += _parts.OnFrame;
+            _parts.OnExceedance += ex => _telemetryLogger.LogEvent("EXCEDENCIA_PECA", $"{ex.RuleId} - {ex.TargetId} - {ex.PeakValue:F1} (limite {ex.LimitValue:F1}) - dano {ex.TotalDamagePct:F2}%");
+            _parts.OnInspection += insp => _telemetryLogger.LogEvent("INSPECAO_PECA", $"{insp.DefectCode} - {insp.TargetPartId} - {insp.Description}");
+            _parts.OnDiagnostic += diag => _telemetryLogger.LogEvent("PECAS_DIAG", diag);
 
             _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
             _persistentFailures.OnDefectRecorded += OnDefectRecorded;
@@ -125,29 +144,63 @@ namespace FlightCareer.UI.Services
             if (_aircraft != null && IsMonitoring && NativeWearFailureMap.ComponentIdFromCause(defect.Cause) is int wearId)
             {
                 // Pane do wear and tear nativo: a peça quebrou no sim e vai a 0% (plano › 0.1, regra 5; decisão 2026-11-14)
-                if (NativeWearFailureMap.Get(wearId)?.Kind is ComponentKind wearKind) _failures.ClampHealth(wearKind, 0.0);
+                if (_parts.IsActive)
+                {
+                    _parts.ApplyNativeFailed(wearId, NativeWearFailureMap.Get(wearId)?.Kind);
+                    _parts.SyncComponents(_aircraft, _failures.Components);
+                }
+                else
+                {
+                    if (NativeWearFailureMap.Get(wearId)?.Kind is ComponentKind wearKind) _failures.ClampHealth(wearKind, 0.0);
+                }
                 SyncLegacyConditions();
             }
             else if (_aircraft != null && IsMonitoring)
             {
-                switch (defect.Code)
+                if (_parts.IsActive)
                 {
-                    case DefectCatalog.EngineFailure:
-                        _failures.ClampHealth(ComponentKind.Engine, 15.0);
-                        break;
-                    case DefectCatalog.EngineFire:
-                        _failures.ClampHealth(ComponentKind.Engine, 5.0);
-                        Damage(ComponentKind.Airframe, 20.0);
-                        break;
-                    case DefectCatalog.EngineDamage:
-                        _failures.ClampHealth(ComponentKind.Engine, 100.0 - defect.Parameter);
-                        break;
-                    case DefectCatalog.GearDamage:
-                        Damage(ComponentKind.LandingGear, 20.0);
-                        break;
-                    case DefectCatalog.BrakesWorn:
-                        _failures.ClampHealth(ComponentKind.Brakes, 30.0);
-                        break;
+                    switch (defect.Code)
+                    {
+                        case DefectCatalog.EngineFailure:
+                            _parts.ClampGroup(ComponentKind.Engine, 15.0);
+                            break;
+                        case DefectCatalog.EngineFire:
+                            _parts.ClampGroup(ComponentKind.Engine, 5.0);
+                            _parts.DamageGroup(ComponentKind.Airframe, 20.0);
+                            break;
+                        case DefectCatalog.EngineDamage:
+                            _parts.ClampGroup(ComponentKind.Engine, 100.0 - defect.Parameter);
+                            break;
+                        case DefectCatalog.GearDamage:
+                            _parts.DamageGroup(ComponentKind.LandingGear, 20.0);
+                            break;
+                        case DefectCatalog.BrakesWorn:
+                            _parts.ClampGroup(ComponentKind.Brakes, 30.0);
+                            break;
+                    }
+                    _parts.SyncComponents(_aircraft, _failures.Components);
+                }
+                else
+                {
+                    switch (defect.Code)
+                    {
+                        case DefectCatalog.EngineFailure:
+                            _failures.ClampHealth(ComponentKind.Engine, 15.0);
+                            break;
+                        case DefectCatalog.EngineFire:
+                            _failures.ClampHealth(ComponentKind.Engine, 5.0);
+                            Damage(ComponentKind.Airframe, 20.0);
+                            break;
+                        case DefectCatalog.EngineDamage:
+                            _failures.ClampHealth(ComponentKind.Engine, 100.0 - defect.Parameter);
+                            break;
+                        case DefectCatalog.GearDamage:
+                            Damage(ComponentKind.LandingGear, 20.0);
+                            break;
+                        case DefectCatalog.BrakesWorn:
+                            _failures.ClampHealth(ComponentKind.Brakes, 30.0);
+                            break;
+                    }
                 }
                 SyncLegacyConditions();
             }
@@ -159,13 +212,22 @@ namespace FlightCareer.UI.Services
 
         private void Damage(ComponentKind kind, double amount)
         {
-            var c = _failures.Get(kind);
-            if (c != null) c.Health = Math.Max(0.0, c.Health - amount);
+            if (_parts.IsActive)
+            {
+                _parts.DamageGroup(kind, amount);
+                if (_aircraft != null) _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+            else
+            {
+                var c = _failures.Get(kind);
+                if (c != null) c.Health = Math.Max(0.0, c.Health - amount);
+            }
         }
 
         /// <summary>
         /// Carrega (ou cria) os componentes da aeronave, aplica reparos/danos feitos fora do voo nas colunas
         /// antigas (Hangar, crash no pouso) e entrega cópias desanexadas para a sessão de voo.
+        /// Se a aeronave possui peças individuais, inicializa o PartFlightSession e sincroniza as barras.
         /// </summary>
         private void LoadFlightComponents(PilotAircraft aircraft)
         {
@@ -175,10 +237,14 @@ namespace FlightCareer.UI.Services
                 var dbAircraft = context.PilotAircrafts
                     .Include(a => a.AircraftType)
                     .Include(a => a.Components)
+                    .Include(a => a.Parts)
                     .FirstOrDefault(a => a.Id == aircraft.Id);
 
                 if (dbAircraft == null)
                 {
+                    _parts.Reset();
+                    _failures.PartsDriven = false;
+                    _failures.PartDamageSink = null;
                     _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
                     return;
                 }
@@ -195,16 +261,79 @@ namespace FlightCareer.UI.Services
                 LegacyConditionBridge.WriteToLegacy(dbAircraft, all);
                 context.SaveChanges();
 
-                var copies = all.Select(CloneComponent).ToList();
-                LegacyConditionBridge.WriteToLegacy(aircraft, copies);
-                _failures.Begin(copies, dbAircraft.AircraftType);
+                if (PartComponentBridge.HasParts(dbAircraft))
+                {
+                    string? model = dbAircraft.AircraftType?.Model;
+                    List<string> features = new();
+                    if (!string.IsNullOrWhiteSpace(model))
+                    {
+                        var limitProfileEntity = context.AircraftLimitProfiles.FirstOrDefault(p => p.AircraftTypeModel == model);
+                        if (limitProfileEntity != null && !string.IsNullOrWhiteSpace(limitProfileEntity.FeaturesJson))
+                        {
+                            try
+                            {
+                                features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(limitProfileEntity.FeaturesJson) ?? new();
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para {model}: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    var domainProfile = _limitResolver.FindById(model);
+
+                    PartComponentBridge.ReconcilePartsFromComponents(all, dbAircraft.Parts, _partCatalog);
+                    PartComponentBridge.SyncComponentsFromParts(dbAircraft, all, dbAircraft.Parts, _partCatalog);
+                    context.SaveChanges();
+
+                    var partCopies = dbAircraft.Parts.Select(ClonePart).ToList();
+                    var compCopies = all.Select(CloneComponent).ToList();
+                    LegacyConditionBridge.WriteToLegacy(aircraft, compCopies);
+
+                    _parts.Begin(partCopies, domainProfile, features);
+                    _failures.Begin(compCopies, dbAircraft.AircraftType);
+                    _failures.PartsDriven = _parts.IsActive;
+                    _failures.PartDamageSink = _parts.IsActive ? _parts.DamageGroup : null;
+                }
+                else
+                {
+                    _parts.Reset();
+                    _failures.PartsDriven = false;
+                    _failures.PartDamageSink = null;
+
+                    var copies = all.Select(CloneComponent).ToList();
+                    LegacyConditionBridge.WriteToLegacy(aircraft, copies);
+                    _failures.Begin(copies, dbAircraft.AircraftType);
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[Componentes] Falha ao carregar componentes da aeronave: {ex.Message}");
+                _parts.Reset();
+                _failures.PartsDriven = false;
+                _failures.PartDamageSink = null;
                 _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
             }
         }
+
+        private static AircraftPart ClonePart(AircraftPart p) => new()
+        {
+            Id = p.Id,
+            PilotAircraftId = p.PilotAircraftId,
+            PartId = p.PartId,
+            EngineIndex = p.EngineIndex,
+            Health = p.Health,
+            HoursSinceReplacement = p.HoursSinceReplacement,
+            CyclesSinceReplacement = p.CyclesSinceReplacement,
+            LastReplacedAtUtc = p.LastReplacedAtUtc,
+            LastReplacedAirframeHours = p.LastReplacedAirframeHours,
+            Flag = p.Flag,
+            FlaggedBy = p.FlaggedBy,
+            FlaggedAtUtc = p.FlaggedAtUtc,
+            IsBroken = p.IsBroken,
+            BrokenAtUtc = p.BrokenAtUtc
+        };
 
         private static AircraftComponent CloneComponent(AircraftComponent c) => new()
         {
@@ -235,6 +364,11 @@ namespace FlightCareer.UI.Services
                 d.LastInspectionAirframeHours = c.LastInspectionAirframeHours;
                 d.InspectionPrecision = c.InspectionPrecision;
                 d.InspectionBias = c.InspectionBias;
+            }
+
+            if (_parts.IsActive)
+            {
+                await _parts.SaveAsync(context);
             }
         }
 
@@ -356,6 +490,10 @@ namespace FlightCareer.UI.Services
                 _persistentFailures.Start(keepWatching, () => "SOLO (FORA DE VOO)", detectNative: false);
             }
             _simConnect.ResetCrashState();
+            // As peças NÃO são zeradas aqui: FinalizeFlightAsync chama StopMonitoring antes de salvar
+            // (SaveComponentsAsync). O próximo LoadFlightComponents faz Begin/Reset da sessão de peças.
+            _failures.PartsDriven = false;
+            _failures.PartDamageSink = null;
             _failures.Reset();
             IsMonitoring = false;
             IsFlightActive = false;
@@ -474,6 +612,11 @@ namespace FlightCareer.UI.Services
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
             _failures.ZeroAll();
+            if (_parts.IsActive)
+            {
+                _parts.ZeroAll();
+                _parts.SyncComponents(_aircraft, _failures.Components);
+            }
             SyncLegacyConditions();
             try
             {
@@ -613,6 +756,20 @@ namespace FlightCareer.UI.Services
                 // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), com o salto limitado no tempo real
                 double deltaHours = SimTimeStep.ToSimHours(wallSeconds, data.SimulationRate);
                 _failures.ProcessTick(data, deltaHours);
+
+                if (_parts.IsActive)
+                {
+                    if (_failures.CrashApplied)
+                    {
+                        _parts.ZeroAll();
+                    }
+                    else
+                    {
+                        _parts.ProcessTick(deltaHours);
+                    }
+                    _parts.SyncComponents(_aircraft, _failures.Components);
+                }
+
                 SyncLegacyConditions();
 
                 // Checar Perda Total
@@ -650,6 +807,7 @@ namespace FlightCareer.UI.Services
                 {
                     _hasTouchedDown = true;
                     _qualityService.RecordTouchdownFpm(touchdownRate);
+                    _lastTouchdownEvent = null;
                     RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
 
                     _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
@@ -661,6 +819,7 @@ namespace FlightCareer.UI.Services
                     if (!FastStreamAlive && data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
+                        _lastTouchdownEvent = null;
                         RegisterLanding(touchdownRate, data, isBounce: true);
                         _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                         OnStatusChanged?.Invoke(_currentStatus);
@@ -771,6 +930,7 @@ namespace FlightCareer.UI.Services
             {
                 _hasTouchedDown = true;
                 _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                _lastTouchdownEvent = ev;
                 if (_lastData is { } data) RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
                 _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
                 OnStatusChanged?.Invoke(_currentStatus);
@@ -778,6 +938,7 @@ namespace FlightCareer.UI.Services
             else if (ev.GroundSpeedKnots > 35 && ev.TouchdownFpm > _qualityService.TouchdownFPM)
             {
                 _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                _lastTouchdownEvent = ev;
                 if (_lastData is { } data) RegisterLanding(ev.TouchdownFpm, data, isBounce: true);
                 _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                 OnStatusChanged?.Invoke(_currentStatus);
@@ -790,6 +951,15 @@ namespace FlightCareer.UI.Services
             if (_aircraft == null) return;
             if (!isBounce) _aircraft.LandingsCount++;
             _failures.ProcessLanding(touchdownFpm, data.VelocityBodyX, data.IsWetOrContaminatedSurface);
+
+            if (_parts.IsActive)
+            {
+                double? pitch = _lastTouchdownEvent?.NoseUpDeg;
+                double? bank = _lastTouchdownEvent?.BankDeg;
+                _parts.ProcessTouchdown(touchdownFpm, pitch, bank, data.VelocityBodyX, isBounce);
+                _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+
             SyncLegacyConditions();
         }
 

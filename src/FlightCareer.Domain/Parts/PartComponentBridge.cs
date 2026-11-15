@@ -159,5 +159,85 @@ namespace FlightCareer.Domain.Parts
 
             return updated;
         }
+
+        /// <summary>
+        /// Reconcilia as peças a partir das barras de componente caso alterações tenham sido feitas
+        /// fora do voo (ex.: reparo ou revisão no Hangar, perda total ou dano manual).
+        /// - Se barra > agregado + 0,5: peças do grupo com Health < barra sobem para o valor da barra;
+        ///   se a barra for >= 99,5, limpa também IsBroken e BrokenAtUtc.
+        /// - Se barra < agregado - 0,5: peças do grupo sofrem clamp para não ultrapassarem a barra.
+        /// </summary>
+        public static int ReconcilePartsFromComponents(
+            IEnumerable<AircraftComponent> components,
+            IEnumerable<AircraftPart> parts,
+            PartCatalog partCatalog,
+            PartComponentMapping? mapping = null)
+        {
+            if (components == null || parts == null || partCatalog == null) return 0;
+            mapping ??= PartComponentMapping.CreateDefault();
+
+            var partsList = parts.ToList();
+            var compList = components.ToList();
+            if (partsList.Count == 0 || compList.Count == 0) return 0;
+
+            var partsByKind = new Dictionary<ComponentKind, List<AircraftPart>>();
+            foreach (var part in partsList)
+            {
+                var def = partCatalog.Get(part.PartId);
+                if (def == null) continue;
+
+                var kind = mapping.ResolveComponentKind(def.Group);
+                if (kind.HasValue)
+                {
+                    if (!partsByKind.TryGetValue(kind.Value, out var list))
+                    {
+                        list = new List<AircraftPart>();
+                        partsByKind[kind.Value] = list;
+                    }
+                    list.Add(part);
+                }
+            }
+
+            int modified = 0;
+            foreach (var comp in compList)
+            {
+                if (!partsByKind.TryGetValue(comp.Kind, out var groupParts) || groupParts.Count == 0)
+                    continue;
+
+                double aggregate = AggregateHealth(groupParts, mapping.Aggregation);
+
+                if (comp.Health > aggregate + 0.5)
+                {
+                    foreach (var p in groupParts)
+                    {
+                        if (p.Health < comp.Health)
+                        {
+                            p.Health = comp.Health;
+                            modified++;
+                        }
+
+                        if (comp.Health >= 99.5 && p.IsBroken)
+                        {
+                            p.IsBroken = false;
+                            p.BrokenAtUtc = null;
+                            modified++;
+                        }
+                    }
+                }
+                else if (comp.Health < aggregate - 0.5)
+                {
+                    foreach (var p in groupParts)
+                    {
+                        if (p.Health > comp.Health)
+                        {
+                            p.Health = comp.Health;
+                            modified++;
+                        }
+                    }
+                }
+            }
+
+            return modified;
+        }
     }
 }

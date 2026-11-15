@@ -65,6 +65,15 @@ namespace FlightCareer.Domain.Limits
         }
 
         /// <summary>
+        /// Localiza o perfil de limites da aeronave diretamente pelo seu modelo/identificador (ex.: "C152", "A320neo").
+        /// </summary>
+        public AircraftLimitProfile? FindById(string? aircraftId)
+        {
+            if (string.IsNullOrWhiteSpace(aircraftId)) return null;
+            return _profiles.FirstOrDefault(p => string.Equals(p.AircraftId, aircraftId, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
         /// Obtém o limite operacional para a chave indicada:
         /// Se definido no perfil, retorna o de menor LimitSource (maior prioridade).
         /// Caso não exista no perfil, busca no padrão da classe (retornando com Source = ClassDefault).
