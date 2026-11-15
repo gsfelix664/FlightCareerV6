@@ -1687,3 +1687,6 @@
   - Adicionado teto de preço por porte da aeronave em `PartPricing.GetClassPartPriceCap` (US$ 30k pistão, US$ 80k turboélice/jato executivo, US$ 55k narrowbody, US$ 110k widebody/cargueiro pesado).
   - Recalibradas todas as faixas de classes (A a J) em `economy_targets.json` com base nas ordens de grandeza reais (A320neo a US$ 1.941/h, A330 a US$ 3.807/h, 747-8i a US$ 5.084/h, CJ4 a US$ 1.558/h, Baron a US$ 436/h, C152 a US$ 88/h).
   - Adicionado teste automatizado cobrindo todas as 46 aeronaves capturadas no catálogo (`EconomySimulation_All46CapturedAircraft_FallWithinTargetBands`) com 100% de conformidade. Total da suíte: 260 testes passando.
+
+## 2026-11-15 - Validação dos sensores novos no C172 G1000 (Claude)
+- Profundor, aileron, piloto automático e trim do profundor validados no MSFS. Master de aviônicos (fica em 1), tensão da bateria (constante) e alternador (0) não funcionam como lidos hoje; leme a confirmar. Detalhes em `docs/plans/sensor-validation/sensores-novos-C172.md`. Nenhum código mudou.
