@@ -28,7 +28,8 @@ Claude: spec da tarefa ──► gemini-task.sh (worktree isolado) ──► Gem
    tools/agents/review-pack.sh F1.1 feat/parts-f1
    ```
    Commits, arquivos, arquivos quentes, alertas automáticos, relatório, build e testes, tudo enxuto.
-   Depois o Claude lê **só** o diff dos arquivos que importam (e os arquivos quentes inteiros).
+   Depois o Claude lê **só** o diff dos arquivos que importam (e os arquivos quentes inteiros, linha a linha).
+   Arquivos quentes também são delegados (decisão do usuário, 2026-11-15), desde que a spec diga exatamente o que mudar e o que não tocar.
 4. **Veredito**: `docs/reviews/<ID>-revisao.md` com APROVADO ou CORRIGIR (lista numerada). Erro recorrente vira
    uma linha em `docs/agents/LICOES.md`.
 5. **Merge** (Claude, após APROVADO): `FC_ALLOW_PROTECTED=1 git merge --no-ff feat/parts-f1` na base.

@@ -18,7 +18,8 @@ Modelo: o padrão do usuário (Gemini 3.8 Flash Medium). Não passe `--model` se
 | Pergunta ampla sobre o código ("onde X é feito?", "tem Y implementado?", varrer diretórios grandes, >~100 KB de leitura) | `agy-ask.sh` (somente leitura) |
 | Implementação com critérios de aceite claros (> ~20 linhas, várias leituras, ciclos de build) | `agy-task.sh` (worktree) |
 | Mudança pequena (≲ 20 linhas), arquivo já lido, ajuste de revisão trivial | Claude direto |
-| Decisão de arquitetura, código delicado (concorrência, interop, segurança), arquivo "quente" do projeto | Claude (ou spec muito detalhada + revisão linha a linha) |
+| Código delicado (concorrência, interop, segurança), arquivo "quente" do projeto | `agy-task.sh` com spec muito detalhada (passo a passo, o que não tocar) + revisão linha a linha do Claude (preferência do usuário: economizar tokens) |
+| Decisão de arquitetura | Claude decide e escreve na spec |
 | Busca pontual (1 símbolo, 1 arquivo) | Claude com Grep/Read: delegar custa mais |
 
 ### Ferramentas (`~/.claude/tools/gemini/`)

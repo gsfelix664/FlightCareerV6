@@ -26,4 +26,4 @@ Fluxo, travas e checklist em `docs/agents/ORQUESTRACAO.md`. Resumo:
 - Revisão: `tools/agents/review-pack.sh <ID> <branch>` primeiro, depois só o diff dos arquivos relevantes (quentes: inteiros). Veredito em `docs/reviews/<ID>-revisao.md` (APROVADO / CORRIGIR numerado). Erro recorrente → uma linha em `docs/agents/LICOES.md`.
 - Máximo de 2 rodadas de CORRIGIR; depois corrija você mesmo ou leve a decisão ao usuário.
 - Merge na base só após APROVADO: `FC_ALLOW_PROTECTED=1 git merge --no-ff <branch>`. Push só quando o usuário pedir.
-- Faça você mesmo o que é pequeno (≲ 20 linhas) ou exige julgamento fino (arquivos quentes de SimConnect, decisões de arquitetura): delegar custa mais do que fazer.
+- **Arquivos quentes também vão para o Gemini** (decisão do usuário, 2026-11-15, para economizar tokens): a spec traz o passo a passo (o que mudar, em qual arquivo/método, por quê, o que **não** tocar, armadilhas do `AGENTS.md` › 6) e o revisor lê o diff desses arquivos **linha a linha** (arquivo inteiro) e roda build e testes antes do merge. Faça você mesmo só o que é trivial (≲ 20 linhas), os ajustes da própria revisão e as decisões de arquitetura (que entram na spec).
