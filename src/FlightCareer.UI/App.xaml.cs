@@ -67,6 +67,18 @@ namespace FlightCareer.UI
 
                     await dbContext.EnsureSchemaUpdatedAsync();
 
+                    // Catálogo fixo de limites por aeronave (F2.0): roda em toda inicialização, para bancos
+                    // existentes receberem os perfis e para dataVersion maior atualizar os limites.
+                    try
+                    {
+                        var applied = await new FlightCareer.Infrastructure.Services.AircraftLimitSeeder(dbContext).SeedLimitsAsync();
+                        System.Diagnostics.Debug.WriteLine($"[Limites] Perfis de limites aplicados: {applied}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Limites] Falha ao semear o catálogo de limites: {ex.Message}");
+                    }
+
                     // Barras de saúde por componente: cria/migra os componentes das aeronaves do hangar
                     try
                     {

@@ -78,9 +78,6 @@ namespace FlightCareer.Infrastructure.Services
         {
             await SeedAircraftsAsync(progressCallback);
 
-            var limitSeeder = new AircraftLimitSeeder(_context);
-            await limitSeeder.SeedLimitsAsync(progressCallback);
-
             var lnmPath = LocateLittleNavmapDatabase();
             if (!string.IsNullOrEmpty(lnmPath) && File.Exists(lnmPath))
             {

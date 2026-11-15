@@ -174,8 +174,13 @@ def extract_simvar_candidates_from_csv(csv_path, context):
     csv_name = os.path.basename(csv_path)
 
     # Mediana das colunas mapeadas
+    engine_type = numbers.get("ctx-engine-type", context.get("ctx-engine-type"))
+    is_jet = engine_type is not None and int(round(float(engine_type))) == 1
+
     for col, (key, unit, ref_name) in SIMVAR_KEY_MAPPING.items():
         if key == "vle" and gear_is_fixed:
+            continue
+        if key == "mmo" and not is_jet:
             continue
 
         values = columns_data.get(col, [])
@@ -352,13 +357,22 @@ def process_merging(captures_dir, poh_path, map_path, out_dir, dry_run=False):
 
         # Aplicar candidatos a limites
         limits = data.setdefault("limits", [])
+        before = {l["key"]: (l.get("value"), l.get("source")) for l in limits}
         if apply_limit_candidates(limits, update_info["candidates"]):
             changed = True
+        after = {l["key"]: (l.get("value"), l.get("source")) for l in limits}
+        diff_lines = [
+            f"    {k}: {before[k][0]} ({before[k][1]}) -> {after[k][0]} ({after[k][1]})" if k in before
+            else f"    {k}: novo {after[k][0]} ({after[k][1]})"
+            for k in sorted(after) if before.get(k) != after[k]
+        ]
 
         if changed:
             data["dataVersion"] = data.get("dataVersion", 1) + 1
             if dry_run:
                 print(f"[DRY-RUN] Alterações para '{aircraft_id}' em {os.path.basename(json_file)}: dataVersion -> {data['dataVersion']}")
+                for line in diff_lines:
+                    print(line)
             else:
                 with open(json_file, "w", encoding="utf-8") as f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
@@ -371,6 +385,8 @@ def process_merging(captures_dir, poh_path, map_path, out_dir, dry_run=False):
 
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description="Mescla e atualiza limites operacionais de aeronaves.")
     parser.add_argument("--captures", help="Diretório contendo capturas de sensores (.csv e -context.json)")
     parser.add_argument("--poh", required=True, help="Arquivo CSV com limites de POH (poh_values.csv)")
