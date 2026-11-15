@@ -62,6 +62,7 @@ namespace FlightCareer.Tests.Limits
                   "dataVersion": 1,
                   "id": "Cessna C152",
                   "class": "Piston",
+                  "features": ["piston", "singleEngine", "fixedGear", "fixedPitchProp", "carbureted"],
                   "simMatch": { "title": ["C152"], "atcModel": ["C152"] },
                   "limits": [
                     { "key": "vne", "value": 149.0, "unit": "knots", "source": "SimVar", "reference": "Ref v1", "notes": null }
@@ -89,6 +90,7 @@ namespace FlightCareer.Tests.Limits
                   "dataVersion": 1,
                   "id": "Cessna C152",
                   "class": "Piston",
+                  "features": ["piston", "singleEngine", "fixedGear", "fixedPitchProp", "carbureted"],
                   "simMatch": { "title": ["C152"], "atcModel": ["C152"] },
                   "limits": [
                     { "key": "vne", "value": 999.0, "unit": "knots", "source": "SimVar", "reference": "Ref v1", "notes": null }
@@ -135,6 +137,7 @@ namespace FlightCareer.Tests.Limits
                   "dataVersion": 2,
                   "id": "Cessna C152",
                   "class": "Piston",
+                  "features": ["piston", "singleEngine", "fixedGear", "fixedPitchProp", "carbureted"],
                   "simMatch": { "title": ["C152"], "atcModel": ["C152"] },
                   "limits": [
                     { "key": "vne", "value": 155.0, "unit": "knots", "source": "SimVar", "reference": "Ref v2", "notes": null }
