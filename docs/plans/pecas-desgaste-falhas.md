@@ -321,3 +321,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 3) · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b
 - F4.2d · 2026-11-15 · PRONTO PARA REVISÃO · [Relatório](docs/reviews/F4.2d-relatorio.md) · branch fix/crash-solo-flaps
 - F2.1c · 2026-11-15 · PRONTO · [Relatório](docs/reviews/F2.1c-relatorio.md) · branch chore/pecas-f2.1c-limpeza
+- F2.3 · 2026-11-15 · PRONTO PARA REVISÃO · [Relatório](docs/reviews/F2.3-relatorio.md) · branch feat/parts-f2.3
