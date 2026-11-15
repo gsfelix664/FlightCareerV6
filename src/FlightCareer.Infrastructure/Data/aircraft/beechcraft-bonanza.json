@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Beechcraft Bonanza",
   "class": "Piston",
+  "engineCount": 1,
   "features": [
     "piston",
     "singleEngine",

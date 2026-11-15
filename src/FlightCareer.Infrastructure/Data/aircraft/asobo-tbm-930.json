@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
+  "engineCount": 1,
   "features": [
     "turboprop",
     "singleEngine",

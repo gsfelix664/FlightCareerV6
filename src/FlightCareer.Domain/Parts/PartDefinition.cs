@@ -20,6 +20,8 @@ namespace FlightCareer.Domain.Parts
         public double LaborHours { get; init; }
         public IReadOnlyList<string> Sensors { get; init; } = Array.Empty<string>();
         public string LifeSource { get; init; } = string.Empty;
+        public bool PerEngine { get; init; }
+        public bool PriceScalesWithAircraft { get; init; }
 
         public PartDefinition() { }
 
@@ -35,7 +37,9 @@ namespace FlightCareer.Domain.Parts
             decimal partPrice,
             double laborHours,
             IReadOnlyList<string> sensors,
-            string lifeSource)
+            string lifeSource,
+            bool perEngine = false,
+            bool priceScalesWithAircraft = false)
         {
             Id = id;
             Name = name;
@@ -49,6 +53,8 @@ namespace FlightCareer.Domain.Parts
             LaborHours = laborHours;
             Sensors = sensors ?? Array.Empty<string>();
             LifeSource = lifeSource;
+            PerEngine = perEngine;
+            PriceScalesWithAircraft = priceScalesWithAircraft;
         }
     }
 }

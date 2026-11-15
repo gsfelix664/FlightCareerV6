@@ -77,6 +77,7 @@ namespace FlightCareer.Infrastructure.Services
                         DataVersion = profile.DataVersion,
                         SimMatchJson = simMatchJson,
                         FeaturesJson = featuresJson,
+                        EngineCount = profile.EngineCount,
                         Limits = profile.Limits.Select(l => new AircraftLimitEntity
                         {
                             Id = Guid.NewGuid(),
@@ -98,6 +99,7 @@ namespace FlightCareer.Infrastructure.Services
                     existing.DataVersion = profile.DataVersion;
                     existing.SimMatchJson = simMatchJson;
                     existing.FeaturesJson = featuresJson;
+                    existing.EngineCount = profile.EngineCount;
 
                     var oldLimits = existing.Limits.ToList();
                     db.AircraftLimits.RemoveRange(oldLimits);

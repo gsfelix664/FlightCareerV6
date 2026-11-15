@@ -111,6 +111,9 @@ namespace FlightCareer.Infrastructure.Services
                 }
             }
 
+            int engineCount = dto.EngineCount ?? (dto.Features != null && dto.Features.Contains(AircraftFeatures.MultiEngine) ? 2 : 1);
+            if (engineCount <= 0) engineCount = 1;
+
             return new AircraftLimitProfile(
                 dto.Id,
                 dto.Class,
@@ -118,7 +121,8 @@ namespace FlightCareer.Infrastructure.Services
                 dto.SimMatch?.Title ?? new List<string>(),
                 dto.SimMatch?.AtcModel ?? new List<string>(),
                 limits,
-                dto.Features ?? new List<string>()
+                dto.Features ?? new List<string>(),
+                engineCount
             );
         }
 
@@ -201,6 +205,25 @@ namespace FlightCareer.Infrastructure.Services
 
             AircraftFeatures.ValidateCoherence(dto.Features, filePath);
 
+            if (dto.EngineCount.HasValue)
+            {
+                if (dto.EngineCount.Value <= 0)
+                {
+                    throw new InvalidDataException($"'engineCount' deve ser maior que zero no arquivo {filePath}.");
+                }
+                if (dto.Features != null)
+                {
+                    if (dto.Features.Contains(AircraftFeatures.SingleEngine) && dto.EngineCount.Value != 1)
+                    {
+                        throw new InvalidDataException($"Aeronave com feature 'singleEngine' deve ter engineCount == 1 no arquivo {filePath} (encontrado {dto.EngineCount.Value}).");
+                    }
+                    if (dto.Features.Contains(AircraftFeatures.MultiEngine) && dto.EngineCount.Value < 2)
+                    {
+                        throw new InvalidDataException($"Aeronave com feature 'multiEngine' deve ter engineCount >= 2 no arquivo {filePath} (encontrado {dto.EngineCount.Value}).");
+                    }
+                }
+            }
+
             if (dto.Limits != null)
             {
                 foreach (var l in dto.Limits)
@@ -264,6 +287,7 @@ namespace FlightCareer.Infrastructure.Services
             public int DataVersion { get; set; }
             public string Id { get; set; } = string.Empty;
             public string Class { get; set; } = string.Empty;
+            public int? EngineCount { get; set; }
             public List<string>? Features { get; set; }
             public SimMatchDto? SimMatch { get; set; }
             public List<LimitItemDto>? Limits { get; set; }

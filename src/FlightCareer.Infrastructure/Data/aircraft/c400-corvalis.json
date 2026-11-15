@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "C400 Corvalis",
   "class": "Piston",
+  "engineCount": 1,
   "features": [
     "piston",
     "singleEngine",

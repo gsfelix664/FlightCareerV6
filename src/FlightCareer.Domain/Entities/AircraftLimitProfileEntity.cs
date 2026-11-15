@@ -25,6 +25,9 @@ namespace FlightCareer.Domain.Entities
         /// <summary>JSON com a lista de características técnicas (features) da aeronave.</summary>
         public string FeaturesJson { get; set; } = "[]";
 
+        /// <summary>Quantidade de motores da aeronave (1 para monomotores, 2 a 4 para multimotores).</summary>
+        public int EngineCount { get; set; } = 1;
+
         public List<AircraftLimitEntity> Limits { get; set; } = new();
     }
 }

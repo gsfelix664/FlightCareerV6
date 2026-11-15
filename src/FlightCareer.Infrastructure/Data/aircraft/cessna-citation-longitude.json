@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Cessna Citation Longitude",
   "class": "Jet",
+  "engineCount": 2,
   "features": [
     "jet",
     "multiEngine",

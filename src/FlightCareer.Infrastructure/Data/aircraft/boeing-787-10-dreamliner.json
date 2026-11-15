@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Boeing 787-10 Dreamliner",
   "class": "Jet",
+  "engineCount": 2,
   "features": [
     "jet",
     "multiEngine",

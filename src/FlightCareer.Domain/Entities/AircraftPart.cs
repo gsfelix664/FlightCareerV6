@@ -34,6 +34,9 @@ namespace FlightCareer.Domain.Entities
         /// <summary>Identificador da peça no catálogo (ex.: 'engine.cylinders').</summary>
         public string PartId { get; set; } = string.Empty;
 
+        /// <summary>Índice do motor para peças instaladas por motor (1..N); 0 para peças da célula/gerais.</summary>
+        public int EngineIndex { get; set; } = 0;
+
         /// <summary>Saúde oculta da peça de 0 a 100%. Nunca exibida numericamente ao piloto.</summary>
         public double Health { get; set; } = 100.0;
 

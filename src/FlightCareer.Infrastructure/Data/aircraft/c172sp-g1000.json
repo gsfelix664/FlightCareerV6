@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "C172SP G1000",
   "class": "Piston",
+  "engineCount": 1,
   "features": [
     "piston",
     "singleEngine",

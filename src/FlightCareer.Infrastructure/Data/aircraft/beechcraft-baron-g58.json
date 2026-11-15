@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
+  "engineCount": 2,
   "features": [
     "piston",
     "multiEngine",

@@ -55,7 +55,7 @@ namespace FlightCareer.Infrastructure.Persistence
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AircraftPart>()
-                .HasIndex(p => new { p.PilotAircraftId, p.PartId })
+                .HasIndex(p => new { p.PilotAircraftId, p.PartId, p.EngineIndex })
                 .IsUnique();
 
             modelBuilder.Entity<AircraftLimitProfileEntity>()
@@ -243,12 +243,15 @@ namespace FlightCareer.Infrastructure.Persistence
                 );",
                 "CREATE INDEX IF NOT EXISTS IX_AircraftLimits_ProfileId ON AircraftLimits(ProfileId);",
 
-                // Características (features) e Peças com saúde oculta (F2.1)
+                // Características (features), contagem de motores e Peças com saúde oculta (F2.1)
                 "ALTER TABLE AircraftLimitProfiles ADD COLUMN FeaturesJson TEXT DEFAULT '[]';",
+                "ALTER TABLE AircraftLimitProfiles ADD COLUMN EngineCount INTEGER NOT NULL DEFAULT 1;",
+                "ALTER TABLE AircraftParts ADD COLUMN EngineIndex INTEGER NOT NULL DEFAULT 0;",
                 @"CREATE TABLE IF NOT EXISTS AircraftParts (
                     Id TEXT NOT NULL PRIMARY KEY,
                     PilotAircraftId TEXT NOT NULL,
                     PartId TEXT NOT NULL,
+                    EngineIndex INTEGER NOT NULL DEFAULT 0,
                     Health REAL NOT NULL,
                     HoursSinceReplacement REAL NOT NULL,
                     CyclesSinceReplacement INTEGER NOT NULL,
@@ -261,7 +264,8 @@ namespace FlightCareer.Infrastructure.Persistence
                     BrokenAtUtc TEXT NULL,
                     CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
                 );",
-                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId ON AircraftParts(PilotAircraftId, PartId);"
+                "DROP INDEX IF EXISTS IX_AircraftParts_PilotAircraftId_PartId;",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId_EngineIndex ON AircraftParts(PilotAircraftId, PartId, EngineIndex);"
             };
 
             foreach (var stmt in migrationStatements)

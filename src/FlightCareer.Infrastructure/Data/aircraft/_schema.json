@@ -8,6 +8,7 @@
     "dataVersion",
     "id",
     "class",
+    "engineCount",
     "features",
     "simMatch",
     "limits"
@@ -34,6 +35,11 @@
         "Jet",
         "Unknown"
       ]
+    },
+    "engineCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
     },
     "features": {
       "type": "array",

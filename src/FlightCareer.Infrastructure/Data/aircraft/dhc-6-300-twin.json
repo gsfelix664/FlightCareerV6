@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
+  "engineCount": 2,
   "features": [
     "turboprop",
     "multiEngine",

@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Boeing 747-400 Global Supertanker",
   "class": "Jet",
+  "engineCount": 4,
   "features": [
     "jet",
     "multiEngine",

@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "747-8i",
   "class": "Jet",
+  "engineCount": 4,
   "features": [
     "jet",
     "multiEngine",

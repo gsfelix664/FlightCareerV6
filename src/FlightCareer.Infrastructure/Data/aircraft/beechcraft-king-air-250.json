@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Beechcraft King Air 250",
   "class": "Turboprop",
+  "engineCount": 2,
   "features": [
     "turboprop",
     "multiEngine",

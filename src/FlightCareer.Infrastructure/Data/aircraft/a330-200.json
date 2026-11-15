@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "A330-200",
   "class": "Jet",
+  "engineCount": 2,
   "features": [
     "jet",
     "multiEngine",

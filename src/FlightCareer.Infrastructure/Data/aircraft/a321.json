@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "A321",
   "class": "Jet",
+  "engineCount": 2,
   "features": [
     "jet",
     "multiEngine",

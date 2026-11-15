@@ -69,27 +69,65 @@ namespace FlightCareer.Infrastructure.Services
                 }
 
                 var applicableParts = _catalog.PartsFor(features);
-                var existingPartIds = a.Parts.Select(p => p.PartId).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var existingParts = a.Parts
+                    .Select(p => (p.PartId.ToLowerInvariant(), p.EngineIndex))
+                    .ToHashSet();
 
-                var missingParts = applicableParts
-                    .Where(p => !existingPartIds.Contains(p.Id))
-                    .Select(p => new AircraftPart
+                int engineCount = Math.Max(1, profile.EngineCount);
+                var missingParts = new List<AircraftPart>();
+
+                foreach (var partDef in applicableParts)
+                {
+                    if (partDef.PerEngine)
                     {
-                        Id = Guid.NewGuid(),
-                        PilotAircraftId = a.Id,
-                        PartId = p.Id,
-                        Health = 100.0,
-                        HoursSinceReplacement = 0.0,
-                        CyclesSinceReplacement = 0,
-                        LastReplacedAtUtc = DateTime.UtcNow,
-                        LastReplacedAirframeHours = a.CurrentAirframeHours,
-                        Flag = PartFlag.None,
-                        FlaggedBy = PartFlagSource.None,
-                        FlaggedAtUtc = null,
-                        IsBroken = false,
-                        BrokenAtUtc = null
-                    })
-                    .ToList();
+                        for (int engineIndex = 1; engineIndex <= engineCount; engineIndex++)
+                        {
+                            if (!existingParts.Contains((partDef.Id.ToLowerInvariant(), engineIndex)))
+                            {
+                                missingParts.Add(new AircraftPart
+                                {
+                                    Id = Guid.NewGuid(),
+                                    PilotAircraftId = a.Id,
+                                    PartId = partDef.Id,
+                                    EngineIndex = engineIndex,
+                                    Health = 100.0,
+                                    HoursSinceReplacement = 0.0,
+                                    CyclesSinceReplacement = 0,
+                                    LastReplacedAtUtc = DateTime.UtcNow,
+                                    LastReplacedAirframeHours = a.CurrentAirframeHours,
+                                    Flag = PartFlag.None,
+                                    FlaggedBy = PartFlagSource.None,
+                                    FlaggedAtUtc = null,
+                                    IsBroken = false,
+                                    BrokenAtUtc = null
+                                });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!existingParts.Contains((partDef.Id.ToLowerInvariant(), 0)))
+                        {
+                            missingParts.Add(new AircraftPart
+                            {
+                                Id = Guid.NewGuid(),
+                                PilotAircraftId = a.Id,
+                                PartId = partDef.Id,
+                                EngineIndex = 0,
+                                Health = 100.0,
+                                HoursSinceReplacement = 0.0,
+                                CyclesSinceReplacement = 0,
+                                LastReplacedAtUtc = DateTime.UtcNow,
+                                LastReplacedAirframeHours = a.CurrentAirframeHours,
+                                Flag = PartFlag.None,
+                                FlaggedBy = PartFlagSource.None,
+                                FlaggedAtUtc = null,
+                                IsBroken = false,
+                                BrokenAtUtc = null
+                            });
+                        }
+                    }
+                }
 
                 if (missingParts.Count == 0) continue;
 

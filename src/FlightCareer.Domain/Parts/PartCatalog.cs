@@ -129,7 +129,9 @@ namespace FlightCareer.Domain.Parts
                 d.PartPrice,
                 d.LaborHours,
                 d.Sensors ?? new List<string>(),
-                d.LifeSource
+                d.LifeSource,
+                d.PerEngine,
+                d.PriceScalesWithAircraft
             )).ToList() ?? new List<PartDefinition>();
 
             return new PartCatalog(parts);
@@ -179,6 +181,8 @@ namespace FlightCareer.Domain.Parts
             public double LaborHours { get; set; }
             public List<string>? Sensors { get; set; }
             public string LifeSource { get; set; } = string.Empty;
+            public bool PerEngine { get; set; }
+            public bool PriceScalesWithAircraft { get; set; }
         }
 
         private class AppliesToDto

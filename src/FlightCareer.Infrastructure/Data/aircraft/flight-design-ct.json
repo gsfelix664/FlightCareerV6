@@ -1,8 +1,9 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Flight Design CT",
   "class": "Piston",
+  "engineCount": 1,
   "features": [
     "piston",
     "singleEngine",
