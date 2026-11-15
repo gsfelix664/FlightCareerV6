@@ -38,3 +38,22 @@
 ## Dúvidas e decisões para o revisor
 - **Leitura nativa de LVars no MSFS 2024:** A documentação oficial do SDK confirma que `SimConnect_AddToDataDefinition` suporta diretamente `"L:VARIABLE_NAME"` com tipo `SIMCONNECT_DATATYPE_FLOAT64` e unidade `"number"`, sem necessidade de módulo WASM intermediário. Isso abre caminho para ler `L:IS_AVATAR` e flags de sistemas de aeronaves de terceiros diretamente pelo `SimConnectService` no futuro, caso aprovado pelo revisor.
 - **Walkaround (`COVER ON:0..2`):** É uma excelente adição para integrar a inspeção externa pré-voo com penalidades (ex.: decolar com calços, voar com pitot coberto gerando indicação zero de velocímetro). Recomendamos incluí-las no `sensor_registry.json` assim que validadas no teste de solo.
+
+---
+
+# RESEARCH-SIMVARS — Rodada 3: Descoberta de Variáveis Novas e Correção da Auditoria
+
+**Data:** 2026-11-15
+
+## Resumo da Rodada 3
+- Auditoria de `auditoria-registro.md` corrigida conforme os 5 itens da revisão da rodada 2:
+  - Presença nos logs reais do `SensorRecorder` (`20261115-1747-Cessna_C152.csv`, `20261115-1636-C172SP_G1000_Passengers.csv`) prova que o SimConnect aceitou o nome (zero exceções e zero rejeições registradas pelo leitor dinâmico).
+  - `FLAP SPEED EXCEEDED` e `GEAR SPEED EXCEEDED` mantidas como aceitas nativamente no sim.
+  - `ELECTRICAL BATTERY LEVEL` reclassificada como funcional e ativa no C152 (98.6% a 100%).
+  - `ELECTRICAL TOTAL LOAD AMPS` confirmada como documentada oficialmente no SDK 2024 e altamente dinâmica (0 a 175 A).
+  - Proposta detalhada para desacoplar `CONTACT POINT COMPRESSION` e `IS SKIDDING` de `perEngine`, expandindo por ponto de contato (`:0` nariz, `:1` principal esquerdo, `:2` principal direito).
+- Mapeamento de cima para baixo pelas peças do `parts_catalog.json` entregue em `docs/plans/sensor-research/descoberta-variaveis.md` com 28 variáveis novas documentadas e com evidências em projetos abertos locais (`FsConnect`, `aircraft` FBW, `MobiFlight`).
+- Seleção "Top 25 para o Próximo Teste" organizada em roteiro executável de 15 minutos em 17 passos operacionais.
+- Seção "Variáveis Descartadas ou Esclarecidas" detalhando a ausência de SimVar nativa para `BRAKE TEMPERATURE` e descarte de variáveis inexistentes/inválidas.
+- Relatório individual gerado em `docs/reviews/RESEARCH-SIMVARS-r3-relatorio.md`.
+

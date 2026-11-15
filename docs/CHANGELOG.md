@@ -1855,4 +1855,24 @@
 - **Não testado no MSFS**:
   - Tarefa estritamente de documentação e pesquisa técnica baseada nas páginas oficiais do SDK MSFS 2024; nenhum código executável ou arquivo de catálogo de regras foi modificado.
 
+## 2026-11-15 - Descoberta de variáveis novas e correções da auditoria - Rodada 3 (Gemini)
+- **Correção da Auditoria com Prova em CSVs Reais (`docs/plans/sensor-research/auditoria-registro.md`)**:
+  - Reavaliação das SimVars auditadas contra os logs reais do `SensorRecorder` (`20261115-1747-Cessna_C152.csv`, `20261115-1636-C172SP_G1000_Passengers.csv`) e fixtures: o leitor dinâmico descarta SimVars rejeitadas por `NAME_UNRECOGNIZED`, logo a presença da coluna no CSV comprova aceitação pelo simulador.
+  - Reclassificação de `FLAP SPEED EXCEEDED` e `GEAR SPEED EXCEEDED` como aceitas nativamente pelo SimConnect (presentes nos 4 logs de teste).
+  - Comprovação de que `ELECTRICAL BATTERY LEVEL` é aceita e ativamente variável nos voos (98.6% a 100% no C152).
+  - Confirmação de que `ELECTRICAL TOTAL LOAD AMPS` está documentada oficialmente no SDK 2024 (não obsoleta) e varia amplamente (0 a 175 A).
+  - Rebaixamento de divergências de escala com valores coerentes (`ELECTRICAL BATTERY ESTIMATED CAPACITY PCT`, 0.986 a 1.0) para nível informativo.
+  - Proposta técnica para leitura de trem de pouso: desacoplar `CONTACT POINT COMPRESSION` e `IS SKIDDING` de `perEngine`, passando a ler explicitamente por ponto de contato (`:0` nariz, `:1` principal esquerdo, `:2` principal direito) para diagnosticar impacto localizado e toque de três pontos.
+- **Descoberta de Variáveis Novas por Peça (`docs/plans/sensor-research/descoberta-variaveis.md`)**:
+  - Mapeamento de cima para baixo a partir do `parts_catalog.json` (Motor, Óleo, Hélice, Trem, Freios, Superfícies, Célula, Luzes, Pressurização, Combustível, Fogo, Walkaround e Ambiente).
+  - Relação de 28 novas variáveis do MSFS 2024 não registradas anteriormente no FlightCareer, com URL oficial do SDK, unidade, índice, modo R/W, suporte no MSFS 2020 e evidências em projetos abertos locais (`FsConnect`, `aircraft` FlyByWire, `MobiFlight`).
+  - Destaque para `COVER ON:0..7` (inspeção externa/walkaround com calços, capas de pitot e amarração de hélice), `LEFT/RIGHT/CENTER WHEEL RPM` (spin-up no toque e flat spot por roda travada), `SUCTION PRESSURE` (vácuo físico das bombas para instrumentos giroscópicos), `ENG OIL QUANTITY:1` (nível do cárter) e `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT` (assimetria física de flaps).
+  - Seleção "Top 25 para o Próximo Teste" com roteiro cronometrado e integrado de 15 minutos em 17 passos para validação em solo e voo curto.
+  - Seção "Variáveis Descartadas ou Esclarecidas" demonstrando que `BRAKE TEMPERATURE` não é SimVar nativa da Asobo (implementada por termodinâmica de primeiros princípios no FlightCareer), além do esclarecimento sobre SimVars inexistentes ou sintaxes inválidas.
+- **Relatório de Execução (`docs/reviews/RESEARCH-SIMVARS-r3-relatorio.md`)**:
+  - Relatório da rodada 3 conforme o modelo das instruções do Gemini e atualização de `RESEARCH-SIMVARS-relatorio.md`.
+- **Não testado no MSFS**:
+  - Tarefa documental e de pesquisa técnica; as novas variáveis descobertas serão validadas fisicamente no simulador através do roteiro Top 25 em tarefa subsequente.
+
+
 

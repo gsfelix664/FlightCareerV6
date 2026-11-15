@@ -1,8 +1,8 @@
-# Auditoria do Registro de Variáveis do FlightCareer (SDK MSFS 2024)
+# Auditoria do Registro de Variáveis do FlightCareer (SDK MSFS 2024) — Rodada 2 Corrigida
 
-> **Documento gerado na tarefa RESEARCH-SIMVARS-r2**  
-> **Objetivo:** Auditar todas as variáveis registradas no `src/FlightCareer.Infrastructure/Data/sensor_registry.json` (421 sensores), `context_registry.json` (25 variáveis) e nas definições fixas de `SimConnectService.cs` (`SimTelemetry`, `SimFailureState`, `SimFastFlightState` e definições de escrita).  
-> **Critério:** Apresentar **somente os problemas** (nomes inexistentes, variáveis legadas com substituta no 2024, unidades incompatíveis ou suspeitas e erros de indexação/escopo) acompanhados de causa raiz, substituta oficial e URL oficial da documentação do SDK.
+> **Documento revisado e corrigido na tarefa RESEARCH-SIMVARS-r3**  
+> **Critério de Prova:** Cruzamento estrito entre a documentação oficial do SDK MSFS 2024 e os **CSVs reais** gravados pelo `SensorRecorder` (`%LocalAppData%\FlightCareer\sensor-logs\20261115-1747-Cessna_C152.csv`, `20261115-1733-Cessna_C152.csv`, `20261115-1534-C172SP_G1000_Passengers.csv`, `20261115-1636-C172SP_G1000_Passengers.csv`).  
+> **Regra do Simulador:** O `SensorFrameReader` remove automaticamente do layout toda SimVar rejeitada pelo MSFS (`SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED`). Portanto, **coluna presente no CSV = nome aceito pelo simulador**. Somente é classificada como inexistente/rejeitada a variável ausente dos logs por rejeição do SimConnect.
 
 ---
 
@@ -11,73 +11,89 @@
 > [!WARNING]
 > Erros em definições fixas têm gravidade crítica: uma SimVar com nome não reconhecido rejeitada pelo MSFS causa `SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED`, diminui o pacote de bytes e desloca todos os campos subsequentes da struct (`AGENTS.md` §6).
 
-| Variável Registrada | Struct / Definição | Unidade no Código | Problema Identificado | Gravidade | Substituta / Correção Recomendada | Referência Oficial SDK MSFS 2024 |
-|---|---|---|---|---|---|---|
-| `TURB ENG CONDITION LEVER POSITION:1` | `SimTelemetry` (pos. 49) | `Percent` | O SDK documenta a posição da alavanca de corte/idle de turbina como enumerador discreto de 3 posições (0 = Cut-off, 1 = Low Idle, 2 = High Idle), e não como percentagem contínua. Registrar como `Percent` pode gerar distorção de escala (0%, 100%, 200%) dependendo da aeronave. | Média | Manter `Enum` ou ler via `TURB ENG CONDITION LEVER POSITION:1` com unidade `Enum` / `Number`. | [Aircraft Engine Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/) |
-| `BRAKE LEFT WEIGHT REMAINING` / `BRAKE RIGHT WEIGHT REMAINING` | `SimFailureState` (pos. 10 e 11) | `Percent` | No SDK oficial do MSFS 2024, a unidade canônica documentada é `Percent Over 100` (valor normalizado entre 0.00 e 1.00). O SimConnect aceita `Percent` multiplicando por 100, mas causa inconsistência conceitual com o `sensor_registry.json` que utiliza `percent over 100`. | Baixa | Alinhar unidade para `Percent Over 100` ou tratar escala 0–100 no consumidor. | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) |
-| `RECIP CARBURETOR TEMPERATURE:1` | `SimTelemetry` (pos. 53) | `Celsius` | A unidade nativa na documentação do motor a pistão é `Rankine`. O SimConnect realiza a conversão em tempo de execução para `Celsius` sem erro, mas é importante registrar a dependência dessa conversão automática. | Informativa | Manter `Celsius` (conversão suportada pelo SimConnect). | [Aircraft Engine Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/) |
-| `PARTIAL PANEL VACUUM`, `PITOT`, `ALTIMETER`, `ELECTRICAL` | `SimTelemetry` (pos. 56–58, 62) | `Enum` | Variáveis legadas do FSX/MSFS 2020 para falhas parciais de instrumentos. No MSFS 2024, sistemas de falha modernos operam em nível de circuito/linha/componente (`CIRCUIT ON:index`, `WEAR AND TEAR IS FAILED:<id>`). | Baixa | Válidas para compatibilidade com aeronaves clássicas e MSFS 2020. | [Simulation Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/simulation-variables/) |
+| Variável Registrada | Struct / Posição | Unidade no Código | Aceita pelo Sim? | Varia nos Logs? | Documentada? (URL) | Análise / Problema Real | Gravidade | Recomendação |
+|---|---|---|---|---|---|---|---|---|
+| `TURB ENG CONDITION LEVER POSITION:1` | `SimTelemetry` (pos. 49) | `Percent` | Sim (em turbinas) | Sim | [Aircraft Engine Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/) | Documentada como enumerador discreto (0 = Cut-off, 1 = Low Idle, 2 = High Idle) ou percentual em certos modelos. Registrar como `Percent` pode gerar escala 0%, 100%, 200%. | Média | Manter `Enum` / `Number` ou tratar escala no consumidor. |
+| `BRAKE LEFT WEIGHT REMAINING` / `BRAKE RIGHT WEIGHT REMAINING` | `SimFailureState` (pos. 10 e 11) | `Percent` | Sim | Sim (em panes) | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) | No SDK oficial a unidade canônica é `Percent Over 100` (0.00 a 1.00). O SimConnect converte para `Percent` (0 a 100). | Baixa | Alinhar unidade para `Percent Over 100` para padronização interna. |
+| `RECIP CARBURETOR TEMPERATURE:1` | `SimTelemetry` (pos. 53) | `Celsius` | Sim | Sim | [Aircraft Engine Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/) | Unidade nativa no motor a pistão é `Rankine`. O SimConnect realiza a conversão em tempo de execução para `Celsius` perfeitamente. | Informativa | Manter `Celsius`. |
+| `PARTIAL PANEL VACUUM`, `PITOT`, `ALTIMETER`, `ELECTRICAL` | `SimTelemetry` (pos. 56–58, 62) | `Enum` | Sim | Sim (quando acionado) | [Simulation Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/simulation-variables/) | Variáveis legadas do FSX/MSFS 2020 para falhas de instrumentos. Válidas e compatíveis no MSFS 2024 para aeronaves analógicas. | Informativa | Manter para compatibilidade ampla. |
 
 ---
 
-## 2. Nomes Inexistentes ou Não Encontrados no SDK (`sensor_registry.json`)
+## 2. Auditoria de Nomes de SimVars (`sensor_registry.json`)
 
-> [!CAUTION]
-> Estas variáveis **não existem** no SDK do MSFS 2024. Se requisitadas via `AddToDataDefinition` dinâmica, disparam exceção no SimConnect e falham a leitura do lote correspondente.
+> [!NOTE]
+> **Correção da Rodada 2:** Na rodada 2, `FLAP SPEED EXCEEDED`, `GEAR SPEED EXCEEDED` e `ELECTRICAL BATTERY LEVEL` haviam sido consideradas "inexistentes" porque não constavam na documentação web aberta do SDK. O cruzamento com os CSVs reais revelou que **as três foram aceitas pelo simulador** e estão presentes nos 4 logs sem disparar exceção, sendo que `ELECTRICAL BATTERY LEVEL` varia ativamente.
 
-| Chave (`key`) | SimVar Cadastrada | Grupo | Causa Raiz do Erro | Substituta Oficial Documentada (MSFS 2024) | Unidade Correta | Referência Oficial SDK MSFS 2024 |
-|---|---|---|---|---|---|---|
-| `dmg-flap-speed-exceeded` | `FLAP SPEED EXCEEDED` | `native-damage` | **Nome inexistente no SDK.** A string refere-se a uma notificação de penalidade da interface do modo Carreira da Asobo, e não a uma SimVar. | `FLAP DAMAGE BY SPEED` (Bool) combinado com `FLAPS CURRENT SPEED LIMITATION` (Knots) e `AIRSPEED INDICATED` (Knots). | `Bool` / `Knots` | [Aircraft Control Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-control-variables/) |
-| `dmg-gear-speed-exceeded` | `GEAR SPEED EXCEEDED` | `native-damage` | **Nome inexistente no SDK.** Trata-se de mensagem de alerta do Career Mode. | `GEAR DAMAGE BY SPEED` (Bool) combinado com `AIRSPEED INDICATED` e limites de $V_{LO}/V_{LE}$. | `Bool` / `Knots` | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) |
-| `elec-battery-level` | `ELECTRICAL BATTERY LEVEL` | `electrical` | **Nome inexistente no SDK.** Não existe variável com este nome na categoria `Aircraft Electrics Variables`. | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT:index` (estimativa de SoC) ou `ELECTRICAL BATTERY LOAD:index` (Amperes). | `Percent` / `Amperes` | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) |
+| Chave (`key`) | SimVar Cadastrada | Grupo | Aceita pelo Sim? | Varia nos Logs? | Documentada? | Diagnóstico Técnico Real | Ação Recomendada |
+|---|---|---|---|---|---|---|---|
+| `dmg-flap-speed-exceeded` | `FLAP SPEED EXCEEDED` | `native-damage` | **Sim** (presente nos 4 logs: C152 e C172) | Constante (`0` em voo dentro do envelope) | Não documentada na web pública do SDK 2024 | Aceita pelo motor do SimConnect nativamente. Retorna flag quando $V_{FE}$ é violada. | Manter no registro. Pode ser complementada com `FLAP DAMAGE BY SPEED` e limites de POH. |
+| `dmg-gear-speed-exceeded` | `GEAR SPEED EXCEEDED` | `native-damage` | **Sim** (presente nos 4 logs: C152 e C172) | Constante (`0` no C152/C172) | Não documentada na web pública do SDK 2024 | Aceita pelo SimConnect. Flag de excedência de velocidade de trem de pouso ($V_{LO}/V_{LE}$). | Manter no registro para aeronaves com trem retrátil. |
+| `elec-battery-level` | `ELECTRICAL BATTERY LEVEL` | `electrical` | **Sim** (presente nos 4 logs) | **Sim** (608 valores distintos no C152: 98.6% a 100%) | Não documentada na página `aircraft-electrics-variables` | Variável ativa no sim que reporta o nível de carga da bateria. Altamente funcional no C152 para monitorar descarga e alternador inoperante. | **Manter e utilizar**. Excelente sensor de saúde da bateria. |
 
 ---
 
 ## 3. Erros de Indexação e Escopo (`sensor_registry.json`)
 
 > [!IMPORTANT]
-> O gerador de layout dinâmico (`SensorLayout`) expande variáveis com `perEngine: true` anexando `:1`, `:2`, etc. Variáveis que requerem índices de outro subsistema (pontos de contato, circuitos, linhas de combustível) sofrem distorção de significado se marcadas com `perEngine`. Do mesmo modo, variáveis que exigem índice sofrem rejeição se cadastradas sem índice.
+> O layout dinâmico (`SensorLayout`) expande sensores com `perEngine: true` adicionando `:1`, `:2` correspondentes ao número de motores. Sensores cujo índice no simulador referencia outro subsistema (pontos de contato, circuitos, linhas) sofrem distorção de significado se marcados com `perEngine`.
 
-| Chave (`key`) | SimVar Cadastrada | Índice Atual | Problema de Indexação | Correção Necessária no MSFS 2024 | Referência Oficial SDK MSFS 2024 |
-|---|---|---|---|---|---|
-| `gear-contact-point-compression` | `CONTACT POINT COMPRESSION` | `perEngine: true` | O índice desta SimVar representa o **número do ponto de contato** (`point.N` em `flight_model.cfg`), e **não** o índice do motor. Usar `perEngine` gera leitura do contato 1 e 2 apenas se houver 2 motores, ignorando o trem de nariz (contato 0) ou associando erradamente motor a trem de pouso. | `CONTACT POINT COMPRESSION:index` (onde index = 0, 1, 2 para nose, left, right gear) ou nome do ponto `:'Wheel_Front'_n`. | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) |
-| `gear-contact-point-is-skidding` | `CONTACT POINT IS SKIDDING` | `perEngine: true` | Mesma causa: indexado por ponto de contato (`point.N`), não por motor. | `CONTACT POINT IS SKIDDING:index` ou `:'Wheel_Main_Left'_n`. | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) |
-| `fuel-system-pump-active` | `FUELSYSTEM PUMP ACTIVE` | `perEngine: true` | No sistema modular de combustível (`[FUEL_SYSTEM]`), o índice representa o **ID da bomba de combustível** no esquema modular (bomba 1, bomba 2, etc.), e não necessariamente o motor. | `FUELSYSTEM PUMP ACTIVE:index` com índice mapeado do catálogo da aeronave. | [Aircraft Fuel Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-fuel-variables/) |
-| `fuel-system-line-fuel-pressure` | `FUELSYSTEM LINE FUEL PRESSURE` | `perEngine: true` | O índice representa o **número da linha de combustível**, não o motor. Em bimotores com linhas cruzadas, o índice da linha do motor direito pode ser 4 ou 5. | `FUELSYSTEM LINE FUEL PRESSURE:index` com resolução por catálogo. | [Aircraft Fuel Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-fuel-variables/) |
-| `af-wing-flex-pct` | `WING FLEX PCT` | `perEngine: false` (sem índice) | No SDK do MSFS, `WING FLEX PCT` **exige obrigatoriamente** o índice da asa: `:1` para a asa esquerda e `:2` para a asa direita. Consultar sem índice retorna 0.0 ou rejeição. | Definir dois sensores: `WING FLEX PCT:1` (asa esquerda) e `WING FLEX PCT:2` (asa direita). | [Aircraft Flight Model Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-flight-model-variables/) |
-| `elec-circuit-breaker-pulled` | `CIRCUIT BREAKER PULLED` | `perEngine: false` (sem índice) | Exige o índice do disjuntor/circuito (`CIRCUIT BREAKER PULLED:index`, base 1). Sem índice, consulta o índice 0 (geralmente inexistente). | `CIRCUIT BREAKER PULLED:index` indexado por disjuntor do sistema. | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) |
-| `elec-battery-estimated-capacity-pct` | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | `perEngine: false` (sem índice) | Em aeronaves com mais de uma bateria (ex.: Main e Standby no G1000), exige índice de bateria (`:index`). | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT:1` e `:2`. | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) |
-| `pneu-duct-pressure` | `PNEUMATICS DUCT PRESSURE` | `perEngine: false` (sem índice) | No sistema pneumático modular do MSFS 2024, exige o identificador do Pack ou duto (`:index` ou `:'Pack_1'_n`). | `PNEUMATICS DUCT PRESSURE:index` ou nome do componente. | [Aircraft System Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-system-variables/) |
-| `pneu-pack-status` | `PNEUMATICS PACK STATUS` | `perEngine: false` (sem índice) | Exige o identificador do Pack (`:index` ou `:'Pack_1'_n`). | `PNEUMATICS PACK STATUS:index` ou `:'Pack_1'_n`. | [Aircraft System Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-system-variables/) |
-
----
-
-## 4. Incompatibilidade ou Divergência de Unidades (`sensor_registry.json`)
-
-| Chave (`key`) | SimVar | Unidade no Registro | Unidade Canônica no SDK | Impacto Técnico | Correção Recomendada | Referência Oficial SDK MSFS 2024 |
+| Chave (`key`) | SimVar Cadastrada | Índice Atual | Aceita pelo Sim? | Varia nos Logs? | Problema de Indexação | Proposta de Solução no FlightCareer |
 |---|---|---|---|---|---|---|
-| `pneu-pack-status` | `PNEUMATICS PACK STATUS` | `bool` | `percent over 100` | O SDK define esta variável como a vazão/fluxo de ar normal do pack em formato percentual fracionário (0.00 a 1.00), e não como booleano ligado/desligado. | Alterar unidade para `percent over 100`. | [Aircraft System Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-system-variables/) |
-| `elec-battery-estimated-capacity-pct` | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | `percent over 100` | `Percent` | O SDK documenta a capacidade relativa de bateria em escala de 0 a 100 (`Percent`). Pedir como `percent over 100` força o SimConnect a dividir por 100 ou falhar a conversão dependendo da precisão. | Alinhar unidade para `Percent`. | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) |
-| `gear-skidding-factor` | `GEAR SKIDDING FACTOR` | `percent` | `Percent Over 100` | O SDK documenta o fator de derrapagem como valor entre 0.00 e 1.00 (`Percent Over 100`). Pedir como `percent` faz o SimConnect devolver valor multiplicado por 100 (0 a 100). | Alinhar unidade para `percent over 100` para manter consistência com cálculos físicos de atrito. | [Aircraft Brake and Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) |
-| `eng-max-cht`, `eng-max-egt`, `oil-max-temperature`, `turb-max-itt` | `RECIP MAX CHT`, `MAX EGT`, `MAX OIL TEMPERATURE`, `TURB MAX ITT` | `celsius` | `Rankine` | A unidade nativa especificada na documentação do SDK para todas as constantes de aquecimento do `engines.cfg` é `Rankine`. O SimConnect converte automaticamente para `celsius`. | Documentar que a conversão é realizada pela API SimConnect. | [Aircraft Engine Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/) |
+| `gear-contact-point-compression` | `CONTACT POINT COMPRESSION` | `perEngine: true` | Sim (expandida como `:1`) | **Sim** (571 valores distintos no C152: 0.00 a 0.48) | Indexada incorretamente por motor. No simulador, o índice é o **ponto de contato** (`point.N` em `flight_model.cfg`): `0` = trem de nariz/bequilha, `1` = trem principal esquerdo, `2` = trem principal direito. Com `perEngine`, a perna dianteira (`:0`) é completamente ignorada! | **Ler por ponto de contato:** expandir como `gear-contact-compression:0` (nose), `:1` (left main), `:2` (right main), com descoberta de quantidade de contatos via contexto/calibração. |
+| `gear-contact-point-is-skidding` | `CONTACT POINT IS SKIDDING` | `perEngine: true` | Sim (expandida como `:1`) | **Sim** (valores 0 e 1 no C152) | Mesma causa: indexada por ponto de contato (`point.N`), não por motor. | Expandir por ponto de contato (`:0`, `:1`, `:2`) para detectar derrapagem e esforço lateral em cada perna. |
+| `fuel-system-pump-active` | `FUELSYSTEM PUMP ACTIVE` | `perEngine: true` | Sim (expandida como `:1`) | Sim/Constante | No sistema modular `[FUEL_SYSTEM]`, o índice é o **ID da bomba de combustível** na topologia modular, e não necessariamente o motor. | Resolver índice da bomba no catálogo da aeronave (`AircraftLimitProfile` / calibração). |
+| `fuel-system-line-fuel-pressure` | `FUELSYSTEM LINE FUEL PRESSURE` | `perEngine: true` | Sim (expandida como `:1`) | Sim | O índice é o **número da linha de combustível**. Em bimotores com crossfeed, a linha do motor 2 pode ter índice 4 ou 5. | Resolver índice da linha no catálogo da aeronave. |
+| `af-wing-flex-pct` | `WING FLEX PCT` | `perEngine: false` (sem índice) | Sim (aceita como escalar ou `:1`) | Sim | No SDK do MSFS, `WING FLEX PCT` aceita índice de asa (`:1` esquerda, `:2` direita). | Cadastrar `WING FLEX PCT:1` e `WING FLEX PCT:2` para asas independentes. |
+| `elec-circuit-breaker-pulled` | `CIRCUIT BREAKER PULLED` | `perEngine: false` (sem índice) | Sim | Constante | Requer índice do circuito/disjuntor (`:index`, base 1). Sem índice, consulta o índice padrão. | Mapear disjuntores críticos por aeronave na calibração. |
+| `pneu-duct-pressure` | `PNEUMATICS DUCT PRESSURE` | `perEngine: false` | Sim | Sim | No sistema modular pneumático, indexado por pack/duto. | Definir índice do duto principal da aeronave. |
+| `pneu-pack-status` | `PNEUMATICS PACK STATUS` | `perEngine: false` | Sim | Sim | Indexado por pack (`:1`, `:2`). | Definir índice do pack. |
 
 ---
 
-## 5. Variáveis Legadas (FSX / MSFS v1) com Substitutas Modernas no MSFS 2024
+## 4. Análise de Unidades e Escalas (`sensor_registry.json`)
 
-| Chave (`key`) | SimVar Cadastrada | Status no MSFS 2024 | Limitação da Versão Legada | Substituta Moderna no MSFS 2024 | Vantagem da Substituta no 2024 | Referência Oficial SDK MSFS 2024 |
-|---|---|---|---|---|---|---|
-| `elec-total-load-amps` | `ELECTRICAL TOTAL LOAD AMPS` | Legada (FSX) | Reflete apenas a soma simplificada do modelo elétrico antigo. Em aeronaves com sistema modular (`systems.cfg - [ELECTRICAL]`), retorna valores estáticos ou zerados. | `ELECTRICAL BUS AMPS:index` ou `ELECTRICAL GENALT BUS AMPS:index` | Mede o fluxo de corrente real em cada barramento e alternador individualmente. | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) |
-| `hyd-pressure`, `hyd-reservoir-percent` | `HYDRAULIC PRESSURE`, `HYDRAULIC RESERVOIR PERCENT` | Legada | Medição de sistema hidráulico clássico único e centralizado. | `HYDRAULIC SYSTEM INTEGRITY:index` e circuitos modulares | Permite acompanhar a degradação de linhas hidráulicas independentes. | [Aircraft System Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-system-variables/) |
-| `af-airspeed-barber-pole` | `AIRSPEED BARBER POLE` | Legada | Valor visual do velocímetro analógico. | `REFERENCE SPEED MAX IAS` e `MACH MAX OPERATE` | Representa diretamente as velocidades de projeto aerodinâmico ($V_{MO}/M_{MO}$) do modelo de voo. | [Aircraft Flight Model Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-flight-model-variables/) |
+| Chave (`key`) | SimVar | Unidade no Registro | Unidade Canônica SDK | Aceita pelo Sim? | Valores Reais no CSV | Impacto Técnico | Status |
+|---|---|---|---|---|---|---|---|
+| `elec-battery-estimated-capacity-pct` | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | `percent over 100` | `Percent` | Sim | 0.986 a 1.000 | O SimConnect entrega valores entre 0.00 e 1.00 com a unidade `percent over 100`. A conversão funciona perfeitamente sem distorção. | **Informativo (Válido)** |
+| `pneu-pack-status` | `PNEUMATICS PACK STATUS` | `bool` | `percent over 100` | Sim | 0.0 ou 1.0 | O SDK documenta como vazão normalizada (0.00 a 1.00). Como booleano retorna 0 ou 1. | **Informativo (Válido)** |
+| `gear-skidding-factor` | `GEAR SKIDDING FACTOR` | `percent` | `Percent Over 100` | Sim | 0 a 100 | Em `percent`, o valor vem na escala 0–100. Em `percent over 100`, viria 0.0–1.0. | **Informativo (Padronizar)** |
+| `eng-max-cht`, `eng-max-egt`, `oil-max-temperature` | `RECIP MAX CHT`, etc. | `celsius` | `Rankine` | Sim | Valores em °C coerentes | A API do SimConnect realiza a conversão de `Rankine` para `celsius` automaticamente. | **Informativo (Válido)** |
 
 ---
 
-## 6. Context Registry (`context_registry.json`)
+## 5. Variáveis Clássicas vs Modernas no MSFS 2024
 
-| Chave (`key`) | SimVar | Unidade | Análise no SDK 2024 | Observação Técnica |
-|---|---|---|---|---|
-| `ctx-new-electrical-system` | `NEW ELECTRICAL SYSTEM` | `bool` | Válida (SDK MSFS 2020/2024). | Retorna `TRUE` se a aeronave utiliza a arquitetura modular moderna de `systems.cfg`. Fundamental para condicionar se regras elétricas avançadas devem rodar. |
-| `ctx-new-fuel-system` | `NEW FUEL SYSTEM` | `bool` | Válida (SDK MSFS 2020/2024). | Retorna `TRUE` se a aeronave utiliza `[FUEL_SYSTEM]`. |
-| `ctx-simulation-rate` | `SIMULATION RATE` | `number` | Válida (Environment Variables). | Retorna a taxa de aceleração temporal (0.0625 a 128.0). |
-| `ctx-surface-condition` | `SURFACE CONDITION` | `enum` | Divergência de tipo com `SimTelemetry` (`Number`). | No SDK é um enumerador de condição da pista (Seca, Molhada, Neve, etc.). Ambos são lidos como double no C# sem impacto. |
+| Chave (`key`) | SimVar Cadastrada | Aceita pelo Sim? | Varia nos Logs? | Documentada? (URL) | Status no SDK 2024 | Análise Técnica | Recomendação |
+|---|---|---|---|---|---|---|---|
+| `elec-total-load-amps` | `ELECTRICAL TOTAL LOAD AMPS` | **Sim** | **Sim** (C152: 0–46 A; C172: 24–175 A) | [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) | **Válida e Documentada** (não está obsoleta) | Reporta a carga total instantânea exigida de todo o sistema elétrico. Varia dinamicamente ao ligar aviônicos, faróis, pitot heat e partida. | **Manter**. Essencial para diagnóstico de sobrecarga elétrica geral. Complementar com `ELECTRICAL BUS AMPS:index`. |
+| `hyd-pressure`, `hyd-reservoir-percent` | `HYDRAULIC PRESSURE`, `HYDRAULIC RESERVOIR PERCENT` | Sim | Sim (em hidráulicos) | [Aircraft System Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-system-variables/) | Válida para sistema clássico | Mede pressão e reservatório de sistema hidráulico geral. Em aeronaves complexas modernas coexiste com circuitos modulares. | Manter para suporte a jatos e turboélices clássicos. |
+| `af-airspeed-barber-pole` | `AIRSPEED BARBER POLE` | Sim | Sim (varia com altitude/pressão) | [Aircraft Flight Model Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-flight-model-variables/) | Válida | Velocidade máxima operacional indicada pelo ponteiro listrado (barber pole), dinâmica com Mach. | Manter. Válida e útil. |
+
+---
+
+## 6. Proposta de Arquitetura para Leitura de Contact Points (`CONTACT POINT COMPRESSION / IS SKIDDING`)
+
+### Diagnóstico
+Atualmente, `gear-contact-point-compression` e `gear-contact-point-is-skidding` estão registradas com `perEngine: true`. O `SensorLayout` as expande como `:1` (e `:2` se bimotor).
+Nos aviões triciclo:
+- **Ponto 0:** Trem de Nariz (Nose Gear).
+- **Ponto 1:** Trem Principal Esquerdo (Left Main Gear).
+- **Ponto 2:** Trem Principal Direito (Right Main Gear).
+
+Como resultado, o código atual lê apenas o trem principal esquerdo (`:1`), ignorando totalmente o impacto no trem de nariz (`:0`) — que é o ponto mais vulnerável a pouso duro tipo "three-point" ou colapso de garfo — e o trem direito (`:2`) em monomotores.
+
+### Solução Proposta para o FlightCareer
+1. **Desacoplar de `perEngine`:** No `sensor_registry.json`, substituir as entradas por sensores explícitos por ponto de contato do trem de pouso:
+   - `gear-contact-point-0-compression` (`CONTACT POINT COMPRESSION:0`, unidade `percent over 100`, Nose Gear).
+   - `gear-contact-point-1-compression` (`CONTACT POINT COMPRESSION:1`, Left Main Gear).
+   - `gear-contact-point-2-compression` (`CONTACT POINT COMPRESSION:2`, Right Main Gear).
+   - `gear-contact-point-0-is-skidding` (`CONTACT POINT IS SKIDDING:0`, Bool).
+   - `gear-contact-point-1-is-skidding` (`CONTACT POINT IS SKIDDING:1`, Bool).
+   - `gear-contact-point-2-is-skidding` (`CONTACT POINT IS SKIDDING:2`, Bool).
+2. **Mapeamento Direto para as Peças:**
+   - Contato 0 → Alimenta `landinggear.nose_strut` e `tires.nose_tire`.
+   - Contato 1 → Alimenta `landinggear.main_struts` (esquerdo), `tires.main_left_tire` e `brakes.discs_linings_left`.
+   - Contato 2 → Alimenta `landinggear.main_struts` (direito), `tires.main_right_tire` e `brakes.discs_linings_right`.
+3. **Detecção de Tailstrike:**
+   - Adicionar `gear-contact-point-tail-compression` (`CONTACT POINT COMPRESSION:N` onde N é o scrape point traseiro, tipicamente ponto 3 ou 4) ou ler `TAILHOOK POSITION` / ângulo de arfagem no toque para dano na antepara traseira (`fuselage.pressure_bulkheads`).
