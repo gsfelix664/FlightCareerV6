@@ -1537,3 +1537,6 @@
   - Removido teste antigo de cobertura cega NO-GO; adicionados testes `LimitKeys_VfeCurrent_IsValidAndHasKnotsUnit` e `ContinuousRules_HaveCoherentLimitKeyAndSensors` (validando correlação estrita entre limites operacionais e sensores).
   - 215 testes xUnit aprovados com 0 falhas; build com 0 erros.
   - Relatório atualizado em `docs/reviews/F2.2-relatorio.md`.
+
+## 2026-11-15 - F2.2: regras de desgaste aprovadas (Claude)
+- Usuário aprovou as 23 regras do `wear_rules.json`. Na aprovação pediu a expansão do catálogo de peças (aviônicos/IFR/GPS/FMS/piloto automático, elétrico, superfícies de comando e empenagem, estrutura de fuselagem pressurizada, asa, trem de pouso detalhado), com custo de reparo em % do valor da aeronave e tempo de hangar — tarefa F2.1b. Nenhum código mudou.
