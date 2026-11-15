@@ -1853,3 +1853,54 @@
   - 327 testes xUnit aprovados; 48 testes Python aprovados.
 - **Não testado no MSFS**:
   - Execução ao vivo com simulador MSFS conectado (validado offline via replay de voo real gravado).
+## 2026-11-15 - Pesquisa de variáveis em projetos abertos (Gemini)
+- **Pesquisa de Variáveis e SimVars (SDK MSFS 2024 e Projetos de Referência)**:
+  - Investigação completa de 42 variáveis cobrindo motor, elétrico, hidráulica, pneumática, trem/estrutura e walkaround do MSFS 2024.
+  - Documentação em `docs/plans/sensor-research/variaveis-referencias.md` com tabela detalhada, links oficiais do SDK 2024, verificação contra o registro do FlightCareer (`sensor_registry.json`) e evidências em 4 projetos abertos (`FsConnect`, `MobiFlight`, `msfs2020-go`, `aircraft` FlyByWire).
+  - Identificação e comprovação técnica de 5 nomes errados ou inventados (`PARTIAL PANEL STATIC`, `AIRCRAFT STRESS DAMAGE`, `ELECTRICAL LINE BREAKER PULLED`, sintaxe de índices em barramentos e rádios).
+  - Análise da evolução da leitura de LVars: confirmação na documentação oficial de que o SimConnect do MSFS 2024 suporta diretamente `L:VARIABLE_NAME` via `SimConnect_AddToDataDefinition` com tipo `FLOAT64`, eliminando a dependência histórica de módulos WASM intermediários.
+  - Análise dos modelos de freios e hidráulica de primeiros princípios do FlyByWire em Rust/WASM e documentação de armadilhas conhecidas (rotação residual em rodas paradas, `GEAR TOTAL PCT EXTENDED` obsoleta retornando 0).
+  - Relação de 20 variáveis prioritárias candidatas ao próximo teste de solo, com passo a passo de validação em solo no MSFS 2024 (incluindo `COVER ON:0..2` e `L:IS_AVATAR`).
+- **Não testado no MSFS**:
+  - Tarefa estritamente de documentação e pesquisa técnica; nenhum código ou regra foi alterado. Teste das variáveis prioritárias será executado no próximo voo/teste de solo.
+
+## 2026-11-15 - Auditoria de variáveis, Key Events e Input Events - Rodada 2 (Gemini)
+- **Auditoria Completa do Registro de Sensores e Definições (`docs/plans/sensor-research/auditoria-registro.md`)**:
+  - Auditoria exaustiva cobrindo `sensor_registry.json` (421 sensores), `context_registry.json` (25 variáveis) e as definições fixas de `SimConnectService.cs` (`SimTelemetry`, `SimFailureState`, `SimFastFlightState` e escrita).
+  - Identificação de nomes inexistentes no SDK (`FLAP SPEED EXCEEDED`, `GEAR SPEED EXCEEDED` que eram notificações do modo Carreira, e `ELECTRICAL BATTERY LEVEL`) com risco de exceção no SimConnect e indicação de substitutas oficiais.
+  - Correção de erros críticos de indexação: sensores de ponto de contato (`CONTACT POINT COMPRESSION`, `CONTACT POINT IS SKIDDING`) e combustível (`FUELSYSTEM PUMP ACTIVE`, `FUELSYSTEM LINE FUEL PRESSURE`) que estavam marcados com `perEngine: true` (expandindo por motor em vez de por contact point / bomba / linha de combustível).
+  - Identificação de SimVars que exigem índice mas estavam sem índice (`WING FLEX PCT`, `CIRCUIT BREAKER PULLED`, `PNEUMATICS DUCT PRESSURE`, `PNEUMATICS PACK STATUS`).
+  - Alinhamento de unidades divergentes (`pneu-pack-status` como `percent over 100`, `elec-battery-estimated-capacity-pct` como `Percent`, `gear-skidding-factor` como `Percent Over 100`, `Rankine` vs `celsius`).
+- **Key Events, Input Events e Suporte Nativo a LVars (`docs/plans/sensor-research/eventos-e-input-events.md`)**:
+  - Confirmação formal no SDK 2024 de todos os eventos de falha utilizados pelo `SimFailureActuator` e `SetAlternatorConnected`.
+  - Mapeamento de novos key events candidatos a panes (`TOGGLE_ALTERNATE_STATIC`, `EXTINGUISH_ENGINE_FIRE`, `ELECTRICAL_CIRCUIT_BREAKER_TOGGLE`, `TOGGLE_ELECT_FUEL_PUMP1..4`).
+  - Análise aprofundada da API de Input Events do MSFS 2024 (`SimConnect_EnumerateInputEvents`, `SimConnect_GetInputEvent`, `SimConnect_SetInputEvent`, `SimConnect_SubscribeInputEvent`): como ela resolve a leitura de switches físicos como o Avionics Master do G1000 e disjuntores, além de suas limitações (hashes dinâmicos e nomenclatura não universal).
+  - Documentação da sintaxe oficial para variáveis indexadas por nome de componente (`SIMVAR:'ComponentName'_n`) e suporte nativo a múltiplos escopos (`A:`, `E:`, `L:`, `I:`, `O:`, `Z:`).
+- **Ferramentas de Conferência ao Vivo e Atualização de Candidatas (`docs/plans/sensor-research/variaveis-referencias.md`)**:
+  - Guia técnico de uso do SimConnect Inspector (Dev Mode) e do SimVarWatcher (SDK Sample) para validação ao vivo de SimVars e diagnóstico de exceções `NAME_UNRECOGNIZED` sem mexer no código do FlightCareer.
+  - Complementação da tabela com a lista completa dos índices de `COVER ON:0..7` (0 calços, 1 motor, 2 pitot, 3 tomada estática, 4 rotores, 5 trem de pouso, 6 hélices, 7 para-brisa).
+  - Refinamento da lista de 20 variáveis candidatas para o teste de solo.
+- **Não testado no MSFS**:
+  - Tarefa estritamente de documentação e pesquisa técnica baseada nas páginas oficiais do SDK MSFS 2024; nenhum código executável ou arquivo de catálogo de regras foi modificado.
+
+## 2026-11-15 - Descoberta de variáveis novas e correções da auditoria - Rodada 3 (Gemini)
+- **Correção da Auditoria com Prova em CSVs Reais (`docs/plans/sensor-research/auditoria-registro.md`)**:
+  - Reavaliação das SimVars auditadas contra os logs reais do `SensorRecorder` (`20261115-1747-Cessna_C152.csv`, `20261115-1636-C172SP_G1000_Passengers.csv`) e fixtures: o leitor dinâmico descarta SimVars rejeitadas por `NAME_UNRECOGNIZED`, logo a presença da coluna no CSV comprova aceitação pelo simulador.
+  - Reclassificação de `FLAP SPEED EXCEEDED` e `GEAR SPEED EXCEEDED` como aceitas nativamente pelo SimConnect (presentes nos 4 logs de teste).
+  - Comprovação de que `ELECTRICAL BATTERY LEVEL` é aceita e ativamente variável nos voos (98.6% a 100% no C152).
+  - Confirmação de que `ELECTRICAL TOTAL LOAD AMPS` está documentada oficialmente no SDK 2024 (não obsoleta) e varia amplamente (0 a 175 A).
+  - Rebaixamento de divergências de escala com valores coerentes (`ELECTRICAL BATTERY ESTIMATED CAPACITY PCT`, 0.986 a 1.0) para nível informativo.
+  - Proposta técnica para leitura de trem de pouso: desacoplar `CONTACT POINT COMPRESSION` e `IS SKIDDING` de `perEngine`, passando a ler explicitamente por ponto de contato (`:0` nariz, `:1` principal esquerdo, `:2` principal direito) para diagnosticar impacto localizado e toque de três pontos.
+- **Descoberta de Variáveis Novas por Peça (`docs/plans/sensor-research/descoberta-variaveis.md`)**:
+  - Mapeamento de cima para baixo a partir do `parts_catalog.json` (Motor, Óleo, Hélice, Trem, Freios, Superfícies, Célula, Luzes, Pressurização, Combustível, Fogo, Walkaround e Ambiente).
+  - Relação de 28 novas variáveis do MSFS 2024 não registradas anteriormente no FlightCareer, com URL oficial do SDK, unidade, índice, modo R/W, suporte no MSFS 2020 e evidências em projetos abertos locais (`FsConnect`, `aircraft` FlyByWire, `MobiFlight`).
+  - Destaque para `COVER ON:0..7` (inspeção externa/walkaround com calços, capas de pitot e amarração de hélice), `LEFT/RIGHT/CENTER WHEEL RPM` (spin-up no toque e flat spot por roda travada), `SUCTION PRESSURE` (vácuo físico das bombas para instrumentos giroscópicos), `ENG OIL QUANTITY:1` (nível do cárter) e `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT` (assimetria física de flaps).
+  - Seleção "Top 25 para o Próximo Teste" com roteiro cronometrado e integrado de 15 minutos em 17 passos para validação em solo e voo curto.
+  - Seção "Variáveis Descartadas ou Esclarecidas" demonstrando que `BRAKE TEMPERATURE` não é SimVar nativa da Asobo (implementada por termodinâmica de primeiros princípios no FlightCareer), além do esclarecimento sobre SimVars inexistentes ou sintaxes inválidas.
+- **Relatório de Execução (`docs/reviews/RESEARCH-SIMVARS-r3-relatorio.md`)**:
+  - Relatório da rodada 3 conforme o modelo das instruções do Gemini e atualização de `RESEARCH-SIMVARS-relatorio.md`.
+- **Não testado no MSFS**:
+  - Tarefa documental e de pesquisa técnica; as novas variáveis descobertas serão validadas fisicamente no simulador através do roteiro Top 25 em tarefa subsequente.
+
+
+
