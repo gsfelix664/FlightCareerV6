@@ -1558,3 +1558,21 @@
 - **Testes e verificação**:
   - Build 0 erros; 219 testes xUnit e 40 testes python aprovados com 100% de sucesso.
   - Relatório completo submetido para aprovação do usuário em `docs/reviews/F2.1b-relatorio.md`.
+
+## 2026-11-15 - F2.1b Rodada 2: incorporação dos adendos do usuário (Gemini)
+- **Ampliação e unificação do catálogo de peças (`parts_catalog.json`)**:
+  - Incorporados os três adendos do usuário (Elétrico/Aviônicos, Hidráulico/Pneumático/Combustível e Motopropulsor), expandindo o catálogo para 134 peças calibradas (meta 130–180 atendida).
+  - Segregação de subsistemas essenciais: divisão de AHRS/IRS e ADC, acréscimo de standby/ISIS, TCAS/EGPWS, gravadores FDR/CVR/ELT, painel de áudio, bateria standby, geradores IDG e RAT, TRU, iluminação externa, disjuntores/relés, bombas hidráulicas elétricas ACMP, acumuladores de pressão, válvulas seletoras e PTU, válvulas de sangria pneumática, pré-resfriadores, detecção de vazamento pneumático, packs ACM, alívio de pressão, válvulas crossfeed e corte de fogo, trocador FOHE, FQIS, coxins/berço, nacele/carenagem, wastegate, filtro de ar, partida pneumática ATS, FADEC/EEC, bicos injetores e NGV de turbina, excitadores de ignição, mecanismo de passo/embandeiramento, degelo elétrico de hélice, módulo APU e portas de carga.
+  - Todas as 134 peças configuradas com faixas de custo percentual de reparo (`repairCostPctOfAircraft`), horas de hangar (`downtimeHours`) e efeitos de falha funcionais.
+- **Novas características funcionais e grupos (`AircraftFeatures` e `PartGroup`)**:
+  - Adicionado novo grupo `Pneumático` em `PartGroup`.
+  - Adicionadas 5 novas características em `AircraftFeatures`: `ptu`, `rat`, `propDeIce`, `fadec`, `bleedAir` com validações estritas de coerência aeronáutica.
+  - Atualizados os 46 perfis de aeronave em `Data/aircraft/*.json` com bump de `dataVersion` para 3 e mapeamento preciso das novas tecnologias por modelo.
+- **Ampliação do catálogo de regras de desgaste (`wear_rules.json`)**:
+  - Adicionadas 10 novas regras operacionais (totalizando 45 regras): partida com aviônicos ligados, descarga profunda da bateria, sobrecarga contínua de amperagem, piloto automático em turbulência severa, operação de bomba de combustível a seco, operação com pressão hidráulica baixa/deprimida, alta potência com óleo frio, ciclos de degelo de hélice, transientes rápidos de torque na caixa de redução e descompressão rápida de cabine.
+  - 100% das novas regras utilizam exclusivamente sensores existentes e limites físicos coerentes.
+- **Testes e integridade**:
+  - `PartCatalogTests` atualizado para validar a meta de 130–180 peças e coerência das novas features.
+  - `WearRuleCatalogTests` atualizado para validar catálogo de regras >= 40 regras.
+  - 219 testes xUnit em `FlightCareer.Tests` e 40 testes python aprovados com 100% de sucesso.
+
