@@ -1,6 +1,6 @@
 # SPIKE-ELETRICO — SimVars elétricas certas no MSFS 2024
 
-**Branch:** docs/spike-sensores-eletricos · **Commit:** 8faa027 (e commit seguinte de docs) · **Data:** 2026-11-15
+**Branch:** docs/spike-sensores-eletricos · **Commits:** 8faa027, 7120b8c · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Pesquisar na documentação oficial do SDK MSFS 2024 (`Aircraft Electrics Variables`, `Aircraft Engine Variables` e `systems.cfg [ELECTRICAL]`) as SimVars corretas para master de aviônicos, tensão/carga da bateria e alternador/gerador.
