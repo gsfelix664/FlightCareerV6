@@ -1474,3 +1474,21 @@
 
 ## 2026-11-15 - Limites do CAP-4 (Paulistinha) (Claude)
 - Manual do Aeroclube de Sorocaba enviado pelo usuário: VNE 119 kt, VNO 73 kt, óleo máx. 107 °C, pressão do óleo mín. 10 psi. Nenhum código mudou.
+
+## 2026-11-15 - F2.1 Lista de peças do Hangar (catálogo, entidade, banco e provisionamento) (Gemini)
+- **Características técnicas das aeronaves (`features`)**:
+  - Definido vocabulário fechado de 18 características em `Domain/Parts/AircraftFeatures.cs` com validação de coerência lógica estrita.
+  - Atualizados os 46 arquivos `Data/aircraft/*.json` com `features` e incremento de `dataVersion` (25 aeronaves baseadas em capturas de contexto MSFS e 21 em documentação técnica/POH).
+  - Atualizado `_schema.json` e loader/seeder (`AircraftLimitCatalogLoader`, `AircraftLimitSeeder`) para validar e persistir a nova coluna `FeaturesJson`.
+- **Catálogo geral de peças (`Domain/Parts/`, `Data/parts_catalog.json`)**:
+  - Criadas classes `PartDefinition`, `PartAppliesTo`, `PartGroup` e `PartCatalog`.
+  - Elaborada proposta calibrada de 50 peças cobrindo 14 grupos funcionais, com preços base em USD, horas de mão de obra, vidas úteis (horas e ciclos) e referências de sensores do `sensor_registry.json`.
+- **Entidade e banco de dados (`AircraftPart`, `AppDbContext`)**:
+  - Criada entidade `AircraftPart` com saúde oculta (0–100%), rastreamento de horas/ciclos desde a troca e sinalização de suspeita (`PartFlag`, `PartFlagSource`).
+  - Mapeado relacionamento em `PilotAircraft` e `AppDbContext.AircraftParts` com índice único `(PilotAircraftId, PartId)`.
+  - Atualização idempotente do banco em `AppDbContext.EnsureSchemaUpdatedAsync` (`CREATE TABLE IF NOT EXISTS AircraftParts` + `ALTER TABLE AircraftLimitProfiles ADD COLUMN FeaturesJson`).
+- **Provisionador idempotente (`AircraftPartProvisioner`)**:
+  - Implementado provisionamento automático das peças faltantes a 100% no `App.xaml.cs`, sem remoção de peças pré-existentes e com suporte seguro a modelos sem perfil.
+- **Testes xUnit**:
+  - Adicionados 13 testes cobrindo catálogo, coerência dos 46 perfis, regras de inclusão/exclusão de peças por classe e migração de banco legado. Total: 208 testes xUnit e 40 testes unitários python aprovados.
+  - Não testado no MSFS: execução com simulador conectado (desgaste em voo planejado para F2.3).
