@@ -1755,3 +1755,7 @@
   - Suíte completa com 301 testes xUnit passando com 100% de sucesso.
 - **Não testado no MSFS**:
   - Execução interativa completa da UI do card de calibração no simulador com SimConnect ao vivo.
+
+## 2026-11-15 - Primeira calibração pelo modo Calibrar: C152 (Claude)
+- Log `20261115-1733-Cessna_C152.csv` analisado pelo `calibrate.py`: `elecMainBusIndex` 1 e `elecSystemVolts` 28 (queda de 3,7 V com o ALT desligado), `rpmMaxRated` 2.550 (`source: SimVar`); `cessna-c152.json` `dataVersion` 5.
+- Passos de aviônicos pulados (sem chave de aviônicos usada no C152): `elecAvionicsCircuitIndex` ausente, a regra de partida com aviônicos ligados fica desligada no C152. Passos `rudder-full` e `end` não marcados. `alternatorRatedAmps` do C152 ainda depende do POH (regra de sobrecarga desligada até lá).
