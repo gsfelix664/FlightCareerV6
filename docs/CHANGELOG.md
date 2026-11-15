@@ -1656,3 +1656,34 @@
   - Criados `ToggleStateTrackerTests.cs` e `FlapSurfaceLockTests.cs`.
   - `TelemetryDefinitionTests.cs` atualizado com teste de contagem de datums em `SimFailureState`.
   - Build com 0 erros; 247 testes xUnit aprovados com 100% de sucesso.
+## 2026-11-15 - F2.3 Motor de desgaste por peça e balanceamento (Gemini)
+- **Motor de Desgaste por Peça (`PartWearEngine`)**:
+  - Implementado motor de desgaste puro em `FlightCareer.Domain/Parts/PartWearEngine.cs`.
+  - Suporta desgaste nominal (70/LifeHours) ao longo da vida útil, estresse contínuo por regras operacionais com multiplicador máximo ativo e soma de perdas horárias (`lossPerHourPct`), e resolução dinâmica de limites (`vfe:current` por dente de flap em uso via `af-flaps-handle-index`).
+  - Reserva nativa ativada exclusivamente quando o limite for `ClassDefault` (sob POH/SimVar/Cfg/NativeOnset os sensores do addon são soberanos); detecção anti-trapaça quando taxa nativa > 0 com nível nativo travado em 1.00; tolerância a sensores ausentes ou NaN.
+  - Métodos `ApplyEvent` para métricas discretas e `ApplyNativeFailed` (0% de saúde e `IsBroken`, idempotente por voo).
+- **Ponte Peças → Componentes (`PartComponentBridge`)**:
+  - As 9 barras de componente passam a ser derivadas do agregado das peças do seu grupo por mínimo ponderado (`0.7 * min + 0.3 * avg`), com mapeamento configurado em `part_component_mapping.json` e propagação para as colunas legadas de `PilotAircraft`.
+  - Salvaguarda `HasParts(aircraft)` implementada para garantir que o sistema antigo não cobre desgaste duas vezes quando a aeronave possui peças.
+- **Precificação e Custos (`PartPricing`)**:
+  - Preço da peça física com piso em `PartPrice` e escala percentual `repairCostPctOfAircraft / 100.0` para aeronaves de maior porte, mão de obra e cálculo de downtime.
+- **Migração e Compra no Mercado (`PartMigrationService`)**:
+  - Migração idempotente (`PartsMigratedAtUtc`) herda saúde das barras com variação determinística por aeronave, e remove peças virgens obsoletas ou não aplicáveis ao modelo (ex.: `tires.nose` em bequilha).
+  - Integrado ao `MarketSimulationService` para provisionamento de peças na compra (novas a 100%, usadas coerentes com o anúncio).
+- **Correção da Falha Pós-Manutenção em Avião Novo**:
+  - Corrigido bug no `ExternalEventEngine` onde aeronaves novas abriam a janela de falha pós-manutenção no primeiro voo. Agora requer `c.LastShopServiceAtUtc.HasValue` registrado em oficina/Hangar.
+- **Simulador e Alvos Econômicos (`PartEconomySimulator` e `economy_targets.json`)**:
+  - Simulador de 1.000 h de voo típico calibrado e verificado para as 9 classes (A a I), com todos os custos/hora dentro das faixas-alvo.
+- **Testes**:
+  - Criados 17 novos testes em `PartWearEngineTests`, `PartBridgeAndMigrationTests`, `PostMaintenanceCorrectionTests` e `PartEconomyBalanceTests`. Total da suíte: 258 testes passando com 100% de sucesso.
+
+## 2026-11-15 - F2.3 Ajustes da revisão rodada 2 (Gemini)
+- **Ativação da Migração no Startup (`App.xaml.cs` e `PartMigrationService`)**:
+  - Integrada chamada `PartMigrationService.MigrateAllPendingAsync(dbContext)` na inicialização de `App.xaml.cs` logo após `EnsurePartsAsync`, com tratamento de exceção registrado.
+  - Implementado teste de integração completo de inicialização e migração com idempotência e remoção de obsoletas virgens em `PartBridgeAndMigrationTests`.
+- **Eliminação de `catch { }` silencioso**:
+  - Exceções ao deserializar `FeaturesJson` em `MarketSimulationService` e `PartMigrationService` registradas com `Debug.WriteLine`.
+- **Calibração de Custos e Recalibração de `economy_targets.json`**:
+  - Adicionado teto de preço por porte da aeronave em `PartPricing.GetClassPartPriceCap` (US$ 30k pistão, US$ 80k turboélice/jato executivo, US$ 55k narrowbody, US$ 110k widebody/cargueiro pesado).
+  - Recalibradas todas as faixas de classes (A a J) em `economy_targets.json` com base nas ordens de grandeza reais (A320neo a US$ 1.941/h, A330 a US$ 3.807/h, 747-8i a US$ 5.084/h, CJ4 a US$ 1.558/h, Baron a US$ 436/h, C152 a US$ 88/h).
+  - Adicionado teste automatizado cobrindo todas as 46 aeronaves capturadas no catálogo (`EconomySimulation_All46CapturedAircraft_FallWithinTargetBands`) com 100% de conformidade. Total da suíte: 260 testes passando.

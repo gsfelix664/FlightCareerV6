@@ -134,6 +134,7 @@ namespace FlightCareer.Tests.Components
             Assert.Empty(none.Evaluate(comps, cruise, 1.0));
 
             comps.Get(ComponentKind.Oil).HoursSinceOverhaul = 0.5;
+            comps.Get(ComponentKind.Oil).LastShopServiceAtUtc = DateTime.UtcNow;
             var engine = new ExternalEventEngine(Catalog.ExternalEvents, EngineClass.Piston, new FixedRandom(0.0));
             var ev = Assert.Single(engine.Evaluate(comps, cruise, 1.0));
             Assert.Equal(ComponentKind.Oil, ev.Outcome.Kind);
@@ -152,6 +153,7 @@ namespace FlightCareer.Tests.Components
             Assert.Empty(engine.Evaluate(comps, taxi, 1.0));
 
             comps.Get(ComponentKind.Brakes).CyclesSinceOverhaul = 1; // recém-trocados
+            comps.Get(ComponentKind.Brakes).LastShopServiceAtUtc = DateTime.UtcNow;
             var fresh = new ExternalEventEngine(Catalog.ExternalEvents, EngineClass.Piston, new FixedRandom(0.0));
             Assert.Equal(ComponentKind.Brakes, Assert.Single(fresh.Evaluate(comps, taxi, 1.0)).Outcome.Kind);
         }

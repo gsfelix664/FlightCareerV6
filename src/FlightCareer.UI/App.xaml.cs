@@ -101,6 +101,17 @@ namespace FlightCareer.UI
                         System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao provisionar peças: {ex.Message}");
                     }
 
+                    // Migração de peças para aeronaves existentes do hangar (F2.3)
+                    try
+                    {
+                        var migrationService = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.PartMigrationService>();
+                        await migrationService.MigrateAllPendingAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao migrar peças de aeronaves: {ex.Message}");
+                    }
+
                     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
                     if (!seeder.IsSeeded())
                     {
@@ -171,6 +182,8 @@ namespace FlightCareer.UI
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>(sp =>
                 new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
             services.AddSingleton(_ => FlightCareer.Domain.Parts.PartCatalog.LoadDefault());
+            services.AddSingleton<FlightCareer.Infrastructure.Services.PartMigrationService>(sp =>
+                new FlightCareer.Infrastructure.Services.PartMigrationService(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftPartProvisioner>(sp =>
                 new FlightCareer.Infrastructure.Services.AircraftPartProvisioner(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
 

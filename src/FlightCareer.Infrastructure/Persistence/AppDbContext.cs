@@ -199,6 +199,9 @@ namespace FlightCareer.Infrastructure.Persistence
                     LastInspectionAirframeHours REAL NOT NULL,
                     InspectionPrecision REAL NOT NULL,
                     InspectionBias REAL NOT NULL,
+                    LastShopServiceAtUtc TEXT NULL,
+                    LastShopServiceAirframeHours REAL NULL,
+                    LastShopServiceAirframeCycles INTEGER NULL,
                     CONSTRAINT FK_AircraftComponents_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
                 );",
                 "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftComponents_PilotAircraftId_Kind ON AircraftComponents(PilotAircraftId, Kind);",
@@ -262,10 +265,22 @@ namespace FlightCareer.Infrastructure.Persistence
                     FlaggedAtUtc TEXT NULL,
                     IsBroken INTEGER NOT NULL,
                     BrokenAtUtc TEXT NULL,
+                    LastShopServiceAtUtc TEXT NULL,
+                    LastShopServiceAirframeHours REAL NULL,
+                    LastShopServiceCycles INTEGER NULL,
                     CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
                 );",
                 "DROP INDEX IF EXISTS IX_AircraftParts_PilotAircraftId_PartId;",
-                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId_EngineIndex ON AircraftParts(PilotAircraftId, PartId, EngineIndex);"
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId_EngineIndex ON AircraftParts(PilotAircraftId, PartId, EngineIndex);",
+
+                // Migração de peças e rastreamento de serviço de oficina (F2.3)
+                "ALTER TABLE PilotAircrafts ADD COLUMN PartsMigratedAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAirframeCycles INTEGER NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;"
             };
 
             foreach (var stmt in migrationStatements)

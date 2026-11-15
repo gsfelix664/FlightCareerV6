@@ -1,0 +1,30 @@
+{
+  "groupMappings": {
+    "Motor": "Engine",
+    "Hélice": "Engine",
+    "Combustível": "Engine",
+    "Óleo": "Oil",
+    "Ignição": "Ignition",
+    "Seção quente": "HotSection",
+    "Elétrico": "Electrical",
+    "Aviônicos": "Electrical",
+    "Instrumentos": "Instruments",
+    "Trem": "LandingGear",
+    "Pneus": "Tires",
+    "Freios": "Brakes",
+    "Asa": "Airframe",
+    "Fuselagem": "Airframe",
+    "Empenagem": "Airframe",
+    "Hidráulico": "Airframe",
+    "Pressurização": "Airframe",
+    "Pneumático": "Airframe",
+    "Cabine": "Airframe",
+    "Oxigênio": "Airframe",
+    "Proteção contra Fogo": "Airframe",
+    "Emergência": "Airframe"
+  },
+  "aggregation": {
+    "minWeight": 0.7,
+    "averageWeight": 0.3
+  }
+}

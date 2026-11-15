@@ -28,6 +28,18 @@
     <None Include="..\FlightCareer.Infrastructure\Data\sensor_registry.json" Link="Data\sensor_registry.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\parts_catalog.json" Link="Data\parts_catalog.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\wear_rules.json" Link="Data\wear_rules.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\part_component_mapping.json" Link="Data\part_component_mapping.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\economy_targets.json" Link="Data\economy_targets.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

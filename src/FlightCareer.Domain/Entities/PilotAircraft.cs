@@ -37,5 +37,8 @@ namespace FlightCareer.Domain.Entities
 
         // Peças individuais com saúde oculta (F2.1)
         public List<AircraftPart> Parts { get; set; } = new();
+
+        /// <summary>Data UTC em que as peças individuais desta aeronave foram migradas das barras/colunas legadas.</summary>
+        public DateTime? PartsMigratedAtUtc { get; set; }
     }
 }

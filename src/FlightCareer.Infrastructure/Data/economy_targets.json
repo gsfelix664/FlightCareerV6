@@ -1,0 +1,74 @@
+{
+  "classes": {
+    "A": {
+      "className": "Pistão leve (carburado, passo fixo)",
+      "example": "C152, J-3 Cub, DR400",
+      "minCostPerHour": 30.0,
+      "maxCostPerHour": 120.0,
+      "source": "estimativa — revisar"
+    },
+    "B": {
+      "className": "Pistão injetado, passo variável",
+      "example": "Bonanza G36, SR22, C172SP",
+      "minCostPerHour": 80.0,
+      "maxCostPerHour": 250.0,
+      "source": "estimativa — revisar"
+    },
+    "C": {
+      "className": "Pistão turboalimentado",
+      "example": "SR22T, C400 Corvalis, C207T",
+      "minCostPerHour": 80.0,
+      "maxCostPerHour": 250.0,
+      "source": "estimativa — revisar"
+    },
+    "D": {
+      "className": "Diesel FADEC",
+      "example": "DA40 NG, DA62",
+      "minCostPerHour": 80.0,
+      "maxCostPerHour": 250.0,
+      "source": "estimativa — revisar"
+    },
+    "E": {
+      "className": "Bimotor pistão",
+      "example": "Baron G58, C404 Titan, DA62",
+      "minCostPerHour": 150.0,
+      "maxCostPerHour": 550.0,
+      "source": "estimativa — revisar"
+    },
+    "F": {
+      "className": "Turboélice monomotor",
+      "example": "TBM 930, PC-12, C208B",
+      "minCostPerHour": 250.0,
+      "maxCostPerHour": 900.0,
+      "source": "estimativa — revisar"
+    },
+    "G": {
+      "className": "Turboélice bi/multimotor pressurizado / regional",
+      "example": "King Air 350, ATR 42/72, DHC-6, ES30",
+      "minCostPerHour": 450.0,
+      "maxCostPerHour": 2500.0,
+      "source": "estimativa — revisar"
+    },
+    "H": {
+      "className": "Jato executivo",
+      "example": "CJ4, Longitude, PC-24",
+      "minCostPerHour": 800.0,
+      "maxCostPerHour": 2000.0,
+      "source": "estimativa — revisar"
+    },
+    "I": {
+      "className": "Jato de linha aérea narrowbody",
+      "example": "A320neo, 737 MAX 8, A321",
+      "minCostPerHour": 1000.0,
+      "maxCostPerHour": 2500.0,
+      "source": "estimativa — revisar"
+    },
+    "J": {
+      "className": "Jato de linha aérea widebody / cargueiro pesado",
+      "example": "747-8i, A330-200, A330-300, 787-10",
+      "minCostPerHour": 2500.0,
+      "maxCostPerHour": 6000.0,
+      "source": "estimativa — revisar"
+    }
+  }
+}

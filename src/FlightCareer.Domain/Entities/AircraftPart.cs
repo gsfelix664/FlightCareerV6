@@ -66,5 +66,14 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Data UTC em que a falha da peça ocorreu.</summary>
         public DateTime? BrokenAtUtc { get; set; }
+
+        /// <summary>Data UTC do último serviço real de oficina/hangar nesta peça. Null para peça original de fábrica/migrada.</summary>
+        public DateTime? LastShopServiceAtUtc { get; set; }
+
+        /// <summary>Horas totais de célula da aeronave no momento do último serviço de oficina nesta peça.</summary>
+        public double? LastShopServiceAirframeHours { get; set; }
+
+        /// <summary>Ciclos totais da aeronave no momento do último serviço de oficina nesta peça.</summary>
+        public int? LastShopServiceCycles { get; set; }
     }
 }
