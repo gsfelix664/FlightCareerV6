@@ -29,6 +29,7 @@ namespace FlightCareer.Domain.Limits
         public const string GLimitPos = "gLimitPos";
         public const string GLimitNeg = "gLimitNeg";
         public const string MaxTouchdownFpm = "maxTouchdownFpm";
+        public const string ChtCoolingRateMax = "chtCoolingRateMax";
 
         // Parâmetros do sistema elétrico da aeronave (F2.4b-CAL)
         public const string ElecSystemVolts = "elecSystemVolts";
@@ -68,6 +69,7 @@ namespace FlightCareer.Domain.Limits
             [GLimitPos] = "g",
             [GLimitNeg] = "g",
             [MaxTouchdownFpm] = "fpm",
+            [ChtCoolingRateMax] = "celsius_per_minute",
             [VfeCurrent] = "knots",
             [ElecSystemVolts] = "volts",
             [ElecAvionicsCircuitIndex] = "index",

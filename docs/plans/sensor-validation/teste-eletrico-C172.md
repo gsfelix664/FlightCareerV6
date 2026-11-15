@@ -36,6 +36,11 @@ Log `20261115-1636-C172SP_G1000_Passengers.csv` (~7 min, REC, roteiro §7 do `RO
 
 1. `avionics_start_with_avionics_master_on`: usar "aviônicos energizados" = `CIRCUIT ON:<n>` com o índice do circuito de aviônicos **por aeronave** (C172 G1000: 3). O índice vem do catálogo da aeronave (`Data/aircraft/<id>.json`, campo novo, origem `SimVar` com este log como referência); sem índice no catálogo, a regra fica desligada naquele avião (nada de `AVIONICS MASTER SWITCH`, que mente).
 2. `battery_deep_discharge_damage`: usar `ELECTRICAL BUS VOLTAGE:1` (todos os barramentos têm a mesma tensão no C172) com o alternador fora (tensão < ~25 V em sistema de 28 V) e limiar de descarga profunda por tensão nominal do sistema (24 V: < 22 V; 12 V: < 11 V). `BATTERY VOLTAGE/LOAD` ficam fora.
-3. `electrical_system_overload_amps`: `ELECTRICAL TOTAL LOAD AMPS` acima da capacidade do alternador da aeronave (limite novo no catálogo, ex.: C172SP 60 A pelo POH), ignorando as amostras com starter engatado.
+3. `electrical_system_overload_amps`: `ELECTRICAL TOTAL LOAD AMPS` acima da capacidade do alternador da aeronave (limite no catálogo, ex.: C172SP 60 A pelo POH), ignorando as amostras com starter engatado.
+   - **Heurística refinada (FIX-REPLAY-BUGS):** O replay revelou que a telemetria do simulador pode reportar correntes altas (`TOTAL LOAD AMPS` mediana de 68 A no C152 com alternador de 60 A) com tensão plenamente regulada em 28,0 V (alternador operando sem estresse prejudicial real). A condição de sobrecarga passa a exigir:
+     1. Alternador ligado (`elec-master-alternator:n > 0.5`) e motor em combustão (`eng-combustion:n > 0.5`);
+     2. Sem starter engatado;
+     3. `elec-total-load-amps > alternatorRatedAmps`;
+     4. Tensão no barramento principal caída na faixa `[0,88 × elecSystemVolts, 0,95 × elecSystemVolts)` (sag de tensão entre 24,6 V e 26,6 V em sistema de 28 V). Tensão estável (≥ 0,95) indica capacidade suficiente sem estresse; abaixo de 0,88 indica alternador fora/em pane (bateria descarregando isolada, tratada pela regra de descarga profunda).
 
 Ainda não confirmado: se o índice global dos barramentos/circuitos muda entre aviões (esperado: sim, depende do `systems.cfg`). Cada avião novo precisa de uma gravação curta de solo para preencher o índice no catálogo.

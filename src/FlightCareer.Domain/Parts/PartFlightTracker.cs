@@ -15,6 +15,11 @@ namespace FlightCareer.Domain.Parts
     /// </summary>
     public sealed class PartFlightTracker
     {
+        public static readonly IReadOnlySet<string> DerivedSensorKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "eng-cht-cooling-rate"
+        };
+
         private readonly PartCatalog _partsCatalog;
         private readonly WearRuleCatalog _wearRuleCatalog;
         private readonly AircraftLimitResolver _resolver;
@@ -24,6 +29,8 @@ namespace FlightCareer.Domain.Parts
 
         private readonly List<AircraftPart> _parts = new();
         private readonly HashSet<string> _reportedDiagnostics = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<int, List<(double SimTime, double Cht)>> _chtHistoryByEngine = new();
+        private double _accumulatedSimSeconds;
         private AircraftLimitProfile? _profile;
         private List<string> _features = new();
         private bool _pausedReported;
@@ -55,6 +62,8 @@ namespace FlightCareer.Domain.Parts
             _eventDeriver.ConfigureElectrical(BuildElectricalConfig(profile));
             _pausedReported = false;
             _reportedDiagnostics.Clear();
+            _accumulatedSimSeconds = 0.0;
+            _chtHistoryByEngine.Clear();
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
@@ -95,6 +104,8 @@ namespace FlightCareer.Domain.Parts
             _eventDeriver.Reset();
             _pausedReported = false;
             _reportedDiagnostics.Clear();
+            _accumulatedSimSeconds = 0.0;
+            _chtHistoryByEngine.Clear();
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
@@ -131,8 +142,13 @@ namespace FlightCareer.Domain.Parts
 
             _pausedReported = false;
 
+            double dtSimSeconds = dtSimHours * 3600.0;
+            _accumulatedSimSeconds += dtSimSeconds;
+
+            var effectiveFrame = InjectDerivedMetrics(frame, dtSimSeconds);
+
             // 1. Desgaste contínuo e faixas de estresse
-            var tickResult = _wearEngine.ApplyTick(_parts, frame, dtSimHours, _features, _resolver, _profile);
+            var tickResult = _wearEngine.ApplyTick(_parts, effectiveFrame, dtSimHours, _features, _resolver, _profile);
 
             var exceedances = new List<PartWearExceedance>(tickResult.Exceedances);
             var inspections = new List<PartWearInspectionEvent>(tickResult.Inspections);
@@ -147,8 +163,7 @@ namespace FlightCareer.Domain.Parts
             }
 
             // 2. Eventos operacionais derivados
-            double dtSimSeconds = dtSimHours * 3600.0;
-            var derivedEvents = _eventDeriver.Update(frame, dtSimSeconds, _features);
+            var derivedEvents = _eventDeriver.Update(effectiveFrame, dtSimSeconds, _features);
             LastDerivedEvents = derivedEvents;
 
             foreach (var ev in derivedEvents)
@@ -321,6 +336,70 @@ namespace FlightCareer.Domain.Parts
                     yield return part;
                 }
             }
+        }
+
+        private SensorFrame InjectDerivedMetrics(SensorFrame frame, double dtSimSeconds)
+        {
+            var dict = new Dictionary<string, double>(frame.Values, StringComparer.OrdinalIgnoreCase);
+
+            for (int eng = 1; eng <= 4; eng++)
+            {
+                bool isComb = false;
+                if (frame.Values.TryGetValue($"eng-combustion:{eng}", out double cVal) ||
+                    (eng == 1 && frame.Values.TryGetValue("eng-combustion", out cVal)))
+                {
+                    isComb = cVal > 0.5;
+                }
+
+                double coolingRate = 0.0;
+
+                if (isComb)
+                {
+                    bool hasCht = frame.Values.TryGetValue($"eng-cht:{eng}", out double cht) ||
+                                  (eng == 1 && frame.Values.TryGetValue("eng-cht", out cht));
+
+                    if (hasCht && !double.IsNaN(cht) && !double.IsInfinity(cht))
+                    {
+                        if (!_chtHistoryByEngine.TryGetValue(eng, out var history))
+                        {
+                            history = new List<(double SimTime, double Cht)>();
+                            _chtHistoryByEngine[eng] = history;
+                        }
+
+                        history.Add((_accumulatedSimSeconds, cht));
+
+                        // Mantém a janela móvel de 60 segundos simulados
+                        while (history.Count >= 2 && history[1].SimTime <= _accumulatedSimSeconds - 60.0)
+                        {
+                            history.RemoveAt(0);
+                        }
+
+                        var oldest = history[0];
+                        double deltaSec = _accumulatedSimSeconds - oldest.SimTime;
+                        if (deltaSec >= 1.0)
+                        {
+                            // Taxa de resfriamento em °C/min (positivo = esfriando)
+                            coolingRate = ((oldest.Cht - cht) * 60.0) / deltaSec;
+                        }
+                    }
+                    else
+                    {
+                        _chtHistoryByEngine.Remove(eng);
+                    }
+                }
+                else
+                {
+                    _chtHistoryByEngine.Remove(eng);
+                }
+
+                dict[$"eng-cht-cooling-rate:{eng}"] = coolingRate;
+                if (eng == 1)
+                {
+                    dict["eng-cht-cooling-rate"] = coolingRate;
+                }
+            }
+
+            return new SensorFrame(dict, frame.ReceivedUtc, frame.SimulationRate);
         }
     }
 }

@@ -308,21 +308,22 @@
       "id": "piston_shock_cooling",
       "description": "Choque térmico por resfriamento abrupto de cabeçote de cilindro em descidas rápidas",
       "kind": "Continuous",
-      "limitKey": "chtMax",
-      "direction": "Below",
+      "requiresEngineRunning": true,
+      "engineRunningDelaySeconds": 60.0,
+      "limitKey": "chtCoolingRateMax",
+      "direction": "Above",
       "appliesTo": {
         "all": [
           "piston"
         ]
       },
       "sensors": [
-        "eng-cht",
-        "af-airspeed-indicated"
+        "eng-cht-cooling-rate"
       ],
       "bands": [
         {
           "name": "caution",
-          "threshold": 0.25,
+          "threshold": 1.0,
           "parts": [
             {
               "partId": "engine.cylinders",
@@ -338,7 +339,7 @@
         },
         {
           "name": "warning",
-          "threshold": 0.35,
+          "threshold": 1.25,
           "parts": [
             {
               "partId": "engine.cylinders",
@@ -354,7 +355,7 @@
         },
         {
           "name": "severe",
-          "threshold": 0.45,
+          "threshold": 1.5,
           "parts": [
             {
               "partId": "engine.cylinders",
@@ -369,7 +370,7 @@
           ]
         }
       ],
-      "source": "estimativa — revisar (referência usual: EAA Shock Cooling in General Aviation)"
+      "source": "Lycoming Service Instruction No. 1094D / Continental Standard Practice Manual M-0 (limite recomendado de resfriamento ~50 °F/min = 27.8 °C/min)"
     },
     {
       "id": "piston_egt_excess",
@@ -647,6 +648,8 @@
       "id": "oil_pressure_low",
       "description": "Pressão de óleo abaixo do limite mínimo operacional",
       "kind": "Continuous",
+      "requiresEngineRunning": true,
+      "engineRunningDelaySeconds": 30.0,
       "limitKey": "oilPressMin",
       "direction": "Below",
       "appliesTo": {
@@ -3392,7 +3395,8 @@
           "inspection": {
             "defectCode": "GENERATOR_OVERHEAT_INSPECTION",
             "isGrounding": false,
-            "minDurationSeconds": 0.0
+            "minDurationSeconds": 0.0,
+            "description": "Inspeção de alternador/gerador e fiação por sobreaquecimento após sobrecarga elétrica prolongada"
           }
         }
       ]

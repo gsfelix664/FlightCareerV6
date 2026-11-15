@@ -47,6 +47,14 @@
       "source": "ClassDefault",
       "reference": "FAR 23 Categoria Normal (component_catalog.json)",
       "notes": null
+    },
+    {
+      "key": "chtCoolingRateMax",
+      "value": 28,
+      "unit": "celsius_per_minute",
+      "source": "ClassDefault",
+      "reference": "Lycoming Service Instruction No. 1094D / Continental Standard Practice Manual M-0 (limite recomendado de resfriamento ~50 °F/min = 27.8 °C/min)",
+      "notes": "Taxa máxima recomendada de choque térmico para motores a pistão refrigerados a ar"
     }
   ],
   "Turboprop": [

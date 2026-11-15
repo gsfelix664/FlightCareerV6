@@ -60,6 +60,8 @@ namespace FlightCareer.Domain.Parts
         private readonly Dictionary<string, double> _exceedanceDurations = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, double> _exceedancePeaks = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _triggeredInspections = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<int, bool> _engineWasCombustion = new();
+        private readonly Dictionary<int, double> _engineCombustionTimeSeconds = new();
 
         public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog)
         {
@@ -72,6 +74,8 @@ namespace FlightCareer.Domain.Parts
             _exceedanceDurations.Clear();
             _exceedancePeaks.Clear();
             _triggeredInspections.Clear();
+            _engineWasCombustion.Clear();
+            _engineCombustionTimeSeconds.Clear();
         }
 
         /// <summary>
@@ -102,6 +106,35 @@ namespace FlightCareer.Domain.Parts
             var stressByPart = new Dictionary<(string PartId, int EngineIndex), (double MaxMultiplier, double SumLossPct, List<string> Rules)>();
 
             int engineCount = DetectEngineCount(frame);
+
+            // Rastreamento de combustão e tempo estabilizado por motor (tempo simulado)
+            for (int eng = 1; eng <= engineCount; eng++)
+            {
+                bool isComb = false;
+                if (frame.Values.TryGetValue($"eng-combustion:{eng}", out double cVal) ||
+                    (eng == 1 && frame.Values.TryGetValue("eng-combustion", out cVal)))
+                {
+                    isComb = cVal > 0.5;
+                }
+
+                bool prevComb = _engineWasCombustion.GetValueOrDefault(eng, false);
+                if (isComb)
+                {
+                    if (!prevComb)
+                    {
+                        _engineCombustionTimeSeconds[eng] = dtSeconds;
+                    }
+                    else
+                    {
+                        _engineCombustionTimeSeconds[eng] = _engineCombustionTimeSeconds.GetValueOrDefault(eng, 0.0) + dtSeconds;
+                    }
+                }
+                else
+                {
+                    _engineCombustionTimeSeconds[eng] = 0.0;
+                }
+                _engineWasCombustion[eng] = isComb;
+            }
 
             // 1. Avalia regras contínuas de estresse
             foreach (var rule in _wearRuleCatalog.Rules)
@@ -188,6 +221,38 @@ namespace FlightCareer.Domain.Parts
 
                 foreach (var engIdx in engineIndices)
                 {
+                    string trackingKey = engIdx.HasValue ? $"{rule.Id}#{engIdx.Value}" : rule.Id;
+
+                    if (rule.RequiresEngineRunning)
+                    {
+                        bool engineReady = false;
+                        if (engIdx.HasValue)
+                        {
+                            bool running = _engineWasCombustion.GetValueOrDefault(engIdx.Value, false);
+                            double time = _engineCombustionTimeSeconds.GetValueOrDefault(engIdx.Value, 0.0);
+                            engineReady = running && time >= rule.EngineRunningDelaySeconds;
+                        }
+                        else
+                        {
+                            for (int e = 1; e <= engineCount; e++)
+                            {
+                                if (_engineWasCombustion.GetValueOrDefault(e, false) &&
+                                    _engineCombustionTimeSeconds.GetValueOrDefault(e, 0.0) >= rule.EngineRunningDelaySeconds)
+                                {
+                                    engineReady = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (!engineReady)
+                        {
+                            _exceedanceDurations.Remove(trackingKey);
+                            _exceedancePeaks.Remove(trackingKey);
+                            continue;
+                        }
+                    }
+
                     double primarySensorValue = double.NaN;
                     bool engineSensorsValid = true;
 
@@ -243,8 +308,6 @@ namespace FlightCareer.Domain.Parts
                         // Avalia via sensor do addon contra o limite
                         activeBand = EvaluateActiveBand(rule, measuredVal, limitVal);
                     }
-
-                    string trackingKey = engIdx.HasValue ? $"{rule.Id}#{engIdx.Value}" : rule.Id;
 
                     if (activeBand != null)
                     {
