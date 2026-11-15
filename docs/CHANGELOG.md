@@ -1507,3 +1507,6 @@
   - Adicionado campo `priceScalesWithAircraft` em `PartDefinition` e no catálogo.
 - **Testes e integridade**:
   - 210 testes xUnit e 40 testes python aprovados com 100% de sucesso. Testes de provisionamento multiquádruplo (Baron G58 com 2 magnetos, C152 com 1, DA62 com 2 glow plugs, 747-8i com 4 seções quentes/fans/reversores).
+
+## 2026-11-15 - F2.1: lista de peças aprovada (Claude)
+- Usuário aprovou as 58 peças do `parts_catalog.json` com duas correções: `tires.nose` só em triciclo (`none: tailwheel`) e magnetos esquerdo/direito como NO-GO (`blocksFlightWhenBroken`), coerente com o `DefectCatalog`. Vidas úteis seguem "estimativa — revisar". Pendência para a F2.3: o provisionador não remove peça que deixou de se aplicar (ex.: `tires.nose` já criado num avião de bequilha) — limpar na migração.

@@ -464,7 +464,7 @@
       "perEngine": true,
       "lifeHours": 500,
       "visibleOnWalkaround": false,
-      "blocksFlightWhenBroken": false,
+      "blocksFlightWhenBroken": true,
       "partPrice": 1200,
       "priceScalesWithAircraft": false,
       "laborHours": 2.5,
@@ -489,7 +489,7 @@
       "perEngine": true,
       "lifeHours": 500,
       "visibleOnWalkaround": false,
-      "blocksFlightWhenBroken": false,
+      "blocksFlightWhenBroken": true,
       "partPrice": 1200,
       "priceScalesWithAircraft": false,
       "laborHours": 2.5,
@@ -1098,7 +1098,11 @@
       "id": "tires.nose",
       "name": "Pneu do trem dianteiro / bequilha",
       "group": "Pneus",
-      "appliesTo": {},
+      "appliesTo": {
+        "none": [
+          "tailwheel"
+        ]
+      },
       "perEngine": false,
       "lifeHours": 400,
       "lifeCycles": 250,
