@@ -1836,3 +1836,23 @@
 - **Não testado no MSFS**:
   - Tarefa estritamente de documentação e pesquisa técnica; nenhum código ou regra foi alterado. Teste das variáveis prioritárias será executado no próximo voo/teste de solo.
 
+## 2026-11-15 - Auditoria de variáveis, Key Events e Input Events - Rodada 2 (Gemini)
+- **Auditoria Completa do Registro de Sensores e Definições (`docs/plans/sensor-research/auditoria-registro.md`)**:
+  - Auditoria exaustiva cobrindo `sensor_registry.json` (421 sensores), `context_registry.json` (25 variáveis) e as definições fixas de `SimConnectService.cs` (`SimTelemetry`, `SimFailureState`, `SimFastFlightState` e escrita).
+  - Identificação de nomes inexistentes no SDK (`FLAP SPEED EXCEEDED`, `GEAR SPEED EXCEEDED` que eram notificações do modo Carreira, e `ELECTRICAL BATTERY LEVEL`) com risco de exceção no SimConnect e indicação de substitutas oficiais.
+  - Correção de erros críticos de indexação: sensores de ponto de contato (`CONTACT POINT COMPRESSION`, `CONTACT POINT IS SKIDDING`) e combustível (`FUELSYSTEM PUMP ACTIVE`, `FUELSYSTEM LINE FUEL PRESSURE`) que estavam marcados com `perEngine: true` (expandindo por motor em vez de por contact point / bomba / linha de combustível).
+  - Identificação de SimVars que exigem índice mas estavam sem índice (`WING FLEX PCT`, `CIRCUIT BREAKER PULLED`, `PNEUMATICS DUCT PRESSURE`, `PNEUMATICS PACK STATUS`).
+  - Alinhamento de unidades divergentes (`pneu-pack-status` como `percent over 100`, `elec-battery-estimated-capacity-pct` como `Percent`, `gear-skidding-factor` como `Percent Over 100`, `Rankine` vs `celsius`).
+- **Key Events, Input Events e Suporte Nativo a LVars (`docs/plans/sensor-research/eventos-e-input-events.md`)**:
+  - Confirmação formal no SDK 2024 de todos os eventos de falha utilizados pelo `SimFailureActuator` e `SetAlternatorConnected`.
+  - Mapeamento de novos key events candidatos a panes (`TOGGLE_ALTERNATE_STATIC`, `EXTINGUISH_ENGINE_FIRE`, `ELECTRICAL_CIRCUIT_BREAKER_TOGGLE`, `TOGGLE_ELECT_FUEL_PUMP1..4`).
+  - Análise aprofundada da API de Input Events do MSFS 2024 (`SimConnect_EnumerateInputEvents`, `SimConnect_GetInputEvent`, `SimConnect_SetInputEvent`, `SimConnect_SubscribeInputEvent`): como ela resolve a leitura de switches físicos como o Avionics Master do G1000 e disjuntores, além de suas limitações (hashes dinâmicos e nomenclatura não universal).
+  - Documentação da sintaxe oficial para variáveis indexadas por nome de componente (`SIMVAR:'ComponentName'_n`) e suporte nativo a múltiplos escopos (`A:`, `E:`, `L:`, `I:`, `O:`, `Z:`).
+- **Ferramentas de Conferência ao Vivo e Atualização de Candidatas (`docs/plans/sensor-research/variaveis-referencias.md`)**:
+  - Guia técnico de uso do SimConnect Inspector (Dev Mode) e do SimVarWatcher (SDK Sample) para validação ao vivo de SimVars e diagnóstico de exceções `NAME_UNRECOGNIZED` sem mexer no código do FlightCareer.
+  - Complementação da tabela com a lista completa dos índices de `COVER ON:0..7` (0 calços, 1 motor, 2 pitot, 3 tomada estática, 4 rotores, 5 trem de pouso, 6 hélices, 7 para-brisa).
+  - Refinamento da lista de 20 variáveis candidatas para o teste de solo.
+- **Não testado no MSFS**:
+  - Tarefa estritamente de documentação e pesquisa técnica baseada nas páginas oficiais do SDK MSFS 2024; nenhum código executável ou arquivo de catálogo de regras foi modificado.
+
+

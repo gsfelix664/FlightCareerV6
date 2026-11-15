@@ -59,7 +59,12 @@ A tabela abaixo analisa cada uma das variáveis da lista sob investigação, con
 | `SIM ON GROUND` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não | `Bool` | Nenhum | R | Sim (`sensor_registry.json`, `sensor-inventory.md` §1) | `FsConnect/data/Aircraft Simulation Variables.html:42197`, `FsConnect/src/CTrue.FsConnect/FsSimVarFactory.cs:152`, `aircraft/fbw-a32nx/src/base/flybywire-aircraft-a320-neo/SimObjects/AirPlanes/FlyByWire_A320_NEO/model/A320_NEO.xml:557` | Detecção primária de fase de voo (solo vs voo). |
 | `COVER ON:0` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:0` (Calços / wheel chocks) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: calços de roda colocados/removidos. |
 | `COVER ON:1` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:1` (Capas de motor / cowl plugs) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: capas de admissão/exaustão do motor. |
-| `COVER ON:2` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:2` (Capa do tubo de pitot) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: capa de proteção do pitot. |
+| `COVER ON:2` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:2` (Capa do tubo de pitot) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: capa de proteção do pitot com flâmula. |
+| `COVER ON:3` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:3` (Capas de tomada estática / static ports) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: proteção da tomada estática externa. |
+| `COVER ON:4` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:4` (Travas de rotores / helicopter tie-downs) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround em helicópteros e giroplanos. |
+| `COVER ON:5` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:5` (Pinos de trem de pouso / gear pins) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: pinos de travamento de solo do trem. |
+| `COVER ON:6` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:6` (Amarrações de hélice / propeller ties) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: amarras de hélices em aeronaves a pistão/turbina. |
+| `COVER ON:7` | Sim ([SDK](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-miscellaneous-variables/)) | Não (novidade nativa do MSFS 2024) | `Bool` | `:7` (Capa de para-brisa / windshield sun cover) | R/W | Não | Preflight behavior templates do MSFS 2024 | Walkaround: proteção solar do cockpit. |
 
 ---
 
@@ -142,47 +147,86 @@ O FlyByWire modela freios e hidráulica em Rust/WASM com física profunda de pri
 
 ---
 
-## 4. Candidatas para o Próximo Teste de Solo
+## 4. Ferramentas de Conferência ao Vivo
+
+Para que o usuário ou desenvolvedor possa testar e validar o comportamento de variáveis candidatas sem necessidade de modificar código ou recompilar o FlightCareer, o ambiente oficial do MSFS disponibiliza duas ferramentas fundamentais: o **SimConnect Inspector** (integrado no Developer Mode) e o **SimVarWatcher** (aplicativo utilitário fornecido como amostra do SDK).
+
+### 4.1. SimConnect Inspector (Developer Mode do MSFS 2024)
+O SimConnect Inspector é a ferramenta diagnóstica nativa embutida no simulador, essencial para inspecionar clientes conectados e diagnosticar erros de protocolo em tempo real.
+
+- **Como acessar:**
+  1. No menu do MSFS, acesse *General Options > Developers* e ative **Developer Mode** (*On*).
+  2. Na barra superior do DevMode, clique no menu **Tools** e selecione **SimConnect Inspector**.
+- **Abas principais e diagnósticos:**
+  - **Proxies:** Lista todos os clientes SimConnect ativos (ex.: `FlightCareer.UI`, drivers de hardware, utilitários).
+  - **Exceptions (A mais crítica):** Exibe qualquer exceção disparada pelo cliente SimConnect em tempo real. Se uma SimVar com nome incorreto for registrada, a exceção `SIMCONNECT_EXCEPTION_NAME_UNRECOGNIZED` (código 3) aparecerá imediatamente nesta aba, identificando a variável rejeitada antes que ela corrompa structs.
+  - **Data Definition:** Exibe a lista completa de datums registrados por cada definição (`DEFINITIONS`), permitindo verificar o tamanho total em bytes e a ordem exata dos campos na struct.
+  - **Frames:** Rastreia as transmissões frame a frame, indicando a taxa de entrega de pacotes e eventuais descartes de telemetria.
+  - **Statistics:** Exibe métricas de largura de banda, contagem de mensagens e latência da conexão IPC.
+
+### 4.2. SimVarWatcher (SDK Sample Project)
+O SimVarWatcher é um cliente SimConnect executável independente desenvolvido pela própria Asobo/Microsoft em C# (localizado em `[MSFS_SDK]\Samples\VisualStudio\SimvarWatcher\`). Ele permite consultar ou escrever qualquer SimVar em tempo de execução sem abrir o código-fonte de add-ons.
+
+- **Principais funcionalidades:**
+  - **Seleção de Objeto:** Permite escolher o objeto alvo (`User Aircraft`, tráfego IA ou SimObject específico).
+  - **Busca e Teste de Variáveis:** Digite o nome da SimVar com seu respectivo índice (ex.: `COVER ON:2`, `CONTACT POINT COMPRESSION:1`, `TURB ENG ITT:1`).
+  - **Seleção Flexível de Unidades:** Permite testar diferentes unidades aceitas (ex.: `celsius` vs `Rankine`, `Percent` vs `Percent Over 100`) para verificar a conversão automática do simulador.
+  - **Watchlist em Tempo Real:** Atualiza continuamente o valor na tela com taxa configurável.
+
+### 4.3. Passo a Passo Rápido: Como o Usuário Confere uma Variável sem o FlightCareer
+1. **Iniciar o simulador** e carregar o voo com a aeronave de interesse no pátio (motores desligados / *cold & dark*).
+2. **Abrir o SimVarWatcher:** Execute o executável compilado do SimVarWatcher (`Simvars.exe`).
+3. **Conectar ao Simulador:** Clique no botão **Connect**. O status no rodapé mudará para *Connected to Flight Simulator*.
+4. **Adicionar a Variável:**
+   - No campo **SimVar**, insira o nome exato (ex.: `COVER ON:0` ou `ELECTRICAL BUS VOLTAGE:1`).
+   - No campo **Unit**, selecione a unidade documentada (ex.: `Bool` ou `Volts`).
+   - Clique em **Add to Watchlist**.
+5. **Acionar o Sistema no Simulador:** Execute a ação física no cockpit ou no solo (ex.: ligar a Master Switch da bateria, puxar o freio de estacionamento, remover a flâmula do pitot).
+6. **Validar a Resposta:** Observe a coluna *Value* no SimVarWatcher. Se o valor variar de forma síncrona com a ação sem disparar exceção no SimConnect Inspector, a variável está validada para inclusão no `sensor_registry.json`.
+
+---
+
+## 5. Candidatas para o Próximo Teste de Solo
 
 Abaixo estão listadas as **20 variáveis candidatas prioritárias**, selecionadas pelo seu alto valor para o sistema de inspeção pré-voo, desgastes operacionais e falhas do FlightCareer, ordenadas por valor decrescente e com o passo de teste que as valida em solo:
 
-1. `COVER ON:0` (Calços de roda)
+1. `COVER ON:0` (Calços de roda / Chocks)
    - *Passo do teste:* No MSFS 2024, em modo pré-voo no pátio, colocar os calços de roda na bequilha/trens → `COVER ON:0` = 1; remover os calços durante a inspeção pré-voo → `COVER ON:0` = 0.
 2. `COVER ON:1` (Capas de motor / Cowl plugs)
    - *Passo do teste:* Na inspeção externa, remover as capas de entrada de ar do motor → `COVER ON:1` transita de 1 para 0.
 3. `COVER ON:2` (Capa do tubo de pitot)
    - *Passo do teste:* No walkaround, remover a capa com flâmula do pitot → `COVER ON:2` transita de 1 para 0.
-4. `L:IS_AVATAR` (Modo Avatar de Walkaround)
+4. `COVER ON:3` (Capas das tomadas estáticas / Static ports)
+   - *Passo do teste:* No walkaround externo, remover as proteções das portas estáticas → `COVER ON:3` transita de 1 para 0.
+5. `L:IS_AVATAR` (Modo Avatar de Walkaround)
    - *Passo do teste:* Sair da cabine para realizar a inspeção externa caminhando ao redor do avião → `L:IS_AVATAR` vai para 1; retornar ao assento do piloto → `L:IS_AVATAR` vai para 0.
-5. `CONTACT POINT COMPRESSION:0` (Compressão da bequilha)
+6. `CONTACT POINT COMPRESSION:0` (Compressão da bequilha / nose gear)
    - *Passo do teste:* No solo, aplicar frenagem forte durante o táxi a 10 kt → compressão da bequilha sobe significativamente devido à transferência de peso à frente.
-6. `CONTACT POINT COMPRESSION:1` (Compressão do trem principal esquerdo)
+7. `CONTACT POINT COMPRESSION:1` (Compressão do trem principal esquerdo)
    - *Passo do teste:* No táxi, efetuar curva fechada para a esquerda com pedal e freio diferencial esquerdo → amortecedor esquerdo sofre compressão sob a força centrífuga/peso.
-7. `CONTACT POINT COMPRESSION:2` (Compressão do trem principal direito)
+8. `CONTACT POINT COMPRESSION:2` (Compressão do trem principal direito)
    - *Passo do teste:* No táxi, efetuar curva fechada para a direita → compressão no ponto 2 sobe.
-8. `BRAKE LEFT POSITION` (Posição do freio esquerdo)
+9. `BRAKE LEFT POSITION` (Posição do freio esquerdo)
    - *Passo do teste:* Pressionar o pedal esquerdo de freio a fundo no solo → valor sobe de 0 a 32767 (ou de 0.0 a 1.0).
-9. `BRAKE RIGHT POSITION` (Posição do freio direito)
-   - *Passo do teste:* Pressionar o pedal direito de freio a fundo no solo → valor sobe de 0 a 32767.
-10. `CIRCUIT BREAKER PULLED` (Disjuntores)
+10. `BRAKE RIGHT POSITION` (Posição do freio direito)
+    - *Passo do teste:* Pressionar o pedal direito de freio a fundo no solo → valor sobe de 0 a 32767.
+11. `CIRCUIT BREAKER PULLED:1` (Disjuntores)
     - *Passo do teste:* Em aeronave com cockpit de disjuntores operáveis (ex.: C172 G1000), puxar o disjuntor do Pitot Heat ou Avionics → valor muda para 1 (true).
-11. `ELECTRICAL BUS VOLTAGE:1` (Tensão do barramento principal)
+12. `ELECTRICAL BUS VOLTAGE:1` (Tensão do barramento principal)
     - *Passo do teste:* Com motor desligado, ligar a Master Switch da bateria → tensão sobe de ~0V para ~24V-25V; dar a partida e ligar o alternador → sobe para ~28V.
-12. `ELECTRICAL BUS AMPS:1` (Corrente do barramento)
+13. `ELECTRICAL BUS AMPS:1` (Corrente do barramento)
     - *Passo do teste:* Ligar Taxi Lights, Landing Lights e Pitot Heat simultaneamente → corrente do barramento 1 sobe em degraus mensuráveis.
-13. `ELECTRICAL BATTERY LOAD:1` (Carga/descarga da bateria)
+14. `ELECTRICAL BATTERY LOAD:1` (Carga/descarga da bateria)
     - *Passo do teste:* Ligar todos os consumidores com motor desligado → leitura negativa acentuada (descarga); acelerar motor com alternador em ON → transita para positivo/neutro (recarga).
-14. `ELECTRICAL BATTERY VOLTAGE:1` (Tensão da bateria)
+15. `ELECTRICAL BATTERY VOLTAGE:1` (Tensão da bateria)
     - *Passo do teste:* Monitorar a tensão no instante do acionamento do starter elétrico (*cranking*) → observar queda transitória da tensão sob o torque de partida.
-15. `PNEUMATICS FAN STATUS:1` (Ventilação pneumática / ECS)
+16. `PNEUMATICS FAN STATUS:1` (Ventilação pneumática / ECS)
     - *Passo do teste:* Em aeronave compatível com o sistema modular pneumático do MSFS 2024, acionar o interruptor de ventilação/fan no painel → variável vai de 0.0 para 1.0.
-16. `HYDRAULIC RESERVOIR PERCENT:1` (Nível do reservatório hidráulico)
+17. `HYDRAULIC RESERVOIR PERCENT:1` (Nível do reservatório hidráulico)
     - *Passo do teste:* Em aeronave com sistema hidráulico, acionar flaps ou comandos de voo no solo e monitorar o nível de fluido.
-17. `HYDRAULIC SYSTEM INTEGRITY:1` (Integridade hidráulica)
+18. `HYDRAULIC SYSTEM INTEGRITY:1` (Integridade hidráulica)
     - *Passo do teste:* Monitorar a integridade nativa (1.0 = íntegro) no solo em aeronave com subsistema hidráulico ativo.
-18. `STRUCTURAL ICE PCT` (Gelo estrutural)
+19. `STRUCTURAL ICE PCT` (Gelo estrutural)
     - *Passo do teste:* No menu de clima do MSFS, configurar temperatura de -5°C com precipitação máxima e congelamento → taxa de gelo sobe de 0 a 100%.
-19. `PARTIAL PANEL PITOT` (Falha do velocímetro/pitot)
+20. `PARTIAL PANEL PITOT` (Falha do velocímetro/pitot)
     - *Passo do teste:* No menu de panes do MSFS, acionar a falha de pitot → a variável muda para 1 (`FAIL`), comprovando a detecção da pane de velocímetro.
-20. `PARTIAL PANEL VACUUM` (Falha do sistema a vácuo)
-    - *Passo do teste:* No menu de panes do MSFS, forçar pane de vácuo → variável muda para 1 (`FAIL`), a sucção zera e o horizonte artificial indica bandeira de falha.
