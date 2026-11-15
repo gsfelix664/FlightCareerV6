@@ -374,7 +374,10 @@ namespace FlightCareer.Infrastructure.Services
                         {
                             features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(profile.FeaturesJson) ?? new();
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[Mercado] Falha ao deserializar FeaturesJson para perfil {profile.AircraftTypeModel}: {ex.Message}");
+                        }
                         engineCount = profile.EngineCount;
                     }
                     _partMigrationService.ProvisionPurchasedAircraft(

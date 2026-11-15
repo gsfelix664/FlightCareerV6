@@ -101,6 +101,17 @@ namespace FlightCareer.UI
                         System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao provisionar peças: {ex.Message}");
                     }
 
+                    // Migração de peças para aeronaves existentes do hangar (F2.3)
+                    try
+                    {
+                        var migrationService = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.PartMigrationService>();
+                        await migrationService.MigrateAllPendingAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao migrar peças de aeronaves: {ex.Message}");
+                    }
+
                     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
                     if (!seeder.IsSeeded())
                     {

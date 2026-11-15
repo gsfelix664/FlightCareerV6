@@ -22,11 +22,28 @@ namespace FlightCareer.Domain.Parts
         public const double DefaultLaborRatePerHour = 100.0;
 
         /// <summary>
+        /// Retorna o teto de preço por peça física com base no porte da aeronave (F2.3).
+        /// Impede que peças de jatos comerciais atinjam valores astronômicos (ex: pneus a $100k+),
+        /// mantendo a ordem de grandeza real de custo direto de manutenção (US$ 1.000 - 2.500/h para narrowbodies).
+        /// </summary>
+        public static double GetClassPartPriceCap(double aircraftValue)
+        {
+            if (aircraftValue <= 2_000_000.0) return 30_000.0;       // Pistão (Classes A, B, C, D, E)
+            if (aircraftValue <= 12_000_000.0) return 80_000.0;      // Turboélice e Jato Executivo (Classes F, G, H)
+            if (aircraftValue <= 150_000_000.0) return 55_000.0;     // Linha aérea Narrowbody (Classe I: A320, 737)
+            return 110_000.0;                                        // Linha aérea Widebody / Cargueiro pesado (Classe J: A330, 747, 787)
+        }
+
+        /// <summary>
         /// Calcula o preço unitário da peça física:
         /// - PartPrice fixo quando PriceScalesWithAircraft == false.
-        /// - max(PartPrice, valor da aeronave × repairCostPctOfAircraft sorteado na faixa) quando escala.
+        /// - max(PartPrice, min(valor da aeronave × repairCostPctOfAircraft sorteado na faixa, teto da classe)) quando escala.
         /// </summary>
-        public static double CalculatePartPrice(PartDefinition def, double aircraftValue, IRandomSource? random = null)
+        public static double CalculatePartPrice(
+            PartDefinition def,
+            double aircraftValue,
+            IRandomSource? random = null,
+            double? maxCap = null)
         {
             if (def == null) return 0.0;
             double basePrice = (double)def.PartPrice;
@@ -44,7 +61,10 @@ namespace FlightCareer.Domain.Parts
                 double pct = minPct + (roll * (maxPct - minPct));
 
                 double scaledCost = aircraftValue * (pct / 100.0);
-                return Math.Round(Math.Max(basePrice, scaledCost), 2);
+                double cap = maxCap ?? GetClassPartPriceCap(aircraftValue);
+                double finalPrice = Math.Max(basePrice, Math.Min(scaledCost, cap));
+
+                return Math.Round(finalPrice, 2);
             }
 
             return Math.Round(basePrice, 2);
@@ -89,9 +109,10 @@ namespace FlightCareer.Domain.Parts
             PartDefinition def,
             double aircraftValue,
             IRandomSource? random = null,
-            double laborRatePerHour = DefaultLaborRatePerHour)
+            double laborRatePerHour = DefaultLaborRatePerHour,
+            double? maxCap = null)
         {
-            double partPrice = CalculatePartPrice(def, aircraftValue, random);
+            double partPrice = CalculatePartPrice(def, aircraftValue, random, maxCap);
             double laborCost = CalculateLaborCost(def, laborRatePerHour);
             double total = Math.Round(partPrice + laborCost, 2);
             double downtime = CalculateDowntimeHours(def, random);

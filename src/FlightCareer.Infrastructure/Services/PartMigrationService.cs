@@ -151,7 +151,10 @@ namespace FlightCareer.Infrastructure.Services
                 {
                     features = JsonSerializer.Deserialize<List<string>>(profile.FeaturesJson, JsonOpts) ?? new();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[Migração] Falha ao deserializar FeaturesJson para perfil {profile.AircraftTypeModel}: {ex.Message}");
+                }
                 engineCount = Math.Max(1, profile.EngineCount);
             }
 
@@ -220,7 +223,14 @@ namespace FlightCareer.Infrastructure.Services
                     int estCycles = def.LifeCycles.HasValue ? (int)Math.Round((deficit / 70.0) * def.LifeCycles.Value) : 0;
                     estCycles = Math.Min(aircraft.LandingsCount, Math.Max(0, estCycles));
 
-                    if (existingMap.TryGetValue(key, out var existingPart))
+                    bool found = existingMap.TryGetValue(key, out var existingPart);
+                    if (!found && engIdx == 1 && existingMap.TryGetValue((def.Id.ToLowerInvariant(), 0), out existingPart))
+                    {
+                        found = true;
+                        existingPart.EngineIndex = 1;
+                    }
+
+                    if (found && existingPart != null)
                     {
                         // Se a peça já existia porém estava a 100% num avião antigo que está desgastado
                         if (existingPart.Health >= 99.9 && aircraft.CurrentAirframeHours > 5.0 && baseHealth < 95.0)
@@ -266,6 +276,36 @@ namespace FlightCareer.Infrastructure.Services
 
             details.Add($"Aeronave {aircraft.Prefix} migrada com sucesso. Criadas: {partsCreated}, Ajustadas: {partsAdjusted}, Removidas: {obsoleteRemoved}.");
             return new MigrationSummary(1, partsCreated, partsAdjusted, obsoleteRemoved, details);
+        }
+
+        /// <summary>
+        /// Migra todas as aeronaves cadastradas no banco que ainda não foram migradas (PartsMigratedAtUtc == null).
+        /// Executado na inicialização da aplicação (App.xaml.cs) logo após o provisionamento de peças.
+        /// </summary>
+        public async Task<int> MigrateAllPendingAsync(IAppDbContext db)
+        {
+            if (db == null) throw new ArgumentNullException(nameof(db));
+
+            var unmigratedAircraft = await db.PilotAircrafts
+                .Include(a => a.AircraftType)
+                .Include(a => a.Components)
+                .Include(a => a.Parts)
+                .Where(a => a.PartsMigratedAtUtc == null)
+                .ToListAsync();
+
+            if (unmigratedAircraft.Count == 0) return 0;
+
+            int migratedCount = 0;
+            foreach (var aircraft in unmigratedAircraft)
+            {
+                var summary = await MigrateAircraftAsync(db, aircraft);
+                if (summary.AircraftMigrated > 0)
+                {
+                    migratedCount++;
+                }
+            }
+
+            return migratedCount;
         }
 
         private double GetBaseHealthFromComponents(PilotAircraft aircraft, string group)
