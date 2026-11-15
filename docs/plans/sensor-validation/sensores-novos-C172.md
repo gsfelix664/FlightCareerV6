@@ -6,7 +6,7 @@ Log `20261115-1534-C172SP_G1000_Passengers.csv` (4 min, REC, marcadores `teste-*
 |---|---|---|---|
 | Posição do profundor | `ELEVATOR POSITION` | −1,00 a +1,00, 100 valores | ✅ válido |
 | Posição do aileron | `AILERON POSITION` | −0,90 a +1,00, 131 valores | ✅ válido |
-| Posição do leme | `RUDDER POSITION` | 0 o voo todo | ❓ confirmar se os pedais foram movidos |
+| Posição do leme | `RUDDER POSITION` | 0 o voo todo | ⏳ não testado (o usuário não moveu os pedais); validar no próximo voo |
 | Piloto automático | `AUTOPILOT MASTER` | 0 → 1 → 0 nos marcadores `teste-ap-on/off` | ✅ válido |
 | Trim do profundor | `ELEVATOR TRIM POSITION` | −0,028 a 0,193 (radianos), 71 valores | ✅ válido |
 | Trim de aileron / leme | `AILERON TRIM PCT`, `RUDDER TRIM PCT` | 0 | — o C172 não tem (esperado) |
