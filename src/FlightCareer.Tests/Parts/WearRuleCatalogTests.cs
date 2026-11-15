@@ -46,7 +46,7 @@ namespace FlightCareer.Tests.Parts
             Catalog.Validate(PartsCatalog, validSensors);
 
             Assert.NotEmpty(Catalog.Rules);
-            Assert.True(Catalog.Rules.Count >= 30, "Deve conter ao menos 30 regras após a expansão F2.1b.");
+            Assert.True(Catalog.Rules.Count >= 40, "Deve conter ao menos 40 regras após a expansão F2.1b (Rodada 2).");
 
             var defectCodePattern = new Regex("^[A-Z0-9]+(_[A-Z0-9]+)*$", RegexOptions.Compiled);
 

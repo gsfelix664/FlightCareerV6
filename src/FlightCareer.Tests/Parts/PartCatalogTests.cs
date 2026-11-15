@@ -40,8 +40,8 @@ namespace FlightCareer.Tests.Parts
         {
             var validSensors = LoadValidSensors();
 
-            // Deve conter entre 90 e 130 peças conforme a especificação F2.1b
-            Assert.InRange(Catalog.Parts.Count, 90, 130);
+            // Deve conter entre 130 e 180 peças conforme a especificação F2.1b (Rodada 2)
+            Assert.InRange(Catalog.Parts.Count, 130, 180);
 
             // Valida sem lançar exceções (IDs únicos, grupo no vocabulário, LifeHours/LifeCycles, LifeSource e sensores existentes)
             Catalog.Validate(validSensors);
@@ -395,6 +395,57 @@ namespace FlightCareer.Tests.Parts
             };
             var ex4 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidTailwheelSteering, "TestTailwheelSteering"));
             Assert.Contains("tailwheel", ex4.Message);
+
+            // ptu em monomotor a pistão deve falhar
+            var invalidPtuPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Ptu
+            };
+            var ex5 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidPtuPiston, "TestPistonPtu"));
+            Assert.Contains("ptu", ex5.Message);
+
+            // rat em pistão deve falhar
+            var invalidRatPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Rat
+            };
+            var ex6 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidRatPiston, "TestPistonRat"));
+            Assert.Contains("rat", ex6.Message);
+
+            // propDeIce em jato deve falhar
+            var invalidPropDeiceJet = new[]
+            {
+                AircraftFeatures.Jet,
+                AircraftFeatures.MultiEngine,
+                AircraftFeatures.RetractableGear,
+                AircraftFeatures.Pressurized,
+                AircraftFeatures.PropDeIce
+            };
+            var ex7 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidPropDeiceJet, "TestJetPropDeIce"));
+            Assert.Contains("propDeIce", ex7.Message);
+
+            // bleedAir em pistão não-pressurizado deve falhar
+            var invalidBleedPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.BleedAir
+            };
+            var ex8 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidBleedPiston, "TestPistonBleedAir"));
+            Assert.Contains("bleedAir", ex8.Message);
         }
 
         [Fact]
@@ -403,15 +454,20 @@ namespace FlightCareer.Tests.Parts
             var loader = new AircraftLimitCatalogLoader();
             var profiles = loader.LoadProfiles().ToDictionary(p => p.AircraftId, StringComparer.OrdinalIgnoreCase);
 
-            // 1. C152 não tem FMS, slats, spoilers nem radar
+            // 1. C152 não tem FMS, slats, spoilers, radar, PTU, RAT, propDeIce, FADEC ou bleedAir
             Assert.True(profiles.ContainsKey("Cessna C152"));
             var c152Features = profiles["Cessna C152"].Features;
             Assert.DoesNotContain(AircraftFeatures.Fms, c152Features);
             Assert.DoesNotContain(AircraftFeatures.Slats, c152Features);
             Assert.DoesNotContain(AircraftFeatures.Spoilers, c152Features);
             Assert.DoesNotContain(AircraftFeatures.WeatherRadar, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Ptu, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Rat, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.PropDeIce, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Fadec, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.BleedAir, c152Features);
 
-            // 2. 747-8i tem slats, spoilers, FMS, radar, antiskid, anteparas de pressão (pressurized)
+            // 2. 747-8i tem slats, spoilers, FMS, radar, antiskid, anteparas de pressão (pressurized), RAT, FADEC, bleedAir
             Assert.True(profiles.ContainsKey("747-8i"));
             var b748Features = profiles["747-8i"].Features;
             Assert.Contains(AircraftFeatures.Slats, b748Features);
@@ -420,11 +476,39 @@ namespace FlightCareer.Tests.Parts
             Assert.Contains(AircraftFeatures.WeatherRadar, b748Features);
             Assert.Contains(AircraftFeatures.Antiskid, b748Features);
             Assert.Contains(AircraftFeatures.Pressurized, b748Features);
+            Assert.Contains(AircraftFeatures.Rat, b748Features);
+            Assert.Contains(AircraftFeatures.Fadec, b748Features);
+            Assert.Contains(AircraftFeatures.BleedAir, b748Features);
 
-            // 3. King Air tem botas de degelo (deIceBoots)
+            // 3. A320neo tem PTU, RAT, FADEC, bleedAir
+            Assert.True(profiles.ContainsKey("A320neo"));
+            var a320Features = profiles["A320neo"].Features;
+            Assert.Contains(AircraftFeatures.Ptu, a320Features);
+            Assert.Contains(AircraftFeatures.Rat, a320Features);
+            Assert.Contains(AircraftFeatures.Fadec, a320Features);
+            Assert.Contains(AircraftFeatures.BleedAir, a320Features);
+
+            // 4. 737 Max 8 tem PTU, FADEC, bleedAir, mas NÃO possui RAT
+            Assert.True(profiles.ContainsKey("737 Max 8"));
+            var b738Features = profiles["737 Max 8"].Features;
+            Assert.Contains(AircraftFeatures.Ptu, b738Features);
+            Assert.Contains(AircraftFeatures.Fadec, b738Features);
+            Assert.Contains(AircraftFeatures.BleedAir, b738Features);
+            Assert.DoesNotContain(AircraftFeatures.Rat, b738Features);
+
+            // 5. King Air tem botas de degelo (deIceBoots), propDeIce e bleedAir
             Assert.True(profiles.ContainsKey("Beechcraft King Air"));
             var kingAirFeatures = profiles["Beechcraft King Air"].Features;
             Assert.Contains(AircraftFeatures.DeIceBoots, kingAirFeatures);
+            Assert.Contains(AircraftFeatures.PropDeIce, kingAirFeatures);
+            Assert.Contains(AircraftFeatures.BleedAir, kingAirFeatures);
+
+            // 6. Diamond DA62 tem FADEC e propDeIce, sem bleedAir
+            Assert.True(profiles.ContainsKey("Diamond DA62"));
+            var da62Features = profiles["Diamond DA62"].Features;
+            Assert.Contains(AircraftFeatures.Fadec, da62Features);
+            Assert.Contains(AircraftFeatures.PropDeIce, da62Features);
+            Assert.DoesNotContain(AircraftFeatures.BleedAir, da62Features);
         }
 
         [Fact]
@@ -435,8 +519,10 @@ namespace FlightCareer.Tests.Parts
 
             var c152Parts = Catalog.PartsFor(profiles["Cessna C152"].Features);
             var b748Parts = Catalog.PartsFor(profiles["747-8i"].Features);
+            var a320Parts = Catalog.PartsFor(profiles["A320neo"].Features);
+            var kingAirParts = Catalog.PartsFor(profiles["Beechcraft King Air"].Features);
 
-            // C152 tem instrumentos analógicos e empenagem básica, sem FMS, slats ou radar
+            // C152 tem instrumentos analógicos e empenagem básica, sem FMS, slats, radar, PTU, RAT ou FADEC
             Assert.Contains(c152Parts, p => p.Id == "avionics.analog_flight_instruments");
             Assert.Contains(c152Parts, p => p.Id == "empennage.elevator");
             Assert.Contains(c152Parts, p => p.Id == "empennage.rudder");
@@ -444,8 +530,12 @@ namespace FlightCareer.Tests.Parts
             Assert.DoesNotContain(c152Parts, p => p.Id == "wing.slats");
             Assert.DoesNotContain(c152Parts, p => p.Id == "wing.spoilers");
             Assert.DoesNotContain(c152Parts, p => p.Id == "avionics.weather_radar");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "hydraulic.ptu");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "electrical.rat");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "engine.fadec_eec");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "pneumatic.bleed_valves");
 
-            // 747-8i tem FMS, slats, spoilers, radar, antiskid e anteparas de pressão
+            // 747-8i tem FMS, slats, spoilers, radar, antiskid, anteparas de pressão, RAT, FADEC, bleed valves e packs
             Assert.Contains(b748Parts, p => p.Id == "avionics.fms_computer");
             Assert.Contains(b748Parts, p => p.Id == "avionics.glass_displays");
             Assert.Contains(b748Parts, p => p.Id == "wing.slats");
@@ -453,7 +543,23 @@ namespace FlightCareer.Tests.Parts
             Assert.Contains(b748Parts, p => p.Id == "avionics.weather_radar");
             Assert.Contains(b748Parts, p => p.Id == "gear.antiskid_system");
             Assert.Contains(b748Parts, p => p.Id == "fuselage.pressure_bulkheads");
+            Assert.Contains(b748Parts, p => p.Id == "electrical.rat");
+            Assert.Contains(b748Parts, p => p.Id == "engine.fadec_eec");
+            Assert.Contains(b748Parts, p => p.Id == "pneumatic.bleed_valves");
+            Assert.Contains(b748Parts, p => p.Id == "pneumatic.air_cycle_machine");
+            Assert.Contains(b748Parts, p => p.Id == "hotsection.fuel_nozzles");
+            Assert.Contains(b748Parts, p => p.Id == "hotsection.ngv");
             Assert.DoesNotContain(b748Parts, p => p.Id == "avionics.analog_flight_instruments");
+
+            // A320neo tem PTU, RAT, FADEC e bleed valves
+            Assert.Contains(a320Parts, p => p.Id == "hydraulic.ptu");
+            Assert.Contains(a320Parts, p => p.Id == "electrical.rat");
+            Assert.Contains(a320Parts, p => p.Id == "engine.fadec_eec");
+            Assert.Contains(a320Parts, p => p.Id == "pneumatic.bleed_valves");
+
+            // King Air tem degelo de hélice e válvulas de sangria
+            Assert.Contains(kingAirParts, p => p.Id == "propeller.deice_boots");
+            Assert.Contains(kingAirParts, p => p.Id == "pneumatic.bleed_valves");
         }
     }
 }
