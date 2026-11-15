@@ -22,3 +22,14 @@ O revisor cruzou a auditoria com os CSVs reais (`%LocalAppData%\FlightCareer\sen
 5. Afirmações de unidade que "falham a conversão" (ex.: `ESTIMATED CAPACITY PCT` em `percent over 100`) não se confirmam: o valor chega coerente (0,986–1,0). Rebaixe para "informativo" quando o CSV mostrar valor coerente.
 
 **Regra para as rodadas seguintes:** "não encontrado na documentação" ≠ "não existe". Classifique cada item como: **aceita pelo sim** (coluna no CSV), **rejeitada pelo sim** (ausente do CSV embora no registro, ou no log `[SimConnect EXCEPTION]`), **documentada**, **não documentada**. Só chame de inexistente o que o sim rejeitou.
+
+---
+
+# Revisão RESEARCH-SIMVARS — rodada 3
+
+**Veredito: APROVADO** (documentação; nada entra no registro sem teste no simulador)
+
+- Auditoria corrigida com prova pelos CSVs reais (aceita / varia / documentada).
+- Descoberta: 28 variáveis por peça, Top 25 com roteiro de ~15 min, descartadas.
+- Conferido pelo revisor na documentação oficial: `ENG OIL QUANTITY:<motor>` existe (Percent Over 100). **Corrigido pelo revisor:** `ELECTRICAL LINE BREAKER PULLED` não existe; o nome documentado é `LINE BREAKER PULLED:<linha>` (Bool, só sistema elétrico v2+, índice 0 sempre falso). Outros nomes de disjuntor documentados: `BUS BREAKER PULLED`, `BATTERY BREAKER PULLED`, `CIRCUIT BREAKER PULLED`, `ELECTRICAL RELAY BREAKER PULLED`, `BREAKER <nome>` (ADF, ALTFLD, AUTOPILOT, AVNBUS1/2, FLAP, GPS, INST, XPNDR...).
+- Próximo passo: tarefa de sensores para incluir as candidatas aprovadas no registro (leitura genérica, rejeitadas saem do layout sozinhas) e o teste de solo de ~15 min do usuário.
