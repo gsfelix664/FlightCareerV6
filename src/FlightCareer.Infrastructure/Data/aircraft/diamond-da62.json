@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Diamond DA62",
   "class": "Piston",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 205.0,
+      "value": 201.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
@@ -62,18 +62,66 @@
     },
     {
       "key": "vfe:1",
-      "value": 136.0,
+      "value": 135.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 119.0,
+      "value": 118.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0809-DA62_Scientific_Research.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2300.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.5 p. 6 (Austro Engine E4P 2300 rpm, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 201.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (+3.8g, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (-1.52g, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
     }
   ]

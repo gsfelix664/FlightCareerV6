@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "A310",
   "class": "Jet",
   "simMatch": {
@@ -22,42 +22,50 @@
     },
     {
       "key": "vle",
-      "value": 250.0,
+      "value": 270.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0820-A310.csv)",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLE 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
       "key": "vfe:1",
       "value": 245.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0820-A310.csv)",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 0 245 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 210.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0820-A310.csv)",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 15 210 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
       "key": "vfe:3",
       "value": 195.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0820-A310.csv)",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 20 195 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     },
     {
       "key": "vfe:4",
       "value": 180.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0820-A310.csv)",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 20 Flaps 40 180 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 270.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLO 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
     }
   ]

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 205.0,
+      "value": 203.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Never exceed 203 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
@@ -62,18 +62,42 @@
     },
     {
       "key": "vfe:1",
-      "value": 145.0,
+      "value": 152.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps 12° 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     },
     {
       "key": "vfe:2",
-      "value": 124.0,
+      "value": 122.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps normal 122 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.5 p. 4 (Continental IO-550-B 2700 rpm, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 165.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (165 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Landing gear extended normal 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
       "notes": null
     }
   ]

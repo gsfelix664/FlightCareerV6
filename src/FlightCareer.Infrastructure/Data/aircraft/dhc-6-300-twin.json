@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 170.0,
+      "value": 166.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VMO 166 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
@@ -46,18 +46,18 @@
     },
     {
       "key": "vfe:1",
-      "value": 103.0,
+      "value": 100.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° 100 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 93.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Airspeed limitations p. 42 (VFE Flaps 10° to 37.5° 93 IAS, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     },
     {
@@ -74,6 +74,30 @@
       "unit": "knots",
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 725.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (T5 725°C, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 101.6,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (NG 101.6%, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 40.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (IDLE Oil Press 40 Min, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
     }
   ]

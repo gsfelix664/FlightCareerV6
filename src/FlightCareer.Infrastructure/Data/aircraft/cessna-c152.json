@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Cessna C152",
   "class": "Piston",
   "simMatch": {
@@ -30,10 +30,10 @@
     },
     {
       "key": "oilTempMax",
-      "value": 115.74,
+      "value": 118.0,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX OIL TEMPERATURE (20261115-0756-Cessna_C152.csv)",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 / 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -46,10 +46,10 @@
     },
     {
       "key": "vne",
-      "value": 149,
+      "value": 149.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (MSFS 2024, 2026-11-15)",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (149 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -62,10 +62,10 @@
     },
     {
       "key": "vfe:2",
-      "value": 85,
+      "value": 85.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (MSFS 2024, 2026-11-15)",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 20° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     },
     {
@@ -104,8 +104,32 @@
       "key": "vfe:3",
       "value": 85.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0756-Cessna_C152.csv)",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 30° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 25.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-5 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 111.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (111 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.76,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     }
   ]

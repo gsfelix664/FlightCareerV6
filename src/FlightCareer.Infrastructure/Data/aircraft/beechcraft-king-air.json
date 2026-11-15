@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "simMatch": {
@@ -14,10 +14,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 263.0,
+      "value": 245.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "REFERENCE SPEED MAX IAS (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vmo 245 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
       "notes": null
     },
     {
@@ -40,16 +40,40 @@
       "key": "vfe:1",
       "value": 202.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Approach 202 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
       "notes": null
     },
     {
       "key": "vfe:2",
       "value": 158.0,
       "unit": "knots",
-      "source": "SimVar",
-      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0814-Beechcraft_King_Air.csv)",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Full Down 158 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.58,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Mmo 0.58, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vle 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vlo extension 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
       "notes": null
     }
   ]
