@@ -353,4 +353,46 @@ Como o sistema elétrico modular v2 do MSFS 2024 indexa os barramentos por índi
 | `elec-main-bus-voltage-1` | Datum de controle do sistema legado: ~24 V com bateria; ~28 V com alternador ativo. |
 | `rudder-position` | Varia entre **-1,00** (leme totalmente à esquerda) e **+1,00** (totalmente à direita) em `teste-leme`. |
 
+---
+
+## 4. Calibração de Nova Aeronave (Solo, ~10 min — F2.4b-CAL)
+
+Para adicionar uma nova aeronave ou levantar os parâmetros do sistema elétrico e comandos (`elecAvionicsCircuitIndex`, `elecAvionicsBusAmpsIndex`, `elecMainBusIndex`, `elecSystemVolts`), utilize o **Modo Calibração** no solo com a rotina interativa do HUD Overlay.
+
+### Procedimento no Simulador (HUD Overlay)
+1. **Posição inicial:** Inicie o simulador no pátio em **Cold & Dark** (tudo desligado).
+2. **Iniciar Calibração:** No HUD Overlay, clique no botão **Calibrar**. O gravador iniciará automaticamente e ativará as varreduras de telemetria estendidas (`calibrationOnly: true`).
+3. **Executar os passos guiados:** Siga as instruções exibidas no card de calibração do HUD. O botão **Pronto** fica disponível assim que o tempo mínimo de cada passo for atingido:
+   - `cold-dark` (10 s): Tudo desligado.
+   - `battery-on` (30 s): Ligar apenas master da bateria (sem aviônicos).
+   - `avionics-on` (30 s): Ligar chave de aviônicos.
+   - `avionics-off` (20 s): Desligar chave de aviônicos.
+   - `avionics-on-2` (10 s): Religar chave de aviônicos.
+   - `engine-start` (30 s): Dar partida e estabilizar em marcha lenta com alternador ligado.
+   - `alternator-off` (60 s): Desligar chave do alternador/gerador (bateria suprindo).
+   - `alternator-on` (30 s): Religar alternador/gerador e aguardar estabilização.
+   - `flaps-each-detent` (30 s): Estender cada dente de flap até o máximo e recolher (pulado automaticamente se aeronave não tiver flaps).
+   - `elevator-full` (5 s): Manche batente a batente (puxar e empurrar).
+   - `aileron-full` (5 s): Manche batente a batente (esquerda e direita).
+   - `rudder-full` (5 s): Pedais batente a batente (esquerda e direita).
+   - `end`: Encerramento da calibração.
+4. **Finalização:** Ao concluir o último passo, o gravador encerra a gravação e o HUD exibe o comando para análise.
+
+### Análise e Gravação dos Parâmetros
+
+Execute no terminal:
+
+```bash
+python tools/aircraft_limits/calibrate.py "%LOCALAPPDATA%\FlightCareer\sensor-logs\<nome-do-arquivo>.csv"
+```
+
+O analisador inspecionará os marcadores `cal:<passo>`, calculará os parâmetros e exibirá o relatório no terminal com as evidências.
+
+Para gravar os parâmetros SimVar diretamente no catálogo da aeronave (`Data/aircraft/<id>.json`) sem sobrescrever dados de POH:
+
+```bash
+python tools/aircraft_limits/calibrate.py "%LOCALAPPDATA%\FlightCareer\sensor-logs\<nome-do-arquivo>.csv" --write
+```
+
+
 

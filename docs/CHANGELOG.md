@@ -1733,3 +1733,25 @@
 ## 2026-11-15 - Teste elétrico de solo do C172 G1000 analisado (Claude)
 - `docs/plans/sensor-validation/teste-eletrico-C172.md`: linha do tempo e resultado das 16 SimVars do spike. Aviônicos detectados por `CIRCUIT ON:3` e `ELECTRICAL BUS AMPS:4`; alternador e descarga pela `ELECTRICAL BUS VOLTAGE:1` (igual nos 5 barramentos); `ELECTRICAL BATTERY VOLTAGE/LOAD:1`, `MAIN BUS`, `GENALT` e `AVIONICS MASTER SWITCH` não atualizam no C172 2024. `RUDDER POSITION` validado.
 - Proposta para as três regras elétricas mudas (índice de circuito por aeronave no catálogo; descarga por tensão do barramento; sobrecarga pela carga total × capacidade do alternador). Nada de código mudou.
+
+## 2026-11-15 - F2.4b-CAL regras elétricas e modo calibração (Gemini)
+- **Ativação das 3 Regras Elétricas no Domínio (`PartEventDeriver`)**:
+  - `avionics_start_with_avionics_master_on`: na borda de partida do motor (`eng-starter:n` 0->1), detecta aviônicos ligados via `elec-circuit-on-<elecAvionicsCircuitIndex>` e emite o evento `avionicsMasterStartSpikes` com contador cumulativo no voo.
+  - `battery_deep_discharge_damage`: com master da bateria ligado e tensão no barramento `elecMainBusIndex` entre 1 V e `elecDeepDischargeVolts`, acumula minutos simulados e emite eventos ao cruzar cada faixa cumulativa (10, 25, 45 min); zera apenas após interrupção contínua ≥ 10 s simulados.
+  - `electrical_system_overload_amps`: com alternador carregando (tensão ≥ 0,95 × nominal), sem starter engatado e carga total superior à capacidade do alternador (`elec-total-load-amps > alternatorRatedAmps`), acumula minutos simulados e emite eventos ao cruzar faixas cumulativas (5, 15, 30 min).
+  - Ausência de limites elétricos no perfil da aeronave desliga a respectiva regra silenciosamente, sem interromper o monitoramento.
+- **Catálogo de Limites por Aeronave (`LimitKeys`, Schema e C172SP G1000)**:
+  - Adicionadas chaves de limites em `LimitKeys`: `elecSystemVolts` (volts), `elecAvionicsCircuitIndex` (index), `elecAvionicsBusAmpsIndex` (index), `elecMainBusIndex` (index), `alternatorRatedAmps` (amperes), `elecDeepDischargeVolts` (volts). Unidades `volts`, `index`, `amperes` registradas no schema JSON.
+  - `c172sp-g1000.json` calibrado com `elecSystemVolts: 28.0`, `elecAvionicsCircuitIndex: 3.0`, `elecAvionicsBusAmpsIndex: 4.0`, `elecMainBusIndex: 1.0` (fonte `SimVar`), e `alternatorRatedAmps: 60.0` (fonte `POH`, Sec. 7 p. 7-47).
+- **Varredura e Modo de Calibração de Solo no HUD Overlay**:
+  - Catálogo de sensores ampliado com varredura estendida: `CIRCUIT ON:4..20`, `ELECTRICAL BUS VOLTAGE:6..10`, `ELECTRICAL BUS AMPS:6..10`, com suporte a `calibrationOnly: true` (lidos e alocados nos blocos do SimConnect exclusivamente durante calibração).
+  - Roteiro guiado em dados (`calibration_script.json`) e classe de domínio (`CalibrationScript`) com 13 passos de solo sequenciais e filtragem por features da aeronave (ex.: exclusão automática de teste de flap para aeronaves sem flap).
+  - HUD Overlay integrado (`DebugOverlayViewModel` e XAML) com card de calibração, botão "Calibrar", contador de tempo mínimo, botões "Pronto", "Pular" e "Cancelar", exibindo comando de análise ao concluir.
+- **Analisador de Calibração (`tools/aircraft_limits/calibrate.py`)**:
+  - Script Python (somente biblioteca padrão) que processa os marcadores `cal:<passo>` do log de calibração, identifica índices e tensões nominais por transições de estado e análise estatística, exibe relatório de evidências no terminal e grava os candidatos com `--write` no catálogo sem sobrescrever dados de POH.
+  - Testado e validado tanto com suite sintética unitária (45 testes Python) quanto com log real de voo do C172SP.
+- **Testes**:
+  - Criados testes unitários C# em `ElectricalRuleDeriverTests.cs`, `CalibrationScriptTests.cs` e `ElectricalLimitsTests.cs`.
+  - Suíte completa com 301 testes xUnit passando com 100% de sucesso.
+- **Não testado no MSFS**:
+  - Execução interativa completa da UI do card de calibração no simulador com SimConnect ao vivo.
