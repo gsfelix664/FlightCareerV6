@@ -37,7 +37,17 @@
     "wetSurfaceMultiplier": 1.8,
     "oilLeakMinFpm": 650.0,           // Pouso duro pode trincar cárter / retentor do virabrequim
     "oilLeakChanceAt1000Fpm": 0.5,
-    "oilLeakRatePerMin": 3.5
+    "oilLeakRatePerMin": 3.5,
+    // Contato com o solo medido na leitura rápida: acima de qualquer destes = acidente (perda total)
+    "crashFpm": 1500.0,
+    "crashBankDeg": 30.0,
+    "crashNoseDownDeg": 15.0,
+    "crashNoseUpDeg": 30.0,
+    "crashG": 6.0,
+    "contactWindowBeforeSec": 1.0,
+    "contactWindowAfterSec": 0.5,
+    "minAirborneSec": 0.5,
+    "traceBeforeSec": 2.0
   },
 
   // Limites padrão por classe de motor (sobrescritos por modelo em "aircraftOverrides")

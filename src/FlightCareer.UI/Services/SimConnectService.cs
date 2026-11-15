@@ -10,8 +10,8 @@ using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState }
-    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight }
+    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
     public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
 
@@ -38,6 +38,23 @@ namespace FlightCareer.UI.Services
         public double EngineCombustion;     // GENERAL ENG COMBUSTION:1
     }
 
+    /// <summary>
+    /// Leitura rápida e leve (a cada 2 frames do simulador, ~20–30 Hz): contato com o solo, razão de descida, G e atitude.
+    /// Definição separada da telemetria principal (nome rejeitado aqui não desloca o SimTelemetry). Mesma ordem do AddFastDef.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SimFastFlightState
+    {
+        public double OnGround;          // SIM ON GROUND
+        public double VerticalSpeed;     // VERTICAL SPEED (ft/min)
+        public double BodyVertical;      // VELOCITY BODY Y (ft/s)
+        public double GForce;            // G FORCE
+        public double Pitch;             // PLANE PITCH DEGREES (MSFS: negativo = nariz para cima)
+        public double Bank;              // PLANE BANK DEGREES
+        public double Airspeed;          // AIRSPEED INDICATED (kt)
+        public double GroundSpeed;       // GROUND VELOCITY (kt)
+    }
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct SimDoubleValue
     {
@@ -58,6 +75,8 @@ namespace FlightCareer.UI.Services
 
         /// <summary>Estado rápido de panes (vigilância + detecção nativa).</summary>
         public event Action<SimFailureState>? OnFailureStateReceived;
+        /// <summary>Leitura rápida de voo (toque, crash, G): a cada 2 frames do simulador.</summary>
+        public event Action<SimFastFlightState>? OnFastFlightReceived;
         /// <summary>Comando do piloto interceptado (mascarado) antes de chegar à aeronave.</summary>
         public event Action<string, uint>? OnMaskedEvent;
         /// <summary>O simulador (re)carregou aeronave ou voo: as falhas do sim foram zeradas.</summary>
@@ -239,6 +258,17 @@ namespace FlightCareer.UI.Services
                 AddFailureDef("GENERAL ENG COMBUSTION:1", "Bool");
                 _simConnect.RegisterDataDefineStruct<SimFailureState>(DEFINITIONS.FailureState);
 
+                // Leitura rápida de voo (toque/crash/G medidos pelo addon, independem do aviso de crash do sim)
+                AddFastDef("SIM ON GROUND", "Bool");
+                AddFastDef("VERTICAL SPEED", "ft/min");
+                AddFastDef("VELOCITY BODY Y", "Feet per second");
+                AddFastDef("G FORCE", "GForce");
+                AddFastDef("PLANE PITCH DEGREES", "degrees");
+                AddFastDef("PLANE BANK DEGREES", "degrees");
+                AddFastDef("AIRSPEED INDICATED", "knots");
+                AddFastDef("GROUND VELOCITY", "knots");
+                _simConnect.RegisterDataDefineStruct<SimFastFlightState>(DEFINITIONS.FastFlight);
+
                 // Escritas diretas (testadas no MSFS 2024: o valor gravado persiste)
                 AddWriteDef(DEFINITIONS.WriteLeftMagneto, "RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteRightMagneto, "RECIP ENG RIGHT MAGNETO:1", "Bool");
@@ -300,12 +330,17 @@ namespace FlightCareer.UI.Services
 
                 _simConnect.OnRecvSimobjectData += SimConnect_OnRecvSimobjectData;
 
+                // A cada segundo (antes: a cada 4 s, o que media o toque segundos depois do contato)
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTelemetry, DEFINITIONS.AircraftData,
-                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.CHANGED, 0, 4, 0);
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.CHANGED, 0, 0, 0);
 
                 // A cada 6 frames (~5-10 Hz): rápido o bastante para desfazer um comando do piloto quase na hora
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFailureState, DEFINITIONS.FailureState,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 6, 0);
+
+                // A cada 2 frames (~20–30 Hz conforme o FPS): o toque e o pico de G duram frações de segundo
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFastFlight, DEFINITIONS.FastFlight,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 2, 0);
             }
             catch (Exception ex)
             {
@@ -326,6 +361,12 @@ namespace FlightCareer.UI.Services
         private void AddFailureDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.FailureState, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddFastDef(string datum, string unit)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.FastFlight, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
             TrackDatum(datum);
         }
 
@@ -598,6 +639,10 @@ namespace FlightCareer.UI.Services
             {
                 CurrentFailureState = failureState;
                 OnFailureStateReceived?.Invoke(failureState);
+            }
+            else if (data.dwData[0] is SimFastFlightState fast)
+            {
+                OnFastFlightReceived?.Invoke(fast);
             }
         }
     }

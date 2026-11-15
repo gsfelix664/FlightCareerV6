@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -52,6 +54,15 @@ namespace FlightCareer.UI.Services
         private DateTime? _groundAbortTime;
         private SimTelemetry? _lastData;
 
+        // Leitura rápida (a cada 2 frames): toque e crash medidos pelo addon, independem do aviso de crash do sim
+        private readonly TouchdownDetector _touchdown;
+        private readonly Stopwatch _fastClock = Stopwatch.StartNew();
+        private DateTime _lastFastSample = DateTime.MinValue;
+        private bool _impactCrashHandled;
+        private static readonly TimeSpan FastStreamTimeout = TimeSpan.FromSeconds(3);
+        /// <summary>Leitura rápida chegando: o toque é medido nela; senão, cai no cálculo antigo pela telemetria de 1 s.</summary>
+        private bool FastStreamAlive => DateTime.Now - _lastFastSample < FastStreamTimeout;
+
         public event Action<string, string, bool>? OnAlert;
         public event Action<string>? OnStatusChanged;
         public event Action<FlightOutcome>? OnFlightFinished;
@@ -80,6 +91,7 @@ namespace FlightCareer.UI.Services
             _catalog = catalog;
             _failures = new ComponentFlightSession(simConnect, catalog, _random);
             _failures.OnFailure += OnAircraftFailureTriggered;
+            _touchdown = new TouchdownDetector(catalog.Landing);
 
             _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
             _persistentFailures.OnDefectRecorded += OnDefectRecorded;
@@ -312,7 +324,10 @@ namespace FlightCareer.UI.Services
             _simulatedFlightTimeSeconds = 0;
             _lastTick = DateTime.MinValue;
 
+            _touchdown.Reset();
+            _impactCrashHandled = false;
             _simConnect.OnDataReceived += OnSimDataReceived;
+            _simConnect.OnFastFlightReceived += OnFastFlight;
             IsMonitoring = true;
 
             OnAlert?.Invoke("SISTEMA INICIALIZADO", "O monitoramento começará automaticamente 10 segundos após você ligar os motores e soltar o freio de estacionamento.", false);
@@ -330,6 +345,7 @@ namespace FlightCareer.UI.Services
         {
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
+            _simConnect.OnFastFlightReceived -= OnFastFlight;
             _persistentFailures.Stop();
             // Volta ao modo vigia: as panes (inclusive as que surgiram neste voo) seguem aplicadas após o pouso
             var keepWatching = _aircraft ?? _watchedAircraft;
@@ -595,7 +611,8 @@ namespace FlightCareer.UI.Services
                 double fpmVs = Math.Abs(data.VerticalSpeed);
                 double touchdownRate = fpmBody > 10 ? fpmBody : fpmVs;
 
-                if (!_hasTouchedDown)
+                // Com a leitura rápida ativa, o toque e o bounce são registrados em OnFastFlight (medidos no contato)
+                if (!_hasTouchedDown && !FastStreamAlive)
                 {
                     _hasTouchedDown = true;
                     _qualityService.RecordTouchdownFpm(touchdownRate);
@@ -607,7 +624,7 @@ namespace FlightCareer.UI.Services
                 else
                 {
                     // Bounce detection: se o impacto subsequente for mais forte (durante a desaceleração de pouso > 35 kts)
-                    if (data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
+                    if (!FastStreamAlive && data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
                         RegisterLanding(touchdownRate, data, isBounce: true);
@@ -675,6 +692,60 @@ namespace FlightCareer.UI.Services
                 {
                     _groundAbortTime = null;
                 }
+            }
+        }
+
+        /// <summary>Leitura rápida: alimenta o detector de toque; o evento sai 0,5 s depois do contato.</summary>
+        private void OnFastFlight(SimFastFlightState s)
+        {
+            if (!IsMonitoring) return;
+            _lastFastSample = DateTime.Now;
+            if (!IsFlightActive || _impactCrashHandled) return;
+
+            var ev = _touchdown.Update(new FastFlightSample(
+                _fastClock.Elapsed.TotalSeconds, s.OnGround >= 0.5, s.VerticalSpeed, s.BodyVertical, s.GForce,
+                -s.Pitch, s.Bank, s.Airspeed, s.GroundSpeed));
+            if (ev != null) HandleTouchdown(ev);
+        }
+
+        private void HandleTouchdown(TouchdownEvent ev)
+        {
+            var inv = CultureInfo.InvariantCulture;
+            string summary = string.Format(inv, "{0} fpm, pico {1:F2} G, nariz {2:F1}°, inclinação {3:F1}°, GS {4:F0} kt",
+                ev.TouchdownFpm, ev.PeakG, ev.NoseUpDeg, ev.BankDeg, ev.GroundSpeedKnots);
+            string trace = string.Join(" | ", ev.Trace.Select(x => string.Format(inv, "{0:F2}s {1}{2:F0}fpm {3:F2}G {4:F0}/{5:F0}°",
+                x.TimeSec - ev.ContactTimeSec, x.OnGround ? "S " : "A ", x.VerticalSpeedFpm, x.GForce, x.NoseUpDeg, x.BankDeg)));
+
+            if (ev.Kind == TouchdownKind.Crash)
+            {
+                _impactCrashHandled = true;
+                _telemetryLogger.LogEvent("CRASH_ADDON", $"{ev.Reason} ({summary})");
+                _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+                _currentStatus = "ACIDENTE";
+                OnStatusChanged?.Invoke(_currentStatus);
+                OnAlert?.Invoke("ACIDENTE", $"Impacto com o solo: {ev.Reason}. A aeronave foi perdida.", true);
+                _ = HandleTotalLossAsync();
+                return;
+            }
+
+            _telemetryLogger.LogEvent("TOQUE", summary);
+            _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+            if (!_isAirborne) return; // contato antes de decolar de fato (ex.: salto na corrida): só registro
+
+            if (!_hasTouchedDown)
+            {
+                _hasTouchedDown = true;
+                _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                if (_lastData is { } data) RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
+                _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
+                OnStatusChanged?.Invoke(_currentStatus);
+            }
+            else if (ev.GroundSpeedKnots > 35 && ev.TouchdownFpm > _qualityService.TouchdownFPM)
+            {
+                _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                if (_lastData is { } data) RegisterLanding(ev.TouchdownFpm, data, isBounce: true);
+                _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
+                OnStatusChanged?.Invoke(_currentStatus);
             }
         }
 
@@ -769,6 +840,8 @@ namespace FlightCareer.UI.Services
             _simConnect.ResetCrashState();
             _failures.Reset(clearSimState: true);
             _qualityService.Reset();
+            _touchdown.Reset();
+            _impactCrashHandled = false;
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
             _simulatedFlightTimeSeconds = 0;
