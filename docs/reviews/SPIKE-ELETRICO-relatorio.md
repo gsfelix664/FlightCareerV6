@@ -1,6 +1,6 @@
 # SPIKE-ELETRICO — SimVars elétricas certas no MSFS 2024
 
-**Branch:** docs/spike-sensores-eletricos · **Commits:** 8faa027, 7120b8c, 7f1d210 (revisão r1) · **Data:** 2026-11-15
+**Branch:** docs/spike-sensores-eletricos · **Commits:** 27503af, 0c2a588 (r2) · **Data:** 2026-11-15
 
 ---
 
