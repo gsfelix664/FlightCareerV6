@@ -1382,3 +1382,9 @@
 - Motor 39: taxa só acima de 2.600 RPM; unidade "fração do nível por segundo" confirmada (razão 0,997); `IS WEAK` a 10%; `IS FAILED` veio depois, sem overstress, por sorteio no tempo.
 - Achado: a pane do wear and tear **não liga `ENG FAILED:1`** nem `GENERAL ENG DAMAGE PERCENT`; a detecção nativa atual não a registra. A F4 precisa ler `IS FAILED:<id>`.
 - Flaps, freios, trem e óleo não respondem no C152 (só addon). Nenhum código mudou.
+
+## 2026-11-15 - Regra 0.1 final: addon fonte da verdade, nativo só sensor (Claude)
+- Decisão do usuário depois da F1.4c: o nativo é muito mais severo que o motor real (C152 a 2.700 RPM perde ~10%/min). O addon calcula toda a saúde, o mais perto do real (fabricante, POH, boletins como o Lycoming SB 369), para qualquer avião, inclusive MSFS 2020 e aviões sem wear and tear. O nível nativo nunca entra no Hangar.
+- A taxa de overstress nativa deixa de ser convertida em % (saem `nativeRateToLossPerHour` e `maxNativeLossPerHour`): é só sensor, usada como reserva (faixa vermelha) quando o addon não tem limite próprio para o modelo, e como conferência no log.
+- Excedências: desgaste acumulado não linear e discrepância de inspeção por gravidade (F2.2). Único evento nativo: `IS FAILED` → pane a 0%; `IS WEAK` só no blackbox (sai `nativeWeakHealthCap`). Nova tarefa F4.2c: ler `IS FAILED`, porque a pane do wear and tear não liga `ENG FAILED`.
+- Atualizados o plano (0.1, F1.4c, F2.2, F2.3, F4.2c), `native-wear-mapping.md`, `calibration-C152.md` e `AGENTS.md` › 6. Nenhum código mudou.
