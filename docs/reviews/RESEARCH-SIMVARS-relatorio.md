@@ -1,6 +1,6 @@
 # RESEARCH-SIMVARS — Pesquisa de Variáveis em Projetos Abertos + SDK 2024
 
-**Branch:** docs/pesquisa-variaveis · **Commit:** a definir · **Data:** 2026-11-15
+**Branch:** docs/pesquisa-variaveis · **Commit:** 0b95fc7 · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Investigar a documentação oficial do SDK MSFS 2024 (APIs de SimVars e SimConnect) e os repositórios de referência locais (`FsConnect`, `MobiFlight-Connector`, `msfs2020-go`, `aircraft` FlyByWire).
