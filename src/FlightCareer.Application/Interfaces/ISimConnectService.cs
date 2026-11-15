@@ -25,5 +25,7 @@ namespace FlightCareer.Application.Interfaces
         void ClearSimFailures();
         void SetEngineFire(bool isOnFire);
         void SetOilLeakedPercent(double percent);
+        void SetAlternatorConnected(int alternatorIndex, bool connected);
+        void WriteFlapSurfacePercent(double fraction);
     }
 }

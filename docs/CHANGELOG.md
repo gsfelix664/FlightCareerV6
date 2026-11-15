@@ -1639,3 +1639,20 @@
 
 ## 2026-11-15 - Botões de teste de falhas no HUD de depuração (Claude)
 - HUD Overlay › "TESTE DE FALHAS (DEPURAÇÃO)": envia qualquer evento do SimConnect com até 5 parâmetros (`SimConnectService.SendEventEx`, `TransmitClientEvent_EX1`), com atalhos para `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE`, `ELECTRICAL_ALTERNATOR_BREAKER_TOGGLE` e `ELECTRICAL_CIRCUIT_TOGGLE`, e liga/desliga a escrita contínua da superfície dos flaps em 50% (`WriteFlapSurfacePercent`). Cada envio grava um marcador `teste-...` no REC. Para validar o spike `docs/plans/spike-falhas-sem-comando.md`. Não testado no MSFS.
+
+## 2026-11-15 - F4.2e Panes de alternador e flap sem mexer no comando do piloto (Gemini)
+- **Alternador livre no cockpit (chave ON, bateria descarregando)**:
+  - Criada classe pura `ToggleStateTracker` (`src/FlightCareer.Domain/Components/ToggleStateTracker.cs`) para gerenciar o estado desejado vs. aplicado com reset em recargas da aeronave/voo no simulador.
+  - Em `SimConnectService.cs`, implementado `SetAlternatorConnected(int alternatorIndex, bool connected)` enviando `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE (1, alternatorIndex)` via `SendEventEx` apenas quando o estado muda.
+  - Em `SimFailureActuator.cs` e `PersistentFailureService.cs`, removido o envio de `ALTERNATOR_OFF` e o mascaramento `AlternatorPilotEvents`, acionando `SetAlternatorConnected(1, false)` nas panes de alternador e `SetAlternatorConnected(1, true)` ao reparar.
+  - Atualizado `DefectCatalog.Alternator` para `DefectEnforcement.NativeToggle` com evento de alternador.
+- **Flaps com alavanca física livre e superfície travada**:
+  - Acrescentadas as SimVars `TRAILING EDGE FLAPS LEFT PERCENT` (`Percent Over 100`) e `FLAPS NUM HANDLE POSITIONS` (`Number`) no fim da struct `SimFailureState` e da definição `AddFailureDef`.
+  - Criada classe pura `FlapSurfaceLock` (`src/FlightCareer.Domain/Components/FlapSurfaceLock.cs`) com método `TargetFraction(index, positions)` para calcular a fração da superfície a partir do índice da alavanca e total de posições.
+  - Em `SimFailureActuator.cs`, pane de flap em voo (`FlapJam`) trava na fração atual da superfície no momento da pane; removido o envio de `FLAPS_SET`.
+  - Em `PersistentFailureService.cs`, enforcement a cada leitura de `SimFailureState` (6 frames) escreve diretamente a superfície com `WriteFlapSurfacePercent` calculando a fração pelo `FlapSurfaceLock`; removida a escrita de `FLAPS HANDLE INDEX` e o mascaramento `FlapPilotEvents`.
+  - Removido `FlapEnforcementPolicy` tornado obsoleto pela escrita contínua da superfície.
+- **Testes unitários**:
+  - Criados `ToggleStateTrackerTests.cs` e `FlapSurfaceLockTests.cs`.
+  - `TelemetryDefinitionTests.cs` atualizado com teste de contagem de datums em `SimFailureState`.
+  - Build com 0 erros; 247 testes xUnit aprovados com 100% de sucesso.

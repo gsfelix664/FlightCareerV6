@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Application.Interfaces;
 
@@ -36,6 +37,8 @@ namespace FlightCareer.UI.Services
         public double CrashFlag;            // CRASH FLAG
         public double SuctionPressure;      // SUCTION PRESSURE (inHg)
         public double EngineCombustion;     // GENERAL ENG COMBUSTION:1
+        public double TrailingEdgeFlapsLeftPercent; // TRAILING EDGE FLAPS LEFT PERCENT (Percent Over 100)
+        public double FlapsNumHandlePositions;     // FLAPS NUM HANDLE POSITIONS (Number)
     }
 
     /// <summary>
@@ -256,6 +259,8 @@ namespace FlightCareer.UI.Services
                 AddFailureDef("CRASH FLAG", "Enum");
                 AddFailureDef("SUCTION PRESSURE", "inHg");
                 AddFailureDef("GENERAL ENG COMBUSTION:1", "Bool");
+                AddFailureDef("TRAILING EDGE FLAPS LEFT PERCENT", "Percent Over 100");
+                AddFailureDef("FLAPS NUM HANDLE POSITIONS", "Number");
                 _simConnect.RegisterDataDefineStruct<SimFailureState>(DEFINITIONS.FailureState);
 
                 // Leitura rápida de voo (toque/crash/G medidos pelo addon, independem do aviso de crash do sim)
@@ -295,6 +300,13 @@ namespace FlightCareer.UI.Services
                     if (e.uEventID == (uint)EVENTS.FlightLoadedEvent || e.uEventID == (uint)EVENTS.AircraftLoadedEvent)
                     {
                         _untrackedToggles.Clear();
+                        foreach (var (index, tracker) in _alternatorTrackers)
+                        {
+                            if (tracker.OnSimReloaded())
+                            {
+                                SendEventEx("ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE", 1, (uint)index);
+                            }
+                        }
                         // Panes persistentes precisam ser reaplicadas depois que a aeronave terminar de carregar
                         OnAircraftReloaded?.Invoke();
                     }
@@ -404,6 +416,7 @@ namespace FlightCareer.UI.Services
                 _nextEventId = FirstDynamicEventId;
                 CurrentFailureState = null;
                 _untrackedToggles.Clear();
+                _alternatorTrackers.Clear();
                 _datumBySendId.Clear();
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
@@ -474,6 +487,32 @@ namespace FlightCareer.UI.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"SimConnect SendEventEx({eventName}) Error: {ex.Message}");
+            }
+        }
+
+        private readonly Dictionary<int, ToggleStateTracker> _alternatorTrackers = new();
+
+        private ToggleStateTracker GetAlternatorTracker(int alternatorIndex)
+        {
+            if (!_alternatorTrackers.TryGetValue(alternatorIndex, out var tracker))
+            {
+                tracker = new ToggleStateTracker(defaultState: true);
+                _alternatorTrackers[alternatorIndex] = tracker;
+            }
+            return tracker;
+        }
+
+        /// <summary>
+        /// Conecta ou desconecta o alternador do barramento elétrico via ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE.
+        /// O estado é rastreado por ToggleStateTracker e o toggle só é transmitido quando há mudança de estado.
+        /// </summary>
+        public void SetAlternatorConnected(int alternatorIndex, bool connected)
+        {
+            var tracker = GetAlternatorTracker(alternatorIndex);
+            if (tracker.RequestState(connected))
+            {
+                // [0] = Source bus index (1), [1] = Target alternator index
+                SendEventEx("ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE", 1, (uint)alternatorIndex);
             }
         }
 

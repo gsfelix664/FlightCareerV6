@@ -11,9 +11,9 @@ namespace FlightCareer.Domain.Services
     {
         /// <summary>Sem efeito no simulador (apenas registro/interdição).</summary>
         None,
-        /// <summary>Evento TOGGLE_* nativo, reenviado uma vez a cada carregamento de aeronave.</summary>
+        /// <summary>Evento TOGGLE_* nativo (ou toggle de conexão de barramento), reaplicado a cada carregamento de aeronave.</summary>
         NativeToggle,
-        /// <summary>Vigilância contínua de SimVar com correção imediata (+ bloqueio de comandos quando aplicável).</summary>
+        /// <summary>Vigilância contínua de SimVar/superfície com correção imediata (+ bloqueio de comandos quando aplicável).</summary>
         Watchdog
     }
 
@@ -65,7 +65,7 @@ namespace FlightCareer.Domain.Services
             [MagnetoRight] = new(MagnetoRight, "Magneto direito inoperante", true, 1200, DefectEnforcement.Watchdog),
             [FlapLock] = new(FlapLock, "Flaps travados", false, 1500, DefectEnforcement.Watchdog),
             [FlapDamage] = new(FlapDamage, "Flaps danificados por velocidade", false, 2500, DefectEnforcement.Watchdog),
-            [Alternator] = new(Alternator, "Alternador inoperante", true, 900, DefectEnforcement.Watchdog),
+            [Alternator] = new(Alternator, "Alternador inoperante", true, 900, DefectEnforcement.NativeToggle, "ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE"),
             [Vacuum] = new(Vacuum, "Bomba de vácuo inoperante", false, 750, DefectEnforcement.NativeToggle, "TOGGLE_VACUUM_FAILURE"),
             [Pitot] = new(Pitot, "Tubo de pitot obstruído", false, 250, DefectEnforcement.NativeToggle, "TOGGLE_PITOT_BLOCKAGE"),
             [StaticPort] = new(StaticPort, "Tomada estática obstruída", false, 200, DefectEnforcement.NativeToggle, "TOGGLE_STATIC_PORT_BLOCKAGE"),

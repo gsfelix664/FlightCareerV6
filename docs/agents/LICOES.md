@@ -8,3 +8,4 @@ Se a lição virar regra geral do projeto, o revisor move para `AGENTS.md` e apa
 - Valor que o código precisa ler (ex.: SIMULATION RATE) tem que estar no layout de leitura de fato; confira de onde a chave vem antes de usá-la. (F1.2)
 - Eventos assíncronos do SimConnect (exceções, dados): acumule e processe uma vez; não reconstrua estado dentro do handler de exceção. (F1.2)
 - Antes de usar um nome de SimVar, confira na documentação do SDK; nome inexistente não dá erro de compilação, só desloca os dados em voo. (fix PARTIAL PANEL STATIC)
+- 2026-11-15 (F4.2e): SimVar de contagem pode não contar o zero — FLAPS NUM HANDLE POSITIONS conta só os dentes estendidos. Confira o significado com uma captura antes de montar fórmula.

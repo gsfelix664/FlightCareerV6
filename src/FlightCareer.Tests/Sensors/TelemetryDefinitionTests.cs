@@ -29,6 +29,23 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void FailureState_DatumCount_MatchesSimFailureStateFields()
+        {
+            string source = File.ReadAllText(FindSimConnectService());
+            var datums = Regex.Matches(source, @"\bAddFailureDef\(\s*""([^""]+)""")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            var match = Regex.Match(source, @"struct\s+SimFailureState\s*\{([^}]+)\}");
+            Assert.True(match.Success);
+            var fields = Regex.Matches(match.Groups[1].Value, @"public\s+double\s+(\w+)\s*;")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            Assert.Equal(fields.Length, datums.Length);
+        }
+
+        [Fact]
         public void TelemetryDefinitions_UseNoKnownInvalidSimVar()
         {
             string source = File.ReadAllText(FindSimConnectService());
