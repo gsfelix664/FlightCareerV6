@@ -30,6 +30,14 @@ namespace FlightCareer.Domain.Limits
         public const string GLimitNeg = "gLimitNeg";
         public const string MaxTouchdownFpm = "maxTouchdownFpm";
 
+        // Parâmetros do sistema elétrico da aeronave (F2.4b-CAL)
+        public const string ElecSystemVolts = "elecSystemVolts";
+        public const string ElecAvionicsCircuitIndex = "elecAvionicsCircuitIndex";
+        public const string ElecAvionicsBusAmpsIndex = "elecAvionicsBusAmpsIndex";
+        public const string ElecMainBusIndex = "elecMainBusIndex";
+        public const string AlternatorRatedAmps = "alternatorRatedAmps";
+        public const string ElecDeepDischargeVolts = "elecDeepDischargeVolts";
+
         /// <summary>
         /// Chave dinâmica que representa o limite estrutural do dente de flap atualmente estendido (Vfe).
         /// Resolvida dinamicamente em tempo de execução no motor de desgaste (F2.3) a partir da posição do manete/superfície
@@ -60,7 +68,13 @@ namespace FlightCareer.Domain.Limits
             [GLimitPos] = "g",
             [GLimitNeg] = "g",
             [MaxTouchdownFpm] = "fpm",
-            [VfeCurrent] = "knots"
+            [VfeCurrent] = "knots",
+            [ElecSystemVolts] = "volts",
+            [ElecAvionicsCircuitIndex] = "index",
+            [ElecAvionicsBusAmpsIndex] = "index",
+            [ElecMainBusIndex] = "index",
+            [AlternatorRatedAmps] = "amperes",
+            [ElecDeepDischargeVolts] = "volts"
         };
 
         public static bool IsValid(string key)
