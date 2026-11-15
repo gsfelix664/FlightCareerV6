@@ -319,3 +319,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.2 (regras de desgaste, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Relatório](docs/reviews/F2.2-relatorio.md). Pedido do usuário na aprovação: expandir o catálogo (aviônicos, elétrico, superfícies de comando, estrutura, trem e asa detalhados) → tarefa F2.1b.
 - Decisão de UI · 2026-11-15 · Hangar por setor; amarelo só o que a inspeção/walkaround descobriu, vermelho só o quebrado (Fase 5).
 - F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 3) · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b
+- F4.2d · 2026-11-15 · PRONTO PARA REVISÃO · [Relatório](docs/reviews/F4.2d-relatorio.md) · branch fix/crash-solo-flaps
