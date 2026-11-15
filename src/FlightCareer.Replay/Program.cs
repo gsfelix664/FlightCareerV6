@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Replay;
+using FlightCareer.Domain.Replay.Synthetic;
+using FlightCareer.Domain.Sensors;
 using FlightCareer.Infrastructure.Replay;
 using FlightCareer.Infrastructure.Services;
 
@@ -29,6 +32,11 @@ namespace FlightCareer.Replay
             {
                 PrintHelp();
                 return 0;
+            }
+
+            if (args[0].Equals("fuzz", StringComparison.OrdinalIgnoreCase))
+            {
+                return RunFuzz(args.Skip(1).ToArray());
             }
 
             string? csvPath = null;
@@ -181,14 +189,214 @@ namespace FlightCareer.Replay
         private static void PrintHelp()
         {
             Console.WriteLine("Uso: FlightCareer.Replay <csv|csv.gz> [opções]");
+            Console.WriteLine("     FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]");
             Console.WriteLine();
-            Console.WriteLine("Opções:");
+            Console.WriteLine("Opções de Replay:");
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");
             Console.WriteLine("  --blackbox <arquivo>     Caminho do log do blackbox para leitura dos toques");
             Console.WriteLine("  --touchdowns <json>      Caminho de arquivo JSON com dados de toques");
             Console.WriteLine("  --from-start             Desgasta desde o início do arquivo (ignora espera de ativação)");
             Console.WriteLine("  --json                   Emite a saída no formato JSON estruturado");
             Console.WriteLine("  -h, --help               Exibe esta mensagem de ajuda");
+            Console.WriteLine();
+            Console.WriteLine("Opções do Fuzz:");
+            Console.WriteLine("  --runs <n>               Número de voos sintéticos a executar (padrão 1000)");
+            Console.WriteLine("  --seed <n>               Semente pseudoaleatória inicial");
+        }
+
+        private static int RunFuzz(string[] args)
+        {
+            int runs = 1000;
+            string? aircraftArg = null;
+            int? baseSeedArg = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i];
+                if (arg.Equals("--runs", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int r) && r > 0) runs = r;
+                }
+                else if (arg.Equals("--aircraft", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    aircraftArg = args[++i];
+                }
+                else if (arg.Equals("--seed", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int s)) baseSeedArg = s;
+                }
+                else if (arg.Equals("-h", StringComparison.OrdinalIgnoreCase) || arg.Equals("--help", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Uso: FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]");
+                    return 0;
+                }
+            }
+
+            int baseSeed = baseSeedArg ?? 42;
+            Console.WriteLine("================================================================================");
+            Console.WriteLine("           FlightCareer V6 — Fuzz Testing com Voos Sintéticos                    ");
+            Console.WriteLine("================================================================================");
+            Console.WriteLine($"Corridas planejadas: {runs}");
+            Console.WriteLine($"Semente base       : {baseSeed}");
+            if (!string.IsNullOrWhiteSpace(aircraftArg))
+            {
+                Console.WriteLine($"Aeronave alvo      : {aircraftArg}");
+            }
+            Console.WriteLine();
+
+            var partsCatalog = PartCatalog.LoadDefault();
+            var wearRuleCatalog = WearRuleCatalog.LoadDefault();
+            var limitLoader = new AircraftLimitCatalogLoader();
+            var resolver = limitLoader.CreateResolver();
+            var allProfiles = limitLoader.LoadProfiles();
+            var sensorRegistry = SensorRegistry.LoadDefault();
+
+            List<AircraftLimitProfile> targetProfiles = new();
+            if (!string.IsNullOrWhiteSpace(aircraftArg))
+            {
+                var prof = resolver.FindById(aircraftArg) ?? resolver.FindProfile(aircraftArg, aircraftArg) ??
+                           allProfiles.FirstOrDefault(p => p.AircraftId.Contains(aircraftArg, StringComparison.OrdinalIgnoreCase));
+                if (prof == null)
+                {
+                    Console.Error.WriteLine($"Erro: Aeronave '{aircraftArg}' não encontrada no catálogo de limites.");
+                    return 1;
+                }
+                targetProfiles.Add(prof);
+            }
+            else
+            {
+                string[] standardModels = { "Cessna C152", "C172SP G1000", "Beechcraft Baron G58", "Asobo TBM 930" };
+                foreach (var model in standardModels)
+                {
+                    var p = resolver.FindById(model) ?? resolver.FindProfile(model, model);
+                    if (p != null) targetProfiles.Add(p);
+                }
+
+                if (targetProfiles.Count == 0)
+                {
+                    targetProfiles.AddRange(allProfiles.Take(4));
+                }
+            }
+
+            var generator = new SyntheticFlightGenerator(resolver);
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+
+            string failureDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightCareer", "fuzz-failures");
+
+            int passedCount = 0;
+            int failedCount = 0;
+            var violationsByType = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            for (int run = 0; run < runs; run++)
+            {
+                int currentSeed = baseSeed + run;
+                var rnd = new SystemRandomSource(currentSeed);
+                var profile = targetProfiles[run % targetProfiles.Count];
+
+                int abuseCount = (run % 5 == 0) ? 0 : 1 + (run % 3);
+                var plan = SyntheticFlightPlan.Random(rnd, profile, abuseCount);
+
+                var scenario = new AircraftScenarioInput(
+                    profile,
+                    sensorRegistry.Sensors,
+                    profile.Features,
+                    profile.EngineCount,
+                    profile.AircraftId);
+
+                var flight = generator.Generate(scenario, plan, rnd);
+
+                var result = replayer.Run(
+                    flight.Frames,
+                    flight.Touchdowns,
+                    profile,
+                    profile.Features,
+                    profile.EngineCount,
+                    activationMode: ReplayActivationMode.GameLike);
+
+                var violations = SyntheticFlightOracle.VerifyInvariants(flight, result);
+
+                if (violations.Count == 0)
+                {
+                    passedCount++;
+                }
+                else
+                {
+                    failedCount++;
+                    foreach (var v in violations)
+                    {
+                        string category = v.Split(':')[0].Trim();
+                        violationsByType[category] = violationsByType.GetValueOrDefault(category, 0) + 1;
+                    }
+
+                    try
+                    {
+                        Directory.CreateDirectory(failureDir);
+                        string baseName = $"fuzz_seed_{currentSeed}_{SensorCsvFormatter.SafeFileName(profile.AircraftId)}";
+
+                        string csvFile = Path.Combine(failureDir, $"{baseName}.csv");
+                        using (var writer = new StreamWriter(csvFile, false, Encoding.UTF8))
+                        {
+                            writer.WriteLine(SensorCsvFormatter.Header(flight.SensorKeys));
+                            foreach (var frame in flight.Frames)
+                            {
+                                writer.WriteLine(SensorCsvFormatter.Row(frame.ReceivedUtc, frame, flight.SensorKeys, null));
+                            }
+                        }
+
+                        string tdFile = Path.Combine(failureDir, $"{baseName}.touchdowns.json");
+                        File.WriteAllText(tdFile, JsonSerializer.Serialize(flight.Touchdowns, JsonOpts));
+
+                        string gtFile = Path.Combine(failureDir, $"{baseName}.groundtruth.json");
+                        var failureInfo = new
+                        {
+                            seed = currentSeed,
+                            aircraft = profile.AircraftId,
+                            groundTruth = flight.GroundTruth,
+                            violations = violations
+                        };
+                        File.WriteAllText(gtFile, JsonSerializer.Serialize(failureInfo, JsonOpts));
+                    }
+                    catch
+                    {
+                    }
+                }
+
+                if ((run + 1) % 100 == 0 || run + 1 == runs)
+                {
+                    Console.Write($"\rProcessados: {run + 1}/{runs} (Aprovados: {passedCount}, Falhas: {failedCount})...");
+                }
+            }
+
+            sw.Stop();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("--------------------------------------------------------------------------------");
+            Console.WriteLine("Resultado do Fuzz Testing:");
+            Console.WriteLine($"  Total de Voos       : {runs}");
+            Console.WriteLine($"  Voos Aprovados      : {passedCount} ({(double)passedCount / runs:P1})");
+            Console.WriteLine($"  Voos com Falhas     : {failedCount} ({(double)failedCount / runs:P1})");
+            Console.WriteLine($"  Tempo Total         : {sw.Elapsed.TotalSeconds:F2} s ({runs / Math.Max(0.001, sw.Elapsed.TotalSeconds):F0} voos/s)");
+            Console.WriteLine("--------------------------------------------------------------------------------");
+
+            if (violationsByType.Count > 0)
+            {
+                Console.WriteLine("Resumo das Violações Encontradas:");
+                foreach (var (type, count) in violationsByType.OrderByDescending(kv => kv.Value))
+                {
+                    Console.WriteLine($"  • {type}: {count} ocorrências");
+                }
+                Console.WriteLine();
+                Console.WriteLine($"Artefatos de reprodução salvos em:\n  {failureDir}");
+            }
+            else
+            {
+                Console.WriteLine("✅ Nenhuma invariante violada em todas as corridas executadas!");
+            }
+
+            Console.WriteLine("================================================================================");
+            return failedCount == 0 ? 0 : 1;
         }
 
         private static AircraftLimitProfile? ResolveProfile(
