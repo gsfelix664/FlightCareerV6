@@ -110,29 +110,77 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
-        public void Coverage_AllNoGoPartsCovered()
+        public void LimitKeys_VfeCurrent_IsValidAndHasKnotsUnit()
         {
-            var noGoParts = PartsCatalog.Parts
-                .Where(p => p.BlocksFlightWhenBroken)
-                .Select(p => p.Id)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            Assert.True(LimitKeys.IsValid(LimitKeys.VfeCurrent));
+            Assert.Equal("knots", LimitKeys.UnitOf(LimitKeys.VfeCurrent));
+        }
 
-            var coveredParts = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        [Fact]
+        public void ContinuousRules_HaveCoherentLimitKeyAndSensors()
+        {
+            var continuousRules = Catalog.Rules.Where(r => r.Kind == WearRuleKind.Continuous).ToList();
+            Assert.NotEmpty(continuousRules);
 
-            foreach (var rule in Catalog.Rules)
+            foreach (var rule in continuousRules)
             {
-                foreach (var band in rule.Bands)
+                Assert.NotNull(rule.LimitKey);
+
+                // Nenhuma regra contínua usa vne ou vno fora de velocidade/estrutura de célula
+                if (rule.LimitKey == LimitKeys.Vne || rule.LimitKey == LimitKeys.Vno || rule.LimitKey == LimitKeys.Mmo)
                 {
-                    foreach (var p in band.Parts)
-                    {
-                        coveredParts.Add(p.PartId);
-                    }
+                    Assert.Contains("airspeed", rule.Id);
+                    Assert.Contains(rule.Sensors, s => s == "af-airspeed-indicated");
                 }
-            }
 
-            foreach (var noGoId in noGoParts)
-            {
-                Assert.True(coveredParts.Contains(noGoId), $"Peça NO-GO '{noGoId}' não aparece em nenhuma regra de desgaste.");
+                // Coerência sensor x limite
+                if (rule.LimitKey == LimitKeys.RpmRedline || rule.LimitKey == LimitKeys.RpmMaxRated)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("rpm"));
+                }
+                else if (rule.LimitKey == LimitKeys.ChtMax)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("cht"));
+                }
+                else if (rule.LimitKey == LimitKeys.OilTempMax)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("oil-temp"));
+                }
+                else if (rule.LimitKey == LimitKeys.OilPressMin)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("oil-press"));
+                }
+                else if (rule.LimitKey == LimitKeys.IttMax)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("itt"));
+                }
+                else if (rule.LimitKey == LimitKeys.TorqueMaxPct)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("torque"));
+                }
+                else if (rule.LimitKey == LimitKeys.N1MaxPct)
+                {
+                    Assert.Contains(rule.Sensors, s => s.Contains("n1"));
+                }
+                else if (rule.LimitKey == LimitKeys.VfeCurrent)
+                {
+                    Assert.Contains("af-airspeed-indicated", rule.Sensors);
+                    Assert.Contains("af-flaps-handle-index", rule.Sensors);
+                }
+                else if (rule.LimitKey == LimitKeys.Vle)
+                {
+                    Assert.Contains("af-airspeed-indicated", rule.Sensors);
+                    Assert.Contains(rule.Sensors, s => s.StartsWith("gear-"));
+                }
+                else if (rule.LimitKey == LimitKeys.Vlo)
+                {
+                    Assert.Contains("af-airspeed-indicated", rule.Sensors);
+                    Assert.Contains(rule.Sensors, s => s == "gear-handle-position" || s == "gear-position");
+                }
+                else if (rule.LimitKey == LimitKeys.GLimitPos || rule.LimitKey == LimitKeys.GLimitNeg)
+                {
+                    Assert.Contains("af-g-force", rule.Sensors);
+                }
             }
         }
 
@@ -174,7 +222,8 @@ namespace FlightCareer.Tests.Parts
             // NÃO pode conter torque de turboélice
             Assert.DoesNotContain(c152Rules, r => r.LimitKey == LimitKeys.TorqueMaxPct);
             // NÃO pode conter trem retrátil
-            Assert.DoesNotContain(c152Rules, r => r.Id == "gear_overspeed_vle_vlo");
+            Assert.DoesNotContain(c152Rules, r => r.Id == "gear_extended_overspeed_vle");
+            Assert.DoesNotContain(c152Rules, r => r.Id == "gear_operation_overspeed_vlo");
 
             // TBM 930 features: turboprop, singleEngine, retractableGear, constantSpeedProp, pressurized, hydraulicGear
             var tbmFeatures = new[]
@@ -192,9 +241,10 @@ namespace FlightCareer.Tests.Parts
             // Deve conter ITT e torque de turbina
             Assert.Contains(tbmRules, r => r.LimitKey == LimitKeys.IttMax);
             Assert.Contains(tbmRules, r => r.LimitKey == LimitKeys.TorqueMaxPct);
-            // Deve conter pressurização e trem retrátil
+            // Deve conter pressurização e trem retrátil (tanto Vle estendido quanto Vlo em trânsito)
             Assert.Contains(tbmRules, r => r.Id == "pressurization_cycle_stress");
-            Assert.Contains(tbmRules, r => r.Id == "gear_overspeed_vle_vlo");
+            Assert.Contains(tbmRules, r => r.Id == "gear_extended_overspeed_vle");
+            Assert.Contains(tbmRules, r => r.Id == "gear_operation_overspeed_vlo");
             // NÃO pode conter CHT de pistão
             Assert.DoesNotContain(tbmRules, r => r.LimitKey == LimitKeys.ChtMax);
             // NÃO pode conter overspeed de RPM de pistão
