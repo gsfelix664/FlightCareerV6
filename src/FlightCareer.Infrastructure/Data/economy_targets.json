@@ -1,0 +1,67 @@
+{
+  "classes": {
+    "A": {
+      "className": "Pistão carburado, passo fixo",
+      "example": "C152",
+      "minCostPerHour": 30.0,
+      "maxCostPerHour": 130.0,
+      "source": "estimativa — revisar"
+    },
+    "B": {
+      "className": "Pistão injetado, passo variável",
+      "example": "Bonanza G36, SR22",
+      "minCostPerHour": 60.0,
+      "maxCostPerHour": 220.0,
+      "source": "estimativa — revisar"
+    },
+    "C": {
+      "className": "Pistão turboalimentado",
+      "example": "SR22T",
+      "minCostPerHour": 80.0,
+      "maxCostPerHour": 260.0,
+      "source": "estimativa — revisar"
+    },
+    "D": {
+      "className": "Diesel FADEC (bimotor)",
+      "example": "DA40 NG, DA62",
+      "minCostPerHour": 65.0,
+      "maxCostPerHour": 240.0,
+      "source": "estimativa — revisar"
+    },
+    "E": {
+      "className": "Bimotor pistão, trem retrátil",
+      "example": "Baron G58",
+      "minCostPerHour": 150.0,
+      "maxCostPerHour": 450.0,
+      "source": "estimativa — revisar"
+    },
+    "F": {
+      "className": "Turboélice monomotor",
+      "example": "TBM 930, PC-12, Caravan",
+      "minCostPerHour": 250.0,
+      "maxCostPerHour": 800.0,
+      "source": "estimativa — revisar"
+    },
+    "G": {
+      "className": "Turboélice bimotor pressurizado",
+      "example": "King Air 350",
+      "minCostPerHour": 600.0,
+      "maxCostPerHour": 2000.0,
+      "source": "estimativa — revisar"
+    },
+    "H": {
+      "className": "Jato executivo",
+      "example": "CJ4, Longitude",
+      "minCostPerHour": 800.0,
+      "maxCostPerHour": 2800.0,
+      "source": "estimativa — revisar"
+    },
+    "I": {
+      "className": "Jato de linha aérea",
+      "example": "A320neo, 737",
+      "minCostPerHour": 8000.0,
+      "maxCostPerHour": 30000.0,
+      "source": "estimativa — revisar"
+    }
+  }
+}

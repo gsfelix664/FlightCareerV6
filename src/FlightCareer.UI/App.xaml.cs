@@ -171,6 +171,8 @@ namespace FlightCareer.UI
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>(sp =>
                 new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
             services.AddSingleton(_ => FlightCareer.Domain.Parts.PartCatalog.LoadDefault());
+            services.AddSingleton<FlightCareer.Infrastructure.Services.PartMigrationService>(sp =>
+                new FlightCareer.Infrastructure.Services.PartMigrationService(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
             services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftPartProvisioner>(sp =>
                 new FlightCareer.Infrastructure.Services.AircraftPartProvisioner(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
 

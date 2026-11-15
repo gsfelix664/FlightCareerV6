@@ -38,6 +38,8 @@ namespace FlightCareer.Domain.Parts
             return _partsById.GetValueOrDefault(partId);
         }
 
+        public PartDefinition? Get(string partId) => Find(partId);
+
         /// <summary>
         /// Retorna todas as peças do catálogo que se aplicam a uma aeronave com as features fornecidas.
         /// </summary>

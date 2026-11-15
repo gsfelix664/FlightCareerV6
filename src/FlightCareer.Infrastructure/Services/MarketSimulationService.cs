@@ -13,13 +13,15 @@ namespace FlightCareer.Infrastructure.Services
     public class MarketSimulationService : IMarketSimulationService
     {
         private readonly AppDbContext _context;
+        private readonly PartMigrationService? _partMigrationService;
         private static DateTime _lastTickUtc = DateTime.UtcNow.AddHours(-1);
         private static readonly SemaphoreSlim _simulationLock = new(1, 1);
         private readonly Random _random = new();
 
-        public MarketSimulationService(AppDbContext context)
+        public MarketSimulationService(AppDbContext context, PartMigrationService? partMigrationService = null)
         {
             _context = context;
+            _partMigrationService = partMigrationService;
         }
 
         public double CalculateBaseMarketValue(
@@ -358,6 +360,32 @@ namespace FlightCareer.Infrastructure.Services
                     CurrentLocationICAO = pilot.CurrentAirportICAO,
                     EngineTboRemainingHours = Math.Max(100.0, listing.TboHours - listing.TsmoHours)
                 };
+
+                // Provisiona peças coerentes com o estado da aeronave comprada (F2.3 - Decisão 3)
+                if (_partMigrationService != null && listing.AircraftType != null)
+                {
+                    var profile = await _context.AircraftLimitProfiles
+                        .FirstOrDefaultAsync(p => p.AircraftTypeModel.ToLower() == listing.AircraftType.Model.ToLower());
+                    var features = new List<string>();
+                    int engineCount = 1;
+                    if (profile != null)
+                    {
+                        try
+                        {
+                            features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(profile.FeaturesJson) ?? new();
+                        }
+                        catch { }
+                        engineCount = profile.EngineCount;
+                    }
+                    _partMigrationService.ProvisionPurchasedAircraft(
+                        newAircraft,
+                        features,
+                        engineCount,
+                        listing.EngineCondition,
+                        listing.TiresCondition,
+                        listing.AirframeCondition,
+                        listing.AvionicsCondition);
+                }
 
                 _context.PilotAircrafts.Add(newAircraft);
 
