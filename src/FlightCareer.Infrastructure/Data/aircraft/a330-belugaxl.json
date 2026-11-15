@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "A330-BelugaXL",
   "class": "Jet",
   "engineCount": 2,
@@ -11,12 +11,15 @@
     "bleedAir",
     "bleedAntiIce",
     "fadec",
+    "fireProtection",
     "fms",
     "glassCockpit",
     "hydraulicGear",
+    "iceDetector",
     "jet",
     "multiEngine",
     "noseWheelSteering",
+    "oxygen",
     "pressurized",
     "ptu",
     "rat",
@@ -24,7 +27,8 @@
     "slats",
     "spoilers",
     "thsTrim",
-    "weatherRadar"
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

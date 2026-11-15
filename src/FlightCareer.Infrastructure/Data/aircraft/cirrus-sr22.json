@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Cirrus SR22",
   "class": "Piston",
   "engineCount": 1,
@@ -11,6 +11,8 @@
     "fuelInjected",
     "glassCockpit",
     "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "piston",
     "singleEngine"
   ],

@@ -64,6 +64,17 @@ namespace FlightCareer.Domain.Parts
         public const string Fadec = "fadec";
         public const string BleedAir = "bleedAir";
 
+        // Adendo 4 F2.1b Rodada 3: Cabine de passageiros, oxigênio, fogo e emergência
+        public const string PassengerCabin = "passengerCabin";
+        public const string Galley = "galley";
+        public const string Lavatory = "lavatory";
+        public const string Oxygen = "oxygen";
+        public const string FireProtection = "fireProtection";
+        public const string Floats = "floats";
+        public const string Skis = "skis";
+        public const string Wipers = "wipers";
+        public const string IceDetector = "iceDetector";
+
         /// <summary>
         /// Todas as características válidas no vocabulário fechado.
         /// </summary>
@@ -102,7 +113,16 @@ namespace FlightCareer.Domain.Parts
             Rat,
             PropDeIce,
             Fadec,
-            BleedAir
+            BleedAir,
+            PassengerCabin,
+            Galley,
+            Lavatory,
+            Oxygen,
+            FireProtection,
+            Floats,
+            Skis,
+            Wipers,
+            IceDetector
         };
 
         /// <summary>
@@ -245,6 +265,28 @@ namespace FlightCareer.Domain.Parts
             if (set.Contains(BleedAir) && set.Contains(Piston) && !set.Contains(Pressurized))
             {
                 throw new InvalidOperationException($"{ctx}: bleedAir (sistema pneumático de sangria) só é aplicável a jato, turboélice ou aeronave a pistão pressurizada.");
+            }
+
+            // 17. galley e lavatory requerem passengerCabin
+            if (set.Contains(Galley) && !set.Contains(PassengerCabin))
+            {
+                throw new InvalidOperationException($"{ctx}: galley requer passengerCabin (cabine de passageiros).");
+            }
+            if (set.Contains(Lavatory) && !set.Contains(PassengerCabin))
+            {
+                throw new InvalidOperationException($"{ctx}: lavatory requer passengerCabin (cabine de passageiros).");
+            }
+
+            // 18. floats e skis são mutuamente exclusivos
+            if (set.Contains(Floats) && set.Contains(Skis))
+            {
+                throw new InvalidOperationException($"{ctx}: não pode possuir floats (flutuadores) e skis (esquis) simultaneamente.");
+            }
+
+            // 19. iceDetector apenas em jet ou turboprop
+            if (set.Contains(IceDetector) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: iceDetector só é aplicável a aeronaves a jato ou turboélice.");
             }
         }
     }

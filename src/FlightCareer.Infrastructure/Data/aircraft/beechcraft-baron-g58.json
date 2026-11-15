@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
   "engineCount": 2,
@@ -13,6 +13,8 @@
     "hydraulicGear",
     "multiEngine",
     "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "piston",
     "propDeIce",
     "retractableGear",

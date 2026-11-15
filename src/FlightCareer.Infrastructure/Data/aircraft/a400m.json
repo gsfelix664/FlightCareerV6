@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "A400M",
   "class": "Turboprop",
   "engineCount": 4,
@@ -12,11 +12,14 @@
     "bleedAntiIce",
     "constantSpeedProp",
     "fadec",
+    "fireProtection",
     "fms",
     "glassCockpit",
     "hydraulicGear",
+    "iceDetector",
     "multiEngine",
     "noseWheelSteering",
+    "oxygen",
     "pressurized",
     "propDeIce",
     "rat",
@@ -25,7 +28,8 @@
     "spoilers",
     "thsTrim",
     "turboprop",
-    "weatherRadar"
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

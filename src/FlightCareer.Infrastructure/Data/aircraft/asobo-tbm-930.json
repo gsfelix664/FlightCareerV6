@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
   "engineCount": 1,
@@ -10,16 +10,20 @@
     "constantSpeedProp",
     "deIceBoots",
     "fadec",
+    "fireProtection",
     "fms",
     "glassCockpit",
     "hydraulicGear",
     "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "pressurized",
     "propDeIce",
     "retractableGear",
     "singleEngine",
     "turboprop",
-    "weatherRadar"
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

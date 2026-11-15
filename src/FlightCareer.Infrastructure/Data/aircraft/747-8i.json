@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "747-8i",
   "class": "Jet",
   "engineCount": 4,
@@ -11,19 +11,26 @@
     "bleedAir",
     "bleedAntiIce",
     "fadec",
+    "fireProtection",
     "fms",
+    "galley",
     "glassCockpit",
     "hydraulicGear",
+    "iceDetector",
     "jet",
+    "lavatory",
     "multiEngine",
     "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
     "pressurized",
     "rat",
     "retractableGear",
     "slats",
     "spoilers",
     "thsTrim",
-    "weatherRadar"
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [

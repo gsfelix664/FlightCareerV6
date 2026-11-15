@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
   "engineCount": 1,
@@ -10,6 +10,7 @@
     "fuelInjected",
     "glassCockpit",
     "noseWheelSteering",
+    "passengerCabin",
     "piston",
     "retractableGear",
     "singleEngine"

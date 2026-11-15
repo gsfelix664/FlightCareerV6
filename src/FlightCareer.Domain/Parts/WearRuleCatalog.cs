@@ -124,6 +124,11 @@ namespace FlightCareer.Domain.Parts
                     {
                         throw new InvalidDataException($"Regra de evento '{rule.Id}' deve especificar uma Metric.");
                     }
+
+                    if (!WearRuleMetrics.All.Contains(rule.Metric))
+                    {
+                        throw new InvalidDataException($"Regra de evento '{rule.Id}' especifica métrica '{rule.Metric}' fora da lista fechada WearRuleMetrics.");
+                    }
                 }
 
                 if (rule.NativeOverstress != null)

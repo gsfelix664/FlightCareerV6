@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "C172SP G1000",
   "class": "Piston",
   "engineCount": 1,
@@ -11,6 +11,7 @@
     "fuelInjected",
     "glassCockpit",
     "noseWheelSteering",
+    "passengerCabin",
     "piston",
     "singleEngine"
   ],

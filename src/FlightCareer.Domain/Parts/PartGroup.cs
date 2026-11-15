@@ -27,6 +27,10 @@ namespace FlightCareer.Domain.Parts
         public const string Fuselagem = "Fuselagem";
         public const string Avionicos = "Aviônicos";
         public const string Pneumatico = "Pneumático";
+        public const string Cabine = "Cabine";
+        public const string Oxigenio = "Oxigênio";
+        public const string Fogo = "Proteção contra Fogo";
+        public const string Emergencia = "Emergência";
 
         public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -48,7 +52,11 @@ namespace FlightCareer.Domain.Parts
             Asa,
             Fuselagem,
             Avionicos,
-            Pneumatico
+            Pneumatico,
+            Cabine,
+            Oxigenio,
+            Fogo,
+            Emergencia
         };
     }
 }

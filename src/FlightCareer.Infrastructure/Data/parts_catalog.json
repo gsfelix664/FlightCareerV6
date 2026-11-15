@@ -32,7 +32,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.crankshaft",
@@ -65,7 +66,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.valves",
@@ -97,7 +99,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.carburetor",
@@ -129,7 +132,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.fuel_injectors",
@@ -162,7 +166,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.turbocharger",
@@ -195,7 +200,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.starter",
@@ -226,7 +232,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.coolant_system",
@@ -258,7 +265,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.compressor",
@@ -292,7 +300,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.reduction_gearbox",
@@ -324,7 +333,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.fan",
@@ -357,7 +367,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.thrust_reverser",
@@ -388,7 +399,8 @@
         8.0,
         36.0
       ],
-      "failureEffect": "Perda de potência ou falha mecânica de motor"
+      "failureEffect": "Perda de potência ou falha mecânica de motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "oil.lubricant",
@@ -422,7 +434,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": 12
     },
     {
       "id": "oil.turbine_oil",
@@ -457,7 +470,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": 12
     },
     {
       "id": "oil.filter",
@@ -488,7 +502,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "oil.turbine_filter",
@@ -520,7 +535,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "oil.cooler",
@@ -553,7 +569,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "oil.pump",
@@ -585,7 +602,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "oil.turbine_pump",
@@ -618,7 +636,8 @@
         1.0,
         4.0
       ],
-      "failureEffect": "Vazamento ou perda de lubrificação do motor"
+      "failureEffect": "Vazamento ou perda de lubrificação do motor",
+      "calendarLifeMonths": null
     },
     {
       "id": "ignition.magneto_left",
@@ -652,7 +671,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Falha de ignição / funcionamento irregular"
+      "failureEffect": "Falha de ignição / funcionamento irregular",
+      "calendarLifeMonths": null
     },
     {
       "id": "ignition.magneto_right",
@@ -686,7 +706,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Falha de ignição / funcionamento irregular"
+      "failureEffect": "Falha de ignição / funcionamento irregular",
+      "calendarLifeMonths": null
     },
     {
       "id": "ignition.spark_plugs",
@@ -720,7 +741,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Falha de ignição / funcionamento irregular"
+      "failureEffect": "Falha de ignição / funcionamento irregular",
+      "calendarLifeMonths": null
     },
     {
       "id": "ignition.glow_plugs",
@@ -751,7 +773,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Falha de ignição / funcionamento irregular"
+      "failureEffect": "Falha de ignição / funcionamento irregular",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.combustor",
@@ -785,7 +808,8 @@
         24.0,
         72.0
       ],
-      "failureEffect": "Degradação térmica severa / perda de empuxo"
+      "failureEffect": "Degradação térmica severa / perda de empuxo",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.turbine_blades",
@@ -820,7 +844,8 @@
         24.0,
         72.0
       ],
-      "failureEffect": "Degradação térmica severa / perda de empuxo"
+      "failureEffect": "Degradação térmica severa / perda de empuxo",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.igniters",
@@ -852,7 +877,8 @@
         24.0,
         72.0
       ],
-      "failureEffect": "Degradação térmica severa / perda de empuxo"
+      "failureEffect": "Degradação térmica severa / perda de empuxo",
+      "calendarLifeMonths": null
     },
     {
       "id": "propeller.blades",
@@ -884,7 +910,8 @@
         6.0,
         18.0
       ],
-      "failureEffect": "Vibração de hélice ou perda de controle de passo"
+      "failureEffect": "Vibração de hélice ou perda de controle de passo",
+      "calendarLifeMonths": null
     },
     {
       "id": "propeller.governor",
@@ -915,7 +942,8 @@
         6.0,
         18.0
       ],
-      "failureEffect": "Vibração de hélice ou perda de controle de passo"
+      "failureEffect": "Vibração de hélice ou perda de controle de passo",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.battery",
@@ -945,7 +973,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": 24
     },
     {
       "id": "electrical.alternator",
@@ -979,7 +1008,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.starter_generator",
@@ -1015,7 +1045,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.voltage_regulator",
@@ -1042,7 +1073,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.wiring_harness",
@@ -1071,7 +1103,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.apu_generator",
@@ -1102,7 +1135,8 @@
         2.0,
         8.0
       ],
-      "failureEffect": "Perda de geração / descarga da bateria"
+      "failureEffect": "Perda de geração / descarga da bateria",
+      "calendarLifeMonths": null
     },
     {
       "id": "instruments.vacuum_pump",
@@ -1133,7 +1167,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Leitura errônea ou perda de instrumento"
+      "failureEffect": "Leitura errônea ou perda de instrumento",
+      "calendarLifeMonths": null
     },
     {
       "id": "instruments.pitot_tube",
@@ -1160,7 +1195,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Leitura errônea ou perda de instrumento"
+      "failureEffect": "Leitura errônea ou perda de instrumento",
+      "calendarLifeMonths": null
     },
     {
       "id": "instruments.static_ports",
@@ -1186,7 +1222,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Leitura errônea ou perda de instrumento"
+      "failureEffect": "Leitura errônea ou perda de instrumento",
+      "calendarLifeMonths": null
     },
     {
       "id": "instruments.gyro_horizon",
@@ -1212,7 +1249,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Leitura errônea ou perda de instrumento"
+      "failureEffect": "Leitura errônea ou perda de instrumento",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.engine_pump",
@@ -1244,7 +1282,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Falha de alimentação / flutuação de pressão"
+      "failureEffect": "Falha de alimentação / flutuação de pressão",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.fcu",
@@ -1278,7 +1317,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Falha de alimentação / flutuação de pressão"
+      "failureEffect": "Falha de alimentação / flutuação de pressão",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.aux_pump",
@@ -1306,7 +1346,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Falha de alimentação / flutuação de pressão"
+      "failureEffect": "Falha de alimentação / flutuação de pressão",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.filter_gascolator",
@@ -1337,7 +1378,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Falha de alimentação / flutuação de pressão"
+      "failureEffect": "Falha de alimentação / flutuação de pressão",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.selector_valve",
@@ -1364,7 +1406,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Falha de alimentação / flutuação de pressão"
+      "failureEffect": "Falha de alimentação / flutuação de pressão",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.main_struts",
@@ -1394,7 +1437,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Colapso ou travamento de trem de pouso"
+      "failureEffect": "Colapso ou travamento de trem de pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.nose_strut",
@@ -1427,7 +1471,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Colapso ou travamento de trem de pouso"
+      "failureEffect": "Colapso ou travamento de trem de pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.tailwheel_assembly",
@@ -1460,7 +1505,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Colapso ou travamento de trem de pouso"
+      "failureEffect": "Colapso ou travamento de trem de pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.actuator",
@@ -1493,7 +1539,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Colapso ou travamento de trem de pouso"
+      "failureEffect": "Colapso ou travamento de trem de pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "tires.main",
@@ -1524,7 +1571,8 @@
         1.0,
         2.0
       ],
-      "failureEffect": "Estouro ou perda de pressão de pneu"
+      "failureEffect": "Estouro ou perda de pressão de pneu",
+      "calendarLifeMonths": 48
     },
     {
       "id": "tires.nose",
@@ -1559,7 +1607,8 @@
         1.0,
         2.0
       ],
-      "failureEffect": "Estouro ou perda de pressão de pneu"
+      "failureEffect": "Estouro ou perda de pressão de pneu",
+      "calendarLifeMonths": 48
     },
     {
       "id": "brakes.pads_discs",
@@ -1591,7 +1640,8 @@
         2.0,
         4.0
       ],
-      "failureEffect": "Perda de eficiência de frenagem"
+      "failureEffect": "Perda de eficiência de frenagem",
+      "calendarLifeMonths": null
     },
     {
       "id": "brakes.master_cylinders",
@@ -1619,7 +1669,8 @@
         2.0,
         4.0
       ],
-      "failureEffect": "Perda de eficiência de frenagem"
+      "failureEffect": "Perda de eficiência de frenagem",
+      "calendarLifeMonths": null
     },
     {
       "id": "airframe.wing_structure",
@@ -1648,7 +1699,8 @@
         12.0,
         48.0
       ],
-      "failureEffect": "Dano estrutural na célula / AOG"
+      "failureEffect": "Dano estrutural na célula / AOG",
+      "calendarLifeMonths": null
     },
     {
       "id": "airframe.flight_controls",
@@ -1680,7 +1732,8 @@
         12.0,
         48.0
       ],
-      "failureEffect": "Dano estrutural na célula / AOG"
+      "failureEffect": "Dano estrutural na célula / AOG",
+      "calendarLifeMonths": null
     },
     {
       "id": "airframe.flaps",
@@ -1710,7 +1763,8 @@
         12.0,
         48.0
       ],
-      "failureEffect": "Dano estrutural na célula / AOG"
+      "failureEffect": "Dano estrutural na célula / AOG",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.pump",
@@ -1743,7 +1797,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Perda de pressão hidráulica"
+      "failureEffect": "Perda de pressão hidráulica",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.reservoir_lines",
@@ -1776,7 +1831,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Perda de pressão hidráulica"
+      "failureEffect": "Perda de pressão hidráulica",
+      "calendarLifeMonths": null
     },
     {
       "id": "pressurization.outflow_valve",
@@ -1807,7 +1863,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Perda de capacidade de pressurização"
+      "failureEffect": "Perda de capacidade de pressurização",
+      "calendarLifeMonths": null
     },
     {
       "id": "pressurization.door_seals",
@@ -1838,7 +1895,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Perda de capacidade de pressurização"
+      "failureEffect": "Perda de capacidade de pressurização",
+      "calendarLifeMonths": 60
     },
     {
       "id": "empennage.stabilizers",
@@ -1866,7 +1924,8 @@
         48.0,
         120.0
       ],
-      "failureEffect": "Dano estrutural nos estabilizadores / interdição de voo (AOG)"
+      "failureEffect": "Dano estrutural nos estabilizadores / interdição de voo (AOG)",
+      "calendarLifeMonths": null
     },
     {
       "id": "empennage.elevator",
@@ -1894,7 +1953,8 @@
         12.0,
         36.0
       ],
-      "failureEffect": "Profundor travado ou excursão limitada de arfagem"
+      "failureEffect": "Profundor travado ou excursão limitada de arfagem",
+      "calendarLifeMonths": null
     },
     {
       "id": "empennage.rudder",
@@ -1923,7 +1983,8 @@
         12.0,
         36.0
       ],
-      "failureEffect": "Deformação do leme ou resposta assimétrica de guinada"
+      "failureEffect": "Deformação do leme ou resposta assimétrica de guinada",
+      "calendarLifeMonths": null
     },
     {
       "id": "empennage.control_cables",
@@ -1951,7 +2012,8 @@
         6.0,
         18.0
       ],
-      "failureEffect": "Folga excessiva nos comandos ou resposta lenta da empenagem"
+      "failureEffect": "Folga excessiva nos comandos ou resposta lenta da empenagem",
+      "calendarLifeMonths": null
     },
     {
       "id": "empennage.hinges_counterweights",
@@ -1978,7 +2040,8 @@
         4.0,
         8.0
       ],
-      "failureEffect": "Vibração nos comandos de cauda / risco de flutter em alta velocidade"
+      "failureEffect": "Vibração nos comandos de cauda / risco de flutter em alta velocidade",
+      "calendarLifeMonths": null
     },
     {
       "id": "empennage.trim_actuator",
@@ -2006,7 +2069,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Compensador travado ou movimento descontrolado (trim runaway)"
+      "failureEffect": "Compensador travado ou movimento descontrolado (trim runaway)",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.wheels_bearings",
@@ -2034,7 +2098,8 @@
         3.0,
         6.0
       ],
-      "failureEffect": "Superaquecimento de rolamento ou travamento de roda no pouso"
+      "failureEffect": "Superaquecimento de rolamento ou travamento de roda no pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.antiskid_system",
@@ -2066,7 +2131,8 @@
         4.0,
         8.0
       ],
-      "failureEffect": "Inoperância do sistema antiskid / perda de frenagem modulada automática"
+      "failureEffect": "Inoperância do sistema antiskid / perda de frenagem modulada automática",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.trunnions_side_stays",
@@ -2095,7 +2161,8 @@
         24.0,
         72.0
       ],
-      "failureEffect": "Colapso estrutural do trem de pouso ou shimmy violento no toque"
+      "failureEffect": "Colapso estrutural do trem de pouso ou shimmy violento no toque",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.nosewheel_steering",
@@ -2126,7 +2193,8 @@
         4.0,
         10.0
       ],
-      "failureEffect": "Perda de controle direcional no táxi ou vibração intensa da bequilha"
+      "failureEffect": "Perda de controle direcional no táxi ou vibração intensa da bequilha",
+      "calendarLifeMonths": null
     },
     {
       "id": "gear.doors_mechanisms",
@@ -2159,7 +2227,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Porta do trem emperrada aberta causando arrasto parasita excessivo"
+      "failureEffect": "Porta do trem emperrada aberta causando arrasto parasita excessivo",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.root_fittings",
@@ -2187,7 +2256,8 @@
         36.0,
         96.0
       ],
-      "failureEffect": "Trinca de fadiga na junção asa-fuselagem / interdição estrutural (AOG)"
+      "failureEffect": "Trinca de fadiga na junção asa-fuselagem / interdição estrutural (AOG)",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.ribs_skin",
@@ -2215,7 +2285,8 @@
         24.0,
         48.0
       ],
-      "failureEffect": "Deformação do perfil alar / aumento de arrasto parasita"
+      "failureEffect": "Deformação do perfil alar / aumento de arrasto parasita",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.tanks_sealant",
@@ -2242,7 +2313,8 @@
         16.0,
         40.0
       ],
-      "failureEffect": "Vazamento de combustível alar através do selante de asa"
+      "failureEffect": "Vazamento de combustível alar através do selante de asa",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.tips_winglets",
@@ -2269,7 +2341,8 @@
         8.0,
         24.0
       ],
-      "failureEffect": "Dano por raspagem de ponta de asa no toque / arrasto induzido"
+      "failureEffect": "Dano por raspagem de ponta de asa no toque / arrasto induzido",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.ailerons",
@@ -2298,7 +2371,8 @@
         12.0,
         30.0
       ],
-      "failureEffect": "Resposta assimétrica ou travamento do controle de rolamento"
+      "failureEffect": "Resposta assimétrica ou travamento do controle de rolamento",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.slats",
@@ -2330,7 +2404,8 @@
         16.0,
         40.0
       ],
-      "failureEffect": "Assimetria ou travamento de slat de bordo de ataque no pouso"
+      "failureEffect": "Assimetria ou travamento de slat de bordo de ataque no pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.spoilers",
@@ -2362,7 +2437,8 @@
         8.0,
         24.0
       ],
-      "failureEffect": "Falha de acionamento ou spoiler travado estendido em voo"
+      "failureEffect": "Falha de acionamento ou spoiler travado estendido em voo",
+      "calendarLifeMonths": null
     },
     {
       "id": "wing.deice_boots",
@@ -2393,7 +2469,8 @@
         12.0,
         24.0
       ],
-      "failureEffect": "Perfuração ou ressecamento da bota pneumática / acúmulo de gelo alar"
+      "failureEffect": "Perfuração ou ressecamento da bota pneumática / acúmulo de gelo alar",
+      "calendarLifeMonths": 48
     },
     {
       "id": "wing.bleed_anti_ice",
@@ -2424,7 +2501,8 @@
         16.0,
         36.0
       ],
-      "failureEffect": "Válvula de sangria presa fechada / inoperância do antigelo alar"
+      "failureEffect": "Válvula de sangria presa fechada / inoperância do antigelo alar",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.frames_bulkheads",
@@ -2452,7 +2530,8 @@
         48.0,
         120.0
       ],
-      "failureEffect": "Deformação permanente de caverna estrutural / interdição mandatória"
+      "failureEffect": "Deformação permanente de caverna estrutural / interdição mandatória",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.pressure_bulkheads",
@@ -2484,7 +2563,8 @@
         60.0,
         140.0
       ],
-      "failureEffect": "Fadiga crítica na antepara / risco de descompressão catastrófica (AOG)"
+      "failureEffect": "Fadiga crítica na antepara / risco de descompressão catastrófica (AOG)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.longerons_stringers",
@@ -2512,7 +2592,8 @@
         60.0,
         150.0
       ],
-      "failureEffect": "Trinca em longarina primária de fuselagem / AOG"
+      "failureEffect": "Trinca em longarina primária de fuselagem / AOG",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.skin_fairings",
@@ -2539,7 +2620,8 @@
         16.0,
         40.0
       ],
-      "failureEffect": "Dano na carenagem de fuselagem / aumento de arrasto aerodinâmico"
+      "failureEffect": "Dano na carenagem de fuselagem / aumento de arrasto aerodinâmico",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.doors_seals",
@@ -2566,7 +2648,8 @@
         8.0,
         24.0
       ],
-      "failureEffect": "Vazamento de pressurização ou alerta de porta destravada em voo"
+      "failureEffect": "Vazamento de pressurização ou alerta de porta destravada em voo",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.windshield_windows",
@@ -2593,7 +2676,8 @@
         6.0,
         18.0
       ],
-      "failureEffect": "Trinca no para-brisa ou delaminação impedindo visão de pouso"
+      "failureEffect": "Trinca no para-brisa ou delaminação impedindo visão de pouso",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.radome",
@@ -2623,7 +2707,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Atenuação de eco radar ou dano de erosão no radome de nariz"
+      "failureEffect": "Atenuação de eco radar ou dano de erosão no radome de nariz",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.antennas",
@@ -2647,7 +2732,8 @@
         2.0,
         6.0
       ],
-      "failureEffect": "Perda de sensibilidade ou estática na recepção COM/NAV/GPS"
+      "failureEffect": "Perda de sensibilidade ou estática na recepção COM/NAV/GPS",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.inverter_converter",
@@ -2678,7 +2764,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Perda do barramento AC essencial / alimentação de instrumentos IFR"
+      "failureEffect": "Perda do barramento AC essencial / alimentação de instrumentos IFR",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.com_nav_radios",
@@ -2704,7 +2791,8 @@
         4.0,
         10.0
       ],
-      "failureEffect": "Perda de comunicação por voz ATC ou recepção de radiofaróis de aproximação"
+      "failureEffect": "Perda de comunicação por voz ATC ou recepção de radiofaróis de aproximação",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.transponder",
@@ -2730,7 +2818,8 @@
         3.0,
         8.0
       ],
-      "failureEffect": "Perda de squawk / perda de vigilância e altitude radar secundário ATC"
+      "failureEffect": "Perda de squawk / perda de vigilância e altitude radar secundário ATC",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.gps_receiver",
@@ -2756,7 +2845,8 @@
         4.0,
         12.0
       ],
-      "failureEffect": "Perda de fixação de posição por satélite GPS / navegação por waypoints"
+      "failureEffect": "Perda de fixação de posição por satélite GPS / navegação por waypoints",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.fms_computer",
@@ -2786,7 +2876,8 @@
         8.0,
         20.0
       ],
-      "failureEffect": "Falha de cálculo LNAV/VNAV / tela inoperante da CDU de rota"
+      "failureEffect": "Falha de cálculo LNAV/VNAV / tela inoperante da CDU de rota",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.autopilot_servos",
@@ -2819,7 +2910,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Desengate involuntário do piloto automático ou servo de comando travado"
+      "failureEffect": "Desengate involuntário do piloto automático ou servo de comando travado",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.glass_displays",
@@ -2849,7 +2941,8 @@
         6.0,
         16.0
       ],
-      "failureEffect": "Tela preta, flicker intermitente ou perda total de instrumentos primários"
+      "failureEffect": "Tela preta, flicker intermitente ou perda total de instrumentos primários",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.analog_flight_instruments",
@@ -2879,7 +2972,8 @@
         4.0,
         10.0
       ],
-      "failureEffect": "Indicação travada ou ponteiro oscilante de velocidade/altitude"
+      "failureEffect": "Indicação travada ou ponteiro oscilante de velocidade/altitude",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.weather_radar",
@@ -2909,7 +3003,8 @@
         6.0,
         18.0
       ],
-      "failureEffect": "Perda de detecção meteorológica de precipitação e células convectivas"
+      "failureEffect": "Perda de detecção meteorológica de precipitação e células convectivas",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.ahrs_irs",
@@ -2933,7 +3028,8 @@
         8.0
       ],
       "failureEffect": "Bandeira ATT/HDG no PFD ou perda de alinhamento inercial",
-      "lifeSource": "estimativa — revisar (referência usuário: AHRS/IRS Service Life)"
+      "lifeSource": "estimativa — revisar (referência usuário: AHRS/IRS Service Life)",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.adc",
@@ -2958,7 +3054,8 @@
         6.0
       ],
       "failureEffect": "Perda de airspeed/altitude no PFD ou dados de ar degradados",
-      "lifeSource": "estimativa — revisar (referência usuário: ADC Maintenance Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: ADC Maintenance Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.standby_instruments",
@@ -2981,7 +3078,8 @@
         6.0
       ],
       "failureEffect": "Apagão da tela do instrumento de reserva integrado",
-      "lifeSource": "estimativa — revisar (referência usuário: Integrated Standby Instrument System)"
+      "lifeSource": "estimativa — revisar (referência usuário: Integrated Standby Instrument System)",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.tcas_egpws",
@@ -3005,7 +3103,8 @@
         8.0
       ],
       "failureEffect": "Inoperância de avisos sonoros e visuais de tráfego e terreno",
-      "lifeSource": "estimativa — revisar (referência usuário: TCAS/EGPWS Avionics Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: TCAS/EGPWS Avionics Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "avionics.flight_recorders_elt",
@@ -3024,7 +3123,8 @@
         6.0
       ],
       "failureEffect": "Falha de auto-teste do ELT ou perda de gravação de parâmetros de voo",
-      "lifeSource": "estimativa — revisar (referência usuário: Flight Recorders & ELT Standards)"
+      "lifeSource": "estimativa — revisar (referência usuário: Flight Recorders & ELT Standards)",
+      "calendarLifeMonths": 24
     },
     {
       "id": "avionics.audio_panel",
@@ -3043,7 +3143,8 @@
         4.0
       ],
       "failureEffect": "Falha de transmissão de áudio nos fones ou seleção de canal COM",
-      "lifeSource": "estimativa — revisar (referência usual: Audio Control Panel Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usual: Audio Control Panel Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.standby_battery",
@@ -3068,7 +3169,8 @@
         2.0
       ],
       "failureEffect": "Incapacidade de suprir barramento essencial de emergência",
-      "lifeSource": "estimativa — revisar (referência usuário: Standby Battery Service Life)"
+      "lifeSource": "estimativa — revisar (referência usuário: Standby Battery Service Life)",
+      "calendarLifeMonths": 24
     },
     {
       "id": "electrical.idg",
@@ -3093,7 +3195,8 @@
         12.0
       ],
       "failureEffect": "Falha de geração AC principal / desconexão do IDG",
-      "lifeSource": "estimativa — revisar (referência usuário: IDG Maintenance Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: IDG Maintenance Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.rat",
@@ -3117,7 +3220,8 @@
         10.0
       ],
       "failureEffect": "Falha de desdobramento ou geração hidráulica/elétrica de emergência",
-      "lifeSource": "estimativa — revisar (referência usuário: Ram Air Turbine Overhaul Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: Ram Air Turbine Overhaul Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.tru_transformer_rectifier",
@@ -3141,7 +3245,8 @@
         8.0
       ],
       "failureEffect": "Perda de conversão AC/DC e isolamento de barramento DC",
-      "lifeSource": "estimativa — revisar (referência usuário: TRU Maintenance Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: TRU Maintenance Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.external_lighting",
@@ -3160,7 +3265,8 @@
         2.0
       ],
       "failureEffect": "Queima de farol de pouso ou strobe impedindo operação noturna",
-      "lifeSource": "estimativa — revisar (referência usuário: External Lighting Service Life)"
+      "lifeSource": "estimativa — revisar (referência usuário: External Lighting Service Life)",
+      "calendarLifeMonths": null
     },
     {
       "id": "electrical.circuit_breakers_relays",
@@ -3179,7 +3285,8 @@
         16.0
       ],
       "failureEffect": "Desarme espúrio ou falha de isolamento de barramento elétrico",
-      "lifeSource": "estimativa — revisar (referência usuário: Electrical Contactors & Circuit Breakers)"
+      "lifeSource": "estimativa — revisar (referência usuário: Electrical Contactors & Circuit Breakers)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.electric_pump",
@@ -3205,7 +3312,8 @@
         10.0
       ],
       "failureEffect": "Perda da bomba hidráulica auxiliar de reserva e solo",
-      "lifeSource": "estimativa — revisar (referência usuário: ACMP Hydraulic Pump Overhaul)"
+      "lifeSource": "estimativa — revisar (referência usuário: ACMP Hydraulic Pump Overhaul)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.accumulators",
@@ -3229,7 +3337,8 @@
         8.0
       ],
       "failureEffect": "Perda de reserva de pressão para freios de emergência",
-      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Accumulators Inspection)"
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Accumulators Inspection)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.filters_valves",
@@ -3254,7 +3363,8 @@
         4.0
       ],
       "failureEffect": "Filtro hidráulico colmatado / atuação lenta de atuadores",
-      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Filters & Valves)"
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Filters & Valves)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.ptu",
@@ -3278,7 +3388,8 @@
         14.0
       ],
       "failureEffect": "Inoperância de transferência hidráulica entre sistemas verde e amarelo",
-      "lifeSource": "estimativa — revisar (referência usuário: PTU Component Maintenance Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: PTU Component Maintenance Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hydraulic.lines_fittings",
@@ -3303,7 +3414,8 @@
         12.0
       ],
       "failureEffect": "Microvazamento contínuo de fluido hidráulico",
-      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Lines & Hoses Service Life)"
+      "lifeSource": "estimativa — revisar (referência usuário: Hydraulic Lines & Hoses Service Life)",
+      "calendarLifeMonths": 60
     },
     {
       "id": "pneumatic.bleed_valves",
@@ -3328,7 +3440,8 @@
         10.0
       ],
       "failureEffect": "Válvula de sangria presa fechada / BLEED TRIP OFF",
-      "lifeSource": "estimativa — revisar (referência usuário: Engine Bleed Valves Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Engine Bleed Valves Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "pneumatic.precooler",
@@ -3353,7 +3466,8 @@
         14.0
       ],
       "failureEffect": "Superaquecimento do duto de sangria / alarme de BLEED OVERHEAT",
-      "lifeSource": "estimativa — revisar (referência usuário: Bleed Air Pre-cooler Overhaul)"
+      "lifeSource": "estimativa — revisar (referência usuário: Bleed Air Pre-cooler Overhaul)",
+      "calendarLifeMonths": null
     },
     {
       "id": "pneumatic.ducts_leak_detection",
@@ -3376,7 +3490,8 @@
         12.0
       ],
       "failureEffect": "Alarme de vazamento pneumático / BLEED DUCT LEAK",
-      "lifeSource": "estimativa — revisar (referência usuário: Pneumatic Ducts & Leak Detection)"
+      "lifeSource": "estimativa — revisar (referência usuário: Pneumatic Ducts & Leak Detection)",
+      "calendarLifeMonths": null
     },
     {
       "id": "pneumatic.air_cycle_machine",
@@ -3404,7 +3519,8 @@
         18.0
       ],
       "failureEffect": "Desarme de pack de refrigeração / limitação de teto operacional",
-      "lifeSource": "estimativa — revisar (referência usuário: Air Cycle Machine (Packs) Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Air Cycle Machine (Packs) Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "pressurization.safety_relief_valves",
@@ -3427,7 +3543,8 @@
         6.0
       ],
       "failureEffect": "Vazamento residual de ar comprimido ou risco de sobrepressão de cabine",
-      "lifeSource": "estimativa — revisar (referência usuário: Safety Relief Valves Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Safety Relief Valves Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.crossfeed_valve",
@@ -3450,7 +3567,8 @@
         8.0
       ],
       "failureEffect": "Válvula de crossfeed travada na posição aberta ou fechada",
-      "lifeSource": "estimativa — revisar (referência usuário: Fuel Crossfeed Valve)"
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Crossfeed Valve)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.fire_shutoff_valve",
@@ -3470,7 +3588,8 @@
         6.0
       ],
       "failureEffect": "Falha de fechamento em emergência ou alarme falso de isolamento de fogo",
-      "lifeSource": "estimativa — revisar (referência usuário: Fuel Fire Shutoff Valves)"
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Fire Shutoff Valves)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.fohe",
@@ -3496,7 +3615,8 @@
         14.0
       ],
       "failureEffect": "Congelamento de micropartículas de água no combustível em baixas temperaturas",
-      "lifeSource": "estimativa — revisar (referência usuário: Fuel-Oil Heat Exchanger Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel-Oil Heat Exchanger Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuel.fqis_sensors",
@@ -3515,7 +3635,8 @@
         6.0
       ],
       "failureEffect": "Indicação errática ou travada no medidor de quantidade nos tanques",
-      "lifeSource": "estimativa — revisar (referência usuário: Fuel Quantity Indicating System)"
+      "lifeSource": "estimativa — revisar (referência usuário: Fuel Quantity Indicating System)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.mounts_trusses",
@@ -3536,7 +3657,8 @@
         24.0
       ],
       "failureEffect": "Vibração excessiva do motor e desalinhamento estrutural",
-      "lifeSource": "estimativa — revisar (referência usuário: Engine Mounts & Truss Inspection)"
+      "lifeSource": "estimativa — revisar (referência usuário: Engine Mounts & Truss Inspection)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.cowling_nacelle",
@@ -3557,7 +3679,8 @@
         18.0
       ],
       "failureEffect": "Trinca em painel de carenagem / arrasto parasita",
-      "lifeSource": "estimativa — revisar (referência usuário: Cowling & Nacelle Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Cowling & Nacelle Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.wastegate_controller",
@@ -3581,7 +3704,8 @@
         8.0
       ],
       "failureEffect": "Perda de pressão de sobrealimentação ou overboost",
-      "lifeSource": "estimativa — revisar (referência usuário: Wastegate Controller Overhaul)"
+      "lifeSource": "estimativa — revisar (referência usuário: Wastegate Controller Overhaul)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.air_intake_filter",
@@ -3601,7 +3725,8 @@
         3.0
       ],
       "failureEffect": "Obstrução do fluxo de admissão / perda de potência",
-      "lifeSource": "estimativa — revisar (referência usuário: Air Intake Filter Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Air Intake Filter Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.pneumatic_starter",
@@ -3626,7 +3751,8 @@
         8.0
       ],
       "failureEffect": "Falha de partida pneumática / recusa de acionamento",
-      "lifeSource": "estimativa — revisar (referência usuário: Air Turbine Starter Overhaul Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: Air Turbine Starter Overhaul Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "engine.fadec_eec",
@@ -3651,7 +3777,8 @@
         12.0
       ],
       "failureEffect": "Degradação para modo manual / flutuação de empuxo",
-      "lifeSource": "estimativa — revisar (referência usuário: FADEC Engine Electronic Controller Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: FADEC Engine Electronic Controller Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.fuel_nozzles",
@@ -3677,7 +3804,8 @@
         10.0
       ],
       "failureEffect": "Pulverização irregular / ponto quente na câmara de combustão",
-      "lifeSource": "estimativa — revisar (referência usuário: Turbine Fuel Nozzles Maintenance)"
+      "lifeSource": "estimativa — revisar (referência usuário: Turbine Fuel Nozzles Maintenance)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.ngv",
@@ -3703,7 +3831,8 @@
         48.0
       ],
       "failureEffect": "Erosão térmica / perda de rendimento da turbina",
-      "lifeSource": "estimativa — revisar (referência usuário: Nozzle Guide Vanes Overhaul)"
+      "lifeSource": "estimativa — revisar (referência usuário: Nozzle Guide Vanes Overhaul)",
+      "calendarLifeMonths": null
     },
     {
       "id": "hotsection.ignition_exciters",
@@ -3728,7 +3857,8 @@
         6.0
       ],
       "failureEffect": "Ausência de centelha nos ignitores / falha na partida da turbina",
-      "lifeSource": "estimativa — revisar (referência usuário: Turbine Ignition Exciters Manual)"
+      "lifeSource": "estimativa — revisar (referência usuário: Turbine Ignition Exciters Manual)",
+      "calendarLifeMonths": null
     },
     {
       "id": "propeller.pitch_feathering",
@@ -3753,7 +3883,8 @@
         12.0
       ],
       "failureEffect": "Dificuldade de variação de passo ou falha ao embandeirar",
-      "lifeSource": "estimativa — revisar (referência usuário: Propeller Pitch & Feathering System)"
+      "lifeSource": "estimativa — revisar (referência usuário: Propeller Pitch & Feathering System)",
+      "calendarLifeMonths": null
     },
     {
       "id": "propeller.deice_boots",
@@ -3777,7 +3908,8 @@
         6.0
       ],
       "failureEffect": "Queima de resistência / acúmulo de gelo nas pás da hélice",
-      "lifeSource": "estimativa — revisar (referência usuário: Propeller Electric De-Ice Boots)"
+      "lifeSource": "estimativa — revisar (referência usuário: Propeller Electric De-Ice Boots)",
+      "calendarLifeMonths": 48
     },
     {
       "id": "engine.apu_core",
@@ -3801,7 +3933,8 @@
         24.0
       ],
       "failureEffect": "Recusa de partida da APU / perda de potência pneumática auxiliar",
-      "lifeSource": "estimativa — revisar (referência usuário: Auxiliary Power Unit Core Overhaul)"
+      "lifeSource": "estimativa — revisar (referência usuário: Auxiliary Power Unit Core Overhaul)",
+      "calendarLifeMonths": null
     },
     {
       "id": "fuselage.cargo_doors_latches",
@@ -3827,7 +3960,524 @@
         12.0
       ],
       "failureEffect": "Alerta DOOR OPEN no solo ou falha no mecanismo de travamento de carga",
-      "lifeSource": "estimativa — revisar (referência usuário: Cargo Doors & Latches Inspection)"
+      "lifeSource": "estimativa — revisar (referência usuário: Cargo Doors & Latches Inspection)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "cabin.passenger_seats",
+      "name": "Assentos de passageiros",
+      "group": "Cabine",
+      "appliesTo": {
+        "all": [
+          "passengerCabin"
+        ]
+      },
+      "lifeHours": 12000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 8500.0,
+      "laborHours": 8.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (fadiga estrutural de trilhos e estofamento após ~12.000 h de voo comercial)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.4
+      ],
+      "downtimeHours": [
+        4.0,
+        16.0
+      ],
+      "failureEffect": "Desgaste de estofamento, quebra de reclinação de assentos, redução de conforto/satisfação de passageiros",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "cabin.galley",
+      "name": "Galley / Copa de bordo",
+      "group": "Cabine",
+      "appliesTo": {
+        "all": [
+          "galley"
+        ]
+      },
+      "lifeHours": 10000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 15000.0,
+      "laborHours": 12.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (fornos, refrigeradores e disjuntores da galley com vida típica de ~10.000 h)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.2,
+        0.5
+      ],
+      "downtimeHours": [
+        6.0,
+        18.0
+      ],
+      "failureEffect": "Falha elétrica de aquecedores/fornos ou travamento de portas da copa",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "cabin.lavatory",
+      "name": "Sistema de lavatório",
+      "group": "Cabine",
+      "appliesTo": {
+        "all": [
+          "lavatory"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 12000.0,
+      "laborHours": 10.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (bombas de vácuo, válvulas de descarga e tanques químicos com ~8.000 h)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Entupimento ou vazamento de lavatório; restrição para missões longas de passageiros (MEL de cabine)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "cabin.in_flight_entertainment",
+      "name": "Sistema de entretenimento a bordo (IFE)",
+      "group": "Cabine",
+      "appliesTo": {
+        "all": [
+          "passengerCabin",
+          "jet"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 18000.0,
+      "laborHours": 8.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (servidores multimídia, cabeamento de dados e telas individuais de assento com ~6.000 h)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.45
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Telas de assento inoperantes ou congeladas; degradação da experiência de bordo",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "oxygen.crew_cylinder",
+      "name": "Cilindro de oxigênio da tripulação",
+      "group": "Oxigênio",
+      "appliesTo": {
+        "all": [
+          "oxygen"
+        ]
+      },
+      "lifeHours": 15000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 3500.0,
+      "laborHours": 4.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (cilindro de alta pressão composto/aço; teste hidrostático obrigatório a cada 60 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": false,
+      "repairCostPctOfAircraft": [
+        0.08,
+        0.2
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Pressão de oxigênio de tripulação insuficiente; impede decolagem de voo em alta altitude (NO-GO)",
+      "calendarLifeMonths": 60
+    },
+    {
+      "id": "oxygen.passenger_system",
+      "name": "Sistema de oxigênio dos passageiros",
+      "group": "Oxigênio",
+      "appliesTo": {
+        "all": [
+          "oxygen",
+          "passengerCabin"
+        ]
+      },
+      "lifeHours": 12000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 9000.0,
+      "laborHours": 8.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (geradores químicos de oxigênio / cilindros centrais com validade de 60 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.35
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Falha de pressurização das linhas de passageiros ou geradores vencidos; limita altitude de despacho",
+      "calendarLifeMonths": 60
+    },
+    {
+      "id": "oxygen.masks_regulators",
+      "name": "Máscaras e reguladores de oxigênio",
+      "group": "Oxigênio",
+      "appliesTo": {
+        "all": [
+          "oxygen"
+        ]
+      },
+      "lifeHours": 8000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 2200.0,
+      "laborHours": 3.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (ressecamento de diafragmas de silicone e vedações de reguladores após ~8.000 h ou 36 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": false,
+      "repairCostPctOfAircraft": [
+        0.05,
+        0.15
+      ],
+      "downtimeHours": [
+        2.0,
+        4.0
+      ],
+      "failureEffect": "Vazamento nas máscaras tipo quick-donning ou travamento do regulador de demanda (NO-GO)",
+      "calendarLifeMonths": 36
+    },
+    {
+      "id": "fire.engine_detection",
+      "name": "Sistema de detecção de fogo do motor",
+      "group": "Proteção contra Fogo",
+      "appliesTo": {
+        "all": [
+          "fireProtection"
+        ]
+      },
+      "lifeHours": 10000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 4200.0,
+      "laborHours": 6.0,
+      "sensors": [
+        "dmg-eng-fire-detected"
+      ],
+      "lifeSource": "estimativa — revisar (loops contínuos pneumáticos Lindberg/Kidde ou condutores coaxiais expostos ao calor do motor)",
+      "perEngine": true,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.12,
+        0.3
+      ],
+      "downtimeHours": [
+        4.0,
+        10.0
+      ],
+      "failureEffect": "Falha do laço sensor de fogo (FIRE LOOP FAULT) ou alarme falso de fogo no motor (NO-GO)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "fire.engine_extinguisher_bottles",
+      "name": "Garrafas extintoras de fogo do motor",
+      "group": "Proteção contra Fogo",
+      "appliesTo": {
+        "all": [
+          "fireProtection"
+        ]
+      },
+      "lifeHours": 15000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 6500.0,
+      "laborHours": 4.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (cilindros de agente Halon com cápsulas squib detonadoras; inspeção obrigatória a cada 60 meses)",
+      "perEngine": true,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.15,
+        0.4
+      ],
+      "downtimeHours": [
+        3.0,
+        8.0
+      ],
+      "failureEffect": "Garrafa extintora descarregada ou cápsula detonadora vencida; aeronave impedida de voar (NO-GO)",
+      "calendarLifeMonths": 60
+    },
+    {
+      "id": "fire.apu_extinguisher",
+      "name": "Detecção e extinção de fogo da APU",
+      "group": "Proteção contra Fogo",
+      "appliesTo": {
+        "all": [
+          "apu",
+          "fireProtection"
+        ]
+      },
+      "lifeHours": 12000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 5000.0,
+      "laborHours": 4.0,
+      "sensors": [
+        "turb-apu-on-fire-detected"
+      ],
+      "lifeSource": "estimativa — revisar (sistema extintor automático da APU com inspeção hidrostática a cada 60 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.1,
+        0.25
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "APU FIRE DISCH inoperante; APU inoperante para partida e geração de solo/voo",
+      "calendarLifeMonths": 60
+    },
+    {
+      "id": "fire.cabin_extinguishers",
+      "name": "Extintores portáteis de cabine e cockpit",
+      "group": "Proteção contra Fogo",
+      "appliesTo": {},
+      "lifeHours": 20000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 450.0,
+      "laborHours": 1.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (extintores manuais Halon/água com pesagem anual e recarga obrigatória a cada 24 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": false,
+      "repairCostPctOfAircraft": [
+        0.02,
+        0.05
+      ],
+      "downtimeHours": [
+        1.0,
+        2.0
+      ],
+      "failureEffect": "Extintor de bordo descarregado ou vencido (NO-GO)",
+      "calendarLifeMonths": 24
+    },
+    {
+      "id": "emergency.evacuation_slides",
+      "name": "Escorregadeiras de evacuação de emergência",
+      "group": "Emergência",
+      "appliesTo": {
+        "all": [
+          "passengerCabin",
+          "jet"
+        ]
+      },
+      "lifeHours": 15000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 22000.0,
+      "laborHours": 10.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (garrafas infladoras de CO2/N2 e tecido vulcanizado com revisão a cada 36 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.25,
+        0.6
+      ],
+      "downtimeHours": [
+        6.0,
+        16.0
+      ],
+      "failureEffect": "SLIDE DISARMED permanente ou garrafa descarregada (NO-GO para voos comerciais)",
+      "calendarLifeMonths": 36
+    },
+    {
+      "id": "emergency.life_vests_rafts",
+      "name": "Coletes salva-vidas e botes de emergência",
+      "group": "Emergência",
+      "appliesTo": {
+        "all": [
+          "passengerCabin"
+        ]
+      },
+      "lifeHours": 12000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": false,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 6000.0,
+      "laborHours": 4.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (cilindros de gás de coletes e botes infláveis com inspeção a cada 36 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.08,
+        0.2
+      ],
+      "downtimeHours": [
+        2.0,
+        6.0
+      ],
+      "failureEffect": "Coletes vencidos ou ausentes; restrição para operações sobre a água (ETOPS/marítimo)",
+      "calendarLifeMonths": 36
+    },
+    {
+      "id": "emergency.windshield_wipers",
+      "name": "Limpadores de para-brisa eletromecânicos",
+      "group": "Emergência",
+      "appliesTo": {
+        "all": [
+          "wipers"
+        ]
+      },
+      "lifeHours": 4000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 1800.0,
+      "laborHours": 2.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (motores conversores, braços pantográficos e palhetas de borracha com ~4.000 h ou 12 meses)",
+      "perEngine": false,
+      "priceScalesWithAircraft": false,
+      "repairCostPctOfAircraft": [
+        0.04,
+        0.1
+      ],
+      "downtimeHours": [
+        1.0,
+        3.0
+      ],
+      "failureEffect": "Palheta rasgada ou motor travado; visibilidade reduzida sob chuva forte no pouso",
+      "calendarLifeMonths": 12
+    },
+    {
+      "id": "emergency.ice_detector",
+      "name": "Sonda detectora de gelo óptico/vibratório",
+      "group": "Emergência",
+      "appliesTo": {
+        "all": [
+          "iceDetector"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "partPrice": 4800.0,
+      "laborHours": 3.0,
+      "sensors": [
+        "inst-structural-ice-pct"
+      ],
+      "lifeSource": "estimativa — revisar (sonda de ressonância magnetoestritiva Rosemount/Goodrich com ~6.000 h)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.08,
+        0.22
+      ],
+      "downtimeHours": [
+        2.0,
+        5.0
+      ],
+      "failureEffect": "Falha do aviso ICE DETECTED; acionamento de degelo depende de observação visual manual",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "gear.skis",
+      "name": "Esquis de pouso para neve/gelo",
+      "group": "Trem",
+      "appliesTo": {
+        "all": [
+          "skis"
+        ]
+      },
+      "lifeHours": 4000.0,
+      "lifeCycles": 2500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 16000.0,
+      "laborHours": 8.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (pranchas de compósito/aço e atuadores de retração de esquis para ~2.500 pousos)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.3,
+        0.7
+      ],
+      "downtimeHours": [
+        4.0,
+        12.0
+      ],
+      "failureEffect": "Trincas na prancha ou travamento da posição do esqui (NO-GO em pistas de neve)",
+      "calendarLifeMonths": 60
+    },
+    {
+      "id": "gear.floats",
+      "name": "Flutuadores anfíbios / hidroavião",
+      "group": "Trem",
+      "appliesTo": {
+        "all": [
+          "floats"
+        ]
+      },
+      "lifeHours": 6000.0,
+      "lifeCycles": 3500,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": true,
+      "partPrice": 28000.0,
+      "laborHours": 12.0,
+      "sensors": [],
+      "lifeSource": "estimativa — revisar (cascos de alumínio, compartimentos estanques e lemes aquáticos com ~3.500 ciclos)",
+      "perEngine": false,
+      "priceScalesWithAircraft": true,
+      "repairCostPctOfAircraft": [
+        0.4,
+        0.9
+      ],
+      "downtimeHours": [
+        6.0,
+        18.0
+      ],
+      "failureEffect": "Vazamento em compartimento estanque ou falha de trem retrátil anfíbio (NO-GO na água)",
+      "calendarLifeMonths": 60
     }
   ]
 }

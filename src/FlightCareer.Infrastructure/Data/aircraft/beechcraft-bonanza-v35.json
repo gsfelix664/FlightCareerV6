@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft Bonanza V35",
   "class": "Piston",
   "engineCount": 1,
@@ -9,6 +9,7 @@
     "constantSpeedProp",
     "fuelInjected",
     "noseWheelSteering",
+    "passengerCabin",
     "piston",
     "retractableGear",
     "singleEngine"

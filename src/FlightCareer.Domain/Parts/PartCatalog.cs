@@ -119,6 +119,11 @@ namespace FlightCareer.Domain.Parts
                     }
                 }
 
+                if (part.CalendarLifeMonths.HasValue && part.CalendarLifeMonths.Value <= 0)
+                {
+                    throw new InvalidDataException($"Peça '{part.Id}' possui CalendarLifeMonths inválido: deve ser > 0 quando especificado.");
+                }
+
                 if (validSensorKeys != null && part.Sensors != null)
                 {
                     foreach (var s in part.Sensors)
@@ -154,7 +159,8 @@ namespace FlightCareer.Domain.Parts
                 d.PriceScalesWithAircraft,
                 d.RepairCostPctOfAircraft,
                 d.DowntimeHours,
-                d.FailureEffect
+                d.FailureEffect,
+                d.CalendarLifeMonths
             )).ToList() ?? new List<PartDefinition>();
 
             return new PartCatalog(parts);
@@ -209,6 +215,7 @@ namespace FlightCareer.Domain.Parts
             public List<double>? RepairCostPctOfAircraft { get; set; }
             public List<double>? DowntimeHours { get; set; }
             public string? FailureEffect { get; set; }
+            public int? CalendarLifeMonths { get; set; }
         }
 
         private class AppliesToDto

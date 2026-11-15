@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Boeing 747-400 Global Supertanker",
   "class": "Jet",
   "engineCount": 4,
@@ -10,19 +10,23 @@
     "autopilot",
     "bleedAir",
     "bleedAntiIce",
+    "fireProtection",
     "fms",
     "glassCockpit",
     "hydraulicGear",
+    "iceDetector",
     "jet",
     "multiEngine",
     "noseWheelSteering",
+    "oxygen",
     "pressurized",
     "rat",
     "retractableGear",
     "slats",
     "spoilers",
     "thsTrim",
-    "weatherRadar"
+    "weatherRadar",
+    "wipers"
   ],
   "simMatch": {
     "title": [],
