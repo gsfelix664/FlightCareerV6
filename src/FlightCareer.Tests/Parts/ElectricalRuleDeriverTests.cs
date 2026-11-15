@@ -16,12 +16,16 @@ namespace FlightCareer.Tests.Parts
             double avionicsCircuit = 0.0,
             double masterBattery = 1.0,
             double busVoltage = 28.0,
-            double totalLoadAmps = 20.0)
+            double totalLoadAmps = 20.0,
+            double combustion = 1.0,
+            double alternator = 1.0)
         {
             var readings = new Dictionary<string, double>
             {
                 ["ctx-simulation-rate"] = simRate,
                 ["eng-starter:1"] = starter,
+                ["eng-combustion:1"] = combustion,
+                ["elec-master-alternator:1"] = alternator,
                 ["elec-circuit-on-3"] = avionicsCircuit,
                 ["elec-master-battery"] = masterBattery,
                 ["elec-bus-voltage-1"] = busVoltage,
@@ -267,23 +271,61 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
-        public void Deriver_Sobrecarga_Acima60ACom28V_Cruza5Min()
+        public void Overload_BarramentoEstavel_NaoConta()
         {
             var deriver = new PartEventDeriver();
             deriver.ConfigureElectrical(CreateC172Config());
 
-            // 65 A (> 60 A rated), alternador carregando (28 V >= 0.95 * 28 = 26.6 V), starter = 0
-            // 6 minutos (360 s) -> deve cruzar threshold 5 min
+            // 75 A (> 60 A rated), mas barramento estável em 28.0 V (>= 0.95 * 28 = 26.6 V):
+            // Alternador está suprindo sem sag de sobrecarga prejudicial -> não deve emitir sobrecarga
             var emitted = new List<DerivedPartEvent>();
             for (int i = 0; i < 360; i++)
             {
-                var frame = CreateFrame(simRate: 1.0, starter: 0.0, busVoltage: 28.0, totalLoadAmps: 65.0);
+                var frame = CreateFrame(simRate: 1.0, starter: 0.0, busVoltage: 28.0, totalLoadAmps: 75.0, combustion: 1.0, alternator: 1.0);
+                var evts = deriver.Update(frame, 1.0, Features);
+                emitted.AddRange(evts.Where(e => e.MetricKey == "electricalOverloadMinutes"));
+            }
+
+            Assert.Empty(emitted);
+        }
+
+        [Fact]
+        public void Overload_TensaoCaida_ComCargaAlta_Conta()
+        {
+            var deriver = new PartEventDeriver();
+            deriver.ConfigureElectrical(CreateC172Config());
+
+            // 75 A (> 60 A rated), barramento com sag para 25.5 V (faixa [0.88 * 28, 0.95 * 28) = [24.64, 26.6)):
+            // Alternador ativo e motor ligado sofrendo sobrecarga real -> cruza threshold de 5 min aos 300 s
+            var emitted = new List<DerivedPartEvent>();
+            for (int i = 0; i < 360; i++)
+            {
+                var frame = CreateFrame(simRate: 1.0, starter: 0.0, busVoltage: 25.5, totalLoadAmps: 75.0, combustion: 1.0, alternator: 1.0);
                 var evts = deriver.Update(frame, 1.0, Features);
                 emitted.AddRange(evts.Where(e => e.MetricKey == "electricalOverloadMinutes"));
             }
 
             Assert.Single(emitted);
             Assert.Equal(5.0, emitted[0].Value);
+        }
+
+        [Fact]
+        public void Overload_AlternadorEmPane_BateriaSozinha_NaoConta()
+        {
+            var deriver = new PartEventDeriver();
+            deriver.ConfigureElectrical(CreateC172Config());
+
+            // 75 A (> 60 A), mas tensão colapsada em 23.5 V (< 0.88 * 28 = 24.64 V):
+            // Alternador fora da barra/desarmado e bateria fornecendo sozinha -> não conta sobrecarga de alternador
+            var emitted = new List<DerivedPartEvent>();
+            for (int i = 0; i < 360; i++)
+            {
+                var frame = CreateFrame(simRate: 1.0, starter: 0.0, busVoltage: 23.5, totalLoadAmps: 75.0, combustion: 1.0, alternator: 1.0);
+                var evts = deriver.Update(frame, 1.0, Features);
+                emitted.AddRange(evts.Where(e => e.MetricKey == "electricalOverloadMinutes"));
+            }
+
+            Assert.Empty(emitted);
         }
 
         [Fact]
