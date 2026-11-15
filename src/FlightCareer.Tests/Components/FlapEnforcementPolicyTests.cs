@@ -11,7 +11,7 @@ namespace FlightCareer.Tests.Components
         [Theory]
         [InlineData(0.0, 1.0)]
         [InlineData(1.0, 2.0)]
-        public void ShouldWrite_NativeFlapFailed_NeverWrites(double current, double locked)
+        public void ShouldWrite_MismatchConfirmedAndThrottleElapsed_WritesEvenWithNativeFailure(double current, double locked)
         {
             var mismatchSince = _now.AddSeconds(-2.0);
             var lastWrite = _now.AddSeconds(-5.0);
@@ -19,12 +19,11 @@ namespace FlightCareer.Tests.Components
             bool result = FlapEnforcementPolicy.ShouldWrite(
                 currentIndex: current,
                 lockedIndex: locked,
-                nativeFlapFailed: true,
                 mismatchSince: mismatchSince,
                 lastWrite: lastWrite,
                 now: _now);
 
-            Assert.False(result);
+            Assert.True(result); // decisão do usuário: a pane nativa não silencia a correção (barulho = indicativo)
         }
 
         [Theory]
@@ -39,7 +38,6 @@ namespace FlightCareer.Tests.Components
             bool result = FlapEnforcementPolicy.ShouldWrite(
                 currentIndex: current,
                 lockedIndex: locked,
-                nativeFlapFailed: false,
                 mismatchSince: mismatchSince,
                 lastWrite: lastWrite,
                 now: _now);
@@ -57,7 +55,6 @@ namespace FlightCareer.Tests.Components
             bool result = FlapEnforcementPolicy.ShouldWrite(
                 currentIndex: 0.0,
                 lockedIndex: 2.0,
-                nativeFlapFailed: false,
                 mismatchSince: mismatchSince,
                 lastWrite: lastWrite,
                 now: _now);
@@ -75,7 +72,6 @@ namespace FlightCareer.Tests.Components
             bool result = FlapEnforcementPolicy.ShouldWrite(
                 currentIndex: 0.0,
                 lockedIndex: 2.0,
-                nativeFlapFailed: false,
                 mismatchSince: mismatchSince,
                 lastWrite: lastWrite,
                 now: _now);
@@ -93,7 +89,6 @@ namespace FlightCareer.Tests.Components
             bool result = FlapEnforcementPolicy.ShouldWrite(
                 currentIndex: 0.0,
                 lockedIndex: 2.0,
-                nativeFlapFailed: false,
                 mismatchSince: mismatchSince,
                 lastWrite: lastWrite,
                 now: _now);

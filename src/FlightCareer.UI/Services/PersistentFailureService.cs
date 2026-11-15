@@ -417,7 +417,7 @@ namespace FlightCareer.UI.Services
                             _flapMismatchSince = null;
                         }
 
-                        if (FlapEnforcementPolicy.ShouldWrite(state.FlapsHandleIndex, defect.Parameter, _nativeFlapFailed, _flapMismatchSince, _lastFlapWrite, now))
+                        if (FlapEnforcementPolicy.ShouldWrite(state.FlapsHandleIndex, defect.Parameter, _flapMismatchSince, _lastFlapWrite, now))
                         {
                             _lastFlapWrite = now;
                             _simConnect.WriteFlapsHandleIndex(defect.Parameter);

@@ -1609,3 +1609,6 @@
 
 
 
+
+## 2026-11-15 - Flap: barulho mantido como indicativo (Claude)
+- Decisão do usuário: com pane de flap aberta, o addon continua corrigindo a alavanca mesmo quando o próprio sim já segura o flap quebrado; o som do motor do flap fica como aviso ao piloto. Mantidos o limite de 1 correção por segundo e a espera de 0,5 s fora da posição (`FlapEnforcementPolicy`). O estado nativo dos flaps continua sendo acompanhado pelo `PersistentFailureService` (sem uso por enquanto).
