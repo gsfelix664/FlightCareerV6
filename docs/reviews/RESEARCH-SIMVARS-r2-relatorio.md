@@ -1,6 +1,6 @@
 # RESEARCH-SIMVARS-r2 — Pesquisa de Variáveis, Auditoria do Registro e SDK 2024 (Rodada 2)
 
-**Branch:** docs/pesquisa-variaveis · **Commit:** pendente · **Data:** 2026-11-15
+**Branch:** docs/pesquisa-variaveis · **Commit:** bcc4c48 · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Investigar as páginas oficiais do SDK MSFS 2024 indicadas pelo usuário (SimConnect, SimVars por sistema, Key Events, Input Events, SimConnect Inspector e SimVarWatcher).
