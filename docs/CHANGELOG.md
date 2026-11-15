@@ -1766,3 +1766,32 @@
   - Adicionada entrada em `tools/aircraft_limits/poh_values.csv` (`Cessna C152,alternatorRatedAmps,60,amperes,...`).
   - Executado `tools/aircraft_limits/merge_limits.py`, atualizando `cessna-c152.json` com `alternatorRatedAmps: 60.0`, `source: POH`, unidade `amperes` e incrementando `dataVersion` para 6.
   - Habilita a regra de sobrecarga elétrica (`electrical_system_overload_amps`) no Cessna 152.
+
+## 2026-11-15 - Regras de desgaste por motor e diagnóstico único (Gemini)
+- **Resolução de Sensores por Motor no `PartWearEngine`**:
+  - `PartWearEngine.ApplyTick` agora resolve dinamicamente se os sensores requeridos de cada regra contínua são globais (chave exata presente no frame) ou por motor (chave presente com índice `:1`).
+  - Número de motores detectado dinamicamente a partir do maior índice numérico `:<n>` presente nas chaves do frame.
+  - Regras com sensores por motor são avaliadas separadamente para cada motor `1..engineCount`, com as leituras `chave:n`.
+  - Estresse resultante aplicado diretamente às peças daquele motor (`EngineIndex == n`).
+  - Para peças compartilhadas (`EngineIndex == 0`), aplica-se o estresse do pior motor entre os avaliados, uma única vez sem somar motores.
+  - Chaves de rastreio de excedência, picos, durações e inspeções segregadas por motor (`<ruleId>#<n>`), incluindo o motor no `TargetId` e em `Notes` para visualização clara no blackbox.
+  - Mensagens de sensor ausente passam a citar a chave tentada (ex.: `'eng-rpm' (nem 'eng-rpm:1')`).
+- **Suporte Multimotor e Prevenção de Exceções (`ApplyTick` e `ApplyEvent`)**:
+  - Dicionários e agrupamentos internos refatorados de `PartId` para `(PartId, EngineIndex)`.
+  - Em `ApplyEvent`, agrupamento por `PartId` via `GroupBy`, aplicando dano e incrementos a todas as instâncias correspondentes sem lançar `ArgumentException` em aeronaves multimotor com peças repetidas.
+- **Deduplicação de Diagnósticos no `PartFlightTracker`**:
+  - `PartFlightTracker` mantém um conjunto de mensagens diagnósticas já emitidas durante o voo, drenando e repassando apenas mensagens inéditas.
+  - Conjunto limpo em `Begin()` e `Reset()`, eliminando a repetição contínua a cada tick no blackbox (`PECAS_DIAG`).
+- **Testes**:
+  - Adicionados 7 novos testes em `PartWearEngineTests.cs`:
+    - `ApplyTick_RpmPorMotor_EngRpm1AcimaDoRedline_DesgastaPecasDoMotor`
+    - `ApplyTick_ChaveGlobal_ContinuaFuncionando`
+    - `ApplyTick_Bimotor_SoMotor2EmVermelho_DesgastaSoPecasDoMotor2`
+    - `ApplyTick_Bimotor_ExcedenciaRastreadaPorMotor`
+    - `ApplyEvent_BimotorPecasRepetidas_NaoLancaExcecao_EAplicaEmTodas`
+    - `Tracker_DiagnosticoDeSensorAusente_SaiUmaVezPorVoo`
+    - `WearRules_TodoSensorExisteNoLayoutReal_PorPerfil` (teste de contrato registro × regras cobrindo todas as 46 aeronaves do catálogo).
+  - Testes unitários atualizados para refletir o frame real com sufixos `:1`.
+  - 309 testes xUnit passando com 100% de sucesso; 45 testes Python passando.
+- **Não testado no MSFS**:
+  - Execução de voo com aeronave bimotor e monomotor no MSFS ao vivo.

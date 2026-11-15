@@ -97,9 +97,11 @@ namespace FlightCareer.Domain.Parts
             double dtSeconds = dtSimHours * 3600.0;
             var featureSet = new HashSet<string>(features ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
 
-            // Mapeamento temporário de estresse acumulado por peça neste tick:
-            // PartId -> (MaxMultiplier, SumLossPerHourPct, ActiveRules)
-            var stressByPart = new Dictionary<string, (double MaxMultiplier, double SumLossPct, List<string> Rules)>(StringComparer.OrdinalIgnoreCase);
+            // Mapeamento temporário de estresse acumulado por (PartId, EngineIndex) neste tick:
+            // (PartId, EngineIndex) -> (MaxMultiplier, SumLossPerHourPct, ActiveRules)
+            var stressByPart = new Dictionary<(string PartId, int EngineIndex), (double MaxMultiplier, double SumLossPct, List<string> Rules)>();
+
+            int engineCount = DetectEngineCount(frame);
 
             // 1. Avalia regras contínuas de estresse
             foreach (var rule in _wearRuleCatalog.Rules)
@@ -107,22 +109,25 @@ namespace FlightCareer.Domain.Parts
                 if (rule.Kind != WearRuleKind.Continuous) continue;
                 if (!rule.AppliesTo.Matches(featureSet)) continue;
 
-                // Verifica presença dos sensores requeridos
+                // Determina se a regra é avaliada por motor ou global
+                bool isPerEngineRule = false;
                 bool sensorsAvailable = true;
-                double primarySensorValue = double.NaN;
 
                 foreach (var sensorKey in rule.Sensors)
                 {
-                    if (!frame.Values.TryGetValue(sensorKey, out double val) || double.IsNaN(val) || double.IsInfinity(val))
+                    if (frame.Values.ContainsKey(sensorKey))
+                    {
+                        // Sensor global com chave exata disponível
+                    }
+                    else if (frame.Values.ContainsKey($"{sensorKey}:1"))
+                    {
+                        // Sensor possui índice por motor no frame
+                        isPerEngineRule = true;
+                    }
+                    else
                     {
                         sensorsAvailable = false;
-                        diagnostics.Add($"[PartWearEngine] Sensor '{sensorKey}' ausente/NaN para regra '{rule.Id}'. Regra ignorada.");
-                        break;
-                    }
-
-                    if (double.IsNaN(primarySensorValue))
-                    {
-                        primarySensorValue = val;
+                        diagnostics.Add($"[PartWearEngine] Sensor '{sensorKey}' (nem '{sensorKey}:1') ausente/NaN para regra '{rule.Id}'. Regra ignorada.");
                     }
                 }
 
@@ -146,10 +151,14 @@ namespace FlightCareer.Domain.Parts
 
                 if (isClassDefault && rule.NativeOverstress != null)
                 {
-                    string rateKey = $"nw-damage-rate-{rule.NativeOverstress.ComponentId}";
+                    string rateKey1 = $"nw-overstress-rate-{rule.NativeOverstress.ComponentId}";
+                    string rateKey2 = $"nw-damage-rate-{rule.NativeOverstress.ComponentId}";
                     string levelKey = $"nw-level-{rule.NativeOverstress.ComponentId}";
 
-                    if (frame.Values.TryGetValue(rateKey, out double nativeRate))
+                    double nativeRate = 0;
+                    bool hasRate = frame.Values.TryGetValue(rateKey1, out nativeRate) || frame.Values.TryGetValue(rateKey2, out nativeRate);
+
+                    if (hasRate)
                     {
                         if (frame.Values.TryGetValue(levelKey, out double nativeLevel))
                         {
@@ -168,95 +177,214 @@ namespace FlightCareer.Domain.Parts
                     }
                 }
 
-                // Identifica a faixa de estresse atingida (se houver)
-                WearRuleBand? activeBand = null;
-                double measuredVal = primarySensorValue;
+                // Lista de índices de motor a avaliar para esta regra (1..engineCount para regras por motor, ou null para global)
+                var engineIndices = isPerEngineRule
+                    ? Enumerable.Range(1, engineCount).Select(i => (int?)i).ToList()
+                    : new List<int?> { null };
 
-                if (nativeOverstressActive)
+                // Rastreio do pior estresse sofrido entre os motores para peças com EngineIndex == 0 (compartilhadas)
+                Dictionary<string, (double WorstMultiplier, double WorstLossPct)>? worstStressForSharedParts =
+                    isPerEngineRule ? new Dictionary<string, (double WorstMultiplier, double WorstLossPct)>(StringComparer.OrdinalIgnoreCase) : null;
+
+                foreach (var engIdx in engineIndices)
                 {
-                    // Ativa a faixa mais severa (vermelha/severe/warning) por reserva nativa
-                    activeBand = rule.Bands.LastOrDefault();
-                }
-                else
-                {
-                    // Avalia via sensor do addon contra o limite
-                    activeBand = EvaluateActiveBand(rule, measuredVal, limitVal);
-                }
+                    double primarySensorValue = double.NaN;
+                    bool engineSensorsValid = true;
 
-                string trackingKey = $"{rule.Id}";
-
-                if (activeBand != null)
-                {
-                    // Acumula tempo de duração e pico na faixa de estresse
-                    double prevDur = _exceedanceDurations.GetValueOrDefault(trackingKey, 0.0);
-                    double currentDur = prevDur + dtSeconds;
-                    _exceedanceDurations[trackingKey] = currentDur;
-
-                    double prevPeak = _exceedancePeaks.GetValueOrDefault(trackingKey, measuredVal);
-                    double currentPeak = rule.Direction == LimitDirection.Above
-                        ? Math.Max(prevPeak, measuredVal)
-                        : Math.Min(prevPeak, measuredVal);
-                    _exceedancePeaks[trackingKey] = currentPeak;
-
-                    double excessPct = limitVal > 0 ? Math.Abs((measuredVal - limitVal) / limitVal) * 100.0 : 0.0;
-
-                    // Aplica multiplicador e perda percentual nas peças da faixa
-                    foreach (var bandPart in activeBand.Parts)
+                    foreach (var sensorKey in rule.Sensors)
                     {
-                        if (!stressByPart.TryGetValue(bandPart.PartId, out var currentStress))
+                        double val;
+                        bool found = false;
+
+                        if (engIdx.HasValue)
                         {
-                            currentStress = (1.0, 0.0, new List<string>());
+                            if (frame.Values.TryGetValue($"{sensorKey}:{engIdx.Value}", out val) && !double.IsNaN(val) && !double.IsInfinity(val))
+                            {
+                                found = true;
+                            }
+                            else if (frame.Values.TryGetValue(sensorKey, out val) && !double.IsNaN(val) && !double.IsInfinity(val))
+                            {
+                                found = true;
+                            }
+                        }
+                        else
+                        {
+                            if (frame.Values.TryGetValue(sensorKey, out val) && !double.IsNaN(val) && !double.IsInfinity(val))
+                            {
+                                found = true;
+                            }
                         }
 
-                        double newMaxMult = Math.Max(currentStress.MaxMultiplier, bandPart.Multiplier);
-                        double newLossPct = currentStress.SumLossPct + bandPart.LossPerHourPct;
-                        currentStress.Rules.Add(rule.Id);
+                        if (!found)
+                        {
+                            engineSensorsValid = false;
+                            break;
+                        }
 
-                        stressByPart[bandPart.PartId] = (newMaxMult, newLossPct, currentStress.Rules);
-
-                        // Registra evento de excedência para blackbox
-                        double damageInTick = (bandPart.LossPerHourPct * dtSimHours);
-                        string sourceStr = nativeOverstressActive
-                            ? (measuredVal >= limitVal ? "Simulador+Addon" : "Simulador")
-                            : "Addon";
-
-                        exceedances.Add(new PartWearExceedance(
-                            rule.Id,
-                            bandPart.PartId,
-                            sourceStr,
-                            currentPeak,
-                            limitVal,
-                            excessPct,
-                            currentDur,
-                            damageInTick,
-                            $"Faixa '{activeBand.Name}' atingida"));
+                        if (double.IsNaN(primarySensorValue))
+                        {
+                            primarySensorValue = val;
+                        }
                     }
 
-                    // Avalia disparo de inspeção da faixa (se configurada)
-                    if (activeBand.Inspection != null)
-                    {
-                        var insp = activeBand.Inspection;
-                        bool minSecMet = !insp.MinSeconds.HasValue || currentDur >= insp.MinSeconds.Value;
-                        bool minExcessMet = !insp.MinExcessPct.HasValue || excessPct >= insp.MinExcessPct.Value;
+                    if (!engineSensorsValid) continue;
 
-                        string inspKey = $"{rule.Id}:{insp.DefectCode}";
-                        if (minSecMet && minExcessMet && !_triggeredInspections.Contains(inspKey))
+                    // Identifica a faixa de estresse atingida (se houver)
+                    WearRuleBand? activeBand = null;
+                    double measuredVal = primarySensorValue;
+
+                    if (nativeOverstressActive)
+                    {
+                        // Ativa a faixa mais severa (vermelha/severe/warning) por reserva nativa
+                        activeBand = rule.Bands.LastOrDefault();
+                    }
+                    else
+                    {
+                        // Avalia via sensor do addon contra o limite
+                        activeBand = EvaluateActiveBand(rule, measuredVal, limitVal);
+                    }
+
+                    string trackingKey = engIdx.HasValue ? $"{rule.Id}#{engIdx.Value}" : rule.Id;
+
+                    if (activeBand != null)
+                    {
+                        // Acumula tempo de duração e pico na faixa de estresse
+                        double prevDur = _exceedanceDurations.GetValueOrDefault(trackingKey, 0.0);
+                        double currentDur = prevDur + dtSeconds;
+                        _exceedanceDurations[trackingKey] = currentDur;
+
+                        double prevPeak = _exceedancePeaks.GetValueOrDefault(trackingKey, measuredVal);
+                        double currentPeak = rule.Direction == LimitDirection.Above
+                            ? Math.Max(prevPeak, measuredVal)
+                            : Math.Min(prevPeak, measuredVal);
+                        _exceedancePeaks[trackingKey] = currentPeak;
+
+                        double excessPct = limitVal > 0 ? Math.Abs((measuredVal - limitVal) / limitVal) * 100.0 : 0.0;
+
+                        // Aplica multiplicador e perda percentual nas peças da faixa
+                        foreach (var bandPart in activeBand.Parts)
                         {
-                            _triggeredInspections.Add(inspKey);
-                            inspections.Add(new PartWearInspectionEvent(
-                                insp.DefectCode,
+                            if (engIdx.HasValue)
+                            {
+                                // Aplica diretamente para a instância da peça daquele motor
+                                var partKey = (bandPart.PartId.ToLowerInvariant(), engIdx.Value);
+                                if (!stressByPart.TryGetValue(partKey, out var currentStress))
+                                {
+                                    currentStress = (1.0, 0.0, new List<string>());
+                                }
+
+                                double newMaxMult = Math.Max(currentStress.MaxMultiplier, bandPart.Multiplier);
+                                double newLossPct = currentStress.SumLossPct + bandPart.LossPerHourPct;
+                                currentStress.Rules.Add(rule.Id);
+                                stressByPart[partKey] = (newMaxMult, newLossPct, currentStress.Rules);
+
+                                // Para peças com EngineIndex == 0 (não são por motor), rastreia o pior motor
+                                if (worstStressForSharedParts != null)
+                                {
+                                    var currentWorst = worstStressForSharedParts.TryGetValue(bandPart.PartId, out var existingWorst)
+                                        ? existingWorst
+                                        : (WorstMultiplier: 1.0, WorstLossPct: 0.0);
+
+                                    worstStressForSharedParts[bandPart.PartId] = (
+                                        WorstMultiplier: Math.Max(currentWorst.WorstMultiplier, bandPart.Multiplier),
+                                        WorstLossPct: Math.Max(currentWorst.WorstLossPct, bandPart.LossPerHourPct)
+                                    );
+                                }
+                            }
+                            else
+                            {
+                                // Regra global: aplica a todas as instâncias da peça instaladas
+                                foreach (var p in parts.Where(x => x.PartId.Equals(bandPart.PartId, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    var partKey = (p.PartId.ToLowerInvariant(), p.EngineIndex);
+                                    if (!stressByPart.TryGetValue(partKey, out var currentStress))
+                                    {
+                                        currentStress = (1.0, 0.0, new List<string>());
+                                    }
+
+                                    double newMaxMult = Math.Max(currentStress.MaxMultiplier, bandPart.Multiplier);
+                                    double newLossPct = currentStress.SumLossPct + bandPart.LossPerHourPct;
+                                    currentStress.Rules.Add(rule.Id);
+                                    stressByPart[partKey] = (newMaxMult, newLossPct, currentStress.Rules);
+                                }
+                            }
+
+                            // Registra evento de excedência para blackbox
+                            double damageInTick = (bandPart.LossPerHourPct * dtSimHours);
+                            string sourceStr = nativeOverstressActive
+                                ? (measuredVal >= limitVal ? "Simulador+Addon" : "Simulador")
+                                : "Addon";
+
+                            string targetId = engIdx.HasValue ? $"{bandPart.PartId}:{engIdx.Value}" : bandPart.PartId;
+                            string notes = engIdx.HasValue
+                                ? $"Faixa '{activeBand.Name}' atingida (Motor {engIdx.Value})"
+                                : $"Faixa '{activeBand.Name}' atingida";
+
+                            exceedances.Add(new PartWearExceedance(
                                 rule.Id,
-                                activeBand.Parts.FirstOrDefault()?.PartId ?? rule.Id,
-                                insp.Grounding,
-                                insp.Description));
+                                targetId,
+                                sourceStr,
+                                currentPeak,
+                                limitVal,
+                                excessPct,
+                                currentDur,
+                                damageInTick,
+                                notes));
+                        }
+
+                        // Avalia disparo de inspeção da faixa (se configurada)
+                        if (activeBand.Inspection != null)
+                        {
+                            var insp = activeBand.Inspection;
+                            bool minSecMet = !insp.MinSeconds.HasValue || currentDur >= insp.MinSeconds.Value;
+                            bool minExcessMet = !insp.MinExcessPct.HasValue || excessPct >= insp.MinExcessPct.Value;
+
+                            string inspKey = engIdx.HasValue
+                                ? $"{rule.Id}#{engIdx.Value}:{insp.DefectCode}"
+                                : $"{rule.Id}:{insp.DefectCode}";
+
+                            if (minSecMet && minExcessMet && !_triggeredInspections.Contains(inspKey))
+                            {
+                                _triggeredInspections.Add(inspKey);
+                                string targetPart = activeBand.Parts.FirstOrDefault()?.PartId ?? rule.Id;
+                                if (engIdx.HasValue) targetPart = $"{targetPart}:{engIdx.Value}";
+
+                                inspections.Add(new PartWearInspectionEvent(
+                                    insp.DefectCode,
+                                    rule.Id,
+                                    targetPart,
+                                    insp.Grounding,
+                                    insp.Description));
+                            }
                         }
                     }
+                    else
+                    {
+                        // Sem excesso: zera acumulador de excedência contínua
+                        _exceedanceDurations.Remove(trackingKey);
+                        _exceedancePeaks.Remove(trackingKey);
+                    }
                 }
-                else
+
+                // Aplica o estresse do pior motor nas peças com EngineIndex == 0 (compartilhadas)
+                if (worstStressForSharedParts != null)
                 {
-                    // Sem excesso: zera acumulador de excedência contínua
-                    _exceedanceDurations.Remove(trackingKey);
-                    _exceedancePeaks.Remove(trackingKey);
+                    foreach (var (partId, (worstMultiplier, worstLossPct)) in worstStressForSharedParts)
+                    {
+                        if (worstMultiplier > 1.0 || worstLossPct > 0)
+                        {
+                            var sharedKey = (partId.ToLowerInvariant(), 0);
+                            if (!stressByPart.TryGetValue(sharedKey, out var currentSharedStress))
+                            {
+                                currentSharedStress = (1.0, 0.0, new List<string>());
+                            }
+
+                            double newMaxMult = Math.Max(currentSharedStress.MaxMultiplier, worstMultiplier);
+                            double newLossPct = currentSharedStress.SumLossPct + worstLossPct;
+                            currentSharedStress.Rules.Add(rule.Id);
+                            stressByPart[sharedKey] = (newMaxMult, newLossPct, currentSharedStress.Rules);
+                        }
+                    }
                 }
             }
 
@@ -276,7 +404,8 @@ namespace FlightCareer.Domain.Parts
                 double maxMultiplier = 1.0;
                 double sumLossPerHourPct = 0.0;
 
-                if (stressByPart.TryGetValue(part.PartId, out var stress))
+                var partKey = (part.PartId.ToLowerInvariant(), part.EngineIndex);
+                if (stressByPart.TryGetValue(partKey, out var stress))
                 {
                     maxMultiplier = stress.MaxMultiplier;
                     sumLossPerHourPct = stress.SumLossPct;
@@ -312,7 +441,9 @@ namespace FlightCareer.Domain.Parts
 
             var featureSet = new HashSet<string>(features ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
 
-            var partMap = parts.ToDictionary(p => p.PartId, StringComparer.OrdinalIgnoreCase);
+            var partsByPartId = parts
+                .GroupBy(p => p.PartId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
             foreach (var rule in _wearRuleCatalog.Rules)
             {
@@ -337,22 +468,25 @@ namespace FlightCareer.Domain.Parts
 
                 foreach (var bandPart in matchedBand.Parts)
                 {
-                    if (partMap.TryGetValue(bandPart.PartId, out var part))
+                    if (partsByPartId.TryGetValue(bandPart.PartId, out var targetList))
                     {
-                        if (part.IsBroken) continue;
-
-                        double damage = bandPart.DamagePerEventPct;
-                        if (damage > 0)
+                        foreach (var part in targetList)
                         {
-                            part.Health = Math.Clamp(part.Health - damage, 0.0, 100.0);
-                            damagedParts.Add(part.PartId);
-                            totalDamageApplied += damage;
-                        }
+                            if (part.IsBroken) continue;
 
-                        // Se o evento representa ciclo de pouso/vida, incrementa CyclesSinceReplacement
-                        if (metricKey.Equals(WearRuleMetrics.LandingCycles, StringComparison.OrdinalIgnoreCase))
-                        {
-                            part.CyclesSinceReplacement++;
+                            double damage = bandPart.DamagePerEventPct;
+                            if (damage > 0)
+                            {
+                                part.Health = Math.Clamp(part.Health - damage, 0.0, 100.0);
+                                damagedParts.Add(part.PartId);
+                                totalDamageApplied += damage;
+                            }
+
+                            // Se o evento representa ciclo de pouso/vida, incrementa CyclesSinceReplacement
+                            if (metricKey.Equals(WearRuleMetrics.LandingCycles, StringComparison.OrdinalIgnoreCase))
+                            {
+                                part.CyclesSinceReplacement++;
+                            }
                         }
                     }
                 }
@@ -458,6 +592,23 @@ namespace FlightCareer.Domain.Parts
                     .OrderByDescending(b => b.Threshold)
                     .LastOrDefault(b => value <= (limit * b.Threshold));
             }
+        }
+
+        private static int DetectEngineCount(SensorFrame frame)
+        {
+            int maxEngine = 1;
+            foreach (var key in frame.Values.Keys)
+            {
+                int colonIdx = key.LastIndexOf(':');
+                if (colonIdx >= 0 && colonIdx < key.Length - 1)
+                {
+                    if (int.TryParse(key.AsSpan(colonIdx + 1), out int n) && n > maxEngine)
+                    {
+                        maxEngine = n;
+                    }
+                }
+            }
+            return maxEngine;
         }
     }
 }
