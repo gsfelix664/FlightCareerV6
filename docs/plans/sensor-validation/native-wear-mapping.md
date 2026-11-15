@@ -34,7 +34,7 @@ Status: **Ativo** = usa a taxa como reserva (regra 1); **Observar** = só log at
 | 36 | BRAKE | Brakes | Freios | Observar | Parado no C152 (freios não simulados); repetir num avião com freios simulados. **F1.4c C152:** não respondeu → só addon nesse avião. |
 | 41 | OIL_TANK_INTEGRITY | Oil | Óleo › cárter/vedação | Observar | Sem overstress no voo; testar com temperatura do óleo no limite. **F1.4c C152:** não respondeu → só addon nesse avião. |
 | 28–34 | ALTERNATOR, BATTERY, IDG, RAT, BUS, CIRCUIT, RECTIFIERS | Electrical | Elétrico | Observar | Só envelhecimento por tempo no C152. |
-| 5–8 | FLAPS + cabos | Airframe | Célula › flaps | Observar | Testar flap acima da Vfe. **F1.4c C152:** não respondeu → só addon nesse avião. |
+| 5–8 | FLAPS + cabos | Airframe | Célula › flaps | Observar | Testar flap acima da Vfe. **F1.4c C152:** inconclusivo (dente 1 a 114 kt, limite do dente 1 = 110 kt); refazer com dente 2 > 85 kt. |
 | 9–14, 19, 20 | AILERONS, ELEVATOR, RUDDER (+ cabos) | Airframe | Célula › comandos | Observar | Testar excesso de G. **F1.4c C152:** sem taxa a 3,1 G (limite 4,4 G): inconclusivo. |
 | 21–27 | HYDRAULIC * | LandingGear (hidráulico) | Hidráulico | Observar | Parado no C152; repetir num avião hidráulico. |
 | 0–4 | FUEL * | — | Combustível | Observar | Sem barra hoje: entra na F2.1. |

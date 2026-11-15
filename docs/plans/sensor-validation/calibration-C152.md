@@ -29,7 +29,7 @@ Relatório bruto: `py -3 tools/analyze_sensor_log.py --type A --model C152 --cal
 | 37 | Pneu | taxa pequena só nos pousos: firme (10,5 ft/s ≈ 630 fpm) pico 0,0022; duro (11,7 ft/s) pico 0,00016. Nível não caiu de forma mensurável (voo 1 sem dano). | Observar; refazer pousos com o dano ligado. |
 | 35 | Trem | sem taxa até 11,7 ft/s | Só addon (pouso duro pela telemetria). |
 | 36 | Freio | sem taxa (frenagem a 31 kt, freio a ~119 °C) | Só addon. |
-| 5–8 | Flaps | **sem taxa** com 114 kt e flap 1 (Vfe 85); `FLAP SPEED EXCEEDED` = 0 | Só addon (velocidade × flap). |
+| 5–8 | Flaps | sem taxa com 114 kt no **dente 1**, mas o limite do dente 1 é **110 kt** (`FLAPS CURRENT SPEED LIMITATION`; 85 kt só nos dentes 2–3): só 4 kt acima. **Correção 2026-11-15 (spike F2.0): inconclusivo.** | Observar; refazer com dente 2 acima de 85 kt. |
 | 9–20 | Comandos | sem taxa a 3,1 G (abaixo do limite de 4,4 G do C152) | Inconclusivo; testar > 4,4 G. |
 | 41/42 | Óleo | sem taxa (CHT máx. 231, óleo máx. 31) | Só addon. |
 
@@ -37,7 +37,7 @@ Relatório bruto: `py -3 tools/analyze_sensor_log.py --type A --model C152 --cal
 Com taxa 0, todos os componentes perdem nível devagar no tempo: ~0,0018 em 753 s (≈ 0,9%/h) na maioria; alternador, bateria, óleo, piloto automático e `GENERAL` 3–4× mais rápido. O script marca isso como "divergente" porque a razão fica 0: **não é erro de unidade**, é envelhecimento por tempo, que o addon não usa (regra 0.1 › 2). Ajuste sugerido no script: taxa 0 com queda pequena e contínua = "desgaste natural".
 
 ## 4. Pendências do portão F1.4c (C152)
-- [x] Usuário aprovou (2026-11-15): limiar 39 = 0,0001; motor 39 **Ativo** (taxa só como reserva/conferência, regra 0.1 › 3); flaps, freios, trem e óleo **só addon**; pneu e comandos em Observar.
+- [x] Usuário aprovou (2026-11-15): limiar 39 = 0,0001; motor 39 **Ativo** (taxa só como reserva/conferência, regra 0.1 › 3); freios, trem e óleo **só addon**; pneu e comandos em Observar. Flaps: aprovados como só addon, mas o teste foi inconclusivo (spike F2.0) e voltam para Observar até refazer.
 - [ ] Repetir pousos firme/duro com dano ligado (pneu 37) e uma puxada > 4,4 G (comandos).
 - [ ] Pista de terra (passos 1 e 7).
 - [x] ~~Fator do addon ÷ nativo~~: descartado (2026-11-15). O addon segue o real (fabricante/SB), não a velocidade do nativo. Este log serve para conferir que o addon acusa o mesmo abuso (RPM > limite) pelos próprios sensores.
