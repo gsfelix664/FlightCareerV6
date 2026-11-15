@@ -169,7 +169,8 @@ namespace FlightCareer.UI
                 sp.GetRequiredService<SimConnectService>(),
                 sp.GetRequiredService<FlightService>(),
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>(),
-                sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
+                sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>(),
+                sp.GetRequiredService<SensorFrameReader>()));
             services.AddSingleton<MetarService>(sp => new MetarService(
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 

@@ -1,4 +1,6 @@
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Sensors;
 using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +54,9 @@ namespace FlightCareer.UI.Services
 
         private readonly SimConnectService _simConnect;
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        // Pane do wear and tear nativo (F4.2c): WEAR AND TEAR IS FAILED:<id> vem do leitor genérico de sensores
+        private readonly SensorFrameReader? _sensorFrames;
+        private readonly NativeWearFailureDetector _nativeWear = new();
 
         private readonly List<AircraftDefect> _openDefects = new();
         private readonly HashSet<string> _togglesApplied = new();
@@ -81,10 +86,12 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<AircraftDefect> OpenDefects => _openDefects;
         public bool IsActive => _active;
 
-        public PersistentFailureService(SimConnectService simConnect, IDbContextFactory<AppDbContext> contextFactory)
+        public PersistentFailureService(SimConnectService simConnect, IDbContextFactory<AppDbContext> contextFactory,
+            SensorFrameReader? sensorFrames = null)
         {
             _simConnect = simConnect;
             _contextFactory = contextFactory;
+            _sensorFrames = sensorFrames;
 
             // O registro de TOGGLE_* enviados vale para a aeronave carregada no simulador, não para o voo do app:
             // só é limpo quando o sim recarrega a aeronave ou a conexão cai.
@@ -132,6 +139,11 @@ namespace FlightCareer.UI.Services
 
             _simConnect.OnFailureStateReceived += OnFailureState;
             _simConnect.OnMaskedEvent += OnMaskedEvent;
+            if (_detectNative && _sensorFrames != null)
+            {
+                _nativeWear.Reset();
+                _sensorFrames.OnFrame += OnSensorFrame;
+            }
             _active = true;
 
             ApplyAll();
@@ -142,6 +154,7 @@ namespace FlightCareer.UI.Services
             if (!_active) return;
             _simConnect.OnFailureStateReceived -= OnFailureState;
             _simConnect.OnMaskedEvent -= OnMaskedEvent;
+            if (_sensorFrames != null) _sensorFrames.OnFrame -= OnSensorFrame;
             _simConnect.SetMaskedEvents(Array.Empty<string>());
             _simConnect.SetPersistentToggles(Array.Empty<string>());
             _active = false;
@@ -461,6 +474,30 @@ namespace FlightCareer.UI.Services
                 OnNativeCrash?.Invoke(DescribeCrashFlag(s.CrashFlag));
 
             DetectVacuumByEffect(s);
+        }
+
+        /// <summary>
+        /// Pane do wear and tear nativo (plano › 0.1, regra 5; F4.2c): a borda 0 → 1 de WEAR AND TEAR IS FAILED:&lt;id&gt;
+        /// vira discrepância. Não passa por ENG FAILED nem GENERAL ENG DAMAGE PERCENT (F1.4c), por isso a leitura própria.
+        /// Só em voo monitorado; o modo vigia não detecta panes novas.
+        /// </summary>
+        private void OnSensorFrame(SensorFrame frame)
+        {
+            if (!_active || !_detectNative || _aircraft == null) return;
+
+            foreach (var e in _nativeWear.Update(frame.Values))
+            {
+                if (e.DefectCode == null)
+                {
+                    OnEnforcementAction?.Invoke($"Wear and tear do simulador: {e.NativeName} (ID {e.ComponentId}) quebrado, só registro");
+                    continue;
+                }
+
+                var defect = Record(e.DefectCode, DefectOrigin.Native, NativeWearFailureMap.CauseFor(e.ComponentId, e.NativeName),
+                    description: "O desgaste do próprio simulador (wear and tear) quebrou esta peça.");
+                if (defect == null)
+                    OnEnforcementAction?.Invoke($"Wear and tear do simulador: {e.NativeName} (ID {e.ComponentId}) quebrado; pane {e.DefectCode} já aberta");
+            }
         }
 
         /// <summary>

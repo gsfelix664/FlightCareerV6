@@ -71,7 +71,8 @@ namespace FlightCareer.UI.Services
             SimConnectService simConnect,
             FlightService flightService,
             IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory,
-            ComponentCatalog catalog)
+            ComponentCatalog catalog,
+            SensorFrameReader sensorFrames)
         {
             _simConnect = simConnect;
             _flightService = flightService;
@@ -80,7 +81,7 @@ namespace FlightCareer.UI.Services
             _failures = new ComponentFlightSession(simConnect, catalog, _random);
             _failures.OnFailure += OnAircraftFailureTriggered;
 
-            _persistentFailures = new PersistentFailureService(simConnect, contextFactory);
+            _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
             _persistentFailures.OnDefectRecorded += OnDefectRecorded;
             _persistentFailures.OnNativeCrash += cause =>
             {
@@ -111,7 +112,13 @@ namespace FlightCareer.UI.Services
         {
             if (defect.Origin != DefectOrigin.Native) return; // panes do addon já foram anunciadas pelo alerta da sessão
 
-            if (_aircraft != null && IsMonitoring)
+            if (_aircraft != null && IsMonitoring && NativeWearFailureMap.ComponentIdFromCause(defect.Cause) is int wearId)
+            {
+                // Pane do wear and tear nativo: a peça quebrou no sim e vai a 0% (plano › 0.1, regra 5; decisão 2026-11-14)
+                if (NativeWearFailureMap.Get(wearId)?.Kind is ComponentKind wearKind) _failures.ClampHealth(wearKind, 0.0);
+                SyncLegacyConditions();
+            }
+            else if (_aircraft != null && IsMonitoring)
             {
                 switch (defect.Code)
                 {
