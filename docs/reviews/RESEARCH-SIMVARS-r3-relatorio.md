@@ -1,6 +1,6 @@
 # RESEARCH-SIMVARS-r3 — Descoberta de Variáveis Novas e Correção da Auditoria
 
-**Branch:** docs/pesquisa-variaveis · **Commit:** a registrar · **Data:** 2026-11-15
+**Branch:** docs/pesquisa-variaveis · **Commit:** ac506d8 · **Data:** 2026-11-15
 
 ## Plano (antes de codar)
 - Corrigir a auditoria da rodada 2 em `docs/plans/sensor-research/auditoria-registro.md` aplicando as correções pedidas na revisão (`RESEARCH-SIMVARS-revisao.md`): comprovar a existência com base nos CSVs reais do `SensorRecorder` (onde coluna presente = nome aceito pelo simulador), reclassificar `FLAP SPEED EXCEEDED`, `GEAR SPEED EXCEEDED` e `ELECTRICAL BATTERY LEVEL` como aceitas nativamente pelo sim, restaurar `ELECTRICAL TOTAL LOAD AMPS` como documentada e dinâmica, tratar unidades coerentes como informativas e propor a solução técnica para a leitura dos pontos de contato do trem de pouso (`CONTACT POINT COMPRESSION / IS SKIDDING`).
