@@ -23,6 +23,7 @@ namespace FlightCareer.Domain.Parts
         private readonly PartComponentMapping _mapping = PartComponentMapping.CreateDefault();
 
         private readonly List<AircraftPart> _parts = new();
+        private readonly HashSet<string> _reportedDiagnostics = new(StringComparer.OrdinalIgnoreCase);
         private AircraftLimitProfile? _profile;
         private List<string> _features = new();
         private bool _pausedReported;
@@ -52,6 +53,7 @@ namespace FlightCareer.Domain.Parts
             _eventDeriver.Reset();
             _eventDeriver.ConfigureElectrical(BuildElectricalConfig(profile));
             _pausedReported = false;
+            _reportedDiagnostics.Clear();
         }
 
         private ElectricalConfig BuildElectricalConfig(AircraftLimitProfile? profile)
@@ -90,6 +92,7 @@ namespace FlightCareer.Domain.Parts
             _wearEngine.ResetExceedanceTracking();
             _eventDeriver.Reset();
             _pausedReported = false;
+            _reportedDiagnostics.Clear();
         }
 
         public PartWearTickResult ProcessTick(SensorFrame? frame, double dtSimHours, DateTime nowUtc)
@@ -129,7 +132,15 @@ namespace FlightCareer.Domain.Parts
 
             var exceedances = new List<PartWearExceedance>(tickResult.Exceedances);
             var inspections = new List<PartWearInspectionEvent>(tickResult.Inspections);
-            var diagnostics = new List<string>(tickResult.DiagnosticMessages);
+            var diagnostics = new List<string>();
+
+            foreach (var diag in tickResult.DiagnosticMessages)
+            {
+                if (_reportedDiagnostics.Add(diag))
+                {
+                    diagnostics.Add(diag);
+                }
+            }
 
             // 2. Eventos operacionais derivados
             double dtSimSeconds = dtSimHours * 3600.0;
@@ -151,7 +162,13 @@ namespace FlightCareer.Domain.Parts
             }
 
             // Drena: cada diagnóstico sai uma vez por voo (antes era copiado a cada tick para o blackbox)
-            diagnostics.AddRange(_eventDeriver.DrainDiagnostics());
+            foreach (var diag in _eventDeriver.DrainDiagnostics())
+            {
+                if (_reportedDiagnostics.Add(diag))
+                {
+                    diagnostics.Add(diag);
+                }
+            }
 
             return new PartWearTickResult(exceedances, inspections, diagnostics);
         }
