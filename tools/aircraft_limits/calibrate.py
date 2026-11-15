@@ -334,7 +334,18 @@ def analyze_main_bus_and_system_volts(rows, step_indices):
     return chosen_idx, system_volts, evidence
 
 
+def _ensure_utf8_output():
+    """O console padrão do Windows (cp1252) não codifica os símbolos do relatório: força UTF-8."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if (getattr(stream, "encoding", "") or "").lower().replace("-", "") != "utf8":
+                stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError) as ex:
+            print(f"[calibrate] não foi possível ajustar a codificação da saída: {ex}", file=sys.__stderr__)
+
+
 def run_calibration(csv_path, context_path=None, aircraft_id=None, out_dir=None, write=False):
+    _ensure_utf8_output()
     if not out_dir:
         out_dir = os.path.join(SCRIPT_DIR, "..", "..", "src", "FlightCareer.Infrastructure", "Data", "aircraft")
     out_dir = os.path.abspath(out_dir)

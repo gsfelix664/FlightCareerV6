@@ -126,6 +126,22 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
+        public void Deriver_DiagnosticoDeRegraDesligada_SaiUmaVezPorVoo()
+        {
+            var deriver = new PartEventDeriver();
+            deriver.ConfigureElectrical(new ElectricalConfig()); // nenhum parâmetro elétrico no catálogo
+
+            deriver.Update(CreateFrame(starter: 0.0, avionicsCircuit: 1.0), 1.0, Features);
+            var first = deriver.DrainDiagnostics();
+            deriver.Update(CreateFrame(starter: 1.0, avionicsCircuit: 1.0), 1.0, Features);
+            deriver.Update(CreateFrame(starter: 0.0, avionicsCircuit: 1.0), 1.0, Features);
+            var later = deriver.DrainDiagnostics();
+
+            Assert.NotEmpty(first);
+            Assert.DoesNotContain(later, m => first.Contains(m));
+        }
+
+        [Fact]
         public void Deriver_DescargaProfunda_CruzaFaixasUmaVezCada()
         {
             var deriver = new PartEventDeriver();

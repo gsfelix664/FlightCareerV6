@@ -150,10 +150,8 @@ namespace FlightCareer.Domain.Parts
                 }
             }
 
-            if (_eventDeriver.DiagnosticMessages.Count > 0)
-            {
-                diagnostics.AddRange(_eventDeriver.DiagnosticMessages);
-            }
+            // Drena: cada diagnóstico sai uma vez por voo (antes era copiado a cada tick para o blackbox)
+            diagnostics.AddRange(_eventDeriver.DrainDiagnostics());
 
             return new PartWearTickResult(exceedances, inspections, diagnostics);
         }

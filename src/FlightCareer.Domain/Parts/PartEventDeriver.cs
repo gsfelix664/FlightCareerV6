@@ -43,6 +43,18 @@ namespace FlightCareer.Domain.Parts
 
         public IReadOnlyList<string> DiagnosticMessages => _diagnosticMessages;
 
+        /// <summary>
+        /// Devolve os diagnósticos ainda não entregues e os remove da fila. As chaves já reportadas
+        /// continuam marcadas, então cada mensagem sai uma vez por voo (até o Reset).
+        /// </summary>
+        public IReadOnlyList<string> DrainDiagnostics()
+        {
+            if (_diagnosticMessages.Count == 0) return Array.Empty<string>();
+            var drained = _diagnosticMessages.ToList();
+            _diagnosticMessages.Clear();
+            return drained;
+        }
+
         public void ConfigureElectrical(ElectricalConfig? config)
         {
             _electricalConfig = config;
