@@ -1430,3 +1430,6 @@
 - Capturas do usuário com REC no MSFS 2024 → `merge_limits.py` → `Data/aircraft/*.json` (VNE, Vfe por dente, Vle, Mmo, CHT/óleo/EGT de pistão, VS0/VS1). Tabela para aprovação em `docs/plans/sensor-validation/F2.0-limites-capturados.md`.
 - `merge_limits.py`: filtros de plausibilidade (turbina sem EGT/óleo do sim, jato sem VNE/VS do sim, Vle acima da VNE descartada), ATC MODEL nos formatos `AC_MODEL_X` e `$$:X`, colunas opcionais `titlePattern`/`atcModelPattern` no `title_map.csv`; 5 testes novos.
 - Classe corrigida para Turboprop: A400M, ATR 42/72, King Air, ES30. `MAX RATED ENGINE RPM` não foi gravado (app antigo nas capturas): RPM vem do POH. 21 aeronaves que o usuário não tem ficam no padrão da classe.
+
+## 2026-11-15 - F2.0: limites capturados aprovados (Claude)
+- Usuário aprovou a tabela `F2.0-limites-capturados.md` (25 aeronaves). Próximo: planilha de POH (RPM, G, limites de turbina e VMO dos jatos). Nenhum código mudou.
