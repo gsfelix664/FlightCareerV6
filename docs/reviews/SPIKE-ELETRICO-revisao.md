@@ -28,3 +28,13 @@ O que a documentação diz e o spike não considerou: o C172 do MSFS 2024 usa o 
 7. Na §2 (diagnóstico), marque o que é **observado** (coluna do CSV + valor) e o que é **hipótese**; tire afirmações que não estejam na documentação nem no CSV.
 8. Refaça as recomendações da §4 em cima dos candidatos v2.
 9. Atualize o relatório, o inventário (paridade), o `SensorLayoutTests` e a entrada do CHANGELOG. Commit `fix(sensors): ...` / `docs(sensors): ...`.
+
+---
+
+# Revisão SPIKE-ELETRICO — rodada 2
+
+**Veredito: APROVADO**
+
+- Os 9 itens da rodada 1 foram aplicados: URLs retail; matriz v2 / v1.00 / FSX; candidatos v2 por índice global (`ELECTRICAL BUS VOLTAGE:1..5`, `ELECTRICAL BUS AMPS:1..5`, `CIRCUIT ON:1..3`, `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1`) e um legado de conferência (`ELECTRICAL MAIN BUS VOLTAGE:1`), 16 datums no total; formato por nome no SimConnect marcado como não documentado (só índices); diagnóstico separando observado × hipótese; roteiro §7 com identificação dos barramentos pelos marcadores e teste do leme.
+- Conferido pelo revisor: `dotnet build` 0 erros; `dotnet test` 264/264; `python -m unittest discover -s tools/tests` 40/40; nenhum sensor existente alterado; registro × inventário em paridade.
+- **Não testado no MSFS.** Próximo passo: o usuário voa o teste de solo da §7 do `ROTEIRO.md` no C172 G1000; depois o revisor escolhe as SimVars das três regras mudas.
