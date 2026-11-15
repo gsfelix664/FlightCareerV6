@@ -1626,3 +1626,6 @@
 
 ## 2026-11-15 - Flap: barulho mantido como indicativo (Claude)
 - Decisão do usuário: com pane de flap aberta, o addon continua corrigindo a alavanca mesmo quando o próprio sim já segura o flap quebrado; o som do motor do flap fica como aviso ao piloto. Mantidos o limite de 1 correção por segundo e a espera de 0,5 s fora da posição (`FlapEnforcementPolicy`). O estado nativo dos flaps continua sendo acompanhado pelo `PersistentFailureService` (sem uso por enquanto).
+
+## 2026-11-15 - Testes no MSFS: F4.2c e crash pelo addon (Claude)
+- Voo com missão (banco novo): pane do motor pelo wear and tear registrada como `ENGINE_FAILURE` (F4.2c OK no MSFS); crash detectado pelo addon e perda total aplicada uma vez. No MSFS 2024 o `CRASH FLAG` não foi visto em nenhum crash e o sim reposiciona o avião no ar. Detalhes em `calibration-C152.md` (voo 4). Seed em banco novo conferido (46 perfis com características, 68 peças no C152). Nenhum código mudou.
