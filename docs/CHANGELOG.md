@@ -1824,3 +1824,15 @@
   - Suíte completa de 319 testes xUnit passando em 3 segundos; 48 testes Python passando em 0,25s.
 - **Não testado no MSFS**:
   - O replay opera offline sobre logs gravados e foi validado contra os dados reais persistidos no banco de dados. Execução de novos voos no MSFS não realizada nesta tarefa.
+
+## 2026-11-15 - Pesquisa de variáveis em projetos abertos (Gemini)
+- **Pesquisa de Variáveis e SimVars (SDK MSFS 2024 e Projetos de Referência)**:
+  - Investigação completa de 42 variáveis cobrindo motor, elétrico, hidráulica, pneumática, trem/estrutura e walkaround do MSFS 2024.
+  - Documentação em `docs/plans/sensor-research/variaveis-referencias.md` com tabela detalhada, links oficiais do SDK 2024, verificação contra o registro do FlightCareer (`sensor_registry.json`) e evidências em 4 projetos abertos (`FsConnect`, `MobiFlight`, `msfs2020-go`, `aircraft` FlyByWire).
+  - Identificação e comprovação técnica de 5 nomes errados ou inventados (`PARTIAL PANEL STATIC`, `AIRCRAFT STRESS DAMAGE`, `ELECTRICAL LINE BREAKER PULLED`, sintaxe de índices em barramentos e rádios).
+  - Análise da evolução da leitura de LVars: confirmação na documentação oficial de que o SimConnect do MSFS 2024 suporta diretamente `L:VARIABLE_NAME` via `SimConnect_AddToDataDefinition` com tipo `FLOAT64`, eliminando a dependência histórica de módulos WASM intermediários.
+  - Análise dos modelos de freios e hidráulica de primeiros princípios do FlyByWire em Rust/WASM e documentação de armadilhas conhecidas (rotação residual em rodas paradas, `GEAR TOTAL PCT EXTENDED` obsoleta retornando 0).
+  - Relação de 20 variáveis prioritárias candidatas ao próximo teste de solo, com passo a passo de validação em solo no MSFS 2024 (incluindo `COVER ON:0..2` e `L:IS_AVATAR`).
+- **Não testado no MSFS**:
+  - Tarefa estritamente de documentação e pesquisa técnica; nenhum código ou regra foi alterado. Teste das variáveis prioritárias será executado no próximo voo/teste de solo.
+
