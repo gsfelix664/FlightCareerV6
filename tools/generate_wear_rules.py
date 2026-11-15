@@ -1,0 +1,1391 @@
+import json
+import re
+import os
+
+sensor_reg = json.load(open('src/FlightCareer.Infrastructure/Data/sensor_registry.json', encoding='utf-8'))
+valid_sensors = set(s['key'] for s in sensor_reg['sensors'])
+
+parts_cat = json.load(open('src/FlightCareer.Infrastructure/Data/parts_catalog.json', encoding='utf-8'))
+valid_parts = set(p['id'] for p in parts_cat['parts'])
+nogo_parts = set(p['id'] for p in parts_cat['parts'] if p.get('blocksFlightWhenBroken'))
+
+valid_limit_keys = {
+    'rpmRedline', 'rpmMaxRated', 'rpmNativeOnset', 'chtMax', 'oilTempMax', 'oilPressMin',
+    'egtMax', 'ittMax', 'torqueMaxPct', 'n1MaxPct', 'vne', 'vno', 'vle', 'vlo', 'mmo',
+    'vs0', 'vs1', 'gLimitPos', 'gLimitNeg', 'maxTouchdownFpm',
+    'vfe:1', 'vfe:2', 'vfe:3', 'vfe:4'
+}
+
+valid_features = {
+    'piston', 'turboprop', 'jet', 'diesel', 'turbocharged', 'carbureted', 'fuelInjected',
+    'fixedPitchProp', 'constantSpeedProp', 'singleEngine', 'multiEngine', 'fixedGear',
+    'retractableGear', 'tailwheel', 'pressurized', 'hydraulicGear', 'apu', 'electricHybrid'
+}
+
+rules = [
+    # 1. Piston RPM Overspeed
+    {
+        'id': 'piston_rpm_overspeed',
+        'description': 'Sobrevelocidade de rotação (RPM) em motor a pistão além da faixa operacional permitida',
+        'kind': 'Continuous',
+        'limitKey': 'rpmRedline',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['piston'] },
+        'sensors': ['eng-rpm', 'eng-max-reached-rpm'],
+        'nativeOverstress': { 'componentId': 39, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.97,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 2.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'propeller.blades', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'ignition.magneto_left', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'ignition.magneto_right', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 6.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 8.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'propeller.blades', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'ignition.magneto_left', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'ignition.magneto_right', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 4.0, 'lossPerHourPct': 1.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 18.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 24.0, 'lossPerHourPct': 18.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'propeller.blades', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'ignition.magneto_left', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'ignition.magneto_right', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 12.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 12.0, 'lossPerHourPct': 5.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'ENGINE_OVERSPEED_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 5.0,
+                    'description': 'Inspeção mandatória por sobrevelocidade de rotação conforme Lycoming SB 369A / Continental SIL 03-3'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Lycoming Service Bulletin No. 369A / Continental SIL 03-3)'
+    },
+
+    # 2. Piston CHT Overheat
+    {
+        'id': 'piston_cht_overheat',
+        'description': 'Superaquecimento de temperatura de cabeça de cilindro (CHT) em motor a pistão',
+        'kind': 'Continuous',
+        'limitKey': 'chtMax',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['piston'] },
+        'sensors': ['eng-cht', 'eng-max-cht'],
+        'nativeOverstress': { 'componentId': 39, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.92,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 2.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 3.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 8.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 20.0, 'lossPerHourPct': 20.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 25.0, 'lossPerHourPct': 26.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'ENGINE_OVERHEAT_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 30.0,
+                    'description': 'Inspeção visual de cabeçote e compressão por superaquecimento prolongado'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Lycoming Flyer - Operations, Engine Longevity)'
+    },
+
+    # 3. Piston Shock Cooling
+    {
+        'id': 'piston_shock_cooling',
+        'description': 'Choque térmico por resfriamento abrupto de cabeçote de cilindro em descidas rápidas',
+        'kind': 'Continuous',
+        'limitKey': 'chtMax',
+        'direction': 'Below',
+        'appliesTo': { 'all': ['piston'] },
+        'sensors': ['eng-cht', 'af-airspeed-indicated'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.25,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.35,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 5.0, 'lossPerHourPct': 2.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.45,
+                'parts': [
+                    { 'partId': 'engine.cylinders', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'engine.valves', 'multiplier': 12.0, 'lossPerHourPct': 8.0 }
+                ]
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: EAA Shock Cooling in General Aviation)'
+    },
+
+    # 4. Piston EGT Excess
+    {
+        'id': 'piston_egt_excess',
+        'description': 'Temperatura excessiva de gases de escape (EGT) / mistura excessivamente pobre em alta potência',
+        'kind': 'Continuous',
+        'limitKey': 'egtMax',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['piston'] },
+        'sensors': ['eng-egt', 'eng-max-egt'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.95,
+                'parts': [
+                    { 'partId': 'engine.valves', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.cylinders', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.fuel_injectors', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.valves', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'engine.cylinders', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 6.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'engine.fuel_injectors', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.06,
+                'parts': [
+                    { 'partId': 'engine.valves', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'engine.cylinders', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'ignition.spark_plugs', 'multiplier': 16.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'engine.fuel_injectors', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'EGT_OVERHEAT_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 60.0,
+                    'description': 'Inspeção boroscópica de válvulas de escape e bicos injetores por temperatura crítica'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Continental Lean-of-Peak Guidance & Lycoming SI 1094D)'
+    },
+
+    # 5. Oil Temperature High
+    {
+        'id': 'oil_temperature_high',
+        'description': 'Superaquecimento do óleo lubrificante de motor',
+        'kind': 'Continuous',
+        'limitKey': 'oilTempMax',
+        'direction': 'Above',
+        'appliesTo': { 'any': ['piston', 'turboprop', 'jet'] },
+        'sensors': ['oil-temperature', 'oil-max-temperature'],
+        'nativeOverstress': { 'componentId': 41, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.94,
+                'parts': [
+                    { 'partId': 'oil.lubricant', 'multiplier': 3.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.turbine_oil', 'multiplier': 3.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.cooler', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.filter', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.turbine_filter', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'oil.lubricant', 'multiplier': 10.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.turbine_oil', 'multiplier': 10.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.cooler', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'oil.filter', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'oil.turbine_filter', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 4.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 4.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 4.0, 'lossPerHourPct': 2.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'oil.lubricant', 'multiplier': 25.0, 'lossPerHourPct': 28.0 },
+                    { 'partId': 'oil.turbine_oil', 'multiplier': 25.0, 'lossPerHourPct': 28.0 },
+                    { 'partId': 'oil.cooler', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.filter', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.turbine_filter', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'engine.crankshaft', 'multiplier': 12.0, 'lossPerHourPct': 10.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 10.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 10.0, 'lossPerHourPct': 8.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'HIGH_OIL_TEMP_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 30.0,
+                    'description': 'Inspeção de bronzinas e análise de partículas no filtro por degradação térmica do lubrificante'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Shell Aviation - Engine Oil Operating Limits)'
+    },
+
+    # 6. Oil Pressure Low
+    {
+        'id': 'oil_pressure_low',
+        'description': 'Pressão de óleo abaixo do limite mínimo operacional',
+        'kind': 'Continuous',
+        'limitKey': 'oilPressMin',
+        'direction': 'Below',
+        'appliesTo': { 'any': ['piston', 'turboprop', 'jet'] },
+        'sensors': ['oil-pressure', 'oil-warning-pressure'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.40,
+                'parts': [
+                    { 'partId': 'engine.crankshaft', 'multiplier': 3.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.70,
+                'parts': [
+                    { 'partId': 'engine.crankshaft', 'multiplier': 10.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 6.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 6.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 6.0, 'lossPerHourPct': 3.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.90,
+                'parts': [
+                    { 'partId': 'engine.crankshaft', 'multiplier': 30.0, 'lossPerHourPct': 32.0 },
+                    { 'partId': 'oil.pump', 'multiplier': 16.0, 'lossPerHourPct': 14.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 16.0, 'lossPerHourPct': 14.0 },
+                    { 'partId': 'propeller.governor', 'multiplier': 16.0, 'lossPerHourPct': 10.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'LOW_OIL_PRESSURE_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 15.0,
+                    'description': 'Inspeção mandatória de bronzinas e bomba de óleo por perda crítica de pressão'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA AC 43.13-1B Section 8)'
+    },
+
+    # 7. Turboprop Torque Exceedance
+    {
+        'id': 'turboprop_torque_exceedance',
+        'description': 'Excesso de torque em motor turboélice acima de 100% de torque máximo contínuo',
+        'kind': 'Continuous',
+        'limitKey': 'torqueMaxPct',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['turboprop'] },
+        'sensors': ['turb-eng-torque', 'turb-max-torque-percent'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.reduction_gearbox', 'multiplier': 2.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'propeller.blades', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.05,
+                'parts': [
+                    { 'partId': 'engine.reduction_gearbox', 'multiplier': 8.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'propeller.blades', 'multiplier': 4.5, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.12,
+                'parts': [
+                    { 'partId': 'engine.reduction_gearbox', 'multiplier': 20.0, 'lossPerHourPct': 16.0 },
+                    { 'partId': 'propeller.blades', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'TURBINE_TORQUE_EXCEEDANCE_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 10.0,
+                    'description': 'Inspeção e cheque dimensional de engrenagens da caixa de redução por sobretorque'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Pratt & Whitney Canada PT6A Maintenance Manual 72-00-00)'
+    },
+
+    # 8. Turbine ITT Overshoot
+    {
+        'id': 'turbine_itt_overshoot',
+        'description': 'Excesso de temperatura inter-turbina (ITT) em turboélices e jatos',
+        'kind': 'Continuous',
+        'limitKey': 'ittMax',
+        'direction': 'Above',
+        'appliesTo': { 'any': ['turboprop', 'jet'] },
+        'sensors': ['turb-itt', 'turb-max-itt'],
+        'nativeOverstress': { 'componentId': 40, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.98,
+                'parts': [
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 3.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.compressor', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'engine.compressor', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 4.0, 'lossPerHourPct': 1.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.07,
+                'parts': [
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 26.0, 'lossPerHourPct': 24.0 },
+                    { 'partId': 'hotsection.combustor', 'multiplier': 14.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'engine.compressor', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 8.0, 'lossPerHourPct': 4.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'TURBINE_HOT_SECTION_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 10.0,
+                    'description': 'Boroscopia obrigatória da seção quente (palhetas CT e anel injetor) por sobretemperatura'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: P&WC PT6A Overhaul / Hot Section Inspection Manual)'
+    },
+
+    # 9. Turbine N1 Overspeed
+    {
+        'id': 'turbine_n1_overspeed',
+        'description': 'Sobrevelocidade de rotação do compressor / gerador de gás (Ng/N1)',
+        'kind': 'Continuous',
+        'limitKey': 'n1MaxPct',
+        'direction': 'Above',
+        'appliesTo': { 'any': ['turboprop', 'jet'] },
+        'sensors': ['turb-n1'],
+        'nativeOverstress': { 'componentId': 40, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.99,
+                'parts': [
+                    { 'partId': 'engine.compressor', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.fan', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.01,
+                'parts': [
+                    { 'partId': 'engine.compressor', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'engine.fan', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.05,
+                'parts': [
+                    { 'partId': 'engine.compressor', 'multiplier': 16.0, 'lossPerHourPct': 15.0 },
+                    { 'partId': 'hotsection.turbine_blades', 'multiplier': 16.0, 'lossPerHourPct': 15.0 },
+                    { 'partId': 'engine.fan', 'multiplier': 16.0, 'lossPerHourPct': 15.0 },
+                    { 'partId': 'oil.turbine_pump', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'TURBINE_OVERSPEED_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 5.0,
+                    'description': 'Inspeção dimensional de rotores do compressor e discos de turbina por sobrevelocidade'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: CFM56 / PT6A Maintenance Manual Over-Speed Limits)'
+    },
+
+    # 10. Flap Overspeed Vfe
+    {
+        'id': 'flap_overspeed_vfe',
+        'description': 'Velocidade do ar acima do limite estrutural para posição estendida de flaps (Vfe)',
+        'kind': 'Continuous',
+        'limitKey': 'vfe:1',
+        'direction': 'Above',
+        'appliesTo': { 'none': [] },
+        'sensors': ['af-airspeed-indicated', 'af-flaps-handle-index'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'airframe.flaps', 'multiplier': 4.0, 'lossPerHourPct': 2.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'airframe.flaps', 'multiplier': 12.0, 'lossPerHourPct': 12.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.18,
+                'parts': [
+                    { 'partId': 'airframe.flaps', 'multiplier': 28.0, 'lossPerHourPct': 36.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'FLAP_OVERSPEED_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 5.0,
+                    'description': 'Inspeção visual e de alinhamento de trilhos, roletes e atuadores de flap por excesso de velocidade'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA AC 43.13-1B Section 4 - Control Surfaces)'
+    },
+
+    # 11. Gear Overspeed Vle/Vlo
+    {
+        'id': 'gear_overspeed_vle_vlo',
+        'description': 'Velocidade do ar acima do limite operacional de trem de pouso (Vle estendido / Vlo operação)',
+        'kind': 'Continuous',
+        'limitKey': 'vle',
+        'direction': 'Above',
+        'appliesTo': { 'any': ['retractableGear', 'hydraulicGear'] },
+        'sensors': ['af-airspeed-indicated', 'gear-handle-position', 'gear-position'],
+        'nativeOverstress': { 'componentId': 35, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'multiplier': 3.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 2.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'gear.nose_strut', 'multiplier': 2.0, 'lossPerHourPct': 1.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.10,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'multiplier': 10.0, 'lossPerHourPct': 10.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 6.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'gear.nose_strut', 'multiplier': 6.0, 'lossPerHourPct': 4.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.20,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'multiplier': 24.0, 'lossPerHourPct': 28.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 14.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'gear.nose_strut', 'multiplier': 14.0, 'lossPerHourPct': 12.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'GEAR_OVERSPEED_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 5.0,
+                    'description': 'Inspeção de portas de trem, trincos e atuadores por arrasto aerodinâmico excessivo'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Cessna / Piper Retractable Gear Maintenance Guidelines)'
+    },
+
+    # 12. Airframe Over-G Positive
+    {
+        'id': 'airframe_over_g_positive',
+        'description': 'Fator de carga G positivo acima do envelope estrutural de certificação',
+        'kind': 'Continuous',
+        'limitKey': 'gLimitPos',
+        'direction': 'Above',
+        'appliesTo': { 'none': [] },
+        'sensors': ['af-g-force', 'af-max-g-force'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.88,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 2.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 8.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 4.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.15,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 22.0, 'lossPerHourPct': 20.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 14.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 10.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'gear.main_struts', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'OVER_G_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 1.0,
+                    'description': 'Inspeção estrutural mandante de longarinas, rebites e berço do motor após excedência de G'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAR Part 23 / Part 25 Flight Envelope Limitations)'
+    },
+
+    # 13. Airframe Over-G Negative
+    {
+        'id': 'airframe_over_g_negative',
+        'description': 'Fator de carga G negativo além do limite estrutural de certificação',
+        'kind': 'Continuous',
+        'limitKey': 'gLimitNeg',
+        'direction': 'Below',
+        'appliesTo': { 'none': [] },
+        'sensors': ['af-g-force', 'af-min-g-force'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.88,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 2.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 8.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 6.0, 'lossPerHourPct': 3.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.15,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 22.0, 'lossPerHourPct': 20.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 16.0, 'lossPerHourPct': 12.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'OVER_G_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 1.0,
+                    'description': 'Inspeção estrutural por excesso de carga de G negativo'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAR Part 23 / Part 25 Airframe Structural Loads)'
+    },
+
+    # 14. VNE Airspeed Exceedance
+    {
+        'id': 'vne_airspeed_exceedance',
+        'description': 'Velocidade indicada acima de VNE / VMO / MMO (velocidade nunca exceder)',
+        'kind': 'Continuous',
+        'limitKey': 'vne',
+        'direction': 'Above',
+        'appliesTo': { 'none': [] },
+        'sensors': ['af-airspeed-indicated', 'af-airspeed-mach'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.98,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.pitot_tube', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 7.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 8.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'instruments.pitot_tube', 'multiplier': 4.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 4.0, 'lossPerHourPct': 2.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.10,
+                'parts': [
+                    { 'partId': 'airframe.wing_structure', 'multiplier': 20.0, 'lossPerHourPct': 18.0 },
+                    { 'partId': 'airframe.flight_controls', 'multiplier': 22.0, 'lossPerHourPct': 20.0 },
+                    { 'partId': 'instruments.pitot_tube', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'instruments.static_ports', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'AIRSPEED_EXCEEDANCE_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 3.0,
+                    'description': 'Inspeção mandatória de superfícies de comando e compensadores por flutter e sobrevelocidade'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA AC 23-19A Airframe Flutter and High Speed Characteristics)'
+    },
+
+    # 15. Touchdown Hard Landing
+    {
+        'id': 'touchdown_hard_landing',
+        'description': 'Impacto no solo com razão de descida elevada (pouso duro ou severo)',
+        'kind': 'Event',
+        'metric': 'touchdownFpm',
+        'appliesTo': { 'none': [] },
+        'sensors': ['gear-plane-touchdown-normal-velocity', 'gear-contact-point-compression'],
+        'nativeOverstress': { 'componentId': 35, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'firm',
+                'threshold': 400.0,
+                'parts': [
+                    { 'partId': 'gear.main_struts', 'damagePerEventPct': 0.4 },
+                    { 'partId': 'gear.nose_strut', 'damagePerEventPct': 0.4 },
+                    { 'partId': 'gear.tailwheel_assembly', 'damagePerEventPct': 0.4 },
+                    { 'partId': 'tires.main', 'damagePerEventPct': 0.6 },
+                    { 'partId': 'tires.nose', 'damagePerEventPct': 0.6 },
+                    { 'partId': 'brakes.master_cylinders', 'damagePerEventPct': 0.2 }
+                ]
+            },
+            {
+                'name': 'hard',
+                'threshold': 600.0,
+                'parts': [
+                    { 'partId': 'gear.main_struts', 'damagePerEventPct': 2.5 },
+                    { 'partId': 'gear.nose_strut', 'damagePerEventPct': 2.5 },
+                    { 'partId': 'gear.tailwheel_assembly', 'damagePerEventPct': 2.5 },
+                    { 'partId': 'tires.main', 'damagePerEventPct': 3.5 },
+                    { 'partId': 'tires.nose', 'damagePerEventPct': 3.5 },
+                    { 'partId': 'brakes.master_cylinders', 'damagePerEventPct': 1.2 },
+                    { 'partId': 'airframe.wing_structure', 'damagePerEventPct': 1.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'HARD_LANDING_INSPECTION',
+                    'grounding': False,
+                    'description': 'Inspeção visual detalhada de montantes, amortecedores e pneus após toque firme'
+                }
+            },
+            {
+                'name': 'severe',
+                'threshold': 850.0,
+                'parts': [
+                    { 'partId': 'gear.main_struts', 'damagePerEventPct': 10.0 },
+                    { 'partId': 'gear.nose_strut', 'damagePerEventPct': 10.0 },
+                    { 'partId': 'gear.tailwheel_assembly', 'damagePerEventPct': 10.0 },
+                    { 'partId': 'tires.main', 'damagePerEventPct': 12.0 },
+                    { 'partId': 'tires.nose', 'damagePerEventPct': 12.0 },
+                    { 'partId': 'brakes.master_cylinders', 'damagePerEventPct': 4.5 },
+                    { 'partId': 'airframe.wing_structure', 'damagePerEventPct': 5.0 },
+                    { 'partId': 'engine.crankshaft', 'damagePerEventPct': 3.0 },
+                    { 'partId': 'propeller.blades', 'damagePerEventPct': 3.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'HARD_LANDING_INSPECTION',
+                    'grounding': True,
+                    'description': 'Inspeção estrutural mandante de célula, berço do motor e trem de pouso por pouso severo'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Boeing / Airbus / Cessna Hard Landing Inspection Manual)'
+    },
+
+    # 16. Brake High Energy
+    {
+        'id': 'brake_high_energy',
+        'description': 'Frenagem severa com alta absorção de energia cinética nos freios',
+        'kind': 'Continuous',
+        'limitKey': 'vne',
+        'direction': 'Above',
+        'appliesTo': { 'none': [] },
+        'sensors': ['brake-left-position', 'brake-right-position', 'brake-left-temperature', 'brake-right-temperature'],
+        'nativeOverstress': { 'componentId': 36, 'threshold': 0.0001 },
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.30,
+                'parts': [
+                    { 'partId': 'brakes.pads_discs', 'multiplier': 3.0, 'lossPerHourPct': 1.0 },
+                    { 'partId': 'tires.main', 'multiplier': 2.0, 'lossPerHourPct': 0.5 },
+                    { 'partId': 'brakes.master_cylinders', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.60,
+                'parts': [
+                    { 'partId': 'brakes.pads_discs', 'multiplier': 8.0, 'lossPerHourPct': 4.0 },
+                    { 'partId': 'tires.main', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'brakes.master_cylinders', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.85,
+                'parts': [
+                    { 'partId': 'brakes.pads_discs', 'multiplier': 18.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'tires.main', 'multiplier': 12.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'brakes.master_cylinders', 'multiplier': 10.0, 'lossPerHourPct': 5.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'BRAKE_OVERHEAT_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 10.0,
+                    'description': 'Inspeção visual de pinças, fluido e desgaste de pastilhas por sobreaquecimento de freios'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Cleveland Wheels & Brakes Technician Guide)'
+    },
+
+    # 17. Engine Starter Duty Cycle
+    {
+        'id': 'engine_starter_duty_cycle',
+        'description': 'Acionamento contínuo de motor de arranque além do limite térmico (duty cycle)',
+        'kind': 'Event',
+        'metric': 'starterSeconds',
+        'appliesTo': { 'any': ['piston', 'turboprop'] },
+        'sensors': ['eng-starter-active', 'eng-starter'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 20.0,
+                'parts': [
+                    { 'partId': 'engine.starter', 'damagePerEventPct': 0.2 },
+                    { 'partId': 'electrical.battery', 'damagePerEventPct': 0.3 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 0.2 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 35.0,
+                'parts': [
+                    { 'partId': 'engine.starter', 'damagePerEventPct': 1.2 },
+                    { 'partId': 'electrical.battery', 'damagePerEventPct': 1.5 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 1.2 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 60.0,
+                'parts': [
+                    { 'partId': 'engine.starter', 'damagePerEventPct': 4.5 },
+                    { 'partId': 'electrical.battery', 'damagePerEventPct': 5.0 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 4.5 }
+                ],
+                'inspection': {
+                    'defectCode': 'STARTER_DUTY_CYCLE_INSPECTION',
+                    'grounding': False,
+                    'description': 'Inspeção de escovas e enrolamento do motor de partida por sobreaquecimento'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Lycoming Starter Cranking Limits: 10s on, 20s off, max 3 cycles)'
+    },
+
+    # 18. Gear Cycle Stress
+    {
+        'id': 'gear_cycle_stress',
+        'description': 'Ciclo de extensão e retração de trem de pouso e atuação hidráulica',
+        'kind': 'Event',
+        'metric': 'gearCycles',
+        'appliesTo': { 'any': ['retractableGear', 'hydraulicGear'] },
+        'sensors': ['gear-handle-position', 'gear-hydraulic-pressure'],
+        'bands': [
+            {
+                'name': 'normal',
+                'threshold': 1.0,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'damagePerEventPct': 0.05 },
+                    { 'partId': 'hydraulic.pump', 'damagePerEventPct': 0.03 }
+                ]
+            },
+            {
+                'name': 'frequent',
+                'threshold': 3.0,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'damagePerEventPct': 0.20 },
+                    { 'partId': 'hydraulic.pump', 'damagePerEventPct': 0.12 }
+                ]
+            },
+            {
+                'name': 'excessive',
+                'threshold': 6.0,
+                'parts': [
+                    { 'partId': 'gear.actuator', 'damagePerEventPct': 0.50 },
+                    { 'partId': 'hydraulic.pump', 'damagePerEventPct': 0.30 }
+                ]
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA Maintenance Handbook - Landing Gear Retraction Cycles)'
+    },
+
+    # 19. Pressurization Cycle Stress
+    {
+        'id': 'pressurization_cycle_stress',
+        'description': 'Ciclo de pressurização e alívio da cabine e fadiga de vedação',
+        'kind': 'Event',
+        'metric': 'pressurizationCycles',
+        'appliesTo': { 'all': ['pressurized'] },
+        'sensors': ['af-pressurization-pressure-differential', 'af-pressurization-cabin-altitude'],
+        'bands': [
+            {
+                'name': 'normal',
+                'threshold': 1.0,
+                'parts': [
+                    { 'partId': 'pressurization.outflow_valve', 'damagePerEventPct': 0.05 },
+                    { 'partId': 'pressurization.door_seals', 'damagePerEventPct': 0.08 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 2.0,
+                'parts': [
+                    { 'partId': 'pressurization.outflow_valve', 'damagePerEventPct': 0.15 },
+                    { 'partId': 'pressurization.door_seals', 'damagePerEventPct': 0.22 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 4.0,
+                'parts': [
+                    { 'partId': 'pressurization.outflow_valve', 'damagePerEventPct': 0.35 },
+                    { 'partId': 'pressurization.door_seals', 'damagePerEventPct': 0.45 }
+                ],
+                'inspection': {
+                    'defectCode': 'PRESSURIZATION_SYSTEM_INSPECTION',
+                    'grounding': False,
+                    'description': 'Teste de estanqueidade e taxa de vazamento do sistema de pressurização'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: King Air / TBM Pressurization System Maintenance)'
+    },
+
+    # 20. Turbocharger Overboost and TIT Overheat
+    {
+        'id': 'turbo_overboost_tit',
+        'description': 'Superaquecimento de TIT (Turbine Inlet Temperature) e sobrepressão de turboalimentador',
+        'kind': 'Continuous',
+        'limitKey': 'egtMax',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['turbocharged'] },
+        'sensors': ['eng-tit', 'eng-manifold-pressure'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.96,
+                'parts': [
+                    { 'partId': 'engine.turbocharger', 'multiplier': 2.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.turbocharger', 'multiplier': 8.0, 'lossPerHourPct': 4.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'engine.turbocharger', 'multiplier': 20.0, 'lossPerHourPct': 16.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'TURBOCHARGER_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 30.0,
+                    'description': 'Inspeção de folga radial do rotor da turbina e wastegate por sobretemperatura'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Garrett / Continental Turbocharger Operation Guide)'
+    },
+
+    # 21. Coolant Overheat
+    {
+        'id': 'coolant_overheat',
+        'description': 'Superaquecimento do sistema de arrefecimento líquido (motores diesel aeronáuticos)',
+        'kind': 'Continuous',
+        'limitKey': 'chtMax',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['diesel'] },
+        'sensors': ['eng-coolant-reservoir-percent', 'eng-cht'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.95,
+                'parts': [
+                    { 'partId': 'engine.coolant_system', 'multiplier': 2.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'engine.coolant_system', 'multiplier': 7.0, 'lossPerHourPct': 4.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.08,
+                'parts': [
+                    { 'partId': 'engine.coolant_system', 'multiplier': 18.0, 'lossPerHourPct': 15.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'COOLANT_SYSTEM_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 20.0,
+                    'description': 'Inspeção de mangueiras, radiador e bomba d água por sobreaquecimento de líquido'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Austro Engine AE300 Operation & Maintenance Manual)'
+    },
+
+    # 22. Fuel System Pressure Stress
+    {
+        'id': 'fuel_system_pressure_stress',
+        'description': 'Estresse e degradação do sistema de alimentação de combustível sob pressão anormal',
+        'kind': 'Continuous',
+        'limitKey': 'oilPressMin',
+        'direction': 'Below',
+        'appliesTo': { 'none': [] },
+        'sensors': ['fuel-system-engine-pressure', 'eng-fuel-pressure'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.40,
+                'parts': [
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.filter_gascolator', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.selector_valve', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.aux_pump', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'engine.carburetor', 'multiplier': 1.5, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 1.5, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.70,
+                'parts': [
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'fuel.filter_gascolator', 'multiplier': 5.0, 'lossPerHourPct': 2.0 },
+                    { 'partId': 'fuel.selector_valve', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'fuel.aux_pump', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'engine.carburetor', 'multiplier': 4.0, 'lossPerHourPct': 1.5 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 4.0, 'lossPerHourPct': 1.5 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.90,
+                'parts': [
+                    { 'partId': 'fuel.engine_pump', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'fuel.filter_gascolator', 'multiplier': 12.0, 'lossPerHourPct': 8.0 },
+                    { 'partId': 'fuel.selector_valve', 'multiplier': 10.0, 'lossPerHourPct': 5.0 },
+                    { 'partId': 'fuel.aux_pump', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'engine.carburetor', 'multiplier': 10.0, 'lossPerHourPct': 6.0 },
+                    { 'partId': 'fuel.fcu', 'multiplier': 10.0, 'lossPerHourPct': 6.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'FUEL_SYSTEM_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 30.0,
+                    'description': 'Cheque de pressão e limpeza de filtros/gascolator por cavitação e perda de vazão'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA-H-8083-32 Aviation Maintenance Technician Handbook)'
+    },
+
+    # 23. Electrical System Overload
+    {
+        'id': 'electrical_system_overload',
+        'description': 'Sobrecarga elétrica nos barramentos e alternadores/geradores',
+        'kind': 'Continuous',
+        'limitKey': 'vne',
+        'direction': 'Above',
+        'appliesTo': { 'none': [] },
+        'sensors': ['elec-genalt-bus-amps', 'elec-total-load-amps', 'elec-main-bus-voltage'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.85,
+                'parts': [
+                    { 'partId': 'electrical.voltage_regulator', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.starter_generator', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'electrical.apu_generator', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'electrical.voltage_regulator', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'electrical.starter_generator', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'electrical.apu_generator', 'multiplier': 6.0, 'lossPerHourPct': 3.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.15,
+                'parts': [
+                    { 'partId': 'electrical.voltage_regulator', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'electrical.wiring_harness', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'electrical.alternator', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'electrical.starter_generator', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'electrical.apu_generator', 'multiplier': 16.0, 'lossPerHourPct': 12.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'ELECTRICAL_OVERLOAD_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 30.0,
+                    'description': 'Inspeção de chicotes elétricos e teste de isolamento por sobrecarga de corrente'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA AC 43.13-1B Chapter 11 - Aircraft Electrical Systems)'
+    },
+
+    # 24. Hydraulic System Overpressure
+    {
+        'id': 'hydraulic_system_overpressure',
+        'description': 'Sobrepressão e picos de demanda no sistema hidráulico',
+        'kind': 'Continuous',
+        'limitKey': 'vne',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['hydraulicGear'] },
+        'sensors': ['gear-hydraulic-pressure'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.90,
+                'parts': [
+                    { 'partId': 'hydraulic.pump', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 1.00,
+                'parts': [
+                    { 'partId': 'hydraulic.pump', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 6.0, 'lossPerHourPct': 3.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 1.15,
+                'parts': [
+                    { 'partId': 'hydraulic.pump', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'hydraulic.reservoir_lines', 'multiplier': 16.0, 'lossPerHourPct': 12.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'HYDRAULIC_SYSTEM_INSPECTION',
+                    'grounding': True,
+                    'minSeconds': 15.0,
+                    'description': 'Cheque de estanqueidade e teste de válvula de alívio por sobrepressão hidráulica'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: FAA-H-8083-31 Aircraft Hydraulic Systems)'
+    },
+
+    # 25. Turbine Start Cycle
+    {
+        'id': 'turbine_start_cycle',
+        'description': 'Ciclo de partida de turbina (igniters e motor-gerador de partida)',
+        'kind': 'Event',
+        'metric': 'engineStartCycle',
+        'appliesTo': { 'any': ['turboprop', 'jet'] },
+        'sensors': ['turb-master-starter-switch', 'turb-itt'],
+        'bands': [
+            {
+                'name': 'normal',
+                'threshold': 1.0,
+                'parts': [
+                    { 'partId': 'hotsection.igniters', 'damagePerEventPct': 0.05 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 0.04 }
+                ]
+            },
+            {
+                'name': 'frequent',
+                'threshold': 3.0,
+                'parts': [
+                    { 'partId': 'hotsection.igniters', 'damagePerEventPct': 0.20 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 0.15 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 5.0,
+                'parts': [
+                    { 'partId': 'hotsection.igniters', 'damagePerEventPct': 0.50 },
+                    { 'partId': 'electrical.starter_generator', 'damagePerEventPct': 0.40 }
+                ]
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: PT6A Engine Starting Limits & Igniter Plug Inspection)'
+    },
+
+    # 26. Diesel Glow Plug Cycle
+    {
+        'id': 'diesel_glow_plug_cycle',
+        'description': 'Ciclo de pré-aquecimento e partida de motores diesel aeronáuticos',
+        'kind': 'Event',
+        'metric': 'glowPlugCycles',
+        'appliesTo': { 'all': ['diesel'] },
+        'sensors': ['elec-master-battery', 'eng-starter-active'],
+        'bands': [
+            {
+                'name': 'normal',
+                'threshold': 1.0,
+                'parts': [
+                    { 'partId': 'ignition.glow_plugs', 'damagePerEventPct': 0.08 }
+                ]
+            },
+            {
+                'name': 'frequent',
+                'threshold': 3.0,
+                'parts': [
+                    { 'partId': 'ignition.glow_plugs', 'damagePerEventPct': 0.28 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 5.0,
+                'parts': [
+                    { 'partId': 'ignition.glow_plugs', 'damagePerEventPct': 0.68 }
+                ]
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Austro Engine AE300 Glow Plug Service Limits)'
+    },
+
+    # 27. Vacuum System Low
+    {
+        'id': 'vacuum_system_low',
+        'description': 'Vácuo de sucção abaixo do limite operacional de instrumentos giroscópicos',
+        'kind': 'Continuous',
+        'limitKey': 'oilPressMin',
+        'direction': 'Below',
+        'appliesTo': { 'all': ['piston'] },
+        'sensors': ['vac-suction-pressure', 'vac-warning-vacuum'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.40,
+                'parts': [
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 2.0, 'lossPerHourPct': 0.0 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.70,
+                'parts': [
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 6.0, 'lossPerHourPct': 3.0 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 6.0, 'lossPerHourPct': 3.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.90,
+                'parts': [
+                    { 'partId': 'instruments.vacuum_pump', 'multiplier': 16.0, 'lossPerHourPct': 12.0 },
+                    { 'partId': 'instruments.gyro_horizon', 'multiplier': 16.0, 'lossPerHourPct': 12.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'VACUUM_SYSTEM_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 60.0,
+                    'description': 'Inspeção de palhetas da bomba de vácuo e teste de precessão do horizonte artificial'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Tempest Pneumatics / Airborne Vacuum Systems Guide)'
+    },
+
+    # 28. Thrust Reverser High Speed
+    {
+        'id': 'thrust_reverser_high_speed',
+        'description': 'Acionamento de reversor de empuxo em alta velocidade ou ciclo operacional',
+        'kind': 'Continuous',
+        'limitKey': 'vne',
+        'direction': 'Above',
+        'appliesTo': { 'all': ['jet'] },
+        'sensors': ['af-airspeed-indicated'],
+        'bands': [
+            {
+                'name': 'caution',
+                'threshold': 0.40,
+                'parts': [
+                    { 'partId': 'engine.thrust_reverser', 'multiplier': 2.0, 'lossPerHourPct': 0.0 }
+                ]
+            },
+            {
+                'name': 'warning',
+                'threshold': 0.60,
+                'parts': [
+                    { 'partId': 'engine.thrust_reverser', 'multiplier': 6.0, 'lossPerHourPct': 2.0 }
+                ]
+            },
+            {
+                'name': 'severe',
+                'threshold': 0.80,
+                'parts': [
+                    { 'partId': 'engine.thrust_reverser', 'multiplier': 16.0, 'lossPerHourPct': 8.0 }
+                ],
+                'inspection': {
+                    'defectCode': 'THRUST_REVERSER_INSPECTION',
+                    'grounding': False,
+                    'minSeconds': 10.0,
+                    'description': 'Inspeção de travas mecânicas e atuadores de concha do reversor de empuxo'
+                }
+            }
+        ],
+        'source': 'estimativa — revisar (referência usual: Boeing / Airbus Thrust Reverser Operating Limitations)'
+    }
+]
+
+# VALIDAÇÃO DO CONJUNTO
+covered_parts = set()
+for r in rules:
+    for b in r['bands']:
+        for p in b['parts']:
+            covered_parts.add(p['partId'])
+
+missing_nogo = nogo_parts - covered_parts
+missing_all = valid_parts - covered_parts
+
+print(f'Total rules defined: {len(rules)}')
+print(f'Total parts covered: {len(covered_parts)} / {len(valid_parts)}')
+print(f'Missing NO-GO parts: {len(missing_nogo)} ({missing_nogo})')
+print(f'Missing ALL parts: {len(missing_all)} ({missing_all})')
+
+if missing_nogo:
+    raise ValueError(f'NO-GO parts missing from wear rules: {missing_nogo}')
+
+output_path = 'src/FlightCareer.Infrastructure/Data/wear_rules.json'
+with open(output_path, 'w', encoding='utf-8') as f:
+    json.dump({'rules': rules}, f, indent=2, ensure_ascii=False)
+
+print(f'Successfully generated {output_path}!')
