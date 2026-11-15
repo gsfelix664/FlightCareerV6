@@ -1699,3 +1699,17 @@
   - Mantida paridade estrita testada entre o catálogo JSON e o inventário Markdown; contagens atualizadas em `SensorLayoutTests.cs`.
 - **Roteiro de teste elétrico no C172 G1000 (`ROTEIRO.md`)**:
   - Adicionada seção 7 com checklist objetivo de teste em solo (motor parado, aviônicos ON/OFF, partida, alternador OFF/ON e deflexão de leme) e tabela com os comportamentos esperados por coluna.
+
+## 2026-11-15 - Spike sensores elétricos MSFS 2024 ajustes da revisão r2 (Gemini)
+- **Correções do Spike Elétrico baseadas no sistema elétrico modular v2 (`spike-eletrico-2024.md`)**:
+  - URLs atualizadas exclusivamente para a documentação retail oficial do SDK MSFS 2024 (todas com HTTP 200).
+  - Matriz de candidatos reestruturada com classificação v2+ / v1.00 / FSX; SimVars legadas e obsoletas do FSX rebaixadas com fundamentação técnica do SDK.
+  - Análise documentada sobre indexação: uso de nomes com aspas (`:'Bus_1'_n`) é não documentado no SimConnect (`AddToDataDefinition`) e arrisca desalinhamento de memória (`NAME_UNRECOGNIZED`), adotando-se estritamente índices numéricos globais.
+  - Metodologia de identificação dos barramentos documentada pelo cruzamento temporal com os marcadores do teste de solo.
+  - Diagnóstico revisado distinguindo valores observados no CSV de hipóteses técnicas documentadas.
+- **Reconfiguração dos 16 candidatos no registro e inventário (`sensor_registry.json` e `sensor-inventory.md`)**:
+  - Adicionadas variáveis modernas v2+: `ELECTRICAL BUS VOLTAGE:1..5`, `ELECTRICAL BUS AMPS:1..5`, `CIRCUIT ON:1..3`, `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` e mantido `ELECTRICAL MAIN BUS VOLTAGE:1` como controle legado.
+  - Eliminadas variáveis obsoletas (`ELECTRICAL HOT BATTERY BUS VOLTAGE`, `ALTERNATOR CONNECTION ON:1`).
+  - Paridade estrita mantida e validada por `SensorRegistryTests` e `SensorLayoutTests`.
+- **Roteiro de teste atualizado (`ROTEIRO.md`)**:
+  - Tabela da seção 7 atualizada com as novas colunas e explicação de identificação de barramentos.
