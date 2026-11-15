@@ -1,0 +1,3 @@
+# Spike falhas sem mexer no comando — Revisão (Claude)
+
+**Veredito: APROVADO como pesquisa.** Recomendações: alternador por `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` (ou `ELECTRICAL_ALTERNATOR_BREAKER_TOGGLE`), precisa de `TransmitClientEvent_EX1` (2 parâmetros); flaps: escrita da superfície tende a jitter, corte do circuito do motor do flap é a alternativa; magnetos: sem opção viável (cockpit amarrado à chave). Atenção: os links citam o formato antigo de URL do SDK (`.htm`); nada foi testado no sim. Próximo passo: botões de teste no HUD de depuração para o usuário disparar cada opção, e só depois mudar o `SimFailureActuator`.
