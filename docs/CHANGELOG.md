@@ -1523,3 +1523,17 @@
   - Criado `WearRuleCatalogTests` com 4 novos testes cobrindo validação referencial completa, cobertura NO-GO, regras de motor por classe e filtragem contextual por modelo (C152 vs TBM 930).
   - 214 testes xUnit aprovados com 0 falhas; build com 0 erros.
   - Relatório detalhado com tabelas de regras e cálculos de ordem de grandeza submetido em `docs/reviews/F2.2-relatorio.md`.
+
+## 2026-11-15 - F2.2 Ajustes da revisão rodada 2 (Gemini)
+- **Remoção de regras artificiais**:
+  - Eliminadas 6 regras que utilizavam limites incompatíveis (`brake_high_energy`, `electrical_system_overload`, `hydraulic_system_overpressure`, `thrust_reverser_high_speed`, `fuel_system_pressure_stress`, `vacuum_system_low`). Peças de sistemas elétrico, hidráulico, combustível e reversor degradam com a taxa normal de vida útil do catálogo e ciclos operacionais.
+- **Flap dinâmico por dente atual**:
+  - Adicionada constante e convenção dinâmica `VfeCurrent = "vfe:current"` em `LimitKeys.cs` e no modelo `WearRule.cs`, permitindo avaliar a velocidade contra o dente específico estendido (`af-flaps-handle-index`).
+- **Segregação de trem de pouso**:
+  - Separadas as regras `gear_extended_overspeed_vle` (Vle com trem baixado) e `gear_operation_overspeed_vlo` (Vlo durante ciclo de transição).
+- **Limpeza do repositório**:
+  - Removido `tools/generate_wear_rules.py` do repositório.
+- **Testes e integridade física**:
+  - Removido teste antigo de cobertura cega NO-GO; adicionados testes `LimitKeys_VfeCurrent_IsValidAndHasKnotsUnit` e `ContinuousRules_HaveCoherentLimitKeyAndSensors` (validando correlação estrita entre limites operacionais e sensores).
+  - 215 testes xUnit aprovados com 0 falhas; build com 0 erros.
+  - Relatório atualizado em `docs/reviews/F2.2-relatorio.md`.
