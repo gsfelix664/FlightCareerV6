@@ -1425,3 +1425,8 @@
 
 ## 2026-11-15 - F2.0a revisada e mesclada (Claude)
 - Revisão APROVADA (`docs/reviews/F2.0a-revisao.md`). Ajustes do revisor: o seed do catálogo de limites passou para o `App.xaml.cs` e roda em toda inicialização (antes só em banco novo), sem derrubar o app se falhar; `merge_limits.py` só grava `mmo` em jato e o `--dry-run` mostra o diff por chave. Não testado com o app no banco real.
+
+## 2026-11-15 - F2.0: limites capturados de 25 aeronaves (Claude)
+- Capturas do usuário com REC no MSFS 2024 → `merge_limits.py` → `Data/aircraft/*.json` (VNE, Vfe por dente, Vle, Mmo, CHT/óleo/EGT de pistão, VS0/VS1). Tabela para aprovação em `docs/plans/sensor-validation/F2.0-limites-capturados.md`.
+- `merge_limits.py`: filtros de plausibilidade (turbina sem EGT/óleo do sim, jato sem VNE/VS do sim, Vle acima da VNE descartada), ATC MODEL nos formatos `AC_MODEL_X` e `$$:X`, colunas opcionais `titlePattern`/`atcModelPattern` no `title_map.csv`; 5 testes novos.
+- Classe corrigida para Turboprop: A400M, ATR 42/72, King Air, ES30. `MAX RATED ENGINE RPM` não foi gravado (app antigo nas capturas): RPM vem do POH. 21 aeronaves que o usuário não tem ficam no padrão da classe.

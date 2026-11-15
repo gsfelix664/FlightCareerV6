@@ -1,11 +1,64 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "737 Max 8",
   "class": "Jet",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "737 Max 8"
+    ],
+    "atcModel": [
+      "N738B"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.82,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 320.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:5",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:8",
+      "value": 162.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 8 (20261115-0817-737_Max_8_Passengers.csv)",
+      "notes": null
+    }
+  ]
 }

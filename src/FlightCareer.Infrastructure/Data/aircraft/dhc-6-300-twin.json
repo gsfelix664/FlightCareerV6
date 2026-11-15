@@ -1,11 +1,80 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "DHC-6-300 Twin Otter"
+    ],
+    "atcModel": [
+      "DHC6"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 170.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 66.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 80.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 170.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 103.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 93.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 93.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 93.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0810-DHC-6-300_Twin_Otter_Skis.csv)",
+      "notes": null
+    }
+  ]
 }

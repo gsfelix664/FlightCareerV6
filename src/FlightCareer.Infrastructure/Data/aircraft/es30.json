@@ -1,11 +1,64 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 3,
   "id": "ES30",
-  "class": "Jet",
+  "class": "Turboprop",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "ES30"
+    ],
+    "atcModel": [
+      "ES-30"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 88.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 105.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 150.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0815-ES30_Passengers.csv)",
+      "notes": null
+    }
+  ]
 }

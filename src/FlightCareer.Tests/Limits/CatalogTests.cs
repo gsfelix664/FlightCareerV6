@@ -125,7 +125,7 @@ namespace FlightCareer.Tests.Limits
 
             var chtMax = c152.Limits.FirstOrDefault(l => l.Key == "chtMax");
             Assert.NotNull(chtMax);
-            Assert.Equal(260.2, chtMax.Value);
+            Assert.Equal(260.2, chtMax.Value, 1); // captura: 260,18 °C (500 °F)
             Assert.Equal("celsius", chtMax.Unit);
         }
     }

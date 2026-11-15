@@ -1,11 +1,80 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
   "simMatch": {
-    "title": [],
-    "atcModel": []
+    "title": [
+      "Beechcraft Bonanza"
+    ],
+    "atcModel": [
+      "BE36"
+    ]
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 205.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 649.07,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 61.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 68.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 145.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 124.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    }
+  ]
 }
