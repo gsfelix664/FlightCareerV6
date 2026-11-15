@@ -26,23 +26,10 @@ namespace FlightCareer.UI.Services
     /// </summary>
     public class PersistentFailureService
     {
-        // Comandos de flap bloqueados enquanto os flaps estiverem travados. A correção usa a SimVar
-        // FLAPS HANDLE INDEX (gravável), então nenhum destes eventos é transmitido pelo addon.
-        private static readonly string[] FlapPilotEvents =
-        {
-            "FLAPS_INCR", "FLAPS_DECR", "FLAPS_UP", "FLAPS_DOWN", "FLAPS_1", "FLAPS_2", "FLAPS_3", "FLAPS_4",
-            "FLAPS_SET", "AXIS_FLAPS_SET", "FLAPS_CONTINUOUS_INCR", "FLAPS_CONTINUOUS_DECR"
-        };
-
-        // Comandos de ligar o alternador bloqueados. A correção transmite ALTERNATOR_OFF (fora desta lista).
-        private static readonly string[] AlternatorPilotEvents =
-        {
-            "ALTERNATOR_ON", "ALTERNATOR_SET", "TOGGLE_ALTERNATOR1", "TOGGLE_MASTER_ALTERNATOR"
-        };
-
-        // Magnetos: sem bloqueio de eventos. Bloquear congelaria a chave (inclusive a partida em START).
-        // A vigilância força o magneto morto para 0, o que reproduz a tabela da pane:
-        // BOTH -> só o bom | L (morto) -> OFF, motor apaga | R -> R | OFF -> OFF.
+        // Chaves e comandos do piloto permanecem livres:
+        // - Alternador: desconectado do barramento (ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE); chave física fica em ON.
+        // - Flaps: superfície travada continuamente (WriteFlapSurfacePercent); alavanca física se move livremente.
+        // - Magnetos: chave acompanha a ignição (limitação do modelo 3D).
 
         private const double EngineDamageThresholdPercent = 10.0;
         private const double BrakesWornThresholdPercent = 15.0;
@@ -66,8 +53,6 @@ namespace FlightCareer.UI.Services
 
         private readonly Dictionary<int, bool> _nativeFlapFailedById = new();
         private bool _nativeFlapFailed;
-        private DateTime? _flapMismatchSince;
-        private DateTime? _lastFlapWrite;
 
         private PilotAircraft? _aircraft;
         private Func<string> _phaseProvider = () => string.Empty;
@@ -136,8 +121,6 @@ namespace FlightCareer.UI.Services
             _lastDbSync = DateTime.Now;
             ReleaseResolved(previousOpen);
             _lastCorrection.Clear();
-            _flapMismatchSince = null;
-            _lastFlapWrite = null;
             _nativeFlapFailedById.Clear();
             _nativeFlapFailed = false;
             _previous = null;
@@ -166,8 +149,6 @@ namespace FlightCareer.UI.Services
             if (_sensorFrames != null) _sensorFrames.OnFrame -= OnSensorFrame;
             _simConnect.SetMaskedEvents(Array.Empty<string>());
             _simConnect.SetPersistentToggles(Array.Empty<string>());
-            _flapMismatchSince = null;
-            _lastFlapWrite = null;
             _active = false;
         }
 
@@ -257,21 +238,8 @@ namespace FlightCareer.UI.Services
         {
             if (!_active) return;
 
-            var masked = new List<string>();
-            foreach (var defect in _openDefects)
-            {
-                switch (defect.Code)
-                {
-                    case DefectCatalog.FlapLock:
-                    case DefectCatalog.FlapDamage:
-                        masked.AddRange(FlapPilotEvents);
-                        break;
-                    case DefectCatalog.Alternator:
-                        masked.AddRange(AlternatorPilotEvents);
-                        break;
-                }
-            }
-            _simConnect.SetMaskedEvents(masked);
+            // Chaves e comandos livres no simulador (sem mascaramento)
+            _simConnect.SetMaskedEvents(Array.Empty<string>());
 
             // Toggles das panes abertas não são desfeitos pelo início de voo (ClearSimFailures)
             _simConnect.SetPersistentToggles(_openDefects
@@ -279,9 +247,15 @@ namespace FlightCareer.UI.Services
                 .Where(s => s.Enforcement == DefectEnforcement.NativeToggle && s.ToggleEvent != null)
                 .Select(s => s.ToggleEvent!));
 
-            // Panes reaplicadas por evento nativo TOGGLE_*.
+            // Panes reaplicadas por evento nativo TOGGLE_* (ou desconexão de alternador via SetAlternatorConnected)
             foreach (var defect in _openDefects)
             {
+                if (defect.Code == DefectCatalog.Alternator)
+                {
+                    _simConnect.SetAlternatorConnected(1, false);
+                    continue;
+                }
+
                 var spec = DefectCatalog.Get(defect.Code);
                 if (spec.Enforcement != DefectEnforcement.NativeToggle || spec.ToggleEvent == null) continue;
                 if (_togglesApplied.Contains(defect.Code)) continue;
@@ -304,8 +278,6 @@ namespace FlightCareer.UI.Services
             _previous = null;
             _suctionSeenHealthy = false;
             _suctionLowSince = null;
-            _flapMismatchSince = null;
-            _lastFlapWrite = null;
             _nativeFlapFailedById.Clear();
             _nativeFlapFailed = false;
             if (_active) _reapplyAfter = DateTime.Now + ReapplyDelayAfterLoad;
@@ -313,13 +285,7 @@ namespace FlightCareer.UI.Services
 
         private void OnMaskedEvent(string simEvent, uint data)
         {
-            // O comando já foi bloqueado pelo SimConnect. Só registrar para o piloto entender.
-            var defect = _openDefects.FirstOrDefault(d =>
-                (simEvent.StartsWith("FLAPS", StringComparison.OrdinalIgnoreCase) || simEvent.StartsWith("AXIS_FLAPS", StringComparison.OrdinalIgnoreCase))
-                    ? d.Code is DefectCatalog.FlapLock or DefectCatalog.FlapDamage
-                    : d.Code == DefectCatalog.Alternator);
-            if (defect != null && ShouldCorrect("masked:" + defect.Code, TimeSpan.FromSeconds(3)))
-                OnEnforcementAction?.Invoke($"Comando bloqueado ({simEvent}): {defect.Title}");
+            // Comandos de alternador e flap não são mais mascarados (comandos do piloto permanecem livres)
         }
 
         // ------------------------------------------------------------------ vigilância contínua
@@ -373,6 +339,14 @@ namespace FlightCareer.UI.Services
             foreach (var old in previous)
             {
                 if (_openDefects.Any(d => d.Code == old.Code)) continue;
+
+                if (old.Code == DefectCatalog.Alternator)
+                {
+                    _simConnect.SetAlternatorConnected(1, true);
+                    OnEnforcementAction?.Invoke($"Pane reparada, removida do simulador: {old.Title}");
+                    continue;
+                }
+
                 var spec = DefectCatalog.Get(old.Code);
                 if (spec.Enforcement != DefectEnforcement.NativeToggle || spec.ToggleEvent == null) continue;
 
@@ -407,25 +381,8 @@ namespace FlightCareer.UI.Services
 
                     case DefectCatalog.FlapLock:
                     case DefectCatalog.FlapDamage:
-                        var now = DateTime.Now;
-                        if (Math.Abs(state.FlapsHandleIndex - defect.Parameter) > FlapEnforcementPolicy.PositionTolerance)
-                        {
-                            _flapMismatchSince ??= now;
-                        }
-                        else
-                        {
-                            _flapMismatchSince = null;
-                        }
-
-                        if (FlapEnforcementPolicy.ShouldWrite(state.FlapsHandleIndex, defect.Parameter, _flapMismatchSince, _lastFlapWrite, now))
-                        {
-                            _lastFlapWrite = now;
-                            _simConnect.WriteFlapsHandleIndex(defect.Parameter);
-                        }
-                        break;
-
-                    case DefectCatalog.Alternator when state.AlternatorSwitch > 0.5:
-                        if (ShouldCorrect(defect.Code)) _simConnect.SendEvent("ALTERNATOR_OFF");
+                        double target = FlapSurfaceLock.TargetFraction(defect.Parameter, state.FlapsNumHandlePositions);
+                        _simConnect.WriteFlapSurfacePercent(target);
                         break;
 
                     // Motor inoperante: o sim zera a falha ao reiniciar o voo/recarregar a aeronave.

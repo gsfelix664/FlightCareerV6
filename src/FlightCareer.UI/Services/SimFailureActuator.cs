@@ -44,7 +44,7 @@ namespace FlightCareer.UI.Services
         private double _lastTransmittedLeak;
 
         // Enforcement
-        private double _lockedFlapsHandle;
+        private double _lockedFlapSurfacePercent;
         private DateTime _lastEnforcement = DateTime.MinValue;
 
         public event Action<FlightFailureRecord>? OnRecord;
@@ -66,6 +66,7 @@ namespace FlightCareer.UI.Services
                 _sim.ClearSimFailures();
                 if (_fireActive || _sim.CurrentData.IsEngineOnFire) _sim.SetEngineFire(false);
                 if (_oilLeakedPercent > 0 || _sim.CurrentData.OilLeakedPercent > 0) _sim.SetOilLeakedPercent(0.0);
+                if (_active.Contains(FailureEffect.AlternatorOff)) _sim.SetAlternatorConnected(1, true);
             }
 
             _active.Clear();
@@ -76,7 +77,7 @@ namespace FlightCareer.UI.Services
             _oilLeakedPercent = 0;
             _oilLeakRatePerMin = 0;
             _lastTransmittedLeak = 0;
-            _lockedFlapsHandle = 0;
+            _lockedFlapSurfacePercent = 0;
             _lastEnforcement = DateTime.MinValue;
         }
 
@@ -126,9 +127,13 @@ namespace FlightCareer.UI.Services
                     _sim.SetFailure("TOGGLE_HYDRAULIC_FAILURE");
                     break;
                 case FailureEffect.FlapJam:
-                    _lockedFlapsHandle = NormalizeFlaps(data.FlapsHandlePercent);
+                    _lockedFlapSurfacePercent = _sim.CurrentFailureState?.TrailingEdgeFlapsLeftPercent ?? NormalizeFlaps(data.FlapsHandlePercent);
+                    _sim.WriteFlapSurfacePercent(_lockedFlapSurfacePercent);
                     break;
-                // MagnetoLeft/MagnetoRight/AlternatorOff: mantidos em Process (enforcement)
+                case FailureEffect.AlternatorOff:
+                    _sim.SetAlternatorConnected(1, false);
+                    break;
+                // MagnetoLeft/MagnetoRight: mantidos em Process (enforcement)
             }
         }
 
@@ -251,19 +256,9 @@ namespace FlightCareer.UI.Services
                 }
             }
 
-            if (_active.Contains(FailureEffect.AlternatorOff) && data.MasterAlternator > 0.5)
+            if (_active.Contains(FailureEffect.FlapJam))
             {
-                // ALTERNATOR_OFF é idempotente (testado no MSFS 2024); um TOGGLE podia religar a chave
-                // se chegasse junto com a correção do PersistentFailureService
-                _sim.SendEvent("ALTERNATOR_OFF");
-                _lastEnforcement = DateTime.Now;
-                return;
-            }
-
-            if (_active.Contains(FailureEffect.FlapJam) && Math.Abs(NormalizeFlaps(data.FlapsHandlePercent) - _lockedFlapsHandle) > 0.02)
-            {
-                _sim.SendEvent("FLAPS_SET", (uint)Math.Round(Math.Clamp(_lockedFlapsHandle, 0.0, 1.0) * 16383.0));
-                _lastEnforcement = DateTime.Now;
+                _sim.WriteFlapSurfacePercent(_lockedFlapSurfacePercent);
             }
         }
 
