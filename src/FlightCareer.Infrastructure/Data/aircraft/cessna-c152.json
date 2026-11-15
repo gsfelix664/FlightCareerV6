@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
@@ -171,6 +171,14 @@
       "unit": "rpm",
       "source": "SimVar",
       "reference": "MAX RATED ENGINE RPM:1 (20261115-1733-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60.0,
+      "unit": "amperes",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 7 p. 7-22 (28-volt DC 60-amp alternator, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
     }
   ]

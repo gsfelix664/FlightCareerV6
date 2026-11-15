@@ -8,6 +8,7 @@ Cessna C152,vfe:2,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 20°
 Cessna C152,vfe:3,85,knots,"Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 30° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
 Cessna C152,gLimitPos,4.4,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up +4.4g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
 Cessna C152,gLimitNeg,-1.76,g,"Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
+Cessna C152,alternatorRatedAmps,60,amperes,"Cessna 152 POH 1979, Sec. 7 p. 7-22 (28-volt DC 60-amp alternator, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)"
 C172SP G1000,rpmRedline,2700,rpm,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 C172SP G1000,chtMax,260,celsius,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-7 (500 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"
 C172SP G1000,oilTempMax,118,celsius,"Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (245 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)"

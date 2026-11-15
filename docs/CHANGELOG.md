@@ -1759,3 +1759,10 @@
 ## 2026-11-15 - Primeira calibração pelo modo Calibrar: C152 (Claude)
 - Log `20261115-1733-Cessna_C152.csv` analisado pelo `calibrate.py`: `elecMainBusIndex` 1 e `elecSystemVolts` 28 (queda de 3,7 V com o ALT desligado), `rpmMaxRated` 2.550 (`source: SimVar`); `cessna-c152.json` `dataVersion` 5.
 - Passos de aviônicos pulados (sem chave de aviônicos usada no C152): `elecAvionicsCircuitIndex` ausente, a regra de partida com aviônicos ligados fica desligada no C152. Passos `rudder-full` e `end` não marcados. `alternatorRatedAmps` do C152 ainda depende do POH (regra de sobrecarga desligada até lá).
+
+## 2026-11-15 - Alternador do C152 pelo POH (Gemini)
+- **Capacidade Nominal do Alternador do C152 (`poh_values.csv` e `cessna-c152.json`)**:
+  - Evidência literal localizada no POH oficial do Cessna 152 (1979), Seção 7 (Airplane & Systems Descriptions › Electrical System), página 7-22: *"The airplane is equipped with a 28-volt, direct-current electrical system ... and a belt-driven 60-amp alternator to maintain the battery's state of charge."*.
+  - Adicionada entrada em `tools/aircraft_limits/poh_values.csv` (`Cessna C152,alternatorRatedAmps,60,amperes,...`).
+  - Executado `tools/aircraft_limits/merge_limits.py`, atualizando `cessna-c152.json` com `alternatorRatedAmps: 60.0`, `source: POH`, unidade `amperes` e incrementando `dataVersion` para 6.
+  - Habilita a regra de sobrecarga elétrica (`electrical_system_overload_amps`) no Cessna 152.
