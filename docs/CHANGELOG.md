@@ -1540,3 +1540,21 @@
 
 ## 2026-11-15 - F2.2: regras de desgaste aprovadas (Claude)
 - Usuário aprovou as 23 regras do `wear_rules.json`. Na aprovação pediu a expansão do catálogo de peças (aviônicos/IFR/GPS/FMS/piloto automático, elétrico, superfícies de comando e empenagem, estrutura de fuselagem pressurizada, asa, trem de pouso detalhado), com custo de reparo em % do valor da aeronave e tempo de hangar — tarefa F2.1b. Nenhum código mudou.
+
+## 2026-11-15 - F2.1b: expansão do catálogo de peças e regras (Gemini)
+- **Expansão do catálogo de peças (`parts_catalog.json`)**:
+  - Catálogo ampliado de 58 para 96 peças, cobrindo detalhadamente superfícies de comando e empenagem (6 peças), trem de pouso estrutural e rodas (5 peças), asa e hipersustentadores/spoilers/degelo (9 peças), fuselagem e anteparas pressurizadas (8 peças), elétrico AC (1 peça) e aviônicos/IFR/telas/FMS/autopilot (9 peças).
+  - Adicionados campos `repairCostPctOfAircraft` ([min, max]), `downtimeHours` ([min, max]) e `failureEffect` a 100% das 96 peças do catálogo com validação estrita.
+- **Novos grupos e vocabulário de características**:
+  - `PartGroup`: adicionados grupos `Empenagem`, `Asa`, `Fuselagem` e `Aviônicos`.
+  - `AircraftFeatures`: adicionadas 11 features funcionais (`glassCockpit`, `fms`, `autopilot`, `weatherRadar`, `slats`, `spoilers`, `thsTrim`, `deIceBoots`, `bleedAntiIce`, `antiskid`, `noseWheelSteering`) com validações de coerência mandatória.
+- **Aeronaves e limite Va (`Data/aircraft/*.json`)**:
+  - Atualizados os 46 arquivos JSON com incremento de `dataVersion` e mapeamento de features funcionais.
+  - Adicionada chave `va` (velocidade de manobra) a `LimitKeys` e preenchida a partir de POH nas aeronaves calibradas.
+- **Ampliação das regras de desgaste (`wear_rules.json`)**:
+  - Adicionadas 12 novas regras operacionais (total de 35 regras): comando brusco acima de Va, ciclos de trim, acúmulo de gelo sem degelo, ciclos de botas pneumáticas, tailstrike, wingtip strike, vento cruzado com carga lateral, curva rápida no táxi, overspeed de speedbrake, ciclos de pressurização de fuselagem, ciclos estruturais de pouso e frenagem de alta energia com antiskid.
+- **Sensores e Inventário**:
+  - Confirmadas no SDK e registradas 5 novas SimVars globais: `ELEVATOR POSITION`, `AILERON POSITION`, `RUDDER POSITION`, `AUTOPILOT MASTER` e `AVIONICS MASTER SWITCH` (total de 378 sensores, paridade 100% com `sensor-inventory.md`).
+- **Testes e verificação**:
+  - Build 0 erros; 219 testes xUnit e 40 testes python aprovados com 100% de sucesso.
+  - Relatório completo submetido para aprovação do usuário em `docs/reviews/F2.1b-relatorio.md`.

@@ -302,3 +302,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.1 (lista de peças, portão) · 2026-11-15 · APROVADO PELO USUÁRIO com 2 correções (pneu dianteiro só triciclo; magnetos NO-GO) · [Relatório](docs/reviews/F2.1-relatorio.md)
 - F2.2 · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.2-relatorio.md) · branch feat/parts-f2.2
 - F2.2 (regras de desgaste, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Relatório](docs/reviews/F2.2-relatorio.md). Pedido do usuário na aprovação: expandir o catálogo (aviônicos, elétrico, superfícies de comando, estrutura, trem e asa detalhados) → tarefa F2.1b.
+- F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b
