@@ -37,6 +37,28 @@ namespace FlightCareer.Tests.Parts
                 1);
         }
 
+        private static AircraftLimitProfile CreateTwinProfile()
+        {
+            var limits = new List<AircraftLimit>
+            {
+                new(LimitKeys.RpmRedline, 2550, "rpm", LimitSource.POH, "Twin POH"),
+                new(LimitKeys.ChtMax, 240, "celsius", LimitSource.POH, "Twin POH"),
+                new(LimitKeys.OilTempMax, 118, "celsius", LimitSource.POH, "Twin POH"),
+                new(LimitKeys.OilPressMin, 25, "psi", LimitSource.POH, "Twin POH"),
+                new(LimitKeys.Vne, 200, "knots", LimitSource.POH, "Twin POH")
+            };
+
+            return new AircraftLimitProfile(
+                "BARON58",
+                "B",
+                2,
+                new[] { "Baron 58", "B58" },
+                new[] { "B58" },
+                limits,
+                new[] { "piston", "constantSpeedProp", "retractableGear", "twinEngine", "naturallyAspirated", "unpressurized" },
+                2);
+        }
+
         [Fact]
         public void NormalWear_OneHourGreen_LosesExactNominalHealth()
         {
@@ -51,20 +73,21 @@ namespace FlightCareer.Tests.Parts
             {
                 Id = Guid.NewGuid(),
                 PartId = "engine.cylinders",
+                EngineIndex = 1,
                 Health = 100.0,
                 HoursSinceReplacement = 0.0
             };
 
-            // 1 hora em voo de cruzeiro totalmente verde
+            // 1 hora em voo de cruzeiro totalmente verde (com chaves reais do motor 1)
             var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
             {
-                ["eng-rpm"] = 2200.0,
-                ["eng-max-reached-rpm"] = 2200.0,
-                ["eng-cht"] = 180.0,
+                ["eng-rpm:1"] = 2200.0,
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["eng-cht:1"] = 180.0,
                 ["eng-max-cht"] = 180.0,
-                ["oil-temperature"] = 80.0,
+                ["oil-temperature:1"] = 80.0,
                 ["oil-max-temperature"] = 80.0,
-                ["oil-pressure"] = 55.0,
+                ["oil-pressure:1"] = 55.0,
                 ["oil-warning-pressure"] = 55.0,
                 ["af-airspeed-indicated"] = 95.0,
                 ["af-g-force"] = 1.0,
@@ -94,22 +117,22 @@ namespace FlightCareer.Tests.Parts
             var profile = CreateC152Profile();
             var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
 
-            var cylPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
-            var valvesPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.valves", Health = 100.0 };
-            var tiresPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "tires.main", Health = 100.0 };
+            var cylPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            var valvesPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.valves", EngineIndex = 1, Health = 100.0 };
+            var tiresPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "tires.main", EngineIndex = 0, Health = 100.0 };
 
             var parts = new[] { cylPart, valvesPart, tiresPart };
 
             // CHT a 265 °C (acima do limite de 240 °C -> faixa severa da regra piston_cht_overheat)
             var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
             {
-                ["eng-rpm"] = 2300.0,
-                ["eng-max-reached-rpm"] = 2300.0,
-                ["eng-cht"] = 265.0,
+                ["eng-rpm:1"] = 2300.0,
+                ["eng-max-reached-rpm:1"] = 2300.0,
+                ["eng-cht:1"] = 265.0,
                 ["eng-max-cht"] = 265.0,
-                ["oil-temperature"] = 85.0,
+                ["oil-temperature:1"] = 85.0,
                 ["oil-max-temperature"] = 85.0,
-                ["oil-pressure"] = 50.0,
+                ["oil-pressure:1"] = 50.0,
                 ["oil-warning-pressure"] = 50.0,
                 ["af-airspeed-indicated"] = 90.0,
                 ["af-g-force"] = 1.0,
@@ -144,18 +167,18 @@ namespace FlightCareer.Tests.Parts
             var profile = CreateC152Profile();
             var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
 
-            var part1x = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
-            var part4x = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
+            var part1x = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            var part4x = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
 
             var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
             {
-                ["eng-rpm"] = 2200.0,
-                ["eng-max-reached-rpm"] = 2200.0,
-                ["eng-cht"] = 180.0,
+                ["eng-rpm:1"] = 2200.0,
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["eng-cht:1"] = 180.0,
                 ["eng-max-cht"] = 180.0,
-                ["oil-temperature"] = 80.0,
+                ["oil-temperature:1"] = 80.0,
                 ["oil-max-temperature"] = 80.0,
-                ["oil-pressure"] = 55.0,
+                ["oil-pressure:1"] = 55.0,
                 ["oil-warning-pressure"] = 55.0,
                 ["af-airspeed-indicated"] = 90.0,
                 ["af-g-force"] = 1.0,
@@ -185,20 +208,20 @@ namespace FlightCareer.Tests.Parts
             var profile = CreateC152Profile(); // C152 é piston
             var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
 
-            var cylPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
+            var cylPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
 
             // Sensores normais mas com ITT altíssimo (950 °C)
             var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
             {
-                ["eng-rpm"] = 2200.0,
-                ["eng-max-reached-rpm"] = 2200.0,
-                ["eng-cht"] = 180.0,
+                ["eng-rpm:1"] = 2200.0,
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["eng-cht:1"] = 180.0,
                 ["eng-max-cht"] = 180.0,
-                ["oil-temperature"] = 80.0,
+                ["oil-temperature:1"] = 80.0,
                 ["oil-max-temperature"] = 80.0,
-                ["oil-pressure"] = 55.0,
+                ["oil-pressure:1"] = 55.0,
                 ["oil-warning-pressure"] = 55.0,
-                ["turb-itt"] = 950.0,
+                ["turb-itt:1"] = 950.0,
                 ["turb-max-itt"] = 950.0,
                 ["af-airspeed-indicated"] = 90.0,
                 ["af-g-force"] = 1.0,
@@ -264,17 +287,17 @@ namespace FlightCareer.Tests.Parts
             var profileWithPoh = CreateC152Profile();
             var resolverPoh = new AircraftLimitResolver(new[] { profileWithPoh }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
 
-            var part1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
+            var part1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
 
             var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
             {
-                ["eng-rpm"] = 2200.0, // Verde no addon
-                ["eng-max-reached-rpm"] = 2200.0,
-                ["eng-cht"] = 180.0,
+                ["eng-rpm:1"] = 2200.0, // Verde no addon
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["eng-cht:1"] = 180.0,
                 ["eng-max-cht"] = 180.0,
-                ["oil-temperature"] = 80.0,
+                ["oil-temperature:1"] = 80.0,
                 ["oil-max-temperature"] = 80.0,
-                ["oil-pressure"] = 55.0,
+                ["oil-pressure:1"] = 55.0,
                 ["oil-warning-pressure"] = 55.0,
                 ["af-airspeed-indicated"] = 90.0,
                 ["af-g-force"] = 1.0,
@@ -303,7 +326,7 @@ namespace FlightCareer.Tests.Parts
             var profileClassDefault = new AircraftLimitProfile("C152CD", "A", 1, new[] { "C152CD" }, new[] { "C152CD" }, limitsClassDefault, profileWithPoh.Features, 1);
             var resolverClassDefault = new AircraftLimitResolver(new[] { profileClassDefault }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
 
-            var part2 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", Health = 100.0 };
+            var part2 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
             var resClassDefault = engine.ApplyTick(new[] { part2 }, frame, 0.1, profileClassDefault.Features, resolverClassDefault, profileClassDefault);
 
             // Com ClassDefault e taxa nativa alta, a reserva nativa atua e dispara a regra!
@@ -359,6 +382,254 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(0.0, part.Health);
             Assert.True(part.IsBroken);
             Assert.Equal(brokenAt, part.BrokenAtUtc);
+        }
+
+        [Fact]
+        public void ApplyTick_RpmPorMotor_EngRpm1AcimaDoRedline_DesgastaPecasDoMotor()
+        {
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            var cylPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+
+            var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["eng-rpm:1"] = 2600.0, // Acima de rpmRedline (2550)
+                ["eng-max-reached-rpm:1"] = 2600.0,
+                ["eng-cht:1"] = 180.0,
+                ["eng-max-cht"] = 180.0,
+                ["oil-temperature:1"] = 80.0,
+                ["oil-max-temperature"] = 80.0,
+                ["oil-pressure:1"] = 55.0,
+                ["oil-warning-pressure"] = 55.0,
+                ["af-airspeed-indicated"] = 90.0,
+                ["af-g-force"] = 1.0,
+                ["af-max-g-force"] = 1.0,
+                ["af-min-g-force"] = 1.0,
+                ["af-flaps-handle-index"] = 0.0
+            };
+
+            var frame = new SensorFrame(sensorValues, DateTime.UtcNow, 1.0);
+            double dtHours = 0.1;
+
+            var result = engine.ApplyTick(new[] { cylPart }, frame, dtHours, profile.Features, resolver, profile);
+
+            double normalLoss = (70.0 / PartsCatalog.Get("engine.cylinders")!.LifeHours) * dtHours;
+            double actualLoss = 100.0 - cylPart.Health;
+
+            Assert.True(actualLoss > normalLoss, $"Desgaste com sobrevelocidade ({actualLoss}) deveria superar o normal ({normalLoss}).");
+            Assert.Contains(result.Exceedances, e => e.RuleId == "piston_rpm_overspeed" && e.TargetId.Contains(":1") && e.Notes.Contains("Motor 1"));
+        }
+
+        [Fact]
+        public void ApplyTick_ChaveGlobal_ContinuaFuncionando()
+        {
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            var wingPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "airframe.wing_structure", EngineIndex = 0, Health = 100.0 };
+
+            // Vne = 149 kt no C152 POH; sensor global af-airspeed-indicated a 160 kt
+            var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["eng-rpm:1"] = 2200.0,
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["af-airspeed-indicated"] = 160.0,
+                ["af-airspeed-mach"] = 0.25,
+                ["af-g-force"] = 1.0,
+                ["af-max-g-force"] = 1.0,
+                ["af-min-g-force"] = 1.0
+            };
+
+            var frame = new SensorFrame(sensorValues, DateTime.UtcNow, 1.0);
+            var result = engine.ApplyTick(new[] { wingPart }, frame, 0.1, profile.Features, resolver, profile);
+
+            Assert.Contains(result.Exceedances, e => e.RuleId == "vne_airspeed_exceedance");
+            Assert.True(wingPart.Health < 100.0);
+        }
+
+        [Fact]
+        public void ApplyTick_Bimotor_SoMotor2EmVermelho_DesgastaSoPecasDoMotor2()
+        {
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var profile = CreateTwinProfile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            var cyl1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            var cyl2 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 2, Health = 100.0 };
+            // Peça compartilhada com EngineIndex 0 presente na regra piston_rpm_overspeed
+            var sharedPart = new AircraftPart { Id = Guid.NewGuid(), PartId = "propeller.governor", EngineIndex = 0, Health = 100.0 };
+
+            var parts = new[] { cyl1, cyl2, sharedPart };
+
+            // Motor 1 a 2200 RPM (verde), Motor 2 a 2700 RPM (vermelho)
+            var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["eng-rpm:1"] = 2200.0,
+                ["eng-max-reached-rpm:1"] = 2200.0,
+                ["eng-rpm:2"] = 2700.0,
+                ["eng-max-reached-rpm:2"] = 2700.0,
+                ["eng-cht:1"] = 180.0,
+                ["eng-cht:2"] = 180.0,
+                ["eng-max-cht"] = 180.0,
+                ["oil-temperature:1"] = 80.0,
+                ["oil-temperature:2"] = 80.0,
+                ["oil-max-temperature"] = 80.0,
+                ["oil-pressure:1"] = 55.0,
+                ["oil-pressure:2"] = 55.0,
+                ["oil-warning-pressure"] = 55.0,
+                ["af-airspeed-indicated"] = 120.0,
+                ["af-g-force"] = 1.0,
+                ["af-max-g-force"] = 1.0,
+                ["af-min-g-force"] = 1.0,
+                ["af-flaps-handle-index"] = 0.0
+            };
+
+            var frame = new SensorFrame(sensorValues, DateTime.UtcNow, 1.0);
+            double dtHours = 0.1;
+
+            var result = engine.ApplyTick(parts, frame, dtHours, profile.Features, resolver, profile);
+
+            double normalCylLoss = (70.0 / PartsCatalog.Get("engine.cylinders")!.LifeHours) * dtHours;
+            double actualCyl1Loss = 100.0 - cyl1.Health;
+            double actualCyl2Loss = 100.0 - cyl2.Health;
+
+            // Motor 1 perdeu apenas o normal
+            Assert.Equal(normalCylLoss, actualCyl1Loss, 5);
+
+            // Motor 2 perdeu muito mais que o normal (faixa severa/warning)
+            Assert.True(actualCyl2Loss > normalCylLoss * 2.0);
+
+            // Peça compartilhada (EngineIndex 0) recebeu estresse do pior motor (motor 2) uma vez só (sem somar)
+            double normalSharedLoss = (70.0 / PartsCatalog.Get("propeller.governor")!.LifeHours) * dtHours;
+            double actualSharedLoss = 100.0 - sharedPart.Health;
+            Assert.True(actualSharedLoss > normalSharedLoss);
+        }
+
+        [Fact]
+        public void ApplyTick_Bimotor_ExcedenciaRastreadaPorMotor()
+        {
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var profile = CreateTwinProfile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            var cyl1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            var cyl2 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 2, Health = 100.0 };
+
+            var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["eng-rpm:1"] = 2600.0,
+                ["eng-max-reached-rpm:1"] = 2600.0,
+                ["eng-rpm:2"] = 2700.0,
+                ["eng-max-reached-rpm:2"] = 2700.0,
+                ["af-airspeed-indicated"] = 120.0
+            };
+
+            var frame = new SensorFrame(sensorValues, DateTime.UtcNow, 1.0);
+            var result = engine.ApplyTick(new[] { cyl1, cyl2 }, frame, 0.1, profile.Features, resolver, profile);
+
+            var ex1 = result.Exceedances.FirstOrDefault(e => e.RuleId == "piston_rpm_overspeed" && e.TargetId == "engine.cylinders:1");
+            var ex2 = result.Exceedances.FirstOrDefault(e => e.RuleId == "piston_rpm_overspeed" && e.TargetId == "engine.cylinders:2");
+
+            Assert.NotNull(ex1);
+            Assert.NotNull(ex2);
+            Assert.Equal(2600.0, ex1.PeakValue);
+            Assert.Equal(2700.0, ex2.PeakValue);
+            Assert.Contains("(Motor 1)", ex1.Notes);
+            Assert.Contains("(Motor 2)", ex2.Notes);
+        }
+
+        [Fact]
+        public void ApplyEvent_BimotorPecasRepetidas_NaoLancaExcecao_EAplicaEmTodas()
+        {
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var profile = CreateTwinProfile();
+
+            var gear1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "gear.main_struts", EngineIndex = 1, Health = 100.0 };
+            var gear2 = new AircraftPart { Id = Guid.NewGuid(), PartId = "gear.main_struts", EngineIndex = 2, Health = 100.0 };
+
+            var parts = new[] { gear1, gear2 };
+
+            // Toque duro de 700 fpm com duas peças do mesmo PartId
+            var res = engine.ApplyEvent(parts, WearRuleMetrics.TouchdownFpm, 700.0, profile.Features);
+
+            Assert.True(gear1.Health < 100.0);
+            Assert.True(gear2.Health < 100.0);
+            Assert.Equal(gear1.Health, gear2.Health);
+            Assert.NotEmpty(res.Inspections);
+        }
+
+        [Fact]
+        public void Tracker_DiagnosticoDeSensorAusente_SaiUmaVezPorVoo()
+        {
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+            var tracker = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+
+            var cyl = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            tracker.Begin(new[] { cyl }, profile, profile.Features);
+
+            // Frame sem sensores de motor (ausentes)
+            var sensorValues = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["af-airspeed-indicated"] = 90.0
+            };
+            var frame = new SensorFrame(sensorValues, DateTime.UtcNow, 1.0);
+
+            // Tick 1: deve conter diagnósticos de sensores ausentes citando a tentativa com :1
+            var tick1 = tracker.ProcessTick(frame, 1.0 / 3600.0, DateTime.UtcNow);
+            Assert.NotEmpty(tick1.DiagnosticMessages);
+            Assert.Contains(tick1.DiagnosticMessages, m => m.Contains("'eng-rpm' (nem 'eng-rpm:1')"));
+
+            // Ticks 2 a 10: os mesmos diagnósticos NÃO devem se repetir
+            for (int i = 2; i <= 10; i++)
+            {
+                var tickN = tracker.ProcessTick(frame, 1.0 / 3600.0, DateTime.UtcNow);
+                Assert.Empty(tickN.DiagnosticMessages);
+            }
+
+            // Após Reset e novo Begin, diagnósticos devem sair mais uma vez
+            tracker.Reset();
+            tracker.Begin(new[] { cyl }, profile, profile.Features);
+
+            var tickNovoVoo = tracker.ProcessTick(frame, 1.0 / 3600.0, DateTime.UtcNow);
+            Assert.NotEmpty(tickNovoVoo.DiagnosticMessages);
+            Assert.Contains(tickNovoVoo.DiagnosticMessages, m => m.Contains("'eng-rpm' (nem 'eng-rpm:1')"));
+        }
+
+        [Fact]
+        public void WearRules_TodoSensorExisteNoLayoutReal_PorPerfil()
+        {
+            var registry = SensorRegistry.LoadDefault();
+            var loader = new Infrastructure.Services.AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles();
+
+            Assert.NotEmpty(profiles);
+
+            foreach (var profile in profiles)
+            {
+                int engineCount = Math.Max(1, profile.EngineCount);
+                var layout = SensorLayout.Build(registry.Sensors, engineCount, includeCalibration: false);
+                var layoutKeys = layout.Blocks.SelectMany(b => b.Slots).Select(s => s.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var featureSet = new HashSet<string>(profile.Features, StringComparer.OrdinalIgnoreCase);
+
+                foreach (var rule in WearRules.Rules)
+                {
+                    if (!rule.AppliesTo.Matches(featureSet)) continue;
+
+                    foreach (var sensorKey in rule.Sensors)
+                    {
+                        bool hasExact = layoutKeys.Contains(sensorKey);
+                        bool hasEngine = Enumerable.Range(1, engineCount).Any(e => layoutKeys.Contains($"{sensorKey}:{e}"));
+
+                        Assert.True(hasExact || hasEngine,
+                            $"Aeronave '{profile.AircraftId}' (motores={engineCount}): sensor '{sensorKey}' da regra '{rule.Id}' não existe no layout (nem exato nem por motor).");
+                    }
+                }
+            }
         }
     }
 }
