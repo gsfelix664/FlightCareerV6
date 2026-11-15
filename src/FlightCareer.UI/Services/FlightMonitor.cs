@@ -59,6 +59,8 @@ namespace FlightCareer.UI.Services
         private readonly Stopwatch _fastClock = Stopwatch.StartNew();
         private DateTime _lastFastSample = DateTime.MinValue;
         private bool _impactCrashHandled;
+        // Perda total em andamento: crash do sim, crash do addon e componentes a 0% podem chegar juntos
+        private bool _totalLossInProgress;
         private static readonly TimeSpan FastStreamTimeout = TimeSpan.FromSeconds(3);
         /// <summary>Leitura rápida chegando: o toque é medido nela; senão, cai no cálculo antigo pela telemetria de 1 s.</summary>
         private bool FastStreamAlive => DateTime.Now - _lastFastSample < FastStreamTimeout;
@@ -95,11 +97,7 @@ namespace FlightCareer.UI.Services
 
             _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
             _persistentFailures.OnDefectRecorded += OnDefectRecorded;
-            _persistentFailures.OnNativeCrash += cause =>
-            {
-                _telemetryLogger.LogEvent("CRASH_FLAG_MSFS", cause);
-                OnAlert?.Invoke("ACIDENTE REPORTADO PELO SIMULADOR", cause, true);
-            };
+            _persistentFailures.OnNativeCrash += HandleSimulatorCrash;
             _persistentFailures.OnEnforcementAction += msg => _telemetryLogger.LogEvent("PANE_PERSISTENTE", msg);
         }
 
@@ -326,8 +324,10 @@ namespace FlightCareer.UI.Services
 
             _touchdown.Reset();
             _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnFastFlightReceived += OnFastFlight;
+            _simConnect.OnCrashEvent += OnSimConnectCrash;
             IsMonitoring = true;
 
             OnAlert?.Invoke("SISTEMA INICIALIZADO", "O monitoramento começará automaticamente 10 segundos após você ligar os motores e soltar o freio de estacionamento.", false);
@@ -346,6 +346,7 @@ namespace FlightCareer.UI.Services
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
             _simConnect.OnFastFlightReceived -= OnFastFlight;
+            _simConnect.OnCrashEvent -= OnSimConnectCrash;
             _persistentFailures.Stop();
             // Volta ao modo vigia: as panes (inclusive as que surgiram neste voo) seguem aplicadas após o pouso
             var keepWatching = _aircraft ?? _watchedAircraft;
@@ -433,9 +434,42 @@ namespace FlightCareer.UI.Services
             OnMonitoringCancelled?.Invoke();
         }
 
+        private void OnSimConnectCrash(object? sender, EventArgs e) =>
+            HandleSimulatorCrash("Acidente reportado pelo simulador");
+
+        private void HandleSimulatorCrash(string cause)
+        {
+            var decision = CrashPolicy.Decide(IsMonitoring, IsFlightActive, _impactCrashHandled);
+            switch (decision)
+            {
+                case CrashDecision.TotalLoss:
+                    _impactCrashHandled = true;
+                    bool alreadyApplied = _failures.CrashApplied;
+                    _failures.MarkCrashApplied();
+                    if (!alreadyApplied)
+                    {
+                        _telemetryLogger.LogEvent("CRASH_MSFS", cause);
+                        _currentStatus = "ACIDENTE";
+                        OnStatusChanged?.Invoke(_currentStatus);
+                        OnAlert?.Invoke("ACIDENTE", $"O simulador reportou acidente: {cause}. A aeronave foi perdida.", true);
+                    }
+                    _ = HandleTotalLossAsync();
+                    break;
+
+                case CrashDecision.AlertOnly:
+                    _telemetryLogger.LogEvent("CRASH_FLAG_MSFS", cause);
+                    OnAlert?.Invoke("ACIDENTE REPORTADO PELO SIMULADOR", cause, true);
+                    break;
+
+                case CrashDecision.Ignore:
+                    break;
+            }
+        }
+
         private async Task HandleTotalLossAsync()
         {
-            if (_aircraft == null) return;
+            if (_aircraft == null || _totalLossInProgress) return;
+            _totalLossInProgress = true;
             
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
@@ -719,6 +753,7 @@ namespace FlightCareer.UI.Services
             if (ev.Kind == TouchdownKind.Crash)
             {
                 _impactCrashHandled = true;
+                _failures.MarkCrashApplied();
                 _telemetryLogger.LogEvent("CRASH_ADDON", $"{ev.Reason} ({summary})");
                 _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
                 _currentStatus = "ACIDENTE";
@@ -842,6 +877,7 @@ namespace FlightCareer.UI.Services
             _qualityService.Reset();
             _touchdown.Reset();
             _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
             _simulatedFlightTimeSeconds = 0;

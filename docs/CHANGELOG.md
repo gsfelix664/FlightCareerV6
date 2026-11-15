@@ -1594,4 +1594,18 @@
   - `PartCatalogTests` e `WearRuleCatalogTests` atualizados com novos testes cobrindo todos os 23 grupos, peças com vida calendárica, coerência das novas features e métricas fechadas.
   - Build com 0 erros; 225 testes xUnit e 40 testes python aprovados com 100% de sucesso.
 
+## 2026-11-15 - F4.2d Crash no solo e flaps sem briga com pane nativa (Gemini)
+- **Bug 1: Crash do simulador no solo vira acidente com perda total direta**:
+  - Criada a política pura `CrashPolicy` (`src/FlightCareer.Domain/Components/CrashPolicy.cs`) com o método `Decide(bool isMonitoring, bool isFlightActive, bool alreadyHandled)` retornando `TotalLoss`, `AlertOnly` ou `Ignore`.
+  - Em `FlightMonitor.cs`, unificado o tratamento de acidentes do simulador no ponto de entrada `HandleSimulatorCrash(string cause)`.
+  - Conectados tanto `_persistentFailures.OnNativeCrash` (`CRASH FLAG`) quanto `_simConnect.OnCrashEvent` (evento `Crashed`, inscrito em `StartMonitoring` e desinscrito em `StopMonitoring`).
+  - Em `ComponentFlightSession.cs`, expostos `CrashApplied` e `MarkCrashApplied()` para evitar alertas duplicados ou reentrância entre `ComponentFlightSession.ProcessTick`, `TouchdownDetector` e `HandleSimulatorCrash`.
+- **Bug 2: Flaps sem briga com pane nativa do simulador**:
+  - Criada a política pura `FlapEnforcementPolicy` (`src/FlightCareer.Domain/Components/FlapEnforcementPolicy.cs`) com `ShouldWrite(double currentIndex, double lockedIndex, bool nativeFlapFailed, DateTime? mismatchSince, DateTime? lastWrite, DateTime now)`.
+  - No `PersistentFailureService.cs`, o estado nativo dos flaps (`_nativeFlapFailed = nw-is-failed-5..8 >= 0,5`) passa a ser acompanhado em todos os modos (voo e vigia) através de `_sensorFrames.OnFrame`.
+  - No `Enforce()`, suspensa a reescrita de `FLAPS HANDLE INDEX` enquanto a pane nativa estiver ativa (`_nativeFlapFailed`), com confirmação de mismatch de 0,5 s e throttle de escrita de 1,0 s (`FlapCorrectionThrottle`), eliminando o loop de som do motor de flaps do MSFS.
+- **Testes unitários**:
+  - Criados `CrashPolicyTests.cs` e `FlapEnforcementPolicyTests.cs` em `src/FlightCareer.Tests/Components/`, totalizando 241 testes passando com 100% de sucesso.
+
+
 
