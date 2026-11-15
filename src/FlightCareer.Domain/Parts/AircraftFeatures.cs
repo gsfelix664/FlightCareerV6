@@ -40,6 +40,23 @@ namespace FlightCareer.Domain.Parts
         public const string Apu = "apu";
         public const string ElectricHybrid = "electricHybrid";
 
+        // Aviônicos e navegação
+        public const string GlassCockpit = "glassCockpit";
+        public const string Fms = "fms";
+        public const string Autopilot = "autopilot";
+        public const string WeatherRadar = "weatherRadar";
+
+        // Aerodinâmica e superfícies
+        public const string Slats = "slats";
+        public const string Spoilers = "spoilers";
+        public const string ThsTrim = "thsTrim";
+
+        // Sistemas de proteção e trem
+        public const string DeIceBoots = "deIceBoots";
+        public const string BleedAntiIce = "bleedAntiIce";
+        public const string Antiskid = "antiskid";
+        public const string NoseWheelSteering = "noseWheelSteering";
+
         /// <summary>
         /// Todas as características válidas no vocabulário fechado.
         /// </summary>
@@ -62,7 +79,18 @@ namespace FlightCareer.Domain.Parts
             Pressurized,
             HydraulicGear,
             Apu,
-            ElectricHybrid
+            ElectricHybrid,
+            GlassCockpit,
+            Fms,
+            Autopilot,
+            WeatherRadar,
+            Slats,
+            Spoilers,
+            ThsTrim,
+            DeIceBoots,
+            BleedAntiIce,
+            Antiskid,
+            NoseWheelSteering
         };
 
         /// <summary>
@@ -153,6 +181,30 @@ namespace FlightCareer.Domain.Parts
             if ((set.Contains(Piston) || set.Contains(Turboprop)) && !set.Contains(FixedPitchProp) && !set.Contains(ConstantSpeedProp))
             {
                 throw new InvalidOperationException($"{ctx}: motor a pistão ou turboélice deve definir fixedPitchProp ou constantSpeedProp.");
+            }
+
+            // 9. deIceBoots e bleedAntiIce exclusivos
+            if (set.Contains(DeIceBoots) && set.Contains(BleedAntiIce))
+            {
+                throw new InvalidOperationException($"{ctx}: não pode ter deIceBoots e bleedAntiIce simultaneamente.");
+            }
+
+            // 10. slats apenas em jet ou turboprop
+            if (set.Contains(Slats) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: slats só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 11. thsTrim apenas em jet ou turboprop
+            if (set.Contains(ThsTrim) && set.Contains(Piston))
+            {
+                throw new InvalidOperationException($"{ctx}: thsTrim só é aplicável a aeronaves a jato ou turboélice.");
+            }
+
+            // 12. tailwheel não possui noseWheelSteering
+            if (set.Contains(Tailwheel) && set.Contains(NoseWheelSteering))
+            {
+                throw new InvalidOperationException($"{ctx}: aeronave tailwheel (bequilha de cauda) não possui noseWheelSteering (direção do trem dianteiro).");
             }
         }
     }

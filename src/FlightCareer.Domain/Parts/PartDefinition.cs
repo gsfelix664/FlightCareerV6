@@ -22,6 +22,9 @@ namespace FlightCareer.Domain.Parts
         public string LifeSource { get; init; } = string.Empty;
         public bool PerEngine { get; init; }
         public bool PriceScalesWithAircraft { get; init; }
+        public IReadOnlyList<double>? RepairCostPctOfAircraft { get; init; }
+        public IReadOnlyList<double>? DowntimeHours { get; init; }
+        public string? FailureEffect { get; init; }
 
         public PartDefinition() { }
 
@@ -39,7 +42,10 @@ namespace FlightCareer.Domain.Parts
             IReadOnlyList<string> sensors,
             string lifeSource,
             bool perEngine = false,
-            bool priceScalesWithAircraft = false)
+            bool priceScalesWithAircraft = false,
+            IReadOnlyList<double>? repairCostPctOfAircraft = null,
+            IReadOnlyList<double>? downtimeHours = null,
+            string? failureEffect = null)
         {
             Id = id;
             Name = name;
@@ -55,6 +61,9 @@ namespace FlightCareer.Domain.Parts
             LifeSource = lifeSource;
             PerEngine = perEngine;
             PriceScalesWithAircraft = priceScalesWithAircraft;
+            RepairCostPctOfAircraft = repairCostPctOfAircraft;
+            DowntimeHours = downtimeHours;
+            FailureEffect = failureEffect;
         }
     }
 }
