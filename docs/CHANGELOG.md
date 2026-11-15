@@ -1376,3 +1376,9 @@
 ## 2026-11-14 - Pane nativa a 0% e perda total econômica (plano) (Claude)
 - Decisões do usuário: pane nativa (`IS FAILED`) leva a peça a 0% (antes ≤ 15%); peça quebrada não roda break check até a troca; perda total deixa de ser deduzida de saúde 0% e passa a ser acidente real (crash) ou **perda total econômica**: reparo (componentes até 100% + panes abertas) > 70% do valor de mercado do avião com os componentes a 100%.
 - Nova tarefa F4.2b no plano, com testes; achado: com os `repairCostFactor` atuais o reparo total de um pistão soma ~0,285 do preço de compra, então os fatores precisam ser recalibrados na implementação. `native-wear-mapping.md` e `AGENTS.md` › 6 atualizados. Nenhum código mudou.
+
+## 2026-11-15 - F1.4c: calibração do C152 no asfalto (Claude)
+- Dois voos do usuário analisados em `docs/plans/sensor-validation/calibration-C152.md`. No primeiro, as opções "Desativar Danos Causados por Estresse do Motor/da Aeronave" estavam marcadas: a taxa nativa é reportada, mas o nível fica em 1,00 (vira a chave anti-trapaça da F1.4b › c).
+- Motor 39: taxa só acima de 2.600 RPM; unidade "fração do nível por segundo" confirmada (razão 0,997); `IS WEAK` a 10%; `IS FAILED` veio depois, sem overstress, por sorteio no tempo.
+- Achado: a pane do wear and tear **não liga `ENG FAILED:1`** nem `GENERAL ENG DAMAGE PERCENT`; a detecção nativa atual não a registra. A F4 precisa ler `IS FAILED:<id>`.
+- Flaps, freios, trem e óleo não respondem no C152 (só addon). Nenhum código mudou.
