@@ -673,6 +673,118 @@
       "perEngine": false
     },
     {
+      "key": "elec-avionics-master-switch-1",
+      "simVar": "AVIONICS MASTER SWITCH:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-avionics-master-switch-2",
+      "simVar": "AVIONICS MASTER SWITCH:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-avionics-bus-voltage",
+      "simVar": "ELECTRICAL AVIONICS BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-avionics-bus-amps",
+      "simVar": "ELECTRICAL AVIONICS BUS AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-switch-on-1",
+      "simVar": "CIRCUIT SWITCH ON:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-switch-on-2",
+      "simVar": "CIRCUIT SWITCH ON:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-1",
+      "simVar": "CIRCUIT ON:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-2",
+      "simVar": "CIRCUIT ON:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-voltage-1",
+      "simVar": "ELECTRICAL BATTERY VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-load-1",
+      "simVar": "ELECTRICAL BATTERY LOAD:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-bus-voltage",
+      "simVar": "ELECTRICAL BATTERY BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-hot-battery-bus-voltage",
+      "simVar": "ELECTRICAL HOT BATTERY BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-main-bus-voltage-1",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-main-bus-voltage-2",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE:2",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-main-bus-amps-1",
+      "simVar": "ELECTRICAL MAIN BUS AMPS:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-alternator-connection-on-1",
+      "simVar": "ALTERNATOR CONNECTION ON:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
       "key": "vac-suction-pressure",
       "simVar": "SUCTION PRESSURE",
       "unit": "inhg",

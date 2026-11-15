@@ -142,6 +142,15 @@ Convenções:
 | `WARNING VOLTAGE` | bool | alerta do painel |
 | `CIRCUIT BREAKER PULLED` | bool | disjuntores por nome: fase futura (aviônicos) |
 | `AVIONICS MASTER SWITCH` | bool | chave master de aviônicos |
+| `AVIONICS MASTER SWITCH:1`, `AVIONICS MASTER SWITCH:2` | bool | aviônicos indexados (Bus 1 / 2) |
+| `ELECTRICAL AVIONICS BUS VOLTAGE`, `ELECTRICAL AVIONICS BUS AMPS` | volts / amperes | barramento de aviônicos |
+| `CIRCUIT SWITCH ON:1`, `CIRCUIT SWITCH ON:2` | bool | chaves de circuito 1 e 2 |
+| `CIRCUIT ON:1`, `CIRCUIT ON:2` | bool | alimentação de circuito 1 e 2 |
+| `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada (1) |
+| `ELECTRICAL BATTERY BUS VOLTAGE`, `ELECTRICAL HOT BATTERY BUS VOLTAGE` | volts | barramentos de bateria |
+| `ELECTRICAL MAIN BUS VOLTAGE:1`, `ELECTRICAL MAIN BUS VOLTAGE:2` | volts | barramentos principais 1 e 2 |
+| `ELECTRICAL MAIN BUS AMPS:1` | amperes | corrente do barramento principal 1 |
+| `ALTERNATOR CONNECTION ON:1` | bool | conexão do alternador 1 ao barramento |
 
 ## 7. Vácuo, pitot, estática e gelo
 
