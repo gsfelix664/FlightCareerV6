@@ -298,5 +298,19 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(WearRuleKind.Event, brake.Kind);
             Assert.Equal("brakeEnergyMkJ", brake.Metric);
         }
+
+        [Fact]
+        public void EventRules_AllMetricsBelongToClosedList_WearRuleMetrics()
+        {
+            var eventRules = Catalog.Rules.Where(r => r.Kind == WearRuleKind.Event).ToList();
+            Assert.NotEmpty(eventRules);
+
+            foreach (var rule in eventRules)
+            {
+                Assert.NotNull(rule.Metric);
+                Assert.True(WearRuleMetrics.All.Contains(rule.Metric),
+                    $"Regra de evento '{rule.Id}' possui métrica '{rule.Metric}' fora do vocabulário fechado WearRuleMetrics.All.");
+            }
+        }
     }
 }

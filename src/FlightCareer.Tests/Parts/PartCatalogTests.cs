@@ -48,6 +48,7 @@ namespace FlightCareer.Tests.Parts
 
             int perEngineCount = 0;
             int priceScalesCount = 0;
+            int calendarLifeCount = 0;
 
             foreach (var part in Catalog.Parts)
             {
@@ -72,13 +73,21 @@ namespace FlightCareer.Tests.Parts
                 Assert.True(part.DowntimeHours[0] >= 0);
                 Assert.True(part.DowntimeHours[0] <= part.DowntimeHours[1]);
 
+                // F2.1b Rodada 3: vida útil calendárica
+                if (part.CalendarLifeMonths.HasValue)
+                {
+                    Assert.True(part.CalendarLifeMonths.Value > 0, $"Peça '{part.Id}' tem CalendarLifeMonths inválido ({part.CalendarLifeMonths.Value}).");
+                    calendarLifeCount++;
+                }
+
                 if (part.PerEngine) perEngineCount++;
                 if (part.PriceScalesWithAircraft) priceScalesCount++;
             }
 
-            // Garante que as novas propriedades perEngine e priceScalesWithAircraft foram calibradas
+            // Garante que as novas propriedades perEngine, priceScalesWithAircraft e calendarLifeMonths foram calibradas
             Assert.True(perEngineCount > 0, "Nenhuma peça configurada com PerEngine.");
             Assert.True(priceScalesCount > 0, "Nenhuma peça configurada com PriceScalesWithAircraft.");
+            Assert.True(calendarLifeCount >= 10, "Menos de 10 peças com envelhecimento calendárico (CalendarLifeMonths).");
         }
 
         [Fact]
@@ -560,6 +569,188 @@ namespace FlightCareer.Tests.Parts
             // King Air tem degelo de hélice e válvulas de sangria
             Assert.Contains(kingAirParts, p => p.Id == "propeller.deice_boots");
             Assert.Contains(kingAirParts, p => p.Id == "pneumatic.bleed_valves");
+        }
+
+        [Fact]
+        public void PartGroups_All23GroupsHaveParts()
+        {
+            Assert.Equal(23, PartGroup.All.Count);
+
+            foreach (var group in PartGroup.All)
+            {
+                var count = Catalog.Parts.Count(p => string.Equals(p.Group, group, StringComparison.OrdinalIgnoreCase));
+                Assert.True(count > 0, $"Grupo '{group}' não possui peças cadastradas no catálogo.");
+            }
+        }
+
+        [Fact]
+        public void CalendarLife_StationaryAgingPartsConfigured()
+        {
+            // Peças de envelhecimento estacionário do Adendo 4
+            var mainBattery = Catalog.Find("electrical.battery");
+            Assert.NotNull(mainBattery);
+            Assert.Equal(24, mainBattery.CalendarLifeMonths);
+
+            var mainTire = Catalog.Find("tires.main");
+            Assert.NotNull(mainTire);
+            Assert.Equal(48, mainTire.CalendarLifeMonths);
+
+            var hydLines = Catalog.Find("hydraulic.lines_fittings");
+            Assert.NotNull(hydLines);
+            Assert.Equal(60, hydLines.CalendarLifeMonths);
+
+            var crewO2 = Catalog.Find("oxygen.crew_cylinder");
+            Assert.NotNull(crewO2);
+            Assert.Equal(60, crewO2.CalendarLifeMonths);
+
+            var fireBottles = Catalog.Find("fire.engine_extinguisher_bottles");
+            Assert.NotNull(fireBottles);
+            Assert.Equal(60, fireBottles.CalendarLifeMonths);
+
+            var elt = Catalog.Find("avionics.flight_recorders_elt");
+            Assert.NotNull(elt);
+            Assert.Equal(24, elt.CalendarLifeMonths);
+
+            var oil = Catalog.Find("oil.lubricant");
+            Assert.NotNull(oil);
+            Assert.Equal(12, oil.CalendarLifeMonths);
+        }
+
+        [Fact]
+        public void Adendo4Features_CoherenceRulesEnforced()
+        {
+            // 1. Galley sem passengerCabin deve falhar
+            var invalidGalley = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Galley
+            };
+            var ex1 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidGalley, "TestGalleyNoCabin"));
+            Assert.Contains("galley requer passengerCabin", ex1.Message);
+
+            // 2. Lavatory sem passengerCabin deve falhar
+            var invalidLavatory = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Lavatory
+            };
+            var ex2 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidLavatory, "TestLavatoryNoCabin"));
+            Assert.Contains("lavatory requer passengerCabin", ex2.Message);
+
+            // 3. Floats e Skis simultaneamente deve falhar
+            var invalidFloatsSkis = new[]
+            {
+                AircraftFeatures.Turboprop,
+                AircraftFeatures.MultiEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.ConstantSpeedProp,
+                AircraftFeatures.Floats,
+                AircraftFeatures.Skis
+            };
+            var ex3 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidFloatsSkis, "TestFloatsAndSkis"));
+            Assert.Contains("floats (flutuadores) e skis (esquis)", ex3.Message);
+
+            // 4. IceDetector em pistão deve falhar
+            var invalidIceDetectorPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.IceDetector
+            };
+            var ex4 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidIceDetectorPiston, "TestIceDetectorPiston"));
+            Assert.Contains("iceDetector", ex4.Message);
+        }
+
+        [Fact]
+        public void SpecificAircraft_Adendo4FeaturesVerified()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles().ToDictionary(p => p.AircraftId, StringComparer.OrdinalIgnoreCase);
+
+            // 1. DHC-6-300 Twin Otter capturado possui skis, passengerCabin, oxygen e wipers
+            Assert.True(profiles.ContainsKey("DHC-6-300 Twin"));
+            var dhc6Features = profiles["DHC-6-300 Twin"].Features;
+            Assert.Contains(AircraftFeatures.Skis, dhc6Features);
+            Assert.Contains(AircraftFeatures.PassengerCabin, dhc6Features);
+            Assert.Contains(AircraftFeatures.Oxygen, dhc6Features);
+            Assert.Contains(AircraftFeatures.Wipers, dhc6Features);
+
+            // 2. 747-8i possui passengerCabin, galley, lavatory, oxygen, fireProtection, wipers e iceDetector
+            Assert.True(profiles.ContainsKey("747-8i"));
+            var b748Features = profiles["747-8i"].Features;
+            Assert.Contains(AircraftFeatures.PassengerCabin, b748Features);
+            Assert.Contains(AircraftFeatures.Galley, b748Features);
+            Assert.Contains(AircraftFeatures.Lavatory, b748Features);
+            Assert.Contains(AircraftFeatures.Oxygen, b748Features);
+            Assert.Contains(AircraftFeatures.FireProtection, b748Features);
+            Assert.Contains(AircraftFeatures.Wipers, b748Features);
+            Assert.Contains(AircraftFeatures.IceDetector, b748Features);
+
+            // 3. C152 é treinador básico de 2 lugares: não possui nenhuma das features de cabine/transporte/específicos
+            Assert.True(profiles.ContainsKey("Cessna C152"));
+            var c152Features = profiles["Cessna C152"].Features;
+            Assert.DoesNotContain(AircraftFeatures.PassengerCabin, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Galley, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Lavatory, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Oxygen, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.FireProtection, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Floats, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Skis, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Wipers, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.IceDetector, c152Features);
+        }
+
+        [Fact]
+        public void PartsFor_Adendo4_CabinOxygenFireEmergencyPartsFilterAppropriately()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles().ToDictionary(p => p.AircraftId, StringComparer.OrdinalIgnoreCase);
+
+            var c152Parts = Catalog.PartsFor(profiles["Cessna C152"].Features);
+            var dhc6Parts = Catalog.PartsFor(profiles["DHC-6-300 Twin"].Features);
+            var b748Parts = Catalog.PartsFor(profiles["747-8i"].Features);
+
+            // C152: extintor portátil comum a todos, mas sem cabine comercial, oxigênio, detecção de fogo fixa, escorregadeiras ou esquis
+            Assert.Contains(c152Parts, p => p.Id == "fire.cabin_extinguishers");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "cabin.passenger_seats");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "cabin.galley");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "cabin.lavatory");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "oxygen.crew_cylinder");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "fire.engine_detection");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "emergency.evacuation_slides");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "gear.skis");
+
+            // DHC-6: esquis, assentos de passageiros, oxigênio, limpadores
+            Assert.Contains(dhc6Parts, p => p.Id == "gear.skis");
+            Assert.Contains(dhc6Parts, p => p.Id == "cabin.passenger_seats");
+            Assert.Contains(dhc6Parts, p => p.Id == "oxygen.crew_cylinder");
+            Assert.Contains(dhc6Parts, p => p.Id == "emergency.windshield_wipers");
+            Assert.DoesNotContain(dhc6Parts, p => p.Id == "cabin.galley");
+            Assert.DoesNotContain(dhc6Parts, p => p.Id == "emergency.evacuation_slides");
+
+            // 747-8i: assentos, galley, lavatório, IFE, escorregadeiras, garrafas de fogo de motor/APU, detector de gelo
+            Assert.Contains(b748Parts, p => p.Id == "cabin.passenger_seats");
+            Assert.Contains(b748Parts, p => p.Id == "cabin.galley");
+            Assert.Contains(b748Parts, p => p.Id == "cabin.lavatory");
+            Assert.Contains(b748Parts, p => p.Id == "cabin.in_flight_entertainment");
+            Assert.Contains(b748Parts, p => p.Id == "emergency.evacuation_slides");
+            Assert.Contains(b748Parts, p => p.Id == "emergency.life_vests_rafts");
+            Assert.Contains(b748Parts, p => p.Id == "fire.engine_detection");
+            Assert.Contains(b748Parts, p => p.Id == "fire.engine_extinguisher_bottles");
+            Assert.Contains(b748Parts, p => p.Id == "fire.apu_extinguisher");
+            Assert.Contains(b748Parts, p => p.Id == "emergency.ice_detector");
+            Assert.DoesNotContain(b748Parts, p => p.Id == "gear.skis");
         }
     }
 }
