@@ -32,6 +32,7 @@ namespace FlightCareer.UI.Services
         }
 
         public bool IsActive => _tracker.IsActive;
+        public bool HasPreflightChanges => _tracker.HasPreflightChanges;
         public IReadOnlyList<AircraftPart> Parts => _tracker.Parts;
 
         public void Begin(List<AircraftPart> copies, AircraftLimitProfile? profile, IReadOnlyList<string> features)
@@ -77,6 +78,33 @@ namespace FlightCareer.UI.Services
                     OnExceedance?.Invoke(ex);
                 }
             }
+
+            if (result.Inspections != null)
+            {
+                foreach (var insp in result.Inspections)
+                {
+                    OnInspection?.Invoke(insp);
+                }
+            }
+
+            if (result.DiagnosticMessages != null)
+            {
+                foreach (var diag in result.DiagnosticMessages)
+                {
+                    OnDiagnostic?.Invoke(diag);
+                }
+            }
+        }
+
+        public void ObservePreflight(double dtSimHours)
+        {
+            SensorFrame? frame;
+            lock (_frameLock)
+            {
+                frame = _lastFrame;
+            }
+
+            var result = _tracker.ObservePreflight(frame, dtSimHours, DateTime.UtcNow);
 
             if (result.Inspections != null)
             {

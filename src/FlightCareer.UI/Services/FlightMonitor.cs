@@ -58,6 +58,7 @@ namespace FlightCareer.UI.Services
         private string _originIcao = string.Empty;
         private DateTime _lastDatabaseUpdate = DateTime.MinValue;
         private DateTime _lastWearUpdate = DateTime.MinValue;
+        private DateTime _lastPreflightTick = DateTime.MinValue;
         private DateTime? _groundAbortTime;
         private SimTelemetry? _lastData;
 
@@ -455,6 +456,7 @@ namespace FlightCareer.UI.Services
             _hasTouchedDown = false;
             _simulatedFlightTimeSeconds = 0;
             _lastTick = DateTime.MinValue;
+            _lastPreflightTick = DateTime.MinValue;
 
             _touchdown.Reset();
             _impactCrashHandled = false;
@@ -564,6 +566,19 @@ namespace FlightCareer.UI.Services
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"Error saving state: {ex.Message}");
+                }
+            }
+            else if (!IsFlightActive && _parts.HasPreflightChanges && _aircraft != null)
+            {
+                try
+                {
+                    await using var context = await CreateDbContextAsync();
+                    await SaveComponentsAsync(context);
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error saving preflight parts state on cancel: {ex.Message}");
                 }
             }
 
@@ -704,6 +719,21 @@ namespace FlightCareer.UI.Services
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
                 }
+
+                if (!IsFlightActive && _parts.IsActive && _aircraft != null)
+                {
+                    DateTime nowPreflight = DateTime.Now;
+                    double wallSec = _lastPreflightTick == DateTime.MinValue ? 0.0 : (nowPreflight - _lastPreflightTick).TotalSeconds;
+                    _lastPreflightTick = nowPreflight;
+                    double dtHours = SimTimeStep.ToSimHours(wallSec, data.SimulationRate);
+                    if (dtHours > 0)
+                    {
+                        _parts.ObservePreflight(dtHours);
+                        _parts.SyncComponents(_aircraft, _failures.Components);
+                        SyncLegacyConditions();
+                    }
+                }
+
                 return;
             }
 

@@ -372,27 +372,31 @@ namespace FlightCareer.Domain.Parts
                                 }
                             }
 
-                            // Registra evento de excedência para blackbox
-                            double damageInTick = (bandPart.LossPerHourPct * dtSimHours);
-                            string sourceStr = nativeOverstressActive
-                                ? (measuredVal >= limitVal ? "Simulador+Addon" : "Simulador")
-                                : "Addon";
+                            // Registra evento de excedência para blackbox apenas se houver efeito ou inspeção
+                            bool hasEffect = (bandPart.Multiplier > 1.0 || bandPart.LossPerHourPct > 0.0) || activeBand.Inspection != null;
+                            if (hasEffect)
+                            {
+                                double damageInTick = (bandPart.LossPerHourPct * dtSimHours);
+                                string sourceStr = nativeOverstressActive
+                                    ? (measuredVal >= limitVal ? "Simulador+Addon" : "Simulador")
+                                    : "Addon";
 
-                            string targetId = engIdx.HasValue ? $"{bandPart.PartId}:{engIdx.Value}" : bandPart.PartId;
-                            string notes = engIdx.HasValue
-                                ? $"Faixa '{activeBand.Name}' atingida (Motor {engIdx.Value})"
-                                : $"Faixa '{activeBand.Name}' atingida";
+                                string targetId = engIdx.HasValue ? $"{bandPart.PartId}:{engIdx.Value}" : bandPart.PartId;
+                                string notes = engIdx.HasValue
+                                    ? $"Faixa '{activeBand.Name}' atingida (Motor {engIdx.Value})"
+                                    : $"Faixa '{activeBand.Name}' atingida";
 
-                            exceedances.Add(new PartWearExceedance(
-                                rule.Id,
-                                targetId,
-                                sourceStr,
-                                currentPeak,
-                                limitVal,
-                                excessPct,
-                                currentDur,
-                                damageInTick,
-                                notes));
+                                exceedances.Add(new PartWearExceedance(
+                                    rule.Id,
+                                    targetId,
+                                    sourceStr,
+                                    currentPeak,
+                                    limitVal,
+                                    excessPct,
+                                    currentDur,
+                                    damageInTick,
+                                    notes));
+                            }
                         }
 
                         // Avalia disparo de inspeção da faixa (se configurada)

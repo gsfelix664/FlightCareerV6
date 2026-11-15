@@ -297,7 +297,7 @@ namespace FlightCareer.Domain.Parts
                         p.PartId,
                         p.Multiplier ?? 1.0,
                         p.LossPerHourPct ?? 0.0,
-                        p.DamagePerEventPct ?? 0.0
+                        p.DamagePerEventPct ?? p.EventDamagePct ?? 0.0
                     )).ToList() ?? new List<WearRulePart>(),
                     b.Inspection != null ? new WearRuleInspection(
                         b.Inspection.DefectCode,
@@ -388,6 +388,7 @@ namespace FlightCareer.Domain.Parts
             public double? Multiplier { get; set; }
             public double? LossPerHourPct { get; set; }
             public double? DamagePerEventPct { get; set; }
+            public double? EventDamagePct { get; set; }
         }
 
         private class WearRuleInspectionDto
