@@ -29,8 +29,8 @@ Relatório bruto: `py -3 tools/analyze_sensor_log.py --type A --model C152 --cal
 | 37 | Pneu | taxa pequena só nos pousos: firme (10,5 ft/s ≈ 630 fpm) pico 0,0022; duro (11,7 ft/s) pico 0,00016. Nível não caiu de forma mensurável (voo 1 sem dano). | Observar; refazer pousos com o dano ligado. |
 | 35 | Trem | sem taxa até 11,7 ft/s | Só addon (pouso duro pela telemetria). |
 | 36 | Freio | sem taxa (frenagem a 31 kt, freio a ~119 °C) | Só addon. |
-| 5–8 | Flaps | sem taxa com 114 kt no **dente 1**, mas o limite do dente 1 é **110 kt** (`FLAPS CURRENT SPEED LIMITATION`; 85 kt só nos dentes 2–3): só 4 kt acima. **Correção 2026-11-15 (spike F2.0): inconclusivo.** | Observar; refazer com dente 2 acima de 85 kt. |
-| 9–20 | Comandos | sem taxa a 3,1 G (abaixo do limite de 4,4 G do C152) | Inconclusivo; testar > 4,4 G. |
+| 5–8 | Flaps | sem taxa com 114 kt no **dente 1**, mas o limite do dente 1 é **110 kt** (`FLAPS CURRENT SPEED LIMITATION`; 85 kt só nos dentes 2–3): só 4 kt acima. **Correção 2026-11-15 (spike F2.0): inconclusivo.** **Voo 3 (`20261115-0905`):** dente 2 a 98 kt (limite 85) por ~2 s → taxa 5–8 até 0,00033 e nível 0,9992 → 0,9988. **Os flaps respondem.** | Observar (taxa pequena; o addon usa velocidade × dente do catálogo F2.0). |
+| 9–20 | Comandos | sem taxa a 3,1 G (voo 1) e a **4,29 G** (voo 3, máximo do sim, saindo de mergulho a ~100 kt; o C152 estola antes de passar de 4,4 G) | Não testável no C152 sem passar da Va; fica em Observar (o addon usa o limite de G do POH). |
 | 41/42 | Óleo | sem taxa (CHT máx. 231, óleo máx. 31) | Só addon. |
 
 ## 3. Desgaste natural nativo (sem overstress)

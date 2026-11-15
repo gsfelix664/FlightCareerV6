@@ -1439,3 +1439,6 @@
 - `Domain/Components/NativeWearFailures.cs`: `NativeWearFailureMap` (Tabela 2 de `native-wear-mapping.md`: ID 0–49 → código de pane e barra) e `NativeWearFailureDetector` (borda 0 → 1 de `WEAR AND TEAR IS FAILED:<id>`, primeira leitura só referência, uma vez por componente por voo, reinício do voo não repara). 25 testes em `NativeWearFailureTests`.
 - `PersistentFailureService` lê `nw-is-failed-<id>` do `SensorFrameReader` (já lia todos os IDs) em voo monitorado e grava a pane (origem `Native`); `FlightMonitor` leva a barra do componente a 0%. Códigos novos no `DefectCatalog`: `BATTERY`, `TIRE_FLAT`, `FLIGHT_CONTROL`, `FUEL_SYSTEM`, `AUTOPILOT`.
 - Fora de missão (modo vigia) continua sem detectar panes novas. **Não testado no MSFS.**
+
+## 2026-11-15 - F1.4c: voo 3 do C152 (Claude)
+- Log `20261115-0905`: flaps no dente 2 a 98 kt (limite 85) geraram taxa nativa 5–8 (até 0,00033) e queda de nível: **os flaps respondem** no C152 (o voo 1 tinha sido inconclusivo). G máximo 4,29 (abaixo do limite de 4,4 G): comandos seguem sem teste. O voo terminou em crash antes do teste longo de motor, então a F4.2c continua **não testada no MSFS**. O seed do catálogo de limites rodou no banco real (46 perfis).
