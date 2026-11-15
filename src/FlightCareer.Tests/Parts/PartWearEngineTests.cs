@@ -622,14 +622,101 @@ namespace FlightCareer.Tests.Parts
 
                     foreach (var sensorKey in rule.Sensors)
                     {
+                        bool isDerived = PartFlightTracker.DerivedSensorKeys.Contains(sensorKey);
                         bool hasExact = layoutKeys.Contains(sensorKey);
                         bool hasEngine = Enumerable.Range(1, engineCount).Any(e => layoutKeys.Contains($"{sensorKey}:{e}"));
 
-                        Assert.True(hasExact || hasEngine,
+                        Assert.True(hasExact || hasEngine || isDerived,
                             $"Aeronave '{profile.AircraftId}' (motores={engineCount}): sensor '{sensorKey}' da regra '{rule.Id}' não existe no layout (nem exato nem por motor).");
                     }
                 }
             }
+        }
+
+        [Fact]
+        public void RequiresEngineRunning_DentroDoAtraso_NaoAvalia()
+        {
+            var profile = CreateC152Profile();
+            var engine = new PartWearEngine(PartsCatalog, WearRules);
+            var crank = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.crankshaft", EngineIndex = 1, Health = 100.0 };
+            var parts = new[] { crank };
+
+            // 1. Motor cortado (eng-combustion = 0) com pressão de óleo 0 psi
+            var fParado = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-combustion:1"] = 0.0,
+                ["oil-pressure:1"] = 0.0,
+                ["oil-warning-pressure:1"] = 20.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, DateTime.UtcNow, 1.0);
+
+            var res1 = engine.ApplyTick(parts, fParado, 10.0 / 3600.0, profile.Features, null, profile);
+            Assert.DoesNotContain(res1.Exceedances, e => e.RuleId == "oil_pressure_low");
+
+            // 2. Motor ligou (eng-combustion = 1), mas decorreram apenas 15 s (< atraso de 30 s)
+            var fPartida = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-combustion:1"] = 1.0,
+                ["oil-pressure:1"] = 0.0,
+                ["oil-warning-pressure:1"] = 20.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, DateTime.UtcNow, 1.0);
+
+            var res2 = engine.ApplyTick(parts, fPartida, 15.0 / 3600.0, profile.Features, null, profile);
+            Assert.DoesNotContain(res2.Exceedances, e => e.RuleId == "oil_pressure_low");
+
+            // 3. Após mais 20 s (total 35 s simulados > 30 s de atraso), continua a 0 psi -> agora AVALIA e gera excedência
+            var res3 = engine.ApplyTick(parts, fPartida, 20.0 / 3600.0, profile.Features, null, profile);
+            Assert.Contains(res3.Exceedances, e => e.RuleId == "oil_pressure_low");
+        }
+
+        [Fact]
+        public void ChtCoolingRate_JanelaSimulada_IndependeDoSimRate()
+        {
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            // Teste 1: SimRate 1x (60 passos de 1 s real = 60 s simulados, CHT caindo de 200 para 160 °C -> taxa esperada 40 °C/min)
+            var tracker1X = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+            var cyl1 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            tracker1X.Begin(new[] { cyl1 }, profile, profile.Features);
+
+            var baseTime = DateTime.UtcNow;
+            for (int i = 0; i <= 60; i++)
+            {
+                double currentCht = 200.0 - (40.0 / 60.0) * i;
+                var values = new Dictionary<string, double>
+                {
+                    ["eng-combustion:1"] = 1.0,
+                    ["eng-cht:1"] = currentCht,
+                    ["ctx-simulation-rate"] = 1.0
+                };
+                var f = new SensorFrame(values, baseTime.AddSeconds(i), 1.0);
+                tracker1X.ProcessTick(f, 1.0 / 3600.0, f.ReceivedUtc);
+            }
+
+            // Teste 2: SimRate 4x (15 passos de 1 s real = 60 s simulados, mesma queda de CHT de 200 para 160 °C no tempo simulado)
+            var tracker4X = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+            var cyl4 = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+            tracker4X.Begin(new[] { cyl4 }, profile, profile.Features);
+
+            for (int i = 0; i <= 15; i++)
+            {
+                double simSeconds = i * 4.0;
+                double currentCht = 200.0 - (40.0 / 60.0) * simSeconds;
+                var values = new Dictionary<string, double>
+                {
+                    ["eng-combustion:1"] = 1.0,
+                    ["eng-cht:1"] = currentCht,
+                    ["ctx-simulation-rate"] = 4.0
+                };
+                var f = new SensorFrame(values, baseTime.AddSeconds(i), 4.0);
+                tracker4X.ProcessTick(f, 4.0 / 3600.0, f.ReceivedUtc);
+            }
+
+            // Ao final de 60s simulados, ambos atingiram a taxa de 40 °C/min e sofreram a mesma perda percentual por choque térmico
+            Assert.Equal(cyl1.Health, cyl4.Health, precision: 3);
+            Assert.True(cyl1.Health < 100.0);
         }
     }
 }

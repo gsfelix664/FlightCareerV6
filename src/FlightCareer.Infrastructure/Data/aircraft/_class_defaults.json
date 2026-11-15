@@ -47,6 +47,14 @@
       "source": "ClassDefault",
       "reference": "FAR 23 Categoria Normal (component_catalog.json)",
       "notes": null
+    },
+    {
+      "key": "chtCoolingRateMax",
+      "value": 28,
+      "unit": "celsius_per_minute",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: orientação comum do setor de ~50 °F/min (27,8 °C/min) de resfriamento da CHT; documento do fabricante não confirmado (a Lycoming SI 1094 trata de empobrecimento da mistura)",
+      "notes": "Taxa máxima recomendada de choque térmico para motores a pistão refrigerados a ar"
     }
   ],
   "Turboprop": [

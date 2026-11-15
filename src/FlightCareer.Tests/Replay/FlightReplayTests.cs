@@ -4,6 +4,7 @@ using System.Linq;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Replay;
+using FlightCareer.Domain.Sensors;
 using FlightCareer.Infrastructure.Replay;
 using FlightCareer.Infrastructure.Services;
 using Xunit;
@@ -64,7 +65,34 @@ namespace FlightCareer.Tests.Replay
         }
 
         [Fact]
-        public void Replay_C152Voo_HorasSimuladas_1_086()
+        public void Replay_C152Voo_HorasComoNoJogo_1_086()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
+            var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
+
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+            var result = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount, activationMode: ReplayActivationMode.GameLike);
+
+            // No modo GameLike (padrão): só computa a partir de 10s contínuos com motor ligado e freio solto
+            // Duração no banco: 1,086 h (tolerância ±0.02 h -> 1.066 a 1.106 h)
+            Assert.InRange(result.TotalSimHours, 1.086 - 0.02, 1.086 + 0.02);
+        }
+
+        [Fact]
+        public void Replay_C152Voo_Horas_FromStart_1_137()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
+            var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
+
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+            var result = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount, activationMode: ReplayActivationMode.FromStart);
+
+            // No modo FromStart: computa desde o início do CSV (~1.137 h)
+            Assert.InRange(result.TotalSimHours, 1.137 - 0.01, 1.137 + 0.01);
+        }
+
+        [Fact]
+        public void Replay_C152Voo_SemSobrecargaEletrica()
         {
             var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
             var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
@@ -72,8 +100,69 @@ namespace FlightCareer.Tests.Replay
             var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
             var result = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount);
 
-            // O voo monitorado durou 1,086 h simuladas no simulador; o CSV inclui taxi/cold-dark pré-voo e corte totalizando ~1.137 h
-            Assert.InRange(result.TotalSimHours, 1.05, 1.15);
+            // Voo normal do C152 tem barramento estável em 28V -> nenhum evento de sobrecarga e nenhuma inspeção
+            bool hasOverloadEvent = result.DerivedEvents.Any(e =>
+                e.MetricKey.Equals(WearRuleMetrics.ElectricalOverloadMinutes, StringComparison.OrdinalIgnoreCase));
+            bool hasOverloadInspection = result.Inspections.Any(i =>
+                i.DefectCode.Equals("GENERATOR_OVERHEAT_INSPECTION", StringComparison.OrdinalIgnoreCase));
+
+            Assert.False(hasOverloadEvent);
+            Assert.False(hasOverloadInspection);
+        }
+
+        [Fact]
+        public void Replay_C152Voo_SemOleoBaixoComMotorParado()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
+            var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
+
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+            var result = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount);
+
+            // Não deve gerar inspeção NO-GO de bronzinas por causa do pré-voo com motor desligado
+            bool hasLowOilInspection = result.Inspections.Any(i =>
+                i.DefectCode.Equals("LOW_OIL_PRESSURE_INSPECTION", StringComparison.OrdinalIgnoreCase));
+
+            Assert.False(hasLowOilInspection);
+        }
+
+        [Fact]
+        public void Replay_C152Voo_ChoqueTermico_SoComQuedaRapida()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
+            var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
+
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+            var resultReal = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount);
+
+            // No voo real do C152, não houve choque térmico (pico de queda não passou de 28 °C/min)
+            bool realHadShock = resultReal.Exceedances.Any(e =>
+                e.RuleId.Equals("piston_shock_cooling", StringComparison.OrdinalIgnoreCase));
+            Assert.False(realHadShock);
+
+            // Com frames sintéticos de queda rápida de CHT (40 °C/min por 2 min com motor em combustão):
+            // CHT começa em 200 °C e cai para 120 °C em 120 s (queda de 80 °C em 2 min = 40 °C/min)
+            var syntheticFrames = new List<SensorFrame>();
+            var baseTime = DateTime.UtcNow;
+            for (int i = 0; i <= 120; i++)
+            {
+                double currentCht = 200.0 - (40.0 / 60.0) * i;
+                var values = new Dictionary<string, double>
+                {
+                    ["eng-combustion:1"] = 1.0,
+                    ["eng-cht:1"] = currentCht,
+                    ["brake-parking-position"] = 0.0,
+                    ["ctx-simulation-rate"] = 1.0
+                };
+                syntheticFrames.Add(new SensorFrame(values, baseTime.AddSeconds(i), 1.0));
+            }
+
+            var resultSynthetic = replayer.Run(syntheticFrames, null, profile, profile.Features, profile.EngineCount);
+            var shockExceedances = resultSynthetic.Exceedances
+                .Where(e => e.RuleId.Equals("piston_shock_cooling", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            Assert.NotEmpty(shockExceedances);
         }
 
         [Fact]

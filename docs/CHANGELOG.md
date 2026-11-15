@@ -1824,3 +1824,32 @@
   - Suíte completa de 319 testes xUnit passando em 3 segundos; 48 testes Python passando em 0,25s.
 - **Não testado no MSFS**:
   - O replay opera offline sobre logs gravados e foi validado contra os dados reais persistidos no banco de dados. Execução de novos voos no MSFS não realizada nesta tarefa.
+
+## 2026-11-15 - Correções dos bugs achados pelo replay (Gemini)
+- **Sobrecarga Elétrica Refinada (`PartEventDeriver.CheckElectricalOverload`)**:
+  - Condição de sobrecarga atualizada para exigir alternador ligado (`elec-master-alternator:n > 0.5`), motor em combustão (`eng-combustion:n > 0.5`), ausência de starter engatado, corrente acima da capacidade nominal (`elec-total-load-amps > alternatorRatedAmps`) e queda de tensão no barramento principal na faixa de sag `[0,88, 0,95) × elecSystemVolts`.
+  - Tensão estável (≥ 0,95) indica capacidade suficiente sem estresse; abaixo de 0,88 indica alternador fora/em pane (bateria isolada descarregando).
+  - Documentação da heurística em `docs/plans/sensor-validation/teste-eletrico-C172.md` e no código.
+- **Regras com Exigência de Motor em Funcionamento (`WearRule.RequiresEngineRunning`)**:
+  - Novos campos `requiresEngineRunning` (bool) e `engineRunningDelaySeconds` (segundos simulados após a borda de combustão 0→1 por motor) adicionados a `WearRule`, `WearRuleCatalog` e `wear_rules.json`.
+  - Aplicado atraso de 30 s a `oil_pressure_low` (conforme POH do C152: pressão mínima vale com motor em marcha após 30 s da partida), eliminando o falso positivo de pressão 0 psi e a inspeção NO-GO indevida no pré-voo.
+  - No `PartWearEngine`, rastreamento contínuo da borda de combustão e tempo estabilizado por motor, zerando o rastreio de excedência quando o motor está parado ou no atraso.
+- **Choque Térmico como Taxa Móvel de Resfriamento da CHT**:
+  - `PartFlightTracker` calcula por motor a taxa de resfriamento da CHT `eng-cht-cooling-rate:n` (°C/min, positivo = esfriando) em média móvel em janela de 60 s simulados, somente com motor em combustão, injetando no frame antes do tick.
+  - Limite novo `chtCoolingRateMax` em `LimitKeys.cs`, unidade `celsius_per_minute` no schema `_schema.json`, e valor padrão para classe Piston em `_class_defaults.json` (28 °C/min ≈ 50 °F/min conforme Lycoming SI 1094D / Continental M-0).
+  - Regra `piston_shock_cooling` atualizada em `wear_rules.json` para sensor `eng-cht-cooling-rate`, `limitKey: chtCoolingRateMax`, `direction: Above`, `requiresEngineRunning: true`, `engineRunningDelaySeconds: 60.0`, eliminando disparos falsos com motor frio.
+  - Exposição de `DerivedSensorKeys` em `PartFlightTracker` mantendo o teste de contrato registro × regras 100% verde.
+- **Replay Fiel ao Jogo (`ReplayActivationMode`)**:
+  - `FlightReplayer` atualizado com `ReplayActivationMode` (`GameLike` padrão, `FromStart`).
+  - No modo `GameLike`, imita o `FlightMonitor` do simulador, ativando o cômputo de horas simuladas e desgaste apenas após 10 segundos reais contínuos de motor em combustão com freio de estacionamento solto (`ParkingBrake < 0.5`).
+  - Duração simulada no voo do C152 passou de 1,137 h para 1,105 h (muito mais próximo das 1,086 h gravadas no banco pelo jogo).
+  - CLI `src/FlightCareer.Replay` atualizada com a opção `--from-start`.
+  - Script `tools/replay/make_fixture.py` ajustado para reter `brake-parking-position` e `elec-master-alternator`, e fixtures regeneradas preservando arquivos de toques existentes.
+- **Descrição de Inspeção**:
+  - Adicionada descrição em português para `GENERATOR_OVERHEAT_INSPECTION` em `wear_rules.json`.
+- **Testes Automatizados**:
+  - Testes de replay no voo do C152 provando ausência de sobrecarga elétrica e ausência de óleo baixo no pré-voo, disparo de choque térmico apenas com queda rápida de 40 °C/min, e horas simuladas no modo `GameLike` e `FromStart`.
+  - Testes unitários para sobrecarga em barramento estável, sag de tensão, alternador em pane, atraso de motor funcionando e independência do SimRate na taxa de resfriamento.
+  - 327 testes xUnit aprovados; 48 testes Python aprovados.
+- **Não testado no MSFS**:
+  - Execução ao vivo com simulador MSFS conectado (validado offline via replay de voo real gravado).

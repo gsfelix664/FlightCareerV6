@@ -120,6 +120,7 @@
               "mach",
               "g",
               "fpm",
+              "celsius_per_minute",
               "volts",
               "index",
               "amperes"

@@ -36,6 +36,7 @@ namespace FlightCareer.Replay
             string? blackboxPath = null;
             string? touchdownsPath = null;
             bool jsonOutput = false;
+            bool fromStart = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -51,6 +52,10 @@ namespace FlightCareer.Replay
                 else if (arg.Equals("--touchdowns", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
                 {
                     touchdownsPath = args[++i];
+                }
+                else if (arg.Equals("--from-start", StringComparison.OrdinalIgnoreCase))
+                {
+                    fromStart = true;
                 }
                 else if (arg.Equals("--json", StringComparison.OrdinalIgnoreCase))
                 {
@@ -126,13 +131,15 @@ namespace FlightCareer.Replay
                 }
 
                 // Executa o replay
+                var activationMode = fromStart ? ReplayActivationMode.FromStart : ReplayActivationMode.GameLike;
                 var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
                 var result = replayer.Run(
                     frames,
                     touchdowns,
                     profile,
                     profile.Features,
-                    profile.EngineCount);
+                    profile.EngineCount,
+                    activationMode: activationMode);
 
                 if (jsonOutput)
                 {
@@ -179,6 +186,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");
             Console.WriteLine("  --blackbox <arquivo>     Caminho do log do blackbox para leitura dos toques");
             Console.WriteLine("  --touchdowns <json>      Caminho de arquivo JSON com dados de toques");
+            Console.WriteLine("  --from-start             Desgasta desde o início do arquivo (ignora espera de ativação)");
             Console.WriteLine("  --json                   Emite a saída no formato JSON estruturado");
             Console.WriteLine("  -h, --help               Exibe esta mensagem de ajuda");
         }

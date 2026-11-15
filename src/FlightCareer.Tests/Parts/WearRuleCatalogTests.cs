@@ -34,6 +34,12 @@ namespace FlightCareer.Tests.Parts
             {
                 set.Add(el.GetProperty("key").GetString()!);
             }
+
+            foreach (var dk in PartFlightTracker.DerivedSensorKeys)
+            {
+                set.Add(dk);
+            }
+
             return set;
         }
 
@@ -138,7 +144,7 @@ namespace FlightCareer.Tests.Parts
                 {
                     Assert.Contains(rule.Sensors, s => s.Contains("rpm"));
                 }
-                else if (rule.LimitKey == LimitKeys.ChtMax)
+                else if (rule.LimitKey == LimitKeys.ChtMax || rule.LimitKey == LimitKeys.ChtCoolingRateMax)
                 {
                     Assert.Contains(rule.Sensors, s => s.Contains("cht"));
                 }

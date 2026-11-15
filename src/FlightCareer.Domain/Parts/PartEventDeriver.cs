@@ -293,19 +293,47 @@ namespace FlightCareer.Domain.Parts
             }
 
             bool anyStarter = false;
+            bool anyAlternatorAndCombustion = false;
+            bool hasAnyAltKey = frame.Values.Keys.Any(k => k.StartsWith("elec-master-alternator", StringComparison.OrdinalIgnoreCase));
+
             for (int eng = 1; eng <= 4; eng++)
             {
-                if (TryGetEngineValues(frame, eng, out _, out double starterVal) && starterVal > 0.5)
+                if (TryGetEngineValues(frame, eng, out double combVal, out double starterVal))
                 {
-                    anyStarter = true;
-                    break;
+                    if (starterVal > 0.5) anyStarter = true;
+
+                    bool alt = false;
+                    if (frame.Values.TryGetValue($"elec-master-alternator:{eng}", out double aVal) ||
+                        (eng == 1 && frame.Values.TryGetValue("elec-master-alternator", out aVal)))
+                    {
+                        alt = aVal > 0.5;
+                    }
+
+                    if (combVal > 0.5 && (alt || !hasAnyAltKey))
+                    {
+                        anyAlternatorAndCombustion = true;
+                    }
                 }
             }
 
             double systemVolts = _electricalConfig.SystemVolts.Value;
             double ratedAmps = _electricalConfig.AlternatorRatedAmps.Value;
 
-            bool isOverload = busVolts >= (0.95 * systemVolts) && !anyStarter && (totalLoadAmps > ratedAmps);
+            // Heurística de Sobrecarga Elétrica Real (Decisão FIX-REPLAY-BUGS):
+            // 1. O alternador deve estar ligado e com o motor em combustão (geração de energia ativa).
+            // 2. Não deve estar em partida (exclui os picos normais de 150-170A do starter).
+            // 3. A corrente total demandada deve exceder a capacidade nominal do alternador (elec-total-load-amps > alternatorRatedAmps).
+            // 4. A tensão no barramento principal (elecMainBusIndex) deve sofrer queda ("voltage sag") para a faixa [0.88 * systemVolts, 0.95 * systemVolts):
+            //    - Tensão estável (>= 0.95 * systemVolts, ex: >= 26.6V em sistema 28V): o alternador está conseguindo suprir a rede
+            //      sem sobreaquecimento/estresse térmico grave, ou o simulador está reportando cargas virtuais sem impacto físico.
+            //    - Tensão colapsada (< 0.88 * systemVolts, ex: < 24.64V em sistema 28V): a tensão caiu para o patamar da bateria isolada (~24V),
+            //      indicando que o alternador desarmou, queimou ou foi desligado (bateria sozinha descarregando, coberta pela regra de descarga profunda).
+            //    - Faixa intermediária [0.88, 0.95): alternador ativo porém operando em sobrecarga térmica real, incapaz de manter a tensão regulada.
+            double vSagMin = 0.88 * systemVolts;
+            double vSagMax = 0.95 * systemVolts;
+            bool voltageSag = busVolts >= vSagMin && busVolts < vSagMax;
+
+            bool isOverload = anyAlternatorAndCombustion && !anyStarter && (totalLoadAmps > ratedAmps) && voltageSag;
 
             if (isOverload)
             {

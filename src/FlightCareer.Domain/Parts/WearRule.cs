@@ -81,6 +81,8 @@ namespace FlightCareer.Domain.Parts
         public WearRuleInspection? Inspection { get; init; }
         public NativeOverstress? NativeOverstress { get; init; }
         public string Source { get; init; } = string.Empty;
+        public bool RequiresEngineRunning { get; init; } = false;
+        public double EngineRunningDelaySeconds { get; init; } = 0.0;
 
         public WearRule() { }
 
@@ -96,7 +98,9 @@ namespace FlightCareer.Domain.Parts
             IReadOnlyList<WearRuleBand> bands,
             WearRuleInspection? inspection,
             NativeOverstress? nativeOverstress,
-            string source)
+            string source,
+            bool requiresEngineRunning = false,
+            double engineRunningDelaySeconds = 0.0)
         {
             Id = id;
             Description = description;
@@ -110,6 +114,8 @@ namespace FlightCareer.Domain.Parts
             Inspection = inspection;
             NativeOverstress = nativeOverstress;
             Source = source;
+            RequiresEngineRunning = requiresEngineRunning;
+            EngineRunningDelaySeconds = engineRunningDelaySeconds;
         }
     }
 }

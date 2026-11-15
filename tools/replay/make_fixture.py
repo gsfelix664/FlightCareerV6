@@ -46,6 +46,9 @@ def load_required_sensor_prefixes(repo_root: Path) -> set:
         "dmg-eng-failed",
         "dmg-crash-flag",
         "nw-is-failed",
+        "brake-parking-position",
+        "brake-parking",
+        "elec-master-alternator",
     }
     sensors.update(fixed_sensors)
 
@@ -203,12 +206,13 @@ def process_fixture(csv_path: Path, blackbox_path: Path | None, out_dir: Path, f
     file_size = out_csv_gz.stat().st_size
 
     # Extrai toques
-    touchdowns = []
     if blackbox_path:
         touchdowns = extract_touchdowns_from_blackbox(blackbox_path)
-
-    with open(out_td_json, "w", encoding="utf-8") as td_f:
-        json.dump(touchdowns, td_f, indent=2, ensure_ascii=False)
+        with open(out_td_json, "w", encoding="utf-8") as td_f:
+            json.dump(touchdowns, td_f, indent=2, ensure_ascii=False)
+    elif not out_td_json.exists():
+        with open(out_td_json, "w", encoding="utf-8") as td_f:
+            json.dump([], td_f, indent=2, ensure_ascii=False)
 
     return out_csv_gz, out_td_json, file_size
 

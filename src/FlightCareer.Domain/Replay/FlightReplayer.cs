@@ -22,6 +22,23 @@ namespace FlightCareer.Domain.Replay
         DateTime? Utc = null);
 
     /// <summary>
+    /// Modo de ativação do desgaste e tempo no replay.
+    /// </summary>
+    public enum ReplayActivationMode
+    {
+        /// <summary>
+        /// Imita o início do FlightMonitor no jogo: só começa a desgastar e contar horas
+        /// após 10 segundos contínuos em tempo real com motor em combustão e freio de estacionamento solto (PB &lt; 0.5).
+        /// </summary>
+        GameLike,
+
+        /// <summary>
+        /// Desgasta e acumula tempo desde a primeira linha do CSV (comportamento inicial).
+        /// </summary>
+        FromStart
+    }
+
+    /// <summary>
     /// Resumo do desgaste e ciclo de uma peça ao término do replay.
     /// </summary>
     public sealed record ReplayPartItem(
@@ -88,7 +105,8 @@ namespace FlightCareer.Domain.Replay
             AircraftLimitProfile? profile = null,
             IReadOnlyList<string>? features = null,
             int? engineCount = null,
-            IReadOnlyList<AircraftPart>? initialParts = null)
+            IReadOnlyList<AircraftPart>? initialParts = null,
+            ReplayActivationMode activationMode = ReplayActivationMode.GameLike)
         {
             var effectiveFeatures = features?.ToList() ?? profile?.Features?.ToList() ?? new List<string>();
             int effectiveEngineCount = engineCount ?? profile?.EngineCount ?? 1;
@@ -196,19 +214,61 @@ namespace FlightCareer.Domain.Replay
                 .ToList();
             int nextTouchdownIndex = 0;
 
+            bool isFlightActive = activationMode == ReplayActivationMode.FromStart;
+            double accumulatedActivationRealSec = 0.0;
+
             for (int i = 0; i < frames.Count; i++)
             {
                 var frame = frames[i];
                 double elapsedSeconds = (frame.ReceivedUtc - startUtc).TotalSeconds;
 
-                double dtSimHours = 0.0;
-                if (i > 0)
-                {
-                    double wallSec = (frame.ReceivedUtc - prevUtc).TotalSeconds;
-                    dtSimHours = SimTimeStep.ToSimHours(wallSec, frame.SimulationRate);
-                    totalSimHours += dtSimHours;
-                }
+                double wallSec = i > 0 ? (frame.ReceivedUtc - prevUtc).TotalSeconds : 0.0;
+                double dtSimHours = i > 0 ? SimTimeStep.ToSimHours(wallSec, frame.SimulationRate) : 0.0;
                 prevUtc = frame.ReceivedUtc;
+
+                if (!isFlightActive)
+                {
+                    bool isCombustion = false;
+                    for (int eng = 1; eng <= effectiveEngineCount; eng++)
+                    {
+                        if (frame.Values.TryGetValue($"eng-combustion:{eng}", out double cVal) ||
+                            (eng == 1 && frame.Values.TryGetValue("eng-combustion", out cVal)))
+                        {
+                            if (cVal > 0.5)
+                            {
+                                isCombustion = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    double parkingBrake = 1.0;
+                    if (frame.Values.TryGetValue("brake-parking-position", out double pb) ||
+                        frame.Values.TryGetValue("brake-parking", out pb))
+                    {
+                        parkingBrake = pb;
+                    }
+
+                    if (isCombustion && parkingBrake < 0.5)
+                    {
+                        accumulatedActivationRealSec += wallSec;
+                        if (accumulatedActivationRealSec >= 10.0)
+                        {
+                            isFlightActive = true;
+                        }
+                    }
+                    else
+                    {
+                        accumulatedActivationRealSec = 0.0;
+                    }
+
+                    if (!isFlightActive)
+                    {
+                        continue;
+                    }
+                }
+
+                totalSimHours += dtSimHours;
 
                 // Processa toques agendados para este instante ou anterior
                 while (nextTouchdownIndex < pendingTouchdowns.Count)

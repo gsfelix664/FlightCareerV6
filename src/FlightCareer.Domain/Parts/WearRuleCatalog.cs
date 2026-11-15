@@ -144,6 +144,16 @@ namespace FlightCareer.Domain.Parts
                     }
                 }
 
+                if (rule.EngineRunningDelaySeconds < 0)
+                {
+                    throw new InvalidDataException($"Regra '{rule.Id}' possui EngineRunningDelaySeconds negativo: {rule.EngineRunningDelaySeconds}.");
+                }
+
+                if (rule.EngineRunningDelaySeconds > 0 && !rule.RequiresEngineRunning)
+                {
+                    throw new InvalidDataException($"Regra '{rule.Id}' possui EngineRunningDelaySeconds configurado mas RequiresEngineRunning é falso.");
+                }
+
                 ValidateInspection(rule.Id, rule.Inspection);
 
                 if (rule.Bands == null || rule.Bands.Count == 0)
@@ -308,7 +318,9 @@ namespace FlightCareer.Domain.Parts
                     r.NativeOverstress.ComponentId,
                     r.NativeOverstress.Threshold
                 ) : null,
-                r.Source
+                r.Source,
+                r.RequiresEngineRunning ?? false,
+                r.EngineRunningDelaySeconds ?? 0.0
             )).ToList() ?? new List<WearRule>();
 
             return new WearRuleCatalog(rules);
@@ -358,6 +370,8 @@ namespace FlightCareer.Domain.Parts
             public WearRuleInspectionDto? Inspection { get; set; }
             public NativeOverstressDto? NativeOverstress { get; set; }
             public string Source { get; set; } = string.Empty;
+            public bool? RequiresEngineRunning { get; set; }
+            public double? EngineRunningDelaySeconds { get; set; }
         }
 
         private class WearRuleBandDto
