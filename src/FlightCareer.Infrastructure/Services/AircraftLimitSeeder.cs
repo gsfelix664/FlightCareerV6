@@ -65,6 +65,7 @@ namespace FlightCareer.Infrastructure.Services
                     title = profile.TitlePatterns,
                     atcModel = profile.AtcModelPatterns
                 });
+                string featuresJson = JsonSerializer.Serialize(profile.Features ?? (IReadOnlyList<string>)Array.Empty<string>());
 
                 if (!existingProfiles.TryGetValue(profile.AircraftId, out var existing))
                 {
@@ -75,6 +76,7 @@ namespace FlightCareer.Infrastructure.Services
                         Class = profile.Class,
                         DataVersion = profile.DataVersion,
                         SimMatchJson = simMatchJson,
+                        FeaturesJson = featuresJson,
                         Limits = profile.Limits.Select(l => new AircraftLimitEntity
                         {
                             Id = Guid.NewGuid(),
@@ -95,6 +97,7 @@ namespace FlightCareer.Infrastructure.Services
                     existing.Class = profile.Class;
                     existing.DataVersion = profile.DataVersion;
                     existing.SimMatchJson = simMatchJson;
+                    existing.FeaturesJson = featuresJson;
 
                     var oldLimits = existing.Limits.ToList();
                     db.AircraftLimits.RemoveRange(oldLimits);

@@ -34,5 +34,8 @@ namespace FlightCareer.Domain.Entities
 
         // Barras de saúde individuais por componente (motor, óleo, pneus, freios...)
         public List<AircraftComponent> Components { get; set; } = new();
+
+        // Peças individuais com saúde oculta (F2.1)
+        public List<AircraftPart> Parts { get; set; } = new();
     }
 }

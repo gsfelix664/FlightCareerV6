@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 
 namespace FlightCareer.Infrastructure.Services
 {
@@ -116,7 +117,8 @@ namespace FlightCareer.Infrastructure.Services
                 dto.DataVersion,
                 dto.SimMatch?.Title ?? new List<string>(),
                 dto.SimMatch?.AtcModel ?? new List<string>(),
-                limits
+                limits,
+                dto.Features ?? new List<string>()
             );
         }
 
@@ -192,6 +194,13 @@ namespace FlightCareer.Infrastructure.Services
                 throw new InvalidDataException($"Class vazia no arquivo {filePath}.");
             }
 
+            if (dto.Features == null || dto.Features.Count == 0)
+            {
+                throw new InvalidDataException($"Features vazias ou não especificadas no arquivo {filePath}.");
+            }
+
+            AircraftFeatures.ValidateCoherence(dto.Features, filePath);
+
             if (dto.Limits != null)
             {
                 foreach (var l in dto.Limits)
@@ -255,6 +264,7 @@ namespace FlightCareer.Infrastructure.Services
             public int DataVersion { get; set; }
             public string Id { get; set; } = string.Empty;
             public string Class { get; set; } = string.Empty;
+            public List<string>? Features { get; set; }
             public SimMatchDto? SimMatch { get; set; }
             public List<LimitItemDto>? Limits { get; set; }
         }

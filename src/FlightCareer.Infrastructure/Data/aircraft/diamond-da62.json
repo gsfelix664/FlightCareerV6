@@ -1,8 +1,18 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Diamond DA62",
   "class": "Piston",
+  "features": [
+    "piston",
+    "diesel",
+    "multiEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "fuelInjected",
+    "turbocharged",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "DA62"

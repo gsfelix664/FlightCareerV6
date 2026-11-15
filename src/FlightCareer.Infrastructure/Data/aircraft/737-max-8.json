@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "737 Max 8",
   "class": "Jet",
+  "features": [
+    "jet",
+    "multiEngine",
+    "retractableGear",
+    "pressurized",
+    "apu",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "737 Max 8"

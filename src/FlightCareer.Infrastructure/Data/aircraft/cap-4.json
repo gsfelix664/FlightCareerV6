@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "CAP-4",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "fixedPitchProp",
+    "carbureted",
+    "tailwheel"
+  ],
   "simMatch": {
     "title": [
       "CAP-4"

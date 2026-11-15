@@ -23,6 +23,10 @@ namespace FlightCareer.Domain.Limits
         int DataVersion,
         IReadOnlyList<string> TitlePatterns,
         IReadOnlyList<string> AtcModelPatterns,
-        IReadOnlyList<AircraftLimit> Limits
-    );
+        IReadOnlyList<AircraftLimit> Limits,
+        IReadOnlyList<string>? Features = null
+    )
+    {
+        public IReadOnlyList<string> Features { get; init; } = Features ?? System.Array.Empty<string>();
+    }
 }

@@ -8,6 +8,7 @@
     "dataVersion",
     "id",
     "class",
+    "features",
     "simMatch",
     "limits"
   ],
@@ -33,6 +34,32 @@
         "Jet",
         "Unknown"
       ]
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "piston",
+          "turboprop",
+          "jet",
+          "diesel",
+          "turbocharged",
+          "carbureted",
+          "fuelInjected",
+          "fixedPitchProp",
+          "constantSpeedProp",
+          "singleEngine",
+          "multiEngine",
+          "fixedGear",
+          "retractableGear",
+          "tailwheel",
+          "pressurized",
+          "hydraulicGear",
+          "apu",
+          "electricHybrid"
+        ]
+      }
     },
     "simMatch": {
       "type": "object",

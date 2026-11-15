@@ -18,6 +18,7 @@ namespace FlightCareer.Application.Interfaces
         DbSet<FinancialTransaction> FinancialTransactions { get; }
         DbSet<MarketListing> MarketListings { get; }
         DbSet<AircraftComponent> AircraftComponents { get; }
+        DbSet<AircraftPart> AircraftParts { get; }
         DbSet<AircraftDefect> AircraftDefects { get; }
         DbSet<AircraftLimitProfileEntity> AircraftLimitProfiles { get; }
         DbSet<AircraftLimitEntity> AircraftLimits { get; }

@@ -22,6 +22,9 @@ namespace FlightCareer.Domain.Entities
         /// <summary>JSON com os padrões de Title e AtcModel para casamento com o simulador.</summary>
         public string SimMatchJson { get; set; } = string.Empty;
 
+        /// <summary>JSON com a lista de características técnicas (features) da aeronave.</summary>
+        public string FeaturesJson { get; set; } = "[]";
+
         public List<AircraftLimitEntity> Limits { get; set; } = new();
     }
 }

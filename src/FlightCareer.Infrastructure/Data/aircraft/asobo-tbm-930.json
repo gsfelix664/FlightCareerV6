@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
+  "features": [
+    "turboprop",
+    "singleEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "pressurized",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "TBM 930"

@@ -1,8 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Flight Design CT",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "fixedPitchProp",
+    "fuelInjected"
+  ],
   "simMatch": {
     "title": [
       "Flight Design CT"

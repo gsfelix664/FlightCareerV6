@@ -1,8 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "Cirrus SR22",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "constantSpeedProp",
+    "fuelInjected"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

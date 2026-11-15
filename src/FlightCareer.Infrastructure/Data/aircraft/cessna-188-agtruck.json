@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "Cessna 188 AGTruck",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "constantSpeedProp",
+    "fuelInjected",
+    "tailwheel"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

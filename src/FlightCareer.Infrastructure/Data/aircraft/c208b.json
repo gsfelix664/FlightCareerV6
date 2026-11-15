@@ -1,8 +1,14 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 1,
+  "dataVersion": 2,
   "id": "C208B",
   "class": "Turboprop",
+  "features": [
+    "turboprop",
+    "singleEngine",
+    "fixedGear",
+    "constantSpeedProp"
+  ],
   "simMatch": {
     "title": [],
     "atcModel": []

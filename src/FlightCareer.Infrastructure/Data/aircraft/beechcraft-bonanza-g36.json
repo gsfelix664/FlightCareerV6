@@ -1,8 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "retractableGear",
+    "constantSpeedProp",
+    "fuelInjected"
+  ],
   "simMatch": {
     "title": [
       "Beechcraft Bonanza"

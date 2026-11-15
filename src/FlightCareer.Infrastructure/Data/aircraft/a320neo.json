@@ -1,8 +1,16 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "A320neo",
   "class": "Jet",
+  "features": [
+    "jet",
+    "multiEngine",
+    "retractableGear",
+    "pressurized",
+    "apu",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "A320neo"

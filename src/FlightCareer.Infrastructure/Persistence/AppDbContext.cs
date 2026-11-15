@@ -17,6 +17,7 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<MarketListing> MarketListings { get; set; }
         public DbSet<AircraftComponent> AircraftComponents { get; set; }
+        public DbSet<AircraftPart> AircraftParts { get; set; }
         public DbSet<AircraftDefect> AircraftDefects { get; set; }
         public DbSet<AircraftLimitProfileEntity> AircraftLimitProfiles { get; set; }
         public DbSet<AircraftLimitEntity> AircraftLimits { get; set; }
@@ -45,6 +46,16 @@ namespace FlightCareer.Infrastructure.Persistence
 
             modelBuilder.Entity<AircraftComponent>()
                 .HasIndex(c => new { c.PilotAircraftId, c.Kind })
+                .IsUnique();
+
+            modelBuilder.Entity<PilotAircraft>()
+                .HasMany(pa => pa.Parts)
+                .WithOne(p => p.PilotAircraft)
+                .HasForeignKey(p => p.PilotAircraftId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftPart>()
+                .HasIndex(p => new { p.PilotAircraftId, p.PartId })
                 .IsUnique();
 
             modelBuilder.Entity<AircraftLimitProfileEntity>()
@@ -230,7 +241,27 @@ namespace FlightCareer.Infrastructure.Persistence
                     Notes TEXT NULL,
                     CONSTRAINT FK_AircraftLimits_AircraftLimitProfiles_ProfileId FOREIGN KEY (ProfileId) REFERENCES AircraftLimitProfiles (Id) ON DELETE CASCADE
                 );",
-                "CREATE INDEX IF NOT EXISTS IX_AircraftLimits_ProfileId ON AircraftLimits(ProfileId);"
+                "CREATE INDEX IF NOT EXISTS IX_AircraftLimits_ProfileId ON AircraftLimits(ProfileId);",
+
+                // Características (features) e Peças com saúde oculta (F2.1)
+                "ALTER TABLE AircraftLimitProfiles ADD COLUMN FeaturesJson TEXT DEFAULT '[]';",
+                @"CREATE TABLE IF NOT EXISTS AircraftParts (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    PartId TEXT NOT NULL,
+                    Health REAL NOT NULL,
+                    HoursSinceReplacement REAL NOT NULL,
+                    CyclesSinceReplacement INTEGER NOT NULL,
+                    LastReplacedAtUtc TEXT NOT NULL,
+                    LastReplacedAirframeHours REAL NOT NULL,
+                    Flag INTEGER NOT NULL,
+                    FlaggedBy INTEGER NOT NULL,
+                    FlaggedAtUtc TEXT NULL,
+                    IsBroken INTEGER NOT NULL,
+                    BrokenAtUtc TEXT NULL,
+                    CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
+                );",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId ON AircraftParts(PilotAircraftId, PartId);"
             };
 
             foreach (var stmt in migrationStatements)

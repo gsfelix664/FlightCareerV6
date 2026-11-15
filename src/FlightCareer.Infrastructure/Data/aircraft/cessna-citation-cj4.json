@@ -1,8 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
+  "features": [
+    "jet",
+    "multiEngine",
+    "retractableGear",
+    "pressurized",
+    "hydraulicGear"
+  ],
   "simMatch": {
     "title": [
       "Citation CJ4"

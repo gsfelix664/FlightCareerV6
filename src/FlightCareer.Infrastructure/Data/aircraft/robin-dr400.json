@@ -1,8 +1,15 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 2,
+  "dataVersion": 3,
   "id": "Robin DR400",
   "class": "Piston",
+  "features": [
+    "piston",
+    "singleEngine",
+    "fixedGear",
+    "fixedPitchProp",
+    "carbureted"
+  ],
   "simMatch": {
     "title": [
       "Robin DR400"

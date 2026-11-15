@@ -1,8 +1,14 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 3,
+  "dataVersion": 4,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
+  "features": [
+    "turboprop",
+    "multiEngine",
+    "fixedGear",
+    "constantSpeedProp"
+  ],
   "simMatch": {
     "title": [
       "DHC-6-300 Twin Otter"
