@@ -257,3 +257,4 @@ Objetivo: (1) achar o **limiar** de overstress de cada componente; (2) confirmar
 - F1.4b (tabelas do portão) · 2026-11-14 · PROPOSTA, AGUARDA APROVAÇÃO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md) · branch docs/f1.4b-tabelas-nativo
 - F1.4c (preparação) · 2026-11-14 · PRONTO PARA VOO · [Relatório](docs/reviews/F1.4c-relatorio.md) · branch feat/calibracao-f14c
 - F1.4b (portão) · 2026-11-14 · APROVADO PELO USUÁRIO · [Tabelas](docs/plans/sensor-validation/native-wear-mapping.md)
+- F1.4c (C152 asfalto) · 2026-11-15 · PROPOSTA, AGUARDA APROVAÇÃO · [Calibração](docs/plans/sensor-validation/calibration-C152.md) · branch docs/f1.4c-calibracao-c152
