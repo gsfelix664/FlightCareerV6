@@ -284,6 +284,10 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 5. **TBO comercial vs. privado:** após o TBO o jogador pode voar voos privados assumindo risco crescente de falha, mas missões comerciais e fretamentos exigem motor estritamente dentro do TBO.
 6. **Top overhaul vs. major overhaul:** top overhaul substitui cilindros, pistões e válvulas por uma fração do preço e recupera parte da confiabilidade; major overhaul é a retífica completa do bloco.
 7. **Vazamento de óleo em cascata:** desgaste severo em lubrificação ou cilindros (< 30%) injeta gradualmente `GENERAL ENG OIL LEAKED PERCENT` via SimConnect (`SetOilLeakedPercent`), derrubando pressão e elevando temperatura nos instrumentos para forçar redução de potência antes de fundir o motor.
+8. **Cabine e MEL de conforto:** interior gasto reduz satisfação e valor de missões de passageiros; lavatório inoperante restringe missões de longo curso (MEL de cabine).
+9. **Oxigênio de emergência:** O2 inoperante limita altitude máxima de despacho no planejamento de rota.
+10. **Envelhecimento ambiental acelerado:** corrosão acelerada em hubs litorâneos/úmidos, areia e desgaste de filtros em desertos, ressecamento sob frio polar extremo.
+11. **Balanceamento econômico na F2.3:** simulação de custo de manutenção por hora em 1.000 h de voo típicas comparada com faixas por classe de aeronave, garantindo salvaguarda "um sistema só cobra" enquanto componentes legados e peças convivem.
 
 ---
 
@@ -313,4 +317,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F2.1 (lista de peças, portão) · 2026-11-15 · APROVADO PELO USUÁRIO com 2 correções (pneu dianteiro só triciclo; magnetos NO-GO) · [Relatório](docs/reviews/F2.1-relatorio.md)
 - F2.2 · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.2-relatorio.md) · branch feat/parts-f2.2
 - F2.2 (regras de desgaste, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Relatório](docs/reviews/F2.2-relatorio.md). Pedido do usuário na aprovação: expandir o catálogo (aviônicos, elétrico, superfícies de comando, estrutura, trem e asa detalhados) → tarefa F2.1b.
-- F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 2) · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b
+- F2.1b · 2026-11-15 · PROPOSTA PARA APROVAÇÃO (RODADA 3) · [Relatório](docs/reviews/F2.1b-relatorio.md) · branch feat/parts-f2.1b

@@ -1576,3 +1576,20 @@
   - `WearRuleCatalogTests` atualizado para validar catálogo de regras >= 40 regras.
   - 219 testes xUnit em `FlightCareer.Tests` e 40 testes python aprovados com 100% de sucesso.
 
+## 2026-11-15 - F2.1b Rodada 3: incorporação do Adendo 4 (Gemini)
+- **Ampliação do catálogo com Adendo 4 e envelhecimento calendárico (`parts_catalog.json`)**:
+  - Incorporado o Adendo 4 do usuário cobrindo Cabine (assentos, galley, lavatório, entretenimento), Oxigênio (cilindro tripulação, sistema de passageiros, máscaras/reguladores), Proteção contra Fogo (detecção de motor, garrafas extintoras de motor e APU, extintores portáteis de cabine), Emergência e Específicos (escorregadeiras de evacuação, coletes/botes, limpadores de para-brisa, detector de gelo, esquis e flutuadores).
+  - Catálogo ampliado para 151 peças unificadas (meta de 130–180 peças rigorosamente mantida).
+  - Adicionado campo `calendarLifeMonths` em `PartDefinition` e calibrado em todas as peças que sofrem envelhecimento estacionário (baterias, pneus, mangueiras, vedações, garrafas de extintor, cilindros de O2, coletes/escorregadeiras, ELT e lubrificantes).
+- **Novos grupos e vocabulário de características (`PartGroup` e `AircraftFeatures`)**:
+  - Adicionados 4 novos grupos em `PartGroup`: `Cabine`, `Oxigênio`, `Proteção contra Fogo` e `Emergência` (totalizando 23 grupos).
+  - Adicionadas 9 novas features em `AircraftFeatures`: `passengerCabin`, `galley`, `lavatory`, `oxygen`, `fireProtection`, `floats`, `skis`, `wipers`, `iceDetector` com validações de coerência aeronáutica (`galley`/`lavatory` requerem `passengerCabin`; `floats`/`skis` mutuamente exclusivos; `iceDetector` restrito a turboprop/jet).
+  - Atualizados os 46 arquivos de aeronaves em `Data/aircraft/*.json` com bump de `dataVersion` para 4 e mapeamento preciso das características (ex.: DHC-6 Twin Otter com `skis`, `passengerCabin`, `oxygen`, `wipers`; 747-8i com conjunto completo; C152 mantido estritamente enxuto).
+- **Métricas de evento fechadas e documentadas (`WearRuleMetrics`)**:
+  - Criada classe canônica `WearRuleMetrics` com o vocabulário fechado das 26 métricas de evento e estresse operacional suportadas pelo motor de desgaste, com fórmulas de derivação a partir da telemetria e sensores do simulador documentadas para a F2.3.
+  - `WearRuleCatalog` passa a validar que toda regra de evento referencia uma métrica de `WearRuleMetrics.All`.
+- **Testes e verificação**:
+  - `PartCatalogTests` e `WearRuleCatalogTests` atualizados com novos testes cobrindo todos os 23 grupos, peças com vida calendárica, coerência das novas features e métricas fechadas.
+  - Build com 0 erros; 225 testes xUnit e 40 testes python aprovados com 100% de sucesso.
+
+
