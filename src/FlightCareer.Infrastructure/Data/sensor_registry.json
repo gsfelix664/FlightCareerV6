@@ -673,6 +673,118 @@
       "perEngine": false
     },
     {
+      "key": "elec-bus-voltage-1",
+      "simVar": "ELECTRICAL BUS VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-2",
+      "simVar": "ELECTRICAL BUS VOLTAGE:2",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-3",
+      "simVar": "ELECTRICAL BUS VOLTAGE:3",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-4",
+      "simVar": "ELECTRICAL BUS VOLTAGE:4",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-5",
+      "simVar": "ELECTRICAL BUS VOLTAGE:5",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-1",
+      "simVar": "ELECTRICAL BUS AMPS:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-2",
+      "simVar": "ELECTRICAL BUS AMPS:2",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-3",
+      "simVar": "ELECTRICAL BUS AMPS:3",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-4",
+      "simVar": "ELECTRICAL BUS AMPS:4",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-5",
+      "simVar": "ELECTRICAL BUS AMPS:5",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-1",
+      "simVar": "CIRCUIT ON:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-2",
+      "simVar": "CIRCUIT ON:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-3",
+      "simVar": "CIRCUIT ON:3",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-voltage-1",
+      "simVar": "ELECTRICAL BATTERY VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-load-1",
+      "simVar": "ELECTRICAL BATTERY LOAD:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-main-bus-voltage-1",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
       "key": "vac-suction-pressure",
       "simVar": "SUCTION PRESSURE",
       "unit": "inhg",

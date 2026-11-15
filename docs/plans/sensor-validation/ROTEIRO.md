@@ -300,3 +300,57 @@ O script irá gerar:
 1. `docs/plans/sensor-validation/A-C152.md` (relatório padrão de sensores).
 2. `docs/plans/sensor-validation/calibration-C152.md` (relatório estruturado de calibração com limiares sugeridos e confirmação da razão integral/queda).
 
+---
+
+## 7. Teste Elétrico e Comandos (C172 G1000)
+
+Roteiro de solo/pátio rápido (~5 minutos) para validar as novas SimVars elétricas (tensão/corrente dos barramentos, carga da bateria, alternador e chaves de aviônicos) e a deflexão de pedais do leme no **Cessna 172SP G1000**.
+
+### Checklist do Teste Elétrico
+
+- [ ] **1. Preparação:** Aeronave no pátio em Cold & Dark. Clicar em **REC** no HUD Overlay do FlightCareer para iniciar a gravação.
+- [ ] **2. Bateria ON com Aviônicos ON (Motor Parado):**
+  - **Ação:** Ligar a chave Master Battery (`BAT`) mantendo o motor desligado. Ligar ambas as chaves de aviônicos (`AVIONICS BUS 1` e `BUS 2`).
+  - **Marcador:** `teste-bateria-avionics-on`
+  - **Duração:** Manter por 2 minutos para registrar descarga da bateria sob carga dos aviônicos.
+- [ ] **3. Aviônicos OFF (30 segundos):**
+  - **Ação:** Desligar ambas as chaves de aviônicos (`AVIONICS BUS 1` e `BUS 2`), mantendo a bateria ligada.
+  - **Marcador:** `teste-avionics-off`
+  - **Duração:** Manter desligado por 30 segundos.
+- [ ] **4. Partida do Motor:**
+  - **Ação:** Religar os aviônicos se necessário pelo checklist, acionar a chave de ignição / starter e estabilizar o motor em marcha lenta (idle).
+  - **Marcador:** `teste-partida`
+  - **Duração:** ~30 segundos até estabilização de RPM e tensão do alternador.
+- [ ] **5. Alternador OFF (60 segundos):**
+  - **Ação:** Desligar a chave `ALT` do Master Switch (deixando `BAT` ligado).
+  - **Marcador:** `teste-alternador-off`
+  - **Duração:** Manter desligado por 60 segundos para registrar a transição de recarga para descarga no barramento principal.
+- [ ] **6. Alternador ON:**
+  - **Ação:** Religar a chave `ALT` do Master Switch.
+  - **Marcador:** `teste-alternador-on`
+  - **Duração:** ~30 segundos para observar retorno de tensão e pico de recarga.
+- [ ] **7. Movimentação dos Pedais do Leme:**
+  - **Ação:** Pressionar o pedal do leme totalmente para a esquerda por 3 segundos, depois totalmente para a direita por 3 segundos, e retornar ao centro.
+  - **Marcador:** `teste-leme`
+- [ ] **8. Finalizar:** Clicar em **REC** no HUD Overlay do FlightCareer para encerrar a gravação do log.
+
+### Como Identificar a Função de Cada Barramento pelos Marcadores
+
+Como o sistema elétrico modular v2 do MSFS 2024 indexa os barramentos por índice numérico global (`ELECTRICAL BUS VOLTAGE:1..5` e `ELECTRICAL BUS AMPS:1..5`), a correspondência física de cada barramento é identificada diretamente comparando o comportamento das colunas com as ações do teste:
+1. **Barramento de Aviônicos (Avionics Bus):** Identificado pelo barramento que apresenta ~24 V em `teste-bateria-avionics-on` e **cai para 0,0 V e 0,0 A** no momento exato em que a chave de aviônicos é desligada (`teste-avionics-off`).
+2. **Barramentos Principais (Main Bus 1 / Main Bus 2):** Identificados pelos barramentos que sobem para ~28 V com o motor e alternador ativos (`teste-partida`), caem para ~24 V quando o alternador é desligado (`teste-alternador-off`) e voltam a ~28 V quando o alternador é religado (`teste-alternador-on`).
+3. **Barramento da Bateria (Battery Bus):** Barramento que permanece em ~24 V com motor desligado e reflete a tensão dos terminais da bateria em todas as etapas.
+
+### O que Cada Coluna Deve Mostrar se Estiver Certa
+
+| Coluna | Comportamento Esperado no Teste |
+|---|---|
+| `elec-bus-voltage-1` a `5` | ~24 V com bateria; sobem para ~28 V com alternador ON. O barramento de aviônicos **cai para 0,0 V** em `teste-avionics-off`. Os barramentos principais caem de ~28 V para ~24 V em `teste-alternador-off`. |
+| `elec-bus-amps-1` a `5` | Corrente consumida por cada barramento. O barramento de aviônicos **vai a 0,0 A** em `teste-avionics-off`. |
+| `elec-circuit-on-1` a `3` | `1` quando o circuito indexado estiver energizado; `0` se desligado/desenergizado. |
+| `elec-battery-load-1` | No v2+, reporta a corrente de fornecimento da bateria: **positivo (> 0 A, ex: +10 a +25 A)** com motor parado ou alternador desligado (bateria suprindo o sistema); **0 A** (ou não fornecedora) quando o alternador está suprindo o sistema e recarregando. |
+| `elec-battery-voltage-1` | No v2+, reporta a tensão nos terminais da bateria quando ela é fornecedora (~24 V a 25 V com motor parado ou alternador desligado); **0 V** quando o alternador é o fornecedor principal do sistema. |
+| `elec-main-bus-voltage-1` | Datum de controle do sistema legado: ~24 V com bateria; ~28 V com alternador ativo. |
+| `rudder-position` | Varia entre **-1,00** (leme totalmente à esquerda) e **+1,00** (totalmente à direita) em `teste-leme`. |
+
+
