@@ -40,8 +40,8 @@ namespace FlightCareer.Tests.Parts
         {
             var validSensors = LoadValidSensors();
 
-            // Deve conter entre 35 e 60 peças conforme a especificação
-            Assert.InRange(Catalog.Parts.Count, 35, 60);
+            // Deve conter entre 90 e 130 peças conforme a especificação F2.1b
+            Assert.InRange(Catalog.Parts.Count, 90, 130);
 
             // Valida sem lançar exceções (IDs únicos, grupo no vocabulário, LifeHours/LifeCycles, LifeSource e sensores existentes)
             Catalog.Validate(validSensors);
@@ -60,6 +60,17 @@ namespace FlightCareer.Tests.Parts
                 Assert.True(part.LifeHours > 0 || (part.LifeCycles.HasValue && part.LifeCycles.Value > 0));
                 Assert.True(part.PartPrice >= 0);
                 Assert.True(part.LaborHours >= 0);
+
+                // F2.1b: validação de faixas de custo de reparo em % e tempo de hangar
+                Assert.NotNull(part.RepairCostPctOfAircraft);
+                Assert.Equal(2, part.RepairCostPctOfAircraft.Count);
+                Assert.True(part.RepairCostPctOfAircraft[0] >= 0);
+                Assert.True(part.RepairCostPctOfAircraft[0] <= part.RepairCostPctOfAircraft[1]);
+
+                Assert.NotNull(part.DowntimeHours);
+                Assert.Equal(2, part.DowntimeHours.Count);
+                Assert.True(part.DowntimeHours[0] >= 0);
+                Assert.True(part.DowntimeHours[0] <= part.DowntimeHours[1]);
 
                 if (part.PerEngine) perEngineCount++;
                 if (part.PriceScalesWithAircraft) priceScalesCount++;
@@ -327,6 +338,122 @@ namespace FlightCareer.Tests.Parts
                     Assert.False(parts.Any(p => p.Group == PartGroup.Helice), $"Jato '{profile.AircraftId}' possui peças de Hélice indevidamente.");
                 }
             }
+        }
+
+        [Fact]
+        public void FeatureCoherence_ExclusiveAndPrerequisiteRules_Enforced()
+        {
+            // deIceBoots e bleedAntiIce exclusivos
+            var exclusiveDeice = new[]
+            {
+                AircraftFeatures.Turboprop,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.ConstantSpeedProp,
+                AircraftFeatures.DeIceBoots,
+                AircraftFeatures.BleedAntiIce
+            };
+            var ex1 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(exclusiveDeice, "TestExclusiveDeice"));
+            Assert.Contains("deIceBoots e bleedAntiIce", ex1.Message);
+
+            // slats apenas em jet ou turboprop (pistão com slats deve falhar)
+            var invalidSlatsPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Slats
+            };
+            var ex2 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidSlatsPiston, "TestPistonSlats"));
+            Assert.Contains("slats", ex2.Message);
+
+            // thsTrim apenas em jet ou turboprop
+            var invalidThsPiston = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.ThsTrim
+            };
+            var ex3 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidThsPiston, "TestPistonThs"));
+            Assert.Contains("thsTrim", ex3.Message);
+
+            // tailwheel não tem noseWheelSteering
+            var invalidTailwheelSteering = new[]
+            {
+                AircraftFeatures.Piston,
+                AircraftFeatures.SingleEngine,
+                AircraftFeatures.FixedGear,
+                AircraftFeatures.FixedPitchProp,
+                AircraftFeatures.Carbureted,
+                AircraftFeatures.Tailwheel,
+                AircraftFeatures.NoseWheelSteering
+            };
+            var ex4 = Assert.Throws<InvalidOperationException>(() => AircraftFeatures.ValidateCoherence(invalidTailwheelSteering, "TestTailwheelSteering"));
+            Assert.Contains("tailwheel", ex4.Message);
+        }
+
+        [Fact]
+        public void SpecificAircraft_MeetF21bFeatureRequirements()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles().ToDictionary(p => p.AircraftId, StringComparer.OrdinalIgnoreCase);
+
+            // 1. C152 não tem FMS, slats, spoilers nem radar
+            Assert.True(profiles.ContainsKey("Cessna C152"));
+            var c152Features = profiles["Cessna C152"].Features;
+            Assert.DoesNotContain(AircraftFeatures.Fms, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Slats, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.Spoilers, c152Features);
+            Assert.DoesNotContain(AircraftFeatures.WeatherRadar, c152Features);
+
+            // 2. 747-8i tem slats, spoilers, FMS, radar, antiskid, anteparas de pressão (pressurized)
+            Assert.True(profiles.ContainsKey("747-8i"));
+            var b748Features = profiles["747-8i"].Features;
+            Assert.Contains(AircraftFeatures.Slats, b748Features);
+            Assert.Contains(AircraftFeatures.Spoilers, b748Features);
+            Assert.Contains(AircraftFeatures.Fms, b748Features);
+            Assert.Contains(AircraftFeatures.WeatherRadar, b748Features);
+            Assert.Contains(AircraftFeatures.Antiskid, b748Features);
+            Assert.Contains(AircraftFeatures.Pressurized, b748Features);
+
+            // 3. King Air tem botas de degelo (deIceBoots)
+            Assert.True(profiles.ContainsKey("Beechcraft King Air"));
+            var kingAirFeatures = profiles["Beechcraft King Air"].Features;
+            Assert.Contains(AircraftFeatures.DeIceBoots, kingAirFeatures);
+        }
+
+        [Fact]
+        public void PartsFor_ExpandedCatalog_FeaturesFilterAppropriateParts()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles().ToDictionary(p => p.AircraftId, StringComparer.OrdinalIgnoreCase);
+
+            var c152Parts = Catalog.PartsFor(profiles["Cessna C152"].Features);
+            var b748Parts = Catalog.PartsFor(profiles["747-8i"].Features);
+
+            // C152 tem instrumentos analógicos e empenagem básica, sem FMS, slats ou radar
+            Assert.Contains(c152Parts, p => p.Id == "avionics.analog_flight_instruments");
+            Assert.Contains(c152Parts, p => p.Id == "empennage.elevator");
+            Assert.Contains(c152Parts, p => p.Id == "empennage.rudder");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "avionics.fms_computer");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "wing.slats");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "wing.spoilers");
+            Assert.DoesNotContain(c152Parts, p => p.Id == "avionics.weather_radar");
+
+            // 747-8i tem FMS, slats, spoilers, radar, antiskid e anteparas de pressão
+            Assert.Contains(b748Parts, p => p.Id == "avionics.fms_computer");
+            Assert.Contains(b748Parts, p => p.Id == "avionics.glass_displays");
+            Assert.Contains(b748Parts, p => p.Id == "wing.slats");
+            Assert.Contains(b748Parts, p => p.Id == "wing.spoilers");
+            Assert.Contains(b748Parts, p => p.Id == "avionics.weather_radar");
+            Assert.Contains(b748Parts, p => p.Id == "gear.antiskid_system");
+            Assert.Contains(b748Parts, p => p.Id == "fuselage.pressure_bulkheads");
+            Assert.DoesNotContain(b748Parts, p => p.Id == "avionics.analog_flight_instruments");
         }
     }
 }
