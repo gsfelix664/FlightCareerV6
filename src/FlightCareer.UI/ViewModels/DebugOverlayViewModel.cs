@@ -418,6 +418,80 @@ namespace FlightCareer.UI.ViewModels
             }
         }
 
+        // ---------------------------------------------------------------- testes do spike de falhas
+        // Botões de depuração para testar no sim as opções de "falhar o sistema sem mexer no comando"
+        // (docs/plans/spike-falhas-sem-comando.md). Cada envio grava um marcador "teste-..." no REC.
+
+        [ObservableProperty] private string _debugEventName = "ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE";
+        [ObservableProperty] private string _debugEventParams = "1 1";
+        [ObservableProperty] private string _debugEventStatus = string.Empty;
+        [ObservableProperty] private bool _isFlapSurfaceLockActive;
+        private bool _flapLockSubscribed;
+
+        [RelayCommand]
+        private void PresetAlternatorBus()
+        {
+            DebugEventName = "ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE";
+            DebugEventParams = "1 1";
+        }
+
+        [RelayCommand]
+        private void PresetAlternatorBreaker()
+        {
+            DebugEventName = "ELECTRICAL_ALTERNATOR_BREAKER_TOGGLE";
+            DebugEventParams = "1";
+        }
+
+        [RelayCommand]
+        private void PresetCircuit()
+        {
+            DebugEventName = "ELECTRICAL_CIRCUIT_TOGGLE";
+            DebugEventParams = "1";
+        }
+
+        [RelayCommand]
+        private void SendDebugEvent()
+        {
+            var name = (DebugEventName ?? string.Empty).Trim().ToUpperInvariant();
+            if (name.Length == 0) return;
+            var parts = (DebugEventParams ?? string.Empty)
+                .Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var p = new uint[5];
+            for (int i = 0; i < parts.Length && i < 5; i++)
+            {
+                if (!uint.TryParse(parts[i], out p[i]))
+                {
+                    DebugEventStatus = $"Parâmetro inválido: {parts[i]}";
+                    return;
+                }
+            }
+            _simConnect.SendEventEx(name, p[0], p[1], p[2], p[3], p[4]);
+            string label = $"teste-evento {name} {string.Join(' ', parts)}";
+            _sensorRecorder.Mark(label);
+            DebugEventStatus = $"Enviado: {name} {string.Join(' ', parts)} ({DateTime.Now:HH:mm:ss})";
+        }
+
+        [RelayCommand]
+        private void ToggleFlapSurfaceLock()
+        {
+            IsFlapSurfaceLockActive = !IsFlapSurfaceLockActive;
+            if (IsFlapSurfaceLockActive && !_flapLockSubscribed)
+            {
+                _simConnect.OnFailureStateReceived += HoldFlapSurface;
+                _flapLockSubscribed = true;
+            }
+            else if (!IsFlapSurfaceLockActive && _flapLockSubscribed)
+            {
+                _simConnect.OnFailureStateReceived -= HoldFlapSurface;
+                _flapLockSubscribed = false;
+            }
+            _sensorRecorder.Mark(IsFlapSurfaceLockActive ? "teste-flap-superficie-50-on" : "teste-flap-superficie-50-off");
+            DebugEventStatus = IsFlapSurfaceLockActive ? "Superfície do flap travada em 50%" : "Superfície do flap liberada";
+        }
+
+        // A cada leitura rápida (~6 frames) reescreve a superfície: é o teste de "jitter" do spike
+        private void HoldFlapSurface(SimFailureState _) => _simConnect.WriteFlapSurfacePercent(0.5);
+
         [RelayCommand]
         private void MarkEvent()
         {
