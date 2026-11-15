@@ -1070,7 +1070,7 @@
       "id": "flap_overspeed_vfe",
       "description": "Velocidade do ar acima do limite estrutural para posição estendida de flaps (Vfe)",
       "kind": "Continuous",
-      "limitKey": "vfe:1",
+      "limitKey": "vfe:current",
       "direction": "Above",
       "appliesTo": {
         "none": []
@@ -1123,10 +1123,104 @@
       "source": "estimativa — revisar (referência usual: FAA AC 43.13-1B Section 4 - Control Surfaces)"
     },
     {
-      "id": "gear_overspeed_vle_vlo",
-      "description": "Velocidade do ar acima do limite operacional de trem de pouso (Vle estendido / Vlo operação)",
+      "id": "gear_extended_overspeed_vle",
+      "description": "Velocidade do ar acima do limite operacional com trem de pouso estendido (Vle)",
       "kind": "Continuous",
       "limitKey": "vle",
+      "direction": "Above",
+      "appliesTo": {
+        "any": [
+          "retractableGear",
+          "hydraulicGear"
+        ]
+      },
+      "sensors": [
+        "af-airspeed-indicated",
+        "gear-position",
+        "gear-total-pct-extended"
+      ],
+      "nativeOverstress": {
+        "componentId": 35,
+        "threshold": 0.0001
+      },
+      "bands": [
+        {
+          "name": "caution",
+          "threshold": 1.0,
+          "parts": [
+            {
+              "partId": "gear.actuator",
+              "multiplier": 3.0,
+              "lossPerHourPct": 2.0
+            },
+            {
+              "partId": "gear.main_struts",
+              "multiplier": 2.0,
+              "lossPerHourPct": 1.0
+            },
+            {
+              "partId": "gear.nose_strut",
+              "multiplier": 2.0,
+              "lossPerHourPct": 1.0
+            }
+          ]
+        },
+        {
+          "name": "warning",
+          "threshold": 1.1,
+          "parts": [
+            {
+              "partId": "gear.actuator",
+              "multiplier": 10.0,
+              "lossPerHourPct": 10.0
+            },
+            {
+              "partId": "gear.main_struts",
+              "multiplier": 6.0,
+              "lossPerHourPct": 4.0
+            },
+            {
+              "partId": "gear.nose_strut",
+              "multiplier": 6.0,
+              "lossPerHourPct": 4.0
+            }
+          ]
+        },
+        {
+          "name": "severe",
+          "threshold": 1.2,
+          "parts": [
+            {
+              "partId": "gear.actuator",
+              "multiplier": 24.0,
+              "lossPerHourPct": 28.0
+            },
+            {
+              "partId": "gear.main_struts",
+              "multiplier": 14.0,
+              "lossPerHourPct": 12.0
+            },
+            {
+              "partId": "gear.nose_strut",
+              "multiplier": 14.0,
+              "lossPerHourPct": 12.0
+            }
+          ],
+          "inspection": {
+            "defectCode": "GEAR_OVERSPEED_INSPECTION",
+            "grounding": false,
+            "minSeconds": 5.0,
+            "description": "Inspeção de portas de trem, trincos e montantes por arrasto aerodinâmico excessivo com trem baixado"
+          }
+        }
+      ],
+      "source": "estimativa — revisar (referência usual: Cessna / Piper Retractable Gear Maintenance Guidelines - Vle extended limits)"
+    },
+    {
+      "id": "gear_operation_overspeed_vlo",
+      "description": "Velocidade do ar acima do limite operacional durante extensão ou retração do trem de pouso (Vlo)",
+      "kind": "Continuous",
+      "limitKey": "vlo",
       "direction": "Above",
       "appliesTo": {
         "any": [
@@ -1207,14 +1301,14 @@
             }
           ],
           "inspection": {
-            "defectCode": "GEAR_OVERSPEED_INSPECTION",
+            "defectCode": "GEAR_OPERATION_OVERSPEED_INSPECTION",
             "grounding": false,
-            "minSeconds": 5.0,
-            "description": "Inspeção de portas de trem, trincos e atuadores por arrasto aerodinâmico excessivo"
+            "minSeconds": 3.0,
+            "description": "Inspeção de mecanismos de acionamento, pinos de torque e atuadores por operação durante ciclo de extensão/retração acima de Vlo"
           }
         }
       ],
-      "source": "estimativa — revisar (referência usual: Cessna / Piper Retractable Gear Maintenance Guidelines)"
+      "source": "estimativa — revisar (referência usual: Cessna / Piper Retractable Gear Maintenance Guidelines - Vlo operating limits)"
     },
     {
       "id": "airframe_over_g_positive",
@@ -1578,6 +1672,10 @@
             {
               "partId": "brakes.master_cylinders",
               "damagePerEventPct": 0.2
+            },
+            {
+              "partId": "brakes.pads_discs",
+              "damagePerEventPct": 0.3
             }
           ]
         },
@@ -1608,6 +1706,10 @@
             {
               "partId": "brakes.master_cylinders",
               "damagePerEventPct": 1.2
+            },
+            {
+              "partId": "brakes.pads_discs",
+              "damagePerEventPct": 1.5
             },
             {
               "partId": "airframe.wing_structure",
@@ -1649,6 +1751,10 @@
               "damagePerEventPct": 4.5
             },
             {
+              "partId": "brakes.pads_discs",
+              "damagePerEventPct": 5.0
+            },
+            {
               "partId": "airframe.wing_structure",
               "damagePerEventPct": 5.0
             },
@@ -1669,98 +1775,6 @@
         }
       ],
       "source": "estimativa — revisar (referência usual: Boeing / Airbus / Cessna Hard Landing Inspection Manual)"
-    },
-    {
-      "id": "brake_high_energy",
-      "description": "Frenagem severa com alta absorção de energia cinética nos freios",
-      "kind": "Continuous",
-      "limitKey": "vne",
-      "direction": "Above",
-      "appliesTo": {
-        "none": []
-      },
-      "sensors": [
-        "brake-left-position",
-        "brake-right-position",
-        "brake-left-temperature",
-        "brake-right-temperature"
-      ],
-      "nativeOverstress": {
-        "componentId": 36,
-        "threshold": 0.0001
-      },
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.3,
-          "parts": [
-            {
-              "partId": "brakes.pads_discs",
-              "multiplier": 3.0,
-              "lossPerHourPct": 1.0
-            },
-            {
-              "partId": "tires.main",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.5
-            },
-            {
-              "partId": "brakes.master_cylinders",
-              "multiplier": 1.5,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 0.6,
-          "parts": [
-            {
-              "partId": "brakes.pads_discs",
-              "multiplier": 8.0,
-              "lossPerHourPct": 4.0
-            },
-            {
-              "partId": "tires.main",
-              "multiplier": 5.0,
-              "lossPerHourPct": 2.0
-            },
-            {
-              "partId": "brakes.master_cylinders",
-              "multiplier": 4.0,
-              "lossPerHourPct": 1.5
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 0.85,
-          "parts": [
-            {
-              "partId": "brakes.pads_discs",
-              "multiplier": 18.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "tires.main",
-              "multiplier": 12.0,
-              "lossPerHourPct": 6.0
-            },
-            {
-              "partId": "brakes.master_cylinders",
-              "multiplier": 10.0,
-              "lossPerHourPct": 5.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "BRAKE_OVERHEAT_INSPECTION",
-            "grounding": false,
-            "minSeconds": 10.0,
-            "description": "Inspeção visual de pinças, fluido e desgaste de pastilhas por sobreaquecimento de freios"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: Cleveland Wheels & Brakes Technician Guide)"
     },
     {
       "id": "engine_starter_duty_cycle",
@@ -2083,326 +2097,6 @@
       "source": "estimativa — revisar (referência usual: Austro Engine AE300 Operation & Maintenance Manual)"
     },
     {
-      "id": "fuel_system_pressure_stress",
-      "description": "Estresse e degradação do sistema de alimentação de combustível sob pressão anormal",
-      "kind": "Continuous",
-      "limitKey": "oilPressMin",
-      "direction": "Below",
-      "appliesTo": {
-        "none": []
-      },
-      "sensors": [
-        "fuel-system-engine-pressure",
-        "eng-fuel-pressure"
-      ],
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.4,
-          "parts": [
-            {
-              "partId": "fuel.engine_pump",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "fuel.filter_gascolator",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "fuel.selector_valve",
-              "multiplier": 1.5,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "fuel.aux_pump",
-              "multiplier": 1.5,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "engine.carburetor",
-              "multiplier": 1.5,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "fuel.fcu",
-              "multiplier": 1.5,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 0.7,
-          "parts": [
-            {
-              "partId": "fuel.engine_pump",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "fuel.filter_gascolator",
-              "multiplier": 5.0,
-              "lossPerHourPct": 2.0
-            },
-            {
-              "partId": "fuel.selector_valve",
-              "multiplier": 4.0,
-              "lossPerHourPct": 1.5
-            },
-            {
-              "partId": "fuel.aux_pump",
-              "multiplier": 4.0,
-              "lossPerHourPct": 1.5
-            },
-            {
-              "partId": "engine.carburetor",
-              "multiplier": 4.0,
-              "lossPerHourPct": 1.5
-            },
-            {
-              "partId": "fuel.fcu",
-              "multiplier": 4.0,
-              "lossPerHourPct": 1.5
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 0.9,
-          "parts": [
-            {
-              "partId": "fuel.engine_pump",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "fuel.filter_gascolator",
-              "multiplier": 12.0,
-              "lossPerHourPct": 8.0
-            },
-            {
-              "partId": "fuel.selector_valve",
-              "multiplier": 10.0,
-              "lossPerHourPct": 5.0
-            },
-            {
-              "partId": "fuel.aux_pump",
-              "multiplier": 10.0,
-              "lossPerHourPct": 6.0
-            },
-            {
-              "partId": "engine.carburetor",
-              "multiplier": 10.0,
-              "lossPerHourPct": 6.0
-            },
-            {
-              "partId": "fuel.fcu",
-              "multiplier": 10.0,
-              "lossPerHourPct": 6.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "FUEL_SYSTEM_INSPECTION",
-            "grounding": true,
-            "minSeconds": 30.0,
-            "description": "Cheque de pressão e limpeza de filtros/gascolator por cavitação e perda de vazão"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: FAA-H-8083-32 Aviation Maintenance Technician Handbook)"
-    },
-    {
-      "id": "electrical_system_overload",
-      "description": "Sobrecarga elétrica nos barramentos e alternadores/geradores",
-      "kind": "Continuous",
-      "limitKey": "vne",
-      "direction": "Above",
-      "appliesTo": {
-        "none": []
-      },
-      "sensors": [
-        "elec-genalt-bus-amps",
-        "elec-total-load-amps",
-        "elec-main-bus-voltage"
-      ],
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.85,
-          "parts": [
-            {
-              "partId": "electrical.voltage_regulator",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "electrical.wiring_harness",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "electrical.alternator",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "electrical.starter_generator",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "electrical.apu_generator",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 1.0,
-          "parts": [
-            {
-              "partId": "electrical.voltage_regulator",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "electrical.wiring_harness",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "electrical.alternator",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "electrical.starter_generator",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "electrical.apu_generator",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 1.15,
-          "parts": [
-            {
-              "partId": "electrical.voltage_regulator",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "electrical.wiring_harness",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "electrical.alternator",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "electrical.starter_generator",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "electrical.apu_generator",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "ELECTRICAL_OVERLOAD_INSPECTION",
-            "grounding": false,
-            "minSeconds": 30.0,
-            "description": "Inspeção de chicotes elétricos e teste de isolamento por sobrecarga de corrente"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: FAA AC 43.13-1B Chapter 11 - Aircraft Electrical Systems)"
-    },
-    {
-      "id": "hydraulic_system_overpressure",
-      "description": "Sobrepressão e picos de demanda no sistema hidráulico",
-      "kind": "Continuous",
-      "limitKey": "vne",
-      "direction": "Above",
-      "appliesTo": {
-        "all": [
-          "hydraulicGear"
-        ]
-      },
-      "sensors": [
-        "gear-hydraulic-pressure"
-      ],
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.9,
-          "parts": [
-            {
-              "partId": "hydraulic.pump",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "hydraulic.reservoir_lines",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 1.0,
-          "parts": [
-            {
-              "partId": "hydraulic.pump",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "hydraulic.reservoir_lines",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 1.15,
-          "parts": [
-            {
-              "partId": "hydraulic.pump",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "hydraulic.reservoir_lines",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "HYDRAULIC_SYSTEM_INSPECTION",
-            "grounding": true,
-            "minSeconds": 15.0,
-            "description": "Cheque de estanqueidade e teste de válvula de alívio por sobrepressão hidráulica"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: FAA-H-8083-31 Aircraft Hydraulic Systems)"
-    },
-    {
       "id": "turbine_start_cycle",
       "description": "Ciclo de partida de turbina (igniters e motor-gerador de partida)",
       "kind": "Event",
@@ -2510,136 +2204,6 @@
         }
       ],
       "source": "estimativa — revisar (referência usual: Austro Engine AE300 Glow Plug Service Limits)"
-    },
-    {
-      "id": "vacuum_system_low",
-      "description": "Vácuo de sucção abaixo do limite operacional de instrumentos giroscópicos",
-      "kind": "Continuous",
-      "limitKey": "oilPressMin",
-      "direction": "Below",
-      "appliesTo": {
-        "all": [
-          "piston"
-        ]
-      },
-      "sensors": [
-        "vac-suction-pressure",
-        "vac-warning-vacuum"
-      ],
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.4,
-          "parts": [
-            {
-              "partId": "instruments.vacuum_pump",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            },
-            {
-              "partId": "instruments.gyro_horizon",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 0.7,
-          "parts": [
-            {
-              "partId": "instruments.vacuum_pump",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            },
-            {
-              "partId": "instruments.gyro_horizon",
-              "multiplier": 6.0,
-              "lossPerHourPct": 3.0
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 0.9,
-          "parts": [
-            {
-              "partId": "instruments.vacuum_pump",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            },
-            {
-              "partId": "instruments.gyro_horizon",
-              "multiplier": 16.0,
-              "lossPerHourPct": 12.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "VACUUM_SYSTEM_INSPECTION",
-            "grounding": false,
-            "minSeconds": 60.0,
-            "description": "Inspeção de palhetas da bomba de vácuo e teste de precessão do horizonte artificial"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: Tempest Pneumatics / Airborne Vacuum Systems Guide)"
-    },
-    {
-      "id": "thrust_reverser_high_speed",
-      "description": "Acionamento de reversor de empuxo em alta velocidade ou ciclo operacional",
-      "kind": "Continuous",
-      "limitKey": "vne",
-      "direction": "Above",
-      "appliesTo": {
-        "all": [
-          "jet"
-        ]
-      },
-      "sensors": [
-        "af-airspeed-indicated"
-      ],
-      "bands": [
-        {
-          "name": "caution",
-          "threshold": 0.4,
-          "parts": [
-            {
-              "partId": "engine.thrust_reverser",
-              "multiplier": 2.0,
-              "lossPerHourPct": 0.0
-            }
-          ]
-        },
-        {
-          "name": "warning",
-          "threshold": 0.6,
-          "parts": [
-            {
-              "partId": "engine.thrust_reverser",
-              "multiplier": 6.0,
-              "lossPerHourPct": 2.0
-            }
-          ]
-        },
-        {
-          "name": "severe",
-          "threshold": 0.8,
-          "parts": [
-            {
-              "partId": "engine.thrust_reverser",
-              "multiplier": 16.0,
-              "lossPerHourPct": 8.0
-            }
-          ],
-          "inspection": {
-            "defectCode": "THRUST_REVERSER_INSPECTION",
-            "grounding": false,
-            "minSeconds": 10.0,
-            "description": "Inspeção de travas mecânicas e atuadores de concha do reversor de empuxo"
-          }
-        }
-      ],
-      "source": "estimativa — revisar (referência usual: Boeing / Airbus Thrust Reverser Operating Limitations)"
     }
   ]
 }

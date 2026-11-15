@@ -70,6 +70,10 @@ namespace FlightCareer.Domain.Parts
         public WearRuleKind Kind { get; init; } = WearRuleKind.Continuous;
         public PartAppliesTo AppliesTo { get; init; } = new();
         public IReadOnlyList<string> Sensors { get; init; } = Array.Empty<string>();
+        /// <summary>
+        /// Chave de limite operacional (do catálogo LimitKeys, ex.: rpmRedline, ittMax, vle, vlo,
+        /// ou convenções dinâmicas como 'vfe:current' para o dente de flap em uso).
+        /// </summary>
         public string? LimitKey { get; init; }
         public LimitDirection Direction { get; init; } = LimitDirection.Above;
         public string? Metric { get; init; }
