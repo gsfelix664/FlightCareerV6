@@ -1492,3 +1492,18 @@
 - **Testes xUnit**:
   - Adicionados 13 testes cobrindo catálogo, coerência dos 46 perfis, regras de inclusão/exclusão de peças por classe e migração de banco legado. Total: 208 testes xUnit e 40 testes unitários python aprovados.
   - Não testado no MSFS: execução com simulador conectado (desgaste em voo planejado para F2.3).
+
+## 2026-11-15 - F2.1 rodada 2: peças por motor, segregação de turbinas e padronização (Gemini)
+- **Peças por motor (`perEngine`) e contagem de motores (`engineCount`)**:
+  - Adicionada propriedade `PerEngine` em `PartDefinition` e coluna `EngineIndex` (1..N ou 0 para célula) em `AircraftPart`.
+  - Atualizado o índice único da tabela `AircraftParts` para `(PilotAircraftId, PartId, EngineIndex)`.
+  - Adicionado `engineCount` nos 46 perfis `Data/aircraft/*.json` (validado por `_schema.json`, persistido em `AircraftLimitProfiles.EngineCount`).
+  - `AircraftPartProvisioner` cria N cópias de peças com `perEngine: true` de forma idempotente.
+- **Segregação de turbinas vs pistão e novas peças centrais**:
+  - Restringidos itens de pistão (`oil.lubricant`, `oil.filter`, `oil.pump`, `fuel.engine_pump`, `fuel.filter_gascolator`, `electrical.alternator`, `engine.starter`) a `all: [piston]`.
+  - Adicionadas peças de turbina: `engine.compressor`, `engine.reduction_gearbox`, `electrical.starter_generator`, `fuel.fcu`, `engine.fan`, `engine.thrust_reverser`, `oil.turbine_oil`, `oil.turbine_filter` e `oil.turbine_pump` (catálogo expandido para 58 peças).
+- **Padronização de fontes e escala de preços**:
+  - Todas as fontes sem manual aberto nesta rodada padronizadas para `"estimativa — revisar (referência usual: ...)"`.
+  - Adicionado campo `priceScalesWithAircraft` em `PartDefinition` e no catálogo.
+- **Testes e integridade**:
+  - 210 testes xUnit e 40 testes python aprovados com 100% de sucesso. Testes de provisionamento multiquádruplo (Baron G58 com 2 magnetos, C152 com 1, DA62 com 2 glow plugs, 747-8i com 4 seções quentes/fans/reversores).
