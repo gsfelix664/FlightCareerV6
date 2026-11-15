@@ -40,7 +40,8 @@ namespace FlightCareer.Tests.Parts
         {
             var validSensors = LoadValidSensors();
 
-            // Deve conter entre 130 e 180 peças conforme a especificação F2.1b (Rodada 2)
+            // Deve conter exatamente 148 peças conforme a especificação F2.1c (eliminação de 4 sobreposições)
+            Assert.Equal(148, Catalog.Parts.Count);
             Assert.InRange(Catalog.Parts.Count, 130, 180);
 
             // Valida sem lançar exceções (IDs únicos, grupo no vocabulário, LifeHours/LifeCycles, LifeSource e sensores existentes)
@@ -307,7 +308,7 @@ namespace FlightCareer.Tests.Parts
 
             Assert.Contains(parts, p => p.Group == PartGroup.Pressurizacao);
             Assert.Contains(parts, p => p.Id == "pressurization.outflow_valve");
-            Assert.Contains(parts, p => p.Id == "pressurization.door_seals");
+            Assert.Contains(parts, p => p.Id == "fuselage.doors_seals");
             Assert.Contains(parts, p => p.Group == PartGroup.Hidraulico);
         }
 
@@ -321,8 +322,9 @@ namespace FlightCareer.Tests.Parts
             {
                 var parts = Catalog.PartsFor(profile.Features);
 
-                // Toda aeronave deve ter pelo menos: célula, trem, pneus, freios, elétrico e óleo
-                Assert.True(parts.Any(p => p.Group == PartGroup.Celula), $"Aeronave '{profile.AircraftId}' sem peças de Célula.");
+                // Toda aeronave deve ter pelo menos: asa, empenagem, trem, pneus, freios, elétrico e óleo
+                Assert.True(parts.Any(p => p.Group == PartGroup.Asa), $"Aeronave '{profile.AircraftId}' sem peças de Asa.");
+                Assert.True(parts.Any(p => p.Group == PartGroup.Empenagem), $"Aeronave '{profile.AircraftId}' sem peças de Empenagem.");
                 Assert.True(parts.Any(p => p.Group == PartGroup.Trem), $"Aeronave '{profile.AircraftId}' sem peças de Trem.");
                 Assert.True(parts.Any(p => p.Group == PartGroup.Pneus), $"Aeronave '{profile.AircraftId}' sem peças de Pneus.");
                 Assert.True(parts.Any(p => p.Group == PartGroup.Freios), $"Aeronave '{profile.AircraftId}' sem peças de Freios.");
@@ -572,9 +574,9 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
-        public void PartGroups_All23GroupsHaveParts()
+        public void PartGroups_All22GroupsHaveParts()
         {
-            Assert.Equal(23, PartGroup.All.Count);
+            Assert.Equal(22, PartGroup.All.Count);
 
             foreach (var group in PartGroup.All)
             {

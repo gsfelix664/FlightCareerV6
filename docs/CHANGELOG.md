@@ -1607,5 +1607,19 @@
 - **Testes unitários**:
   - Criados `CrashPolicyTests.cs` e `FlapEnforcementPolicyTests.cs` em `src/FlightCareer.Tests/Components/`, totalizando 241 testes passando com 100% de sucesso.
 
+## 2026-11-15 - F2.1c Limpeza das sobreposições do catálogo de peças (Gemini)
+- **Eliminação de sobreposições no catálogo de peças (`parts_catalog.json`)**:
+  - **Wastegate**: Removido `engine.wastegate_controller`; `engine.turbocharger` ("Turbocompressor, wastegate e controlador de pressão") passa a unificar todo o conjunto de sobrealimentação e controle; sensores atualizados para incluir `eng-wastegate-position`.
+  - **Vedações**: Removido `pressurization.door_seals`; `fuselage.doors_seals` ("Portas, escotilhas e vedações de cabine") unifica todas as vedações com `appliesTo: {}` cobrindo todas as aeronaves (incluindo pressurizadas); sensores atualizados com `af-pressurization-cabin-altitude` e `calendarLifeMonths: 60`.
+  - **Linhas hidráulicas**: Unificados `hydraulic.reservoir_lines` e `hydraulic.lines_fittings` em `hydraulic.lines_fittings` ("Reservatório, tubulações, mangueiras e conexões hidráulicas"), adotando a menor vida útil (3.500 h), faixa de custo abrangente [0.15, 0.60], vida calendárica de 60 meses e sensores combinados (`hyd-reservoir-percent`, `hyd-system-integrity`, `nw-level-21`, `nw-is-failed-21`).
+  - **Extinção do grupo Célula**: Migrados `airframe.wing_structure` e `airframe.flaps` para o grupo `Asa`, e `airframe.flight_controls` para o grupo `Empenagem`. IDs mantidos para compatibilidade com o banco.
+- **Redirecionamento em regras de desgaste (`wear_rules.json`)**:
+  - Atualizadas as regras de pressurização (`pressurization.door_seals` → `fuselage.doors_seals`) e turbulência (`hydraulic.reservoir_lines` → `hydraulic.lines_fittings`), sem nenhuma perda de regra ou peça órfã.
+- **Domínio e Testes (`PartGroup` e `PartCatalogTests`)**:
+  - Removido `Celula` de `PartGroup.cs`, restando 22 grupos ativos no vocabulário fechado.
+  - `PartCatalogTests` atualizado para validar catálogo consolidado com 148 peças exatas e todos os 22 grupos cobertos.
+  - Build com 0 erros; 241 testes xUnit passando com 100% de sucesso.
+
+
 
 
