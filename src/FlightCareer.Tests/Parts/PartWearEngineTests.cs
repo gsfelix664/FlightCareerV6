@@ -718,5 +718,178 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(cyl1.Health, cyl4.Health, precision: 3);
             Assert.True(cyl1.Health < 100.0);
         }
+
+        private static AircraftLimitProfile CreateC172Profile()
+        {
+            var limits = new List<AircraftLimit>
+            {
+                new(LimitKeys.ElecSystemVolts, 28, "volts", LimitSource.POH, "C172 POH"),
+                new(LimitKeys.ElecAvionicsCircuitIndex, 3, "number", LimitSource.POH, "C172 POH"),
+                new(LimitKeys.ElecAvionicsBusAmpsIndex, 4, "number", LimitSource.POH, "C172 POH"),
+                new(LimitKeys.ElecMainBusIndex, 1, "number", LimitSource.POH, "C172 POH"),
+                new(LimitKeys.AlternatorRatedAmps, 60, "amperes", LimitSource.POH, "C172 POH"),
+                new(LimitKeys.ElecDeepDischargeVolts, 22, "volts", LimitSource.POH, "C172 POH")
+            };
+
+            return new AircraftLimitProfile(
+                "C172SP G1000",
+                "A",
+                1,
+                new[] { "piston", "singleEngine" },
+                new[] { "Cessna 172SP" },
+                limits
+            );
+        }
+
+        [Fact]
+        public void Tracker_ObservePreflight_NaoAplicaDesgasteNatural_NemHoras()
+        {
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+            var tracker = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+
+            var cyl = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0, HoursSinceReplacement = 0.0 };
+            tracker.Begin(new[] { cyl }, profile, profile.Features);
+
+            var frame = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-combustion:1"] = 1.0,
+                ["eng-rpm:1"] = 1000.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, DateTime.UtcNow, 1.0);
+
+            // 1 hora simulada em preflight com motor funcionando em marcha lenta
+            var res = tracker.ObservePreflight(frame, 1.0, DateTime.UtcNow);
+
+            Assert.Equal(100.0, cyl.Health);
+            Assert.Equal(0.0, cyl.HoursSinceReplacement);
+            Assert.Empty(res.Exceedances);
+            Assert.False(tracker.HasPreflightChanges);
+        }
+
+        [Fact]
+        public void Tracker_PartidaNaPreparacao_NaoContaDeNovoNoVoo()
+        {
+            var profile = CreateC152Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+            var tracker = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+
+            var starter = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.starter", EngineIndex = 1, Health = 100.0 };
+            tracker.Begin(new[] { starter }, profile, profile.Features);
+
+            var now = DateTime.UtcNow;
+
+            // 1. Preflight: starter ligado por 2 segundos
+            var f1 = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-starter:1"] = 1.0,
+                ["eng-combustion:1"] = 0.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, now, 1.0);
+            tracker.ObservePreflight(f1, 2.0 / 3600.0, now);
+
+            // 2. Preflight: motor pega (combustion = 1, starter = 0)
+            var f2 = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-starter:1"] = 0.0,
+                ["eng-combustion:1"] = 1.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, now.AddSeconds(2), 1.0);
+            var preflightRes = tracker.ObservePreflight(f2, 1.0 / 3600.0, now.AddSeconds(2));
+
+            var startEvents = tracker.LastDerivedEvents.Where(e => e.MetricKey == "engineStartCycle").ToList();
+            Assert.Single(startEvents);
+
+            // 3. Voo ativo inicia: chama ProcessTick com motor já funcionando
+            var f3 = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-starter:1"] = 0.0,
+                ["eng-combustion:1"] = 1.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, now.AddSeconds(15), 1.0);
+            var tickRes = tracker.ProcessTick(f3, 1.0 / 3600.0, now.AddSeconds(15));
+
+            var flightStartEvents = tracker.LastDerivedEvents.Where(e => e.MetricKey == "engineStartCycle").ToList();
+            Assert.Empty(flightStartEvents);
+        }
+
+        [Fact]
+        public void Tracker_PartidaComAvionicsLigadoNaPreparacao_EmiteSpike()
+        {
+            var profile = CreateC172Profile();
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+            var tracker = new PartFlightTracker(PartsCatalog, WearRules, resolver);
+
+            var display = new AircraftPart { Id = Guid.NewGuid(), PartId = "avionics.glass_displays", EngineIndex = 0, Health = 100.0 };
+            tracker.Begin(new[] { display }, profile, profile.Features);
+
+            var now = DateTime.UtcNow;
+
+            // Starter ligado com avionics master ligado (elec-circuit-on-3 = 1) -> borda 0->1 do starter emite spike
+            var f1 = new SensorFrame(new Dictionary<string, double>
+            {
+                ["eng-starter:1"] = 1.0,
+                ["elec-circuit-on-3"] = 1.0,
+                ["eng-combustion:1"] = 0.0,
+                ["ctx-simulation-rate"] = 1.0
+            }, now, 1.0);
+            var res1 = tracker.ObservePreflight(f1, 2.0 / 3600.0, now);
+
+            var spikes = tracker.LastDerivedEvents.Where(e => e.MetricKey == WearRuleMetrics.AvionicsMasterStartSpikes).ToList();
+            Assert.Single(spikes);
+            Assert.Equal(1.0, spikes[0].Value);
+            Assert.True(tracker.HasPreflightChanges);
+            Assert.True(display.Health < 100.0);
+        }
+
+        [Fact]
+        public void ApplyTick_FaixaSemEfeito_NaoRegistraExcedencia()
+        {
+            // Regra contínua sintética com uma faixa sem efeito (multiplier: 1.0, lossPerHourPct: 0.0, sem inspeção)
+            var ruleNoEffect = new WearRule(
+                "test_rule_no_effect",
+                "Regra de teste sem efeito na faixa",
+                WearRuleKind.Continuous,
+                new PartAppliesTo(new[] { "piston" }, Array.Empty<string>(), Array.Empty<string>()),
+                new[] { "test-sensor" },
+                "testLimit",
+                LimitDirection.Above,
+                null,
+                new[]
+                {
+                    new WearRuleBand(
+                        "caution_zero_effect",
+                        1.0,
+                        new[] { new WearRulePart("engine.cylinders", 1.0, 0.0, 0.0) },
+                        null
+                    )
+                },
+                null,
+                null,
+                "teste",
+                false,
+                0.0
+            );
+
+            var wearCatalog = new WearRuleCatalog(new[] { ruleNoEffect });
+            var engine = new PartWearEngine(PartsCatalog, wearCatalog);
+
+            var limit = new AircraftLimit("testLimit", 100.0, "units", LimitSource.POH, "test");
+            var profile = new AircraftLimitProfile("TEST", "A", 1, new[] { "piston" }, new[] { "TEST" }, new[] { limit });
+            var resolver = new AircraftLimitResolver(new[] { profile }, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
+            var cyl = new AircraftPart { Id = Guid.NewGuid(), PartId = "engine.cylinders", EngineIndex = 1, Health = 100.0 };
+
+            var frame = new SensorFrame(new Dictionary<string, double>
+            {
+                ["test-sensor"] = 120.0, // Acima do limite de 100.0
+                ["ctx-simulation-rate"] = 1.0
+            }, DateTime.UtcNow, 1.0);
+
+            var result = engine.ApplyTick(new[] { cyl }, frame, 1.0 / 3600.0, profile.Features, resolver, profile);
+
+            // Faixa sem efeito não deve ir para a lista de excedências do blackbox
+            Assert.Empty(result.Exceedances);
+        }
     }
 }

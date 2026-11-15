@@ -79,6 +79,28 @@ namespace FlightCareer.Tests.Replay
         }
 
         [Fact]
+        public void Replay_C152Voo_GameLike_ContaPartidaNaPreparacao()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
+            var frames = SensorLogReader.ReadFrames(GetFixturePath("c152-sbmt-snej-20261115.csv.gz"));
+
+            var replayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver);
+            var result = replayer.Run(frames, null, profile, profile.Features, profile.EngineCount, activationMode: ReplayActivationMode.GameLike);
+
+            var startCycle = result.DerivedEvents.FirstOrDefault(e => e.MetricKey == "engineStartCycle");
+            var starterSec = result.DerivedEvents.FirstOrDefault(e => e.MetricKey == "starterSeconds");
+
+            Assert.NotNull(startCycle);
+            Assert.Equal(1.0, startCycle.Value);
+
+            Assert.NotNull(starterSec);
+            Assert.InRange(starterSec.Value, 1.5, 2.0);
+
+            // Horas continuam em torno de 1,105 h (sem acumular tempo de preparação nas horas de voo)
+            Assert.InRange(result.TotalSimHours, 1.086 - 0.02, 1.086 + 0.03);
+        }
+
+        [Fact]
         public void Replay_C152Voo_Horas_FromStart_1_137()
         {
             var (partsCatalog, wearRuleCatalog, resolver, profile) = LoadCatalogAndProfile("Cessna C152");
