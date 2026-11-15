@@ -256,10 +256,8 @@ namespace FlightCareer.UI.Services
                 }
             }
 
-            if (_active.Contains(FailureEffect.FlapJam))
-            {
-                _sim.WriteFlapSurfacePercent(_lockedFlapSurfacePercent);
-            }
+            // FlapJam: a trava contínua da superfície fica com o PersistentFailureService (a pane vira FLAP_LOCK no
+            // FlightMonitor). Escrever aqui também criaria dois alvos diferentes brigando pela superfície.
         }
 
         private static double NormalizeFlaps(double handle) => handle > 1.0 ? handle / 100.0 : handle;

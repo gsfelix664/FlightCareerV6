@@ -7,37 +7,26 @@ namespace FlightCareer.Tests.Components
     {
         [Theory]
         [InlineData(0, 0)]
-        [InlineData(0, 1)]
-        [InlineData(2, 1)]
+        [InlineData(2, 0)]
         [InlineData(1, -1)]
-        public void TargetFraction_PositionsMenorOuIgualAUm_RetornaZero(double index, double positions)
+        public void TargetFraction_NoPositions_ReturnsZero(double index, double positions) =>
+            Assert.Equal(0.0, FlapSurfaceLock.TargetFraction(index, positions));
+
+        [Fact]
+        public void TargetFraction_C152_ThreeExtendedDetents()
         {
-            double result = FlapSurfaceLock.TargetFraction(index, positions);
-            Assert.Equal(0.0, result);
+            // C152 no MSFS 2024: FLAPS NUM HANDLE POSITIONS = 3, índices 0..3
+            Assert.Equal(0.0, FlapSurfaceLock.TargetFraction(0, 3));
+            Assert.Equal(1.0 / 3.0, FlapSurfaceLock.TargetFraction(1, 3), precision: 4);
+            Assert.Equal(2.0 / 3.0, FlapSurfaceLock.TargetFraction(2, 3), precision: 4);
+            Assert.Equal(1.0, FlapSurfaceLock.TargetFraction(3, 3));
         }
 
         [Fact]
-        public void TargetFraction_C152QuatroPosicoes_CalculaCorretamente()
+        public void TargetFraction_IsClamped()
         {
-            // C152: 4 posições (UP=0, 10=1, 20=2, 30=3) -> divisor 3
-            Assert.Equal(0.0, FlapSurfaceLock.TargetFraction(0, 4));
-            Assert.Equal(1.0 / 3.0, FlapSurfaceLock.TargetFraction(1, 4), precision: 4);
-            Assert.Equal(2.0 / 3.0, FlapSurfaceLock.TargetFraction(2, 4), precision: 4);
-            Assert.Equal(1.0, FlapSurfaceLock.TargetFraction(3, 4));
-        }
-
-        [Fact]
-        public void TargetFraction_IndiceNegativo_LimitaAZero()
-        {
-            double result = FlapSurfaceLock.TargetFraction(-1, 4);
-            Assert.Equal(0.0, result);
-        }
-
-        [Fact]
-        public void TargetFraction_IndiceAcimaDoMaximo_LimitaAUm()
-        {
-            double result = FlapSurfaceLock.TargetFraction(5, 4);
-            Assert.Equal(1.0, result);
+            Assert.Equal(0.0, FlapSurfaceLock.TargetFraction(-1, 3));
+            Assert.Equal(1.0, FlapSurfaceLock.TargetFraction(5, 3));
         }
     }
 }
