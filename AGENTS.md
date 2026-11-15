@@ -39,6 +39,7 @@ Execute a partir da raiz do repositório:
 dotnet build src/FlightCareer.slnx
 dotnet test src/FlightCareer.Tests
 dotnet run --project src/FlightCareer.UI
+dotnet run --project src/FlightCareer.Replay -- <csv|csv.gz> [--aircraft <modelo>]
 ```
 
 - Use o `dotnet` do PATH. Não fixe caminhos de usuário (`C:\Users\<nome>\...`).
@@ -149,7 +150,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 Uma tarefa só está concluída quando:
 
 1. `dotnet build src/FlightCareer.slnx` passa com **0 erros**;
-2. `dotnet test src/FlightCareer.Tests` passa (e lógica nova de Domain/Application tem teste);
+2. `dotnet test src/FlightCareer.Tests` passa (e lógica nova de Domain/Application tem teste; desgaste/regras novas exigem teste de replay quando houver log);
 3. o que não pôde ser testado sem o simulador está **dito explicitamente** no relatório ao usuário ("não testado no MSFS");
 4. há entrada no `docs/CHANGELOG.md`, e este arquivo foi atualizado se o estado de algum sistema mudou.
 

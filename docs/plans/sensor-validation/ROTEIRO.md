@@ -394,5 +394,32 @@ Para gravar os parâmetros SimVar diretamente no catálogo da aeronave (`Data/ai
 python tools/aircraft_limits/calibrate.py "%LOCALAPPDATA%\FlightCareer\sensor-logs\<nome-do-arquivo>.csv" --write
 ```
 
+---
+
+## 5. Replay de Voos Gravados (Testes e CLI — REPLAY)
+
+Permite transformar voos reais gravados com o REC em **fixtures de teste automatizado** e reexecutá-los instantaneamente pela CLI para validar regras de desgaste, toques de pouso e eventos operacionais.
+
+### 5.1 Como Transformar um Voo Novo em Fixture e Teste
+
+1. **Localizar os arquivos do voo:**
+   - Log bruto de sensores: `%LocalAppData%\FlightCareer\sensor-logs\AAAAMMDD-HHMM-<Aeronave>.csv`
+   - Log de blackbox correspondente: `src/FlightCareer.UI/bin/Debug/net10.0-windows/logs/flights/flight_AAAAMMDD_HHMMSS_<origem>_<destino>_<matricula>.csv`
+
+2. **Gerar a fixture compacta:**
+   ```bash
+   python tools/replay/make_fixture.py "%LocalAppData%\FlightCareer\sensor-logs\<nome>.csv" --blackbox "src/FlightCareer.UI/bin/Debug/net10.0-windows/logs/flights/<blackbox>.csv" --out "src/FlightCareer.Tests/Fixtures/Flights" --name "<id-do-teste>"
+   ```
+   O script extrai as colunas usadas pelas regras (removendo posições geográficas) gerando `<id-do-teste>.csv.gz` (< 1 MB) e `<id-do-teste>.touchdowns.json`.
+
+3. **Executar pela CLI:**
+   ```bash
+   dotnet run --project src/FlightCareer.Replay -- src/FlightCareer.Tests/Fixtures/Flights/<id-do-teste>.csv.gz --aircraft "<Modelo>"
+   ```
+
+4. **Criar teste automatizado xUnit:**
+   Adicione um teste em `src/FlightCareer.Tests/Replay/FlightReplayTests.cs` validando o comportamento esperado (excedências, faixas de perda, inspeções e ciclos).
+
+
 
 

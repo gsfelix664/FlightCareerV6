@@ -1795,3 +1795,32 @@
   - 309 testes xUnit passando com 100% de sucesso; 45 testes Python passando.
 - **Não testado no MSFS**:
   - Execução de voo com aeronave bimotor e monomotor no MSFS ao vivo.
+
+## 2026-11-15 - Replay de voos gravados e CLI (Gemini)
+- **Motor de Replay Determinístico (`FlightCareer.Domain/Replay/FlightReplayer.cs`)**:
+  - Motor puro de domínio que consome sequências de `SensorFrame` e eventos de toque (`ReplayTouchdown`) sem dependências de I/O ou EF.
+  - Orquestra `PartFlightTracker` tick a tick com conversão precisa de tempo simulado via `SimTimeStep.ToSimHours`.
+  - Disparo de toques com o solo no instante correto do voo (por tempo decorrido ou UTC), aplicando ciclos de pouso e danos de impacto.
+  - Consolida perdas de saúde por peça, horas acumuladas, ciclos, excedências, inspeções, eventos operacionais e diagnósticos únicos (`FlightReplayResult`).
+  - Exposição de `LastDerivedEvents` em `PartFlightTracker` para captura de eventos com carimbo de tempo.
+- **Leitor de Logs e Blackbox (`FlightCareer.Infrastructure/Replay/SensorLogReader.cs`)**:
+  - Leitura transparente de arquivos de telemetria `.csv` e comprimidos `.csv.gz`, com suporte a BOM UTF-8, cultura invariante, valores numéricos e markers com escape RFC 4180.
+  - Parser robusto de toques a partir do log do blackbox (`# [EVENTO <seg>s] TOQUE: ...`) e de arquivos JSON (`.touchdowns.json`).
+- **Script Gerador de Fixtures (`tools/replay/make_fixture.py`)**:
+  - Script em Python stdlib que filtra logs brutos de gravação do REC (`%LocalAppData%\FlightCareer\sensor-logs\`), mantendo apenas as colunas consumidas por regras de desgaste e pelo `PartEventDeriver`.
+  - Remove coordenadas e dados geográficos sensíveis de posição.
+  - Comprime a saída para `.csv.gz` (< 1 MB) e gera `<nome>.touchdowns.json` a partir do blackbox.
+  - Fixtures geradas para o C152 voo SBMT→SNEJ (774 KB), C172 teste elétrico (115 KB) e C152 calibração (98 KB) em `src/FlightCareer.Tests/Fixtures/Flights/`.
+  - Testes unitários do script em `tools/tests/test_make_fixture.py`.
+- **Ferramenta de Linha de Comando (`src/FlightCareer.Replay`)**:
+  - CLI .NET 10 console adicionada a `src/FlightCareer.slnx`.
+  - Execução: `dotnet run --project src/FlightCareer.Replay -- <csv|csv.gz> [--aircraft <modelo>] [--blackbox <arquivo>|--touchdowns <json>] [--json]`.
+  - Dedução automática de aeronave a partir do arquivo `-context.json` via `AircraftLimitResolver`.
+  - Relatório legível em português com resumo de tempo simulado, top 15 peças desgastadas, excedências consolidadas, inspeções requeridas, eventos operacionais derivados e diagnósticos únicos.
+  - Opção `--json` para integração estruturada.
+- **Testes Automatizados xUnit (`src/FlightCareer.Tests/Replay/`)**:
+  - 10 novos testes cobrindo voo real do C152 (RPM redline motor 1, horas simuladas, danos e ciclos do toque a 658 fpm, deduplicação de diagnósticos, estresse vs desgaste natural), teste elétrico do C172 (partida sem spike com aviônicos desligados, ausência de descarga profunda) e calibração do C152 (smoke test).
+  - Testes de parser de BOM/CSV/markers e toques de blackbox.
+  - Suíte completa de 319 testes xUnit passando em 3 segundos; 48 testes Python passando em 0,25s.
+- **Não testado no MSFS**:
+  - O replay opera offline sobre logs gravados e foi validado contra os dados reais persistidos no banco de dados. Execução de novos voos no MSFS não realizada nesta tarefa.
