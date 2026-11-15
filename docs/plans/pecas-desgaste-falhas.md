@@ -296,3 +296,4 @@ Objetivo: o addon **já nasce** com os limites operacionais de cada aeronave do 
 - F1.4c (C152 asfalto, portão) · 2026-11-15 · APROVADO PELO USUÁRIO · [Calibração](docs/plans/sensor-validation/calibration-C152.md)
 - F2.0a · 2026-11-15 · PRONTO · [Relatório](docs/reviews/F2.0a-relatorio.md) · branch feat/limites-f2.0a
 - F2.0 (limites capturados, 25 aeronaves) · 2026-11-15 · APROVADO PELO USUÁRIO · [Tabela](docs/plans/sensor-validation/F2.0-limites-capturados.md)
+- F2.0b · 2026-11-15 · PRONTO · [Relatório](docs/reviews/F2.0b-relatorio.md) · branch chore/limites-poh-f2.0b

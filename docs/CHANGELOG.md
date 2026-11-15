@@ -1433,3 +1433,15 @@
 
 ## 2026-11-15 - F2.0: limites capturados aprovados (Claude)
 - Usuário aprovou a tabela `F2.0-limites-capturados.md` (25 aeronaves). Próximo: planilha de POH (RPM, G, limites de turbina e VMO dos jatos). Nenhum código mudou.
+
+## 2026-11-15 - F2.0b: limites de POH/TCDS das 25 aeronaves capturadas (Gemini)
+- **Planilha de limites POH (`tools/aircraft_limits/poh_values.csv`)**:
+  - Levantamento e compilação de 242 limites oficiais extraídos diretamente de fontes primárias homologadas (POH/AFM Seção 2 das fabricantes, TCDS EASA e FAA).
+  - Cobertura completa para todas as aeronaves capturadas com certificação civil (23 modelos; CAP-4 e ES-30 devidamente registradas como sem fonte oficial aplicável).
+  - Inclui parâmetros críticos ausentes ou descartados das capturas do simulador: RPM Redline, limites de carga operacional (gLimitPos / gLimitNeg), limites de motores turboélice (ITT, Torque %, Ng N1 %, Np RPM), limites de jatos (VMO, MMO, N1 %) e limites térmicos de motores a pistão (CHT máx, óleo máx, pressão mínima).
+- **Consolidação dos Perfis de Aeronaves (`Data/aircraft/*.json`)**:
+  - Executado `merge_limits.py` aplicando a prioridade estrita de fontes (POH > SimVar > Cfg > NativeOnset > ClassDefault).
+  - Atualizados 23 arquivos JSON com incremento de `dataVersion`, preservando compatibilidade com o seeder e garantindo rastreabilidade de todas as referências.
+- **Documentação e Análise de Divergências**:
+  - Atualizado `docs/plans/sensor-validation/F2.0-limites-capturados.md` com a tabela completa "POH/TCDS e Comparação Sim × POH", respondendo a todos os pontos de conferência abertos (ex.: correção de Vfe errática do 747-8i no sim, identificação dos limites de coolant diesel/Rotax, e ajuste de VMO do A400M de 400 para 300 kt).
+  - Atualizado o Diário de Execução em `docs/plans/pecas-desgaste-falhas.md`.
