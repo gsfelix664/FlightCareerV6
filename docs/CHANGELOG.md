@@ -1629,3 +1629,10 @@
 
 ## 2026-11-15 - Testes no MSFS: F4.2c e crash pelo addon (Claude)
 - Voo com missão (banco novo): pane do motor pelo wear and tear registrada como `ENGINE_FAILURE` (F4.2c OK no MSFS); crash detectado pelo addon e perda total aplicada uma vez. No MSFS 2024 o `CRASH FLAG` não foi visto em nenhum crash e o sim reposiciona o avião no ar. Detalhes em `calibration-C152.md` (voo 4). Seed em banco novo conferido (46 perfis com características, 68 peças no C152). Nenhum código mudou.
+
+## 2026-11-15 - Spike falhas sem mexer no comando (Gemini)
+- Levantamento completo no SDK oficial do MSFS 2024 de como aplicar cada pane sem mover chaves ou alavancas no painel.
+- Alternador: identificado `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` (bus: 1, alt: 1), que desliga a geração mantendo a chave física ON e descarregando a bateria (exige `_EX1` no SimConnect).
+- Flaps e Magnetos: detalhadas as limitações técnicas da engine do sim (conflito com o solver aerodinâmico e amarrações de Model Behaviors do modelo 3D).
+- Criados documento técnico `docs/plans/spike-falhas-sem-comando.md` com matriz comparativa e roteiro de teste em voo para o C152, e relatório `docs/reviews/SPIKE-FALHAS-relatorio.md`. Nenhum arquivo de código foi alterado.
+
