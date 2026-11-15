@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "A330-BelugaXL",
+  "class": "Jet",
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": []
+}

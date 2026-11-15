@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "C400 Corvalis",
+  "class": "Piston",
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": []
+}

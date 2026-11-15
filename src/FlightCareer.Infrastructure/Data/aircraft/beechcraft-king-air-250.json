@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "Beechcraft King Air 250",
+  "class": "Turboprop",
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": []
+}

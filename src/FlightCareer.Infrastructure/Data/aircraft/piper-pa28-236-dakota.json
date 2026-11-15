@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "Piper PA28-236 Dakota",
+  "class": "Piston",
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": []
+}

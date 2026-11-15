@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "Asobo TBM 930",
+  "class": "Turboprop",
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": []
+}

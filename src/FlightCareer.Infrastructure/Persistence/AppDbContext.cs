@@ -18,6 +18,8 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<MarketListing> MarketListings { get; set; }
         public DbSet<AircraftComponent> AircraftComponents { get; set; }
         public DbSet<AircraftDefect> AircraftDefects { get; set; }
+        public DbSet<AircraftLimitProfileEntity> AircraftLimitProfiles { get; set; }
+        public DbSet<AircraftLimitEntity> AircraftLimits { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -43,6 +45,16 @@ namespace FlightCareer.Infrastructure.Persistence
 
             modelBuilder.Entity<AircraftComponent>()
                 .HasIndex(c => new { c.PilotAircraftId, c.Kind })
+                .IsUnique();
+
+            modelBuilder.Entity<AircraftLimitProfileEntity>()
+                .HasMany(p => p.Limits)
+                .WithOne(l => l.Profile)
+                .HasForeignKey(l => l.ProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftLimitProfileEntity>()
+                .HasIndex(p => p.AircraftTypeModel)
                 .IsUnique();
 
             modelBuilder.Entity<Airport>()
@@ -196,7 +208,29 @@ namespace FlightCareer.Infrastructure.Persistence
                     IsResolved INTEGER NOT NULL,
                     ResolvedAtUtc TEXT NULL
                 );",
-                "CREATE INDEX IF NOT EXISTS IX_AircraftDefects_PilotAircraftId_IsResolved ON AircraftDefects(PilotAircraftId, IsResolved);"
+                "CREATE INDEX IF NOT EXISTS IX_AircraftDefects_PilotAircraftId_IsResolved ON AircraftDefects(PilotAircraftId, IsResolved);",
+
+                // Catálogo de limites de aeronaves
+                @"CREATE TABLE IF NOT EXISTS AircraftLimitProfiles (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    AircraftTypeModel TEXT NOT NULL,
+                    Class TEXT NOT NULL,
+                    DataVersion INTEGER NOT NULL,
+                    SimMatchJson TEXT NOT NULL
+                );",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftLimitProfiles_AircraftTypeModel ON AircraftLimitProfiles(AircraftTypeModel);",
+                @"CREATE TABLE IF NOT EXISTS AircraftLimits (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    ProfileId TEXT NOT NULL,
+                    Key TEXT NOT NULL,
+                    Value REAL NOT NULL,
+                    Unit TEXT NOT NULL,
+                    Source INTEGER NOT NULL,
+                    Reference TEXT NOT NULL,
+                    Notes TEXT NULL,
+                    CONSTRAINT FK_AircraftLimits_AircraftLimitProfiles_ProfileId FOREIGN KEY (ProfileId) REFERENCES AircraftLimitProfiles (Id) ON DELETE CASCADE
+                );",
+                "CREATE INDEX IF NOT EXISTS IX_AircraftLimits_ProfileId ON AircraftLimits(ProfileId);"
             };
 
             foreach (var stmt in migrationStatements)

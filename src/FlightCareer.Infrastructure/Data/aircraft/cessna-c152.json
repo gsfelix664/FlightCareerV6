@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 1,
+  "id": "Cessna C152",
+  "class": "Piston",
+  "simMatch": {
+    "title": [
+      "Cessna C152"
+    ],
+    "atcModel": [
+      "C152"
+    ]
+  },
+  "limits": [
+    {
+      "key": "rpmRedline",
+      "value": 2550,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Cessna 152 POH, seção 2 (Limitações)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.2,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.7,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.5,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 149,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 110,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 85,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 4.4,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 152 POH, categoria utilidade",
+      "notes": null
+    },
+    {
+      "key": "rpmNativeOnset",
+      "value": 2600,
+      "unit": "rpm",
+      "source": "NativeOnset",
+      "reference": "calibration-C152.md",
+      "notes": null
+    }
+  ]
+}
