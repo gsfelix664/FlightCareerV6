@@ -1391,3 +1391,8 @@
 
 ## 2026-11-15 - F1.4c: portão do C152 aprovado (Claude)
 - Usuário aprovou: limiar do motor 39 = 0,0001; motor 39 Ativo só como reserva/conferência; flaps, freios, trem e óleo só addon no C152; pneu e comandos em Observar. Registrado em `calibration-C152.md`, `native-wear-mapping.md` e no diário do plano. Pendentes de voo: pousos firme/duro com dano ligado, puxada > 4,4 G e pista de terra. Nenhum código mudou.
+
+## 2026-11-15 - Plano F2.0: catálogo fixo de limites por aeronave (Claude)
+- Decisão do usuário: os limites operacionais de cada aeronave do catálogo (as 45 de `aircrafts.csv`) são montados durante o desenvolvimento e o app já nasce com eles no banco; nada é aprendido em tempo de jogo. Prioridade: POH → SimVars de projeto → CFG → início da taxa nativa (calibração) → padrão da classe.
+- Formato proposto: um JSON por aeronave em `Data/aircraft/` (com JSON Schema, origem e referência de cada valor), seed idempotente por `dataVersion` em `AircraftLimitProfiles`/`AircraftLimits`, `AircraftLimitResolver` em Domain e ferramentas em `tools/aircraft_limits/`. Adicionar avião = adicionar arquivo. Os `aircraftOverrides` do `component_catalog.json` migram para lá.
+- Regra 0.1 › 3 e F2.2/F2.3 alinhadas: a taxa nativa só serve de reserva quando o limite é `ClassDefault`; as faixas das regras de estresse são relativas aos limites do catálogo. `AGENTS.md` › 6 atualizado. Nenhum código mudou.
