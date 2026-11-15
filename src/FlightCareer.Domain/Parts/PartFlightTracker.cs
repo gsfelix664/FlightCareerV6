@@ -41,6 +41,7 @@ namespace FlightCareer.Domain.Parts
 
         public bool IsActive => _parts.Count > 0;
         public IReadOnlyList<AircraftPart> Parts => _parts;
+        public IReadOnlyList<DerivedPartEvent> LastDerivedEvents { get; private set; } = Array.Empty<DerivedPartEvent>();
 
         public void Begin(IEnumerable<AircraftPart> copies, AircraftLimitProfile? profile, IReadOnlyList<string>? features)
         {
@@ -54,6 +55,7 @@ namespace FlightCareer.Domain.Parts
             _eventDeriver.ConfigureElectrical(BuildElectricalConfig(profile));
             _pausedReported = false;
             _reportedDiagnostics.Clear();
+            LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
         private ElectricalConfig BuildElectricalConfig(AircraftLimitProfile? profile)
@@ -93,10 +95,12 @@ namespace FlightCareer.Domain.Parts
             _eventDeriver.Reset();
             _pausedReported = false;
             _reportedDiagnostics.Clear();
+            LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
 
         public PartWearTickResult ProcessTick(SensorFrame? frame, double dtSimHours, DateTime nowUtc)
         {
+            LastDerivedEvents = Array.Empty<DerivedPartEvent>();
             if (!IsActive || dtSimHours <= 0)
             {
                 return new PartWearTickResult(
@@ -145,6 +149,7 @@ namespace FlightCareer.Domain.Parts
             // 2. Eventos operacionais derivados
             double dtSimSeconds = dtSimHours * 3600.0;
             var derivedEvents = _eventDeriver.Update(frame, dtSimSeconds, _features);
+            LastDerivedEvents = derivedEvents;
 
             foreach (var ev in derivedEvents)
             {
