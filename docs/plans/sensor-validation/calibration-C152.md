@@ -41,3 +41,8 @@ Com taxa 0, todos os componentes perdem nível devagar no tempo: ~0,0018 em 753 
 - [ ] Repetir pousos firme/duro com dano ligado (pneu 37) e uma puxada > 4,4 G (comandos).
 - [ ] Pista de terra (passos 1 e 7).
 - [x] ~~Fator do addon ÷ nativo~~: descartado (2026-11-15). O addon segue o real (fabricante/SB), não a velocidade do nativo. Este log serve para conferir que o addon acusa o mesmo abuso (RPM > limite) pelos próprios sensores.
+
+## Voo 4 (2026-11-15, `20261115-1431`, missão ativa, banco novo) — F4.2c e crash
+- Overstress contínuo (sim rate até 8×): `IS WEAK:39` com nível 0,0996 (10%), `IS FAILED:39` ~75 s reais depois a 8× (~10 min simulados). Confirma o voo 2.
+- O addon gravou `ENGINE_FAILURE` com causa `WEAR AND TEAR IS FAILED:39` e reaplicou a pane (`TOGGLE_ENGINE1_FAILURE`). **F4.2c testada no MSFS: OK.**
+- Crash: `CRASH_ADDON` (9.127 fpm, 135° de inclinação, nariz 72° para baixo) → perda total uma única vez. **`CRASH FLAG` nunca passou de 0** nas leituras e o MSFS 2024 reposicionou o avião no ar depois de cada crash (salto de IAS de 0/88 para ~100 kt), mesmo com "Desativar Danos de Colisão" desmarcado — só a detecção do addon pega esse caso. Crashes depois da perda total não são monitorados (o voo já foi encerrado), como esperado.
