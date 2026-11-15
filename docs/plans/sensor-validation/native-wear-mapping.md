@@ -4,26 +4,26 @@
 **Base:** `native-wear-C152.md` (único voo medido, em pista de terra e com abuso extremo), `DefectCatalog.cs`, `component_catalog.json`.
 **SDK conferido:** página "Aircraft Misc. Variables" do SDK 2024 (`WEAR AND TEAR LEVEL:39` = `'PISTON_ENGINE'_n`; 1 = intacto, 0 = falhou; só leitura). A lista de IDs 0–49 é a do `sensor-inventory.md` › 12, aceita pelo MSFS no voo do C152. A unidade e a fórmula de `OVERSTRESS DAMAGE RATE` **não** estão documentadas: a conversão abaixo é hipótese a confirmar na F1.4c.
 
+> **Revisão 2026-11-15 (plano › 0.1, versão final):** o addon é a fonte da verdade e o nativo é só sensor. A taxa nativa **não** vira % de desgaste (sem `nativeRateToLossPerHour` nem `maxNativeLossPerHour`), e `IS WEAK` **não** gera dano. Valem as regras abaixo; o resto da tabela (IDs, peças, códigos de pane, NO-GO) continua aprovado.
+
 ## Princípio (decisão do usuário)
 
-- O addon calcula e grava a saúde de todas as peças (desgaste normal por hora/ciclo + estresse), igual em todas as aeronaves. O **nível** nativo nunca entra no Hangar.
-- O addon define a taxa normal (vida útil de carreira) e a de estresse para qualquer avião. Quando o nativo acusa overstress (taxa acima do limiar), a **taxa do nativo substitui** a de estresse do addon naquele componente (Tabela 1). Uma fonte por vez, nunca a soma. A taxa é usada sempre que for reportada, com a opção de wear and tear ligada ou não.
-- As taxas de estresse do addon são **calibradas para o nativo** (F1.4c), para o mesmo abuso custar parecido em aviões com e sem wear and tear.
-- Por cima disso, reage a **eventos** do nativo (Tabela 2): **fraca** (`IS WEAK` 0 → 1) → dano de desgaste; **quebrada** (`IS FAILED` 0 → 1) → pane.
+- O addon calcula e grava a saúde de todas as peças, o mais perto do real, igual em qualquer avião (MSFS 2024 com ou sem wear and tear, terceiros, MSFS 2020). O **nível** nativo nunca entra no Hangar: o nativo do C152 cair para 80% numa decolagem com manete toda à frente não significa motor a 80% no Hangar.
+- A taxa de overstress nativa é **sensor**: com limite próprio do addon para o componente naquele modelo, só os sensores do addon decidem e a taxa vai para o log como conferência; sem limite próprio, em componente **Ativo**, taxa acima do limiar = faixa vermelha da regra do addon (dano do addon, realista e não linear).
+- Evento: só **quebrada** (`IS FAILED` 0 → 1) → pane (Tabela 2). **Fraca** (`IS WEAK`) só vai para o blackbox.
 - Leitura numa definição de dados separada do `SimTelemetry`, em frequência baixa. Tudo vai para o log detalhado do voo.
 
-## Tabela 1 — Overstress nativo → estresse da peça
+## Tabela 1 — Overstress nativo (sensor)
 
 Regras:
-1. Enquanto `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` > **limiar**: `estresse (%/h) = min(taxa × nativeRateToLossPerHour, maxNativeLossPerHour)`.
-2. Com o nativo acima do limiar, ele **substitui** o estresse dos sensores do addon (mesmo que seja menor). Abaixo do limiar, vale o estresse do addon (abuso que o nativo não modela continua sendo cobrado). O desgaste normal do addon continua sempre.
-2a. A taxa conta mesmo com a opção de wear and tear desligada (no voo F1.4b ela continuou reportando; só o nível travou em 1,00).
-3. Fator inicial = **conversão pura de unidade**, sem escala (decisão do usuário): hipótese "fração do nível por segundo" → `nativeRateToLossPerHour = 100 × 3600 = 360.000`. Ex.: taxa 0,0015 → 540 %/h → 40 s = −6%. No C152 o nível caiu 3,3% nesses 40 s, então a hipótese ainda precisa da F1.4c.
-4. Teto `maxNativeLossPerHour` por componente, proposta inicial **1.000 %/h** (acima do maior valor visto no C152: 0,0020 → 720 %/h, para não cortar o nativo): protege contra valor absurdo ou mudança da fórmula num update do MSFS.
-5. Limiar provisório **0,0001** em todos os componentes Ativo até a F1.4c medir o ruído em operação normal (`limiar = max(ruído normal × 3, 0,0001)`).
-6. Cada trecho em overstress gera uma linha no blackbox: componente, início, fim, duração, perda aplicada ("overstress detectado pelo simulador: motor, 42 s, −3,1%").
+1. Componente **Ativo** sem limite próprio do addon para o modelo: `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` > **limiar** → faixa vermelha na regra do addon. Com limite próprio, a taxa só é registrada (conferência: nativo acusou e o addon não → limite faltando no catálogo).
+2. Nunca soma com a faixa vermelha dos sensores do addon e nunca converte a taxa em %.
+3. A taxa conta mesmo com o dano por estresse desativado no sim (nível travado em 1,00, F1.4b e F1.4c); taxa > 0 com nível em exatamente 1,00 = dano desativado (chave anti-trapaça, blackbox).
+4. Unidade medida no C152 (só informativa): fração do nível por segundo (razão 0,997).
+5. Limiar **0,0001** (C152: taxa exatamente 0 até 2.600 RPM; `calibration-C152.md`).
+6. Cada trecho em overstress gera uma linha no blackbox: componente, fonte, pico, duração.
 
-Status: **Ativo** = usa a taxa; **Observar** = só log até a F1.4c; **Não usar**.
+Status: **Ativo** = usa a taxa como reserva (regra 1); **Observar** = só log até a F1.4c; **Não usar**.
 
 | ID | Nativo | Componente | Peça F2.1 (provisória) | Status | Observação |
 |---|---|---|---|---|---|
@@ -46,7 +46,7 @@ Status: **Ativo** = usa a taxa; **Observar** = só log até a F1.4c; **Não usar
 ### Regras do evento
 
 1. Gatilho por **borda de subida** (0 → 1), lido junto com as panes nativas que o `PersistentFailureService` já detecta. Um evento de cada tipo por componente por voo.
-2. **Fraca:** a saúde da peça fica no máximo em `nativeWeakHealthCap` = **35%** (proposta). Se já estiver abaixo, nada muda. 35% fica abaixo do limite do walkaround (40%), então a peça visível passa a ganhar a exclamação amarela no próximo walkaround, e acima do início dos break checks (30%). **Não** cria discrepância nem aviso na hora (regra 0.11: amarelo só quando o piloto descobre). Vai para o blackbox.
+2. **Fraca:** só blackbox; não altera a saúde (revisão 2026-11-15). O `nativeWeakHealthCap` sai do plano.
 3. **Quebrada:** pane com o código da tabela abaixo, origem `Native`, e a saúde da peça vai a **0%** (decisão do usuário, 2026-11-14, no lugar dos 15% aprovados antes): peça quebrada = 0%, só a troca devolve a 100%. Marca `IsBroken` quando existir peça (Fase 2); peça `IsBroken` não roda break check. Saúde 0% **não** é perda total (plano › F4.2b).
 4. **Sem duplicar:** se já há discrepância aberta com o mesmo código (do addon ou de outra leitura nativa, ex.: `ENG FAILED`), o evento vai só para o blackbox.
 5. Pane sem forma de ser mantida no simulador (enforcement `None`): depois que o voo é reiniciado o MSFS esquece a pane, mas ela continua valendo como **NO-GO no Hangar** (o `StartMonitoring` bloqueia).
