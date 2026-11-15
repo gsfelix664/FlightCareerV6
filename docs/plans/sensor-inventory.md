@@ -142,15 +142,11 @@ Convenções:
 | `WARNING VOLTAGE` | bool | alerta do painel |
 | `CIRCUIT BREAKER PULLED` | bool | disjuntores por nome: fase futura (aviônicos) |
 | `AVIONICS MASTER SWITCH` | bool | chave master de aviônicos |
-| `AVIONICS MASTER SWITCH:1`, `AVIONICS MASTER SWITCH:2` | bool | aviônicos indexados (Bus 1 / 2) |
-| `ELECTRICAL AVIONICS BUS VOLTAGE`, `ELECTRICAL AVIONICS BUS AMPS` | volts / amperes | barramento de aviônicos |
-| `CIRCUIT SWITCH ON:1`, `CIRCUIT SWITCH ON:2` | bool | chaves de circuito 1 e 2 |
-| `CIRCUIT ON:1`, `CIRCUIT ON:2` | bool | alimentação de circuito 1 e 2 |
-| `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada (1) |
-| `ELECTRICAL BATTERY BUS VOLTAGE`, `ELECTRICAL HOT BATTERY BUS VOLTAGE` | volts | barramentos de bateria |
-| `ELECTRICAL MAIN BUS VOLTAGE:1`, `ELECTRICAL MAIN BUS VOLTAGE:2` | volts | barramentos principais 1 e 2 |
-| `ELECTRICAL MAIN BUS AMPS:1` | amperes | corrente do barramento principal 1 |
-| `ALTERNATOR CONNECTION ON:1` | bool | conexão do alternador 1 ao barramento |
+| `ELECTRICAL BUS VOLTAGE:1`, `ELECTRICAL BUS VOLTAGE:2`, `ELECTRICAL BUS VOLTAGE:3`, `ELECTRICAL BUS VOLTAGE:4`, `ELECTRICAL BUS VOLTAGE:5` | volts | barramentos v2+ (tensão dos barramentos 1 a 5) |
+| `ELECTRICAL BUS AMPS:1`, `ELECTRICAL BUS AMPS:2`, `ELECTRICAL BUS AMPS:3`, `ELECTRICAL BUS AMPS:4`, `ELECTRICAL BUS AMPS:5` | amperes | barramentos v2+ (corrente dos barramentos 1 a 5) |
+| `CIRCUIT ON:1`, `CIRCUIT ON:2`, `CIRCUIT ON:3` | bool | circuitos v2+ (energização dos circuitos 1 a 3) |
+| `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada v2+ (1) |
+| `ELECTRICAL MAIN BUS VOLTAGE:1` | volts | barramento principal legado v1.00 (controle/conferência) |
 
 ## 7. Vácuo, pitot, estática e gelo
 

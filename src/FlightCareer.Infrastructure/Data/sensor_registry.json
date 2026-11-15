@@ -673,44 +673,72 @@
       "perEngine": false
     },
     {
-      "key": "elec-avionics-master-switch-1",
-      "simVar": "AVIONICS MASTER SWITCH:1",
-      "unit": "bool",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-avionics-master-switch-2",
-      "simVar": "AVIONICS MASTER SWITCH:2",
-      "unit": "bool",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-avionics-bus-voltage",
-      "simVar": "ELECTRICAL AVIONICS BUS VOLTAGE",
+      "key": "elec-bus-voltage-1",
+      "simVar": "ELECTRICAL BUS VOLTAGE:1",
       "unit": "volts",
       "group": "electrical",
       "perEngine": false
     },
     {
-      "key": "elec-avionics-bus-amps",
-      "simVar": "ELECTRICAL AVIONICS BUS AMPS",
+      "key": "elec-bus-voltage-2",
+      "simVar": "ELECTRICAL BUS VOLTAGE:2",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-3",
+      "simVar": "ELECTRICAL BUS VOLTAGE:3",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-4",
+      "simVar": "ELECTRICAL BUS VOLTAGE:4",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-5",
+      "simVar": "ELECTRICAL BUS VOLTAGE:5",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-1",
+      "simVar": "ELECTRICAL BUS AMPS:1",
       "unit": "amperes",
       "group": "electrical",
       "perEngine": false
     },
     {
-      "key": "elec-circuit-switch-on-1",
-      "simVar": "CIRCUIT SWITCH ON:1",
-      "unit": "bool",
+      "key": "elec-bus-amps-2",
+      "simVar": "ELECTRICAL BUS AMPS:2",
+      "unit": "amperes",
       "group": "electrical",
       "perEngine": false
     },
     {
-      "key": "elec-circuit-switch-on-2",
-      "simVar": "CIRCUIT SWITCH ON:2",
-      "unit": "bool",
+      "key": "elec-bus-amps-3",
+      "simVar": "ELECTRICAL BUS AMPS:3",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-4",
+      "simVar": "ELECTRICAL BUS AMPS:4",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-5",
+      "simVar": "ELECTRICAL BUS AMPS:5",
+      "unit": "amperes",
       "group": "electrical",
       "perEngine": false
     },
@@ -724,6 +752,13 @@
     {
       "key": "elec-circuit-on-2",
       "simVar": "CIRCUIT ON:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-3",
+      "simVar": "CIRCUIT ON:3",
       "unit": "bool",
       "group": "electrical",
       "perEngine": false
@@ -743,44 +778,9 @@
       "perEngine": false
     },
     {
-      "key": "elec-battery-bus-voltage",
-      "simVar": "ELECTRICAL BATTERY BUS VOLTAGE",
-      "unit": "volts",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-hot-battery-bus-voltage",
-      "simVar": "ELECTRICAL HOT BATTERY BUS VOLTAGE",
-      "unit": "volts",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
       "key": "elec-main-bus-voltage-1",
       "simVar": "ELECTRICAL MAIN BUS VOLTAGE:1",
       "unit": "volts",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-main-bus-voltage-2",
-      "simVar": "ELECTRICAL MAIN BUS VOLTAGE:2",
-      "unit": "volts",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-main-bus-amps-1",
-      "simVar": "ELECTRICAL MAIN BUS AMPS:1",
-      "unit": "amperes",
-      "group": "electrical",
-      "perEngine": false
-    },
-    {
-      "key": "elec-alternator-connection-on-1",
-      "simVar": "ALTERNATOR CONNECTION ON:1",
-      "unit": "bool",
       "group": "electrical",
       "perEngine": false
     },
