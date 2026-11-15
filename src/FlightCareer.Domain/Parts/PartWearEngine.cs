@@ -350,8 +350,7 @@ namespace FlightCareer.Domain.Parts
                         }
 
                         // Se o evento representa ciclo de pouso/vida, incrementa CyclesSinceReplacement
-                        if (metricKey.Equals(WearRuleMetrics.LandingCycles, StringComparison.OrdinalIgnoreCase) ||
-                            metricKey.Equals(WearRuleMetrics.TouchdownFpm, StringComparison.OrdinalIgnoreCase))
+                        if (metricKey.Equals(WearRuleMetrics.LandingCycles, StringComparison.OrdinalIgnoreCase))
                         {
                             part.CyclesSinceReplacement++;
                         }

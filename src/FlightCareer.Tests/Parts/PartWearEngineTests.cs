@@ -327,8 +327,9 @@ namespace FlightCareer.Tests.Parts
             Assert.True(tiresPart.Health < 100.0, "Pneus deveriam sofrer dano no toque duro.");
             Assert.NotEmpty(eventResult.Inspections);
             Assert.Contains(eventResult.Inspections, i => i.DefectCode.Contains("LANDING") || i.DefectCode.Contains("HARD"));
-            Assert.Equal(1, gearPart.CyclesSinceReplacement);
-            Assert.Equal(1, tiresPart.CyclesSinceReplacement);
+            // F2.4: touchdownFpm aplica dano por impacto, mas NÃO incrementa CyclesSinceReplacement (deve incrementar apenas em landingCycles)
+            Assert.Equal(0, gearPart.CyclesSinceReplacement);
+            Assert.Equal(0, tiresPart.CyclesSinceReplacement);
         }
 
         [Fact]

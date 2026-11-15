@@ -50,6 +50,21 @@ namespace FlightCareer.UI.Services
         public string LatestFailureSummary => _history.LastOrDefault(r => r.Source != "Excedência")?.Title ?? string.Empty;
         public bool IsEngineOnFire => _actuator.IsEngineOnFire;
         public bool CrashApplied => _crashApplied;
+        public bool PartsDriven { get; set; }
+        public Action<ComponentKind, double>? PartDamageSink { get; set; }
+
+        private void ApplyDamage(ComponentKind kind, double amount)
+        {
+            if (PartsDriven && PartDamageSink != null)
+            {
+                PartDamageSink(kind, amount);
+            }
+            else
+            {
+                var target = Get(kind);
+                if (target != null) target.Health = Math.Clamp(target.Health - amount, 0.0, 100.0);
+            }
+        }
 
         /// <summary>Marca o crash como aplicado sem emitir falhas adicionais (evita perda total ou alertas duplicados).</summary>
         public void MarkCrashApplied() => _crashApplied = true;
@@ -125,17 +140,20 @@ namespace FlightCareer.UI.Services
             }
 
             // 2. Desgaste
-            foreach (var ex in _wear.ApplyTick(_components, data, dtHours))
+            if (!PartsDriven)
             {
-                string limit = ex.Limit != 0 ? $" (limite {ex.Limit:F0})" : string.Empty;
-                Emit(new FlightFailureRecord
+                foreach (var ex in _wear.ApplyTick(_components, data, dtHours))
                 {
-                    Title = $"EXCEDÊNCIA: {ex.Parameter.ToUpperInvariant()}",
-                    Description = $"{ex.Parameter}: {ex.Value:F0}{limit}. Desgaste acelerado em {ComponentName(ex.Kind)} enquanto durar.",
-                    IsCritical = false,
-                    Kind = ex.Kind,
-                    Source = "Excedência"
-                });
+                    string limit = ex.Limit != 0 ? $" (limite {ex.Limit:F0})" : string.Empty;
+                    Emit(new FlightFailureRecord
+                    {
+                        Title = $"EXCEDÊNCIA: {ex.Parameter.ToUpperInvariant()}",
+                        Description = $"{ex.Parameter}: {ex.Value:F0}{limit}. Desgaste acelerado em {ComponentName(ex.Kind)} enquanto durar.",
+                        IsCritical = false,
+                        Kind = ex.Kind,
+                        Source = "Excedência"
+                    });
+                }
             }
 
             // 3. Panes por desgaste (abaixo de 20%)
@@ -148,8 +166,7 @@ namespace FlightCareer.UI.Services
             foreach (var ev in _external.Evaluate(_components, data, dtHours))
             {
                 var o = ev.Outcome;
-                var target = Get(o.Kind);
-                if (target != null) target.Health = Math.Clamp(target.Health - ev.Damage, 0.0, 100.0);
+                ApplyDamage(o.Kind, ev.Damage);
                 _actuator.Apply(o.Effect, o.EffectValue, data);
                 Emit(new FlightFailureRecord
                 {
@@ -207,16 +224,19 @@ namespace FlightCareer.UI.Services
         {
             if (_wear == null || _components.Count == 0) return;
 
-            foreach (var ex in _wear.ApplyLanding(_components, touchdownFpm, lateralFps, wetSurface))
+            if (!PartsDriven)
             {
-                Emit(new FlightFailureRecord
+                foreach (var ex in _wear.ApplyLanding(_components, touchdownFpm, lateralFps, wetSurface))
                 {
-                    Title = $"EXCEDÊNCIA: {ex.Parameter.ToUpperInvariant()}",
-                    Description = $"{ex.Parameter}: {ex.Value:F0} (limite {ex.Limit:F0}). Inspecione {ComponentName(ex.Kind)}.",
-                    IsCritical = false,
-                    Kind = ex.Kind,
-                    Source = "Excedência"
-                });
+                    Emit(new FlightFailureRecord
+                    {
+                        Title = $"EXCEDÊNCIA: {ex.Parameter.ToUpperInvariant()}",
+                        Description = $"{ex.Parameter}: {ex.Value:F0} (limite {ex.Limit:F0}). Inspecione {ComponentName(ex.Kind)}.",
+                        IsCritical = false,
+                        Kind = ex.Kind,
+                        Source = "Excedência"
+                    });
+                }
             }
 
             // Pouso duro pode trincar o cárter / retentor do virabrequim (uma chance por voo)
@@ -246,8 +266,7 @@ namespace FlightCareer.UI.Services
         {
             if (mode.Damage > 0)
             {
-                var target = Get(mode.DamageKind ?? kind);
-                if (target != null) target.Health = Math.Clamp(target.Health - mode.Damage, 0.0, 100.0);
+                ApplyDamage(mode.DamageKind ?? kind, mode.Damage);
             }
 
             _actuator.Apply(mode.Effect, mode.EffectValue, data);

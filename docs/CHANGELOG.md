@@ -1690,3 +1690,19 @@
 
 ## 2026-11-15 - Validação dos sensores novos no C172 G1000 (Claude)
 - Profundor, aileron, piloto automático e trim do profundor validados no MSFS. Master de aviônicos (fica em 1), tensão da bateria (constante) e alternador (0) não funcionam como lidos hoje; leme a confirmar. Detalhes em `docs/plans/sensor-validation/sensores-novos-C172.md`. Nenhum código mudou.
+
+## 2026-11-15 - F2.4 peças no voo (Gemini)
+- **Correção do Duplo Incremento em `PartWearEngine`**: Corrigido bug onde `CyclesSinceReplacement` incrementava tanto em `touchdownFpm` quanto em `landingCycles`. Agora incrementa apenas em `landingCycles`.
+- **Derivador de Eventos Operacionais (`PartEventDeriver`)**: Criada classe pura de domínio que deriva ciclos de partida de pistão (`engineStartCycle`) ou turbina (`turbineStartCycle`), tempo contínuo de acionamento do starter (`starterSeconds`), ciclos de trem retrátil (`gearCycles`) e ciclo completo de voo (`flightCycles`, emitido no primeiro pouso após estar no ar, sem duplicar em bounce).
+- **Reconciliação no Início do Voo (`PartComponentBridge.ReconcilePartsFromComponents`)**: Reconciliação bidirecional antes do voo. Reparos ou revisões no Hangar (barra > agregado + 0,5) elevam a saúde das peças do grupo e limpam `IsBroken` se barra ≥ 99,5; danos fora de voo (barra < agregado - 0,5) aplicam clamp nas peças do grupo. As barras em seguida refletem exatamente as peças.
+- **Rastreador de Peças em Voo (`PartFlightTracker`)**: Lógica pura de Domain que processa `SensorFrame` e tempo simulado, pausa desgaste se o frame for mais antigo que 5 s, aplica eventos derivados e de toque, direciona panes nativas para as peças afetadas ou menor saúde do grupo (idempotente) e sincroniza as 9 barras e colunas legadas.
+- **Persistência em Lote (`PartStateWriter`)**: Cópia otimizada por ID para `AppDbContext` em `Infrastructure/Services/`, preservando `Health`, `HoursSinceReplacement`, `CyclesSinceReplacement`, `IsBroken` e `BrokenAtUtc`.
+- **Sessão de Voo com Peças (`PartFlightSession`)**: Orquestrador na UI que gerencia thread-safety do `SensorFrame`, dispara eventos para o blackbox (`EXCEDENCIA_PECA`, `INSPECAO_PECA`, `PECAS_DIAG`) e delega para o `PartFlightTracker`.
+- **Integração no `ComponentFlightSession` e `FlightMonitor`**:
+  - Em aeronaves com peças, `WearEngine.ApplyTick` e `ApplyLanding` não executam; danos de modo de falha, eventos externos e panes nativas são roteados diretamente para as peças do grupo via `DamageGroup`/`ClampGroup`.
+  - Salvamento das peças nos 4 pontos do ciclo de voo (atualização periódica de 60 s, cancelamento, perda total e conclusão do voo).
+  - Aeronaves sem peças continuam operando 100% pelo sistema legado de componentes sem qualquer alteração comportamental.
+- **Testes Unitários e de Integração**:
+  - Criado `PartFlightIntegrationTests.cs` cobrindo regressão de ciclos, derivador de eventos, reconciliação bidirecional, panes nativas, danos em grupo, integração com frames sintéticos e persistência em SQLite em memória.
+  - Adicionado teste para `AircraftLimitResolver.FindById`.
+  - Total da suíte: 284 testes xUnit passando com 100% de sucesso.
