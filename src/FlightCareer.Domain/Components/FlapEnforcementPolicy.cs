@@ -4,7 +4,7 @@ namespace FlightCareer.Domain.Components
 {
     /// <summary>
     /// Política pura de enforcement para alavanca de flaps com pane persistente.
-    /// Evita "briga" contínua com a pane nativa de flaps do simulador e reescrita durante movimento normal da alavanca.
+    /// Reescreve no máximo 1×/s e só depois de 0,5 s fora da posição. A pane nativa de flap NÃO suprime a correção: o barulho do motor do flap fica como indicativo ao piloto (decisão do usuário, 2026-11-15).
     /// </summary>
     public static class FlapEnforcementPolicy
     {
@@ -15,12 +15,10 @@ namespace FlightCareer.Domain.Components
         public static bool ShouldWrite(
             double currentIndex,
             double lockedIndex,
-            bool nativeFlapFailed,
             DateTime? mismatchSince,
             DateTime? lastWrite,
             DateTime now)
         {
-            if (nativeFlapFailed) return false;
             if (Math.Abs(currentIndex - lockedIndex) <= PositionTolerance) return false;
             if (!mismatchSince.HasValue || now - mismatchSince.Value < MismatchConfirmationTime) return false;
             if (lastWrite.HasValue && now - lastWrite.Value < FlapCorrectionThrottle) return false;
