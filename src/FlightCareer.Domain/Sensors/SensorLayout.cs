@@ -45,8 +45,9 @@ namespace FlightCareer.Domain.Sensors
         /// Monta o layout a partir da lista de sensores e da contagem de motores.
         /// Expande sensores PerEngine em :1..:engineCount.
         /// Sempre inclui o slot reservado ctx-simulation-rate no início do bloco 0.
+        /// Quando includeCalibration é falso, sensores marcados com CalibrationOnly são excluídos do layout.
         /// </summary>
-        public static SensorLayout Build(IReadOnlyList<SensorDefinition> sensors, int engineCount, int blockSize = 256)
+        public static SensorLayout Build(IReadOnlyList<SensorDefinition> sensors, int engineCount, int blockSize = 256, bool includeCalibration = false)
         {
             int validBlockSize = blockSize > 0 ? blockSize : 256;
             int clampedEngines = Math.Clamp(engineCount, 1, 16);
@@ -60,6 +61,11 @@ namespace FlightCareer.Domain.Sensors
             {
                 foreach (var s in sensors)
                 {
+                    if (s.CalibrationOnly && !includeCalibration)
+                    {
+                        continue;
+                    }
+
                     if (s.PerEngine)
                     {
                         for (int eng = 1; eng <= clampedEngines; eng++)

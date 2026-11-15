@@ -764,6 +764,215 @@
       "perEngine": false
     },
     {
+      "key": "elec-circuit-on-4",
+      "simVar": "CIRCUIT ON:4",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-5",
+      "simVar": "CIRCUIT ON:5",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-6",
+      "simVar": "CIRCUIT ON:6",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-7",
+      "simVar": "CIRCUIT ON:7",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-8",
+      "simVar": "CIRCUIT ON:8",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-9",
+      "simVar": "CIRCUIT ON:9",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-10",
+      "simVar": "CIRCUIT ON:10",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-11",
+      "simVar": "CIRCUIT ON:11",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-12",
+      "simVar": "CIRCUIT ON:12",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-13",
+      "simVar": "CIRCUIT ON:13",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-14",
+      "simVar": "CIRCUIT ON:14",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-15",
+      "simVar": "CIRCUIT ON:15",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-16",
+      "simVar": "CIRCUIT ON:16",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-17",
+      "simVar": "CIRCUIT ON:17",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-18",
+      "simVar": "CIRCUIT ON:18",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-19",
+      "simVar": "CIRCUIT ON:19",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-20",
+      "simVar": "CIRCUIT ON:20",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-6",
+      "simVar": "ELECTRICAL BUS VOLTAGE:6",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-7",
+      "simVar": "ELECTRICAL BUS VOLTAGE:7",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-8",
+      "simVar": "ELECTRICAL BUS VOLTAGE:8",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-9",
+      "simVar": "ELECTRICAL BUS VOLTAGE:9",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-10",
+      "simVar": "ELECTRICAL BUS VOLTAGE:10",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-6",
+      "simVar": "ELECTRICAL BUS AMPS:6",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-7",
+      "simVar": "ELECTRICAL BUS AMPS:7",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-8",
+      "simVar": "ELECTRICAL BUS AMPS:8",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-9",
+      "simVar": "ELECTRICAL BUS AMPS:9",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-10",
+      "simVar": "ELECTRICAL BUS AMPS:10",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
       "key": "elec-battery-voltage-1",
       "simVar": "ELECTRICAL BATTERY VOLTAGE:1",
       "unit": "volts",

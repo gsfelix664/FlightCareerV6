@@ -144,7 +144,7 @@ Convenções:
 | `AVIONICS MASTER SWITCH` | bool | chave master de aviônicos |
 | `ELECTRICAL BUS VOLTAGE:1`, `ELECTRICAL BUS VOLTAGE:2`, `ELECTRICAL BUS VOLTAGE:3`, `ELECTRICAL BUS VOLTAGE:4`, `ELECTRICAL BUS VOLTAGE:5` | volts | barramentos v2+ (tensão dos barramentos 1 a 5) |
 | `ELECTRICAL BUS AMPS:1`, `ELECTRICAL BUS AMPS:2`, `ELECTRICAL BUS AMPS:3`, `ELECTRICAL BUS AMPS:4`, `ELECTRICAL BUS AMPS:5` | amperes | barramentos v2+ (corrente dos barramentos 1 a 5) |
-| `CIRCUIT ON:1`, `CIRCUIT ON:2`, `CIRCUIT ON:3` | bool | circuitos v2+ (energização dos circuitos 1 a 3) |
+| `CIRCUIT ON:1`, `CIRCUIT ON:2`, `CIRCUIT ON:3`, `CIRCUIT ON:4`, `CIRCUIT ON:5`, `CIRCUIT ON:6`, `CIRCUIT ON:7`, `CIRCUIT ON:8`, `CIRCUIT ON:9`, `CIRCUIT ON:10` | bool | circuitos v2+ (energização dos circuitos 1 a 10) |
 | `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada v2+ (1) |
 | `ELECTRICAL MAIN BUS VOLTAGE:1` | volts | barramento principal legado v1.00 (controle/conferência) |
 
@@ -275,6 +275,16 @@ Convenções:
 | `WEAR AND TEAR LEVEL:48`, `WEAR AND TEAR IS WEAK:48`, `WEAR AND TEAR IS FAILED:48`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:48` | percent over 100 / bool | ID 48: TAILWHEEL TIRE |
 | `WEAR AND TEAR LEVEL:49`, `WEAR AND TEAR IS WEAK:49`, `WEAR AND TEAR IS FAILED:49`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:49` | percent over 100 / bool | ID 49: TAILWHEEL TIRE PRESSURE |
 | `WEAR AND TEAR EXPOSED PARTS LEVEL`, `WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL` | percent over 100 | Nível geral de peças expostas (sem ID) |
+
+## 13. Só calibração (varredura)
+
+SimVars temporárias para rotina guiada de calibração (`CalibrationMode = true`, excluídas do voo normal).
+
+| SimVar | Unidade | Descrição / uso |
+|---|---|---|
+| `CIRCUIT ON:11`, `CIRCUIT ON:12`, `CIRCUIT ON:13`, `CIRCUIT ON:14`, `CIRCUIT ON:15`, `CIRCUIT ON:16`, `CIRCUIT ON:17`, `CIRCUIT ON:18`, `CIRCUIT ON:19`, `CIRCUIT ON:20` | bool | varredura de circuitos para identificação da chave de aviônicos |
+| `ELECTRICAL BUS VOLTAGE:6`, `ELECTRICAL BUS VOLTAGE:7`, `ELECTRICAL BUS VOLTAGE:8`, `ELECTRICAL BUS VOLTAGE:9`, `ELECTRICAL BUS VOLTAGE:10` | volts | varredura de tensão de barramentos |
+| `ELECTRICAL BUS AMPS:6`, `ELECTRICAL BUS AMPS:7`, `ELECTRICAL BUS AMPS:8`, `ELECTRICAL BUS AMPS:9`, `ELECTRICAL BUS AMPS:10` | amperes | varredura de amperagem de barramentos |
 
 ### Spike de sintaxe alternativa (motor pistão, ID 39)
 

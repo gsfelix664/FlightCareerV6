@@ -8,5 +8,6 @@ namespace FlightCareer.Domain.Sensors
     /// <param name="Unit">Unidade de medida no SDK, em minúsculas.</param>
     /// <param name="Group">Grupo/sistema (context, piston, oil, turbine, etc.).</param>
     /// <param name="PerEngine">Verdadeiro quando a variável possui índice por motor (:N no inventário).</param>
-    public sealed record SensorDefinition(string Key, string SimVar, string Unit, string Group, bool PerEngine);
+    /// <param name="CalibrationOnly">Indica que o sensor só é requisitado e lido no modo de calibração de aeronave.</param>
+    public sealed record SensorDefinition(string Key, string SimVar, string Unit, string Group, bool PerEngine, bool CalibrationOnly = false);
 }
