@@ -11,3 +11,16 @@ Conferido pelo revisor: build 0 erros; `dotnet test` 486/486. Aprovados: domíni
 
 ## Fora do escopo (continua)
 - `SimTelemetry.cs`, vazamento de combustível, APU, despejo.
+
+---
+
+# Revisão COMBUSTIVEL-REAL — rodada 2
+
+**Veredito: APROVADO**
+
+Conferido pelo revisor: build 0 erros; `dotnet test` 492/492.
+1. `FuelUsageAccumulator.Reset()` chamado no `StartMonitoring`; teste de dois voos seguidos.
+2. `FuelSyncCoordinator` (Domain, relógio injetável): grava, confere com leitura nova, até 3 tentativas de 5 s, falha fora do solo; `FuelIntegrityMonitor` só depois da confirmação; falha → alerta e `StopMonitoring`.
+3. Hangar/Refuel só gravam se a aeronave é a ativa/vigiada (`FlightMonitor.WatchedAircraftId`); DI resolve o `FlightMonitor` singleton no `HangarViewModel` (sem ciclo).
+
+Ressalvas: `RefuelViewModel` não é instanciado em lugar nenhum (código morto anterior a esta tarefa); o caminho real é o `HangarViewModel.Refuel`. Não testado no MSFS: escrita dos tanques (sistema novo e legado), sincronização, travas; roteiro no relatório.
