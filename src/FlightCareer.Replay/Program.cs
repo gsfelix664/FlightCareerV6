@@ -291,8 +291,10 @@ namespace FlightCareer.Replay
             string failureDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FlightCareer", "fuzz-failures");
 
             int passedCount = 0;
+            int missingLimitRunsCount = 0;
             int failedCount = 0;
             var violationsByType = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            var missingLimitsByType = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -327,9 +329,13 @@ namespace FlightCareer.Replay
 
                 if (!fastMode && flight.GroundTruth.InjectedAbuses.Count > 0)
                 {
+                    double controlDuration = flight.GroundTruth.IsCancelled && flight.Frames.Count > 1
+                        ? (flight.Frames[^1].ReceivedUtc - flight.Frames[0].ReceivedUtc).TotalSeconds
+                        : plan.TotalDurationSeconds;
+
                     var controlPlan = new SyntheticFlightPlan
                     {
-                        TotalDurationSeconds = plan.TotalDurationSeconds,
+                        TotalDurationSeconds = controlDuration,
                         SimRateSegments = plan.SimRateSegments,
                         Abuses = Array.Empty<SyntheticAbuseRecord>()
                     };
@@ -347,19 +353,34 @@ namespace FlightCareer.Replay
 
                     foreach (var abuse in flight.GroundTruth.InjectedAbuses)
                     {
-                        var gtViolations = SyntheticFlightOracle.VerifyGroundTruth(controlResult, result, abuse);
+                        var gtViolations = SyntheticFlightOracle.VerifyGroundTruth(controlResult, result, abuse, profile, wearRuleCatalog);
                         violations.AddRange(gtViolations);
                     }
                 }
 
-                if (violations.Count == 0)
+                var missingLimits = violations.Where(v => v.StartsWith("limite ausente:", StringComparison.OrdinalIgnoreCase)).ToList();
+                var actualViolations = violations.Where(v => !v.StartsWith("limite ausente:", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                foreach (var m in missingLimits)
                 {
-                    passedCount++;
+                    missingLimitsByType[m] = missingLimitsByType.GetValueOrDefault(m, 0) + 1;
+                }
+
+                if (actualViolations.Count == 0)
+                {
+                    if (missingLimits.Count > 0)
+                    {
+                        missingLimitRunsCount++;
+                    }
+                    else
+                    {
+                        passedCount++;
+                    }
                 }
                 else
                 {
                     failedCount++;
-                    foreach (var v in violations)
+                    foreach (var v in actualViolations)
                     {
                         string category = v.Split(':')[0].Trim();
                         violationsByType[category] = violationsByType.GetValueOrDefault(category, 0) + 1;
@@ -389,7 +410,7 @@ namespace FlightCareer.Replay
                             seed = currentSeed,
                             aircraft = profile.AircraftId,
                             groundTruth = flight.GroundTruth,
-                            violations = violations
+                            violations = actualViolations
                         };
                         File.WriteAllText(gtFile, JsonSerializer.Serialize(failureInfo, JsonOpts));
                     }
@@ -400,7 +421,7 @@ namespace FlightCareer.Replay
 
                 if ((run + 1) % 100 == 0 || run + 1 == runs)
                 {
-                    Console.Write($"\rProcessados: {run + 1}/{runs} (Aprovados: {passedCount}, Falhas: {failedCount})...");
+                    Console.Write($"\rProcessados: {run + 1}/{runs} (Aprovados: {passedCount}, Limite Ausente: {missingLimitRunsCount}, Falhas: {failedCount})...");
                 }
             }
 
@@ -411,9 +432,23 @@ namespace FlightCareer.Replay
             Console.WriteLine("Resultado do Fuzz Testing:");
             Console.WriteLine($"  Total de Voos       : {runs}");
             Console.WriteLine($"  Voos Aprovados      : {passedCount} ({(double)passedCount / runs:P1})");
+            if (missingLimitRunsCount > 0)
+            {
+                Console.WriteLine($"  Voos c/ Limite Aus. : {missingLimitRunsCount} ({(double)missingLimitRunsCount / runs:P1})");
+            }
             Console.WriteLine($"  Voos com Falhas     : {failedCount} ({(double)failedCount / runs:P1})");
             Console.WriteLine($"  Tempo Total         : {sw.Elapsed.TotalSeconds:F2} s ({runs / Math.Max(0.001, sw.Elapsed.TotalSeconds):F0} voos/s)");
             Console.WriteLine("--------------------------------------------------------------------------------");
+
+            if (missingLimitsByType.Count > 0)
+            {
+                Console.WriteLine("Resumo dos Limites Ausentes no Catálogo:");
+                foreach (var (key, count) in missingLimitsByType.OrderByDescending(kv => kv.Value))
+                {
+                    Console.WriteLine($"  • {key}: {count} ocorrências");
+                }
+                Console.WriteLine();
+            }
 
             if (violationsByType.Count > 0)
             {
@@ -427,7 +462,7 @@ namespace FlightCareer.Replay
             }
             else
             {
-                Console.WriteLine("✅ Nenhuma invariante violada em todas as corridas executadas!");
+                Console.WriteLine("✅ Nenhuma invariante ou gabarito violado em todas as corridas executadas!");
             }
 
             Console.WriteLine("================================================================================");

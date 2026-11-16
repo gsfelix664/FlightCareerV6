@@ -997,6 +997,9 @@
         "elec-genalt-bus-voltage",
         "elec-genalt-bus-amps",
         "elec-genalt-load",
+        "elec-generator-amps",
+        "elec-generator-voltage",
+        "elec-generator-active",
         "nw-level-28",
         "nw-is-failed-28"
       ],
@@ -1033,6 +1036,9 @@
         "elec-genalt-bus-voltage",
         "elec-genalt-bus-amps",
         "elec-genalt-load",
+        "elec-generator-amps",
+        "elec-generator-voltage",
+        "elec-generator-active",
         "eng-starter-active",
         "nw-level-28",
         "nw-is-failed-28"
@@ -1425,7 +1431,8 @@
       "laborHours": 6.0,
       "sensors": [
         "gear-plane-touchdown-normal-velocity",
-        "gear-contact-point-compression",
+        "gear-contact-point-compression-1",
+        "gear-contact-point-compression-2",
         "nw-level-35",
         "nw-is-failed-35"
       ],
@@ -1559,6 +1566,8 @@
       "sensors": [
         "gear-is-skidding",
         "gear-skidding-factor",
+        "gear-contact-point-is-skidding-1",
+        "gear-contact-point-is-skidding-2",
         "tire-wheel-rpm",
         "nw-level-37",
         "nw-is-failed-37"

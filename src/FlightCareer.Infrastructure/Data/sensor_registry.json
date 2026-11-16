@@ -596,6 +596,27 @@
       "perEngine": true
     },
     {
+      "key": "elec-generator-amps",
+      "simVar": "ELECTRICAL GENERATOR AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-generator-voltage",
+      "simVar": "ELECTRICAL GENERATOR VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-generator-active",
+      "simVar": "ELECTRICAL GENERATOR ACTIVE",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
       "key": "elec-main-bus-voltage",
       "simVar": "ELECTRICAL MAIN BUS VOLTAGE",
       "unit": "volts",
@@ -1169,18 +1190,67 @@
       "perEngine": false
     },
     {
-      "key": "gear-contact-point-compression",
-      "simVar": "CONTACT POINT COMPRESSION",
+      "key": "gear-contact-point-compression-0",
+      "simVar": "CONTACT POINT COMPRESSION:0",
       "unit": "position",
       "group": "gear",
-      "perEngine": true
+      "perEngine": false
     },
     {
-      "key": "gear-contact-point-is-skidding",
-      "simVar": "CONTACT POINT IS SKIDDING",
+      "key": "gear-contact-point-compression-1",
+      "simVar": "CONTACT POINT COMPRESSION:1",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-compression-2",
+      "simVar": "CONTACT POINT COMPRESSION:2",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-0",
+      "simVar": "CONTACT POINT IS SKIDDING:0",
       "unit": "bool",
       "group": "gear",
-      "perEngine": true
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-1",
+      "simVar": "CONTACT POINT IS SKIDDING:1",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-2",
+      "simVar": "CONTACT POINT IS SKIDDING:2",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-0",
+      "simVar": "CONTACT POINT IS ON GROUND:0",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-1",
+      "simVar": "CONTACT POINT IS ON GROUND:1",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-2",
+      "simVar": "CONTACT POINT IS ON GROUND:2",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
     },
     {
       "key": "gear-is-skidding",
@@ -1347,6 +1417,13 @@
       "key": "af-min-g-force",
       "simVar": "MIN G FORCE",
       "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-dynamic-pressure",
+      "simVar": "DYNAMIC PRESSURE",
+      "unit": "pound-force per square foot",
       "group": "airframe",
       "perEngine": false
     },

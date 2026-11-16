@@ -30,11 +30,11 @@ Resultados do C152 (2026-11-16): `docs/plans/sensor-validation/probe-runs/matriz
 - Resultado na `auditoria-registro.md` e numa coluna `validado` da `simvars-msfs2024.csv`.
 - A partir daqui, nenhuma variável entra no registro sem prova da matriz.
 
-## Passo 3 — Limpar e corrigir o registro atual (Gemini)
-- Variáveis que alimentam regra e nunca mudaram nos logs do C152/C172: `ENG VIBRATION`, `GEAR SKIDDING FACTOR` → trocar por sensor que funcione ou tirar da regra.
-- `CONTACT POINT COMPRESSION` / `CONTACT POINT IS SKIDDING`: ler os índices certos (`:0..N`) em vez do `:1` herdado de `perEngine`.
-- `ELECTRICAL GENALT *` não funciona no C172 2024 → trocar por `ELECTRICAL GENERATOR AMPS/VOLTAGE/ACTIVE:n` se a matriz confirmar.
-- Variáveis novas aprovadas (Top 25 da pesquisa e candidatas de desgaste) entram no registro.
+## Passo 3 — Limpar e corrigir o registro atual (Gemini) — [CONCLUÍDO em 2026-11-16, tarefa REGRAS-C152]
+- Variáveis que alimentam regra e nunca mudaram nos logs do C152/C172: `ENG VIBRATION`, `GEAR SKIDDING FACTOR`, `MIN G FORCE` mantidas no registro para continuar gravação em outros modelos; regras de desgaste desacopladas delas (`airframe_over_g_negative` usa `af-g-force`).
+- `CONTACT POINT COMPRESSION` / `CONTACT POINT IS SKIDDING`: substituídos por chaves explícitas por ponto de contato (`gear-contact-point-compression-0..2`, `gear-contact-point-is-skidding-0..2`, `gear-contact-point-on-ground-0..2`) com `perEngine: false`.
+- `ELECTRICAL GENERATOR AMPS/VOLTAGE/ACTIVE` adicionados com `perEngine: true`. Chaves legadas `elec-genalt-*` mantidas.
+- Variáveis novas aprovadas (`af-dynamic-pressure`) adicionadas ao registro.
 
 ## Passo 4 — Ligar as variáveis às peças (Gemini; decisões do Claude na spec)
 Para cada peça de `parts_catalog.json`: sensor → regra em `wear_rules.json` → limite por aeronave em `Data/aircraft/` (prioridade POH → SimVar → CFG → início da taxa nativa → padrão da classe). Cada regra nova com teste de replay. Exemplos:
@@ -48,12 +48,12 @@ Para cada peça de `parts_catalog.json`: sensor → regra em `wear_rules.json` �
 - Disjuntores e conexões (`ALTERNATOR/BATTERY CONNECTION ON`, `LINE/BUS BREAKER PULLED`) → eventos de sobrecarga elétrica.
 - Turbina: `TURB ENG N1 LOSS`, `... EFFICIENCY LOSS` → só sensor/conferência (decisão de 2026-11-15: o addon é a fonte da verdade, o nativo não vira % de desgaste e nada é gravado no sim).
 
-## Passo 5 — Bugs do fuzz (precisa de autorização do usuário)
-Pode ir junto com o passo 4 (mesma área). Lista em `docs/reviews/FUZZ-revisao.md` (rodada 2):
-- `PartWearEngine.cs:176` descarta limite `<= 0` → `airframe_over_g_negative` nunca dispara.
-- `egtMax` ausente em 35/46 aeronaves e sem padrão de classe → `piston_egt_excess` mudo.
-- Gerador: posição do trem em 0–1 (o sim usa 0–100), voos curtos demais para os acumuladores; endurecer `isUp` do `PartEventDeriver`.
-- Depois: o gerador sintético simula também os sensores novos; `fuzz --runs 1000` com falhas perto de zero.
+## Passo 5 — Bugs do fuzz (precisa de autorização do usuário) — [CONCLUÍDO em 2026-11-16, tarefa REGRAS-C152]
+Resolvidos bugs 1–4 de `docs/reviews/FUZZ-revisao.md` (rodada 2):
+- `PartWearEngine.cs:176`: suporte a limites negativos na direção Below (`airframe_over_g_negative` operacional e testada).
+- `egtMax`: padrão de classe adicionado em `_class_defaults.json` › `Piston` (893.52 °C).
+- Gerador e deriver: escala do trem de pouso ajustada para percentual (0–100), `isUp <= 10.0` e `isDown >= 90.0`, duração de abusos contínuos garantida e sincronismo de voo controle em cancelamentos.
+- Gerador sintético atualizado com sensores novos (pontos de contato por roda, gerador e pressão dinâmica).
 
 ## Passo 6 — Prova no simulador
 - Voo normal com REC ligado → nova fixture de replay.

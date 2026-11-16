@@ -84,6 +84,7 @@ namespace FlightCareer.Tests.Sensors
                 "percent over 100",
                 "position",
                 "position 32k",
+                "pound-force per square foot",
                 "pounds",
                 "pounds per hour",
                 "psf",

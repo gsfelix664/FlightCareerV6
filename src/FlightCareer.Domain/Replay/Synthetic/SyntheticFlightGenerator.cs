@@ -62,6 +62,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
             double elecSystemVolts = ResolveLimit(LimitKeys.ElecSystemVolts, 28.0);
             double alternatorRatedAmps = ResolveLimit(LimitKeys.AlternatorRatedAmps, 60.0);
             double chtCoolingRateMax = ResolveLimit(LimitKeys.ChtCoolingRateMax, 28.0);
+            double egtMax = ResolveLimit(LimitKeys.EgtMax, 893.52);
 
             double vfe1 = ResolveLimit("vfe:1", 110.0);
             double vfe2 = ResolveLimit("vfe:2", 85.0);
@@ -151,7 +152,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
             double gForce = 1.0;
             int flapIndex = 0;
             double flapPercent = 0.0;
-            double gearPosition = 1.0; // 1 = baixado e travado
+            double gearPosition = 100.0; // 100 = baixado e travado (escala percent 0-100)
 
             double busVoltage = 0.0;
             double loadAmps = 0.0;
@@ -332,7 +333,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = rpmRedline * 0.75 + (rnd.NextDouble() - 0.5) * 10.0;
                         oilPress[e] = 48.0;
-                        cht[e] = 155.0 + (rnd.NextDouble() - 0.5) * 1.0;
+                        if (thermalShockAbuse != null && t >= thermalShockAbuse.StartSeconds && t <= thermalShockAbuse.StartSeconds + thermalShockAbuse.DurationSeconds)
+                        {
+                            // Em choque térmico, preserva o resfriamento contínuo
+                        }
+                        else
+                        {
+                            cht[e] = 155.0 + (rnd.NextDouble() - 0.5) * 1.0;
+                        }
                         oilTemp[e] = 85.0 + (rnd.NextDouble() - 0.5) * 0.5;
                         egt[e] = 710.0;
                     }
@@ -351,7 +359,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = rpmRedline * 0.60;
                         oilPress[e] = 42.0;
-                        cht[e] = Math.Max(130.0, cht[e] - 0.15);
+                        if (thermalShockAbuse != null && t >= thermalShockAbuse.StartSeconds)
+                        {
+                            cht[e] = Math.Max(50.0, cht[e] - 0.15);
+                        }
+                        else
+                        {
+                            cht[e] = Math.Max(130.0, cht[e] - 0.15);
+                        }
                         oilTemp[e] = Math.Max(75.0, oilTemp[e] - 0.10);
                         egt[e] = 650.0;
                     }
@@ -365,7 +380,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     ias = normalApproachIas + (rnd.NextDouble() - 0.5) * 2.0;
                     flapIndex = 2;
                     flapPercent = 1.0;
-                    if (isRetractable) gearPosition = 1.0;
+                    if (isRetractable) gearPosition = 100.0;
 
                     for (int e = 1; e <= engineCount; e++)
                     {
@@ -466,16 +481,16 @@ namespace FlightCareer.Domain.Replay.Synthetic
                             break;
 
                         case SyntheticAbuseType.ThermalShock:
-                            // Esfria drasticamente a CHT a uma taxa > chtCoolingRateMax (ex.: -45 °C/min)
+                            // Esfria drasticamente a CHT a uma taxa > chtCoolingRateMax (ex.: -48 °C/min)
                             ApplyToEngines(eTarget, eng =>
                             {
-                                double shockRatePerSec = (chtCoolingRateMax + 15.0) / 60.0;
+                                double shockRatePerSec = (chtCoolingRateMax + 20.0) / 60.0;
                                 cht[eng] = Math.Max(50.0, cht[eng] - shockRatePerSec * dtStep);
                             });
                             break;
 
                         case SyntheticAbuseType.EgtHigh:
-                            ApplyToEngines(eTarget, eng => egt[eng] = 880.0 + abuse.Intensity * 50.0);
+                            ApplyToEngines(eTarget, eng => egt[eng] = egtMax * (1.0 + Math.Max(0.05, abuse.Intensity)));
                             break;
 
                         case SyntheticAbuseType.FlapOverSpeed:
@@ -517,7 +532,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                             {
                                 // Alterna rapidamente o trem a cada 3 segundos
                                 int cyclePhase = (int)Math.Floor(t / 3.0) % 2;
-                                gearPosition = cyclePhase == 0 ? 0.0 : 1.0;
+                                gearPosition = cyclePhase == 0 ? 0.0 : 100.0;
                             }
                             break;
                     }
@@ -575,6 +590,33 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     else if (key.StartsWith("gear-contact-point-compression", StringComparison.OrdinalIgnoreCase))
                     {
                         val = onGround ? 0.35 : 0.0;
+                    }
+                    else if (key.StartsWith("gear-contact-point-on-ground", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = onGround ? 1.0 : 0.0;
+                    }
+                    else if (key.StartsWith("gear-contact-point-is-skidding", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = 0.0;
+                    }
+                    else if (key.Equals("af-dynamic-pressure", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = 0.00338 * (ias * ias);
+                    }
+                    else if (key.StartsWith("elec-generator-amps", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int engIdx = ExtractEngineIndex(key);
+                        val = (alternator[engIdx] && combustion[engIdx]) ? loadAmps : 0.0;
+                    }
+                    else if (key.StartsWith("elec-generator-voltage", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int engIdx = ExtractEngineIndex(key);
+                        val = (alternator[engIdx] && combustion[engIdx]) ? busVoltage : 0.0;
+                    }
+                    else if (key.StartsWith("elec-generator-active", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int engIdx = ExtractEngineIndex(key);
+                        val = (alternator[engIdx] && combustion[engIdx]) ? 1.0 : 0.0;
                     }
                     else if (key.Equals("elec-master-battery", StringComparison.OrdinalIgnoreCase))
                     {

@@ -1469,8 +1469,7 @@
         "none": []
       },
       "sensors": [
-        "af-g-force",
-        "af-min-g-force"
+        "af-g-force"
       ],
       "bands": [
         {
@@ -1641,7 +1640,8 @@
       },
       "sensors": [
         "gear-plane-touchdown-normal-velocity",
-        "gear-contact-point-compression"
+        "gear-contact-point-compression-1",
+        "gear-contact-point-compression-2"
       ],
       "nativeOverstress": {
         "componentId": 35,
@@ -2985,7 +2985,8 @@
       "metric": "landingCycles",
       "sensors": [
         "gear-plane-touchdown-normal-velocity",
-        "gear-contact-point-compression"
+        "gear-contact-point-compression-1",
+        "gear-contact-point-compression-2"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
