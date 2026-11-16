@@ -5,18 +5,44 @@ namespace FlightCareer.Domain.Services
 {
     public class FlightQualityService
     {
-        public int ComfortViolations { get; private set; }
-        public int CargoViolations { get; private set; }
-        public double MaxGForce { get; private set; }
+        private readonly FlightQualityRules _rules;
+
+        public FlightQualityRules Rules => _rules;
+
+        public bool IsPaxFlight { get; private set; } = true;
+
+        public double GSeconds { get; private set; }
+        public double BankSeconds { get; private set; }
+        public double PitchSeconds { get; private set; }
+        public double JerkSeconds { get; private set; }
+        public double SlipSeconds { get; private set; }
+
+        public double MaxGForce { get; private set; } = 1.0;
         public double MinGForce { get; private set; } = 1.0;
         public double MaxBank { get; private set; }
         public double MaxPitch { get; private set; }
         public double TouchdownFPM { get; private set; }
 
+        [Obsolete("Use os acumulados em segundos (GSeconds, BankSeconds, etc.)")]
+        public int ComfortViolations => (int)Math.Round(BankSeconds + PitchSeconds + (IsPaxFlight ? GSeconds + JerkSeconds + SlipSeconds : 0));
+
+        [Obsolete("Use os acumulados em segundos (GSeconds, JerkSeconds)")]
+        public int CargoViolations => (int)Math.Round(!IsPaxFlight ? GSeconds + JerkSeconds : 0);
+
+        public FlightQualityService(FlightQualityRules? rules = null)
+        {
+            _rules = rules ?? new FlightQualityRules();
+            Reset();
+        }
+
         public void Reset()
         {
-            ComfortViolations = 0;
-            CargoViolations = 0;
+            IsPaxFlight = true;
+            GSeconds = 0;
+            BankSeconds = 0;
+            PitchSeconds = 0;
+            JerkSeconds = 0;
+            SlipSeconds = 0;
             MaxGForce = 1.0;
             MinGForce = 1.0;
             MaxBank = 0;
@@ -24,29 +50,68 @@ namespace FlightCareer.Domain.Services
             TouchdownFPM = 0;
         }
 
+        [Obsolete("Use ProcessSample com FlightQualitySample e segundos simulados")]
         public void ProcessFrame(SimTelemetry data, bool isPaxFlight)
         {
-            if (data.OnGround > 0.5) return;
+            ProcessSample(FlightQualitySample.FromTelemetry(data), isPaxFlight, 1.0);
+        }
+
+        public void ProcessSample(FlightQualitySample sample, bool isPaxFlight, double simSeconds)
+        {
+            if (sample.OnGround) return;
+            if (sample.MotionPaused == true) return;
+
+            // Monitorar Extremos (G, Bank, Pitch)
+            if (sample.GForce > MaxGForce) MaxGForce = sample.GForce;
+            if (sample.GForce < MinGForce) MinGForce = sample.GForce;
+
+            double absBank = Math.Abs(sample.BankDeg);
+            if (absBank > MaxBank) MaxBank = absBank;
+
+            double absPitch = Math.Abs(sample.PitchUpDeg);
+            if (absPitch > MaxPitch) MaxPitch = absPitch;
+
+            if (double.IsNaN(simSeconds) || simSeconds <= 0) return;
+
+            IsPaxFlight = isPaxFlight;
+
+            // Turbulência atenua solavanco e excesso de G (não é culpa do piloto)
+            bool isTurbulence = sample.WindVerticalFps.HasValue && Math.Abs(sample.WindVerticalFps.Value) >= _rules.WindVerticalThresholdFps;
+            double accelSimSeconds = isTurbulence ? simSeconds * _rules.TurbulenceFactor : simSeconds;
 
             // Monitorar G-Force
-            if (data.GForce > MaxGForce) MaxGForce = data.GForce;
-            if (data.GForce < MinGForce) MinGForce = data.GForce;
-
-            if (data.GForce > 1.6 || data.GForce < 0.4)
+            if (sample.GForce > _rules.MaxGForce || sample.GForce < _rules.MinGForce)
             {
-                if (isPaxFlight) ComfortViolations++;
-                else CargoViolations++;
+                GSeconds += accelSimSeconds;
             }
 
-            // Monitorar Bank (Inclinação Lateral > 30 graus)
-            double absBank = Math.Abs(data.PlaneBank);
-            if (absBank > MaxBank) MaxBank = absBank;
-            if (absBank > 30) ComfortViolations++;
+            // Monitorar Jerk (solavanco vertical)
+            if (sample.LoadFactorYDot.HasValue && Math.Abs(sample.LoadFactorYDot.Value) > _rules.JerkThreshold)
+            {
+                JerkSeconds += accelSimSeconds;
+            }
 
-            // Monitorar Pitch (Inclinação Vertical > 20 ou < -15 graus)
-            double absPitch = Math.Abs(data.PlanePitch);
-            if (absPitch > MaxPitch) MaxPitch = absPitch;
-            if (data.PlanePitch > 20 || data.PlanePitch < -15) ComfortViolations++;
+            // Em voos de carga, manobras de atitude e derrapagem não incomodam
+            if (isPaxFlight)
+            {
+                // Monitorar Bank (Inclinação lateral)
+                if (absBank > _rules.MaxBankDeg)
+                {
+                    BankSeconds += simSeconds;
+                }
+
+                // Monitorar Pitch (Nariz para cima > 20° ou nariz para baixo > 15°)
+                if (sample.PitchUpDeg > _rules.PitchUpMaxDeg || sample.PitchUpDeg < -_rules.PitchDownMaxDeg)
+                {
+                    PitchSeconds += simSeconds;
+                }
+
+                // Monitorar Derrapagem (Slip / Beta)
+                if (sample.BetaDeg.HasValue && Math.Abs(sample.BetaDeg.Value) > _rules.SlipThresholdDeg)
+                {
+                    SlipSeconds += simSeconds;
+                }
+            }
         }
 
         public void RecordTouchdownFpm(double fpm)
@@ -76,8 +141,22 @@ namespace FlightCareer.Domain.Services
                 else score -= 60;
             }
 
-            score -= (ComfortViolations * 0.1); 
-            score -= (CargoViolations * 0.05);
+            double penalty;
+            if (IsPaxFlight)
+            {
+                penalty = (GSeconds * _rules.PaxGWeight)
+                        + (BankSeconds * _rules.PaxBankWeight)
+                        + (PitchSeconds * _rules.PaxPitchWeight)
+                        + (JerkSeconds * _rules.PaxJerkWeight)
+                        + (SlipSeconds * _rules.PaxSlipWeight);
+            }
+            else
+            {
+                penalty = (GSeconds * _rules.CargoGWeight)
+                        + (JerkSeconds * _rules.CargoJerkWeight);
+            }
+
+            score -= penalty;
 
             return Math.Max(0, Math.Min(100.0, score));
         }

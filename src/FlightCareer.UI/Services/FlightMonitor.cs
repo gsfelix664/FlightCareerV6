@@ -928,7 +928,8 @@ namespace FlightCareer.UI.Services
 
             // --- MONITORAMENTO DE QUALIDADE ---
             bool hasPax = _activeMissions.Any(m => m.PassengerCount > 0);
-            _qualityService.ProcessFrame(data, hasPax);
+            double qualitySimSeconds = isPaused ? 0.0 : SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
+            _qualityService.ProcessSample(FlightQualitySample.FromTelemetry(data), hasPax, qualitySimSeconds);
 
             // Durante o Voo: Atualizar combustível, localização e estado no Hangar a cada 60 segundos (1 min)
             if ((DateTime.Now - _lastDatabaseUpdate).TotalSeconds >= 60)
