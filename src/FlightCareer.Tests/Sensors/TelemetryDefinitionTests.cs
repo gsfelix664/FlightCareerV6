@@ -65,6 +65,22 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void IntegrityState_DatumCount_MatchesSimIntegrityStateFields()
+        {
+            string source = File.ReadAllText(FindSimConnectService());
+            var datums = Regex.Matches(source, @"\bAddIntegrityDef\(\s*""([^""]+)""")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            int doubleFields = typeof(FlightCareer.Domain.Integrity.SimIntegrityState)
+                .GetFields(BindingFlags.Public | BindingFlags.Instance)
+                .Count(f => f.FieldType == typeof(double));
+
+            Assert.Equal(4, doubleFields);
+            Assert.Equal(doubleFields, datums.Length);
+        }
+
+        [Fact]
         public void TelemetryDefinitions_UseNoKnownInvalidSimVar()
         {
             string source = File.ReadAllText(FindSimConnectService());
