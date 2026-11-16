@@ -135,6 +135,33 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
             var violations = new List<string>();
 
+            // Se o abuso não chegou a acontecer porque o voo encerrou antes do seu início
+            double simDuration = abusedResult.TotalSimHours * 3600.0;
+            if (abuse.StartSeconds >= simDuration - 1.0)
+            {
+                return violations;
+            }
+
+            // Se o abuso for de acumulador contínuo em tempo, verifica se coube no voo para acumular o threshold mínimo
+            if (abuse.Type == SyntheticAbuseType.BatteryDischarging)
+            {
+                double activeSimSeconds = Math.Min(abuse.DurationSeconds, Math.Max(0.0, simDuration - abuse.StartSeconds));
+                if (activeSimSeconds < 600.0)
+                {
+                    // Descarga profunda exige no mínimo 10 minutos (600s) simulados para atingir threshold; não esperar evento
+                    return violations;
+                }
+            }
+            else if (abuse.Type == SyntheticAbuseType.ElectricalOverload)
+            {
+                double activeSimSeconds = Math.Min(abuse.DurationSeconds, Math.Max(0.0, simDuration - abuse.StartSeconds));
+                if (activeSimSeconds < 300.0)
+                {
+                    // Sobrecarga elétrica exige no mínimo 5 minutos (300s) simulados para atingir threshold; não esperar evento
+                    return violations;
+                }
+            }
+
             // 1. Se o abuso especificou uma regra esperada, ela deve ter sido acionada
             if (!string.IsNullOrWhiteSpace(abuse.TargetRuleId))
             {

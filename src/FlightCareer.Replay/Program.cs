@@ -327,9 +327,13 @@ namespace FlightCareer.Replay
 
                 if (!fastMode && flight.GroundTruth.InjectedAbuses.Count > 0)
                 {
+                    double controlDuration = flight.GroundTruth.IsCancelled && flight.Frames.Count > 1
+                        ? (flight.Frames[^1].ReceivedUtc - flight.Frames[0].ReceivedUtc).TotalSeconds
+                        : plan.TotalDurationSeconds;
+
                     var controlPlan = new SyntheticFlightPlan
                     {
-                        TotalDurationSeconds = plan.TotalDurationSeconds,
+                        TotalDurationSeconds = controlDuration,
                         SimRateSegments = plan.SimRateSegments,
                         Abuses = Array.Empty<SyntheticAbuseRecord>()
                     };

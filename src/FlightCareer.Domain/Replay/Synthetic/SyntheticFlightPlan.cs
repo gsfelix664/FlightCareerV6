@@ -59,21 +59,47 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 {
                     SyntheticAbuseType.OilTempOverheat,
                     SyntheticAbuseType.OilPressureLow,
-                    SyntheticAbuseType.FlapOverSpeed,
-                    SyntheticAbuseType.VneExceeded,
                     SyntheticAbuseType.PositiveGExceeded,
                     SyntheticAbuseType.NegativeGExceeded,
                     SyntheticAbuseType.HardLanding,
                     SyntheticAbuseType.LongStart,
-                    SyntheticAbuseType.AvionicsMasterOnStart,
-                    SyntheticAbuseType.BatteryDischarging,
-                    SyntheticAbuseType.ElectricalOverload,
                     SyntheticAbuseType.DataMissingSensor,
                     SyntheticAbuseType.DataNanValues,
                     SyntheticAbuseType.DataFrameGap,
                     SyntheticAbuseType.DataSimPause,
                     SyntheticAbuseType.DataCancelledMidFlight
                 };
+
+                bool hasVne = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.Vne, StringComparison.OrdinalIgnoreCase));
+                bool hasVfe = profile.Limits.Any(l => l.Key.StartsWith("vfe", StringComparison.OrdinalIgnoreCase));
+
+                if (hasVne)
+                {
+                    candidateTypes.Add(SyntheticAbuseType.VneExceeded);
+                }
+
+                if (hasVfe)
+                {
+                    candidateTypes.Add(SyntheticAbuseType.FlapOverSpeed);
+                }
+
+                bool hasMainBus = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase));
+                bool hasAvionicsCircuit = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase));
+                bool hasRatedAmps = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.AlternatorRatedAmps, StringComparison.OrdinalIgnoreCase));
+
+                if (hasMainBus)
+                {
+                    candidateTypes.Add(SyntheticAbuseType.BatteryDischarging);
+                    if (hasRatedAmps)
+                    {
+                        candidateTypes.Add(SyntheticAbuseType.ElectricalOverload);
+                    }
+                }
+
+                if (hasAvionicsCircuit)
+                {
+                    candidateTypes.Add(SyntheticAbuseType.AvionicsMasterOnStart);
+                }
 
                 if (isPiston)
                 {
@@ -127,6 +153,40 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     if (ab.StartSeconds + ab.DurationSeconds + 30.0 > duration)
                     {
                         duration = ab.StartSeconds + ab.DurationSeconds + 30.0;
+                    }
+                }
+
+                // Garante que o cancelamento prematuro de voo ocorra após o término de abusos físicos anteriores
+                var cancelAbuse = abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.DataCancelledMidFlight);
+                if (cancelAbuse != null)
+                {
+                    double latestAbuseEnd = 0.0;
+                    foreach (var ab in abuses)
+                    {
+                        if (ab.Type != SyntheticAbuseType.DataCancelledMidFlight)
+                        {
+                            latestAbuseEnd = Math.Max(latestAbuseEnd, ab.StartSeconds + ab.DurationSeconds);
+                        }
+                    }
+
+                    if (latestAbuseEnd > 0)
+                    {
+                        abuses.Remove(cancelAbuse);
+                        double cancelTime = latestAbuseEnd + 15.0;
+                        abuses.Add(new SyntheticAbuseRecord(
+                            cancelAbuse.Type,
+                            cancelTime,
+                            0.0,
+                            cancelAbuse.Intensity,
+                            cancelAbuse.EngineIndex,
+                            cancelAbuse.TargetRuleId,
+                            cancelAbuse.TargetPartId,
+                            cancelAbuse.Notes));
+
+                        if (cancelTime + 10.0 > duration)
+                        {
+                            duration = cancelTime + 10.0;
+                        }
                     }
                 }
             }
@@ -193,7 +253,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
                 case SyntheticAbuseType.ThermalShock:
                     startSec = totalDuration * 0.65; // em descida
-                    durationSec = 60.0;
+                    durationSec = 70.0;
                     ruleId = "piston_shock_cooling";
                     partId = "engine.cylinders";
                     break;
