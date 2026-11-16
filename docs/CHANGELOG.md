@@ -2067,3 +2067,7 @@
 ## 2026-11-16 - Análise das variáveis diversas da aeronave do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/variaveis-aeronave-diversos.md` (116 SimVars): vento no eixo do avião e alertas no HUD, precisão do pouso (ponto e rumo do toque), manobras bruscas (taxas angulares), fim de missão no estacionamento, pintura/matrícula, capas e travas no walkaround, slew como trapaça e desgaste das partes expostas.
 - 22 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis de rádio e navegação do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-radio-navegacao.md` (278 SimVars): HUD (ETE, radioaltímetro, transponder), qualidade (precisão ILS/RNAV, autorizações do ATC, desvio do plano, código de emergência), missões (pista mínima por avião, comprimento/largura da pista, gate e chegada à vaga, aeroporto com torre) e matrícula/companhia/voo graváveis (`ATC ID`, `ATC AIRLINE`, `ATC FLIGHT NUMBER`).
+- `ATC *` em lista separada do Watcher (`flightcareer-candidatas-atc.simvars`) por causa da suspeita das quedas do MSFS; 18 variáveis de GPS/NAV/COM/transponder na lista principal. Só documentação; nada testado no MSFS.
