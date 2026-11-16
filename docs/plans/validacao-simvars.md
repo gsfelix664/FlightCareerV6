@@ -1,6 +1,6 @@
 # Plano — Validação das SimVars e ligação com o desgaste por peça
 
-Criado em 2026-11-16 (Claude). Pré-requisito: ferramenta `FlightCareer.SimVarProbe` (tarefa SIMVAR-PROBE, branch `feat/simvar-probe`).
+Criado em 2026-11-16 (Claude). Pré-requisito: ferramenta `FlightCareer.SimVarProbe` (tarefa SIMVAR-PROBE, **aprovada e mergeada** em 2026-11-16; uso em `tools/simvar_probe/README.md`). Primeira rodada no C152 parado: 4.750 leituras, 94 rejeitadas, 104 variando.
 
 ## Contexto
 - `docs/plans/sensor-research/simvars-msfs2024.csv`: 1.678 SimVars da documentação do SDK 2024, cruzadas com o SimvarWatcher e com o `sensor_registry.json`.
@@ -13,6 +13,15 @@ Criado em 2026-11-16 (Claude). Pré-requisito: ferramenta `FlightCareer.SimVarPr
 - Em cada um, voo curto com marca (`m`+Enter) em cada fase: pátio desligado → partida → táxi (curvas e frenagem) → decolagem → cruzeiro com comandos (aileron, profundor, leme) → pouso.
 - Opção `--max-generic 20` para cobrir os circuitos.
 - Quem faz: usuário (precisa do simulador).
+
+## Passo 1b — Teste das panes que o addon envia (escrita)
+- O SimvarWatcher não envia eventos: a lista abaixo é **só o que o addon implementa hoje** (`SimFailureActuator` / `SimConnectService`):
+  - eventos: `TOGGLE_ENGINE1_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`, `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` (bus, alt; `TransmitClientEvent_EX1`), `MAGNETO1_OFF`;
+  - SimVars escritas: `ENG ON FIRE:1`, `GENERAL ENG OIL LEAKED PERCENT:1`, `RECIP ENG LEFT/RIGHT MAGNETO:1`, `FLAPS HANDLE INDEX`, `TRAILING EDGE FLAPS LEFT/RIGHT PERCENT`.
+- Extrair da documentação do SDK 2024 a lista completa de **Key Events** de pane e falha (ex.: `TOGGLE_ENGINE2..4_FAILURE`, freios, sistemas), no mesmo formato da `simvars-msfs2024.csv`, marcando os que o addon já usa.
+- Novo modo da ferramenta (`FlightCareer.SimVarProbe panes`, tarefa separada da leitura): para cada pane, (1) o sim aceita o evento/SimVar, (2) a SimVar de confirmação muda (ex.: `ENG FAILED:1`, `PARTIAL PANEL VACUUM`, `ALTERNATOR CONNECTION ON:1`), (3) quanto tempo ela se mantém sem reaplicar, (4) desfazer volta ao normal (prova que toggle duas vezes repara). Efeitos só visuais (superfície do flap, ponteiro, fogo) com pergunta s/n no console.
+- Segurança: só no solo, parado e com freio de estacionamento; pergunta antes de cada pane; desfaz cada uma; no fim e no Ctrl+C confere que nada ficou ativo. Saída `panes-report.csv` (aceita / aplicou / manteve / desfez / segundos).
+- Não prova o fluxo do addon em voo (`PersistentFailureService`, modo vigia): isso continua nas pendências de teste no MSFS (F4.2e).
 
 ## Passo 2 — Matriz variável × avião
 - Script (em `tools/`, só biblioteca padrão, com teste) que junta os `report.csv` numa tabela: aceita e varia / aceita e parada / rejeitada, por avião.
