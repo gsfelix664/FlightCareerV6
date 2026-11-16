@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "currency": "$",
+  "note": "estimativa — calibrar",
+  "sizeClasses": {
+    "light": {
+      "maxMtowLbs": 12500.0,
+      "description": "Leve (< 12.500 lb)"
+    },
+    "medium": {
+      "maxMtowLbs": 60000.0,
+      "description": "Médio (12.500–60.000 lb)"
+    },
+    "heavy": {
+      "maxMtowLbs": null,
+      "description": "Pesado (> 60.000 lb)"
+    }
+  },
+  "landing": {
+    "tiers": {
+      "1": { "baseFee": 250.0, "perLbFee": 0.035 },
+      "2": { "baseFee": 80.0, "perLbFee": 0.015 },
+      "3": { "baseFee": 25.0, "perLbFee": 0.005 },
+      "4": { "baseFee": 0.0, "perLbFee": 0.0 }
+    }
+  },
+  "passengerFee": {
+    "tiers": {
+      "1": 12.0,
+      "2": 6.0,
+      "3": 2.0,
+      "4": 0.0
+    }
+  },
+  "handling": {
+    "tiers": {
+      "1": { "medium": 250.0, "heavy": 1500.0 },
+      "2": { "medium": 150.0, "heavy": 800.0 },
+      "3": { "medium": 0.0, "heavy": 0.0 },
+      "4": { "medium": 0.0, "heavy": 0.0 }
+    }
+  },
+  "navTerminal": {
+    "feePerThousandLbs": 3.0,
+    "applicableTiers": [1, 2, 3],
+    "applicableSizeClasses": ["medium", "heavy"],
+    "comment": "Cobrado por MTOW até a missão ter plano IFR explícito"
+  },
+  "parking": {
+    "freeHours": 2.0,
+    "tiers": {
+      "1": { "light": 5.0, "medium": 40.0, "heavy": 200.0 },
+      "2": { "light": 3.0, "medium": 25.0, "heavy": 120.0 },
+      "3": { "light": 1.0, "medium": 10.0, "heavy": 50.0 },
+      "4": { "light": 0.0, "medium": 0.0, "heavy": 0.0 }
+    }
+  },
+  "countryOverrides": {},
+  "icaoOverrides": {}
+}
