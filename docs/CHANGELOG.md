@@ -2006,3 +2006,7 @@
 - Build 0 erros; `dotnet test` 455/455. Não testado no MSFS.
 ## 2026-11-16 - Regra de delegação: dados também vão para o Gemini (Claude)
 - `CLAUDE.md` e `tools/agents/global/CLAUDE.md`: catálogos e dados (JSON/CSV) com mais de ~20 linhas vão para o Gemini, com o critério na spec e revisão por amostragem; pesquisa, análise de documentação e planos continuam com o Claude (decisão do usuário).
+
+## 2026-11-16 - Análise das variáveis de motor do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-motor.md` (189 SimVars): foco no que falta no registro e nos usos fora do desgaste — HUD (fluxo, % de potência, carburador), gestão do motor na nota de pilotagem, Hobbs e combustível real na economia, FLX × TOGA nos jatos, panes por SimVar gravável (falha do turbo, falta de combustível, limite do manete) e a decisão pendente de gravar as perdas de eficiência da turbina.
+- 24 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
