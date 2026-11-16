@@ -42,7 +42,7 @@ Para cada peça de `parts_catalog.json`: sensor → regra em `wear_rules.json` �
 - Deflexão dos comandos × `DYNAMIC PRESSURE` → comando pleno acima da Va (empenagem, dobradiças, comandos).
 - `TOTAL WEIGHT` × `MAX LANDING WEIGHT` / `MAX TAKEOFF WEIGHT` → pouso e decolagem acima do peso (inspeção estrutural).
 - `CG PERCENT` × `CG FWD/AFT LIMIT` → operação fora do CG.
-- `SEMIBODY LOADFACTOR X/Z` → carga lateral no trem e na célula.
+- ~~`SEMIBODY LOADFACTOR X/Z`~~ (obsoletas, ver `sensor-research/variaveis-obsoletas.md`) → carga lateral por `ACCELERATION BODY X` e `G FORCE`.
 - `REJECTED TAKEOFF BRAKES ACTIVE`, `BRAKE * TEMPERATURE EFFECT` → freios.
 - Pontos de contato por roda (`IS ON GROUND`, `SKIDDING FACTOR`, `SURFACE TYPE`) → pneus e rolamentos por roda e por piso.
 - Disjuntores e conexões (`ALTERNATOR/BATTERY CONNECTION ON`, `LINE/BUS BREAKER PULLED`) → eventos de sobrecarga elétrica.

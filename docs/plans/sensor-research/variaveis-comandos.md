@@ -1,5 +1,7 @@
 # Variáveis de comandos de voo do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Control Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-control-variables/) do SDK 2024 (96 SimVars: ailerons, profundor, leme, compensadores, flaps, spoilers, manche, fly-by-wire, asa dobrável, porta-aviões, Concorde).
 Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv`. O C152 não tem compensador de aileron/leme, spoiler, slat nem fly-by-wire: "constante" nesses grupos é esperado.
 

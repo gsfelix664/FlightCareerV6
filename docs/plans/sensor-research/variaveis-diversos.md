@@ -1,5 +1,7 @@
 # Variáveis "Miscellaneous" do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Miscellaneous Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/miscellaneous-variables/) do SDK 2024 (88 SimVars, categoria `Diversos` em `simvars-msfs2024.csv`).
 Coluna **C152** = resultado do SimVarProbe em `probe-runs/matriz-C152.csv` (3 rodadas, 2026-11-16): `varia`, `constante` ou `rejeitada`. "Constante" num voo normal **não** prova que a variável está morta quando ela é uma opção do sim ou um evento raro (crash, fumaça).
 Coluna **Hoje** = onde o app já lê: `Tel` (`SimTelemetry`), `Ctx` (`context_registry.json`, uma leitura no início), `Reg` (`sensor_registry.json`, REC e desgaste por peça), `Fail` (leitura rápida de panes).

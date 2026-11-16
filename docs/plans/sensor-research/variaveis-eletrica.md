@@ -1,5 +1,7 @@
 # Variáveis do sistema elétrico do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) do SDK 2024 (111 SimVars: barramentos, baterias, disjuntores, circuitos, geradores, relés, energia externa, linhas, alternador, APU).
 Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv`. O C152 usa o **sistema elétrico novo** (v2, `NEW ELECTRICAL SYSTEM`): as variáveis legadas (`GENALT`, `MAIN BUS`, `AVIONICS BUS`, `BATTERY BUS`, `HOT BATTERY BUS`, `OLD CHARGING AMPS`) ficam 0 e só servem a aviões com sistema legado.
 Índices v2+: barramento, bateria, circuito e gerador aceitam **nome ou índice**; os índices mudam por aeronave (Developer Mode › Electrical System Debug).
