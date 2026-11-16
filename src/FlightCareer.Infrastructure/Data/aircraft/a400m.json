@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "A400M",
   "class": "Turboprop",
   "engineCount": 4,
@@ -94,6 +94,22 @@
       "unit": "knots",
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: TP400-D6; geradores AC + TRU, como a classe jato",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: TP400-D6; geradores AC + TRU, como a classe jato",
       "notes": null
     }
   ]

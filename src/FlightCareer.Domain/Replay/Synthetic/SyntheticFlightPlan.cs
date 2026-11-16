@@ -40,6 +40,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
             bool isPiston = string.Equals(profile.Class, "Piston", StringComparison.OrdinalIgnoreCase) || featSet.Contains("piston");
             bool isRetractable = featSet.Contains("retractableGear") || featSet.Contains("hydraulicGear");
             bool hasFlaps = !featSet.Contains(AircraftFeatures.NoFlaps);
+            bool hasElectrical = !featSet.Contains(AircraftFeatures.NoElectrical);
             int engineCount = Math.Max(1, profile.EngineCount);
 
             // Sim rate: 80% dos voos 1x fixo; 20% com trecho acelerado durante cruzeiro
@@ -80,6 +81,13 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 if (!hasFlaps)
                 {
                     candidateTypes.Remove(SyntheticAbuseType.FlapOverSpeed);
+                }
+
+                if (!hasElectrical)
+                {
+                    candidateTypes.Remove(SyntheticAbuseType.BatteryDischarging);
+                    candidateTypes.Remove(SyntheticAbuseType.ElectricalOverload);
+                    candidateTypes.Remove(SyntheticAbuseType.AvionicsMasterOnStart);
                 }
 
                 if (isPiston)

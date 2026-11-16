@@ -748,14 +748,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
             double ResolveLimit(string limitKey, double fallback)
             {
+                var pLim = profile.Limits?.FirstOrDefault(l => string.Equals(l.Key, limitKey, StringComparison.OrdinalIgnoreCase));
+                if (pLim != null && pLim.Value > 0) return pLim.Value;
+
                 if (_resolver != null)
                 {
                     var lim = _resolver.Get(profile, aircraftClass, limitKey);
                     if (lim != null && lim.Value > 0) return lim.Value;
                 }
-
-                var pLim = profile.Limits?.FirstOrDefault(l => string.Equals(l.Key, limitKey, StringComparison.OrdinalIgnoreCase));
-                if (pLim != null && pLim.Value > 0) return pLim.Value;
 
                 return fallback;
             }

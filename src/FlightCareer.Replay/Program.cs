@@ -204,6 +204,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("  --runs <n>               Número de voos sintéticos (padrão 1000 no total; com 'all' padrão 50 por aeronave)");
             Console.WriteLine("  --seed <n>               Semente pseudoaleatória inicial (padrão 42)");
             Console.WriteLine("  --fast                   Modo rápido: valida apenas invariantes (sem voo controle e gabarito)");
+            Console.WriteLine("  Nota: o fuzz usa índices elétricos padrão de teste quando a aeronave não os tem no catálogo.");
         }
 
         private static int RunFuzz(string[] args)
@@ -280,6 +281,11 @@ namespace FlightCareer.Replay
                     targetProfiles.AddRange(allProfiles.Take(4));
                 }
             }
+
+            // Aplica os índices elétricos padrão de teste aos perfis alvo do fuzz (não afeta o jogo)
+            targetProfiles = targetProfiles
+                .Select(FuzzTestDefaults.WithTestElectricalIndices)
+                .ToList();
 
             Console.WriteLine("================================================================================");
             Console.WriteLine("           FlightCareer V6 — Fuzz Testing com Voos Sintéticos                    ");

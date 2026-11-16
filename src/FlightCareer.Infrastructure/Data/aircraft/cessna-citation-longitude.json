@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Cessna Citation Longitude",
   "class": "Jet",
   "engineCount": 2,
@@ -75,6 +75,30 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Honeywell HTF7700L",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 140.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Honeywell HTF7700L",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 1000.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Honeywell HTF7700L",
+      "notes": null
     }
   ]
 }

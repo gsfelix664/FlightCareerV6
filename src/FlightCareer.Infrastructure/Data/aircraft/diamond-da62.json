@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
@@ -151,6 +151,14 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: 2 × 70 A (DA62, aproximado)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Austro AE330",
+      "notes": null
     }
   ]
 }

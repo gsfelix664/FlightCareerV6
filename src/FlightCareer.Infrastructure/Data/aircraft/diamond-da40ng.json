@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Diamond DA40NG",
   "class": "Piston",
   "engineCount": 1,
@@ -138,6 +138,14 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Austro AE300",
+      "notes": null
     }
   ]
 }

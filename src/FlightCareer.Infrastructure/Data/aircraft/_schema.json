@@ -64,7 +64,8 @@
           "hydraulicGear",
           "apu",
           "electricHybrid",
-          "noFlaps"
+          "noFlaps",
+          "noElectrical"
         ]
       }
     },

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "C400 Corvalis",
   "class": "Piston",
   "engineCount": 1,
@@ -98,6 +98,22 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: 100 A (Corvalis, aproximado)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-550-C",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2600.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-550-C",
+      "notes": null
     }
   ]
 }
