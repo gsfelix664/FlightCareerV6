@@ -1975,3 +1975,8 @@
 - Revisão da SIMVAR-PROBE (aprovada): `catch {}` silenciosos removidos e `--block-size` respeitado; rodada completa conferida no MSFS (C152 parado, sem deslocamento entre blocos).
 - Plano `docs/plans/validacao-simvars.md` (validação das SimVars, teste de panes/Key Events, ligação com as peças).
 - Testes do usuário no C152 (1 parado + 2 voos) em `docs/plans/sensor-validation/probe-runs/`, com matriz `matriz-C152.csv/.md`. Achados: `ELECTRICAL GENERATOR *` substitui `GENALT`; pontos de contato por índice funcionam; limites de G do sim ≠ POH; `ENG VIBRATION`, `GEAR SKIDDING FACTOR`, `SEMIBODY LOADFACTOR X/Z` e `MIN G FORCE` mortas no C152. O MSFS caiu 3 vezes com o mesmo erro interno durante a sondagem (suspeita: variáveis `ATC *`/`AI *` na troca de controle do ATC; não provado).
+
+## 2026-11-16 - Análise das variáveis "Miscellaneous" do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-diversos.md`: as 88 SimVars da página Miscellaneous cruzadas com a matriz do C152 e com o que o app já lê, com usos para HUD, qualidade do voo/passageiros, missões e economia, integridade da carreira (crash desligado, pausa, teletransporte) e desgaste/panes.
+- Achado: `FlightQualityService` conta violações por pacote de telemetria (depende da frequência); corrigir para tempo ao mexer na nota dos passageiros.
+- Só documentação; nada testado no MSFS.

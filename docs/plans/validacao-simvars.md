@@ -4,6 +4,7 @@ Criado em 2026-11-16 (Claude). Pré-requisito: ferramenta `FlightCareer.SimVarPr
 Resultados do C152 (2026-11-16): `docs/plans/sensor-validation/probe-runs/matriz-C152.md`. O MSFS caiu 3 vezes durante a sondagem (mesmo erro interno; suspeita: `ATC *`/`AI *`); próximo teste com `--filter "^(?!ATC |AI )"`.
 
 ## Contexto
+- Variáveis da página Miscellaneous (clima, crash, realismo, pausa) e seus usos além do desgaste: `docs/plans/sensor-research/variaveis-diversos.md`.
 - `docs/plans/sensor-research/simvars-msfs2024.csv`: 1.678 SimVars da documentação do SDK 2024, cruzadas com o SimvarWatcher e com o `sensor_registry.json`.
 - `src/FlightCareer.Infrastructure/Data/simvar_probe_list.csv`: lista de entrada do SimVarProbe (1.755 = documentação ∪ lista interna do SimvarWatcher; ~4.500 leituras com índices).
 - Ferramentas de descoberta no Developer Mode do MSFS 2024: Behaviors Debug (abas Variables e Input Events, Ctrl+G sobre um botão), Electrical/Fuel/Hydraulic System Debug (índices de circuitos, barramentos e linhas), Wheels (índices dos pontos de contato), SimConnect Inspector (exceções e definições do nosso app).
