@@ -164,6 +164,66 @@ namespace FlightCareer.Tests.Replay.Fuzz
         }
 
         [Fact]
+        public void Fuzz_Mutacao_SemResolucaoChavePorMotor_GabaritoDeveFalhar()
+        {
+            var (partsCatalog, wearRuleCatalog, resolver, registry) = LoadCatalogs();
+            var profile = resolver.FindById("Cessna C152");
+            Assert.NotNull(profile);
+
+            var rnd = new SystemRandomSource(12345);
+            var scenario = new AircraftScenarioInput(profile, registry.Sensors, profile.Features, profile.EngineCount, profile.AircraftId);
+            var generator = new SyntheticFlightGenerator(resolver);
+
+            // Voo controle normal
+            var controlPlan = SyntheticFlightPlan.CreateNormal(durationSeconds: 300.0);
+            var controlFlight = generator.Generate(scenario, controlPlan, rnd);
+
+            // Voo com RPM overspeed no motor 1 (gera sensor eng-rpm:1)
+            var abuse = new SyntheticAbuseRecord(
+                SyntheticAbuseType.RpmOverspeed,
+                StartSeconds: 120.0,
+                DurationSeconds: 25.0,
+                Intensity: 0.12,
+                EngineIndex: 1,
+                TargetRuleId: "piston_rpm_overspeed",
+                TargetPartId: "engine.cylinders");
+
+            var abusedPlan = new SyntheticFlightPlan
+            {
+                TotalDurationSeconds = 300.0,
+                Abuses = new[] { abuse }
+            };
+            var abusedFlight = generator.Generate(scenario, abusedPlan, rnd);
+
+            // 1. Execução mutada (reproduz o bug real de 2026-11-15: PartWearEngine sem resolver chave:1)
+            var mutatedReplayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver)
+            {
+                DisablePerEngineSensorResolution = true
+            };
+            var controlResultMutated = mutatedReplayer.Run(controlFlight.Frames, controlFlight.Touchdowns, profile, profile.Features, profile.EngineCount);
+            var abusedResultMutated = mutatedReplayer.Run(abusedFlight.Frames, abusedFlight.Touchdowns, profile, profile.Features, profile.EngineCount);
+
+            var mutatedViolations = SyntheticFlightOracle.VerifyGroundTruth(controlResultMutated, abusedResultMutated, abuse);
+
+            // O gabarito DEVE falhar sob mutação porque 'eng-rpm:1' é ignorado e a regra não dispara
+            Assert.NotEmpty(mutatedViolations);
+            Assert.Contains(mutatedViolations, v => v.Contains("não disparou a regra esperada") || v.Contains("não foi estritamente maior"));
+
+            // 2. Execução normal de produção (com DisablePerEngineSensorResolution = false)
+            var normalReplayer = new FlightReplayer(partsCatalog, wearRuleCatalog, resolver)
+            {
+                DisablePerEngineSensorResolution = false
+            };
+            var controlResultNormal = normalReplayer.Run(controlFlight.Frames, controlFlight.Touchdowns, profile, profile.Features, profile.EngineCount);
+            var abusedResultNormal = normalReplayer.Run(abusedFlight.Frames, abusedFlight.Touchdowns, profile, profile.Features, profile.EngineCount);
+
+            var normalViolations = SyntheticFlightOracle.VerifyGroundTruth(controlResultNormal, abusedResultNormal, abuse);
+
+            // Na execução normal, o gabarito deve ser aprovado com 0 violações
+            Assert.Empty(normalViolations);
+        }
+
+        [Fact]
         public void Fuzz_Gabarito_HardLanding_GeraDanoEInspecoes()
         {
             var (partsCatalog, wearRuleCatalog, resolver, registry) = LoadCatalogs();
@@ -216,8 +276,8 @@ namespace FlightCareer.Tests.Replay.Fuzz
                 DurationSeconds: 10.0,
                 Intensity: 0.0,
                 EngineIndex: 1,
-                TargetRuleId: "avionicsMasterStartSpikes",
-                TargetPartId: "electrical.avionics_bus");
+                TargetRuleId: "avionics_start_with_avionics_master_on",
+                TargetPartId: "avionics.com_nav_radios");
 
             var plan = new SyntheticFlightPlan
             {
