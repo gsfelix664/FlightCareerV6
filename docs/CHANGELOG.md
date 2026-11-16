@@ -2148,3 +2148,23 @@
 - Novo `docs/plans/sensor-research/eventos-motor.md`: parada por falta de combustível (`SHUTOFF_VALVE_OFF`, `SET_FUEL_VALVE_ENG*`), ignição da turbina, panes por mascaramento do comando do piloto (manete, governador, mistura, cowl flap, partida, reverso), cheque de magnetos e outros procedimentos recebidos do piloto. `ISOLATE_TURBINE_*` só serve ao DarkStar; as panes nativas de motor ficam na página de falhas.
 - `eventos-eletricos.md`: decisão do usuário de usar as duas panes elétricas (disjuntor rearmável e fio rompido).
 - Só documentação; nada testado no MSFS.
+## 2026-11-16 - SLEW-INTEGRIDADE Slew no solo permitido, voo invalidado no ar e detecção de congelamento (Gemini)
+- **Regra de integridade do Slew e Congelamentos**:
+  - Antes de iniciar o monitoramento: uso livre.
+  - No solo antes da decolagem: reposicionamento por slew permitido até 1.000 m acumulados (padrão configurável), registrando "slew no solo: X m" no blackbox ao concluir cada uso.
+  - Slew no ar, slew no solo após decolagem (pousou e usou slew), ou deslocamento total em slew no solo excedendo 1.000 m: voo invalidado.
+  - Congelamentos do simulador (`IS ALTITUDE FREEZE ON`, `IS ATTITUDE FREEZE ON`, `IS LATITUDE LONGITUDE FREEZE ON`): permitidos no solo antes da decolagem; ativados em voo ou após a decolagem invalidam o voo ("Voo invalidado: congelamento").
+  - Reutilização do canal de invalidação (`InvalidateFlight`), cancelando recompensas de missões, mantendo cobrança de combustível/taxas e emitindo alerta no HUD.
+- **Domínio (`FlightCareer.Domain/Integrity/`, `FlightCareer.Domain/Utils/`)**:
+  - `SlewMonitor` e `SlewVerdict`: lógica pura que acumula deslocamento Haversine durante `IS SLEW ACTIVE`, valida solo/ar/decolagem, limites configuráveis e flags de congelamento.
+  - `LocationUtils.CalculateDistanceMeters`: cálculo de distância geográfica esférica direta em metros.
+- **SimConnect e Interfaces (`ISimConnectService.cs`, `SimConnectService.cs`)**:
+  - Leitura a 1 s na nova definição separada `IntegrityStateRead` com a struct `SimIntegrityState` (`IS SLEW ACTIVE`, `IS ALTITUDE FREEZE ON`, `IS ATTITUDE FREEZE ON`, `IS LATITUDE LONGITUDE FREEZE ON`). Nenhuma escrita em `IS SLEW ACTIVE`.
+- **FlightMonitor (`FlightMonitor.cs`)**:
+  - Extraído método comum `InvalidateFlight(string reason)` reutilizado para integridade de combustível, slew e congelamento.
+  - Alimentação contínua de `SlewMonitor` a cada frame recebido. Registro no blackbox com tag `SLEW` para reposicionamentos permitidos no solo.
+- **Testes xUnit**:
+  - 7 novos testes em `SlewMonitorTests.cs`: `Slew_NoSoloDentroDoLimite_Permitido`, `Slew_NoSoloAcimaDoLimite_Invalida`, `Slew_NoAr_Invalida`, `Slew_DepoisDaDecolagem_NoSolo_Invalida`, `Slew_Inativo_NaoSomaDistancia`, `Freeze_EmVoo_Invalida`, `Freeze_NoSoloAntesDaDecolagem_Permitido`.
+  - 1 novo teste em `TelemetryDefinitionTests.cs` conferindo a contagem e correspondência dos datums de `IntegrityStateRead` com os campos de `SimIntegrityState`.
+  - Total: 500 testes aprovados, 0 falhas.
+

@@ -8,11 +8,12 @@ using System.Windows.Interop;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Integrity;
 using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState, RequestIntegrityState }
     public enum DEFINITIONS
     {
         AircraftData, EngineFireState, OilLeakState, FailureState,
@@ -29,7 +30,8 @@ namespace FlightCareer.UI.Services
         WriteFuelTankLeftMain, WriteFuelTankRightMain,
         WriteFuelTankLeftAux, WriteFuelTankRightAux,
         WriteFuelTankLeftTip, WriteFuelTankRightTip,
-        WriteFuelTankCenter, WriteFuelTankCenter2, WriteFuelTankCenter3
+        WriteFuelTankCenter, WriteFuelTankCenter2, WriteFuelTankCenter3,
+        IntegrityStateRead
     }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
     public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
@@ -133,10 +135,14 @@ namespace FlightCareer.UI.Services
         public event Action? OnAircraftReloaded;
         /// <summary>Estado de combustível e tanques atualizado a cada 1 s.</summary>
         public event Action<SimFuelState>? OnFuelStateReceived;
+        /// <summary>Estado de integridade (slew e congelamentos) atualizado a cada 1 s.</summary>
+        public event Action<SimIntegrityState>? OnIntegrityStateReceived;
 
         public SimFailureState? CurrentFailureState { get; private set; }
         public SimFuelState CurrentFuelState => _currentFuelState;
         private SimFuelState _currentFuelState;
+        public SimIntegrityState CurrentIntegrityState => _currentIntegrityState;
+        private SimIntegrityState _currentIntegrityState;
 
         public bool IsCrashed { get; set; } = false;
 
@@ -395,6 +401,13 @@ namespace FlightCareer.UI.Services
 
                 _simConnect.RegisterDataDefineStruct<SimFuelState>(DEFINITIONS.FuelStateRead);
 
+                // Leitura do estado de integridade (slew e congelamentos)
+                AddIntegrityDef("IS SLEW ACTIVE");
+                AddIntegrityDef("IS ALTITUDE FREEZE ON");
+                AddIntegrityDef("IS ATTITUDE FREEZE ON");
+                AddIntegrityDef("IS LATITUDE LONGITUDE FREEZE ON");
+                _simConnect.RegisterDataDefineStruct<SimIntegrityState>(DEFINITIONS.IntegrityStateRead);
+
                 // Definições de escrita para tanques de combustível (mapeadas uma vez)
                 foreach (var (simVar, def) in FuelTankWriteDefs)
                 {
@@ -476,6 +489,10 @@ namespace FlightCareer.UI.Services
                 // Leitura do estado e tanques de combustível a cada 1 s
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFuelState, DEFINITIONS.FuelStateRead,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+
+                // Leitura do estado de integridade (slew e congelamentos) a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestIntegrityState, DEFINITIONS.IntegrityStateRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
             }
             catch (Exception ex)
             {
@@ -514,6 +531,12 @@ namespace FlightCareer.UI.Services
         private void AddFuelDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.FuelStateRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddIntegrityDef(string datum, string unit = "Bool")
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.IntegrityStateRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
             TrackDatum(datum);
         }
 
@@ -856,6 +879,11 @@ namespace FlightCareer.UI.Services
             {
                 _currentFuelState = fuelState;
                 OnFuelStateReceived?.Invoke(fuelState);
+            }
+            else if (data.dwData[0] is SimIntegrityState integrityState)
+            {
+                _currentIntegrityState = integrityState;
+                OnIntegrityStateReceived?.Invoke(integrityState);
             }
         }
 

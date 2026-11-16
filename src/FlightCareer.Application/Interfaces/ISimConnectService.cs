@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Integrity;
 using System;
 using System.Collections.Generic;
 
@@ -13,12 +14,14 @@ namespace FlightCareer.Application.Interfaces
         event EventHandler? OnCrashEvent;
         event Action? OnAircraftReloaded;
         event Action<SimFuelState>? OnFuelStateReceived;
+        event Action<SimIntegrityState>? OnIntegrityStateReceived;
 
         bool IsCrashed { get; set; }
         bool DebugMode { get; set; }
         bool IsConnected { get; }
         SimTelemetry CurrentData { get; }
         SimFuelState CurrentFuelState { get; }
+        SimIntegrityState CurrentIntegrityState { get; }
         int TurbineEngineCount { get; }
 
         void ResetCrashState();
