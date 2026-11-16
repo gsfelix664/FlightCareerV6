@@ -1,6 +1,6 @@
 # NOTA-PASSAGEIROS — Nota de conforto por tempo simulado e sinal do pitch
 
-**Branch:** fix/nota-passageiros-tempo · **Commit:** <pendente> · **Data:** 2026-11-16
+**Branch:** fix/nota-passageiros-tempo · **Commit:** 952e80b · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 1. Criar `FlightQualityRules` (record em `Domain/Services`) com limites operacionais (G 0,4–1,6, bank 30°, pitch up 20°, pitch down 15°, jerk 2,0 /s, slip 5°, vento vertical 5 ft/s, fração turbulência 0,25) e pesos calibrados para paridade com a escala original.
