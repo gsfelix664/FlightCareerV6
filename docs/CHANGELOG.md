@@ -2282,3 +2282,6 @@
     - `FlightPersistenceTests.FlightService_AutoStartUsed_ReducesXpAndMentionsInMessage`: valida redução de XP no logbook (`Flight.XP`), acúmulo no piloto (`pilot.ExperiencePoints`) e inclusão do sufixo na mensagem final.
   - Build 0 erros, `dotnet test` 552/552 aprovados (538 baseline + 14 novos), `TelemetryDefinitionTests` 5/5 aprovados. Não testado no MSFS.
 - Revisão (Claude): `OnFuelTruckCharged` faz o `MainViewModel` recarregar saldo e aeronave (contexto longo); cobrança passa a ser `sim final − combustível do app`, aceitando o valor do sim. 552/552 testes. Não testado no MSFS.
+
+## 2026-11-16 - Moeda genérica $ (Claude)
+- Decisão do usuário: valores em `$` genérico, base dólar, sem escrever "US$". O app já força a cultura en-US no `App.xaml.cs` (`:C2` → `$1,234.56`); as duas mensagens do caminhão de combustível que escreviam "R$" passam a usar `:C2`. Plano de taxas (`taxas-aeroporto-servicos-solo.md` § 6) atualizado com a decisão e as recomendações ainda a confirmar.

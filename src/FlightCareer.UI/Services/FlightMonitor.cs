@@ -536,8 +536,8 @@ namespace FlightCareer.UI.Services
                     _pilot.Balance = pilot.Balance;
                 }
 
-                _telemetryLogger.LogEvent("COMBUSTIVEL_CAMINHAO", $"{deliveredGallons:F1} gal cobrados (R$ {cost:N2}) a R$ {pricePerGallon:N2}/gal");
-                OnAlert?.Invoke("ABASTECIMENTO", $"Caminhão: {deliveredGallons:F1} gal cobrados (R$ {cost:N2})", false);
+                _telemetryLogger.LogEvent("COMBUSTIVEL_CAMINHAO", $"{deliveredGallons:F1} gal cobrados ({cost:C2}) a {pricePerGallon:C2}/gal");
+                OnAlert?.Invoke("ABASTECIMENTO", $"Caminhão: {deliveredGallons:F1} gal cobrados ({cost:C2})", false);
                 OnFuelTruckCharged?.Invoke(aircraftId);
                 return aircraft.FuelAmount;
             }
