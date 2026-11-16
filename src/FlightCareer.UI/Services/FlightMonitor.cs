@@ -1,6 +1,7 @@
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Integrity;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
@@ -36,6 +37,7 @@ namespace FlightCareer.UI.Services
         private readonly FuelUsageAccumulator _fuelAccumulator = new();
         private readonly FuelSyncCoordinator _fuelSync = new();
         private FuelIntegrityMonitor? _fuelIntegrity;
+        private SlewMonitor _slewMonitor = new();
         private bool _flightInvalidated;
         private string? _flightInvalidationReason;
         private TouchdownEvent? _lastTouchdownEvent;
@@ -503,6 +505,7 @@ namespace FlightCareer.UI.Services
             _fuelIntegrity = _fuelSync.Status == FuelSyncStatus.Confirmed
                 ? new FuelIntegrityMonitor(fuelCapacity, fuelTolerance)
                 : null;
+            _slewMonitor = new SlewMonitor();
             _flightInvalidated = false;
             _flightInvalidationReason = null;
             _startConditionTime = null;
@@ -748,6 +751,43 @@ namespace FlightCareer.UI.Services
             if (!IsMonitoring) return;
             _lastData = data;
 
+            // --- MONITORAMENTO DE INTEGRIDADE: SLEW E CONGELAMENTOS ---
+            var integrityState = _simConnect.CurrentIntegrityState;
+            bool slewActive = integrityState.IsSlewActive > 0.5;
+            bool altFreeze = integrityState.IsAltitudeFreezeOn > 0.5;
+            bool attFreeze = integrityState.IsAttitudeFreezeOn > 0.5;
+            bool latLonFreeze = integrityState.IsLatitudeLongitudeFreezeOn > 0.5;
+
+            var slewVerdict = _slewMonitor.Update(
+                slewActive: slewActive,
+                onGround: data.IsOnGround,
+                hasTakenOff: _isAirborne,
+                latDeg: data.Latitude,
+                lonDeg: data.Longitude
+            );
+
+            if (slewVerdict.Invalidated)
+            {
+                InvalidateFlight(slewVerdict.Reason ?? "slew");
+            }
+            else if (slewVerdict.UsageCompleted)
+            {
+                _telemetryLogger.LogEvent("SLEW", $"slew no solo: {Math.Round(slewVerdict.UsageMeters)} m");
+            }
+
+            var freezeVerdict = _slewMonitor.CheckFreeze(
+                altitudeFreeze: altFreeze,
+                attitudeFreeze: attFreeze,
+                latLonFreeze: latLonFreeze,
+                onGround: data.IsOnGround,
+                hasTakenOff: _isAirborne
+            );
+
+            if (freezeVerdict.Invalidated)
+            {
+                InvalidateFlight(freezeVerdict.Reason ?? "congelamento");
+            }
+
             var fuelState = _simConnect.CurrentFuelState;
             _fuelAccumulator.Update(new[]
             {
@@ -862,13 +902,7 @@ namespace FlightCareer.UI.Services
                 {
                     if (evt.Type == FuelIntegrityEventType.UnlimitedFuelActive || evt.Type == FuelIntegrityEventType.InFlightRefueling)
                     {
-                        if (!_flightInvalidated)
-                        {
-                            _flightInvalidated = true;
-                            _flightInvalidationReason = evt.Message;
-                            _telemetryLogger.LogEvent("INTEGRIDADE", $"Voo invalidado: {evt.Message}");
-                            OnAlert?.Invoke("VOO INVALIDADO", "Voo invalidado: combustível alterado em voo", true);
-                        }
+                        InvalidateFlight(evt.Message);
                     }
                 }
             }
@@ -1323,6 +1357,17 @@ namespace FlightCareer.UI.Services
             );
 
             OnFlightFinished?.Invoke(outcome);
+        }
+
+        private void InvalidateFlight(string reason)
+        {
+            if (_flightInvalidated) return;
+            _flightInvalidated = true;
+            _flightInvalidationReason = reason.StartsWith("Voo invalidado", StringComparison.OrdinalIgnoreCase)
+                ? reason
+                : $"Voo invalidado: {reason}";
+            _telemetryLogger.LogEvent("INTEGRIDADE", _flightInvalidationReason);
+            OnAlert?.Invoke("VOO INVALIDADO", _flightInvalidationReason, true);
         }
     }
 }

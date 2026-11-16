@@ -22,6 +22,11 @@ namespace FlightCareer.Domain.Utils
             return R * c;
         }
 
+        public static double CalculateDistanceMeters(double lat1, double lon1, double lat2, double lon2)
+        {
+            return CalculateDistance(lat1, lon1, lat2, lon2) * 1852.0;
+        }
+
         private static double ToRadians(double angle)
         {
             return (Math.PI / 180) * angle;
