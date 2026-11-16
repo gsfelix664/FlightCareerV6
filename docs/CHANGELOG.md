@@ -2046,3 +2046,12 @@
 - **Validação de Build e Testes**:
   - `dotnet build src/FlightCareer.slnx`: 0 erros.
   - `dotnet test src/FlightCareer.Tests`: 463 testes aprovados, 0 falhas.
+
+## 2026-11-16 - Análise das variáveis de motor do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-motor.md` (189 SimVars): foco no que falta no registro e nos usos fora do desgaste — HUD (fluxo, % de potência, carburador), gestão do motor na nota de pilotagem, Hobbs e combustível real na economia, FLX × TOGA nos jatos, panes por SimVar gravável (falha do turbo, falta de combustível, limite do manete) e a decisão pendente de gravar as perdas de eficiência da turbina.
+- 24 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - SimVars obsoletas do SDK 2024 (Claude)
+- A documentação marca obsoletas com `class=obsolete`, que o extrator não capturava. Levantamento nas 15 páginas: 70 obsoletas, em `docs/plans/sensor-research/variaveis-obsoletas.md`.
+- Removidas das listas do Watcher: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `EXIT OPEN`; `ELEVATOR TRIM PCT` trocada por `EX1`. Aviso nas análises `variaveis-*.md` e no plano de validação.
+- Pendente (código, Gemini): `CRASH FLAG` e `GENERAL ENG FIRE DETECTED` ainda são lidos em produção; coluna `obsoleta` no extrator com teste.
