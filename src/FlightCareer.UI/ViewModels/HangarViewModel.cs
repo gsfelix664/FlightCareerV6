@@ -448,8 +448,8 @@ namespace FlightCareer.UI.ViewModels
             if (_simConnect == null || !_simConnect.IsConnected) return;
 
             var simData = _simConnect.CurrentData;
-            bool onGround = simData.SimOnGround;
-            bool engineRunning = simData.GeneralEngCombustion > 0;
+            bool onGround = simData.IsOnGround;
+            bool engineRunning = simData.IsEngineRunning;
 
             if (onGround && !engineRunning)
             {

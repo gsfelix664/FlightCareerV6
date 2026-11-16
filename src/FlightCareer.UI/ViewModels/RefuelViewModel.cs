@@ -85,7 +85,7 @@ namespace FlightCareer.UI.ViewModels
             if (_simConnect != null && _simConnect.IsConnected)
             {
                 var simData = _simConnect.CurrentData;
-                if (simData.SimOnGround && simData.GeneralEngCombustion == 0)
+                if (simData.IsOnGround && !simData.IsEngineRunning)
                 {
                     var activeTanks = _simConnect.GetActiveFuelTanks();
                     if (activeTanks.Count > 0)
