@@ -14,3 +14,19 @@ Conferido pelo revisor: build 0 erros; `dotnet test` 439/439; Python 48/48; `fuz
 3. **Horas por peça:** o invariante de horas só confere peças com prefixo `airframe.` ou `eng.`; o prefixo real das peças do motor é `engine.`. Confira todas as peças instaladas (exceto as que o catálogo diz não acumularem horas, se houver).
 4. **Prova de que funciona:** acrescente um teste que reproduz a mutação do revisor sem mexer no código de produção (ex.: frame sintético só com chaves sem `:n` ou um `PartWearEngine` com resolução desativada por um ponto de teste interno) e confirma que o gabarito falha; e rode a CLI com gabarito em 1000 voos, colando o resumo no relatório.
 5. Dúvida do executor (`landingCycles` só nas 4 peças estruturais): fora do escopo; listar para decisão do usuário.
+
+---
+
+# Revisão FUZZ — rodada 2
+
+**Veredito: APROVADO** (a ferramenta; os bugs que ela achou vão para a próxima tarefa)
+
+- CLI `fuzz` agora roda o gabarito com voo-controle; `--fast` só invariantes. Gabarito exige perda estritamente maior; invariante de horas cobre todas as peças. Teste de mutação `Fuzz_Mutacao_SemResolucaoChavePorMotor_GabaritoDeveFalhar` aprovado (ponto de teste `DisablePerEngineSensorResolution`, desligado por padrão).
+- Conferido pelo revisor: build 0 erros; `dotnet test` 440/440; `fuzz --runs 300 --seed 777` com gabarito: 181 aprovados / 119 falhas (261 violações), coerente com o relatório (1000 voos: 644/356).
+
+## Bugs achados — classificação do revisor (conferida no código e no catálogo)
+1. **Produção, grave:** `PartWearEngine.cs:176` descarta limite `<= 0`; `gLimitNeg` é sempre negativo (padrão −1,52 pistão/turboélice, −1,0 jato; 38 das 46 aeronaves usam o padrão) → `airframe_over_g_negative` nunca dispara em nenhum avião.
+2. **Catálogo, grave:** `egtMax` ausente em 35 das 46 aeronaves e sem padrão de classe em `_class_defaults.json` → `piston_egt_excess` mudo nessas (ex.: Baron G58).
+3. **Gerador (não é bug de produção):** `GEAR POSITION`/`GEAR HANDLE POSITION` no registro são `percent` (0–100); o gerador manda 0–1. O teste `isUp = gearPos <= 10 || ...` do `PartEventDeriver` é ambíguo e merece endurecimento, mas funciona com o dado real.
+4. **Gerador:** voos curtos demais para os acumuladores (10 min de descarga, 5 min de sobrecarga); o abuso tem de durar o suficiente ou o gabarito não deve esperar o evento.
+5. `landingCycles` só nas 4 peças estruturais: decisão do usuário.
