@@ -1944,3 +1944,28 @@
   - 439 testes xUnit aprovados com 0 falhas; 48 testes Python aprovados.
 - **Não testado no MSFS**:
   - O motor de fuzz e replay é pura lógica de teste e simulação sintética sem conexão ao vivo com o SimConnect.
+
+## 2026-11-16 - Ferramenta SimVarProbe de sondagem e gravação de SimVars (Gemini)
+- **Domínio (`FlightCareer.Domain/Sensors/Probe/`)**:
+  - Implementados `ProbeTypes` (`ProbeIndexKind`, `ProbeEntry`, `ProbeSlot`, `ProbeOptions`, `ProbeStatus`, `ProbeBlock`).
+  - `ProbeListLoader`: carregamento resiliente de CSV com suporte a RFC 4180 (aspas duplas escapadas, campos com vírgulas), comentários `#` e fallback automático para unidade `"number"` quando variáveis numéricas não tiverem unidade definida.
+  - `ProbeSlotExpander`: expansão determinística de índices para motores (`1..MaxEngine`), pontos de contato (`0..MaxContact`), wear nativo (`0..49`), cover (`0..7`), genéricos (`sem índice` + `0..MaxGeneric`) e multi-índice (`sem índice`), com filtragem regex opcional e garantia de unicidade de nomes.
+  - `ProbeBlockPlanner`: particionamento de slots numéricos em blocos sequenciais de até `BlockSize` (padrão 200), garantindo exclusão absoluta de slots rejeitados e strings.
+  - `ProbeStatsAccumulator`: acumulação concorrente de estatísticas por slot (amostras válidas, contagem de NaN, valores distintos limitados a 1.000, mín, máx, primeiro e último valor numérico/texto) e classificação automática de estado (`AceitaConstante`, `AceitaVariando`, `AceitaSemAmostras`).
+  - `ProbeReportBuilder`: consolidação de inventário e geração estruturada de `report.csv` e `summary.txt`, respeitando a precedência estrita de rejeição sobre amostras gravadas.
+  - `ProbeCsvWriter`: escrita de CSV compatível com RFC 4180, formatação numérica invariante (`CultureInfo.InvariantCulture`) e codificação UTF-8 com BOM.
+- **Console (`FlightCareer.SimVarProbe`)**:
+  - Projeto console `net10.0-windows` x64 em `src/FlightCareer.SimVarProbe/` referenciando `Domain` e DLLs do SimConnect gerenciada/nativa.
+  - Conexão nativa sem janela com `EventWaitHandle` e tratamento gracioso de falha de conexão quando o MSFS não estiver aberto (saída com código ≠ 0).
+  - Execução em duas fases:
+    - **Fase A (Sondagem/Validação)**: registro de 1 slot por definição via `SIMCONNECT_PERIOD.ONCE` em lotes de até 200 com detecção precisa de `NAME_UNRECOGNIZED` via `GetLastSentPacketID` e mapeamento de exceções por slot.
+    - **Fase B (Gravação Contínua)**: blocos numéricos de até 200 floats com preenchimento via `SIMULATION RATE` gravados a cada 1 s em `values.csv` (com coluna `sim_rate` e marcador de eventos), e monitoramento de transição de variáveis de texto em `strings.csv`.
+  - Reconstrução dinâmica e segura de blocos fora do handler de eventos em caso de exceções na Fase B, sem interrupção da gravação dos demais blocos.
+  - Comandos interativos no console: `m` ou `m <texto>` para registrar marcações operacionais com contador e `q` para encerramento gracioso com descarregamento total de arquivos.
+  - Tratamento de `Console.CancelKeyPress` (Ctrl+C) e opção `--duration <seg>` para gravação temporizada.
+- **Testes e Documentação**:
+  - Criados 15 testes unitários em `FlightCareer.Tests/Sensors/Probe/ProbeDomainTests.cs` cobrindo carregamento real de 1.755 entradas, expansão de todas as classes de índices, planejamento de blocos, acumulador, oráculo de status e formatação CSV. Total de testes xUnit: 455 aprovados (0 falhas).
+  - Criado `tools/simvar_probe/README.md` com instruções de uso, roteiro operacional passo a passo de voo (pátio, partida, táxi, voo, pouso) e dicionário de status dos relatórios.
+  - Atualizados `AGENTS.md` e `src/FlightCareer.slnx`.
+- **Validação no MSFS**:
+  - Testado no MSFS 2024 em tempo real com o Cessna C152 em solo: sondagem de 4.750 slots completada (4.656 aceitas, 94 rejeitadas) e gravação contínua em 23 blocos validada nos arquivos `report.csv`, `summary.txt`, `values.csv` e `strings.csv`.

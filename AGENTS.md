@@ -39,6 +39,7 @@ Execute a partir da raiz do repositório:
 dotnet build src/FlightCareer.slnx
 dotnet test src/FlightCareer.Tests
 dotnet run --project src/FlightCareer.UI
+dotnet run --project src/FlightCareer.SimVarProbe [--probe-only] [--duration <seg>] [--filter <regex>]
 dotnet run --project src/FlightCareer.Replay -- <csv|csv.gz> [--aircraft <modelo>]
 dotnet run --project src/FlightCareer.Replay -- fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]
 ```
@@ -148,6 +149,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 ### Sensores (plano de peças, fase 1 — F1.1 a F1.3 concluídas)
 - `Domain/Sensors/`: `SensorRegistry` (catálogo `sensor_registry.json` + `context_registry.json`, paridade testada com `docs/plans/sensor-inventory.md`), `SensorLayout` (expansão por motor, blocos de 256 preenchidos com `SIMULATION RATE`), `SensorCsvFormatter`.
 - `UI/Services/`: `SensorFrameReader` (leitura genérica, IDs 999/1000+, rejeitadas saem do layout), `ContextSnapshotReader` (IDs 2000/2001, strings em `STRING256`), `SensorRecorder` (REC/Marcar no HUD Overlay, CSV + `-context.json` em `%LocalAppData%\FlightCareer\sensor-logs\`).
+- `FlightCareer.SimVarProbe`: ferramenta de console que conecta ao MSFS, valida e sonda ~1.760 SimVars em duas fases (Fase A: ONCE por slot com detecção de `NAME_UNRECOGNIZED`; Fase B: gravação contínua em blocos de até 200 floats a cada 1 s e strings sob transição), gerando `report.csv`, `summary.txt`, `values.csv` e `strings.csv`. Guia em `tools/simvar_probe/README.md`.
 - Testado no MSFS (C152, 2026-11-14): leitura a ~0,43 s, valores coerentes, sem crash após o preenchimento até 256. F1.4 preparada: roteiro `docs/plans/sensor-validation/ROTEIRO.md` e `tools/analyze_sensor_log.py` (só biblioteca padrão; testes em `python -m unittest discover -s tools/tests`). F1.4b: primeiro voo do C152 analisado (`native-wear-C152.md`) e tabelas do portão 🔒 **aprovadas** em `native-wear-mapping.md` (2026-11-14) e calibração addon × nativo planejada (F1.4c, voos do usuário); depois o usuário voa a matriz A–I e o revisor aprova os relatórios.
 
 ## 8. Definição de pronto

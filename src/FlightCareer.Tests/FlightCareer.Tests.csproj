@@ -40,6 +40,9 @@
     <None Include="..\FlightCareer.Infrastructure\Data\economy_targets.json" Link="Data\economy_targets.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\FlightCareer.Infrastructure\Data\simvar_probe_list.csv" Link="Data\simvar_probe_list.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Fixtures\Flights\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

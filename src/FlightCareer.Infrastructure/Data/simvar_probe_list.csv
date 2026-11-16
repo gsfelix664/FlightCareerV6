@@ -1,0 +1,1756 @@
+simvar,unit,isString,indexKind,source,category,settable
+CAMERA GAMEPLAY PITCH YAW,radians,false,generic,doc+watcher,Câmera,false
+CAMERA REQUEST ACTION,number,false,none,doc+watcher,Câmera,true
+CAMERA STATE,Enum,false,none,doc+watcher,Câmera,true
+CAMERA SUBSTATE,Enum,false,none,doc+watcher,Câmera,true
+CAMERA VIEW TYPE AND INDEX,Enum,false,generic,doc+watcher,Câmera,true
+CAMERA VIEW TYPE AND INDEX MAX,Enum,false,generic,doc+watcher,Câmera,true
+DIRECTORS CUT CAMERA PITCH,percent,false,none,doc+watcher,Câmera,true
+DIRECTORS CUT CAMERA YAW,percent,false,none,doc+watcher,Câmera,true
+GAMEPLAY CAMERA FOCUS,Enum,false,none,doc+watcher,Câmera,true
+IS CAMERA RAY INTERSECT WITH NODE,Bool,false,generic,doc+watcher,Câmera,false
+CHASE CAMERA HEADLOOK,Enum,false,none,doc+watcher,Câmera,true
+CHASE CAMERA MOMENTUM,percent,false,none,doc+watcher,Câmera,true
+CHASE CAMERA SPEED,percent,false,none,doc+watcher,Câmera,true
+CHASE CAMERA ZOOM,percent,false,none,doc+watcher,Câmera,true
+CHASE CAMERA ZOOM SPEED,percent,false,none,doc+watcher,Câmera,true
+CAMERA ACTION COCKPIT VIEW RESET,Bool,false,none,doc+watcher,Câmera,true
+CAMERA ACTION COCKPIT VIEW SAVE,Bool,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA HEADLOOK,Enum,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA HEIGHT,percent,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA INSTRUMENT AUTOSELECT,Bool,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA MOMENTUM,percent,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA SIDE,number,false,none,doc+watcher,Câmera,false
+COCKPIT CAMERA SPEED,percent,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA UPPER POSITION,Bool,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA ZOOM,percent,false,none,doc+watcher,Câmera,true
+COCKPIT CAMERA ZOOM SPEED,percent,false,none,doc+watcher,Câmera,true
+DRONE CAMERA FOCUS,meters,false,none,doc+watcher,Câmera,true
+DRONE CAMERA FOCUS MODE,Enum,false,none,doc+watcher,Câmera,true
+DRONE CAMERA FOLLOW,Bool,false,none,doc+watcher,Câmera,true
+DRONE CAMERA FOV,radians,false,none,doc+watcher,Câmera,true
+DRONE CAMERA LOCKED,Bool,false,none,doc+watcher,Câmera,true
+DRONE CAMERA SPEED ROTATION,radians per second,false,none,doc+watcher,Câmera,true
+DRONE CAMERA SPEED TRAVELLING,meter per second,false,none,doc+watcher,Câmera,true
+SMART CAMERA ACTIVE,Bool,false,none,doc+watcher,Câmera,true
+SMART CAMERA INFO,number,false,generic,doc+watcher,Câmera,true
+SMART CAMERA LIST,Enum,false,generic,doc+watcher,Câmera,false
+SMART CAMERA LIST DESCRIPTION,,true,generic,doc+watcher,Câmera,false
+BAGGAGELOADER ANGLE CURRENT,degrees,false,none,doc+watcher,Serviços,true
+BAGGAGELOADER ANGLE TARGET,degrees,false,none,doc+watcher,Serviços,true
+BAGGAGELOADER END RAMP Y,meters,false,none,doc+watcher,Serviços,false
+BAGGAGELOADER END RAMP Z,meters,false,none,doc+watcher,Serviços,false
+BAGGAGELOADER PIVOT Y,meters,false,none,doc+watcher,Serviços,false
+BAGGAGELOADER PIVOT Z,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP ELEVATION CURRENT,meters,false,none,doc+watcher,Serviços,true
+BOARDINGRAMP ELEVATION TARGET,meters,false,none,doc+watcher,Serviços,true
+BOARDINGRAMP END POSITION Y,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP END POSITION Z,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP ORIENTATION CURRENT,percent over 100,false,none,doc+watcher,Serviços,true
+BOARDINGRAMP ORIENTATION TARGET,percent over 100,false,none,doc+watcher,Serviços,true
+BOARDINGRAMP START POSITION Y,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP START POSITION Z,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP STRAIGHT POSITION Y,meters,false,none,doc+watcher,Serviços,false
+BOARDINGRAMP STRAIGHT POSITION Z,meters,false,none,doc+watcher,Serviços,false
+CATERINGTRUCK AIRCRAFT DOOR CONTACT OFFSET Z,meters,false,none,doc+watcher,Serviços,false
+CATERINGTRUCK ELEVATION CURRENT,meters,false,none,doc+watcher,Serviços,true
+CATERINGTRUCK ELEVATION TARGET,meters,false,none,doc+watcher,Serviços,true
+CATERINGTRUCK OPENING CURRENT,percent over 100,false,none,doc+watcher,Serviços,true
+CATERINGTRUCK OPENING TARGET,percent over 100,false,none,doc+watcher,Serviços,true
+FUELTRUCK HOSE DEPLOYED,percent over 100,false,none,doc+watcher,Serviços,true
+FUELTRUCK HOSE END POSX,meters,false,none,doc+watcher,Serviços,false
+FUELTRUCK HOSE END POSZ,meters,false,none,doc+watcher,Serviços,false
+FUELTRUCK HOSE END RELATIVE HEADING,degrees,false,none,doc+watcher,Serviços,false
+GROUNDPOWERUNIT HOSE DEPLOYED,percent over 100,false,none,doc+watcher,Serviços,true
+GROUNDPOWERUNIT HOSE END POSX,meters,false,none,doc+watcher,Serviços,false
+GROUNDPOWERUNIT HOSE END POSZ,meters,false,none,doc+watcher,Serviços,false
+GROUNDPOWERUNIT HOSE END RELATIVE HEADING,degrees,false,none,doc+watcher,Serviços,false
+JETWAY HOOD LEFT BEND,percent,false,none,doc+watcher,Serviços,true
+JETWAY HOOD LEFT DEPLOYMENT,degrees,false,none,doc+watcher,Serviços,true
+JETWAY HOOD RIGHT BEND,percent,false,none,doc+watcher,Serviços,true
+JETWAY HOOD RIGHT DEPLOYMENT,degrees,false,none,doc+watcher,Serviços,true
+JETWAY HOOD TOP HORIZONTAL,percent,false,none,doc+watcher,Serviços,true
+JETWAY HOOD TOP VERTICAL,percent,false,none,doc+watcher,Serviços,true
+JETWAY MOVING,Boolean,false,none,doc+watcher,Serviços,true
+JETWAY WHEEL ORIENTATION CURRENT,degrees,false,none,doc+watcher,Serviços,true
+JETWAY WHEEL ORIENTATION TARGET,degrees,false,none,doc+watcher,Serviços,true
+JETWAY WHEEL SPEED,meters per second,false,none,doc+watcher,Serviços,true
+MARSHALLER AIRCRAFT DIRECTION PARKINGSPACE,radians,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT DISTANCE,meters,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT DISTANCE DIRECTION X PARKINGSPACE,meters,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT DISTANCE DIRECTION Z PARKINGSPACE,meters,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT ENGINE SHUTDOWN,Bool,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT HEADING PARKINGSPACE,radians,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT PROJECTION POINT PARKINGSPACE,meters,false,none,doc+watcher,Serviços,false
+MARSHALLER AIRCRAFT VELOCITY,knots,false,none,doc+watcher,Serviços,false
+PUSHBACK ANGLE,radians,false,none,doc+watcher,Serviços,false
+PUSHBACK ATTACHED,Boolean,false,none,doc+watcher,Serviços,true
+PUSHBACK AVAILABLE,Bool,false,none,doc+watcher,Serviços,true
+PUSHBACK CONTACTX,feet,false,none,doc+watcher,Serviços,false
+PUSHBACK CONTACTY,feet,false,none,doc+watcher,Serviços,false
+PUSHBACK CONTACTZ,feet,false,none,doc+watcher,Serviços,false
+PUSHBACK STATE,Enum,false,none,doc+watcher,Serviços,true
+PUSHBACK WAIT,Bool,false,none,doc+watcher,Serviços,false
+WAGON BACK LINK LENGTH,meters,false,none,doc+watcher,Serviços,false
+WAGON BACK LINK ORIENTATION,degrees,false,none,doc+watcher,Serviços,true
+WAGON BACK LINK START POSZ,meters,false,none,doc+watcher,Serviços,false
+WAGON FRONT LINK LENGTH,meters,false,none,doc+watcher,Serviços,false
+WAGON FRONT LINK ORIENTATION,degrees,false,none,doc+watcher,Serviços,true
+WAGON FRONT LINK START POSZ,meters,false,none,doc+watcher,Serviços,false
+ANIMATION DELTA TIME,seconds,false,none,doc+watcher,Diversos,false
+ARTIFICIAL GROUND ELEVATION,feet,false,none,doc+watcher,Diversos,false
+CATEGORY,,true,none,doc+watcher,Diversos,false
+CONTROLLABLE,number,false,none,doc+watcher,Diversos,false
+CRASH FLAG,Enum,false,none,doc+watcher,Diversos,false
+CRASH SEQUENCE,Enum,false,none,doc+watcher,Diversos,false
+GROUND ALTITUDE,meters,false,none,doc+watcher,Diversos,false
+HAND ANIM STATE,Enum,false,none,doc+watcher,Diversos,true
+HIDE AVATAR IN AIRCRAFT,Bool,false,none,doc+watcher,Diversos,false
+IDLE ANIMATION ID,,true,none,doc+watcher,Diversos,false
+MAGVAR,degrees,false,none,doc+watcher,Diversos,false
+MISSION SCORE,number,false,none,doc+watcher,Diversos,true
+MOTION SIMULATION,Bool,false,none,doc+watcher,Diversos,false
+PARACHUTE OPEN,Bool,false,none,doc+watcher,Diversos,true
+REALISM,number,false,none,doc+watcher,Diversos,true
+REALISM CRASH DETECTION,Bool,false,none,doc+watcher,Diversos,false
+REALISM CRASH WITH OTHERS,Bool,false,none,doc+watcher,Diversos,false
+SIM DISABLED,Bool,false,none,doc+watcher,Diversos,true
+SIM ON GROUND,Bool,false,none,doc+watcher,Diversos,false
+SIM SHOULD SET ON GROUND,Bool,false,none,doc+watcher,Diversos,false
+TRACK IR ENABLE,Bool,false,none,doc+watcher,Diversos,true
+TOTAL WORLD VELOCITY,feet per second,false,none,doc+watcher,Diversos,false
+USER INPUT ENABLED,Bool,false,none,doc+watcher,Diversos,true
+VISUAL MODEL RADIUS,meters,false,none,doc+watcher,Diversos,false
+VELOCITY WORLD X,feet per second,false,none,doc+watcher,Diversos,true
+VELOCITY WORLD Y,feet per second,false,none,doc+watcher,Diversos,true
+VELOCITY WORLD Z,feet per second,false,none,doc+watcher,Diversos,true
+VR GROUP INTERACTION ON,Bool,false,none,doc+watcher,Diversos,false
+PYLON HEIGHT,meters,false,none,doc+watcher,Diversos,false
+PYLON COLLISION POSITION,meters,false,none,doc+watcher,Diversos,false
+FAUNA BEHAVIOUR STATE,,true,none,doc+watcher,Diversos,false
+FAUNA FORCE MAGNITUDE,number,false,none,doc+watcher,Diversos,false
+FAUNA HEADING ROTATION ANGLE,degrees,false,none,doc+watcher,Diversos,false
+FAUNA TURN RATE,number,false,none,doc+watcher,Diversos,false
+GENDER,number,false,none,doc+watcher,Diversos,true
+HEIGHT,number,false,none,doc+watcher,Diversos,true
+IS CROUCH,Bool,false,none,doc+watcher,Diversos,true
+IS TALKING,Bool,false,none,doc+watcher,Diversos,true
+AMBIENT DENSITY,Slugs per cubic feet,false,none,doc+watcher,Diversos,false
+AMBIENT IN CLOUD,Bool,false,none,doc+watcher,Diversos,false
+AMBIENT IN SMOKE,Bool,false,none,doc+watcher,Diversos,false
+AMBIENT PRECIP RATE,millimeter of water,false,none,doc+watcher,Diversos,false
+AMBIENT PRECIP STATE,mask,false,none,doc+watcher,Diversos,false
+AMBIENT PRESSURE,millibars,false,none,doc+watcher,Diversos,false
+AMBIENT TEMPERATURE,celsius,false,none,doc+watcher,Diversos,false
+AMBIENT VISIBILITY,meters,false,none,doc+watcher,Diversos,false
+AMBIENT WIND DIRECTION,degrees,false,none,doc+watcher,Diversos,false
+AMBIENT WIND VELOCITY,feet per second,false,none,doc+watcher,Diversos,false
+AMBIENT WIND X,feet per second,false,none,doc+watcher,Diversos,false
+AMBIENT WIND Y,feet per second,false,none,doc+watcher,Diversos,false
+AMBIENT WIND Z,feet per second,false,none,doc+watcher,Diversos,false
+BAROMETER PRESSURE,millibars,false,none,doc+watcher,Diversos,false
+DENSITY ALTITUDE,feet,false,none,doc+watcher,Diversos,false
+ENV CLOUD DENSITY,percent over 100,false,none,doc+watcher,Diversos,false
+ENV SMOKE DENSITY,percent over 100,false,none,doc+watcher,Diversos,false
+SEA LEVEL AMBIENT TEMPERATURE,celsius,false,none,doc+watcher,Diversos,false
+SEA LEVEL PRESSURE,millibars,false,none,doc+watcher,Diversos,false
+STRUCT AMBIENT WIND,feet per second,false,none,doc+watcher,Diversos,false
+AI DESIRED SPEED,number,false,none,doc,Diversos,true
+AI WAYPOINT LIST,number,false,none,doc,Diversos,true
+AI CURRENT WAYPOINT,number,false,none,doc,Diversos,true
+AI DESIRED HEADING,number,false,none,doc,Diversos,true
+AI GROUNDTURNTIME,number,false,none,doc,Diversos,true
+AI GROUNDCRUISESPEED,number,false,none,doc,Diversos,true
+AI GROUNDTURNSPEED,number,false,none,doc,Diversos,true
+AI TRAFFIC ISIFR,number,false,none,doc,Diversos,false
+AI TRAFFIC STATE,,true,none,doc,Diversos,false
+AI TRAFFIC CURRENT AIRPORT,,true,none,doc,Diversos,false
+AI TRAFFIC ASSIGNED RUNWAY,,true,none,doc,Diversos,false
+AI TRAFFIC ASSIGNED PARKING,,true,none,doc,Diversos,false
+AI TRAFFIC FROMAIRPORT,,true,none,doc,Diversos,false
+AI TRAFFIC TOAIRPORT,,true,none,doc,Diversos,false
+AI TRAFFIC ETD,number,false,none,doc,Diversos,false
+AI TRAFFIC ETA,number,false,none,doc,Diversos,false
+STRUCT DAMAGEVISIBLE,number,false,none,doc+watcher,Diversos,false
+STRUC AIRSPEED HOLD PID CONSTS,number,false,none,doc+watcher,Diversos,false
+STRUC HEADING HOLD PID CONSTS,number,false,none,doc+watcher,Diversos,false
+STRUCT BODY ROTATION ACCELERATION,number,false,none,doc+watcher,Diversos,false
+STRUCT PBH32,number,false,none,doc+watcher,Diversos,false
+STRUCT REALISM VARS,number,false,none,doc+watcher,Diversos,false
+STRUCT SURFACE RELATIVE VELOCITY,"`SIMCONNECT_DATA_XYZ` structure, feet per second",false,none,doc+watcher,Diversos,false
+STRUCT WORLDVELOCITY,"`SIMCONNECT_DATA_XYZ` structure, feet per second",false,none,doc+watcher,Diversos,false
+STRUCT WORLD ACCELERATION,"`SIMCONNECT_DATA_XYZ` structure, feet per second squared",false,none,doc+watcher,Diversos,false
+STRUCT WORLD ROTATION VELOCITY,"`SIMCONNECT_DATA_XYZ` structure, radians per second",false,none,doc+watcher,Diversos,false
+BOMB AMMO,number,false,none,doc+watcher,Diversos,true
+CANNON AMMO,number,false,none,doc+watcher,Diversos,true
+GUN AMMO,number,false,none,doc+watcher,Diversos,true
+ROCKET AMMO,number,false,none,doc+watcher,Diversos,true
+COLLECTIVE POSITION,percent over 100,false,none,doc+watcher,Helicóptero,false
+VORTEX RING STATE PROTECTION ASSISTANCE IMPACT,percent over 100,false,none,doc+watcher,Helicóptero,false
+DISK BANK ANGLE,radians,false,engine,doc+watcher,Helicóptero,false
+DISK BANK PCT,percent over 100,false,engine,doc+watcher,Helicóptero,false
+DISK CONING PCT,percent over 100,false,engine,doc+watcher,Helicóptero,false
+DISK PITCH ANGLE,radians,false,engine,doc+watcher,Helicóptero,false
+DISK PITCH PCT,percent over 100,false,engine,doc+watcher,Helicóptero,false
+HOVER INDUCED VELOCITY,meter per second,false,none,doc+watcher,Helicóptero,false
+NUMBER OF MAIN ROTORS,number,false,none,doc+watcher,Helicóptero,false
+ROTOR BRAKE ACTIVE,Bool,false,none,doc+watcher,Helicóptero,false
+ROTOR BRAKE AVAILABLE,Bool,false,none,doc+watcher,Helicóptero,false
+ROTOR BRAKE HANDLE POS,percent over 100,false,none,doc+watcher,Helicóptero,false
+ROTOR CHIP DETECTED,Bool,false,none,doc+watcher,Helicóptero,false
+ROTOR CLUTCH ACTIVE,Bool,false,none,doc+watcher,Helicóptero,false
+ROTOR CLUTCH SWITCH POS,Bool,false,none,doc+watcher,Helicóptero,false
+ROTOR COLLECTIVE BLADE PITCH PCT,percent over 100,false,none,doc+watcher,Helicóptero,false
+ROTOR CYCLIC BLADE MAX PITCH POSITION,degrees,false,engine,doc+watcher,Helicóptero,false
+ROTOR CYCLIC BLADE PITCH PCT,percent over 100,false,none,doc+watcher,Helicóptero,false
+ROTOR GOV ACTIVE,Bool,false,engine,doc+watcher,Helicóptero,false
+ROTOR GOV TARGET PCT,percent over 100,false,engine,doc+watcher,Helicóptero,true
+ROTOR GOV ENGINE TRIM,percent over 100,false,engine,doc+watcher,Helicóptero,false
+ROTOR GOV SWITCH POS,Bool,false,engine,doc+watcher,Helicóptero,false
+ROTOR LATERAL TRIM PCT,percent over 100,false,none,doc+watcher,Helicóptero,false
+ROTOR LONGITUDINAL TRIM PCT,percent over 100,false,none,doc+watcher,Helicóptero,false
+ROTOR RADIUS,feet,false,engine,doc+watcher,Helicóptero,false
+ROTOR ROTATION ANGLE,radians,false,engine,doc+watcher,Helicóptero,false
+ROTOR RPM,rpm,false,engine,doc+watcher,Helicóptero,false
+ROTOR RPM PCT,percent over 100,false,engine,doc+watcher,Helicóptero,false
+ROTOR TEMPERATURE,rankine,false,none,doc+watcher,Helicóptero,false
+STRUCT ROTOR POSITION,"`SIMCONNECT_DATA_XYZ` structure, feet",false,engine,doc+watcher,Helicóptero,false
+TAIL ROTOR BLADE PITCH PCT,percent over 100,false,none,doc+watcher,Helicóptero,false
+TAIL ROTOR PEDAL POSITION,percent over 100,false,none,doc+watcher,Helicóptero,false
+ENG ELECTRICAL LOAD,percent scaler 16k,false,engine,doc+watcher,Helicóptero,false
+ENG FUEL PRESSURE,psi scaler 16k,false,engine,doc+watcher,Helicóptero,false
+ENG ROTOR RPM,percent over 100,false,engine,doc+watcher,Helicóptero,false
+ENG TORQUE PERCENT,percent over 100,false,engine,doc+watcher,Helicóptero,false
+ENG TRANSMISSION PRESSURE,psi scaler 16k,false,engine,doc+watcher,Helicóptero,false
+ENG TRANSMISSION TEMPERATURE,celsius scaler 16k,false,engine,doc+watcher,Helicóptero,false
+ENG TURBINE TEMPERATURE,celsius scaler 16k,false,engine,doc+watcher,Helicóptero,false
+FREEWHEELING UNIT ENGAGED,Bool,false,engine,doc+watcher,Helicóptero,true
+HELICOPTER MASTER THROTTLE POSITION,percent over 100,false,none,doc+watcher,Helicóptero,false
+IS ATTACHED TO SLING,Bool,false,none,doc+watcher,Helicóptero,false
+NUM SLING CABLES,number,false,none,doc+watcher,Helicóptero,false
+SLING ACTIVE PAYLOAD STATION,number,false,generic,doc+watcher,Helicóptero,true
+SLING CABLE BROKEN,Bool,false,generic,doc+watcher,Helicóptero,false
+SLING CABLE EXTENDED LENGTH,feet,false,generic,doc+watcher,Helicóptero,true
+SLING HOIST PERCENT DEPLOYED,percent over 100,false,generic,doc+watcher,Helicóptero,false
+SLING HOIST SWITCH,Bool,false,generic,doc+watcher,Helicóptero,true
+SLING HOOK IN PICKUP MODE,Bool,false,none,doc+watcher,Helicóptero,false
+SLING OBJECT ATTACHED,"Bool, string",false,none,doc+watcher,Helicóptero,false
+BALLOON AUTO FILL ACTIVE,Boolean,false,none,doc+watcher,Balão/dirigível,true
+BALLOON FILL AMOUNT,percent over 100,false,none,doc+watcher,Balão/dirigível,true
+BALLOON GAS DENSITY,Slugs per cubic feet,false,none,doc+watcher,Balão/dirigível,false
+BALLOON GAS TEMPERATURE,rankine,false,none,doc+watcher,Balão/dirigível,true
+BALLOON VENT OPEN VALUE,percent over 100,false,none,doc+watcher,Balão/dirigível,true
+BURNER FUEL FLOW RATE,pounds per hour,false,generic,doc+watcher,Balão/dirigível,false
+BURNER HEATING POWER,number,false,generic,doc+watcher,Balão/dirigível,false
+BURNER PILOT LIGHT ON,Boolean,false,generic,doc+watcher,Balão/dirigível,true
+BURNER VALVE OPEN VALUE,percent over 100,false,generic,doc+watcher,Balão/dirigível,true
+GROUND ATTACHMENT,Bool,false,none,doc+watcher,Balão/dirigível,true
+AIRSHIP COMPARTMENT GAS TYPE,Enum,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP COMPARTMENT OVERPRESSURE,millibars,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP COMPARTMENT PRESSURE,millibars,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP COMPARTMENT TEMPERATURE,celsius,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP COMPARTMENT VOLUME,cubic meter,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP COMPARTMENT WEIGHT,pound,false,generic,doc+watcher,Balão/dirigível,false
+AIRSHIP DAMPER STATE,Enum,false,generic,doc+watcher,Balão/dirigível,true
+AIRSHIP FAN POWER PCT,percent over 100,false,generic,doc+watcher,Balão/dirigível,true
+AIRSHIP VALVE STATE,Enum,false,generic,doc+watcher,Balão/dirigível,true
+MAST TRUCK DEPLOYMENT,Bool,false,none,doc+watcher,Balão/dirigível,true
+MAST TRUCK EXTENSION,percent,false,none,doc+watcher,Balão/dirigível,true
+AUTOPILOT AIRSPEED ACQUISITION,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AIRSPEED HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AIRSPEED HOLD CURRENT,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AIRSPEED HOLD VAR,knots,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AIRSPEED MAX CALCULATED,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AIRSPEED MIN CALCULATED,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ALT RADIO MODE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ALTITUDE ARM,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ALTITUDE LOCK,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ALTITUDE LOCK VAR,feet,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT ALTITUDE MANUALLY TUNABLE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ALTITUDE SLOT INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT APPROACH ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT APPROACH ARM,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT APPROACH CAPTURED,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT APPROACH HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT APPROACH IS LOCALIZER,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT ATTITUDE HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AVAILABLE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT AVIONICS MANAGED,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT BACKCOURSE HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT BANK HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT BANK HOLD REF,radians,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT CRUISE SPEED HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT DEFAULT PITCH MODE,Enum,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT DEFAULT ROLL MODE,Enum,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT DISENGAGED,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT DIRECTOR ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT DIRECTOR BANK,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT DIRECTOR BANK EX1,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT DIRECTOR PITCH,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT DIRECTOR PITCH EX1,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT FLIGHT LEVEL CHANGE,Bool,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT GLIDESLOPE ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT GLIDESLOPE ARM,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT GLIDESLOPE HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT HEADING LOCK,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT HEADING LOCK DIR,degrees,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT HEADING MANUALLY TUNABLE,Bool,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT HEADING SLOT INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MACH HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MACH HOLD VAR,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MANAGED INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MANAGED SPEED IN MACH,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MANAGED THROTTLE ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MASTER,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MAX BANK,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MAX BANK ID,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT MAX SPEED HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT NAV1 LOCK,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT NAV SELECTED,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT PITCH HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT PITCH HOLD REF,radians,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT RPM HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT RPM HOLD VAR,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT RPM SLOT INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT SPEED SETTING,knots,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT SPEED SLOT INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT TAKEOFF POWER ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT THROTTLE ARM,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT THROTTLE MAX THRUST,percent,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT VERTICAL HOLD,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT VERTICAL HOLD VAR,feet per minute,false,none,doc+watcher,Piloto automático,true
+AUTOPILOT VS SLOT INDEX,number,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT WING LEVELER,Bool,false,none,doc+watcher,Piloto automático,false
+AUTOPILOT YAW DAMPER,Bool,false,none,doc+watcher,Piloto automático,false
+ASSISTANCE LANDING ENABLED,Bool,false,none,doc+watcher,Piloto automático,false
+ASSISTANCE TAKEOFF ENABLED,Bool,false,none,doc+watcher,Piloto automático,false
+AI ANTISTALL STATE,Enum,false,none,doc+watcher,Piloto automático,false
+AI AUTOTRIM ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+AI AUTOTRIM ACTIVE AGAINST PLAYER,Bool,false,none,doc+watcher,Piloto automático,false
+AI CONTROLS,Bool,false,none,doc+watcher,Piloto automático,false
+AI CURSOR MODE ACTIVE,Bool,false,none,doc+watcher,Piloto automático,false
+DELEGATE CONTROLS TO AI,Bool,false,none,doc+watcher,Piloto automático,true
+FLY ASSISTANT CANCEL DESTINATION,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT CANCEL DESTINATION DISPLAY,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT COM AI LOCKED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT HAVE DESTINATION,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT LANDING SPEED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT LANDING SPEED DISPLAY MODE,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT NEAREST CATEGORY,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT NEAREST COUNT,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT NEAREST METADATA,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT NEAREST NAME,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT NEAREST SELECTED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT RIBBONS ACTIVE,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT SET AS DESTINATION,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT STALL SPEED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT STALL SPEED DISPLAY MODE,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT TAKEOFF SPEED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT TAKEOFF SPEED DISPLAY MODE,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT TAKEOFF SPEED ESTIMATED,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT TAXI RIBBONS ACTIVE,number,false,none,doc+watcher,Piloto automático,false
+FLY ASSISTANT TELEPORT TO INCREASED ALTITUDE,number,false,none,doc+watcher,Piloto automático,false
+ANTISKID BRAKES ACTIVE,Bool,false,none,doc+watcher,Freios e trem,false
+AUTOBRAKES ACTIVE,Bool,false,none,doc+watcher,Freios e trem,false
+AUTO BRAKE SWITCH CB,number,false,none,doc+watcher,Freios e trem,false
+BRAKE DEPENDENT HYDRAULIC PRESSURE,pound-force per square foot,false,none,doc+watcher,Freios e trem,false
+BRAKE INDICATOR,Enum,false,none,doc+watcher,Freios e trem,false
+BRAKE LEFT POSITION,position,false,none,doc+watcher,Freios e trem,true
+BRAKE LEFT POSITION EX1,position,false,none,doc+watcher,Freios e trem,true
+BRAKE LEFT TEMPERATURE,kelvin,false,none,doc+watcher,Freios e trem,false
+BRAKE LEFT TEMPERATURE EFFECT,percent over 100,false,none,doc+watcher,Freios e trem,false
+BRAKE LEFT WEIGHT REMAINING,percent over 100,false,none,doc+watcher,Freios e trem,false
+BRAKE PARKING INDICATOR,Enum,false,none,doc+watcher,Freios e trem,false
+BRAKE PARKING POSITION,Bool,false,none,doc+watcher,Freios e trem,false
+BRAKE RIGHT POSITION,position,false,none,doc+watcher,Freios e trem,true
+BRAKE RIGHT POSITION EX1,position,false,none,doc+watcher,Freios e trem,true
+BRAKE RIGHT TEMPERATURE,kelvin,false,none,doc+watcher,Freios e trem,false
+BRAKE RIGHT TEMPERATURE EFFECT,percent over 100,false,none,doc+watcher,Freios e trem,false
+BRAKE RIGHT WEIGHT REMAINING,percent over 100,false,none,doc+watcher,Freios e trem,false
+PARKING BRAKE AVAILABLE,Bool,false,none,doc+watcher,Freios e trem,false
+REJECTED TAKEOFF BRAKES ACTIVE,Bool,false,none,doc+watcher,Freios e trem,false
+TOE BRAKES AVAILABLE,Bool,false,none,doc+watcher,Freios e trem,false
+CONTACT POINT COMPRESSION,percent over 100,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT IS ON GROUND,Bool,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT IS SKIDDING,Bool,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT POSITION,percent over 100,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT SKIDDING FACTOR,percent over 100,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT STEER ANGLE,radians,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT STEER ANGLE PCT,percent over 100,false,contact,doc+watcher,Freios e trem,false
+CONTACT POINT SURFACE TYPE,Enum,false,contact,doc+watcher,Freios e trem,true
+CONTACT POINT WATER DEPTH,feet,false,contact,doc+watcher,Freios e trem,false
+AUX WHEEL ROTATION ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+AUX WHEEL RPM,rpm,false,none,doc+watcher,Freios e trem,false
+CENTER WHEEL ROTATION ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+CENTER WHEEL RPM,rpm,false,none,doc+watcher,Freios e trem,false
+GEAR ANIMATION POSITION,keyframe,false,generic,doc+watcher,Freios e trem,false
+GEAR AUX POSITION,percent over 100,false,none,doc+watcher,Freios e trem,true
+GEAR AUX STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+GEAR AUX STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR CENTER POSITION,percent over 100,false,none,doc+watcher,Freios e trem,true
+GEAR CENTER STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+GEAR CENTER STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR DAMAGE BY SPEED,Bool,false,none,doc+watcher,Freios e trem,false
+GEAR EMERGENCY HANDLE POSITION,Bool,false,none,doc+watcher,Freios e trem,false
+GEAR HANDLE POSITION,Bool,false,none,doc+watcher,Freios e trem,true
+GEAR HYDRAULIC PRESSURE,pound-force per square foot,false,none,doc+watcher,Freios e trem,false
+GEAR IS ON GROUND,Bool,false,generic,doc+watcher,Freios e trem,false
+GEAR IS SKIDDING,Bool,false,generic,doc+watcher,Freios e trem,false
+GEAR LEFT POSITION,percent over 100,false,none,doc+watcher,Freios e trem,true
+GEAR LEFT STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+GEAR LEFT STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR POSITION,Enum,false,generic,doc+watcher,Freios e trem,true
+GEAR RIGHT POSITION,percent over 100,false,none,doc+watcher,Freios e trem,true
+GEAR RIGHT STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+GEAR RIGHT STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR SKIDDING FACTOR,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR SPEED EXCEEDED,Bool,false,none,doc+watcher,Freios e trem,false
+GEAR STEER ANGLE,radians,false,generic,doc+watcher,Freios e trem,false
+GEAR STEER ANGLE PCT,percent over 100,false,generic,doc+watcher,Freios e trem,false
+GEAR TAIL POSITION,percent over 100,false,none,doc+watcher,Freios e trem,false
+GEAR TOTAL PCT EXTENDED,percent,false,none,doc+watcher,Freios e trem,false
+GEAR WARNING,Enum,false,generic,doc+watcher,Freios e trem,false
+GEAR WATER DEPTH,feet,false,generic,doc+watcher,Freios e trem,false
+IS GEAR FLOATS,Bool,false,none,doc+watcher,Freios e trem,false
+IS GEAR RETRACTABLE,Bool,false,none,doc+watcher,Freios e trem,false
+IS GEAR SKIDS,Bool,false,none,doc+watcher,Freios e trem,false
+IS GEAR SKIS,Bool,false,none,doc+watcher,Freios e trem,false
+IS GEAR WHEELS,Bool,false,none,doc+watcher,Freios e trem,false
+LEFT WHEEL ROTATION ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+LEFT WHEEL RPM,rpm,false,none,doc+watcher,Freios e trem,false
+NOSEWHEEL LOCK ON,Bool,false,none,doc+watcher,Freios e trem,false
+NOSEWHEEL MAX STEERING ANGLE,radians,false,none,doc+watcher,Freios e trem,true
+RETRACT FLOAT SWITCH,Bool,false,none,doc+watcher,Freios e trem,false
+RETRACT LEFT FLOAT EXTENDED,percent,false,none,doc+watcher,Freios e trem,false
+RETRACT RIGHT FLOAT EXTENDED,percent,false,none,doc+watcher,Freios e trem,false
+RIGHT WHEEL ROTATION ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+RIGHT WHEEL RPM,rpm,false,none,doc+watcher,Freios e trem,false
+STEER INPUT CONTROL,percent over 100,false,none,doc+watcher,Freios e trem,false
+TAILWHEEL LOCK ON,Bool,false,none,doc+watcher,Freios e trem,false
+WATER LEFT RUDDER EXTENDED,percent,false,none,doc+watcher,Freios e trem,false
+WATER LEFT RUDDER STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+WATER LEFT RUDDER STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+WATER RIGHT RUDDER EXTENDED,percent,false,none,doc+watcher,Freios e trem,false
+WATER RIGHT RUDDER STEER ANGLE,radians,false,none,doc+watcher,Freios e trem,false
+WATER RIGHT RUDDER STEER ANGLE PCT,percent over 100,false,none,doc+watcher,Freios e trem,false
+WATER RUDDER HANDLE POSITION,percent over 100,false,none,doc+watcher,Freios e trem,true
+WHEEL ROTATION ANGLE,radians,false,generic,doc+watcher,Freios e trem,false
+WHEEL RPM,rpm,false,generic,doc+watcher,Freios e trem,false
+AILERON AVERAGE DEFLECTION,radians,false,none,doc+watcher,Controles,false
+AILERON LEFT DEFLECTION,radians,false,none,doc+watcher,Controles,true
+AILERON LEFT DEFLECTION PCT,percent over 100,false,none,doc+watcher,Controles,false
+AILERON POSITION,position 16k,false,none,doc+watcher,Controles,true
+AILERON RIGHT DEFLECTION,radians,false,none,doc+watcher,Controles,true
+AILERON RIGHT DEFLECTION PCT,percent over 100,false,none,doc+watcher,Controles,false
+AILERON TRIM,radians,false,none,doc+watcher,Controles,false
+AILERON TRIM DISABLED,Bool,false,none,doc+watcher,Controles,false
+AILERON TRIM MAX,radians,false,none,doc+watcher,Controles,false
+AILERON TRIM MIN,radians,false,none,doc+watcher,Controles,false
+AILERON TRIM PCT,percent over 100,false,none,doc+watcher,Controles,true
+AILERON TRIM PCT EX1,percent over 100,false,none,doc+watcher,Controles,false
+ELEVATOR DEFLECTION,radians,false,none,doc+watcher,Controles,true
+ELEVATOR DEFLECTION PCT,percent over 100,false,none,doc+watcher,Controles,false
+ELEVATOR POSITION,position 16k,false,none,doc+watcher,Controles,true
+ELEVATOR TRIM DISABLED,Bool,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM DOWN LIMIT,radians,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM INDICATOR,position,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM LIMIT RATIO,number,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM MAX,radians,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM MIN,radians,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM NEUTRAL,radians,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM PCT,percent over 100,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM PCT EX1,percent over 100,false,none,doc+watcher,Controles,false
+ELEVATOR TRIM PCT EX2,percent over 100,false,none,doc+watcher,Controles,true
+ELEVATOR TRIM POSITION,radians,false,none,doc+watcher,Controles,true
+ELEVATOR TRIM UP LIMIT,radians,false,none,doc+watcher,Controles,false
+ELEVON DEFLECTION,radians,false,none,doc+watcher,Controles,false
+FLAPS AVAILABLE,Bool,false,none,doc+watcher,Controles,false
+FLAPS CURRENT SPEED LIMITATION,knots,false,none,doc+watcher,Controles,false
+FLAP DAMAGE BY SPEED,Bool,false,none,doc+watcher,Controles,false
+FLAPS EFFECTIVE HANDLE INDEX,number,false,none,doc+watcher,Controles,false
+FLAPS HANDLE INDEX,number,false,none,doc+watcher,Controles,true
+FLAPS HANDLE PERCENT,percent over 100,false,none,doc+watcher,Controles,false
+FLAPS NUM HANDLE POSITIONS,number,false,none,doc+watcher,Controles,false
+FLAP POSITION SET,number,false,none,doc+watcher,Controles,true
+FLAP SPEED EXCEEDED,Bool,false,none,doc+watcher,Controles,false
+LEADING EDGE FLAPS LEFT ANGLE,radians,false,none,doc+watcher,Controles,false
+LEADING EDGE FLAPS LEFT INDEX,number,false,none,doc+watcher,Controles,false
+LEADING EDGE FLAPS LEFT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+LEADING EDGE FLAPS RIGHT ANGLE,radians,false,none,doc+watcher,Controles,false
+LEADING EDGE FLAPS RIGHT INDEX,number,false,none,doc+watcher,Controles,false
+LEADING EDGE FLAPS RIGHT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+NEGATIVE G LIMIT FLAPS DOWN,GForce,false,none,doc+watcher,Controles,false
+NEGATIVE G LIMIT FLAPS UP,GForce,false,none,doc+watcher,Controles,false
+POSITIVE G LIMIT FLAPS DOWN,GForce,false,none,doc+watcher,Controles,false
+POSITIVE G LIMIT FLAPS UP,GForce,false,none,doc+watcher,Controles,false
+TRAILING EDGE FLAPS LEFT ANGLE,radians,false,none,doc+watcher,Controles,false
+TRAILING EDGE FLAPS LEFT INDEX,number,false,none,doc+watcher,Controles,false
+TRAILING EDGE FLAPS LEFT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+TRAILING EDGE FLAPS RIGHT ANGLE,radians,false,none,doc+watcher,Controles,false
+TRAILING EDGE FLAPS RIGHT INDEX,number,false,none,doc+watcher,Controles,false
+TRAILING EDGE FLAPS RIGHT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+FLY BY WIRE ALPHA PROTECTION,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE ELAC FAILED,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE ELAC SWITCH,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE FAC FAILED,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE FAC SWITCH,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE SEC FAILED,Bool,false,none,doc+watcher,Controles,false
+FLY BY WIRE SEC SWITCH,Bool,false,none,doc+watcher,Controles,false
+FOLDING WING HANDLE POSITION,Bool,false,none,doc+watcher,Controles,false
+FOLDING WING LEFT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+FOLDING WING RIGHT PERCENT,percent over 100,false,none,doc+watcher,Controles,true
+RUDDER DEFLECTION,radians,false,none,doc+watcher,Controles,true
+RUDDER DEFLECTION PCT,percent over 100,false,none,doc+watcher,Controles,false
+RUDDER PEDAL INDICATOR,position,false,none,doc+watcher,Controles,false
+RUDDER PEDAL POSITION,position 16k,false,none,doc+watcher,Controles,true
+RUDDER POSITION,position 16k,false,none,doc+watcher,Controles,true
+RUDDER TRIM,radians,false,none,doc+watcher,Controles,false
+RUDDER TRIM MAX,radians,false,none,doc+watcher,Controles,false
+RUDDER TRIM MIN,radians,false,none,doc+watcher,Controles,false
+RUDDER TRIM DISABLED,Bool,false,none,doc+watcher,Controles,false
+RUDDER TRIM PCT,percent over 100,false,none,doc+watcher,Controles,true
+RUDDER TRIM PCT EX1,percent over 100,false,none,doc+watcher,Controles,true
+SPOILERS ARMED,Bool,false,none,doc+watcher,Controles,false
+SPOILER AVAILABLE,Bool,false,none,doc+watcher,Controles,false
+SPOILERS HANDLE POSITION,percent over 100,false,none,doc+watcher,Controles,true
+SPOILERS LEFT POSITION,percent over 100,false,none,doc+watcher,Controles,false
+SPOILERS RIGHT POSITION,percent over 100,false,none,doc+watcher,Controles,false
+YOKE X INDICATOR,position,false,none,doc+watcher,Controles,false
+YOKE X POSITION,position,false,none,doc+watcher,Controles,true
+YOKE X POSITION WITH AP,position 16k,false,none,doc+watcher,Controles,false
+YOKE Y INDICATOR,position,false,none,doc+watcher,Controles,false
+YOKE Y POSITION,position 16k,false,none,doc+watcher,Controles,true
+YOKE Y POSITION WITH AP,position 16k,false,none,doc+watcher,Controles,false
+HOLDBACK BAR INSTALLED,Bool,false,none,doc+watcher,Controles,false
+LAUNCHBAR HELD EXTENDED,Bool,false,none,doc+watcher,Controles,false
+LAUNCHBAR POSITION,percent over 100,false,none,doc+watcher,Controles,false
+LAUNCHBAR SWITCH,Bool,false,none,doc+watcher,Controles,false
+NUMBER OF CATAPULTS,number,false,none,doc+watcher,Controles,false
+CONCORDE NOSE ANGLE,radians,false,none,doc+watcher,Controles,false
+CONCORDE VISOR NOSE HANDLE,Enum,false,none,doc+watcher,Controles,false
+CONCORDE VISOR POSITION PERCENT,percent over 100,false,none,doc+watcher,Controles,false
+BUS LOOKUP INDEX,number,false,generic,doc+watcher,Elétrico,true
+BUS BREAKER PULLED,Bool,false,multi,doc+watcher,Elétrico,true
+BUS CONNECTION ON,Bool,false,multi,doc+watcher,Elétrico,true
+ELECTRICAL BUS AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL BUS VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL TOTAL LOAD AMPS,amperes,false,none,doc+watcher,Elétrico,false
+NEW ELECTRICAL SYSTEM,Bool,false,none,doc+watcher,Elétrico,false
+ELECTRICAL AVIONICS BUS AMPS,amperes,false,none,doc+watcher,Elétrico,true
+ELECTRICAL AVIONICS BUS VOLTAGE,volts,false,none,doc+watcher,Elétrico,true
+ELECTRICAL BATTERY BUS AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL BATTERY BUS VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL GENALT BUS AMPS,amperes,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL GENALT BUS VOLTAGE,volts,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL MAIN BUS AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL MAIN BUS VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL OLD CHARGING AMPS,amps,false,generic,doc+watcher,Elétrico,false
+BATTERY BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+BATTERY CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL BATTERY ESTIMATED CAPACITY PCT,percent,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL BATTERY LEVEL,percent,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL BATTERY LOAD,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL BATTERY VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL HOT BATTERY BUS AMPS,amperes,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL HOT BATTERY BUS VOLTAGE,volts,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL MASTER BATTERY,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER ADF,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER ALTFLD,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER AUTOPILOT,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER AVNBUS1,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER AVNBUS2,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER AVNFAN,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER FLAP,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER GPS,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER INST,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER INSTLTS,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER LTS PWR,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER NAVCOM1,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER NAVCOM2,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER NAVCOM3,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER NAVCOM4,Bool,false,none,doc+watcher,Elétrico,true
+BREAKER TURNCOORD,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER WARN,Bool,false,generic,doc+watcher,Elétrico,true
+BREAKER XPNDR,Bool,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL CIRCUIT EXISTS,Bool,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL CIRCUIT AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL CIRCUIT VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+CIRCUIT AUTOPILOT ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT AUTO BRAKES ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT AUTO FEATHER ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT AVIONICS ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+CIRCUIT CABIN SIGNAL GO,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT CABIN SIGNAL STANDBY,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT CABIN SIGNAL STOP,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT COM ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+CIRCUIT ELECTRIC ENGINE ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT FLAP MOTOR ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT GEAR MOTOR ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT GEAR WARNING ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT GENERAL PANEL ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT HOIST ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT HYDRAULIC PUMP ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT HYDRAULIC VALVE ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT MARKER BEACON ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT NAV ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT NAVCOM1 ON,Bool,false,none,doc+watcher,Elétrico,false
+CIRCUIT NAVCOM2 ON,Bool,false,none,doc+watcher,Elétrico,false
+CIRCUIT NAVCOM3 ON,Bool,false,none,doc+watcher,Elétrico,false
+CIRCUIT NAVCOM4 ON,Bool,false,none,doc+watcher,Elétrico,false
+CIRCUIT ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT PITOT HEAT ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT POWER SETTING,percent over 100,false,generic,doc+watcher,Elétrico,false
+CIRCUIT PROP SYNC ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT ROTOR BRAKE ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT SLING ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT STALL WARNING ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT STANDBY VACUUM ON,Bool,false,generic,doc+watcher,Elétrico,false
+CIRCUIT SWITCH ON,Bool,false,generic,doc+watcher,Elétrico,true
+CIRCUIT TRANSPONDER ON,Bool,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL GENERATOR ACTIVE,Bool,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL GENERATOR AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL GENERATOR VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL GENERATOR SWITCH,Bool,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL GENALT LOAD,percent,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL RELAY AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL RELAY BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL RELAY CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+ELECTRICAL RELAY LINE OPEN,Bool,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL RELAY POWERED,Bool,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL RELAY VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL EXTERNAL POWER AMPS,amperes,false,generic,doc+watcher,Elétrico,false
+ELECTRICAL EXTERNAL POWER VOLTAGE,volts,false,generic,doc+watcher,Elétrico,false
+EXTERNAL POWER AVAILABLE,Bool,false,generic,doc+watcher,Elétrico,false
+EXTERNAL POWER BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+EXTERNAL POWER CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+EXTERNAL POWER ON,Bool,false,generic,doc+watcher,Elétrico,false
+LINE CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+LINE BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+ALTERNATOR BREAKER PULLED,Bool,false,generic,doc+watcher,Elétrico,true
+ALTERNATOR CONNECTION ON,Bool,false,generic,doc+watcher,Elétrico,true
+GENERAL ENG MASTER ALTERNATOR,Bool,false,generic,doc+watcher,Elétrico,false
+APU BLEED PRESSURE RECEIVED BY ENGINE,psi,false,engine,doc+watcher,Elétrico,false
+APU GENERATOR ACTIVE,Bool,false,generic,doc+watcher,Elétrico,true
+APU GENERATOR SWITCH,Bool,false,generic,doc+watcher,Elétrico,false
+APU ON FIRE DETECTED,Bool,false,none,doc+watcher,Elétrico,false
+APU PCT RPM,percent over 100,false,none,doc+watcher,Elétrico,false
+APU PCT STARTER,percent over 100,false,none,doc+watcher,Elétrico,false
+APU SWITCH,Bool,false,none,doc+watcher,Elétrico,true
+APU VOLTS,volts,false,generic,doc+watcher,Elétrico,false
+BLEED AIR APU,Bool,false,none,doc+watcher,Elétrico,false
+BLEED AIR ENGINE,Bool,false,engine,doc+watcher,Motor,false
+BLEED AIR SOURCE CONTROL,Enum,false,engine,doc+watcher,Motor,false
+COWL FLAPS,number,false,none,doc+watcher,Motor,false
+ENGINE CONTROL SELECT,mask,false,none,doc+watcher,Motor,true
+ENGINE MIXURE AVAILABLE,Bool,false,none,doc+watcher,Motor,false
+ENGINE PRIMER,number,false,engine,doc+watcher,Motor,true
+ENGINE TYPE,Enum,false,none,doc+watcher,Motor,false
+ENG ANTI ICE,Bool,false,engine,doc+watcher,Motor,false
+ENG COMBUSTION,Bool,false,engine,doc+watcher,Motor,false
+ENG CYLINDER HEAD TEMPERATURE,rankine,false,engine,doc+watcher,Motor,false
+ENG EXHAUST GAS TEMPERATURE,rankine,false,engine,doc+watcher,Motor,false
+ENG EXHAUST GAS TEMPERATURE GES,percent over 100,false,engine,doc+watcher,Motor,false
+ENG FAILED,number,false,engine,doc+watcher,Motor,false
+ENG FUEL FLOW BUG POSITION,pounds per hour,false,engine,doc+watcher,Motor,false
+ENG FUEL FLOW GPH,gallons per hour,false,engine,doc+watcher,Motor,false
+ENG FUEL FLOW PPH,pounds per hour,false,engine,doc+watcher,Motor,false
+ENG FUEL FLOW PPH SSL,percent scaler 16k,false,engine,doc+watcher,Motor,false
+ENG HYDRAULIC PRESSURE,pound-force per square foot,false,engine,doc+watcher,Motor,false
+ENG HYDRAULIC QUANTITY,percent over 100,false,engine,doc+watcher,Motor,false
+ENG MANIFOLD PRESSURE,inHg,false,engine,doc+watcher,Motor,false
+ENG MAX RPM,rpm,false,engine,doc+watcher,Motor,false
+ENG N1 RPM,rpm,false,engine,doc+watcher,Motor,false
+ENG N2 RPM,rpm,false,engine,doc+watcher,Motor,false
+ENG OIL PRESSURE,pound-force per square foot,false,engine,doc+watcher,Motor,false
+ENG OIL QUANTITY,percent over 100,false,engine,doc+watcher,Motor,false
+ENG OIL TEMPERATURE,rankine,false,engine,doc+watcher,Motor,false
+ENG ON FIRE,Bool,false,engine,doc+watcher,Motor,true
+ENG PRESSURE RATIO,ratio,false,engine,doc+watcher,Motor,false
+ENG PRESSURE RATIO GES,percent scaler 16k,false,engine,doc+watcher,Motor,false
+ENG RPM ANIMATION PERCENT,percent,false,engine,doc+watcher,Motor,false
+ENG RPM SCALER,scaler,false,engine,doc+watcher,Motor,false
+ENG TILT PITCH,radians,false,engine,doc+watcher,Motor,true
+ENG TILT PITCH PERCENT,percent over 100,false,engine,doc+watcher,Motor,true
+ENG TILT PITCH PERCENT EX1,percent over 100,false,engine,doc+watcher,Motor,true
+ENG TILT YAW,radians,false,engine,doc+watcher,Motor,true
+ENG TILT YAW PERCENT,percent over 100,false,engine,doc+watcher,Motor,true
+ENG TILT YAW PERCENT EX1,percent over 100,false,engine,doc+watcher,Motor,true
+ENG TORQUE,foot pounds,false,engine,doc+watcher,Motor,false
+ENG VIBRATION,number,false,engine,doc+watcher,Motor,false
+ESTIMATED FUEL FLOW,pounds per hour,false,engine,doc+watcher,Motor,false
+FULL THROTTLE THRUST TO WEIGHT RATIO,number,false,none,doc+watcher,Motor,false
+GENERAL ENG ANTI ICE POSITION,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG COMBUSTION,Bool,false,engine,doc+watcher,Motor,true
+GENERAL ENG COMBUSTION EX1,Bool,false,engine,doc+watcher,Motor,true
+GENERAL ENG COMBUSTION SOUND PERCENT,percent,false,engine,doc+watcher,Motor,false
+GENERAL ENG DAMAGE PERCENT,percent,false,engine,doc+watcher,Motor,false
+GENERAL ENG ELAPSED TIME,seconds,false,engine,doc+watcher,Motor,false
+GENERAL ENG EXHAUST GAS TEMPERATURE,rankine,false,engine,doc+watcher,Motor,true
+GENERAL ENG FAILED,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG FIRE DETECTED,number,false,engine,doc+watcher,Motor,false
+GENERAL ENG FUEL PRESSURE,psf,false,engine,doc+watcher,Motor,true
+GENERAL ENG FUEL PUMP ON,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG FUEL PUMP SWITCH,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG FUEL PUMP SWITCH EX1,Enum,false,engine,doc+watcher,Motor,false
+GENERAL ENG FUEL USED SINCE START,pounds,false,engine,doc+watcher,Motor,false
+GENERAL ENG FUEL VALVE,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG GENERATOR ACTIVE,Bool,false,engine,doc+watcher,Motor,true
+GENERAL ENG GENERATOR SWITCH,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG HOBBS ELAPSED TIME,seconds,false,engine,doc+watcher,Motor,false
+GENERAL ENG MAX REACHED RPM,rpm,false,engine,doc+watcher,Motor,false
+GENERAL ENG MIXTURE LEVER POSITION,percent,false,engine,doc+watcher,Motor,true
+GENERAL ENG OIL LEAKED PERCENT,percent,false,engine,doc+watcher,Motor,false
+GENERAL ENG OIL PRESSURE,psf,false,engine,doc+watcher,Motor,true
+GENERAL ENG OIL TEMPERATURE,rankine,false,engine,doc+watcher,Motor,true
+GENERAL ENG PCT MAX RPM,percent,false,engine,doc+watcher,Motor,true
+GENERAL ENG PROPELLER LEVER POSITION,percent,false,engine,doc+watcher,Motor,true
+GENERAL ENG REVERSE THRUST ENGAGED,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG RPM,rpm,false,engine,doc+watcher,Motor,true
+GENERAL ENG STARTER,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG STARTER ACTIVE,Bool,false,engine,doc+watcher,Motor,false
+GENERAL ENG THROTTLE LEVER POSITION,percent,false,engine,doc+watcher,Motor,true
+GENERAL ENG THROTTLE MANAGED MODE,number,false,engine,doc+watcher,Motor,false
+MASTER IGNITION SWITCH,Bool,false,none,doc+watcher,Motor,false
+MAX EGT,rankine,false,none,doc+watcher,Motor,false
+MAX OIL TEMPERATURE,rankine,false,none,doc+watcher,Motor,false
+MAX RATED ENGINE RPM,rpm,false,engine,doc+watcher,Motor,false
+NUMBER OF ENGINES,number,false,none,doc+watcher,Motor,false
+OIL AMOUNT,fs7 oil quantity,false,engine,doc+watcher,Motor,true
+PANEL AUTO FEATHER SWITCH,Bool,false,engine,doc+watcher,Motor,false
+PROP AUTO CRUISE ACTIVE,Bool,false,engine,doc+watcher,Motor,false
+PROP AUTO FEATHER ARMED,Bool,false,engine,doc+watcher,Motor,false
+PROP BETA,radians,false,engine,doc+watcher,Motor,false
+PROP BETA FORCED ACTIVE,Bool,false,engine,doc+watcher,Motor,true
+PROP BETA FORCED POSITION,radians,false,engine,doc+watcher,Motor,true
+PROP BETA MAX,radians,false,none,doc+watcher,Motor,false
+PROP BETA MIN,radians,false,none,doc+watcher,Motor,false
+PROP BETA MIN REVERSE,radians,false,none,doc+watcher,Motor,false
+PROP DEICE SWITCH,Bool,false,engine,doc+watcher,Motor,false
+PROP FEATHERED,Bool,false,engine,doc+watcher,Motor,false
+PROP FEATHERING INHIBIT,Bool,false,engine,doc+watcher,Motor,false
+PROP FEATHER SWITCH,Bool,false,engine,doc+watcher,Motor,false
+PROP LOCK,Bool,false,engine,doc+watcher,Motor,false
+PROP MAX RPM PERCENT,percent,false,engine,doc+watcher,Motor,true
+PROP ROTATION ANGLE,radians,false,none,doc+watcher,Motor,false
+PROP RPM,rpm,false,engine,doc+watcher,Motor,true
+PROP SYNC ACTIVE,Bool,false,engine,doc+watcher,Motor,false
+PROP SYNC DELTA LEVER,position,false,engine,doc+watcher,Motor,false
+PROP THRUST,pounds,false,engine,doc+watcher,Motor,false
+PROPELLER ADVANCED SELECTION,Enum,false,none,doc+watcher,Motor,false
+SHUTOFF VALVE PULLED,Bool,false,none,doc+watcher,Motor,false
+STRUCT ENGINE POSITION,"`SIMCONNECT_DATA_XYZ` structure, feet",false,engine,doc+watcher,Motor,false
+THROTTLE INPUT BLOCKED BY LOWER BOUNDS,Bool,false,engine,doc+watcher,Motor,true
+THROTTLE INPUT BLOCKED BY UPPER BOUNDS,Bool,false,engine,doc+watcher,Motor,true
+THROTTLE LOWER LIMIT,percent,false,none,doc+watcher,Motor,false
+TURB ENG AFTERBURNER,Bool,false,engine,doc+watcher,Motor,false
+TURB ENG AFTERBURNER PCT ACTIVE,percent over 100,false,engine,doc+watcher,Motor,false
+TURB ENG AFTERBURNER STAGE ACTIVE,number,false,engine,doc+watcher,Motor,false
+TURB ENG ANIMATION RPM,rpm,false,engine,doc+watcher,Motor,false
+TURB ENG BLEED AIR,psi,false,engine,doc+watcher,Motor,false
+TURB ENG COMMANDED N1,percent,false,engine,doc+watcher,Motor,false
+TURB ENG COMMANDED N1 OVERRIDE ACTIVE,Bool,false,engine,doc+watcher,Motor,true
+TURB ENG CONDITION LEVER POSITION,Enum,false,engine,doc+watcher,Motor,true
+TURB ENG CORRECTED FF,pounds per hour,false,engine,doc+watcher,Motor,true
+TURB ENG CORRECTED N1,percent,false,engine,doc+watcher,Motor,true
+TURB ENG CORRECTED N2,percent,false,engine,doc+watcher,Motor,true
+TURB ENG FREE TURBINE TORQUE,foot pound,false,engine,doc+watcher,Motor,true
+TURB ENG FUEL AVAILABLE,Bool,false,engine,doc+watcher,Motor,false
+TURB ENG FUEL EFFICIENCY LOSS,percent,false,engine,doc+watcher,Motor,true
+TURB ENG FUEL FLOW PPH,pounds per hour,false,engine,doc+watcher,Motor,false
+TURB ENG HIGH IDLE,percent,false,engine,doc+watcher,Motor,false
+TURB ENG IGNITION SWITCH,Bool,false,engine,doc+watcher,Motor,false
+TURB ENG IGNITION SWITCH EX1,Enum,false,engine,doc+watcher,Motor,false
+TURB ENG INLET TEMPERATURE,rankine,false,engine,doc+watcher,Motor,false
+TURB ENG IS IGNITING,Bool,false,engine,doc+watcher,Motor,false
+TURB ENG ITT,rankine,false,engine,doc+watcher,Motor,true
+TURB ENG ITT COOLING EFFICIENCY LOSS,percent,false,engine,doc+watcher,Motor,true
+TURB ENG JET THRUST,pounds,false,engine,doc+watcher,Motor,false
+TURB ENG LOW IDLE,percent,false,engine,doc+watcher,Motor,false
+TURB ENG MASTER STARTER SWITCH,Bool,false,engine,doc+watcher,Motor,false
+TURB ENG MAX TORQUE PERCENT,percent,false,engine,doc+watcher,Motor,true
+TURB ENG N1,percent,false,engine,doc+watcher,Motor,true
+TURB ENG N1 LOSS,percent,false,engine,doc+watcher,Motor,true
+TURB ENG N2,percent,false,engine,doc+watcher,Motor,true
+TURB ENG NUM TANKS USED,number,false,engine,doc+watcher,Motor,false
+TURB ENG PRESSURE RATIO,ratio,false,engine,doc+watcher,Motor,true
+TURB ENG PRIMARY NOZZLE PERCENT,percent over 100,false,engine,doc+watcher,Motor,false
+TURB ENG REVERSE NOZZLE PERCENT,percent,false,engine,doc+watcher,Motor,false
+TURB ENG TANKS USED,mask,false,engine,doc+watcher,Motor,false
+TURB ENG TANK SELECTOR,Enum,false,engine,doc+watcher,Motor,false
+TURB ENG THROTTLE COMMANDED N1,percent,false,engine,doc+watcher,Motor,false
+TURB ENG THRUST EFFICIENCY LOSS,percent,false,engine,doc+watcher,Motor,true
+TURB ENG VIBRATION,number,false,engine,doc+watcher,Motor,false
+TURB MAX ITT,rankine,false,none,doc+watcher,Motor,false
+OIL COOLING FLAPS POSITION,percent over 100,false,engine,doc+watcher,Motor,false
+RADIATOR COOLING FLAPS POSITION,percent over 100,false,engine,doc+watcher,Motor,false
+RECIP CARBURETOR TEMPERATURE,celsius,false,engine,doc+watcher,Motor,false
+RECIP ENG ALTERNATE AIR POSITION,position,false,engine,doc+watcher,Motor,true
+RECIP ENG ANTIDETONATION TANK MAX QUANTITY,gallons,false,engine,doc+watcher,Motor,false
+RECIP ENG ANTIDETONATION TANK QUANTITY,gallons,false,engine,doc+watcher,Motor,true
+RECIP ENG ANTIDETONATION TANK VALVE,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG ANTIDETONATION FLOW RATE,gallons per hour,false,engine,doc+watcher,Motor,false
+RECIP ENG BRAKE POWER,ft lb per second,false,engine,doc+watcher,Motor,true
+RECIP ENG BRAKE POWER PCT,percent over 100,false,engine,doc+watcher,Motor,false
+RECIP ENG COOLANT RESERVOIR PERCENT,percent,false,engine,doc+watcher,Motor,true
+RECIP ENG COWL FLAP POSITION,percent,false,engine,doc+watcher,Motor,true
+RECIP ENG CYLINDER HEAD TEMPERATURE,celsius,false,engine,doc+watcher,Motor,true
+RECIP ENG CYLINDER HEALTH,percent over 100,false,engine,doc+watcher,Motor,false
+RECIP ENG DETONATING,Bool,false,engine,doc+watcher,Motor,false
+RECIP ENG EMERGENCY BOOST ACTIVE,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG EMERGENCY BOOST ELAPSED TIME,seconds,false,engine,doc+watcher,Motor,true
+RECIP ENG ENGINE MASTER SWITCH,Bool,false,engine,doc+watcher,Motor,false
+RECIP ENG FUEL AVAILABLE,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG FUEL FLOW,pounds per hour,false,engine,doc+watcher,Motor,true
+RECIP ENG FUEL NUMBER TANKS USED,number,false,engine,doc+watcher,Motor,false
+RECIP ENG FUEL TANKS USED,mask,false,engine,doc+watcher,Motor,true
+RECIP ENG FUEL TANK SELECTOR,Enum,false,engine,doc+watcher,Motor,false
+RECIP ENG GLOW PLUG ACTIVE,Bool,false,engine,doc+watcher,Motor,false
+RECIP ENG LEFT MAGNETO,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG MANIFOLD PRESSURE,psi,false,engine,doc+watcher,Motor,true
+RECIP ENG NITROUS TANK MAX QUANTITY,gallons,false,engine,doc+watcher,Motor,false
+RECIP ENG NITROUS TANK QUANTITY,gallons,false,engine,doc+watcher,Motor,true
+RECIP ENG NITROUS TANK VALVE,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG NUM CYLINDERS,number,false,engine,doc+watcher,Motor,false
+RECIP ENG NUM CYLINDERS FAILED,number,false,engine,doc+watcher,Motor,false
+RECIP ENG PRIMER,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG RADIATOR TEMPERATURE,celsius,false,engine,doc+watcher,Motor,true
+RECIP ENG RIGHT MAGNETO,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG SPRAYBAR FLOW RATE,gallons per hour,false,engine,doc+watcher,Motor,false
+RECIP ENG SPRAYBAR TANK MAX QUANTITY,gallons,false,engine,doc+watcher,Motor,true
+RECIP ENG SPRAYBAR TANK QUANTITY,gallons,false,engine,doc+watcher,Motor,true
+RECIP ENG SPRAYBAR TANK VALVE,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG STARTER TORQUE,foot pound,false,engine,doc+watcher,Motor,true
+RECIP ENG SUPERCHARGER ACTIVE GEAR,number,false,engine,doc+watcher,Motor,false
+RECIP ENG TURBINE INLET TEMPERATURE,celsius,false,engine,doc+watcher,Motor,true
+RECIP ENG TURBOCHARGER FAILED,Bool,false,engine,doc+watcher,Motor,true
+RECIP ENG WASTEGATE POSITION,percent,false,engine,doc+watcher,Motor,true
+RECIP MAX CHT,rankine,false,none,doc+watcher,Motor,false
+RECIP MIXTURE RATIO,ratio,false,engine,doc+watcher,Motor,false
+BETA DOT,radians per second,false,none,doc+watcher,Modelo de voo,false
+DECISION ALTITUDE MSL,feet,false,none,doc+watcher,Modelo de voo,false
+DECISION HEIGHT,feet,false,none,doc+watcher,Modelo de voo,false
+DESIGN CRUISE ALT,feet,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPAWN ALTITUDE CRUISE,feet,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPAWN ALTITUDE DESCENT,feet,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPEED CLIMB,feet per second,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPEED MIN ROTATION,feet per second,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPEED VC,feet per second,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPEED VS0,feet per second,false,none,doc+watcher,Modelo de voo,false
+DESIGN SPEED VS1,feet per second,false,none,doc+watcher,Modelo de voo,false
+DESIGN TAKEOFF SPEED,knots,false,none,doc+watcher,Modelo de voo,false
+DYNAMIC PRESSURE,pound-force per square foot,false,none,doc+watcher,Modelo de voo,false
+ESTIMATED CRUISE SPEED,feet per second,false,none,doc+watcher,Modelo de voo,false
+G FORCE,GForce,false,none,doc+watcher,Modelo de voo,true
+G LIMITER SETTING,Enum,false,none,doc+watcher,Modelo de voo,false
+INCIDENCE ALPHA,radians,false,generic,doc+watcher,Modelo de voo,false
+INCIDENCE BETA,radians,false,none,doc+watcher,Modelo de voo,false
+IS TAIL DRAGGER,Bool,false,none,doc+watcher,Modelo de voo,false
+LINEAR CL ALPHA,per radian,false,none,doc+watcher,Modelo de voo,false
+MACH MAX OPERATE,mach,false,none,doc+watcher,Modelo de voo,false
+MAX G FORCE,GForce,false,none,doc+watcher,Modelo de voo,false
+MIN DRAG VELOCITY,feet per second,false,none,doc+watcher,Modelo de voo,false
+MIN G FORCE,GForce,false,none,doc+watcher,Modelo de voo,false
+REFERENCE SPEED MAX IAS,knots,false,none,doc+watcher,Modelo de voo,false
+REFERENCE SPEED MAX IAS GEAR DOWN,knots,false,none,doc+watcher,Modelo de voo,false
+SEMIBODY LOADFACTOR X,number,false,none,doc+watcher,Modelo de voo,false
+SEMIBODY LOADFACTOR Y,number,false,none,doc+watcher,Modelo de voo,false
+SEMIBODY LOADFACTOR YDOT,per second,false,none,doc+watcher,Modelo de voo,false
+SEMIBODY LOADFACTOR Z,number,false,none,doc+watcher,Modelo de voo,false
+SIGMA SQRT,number,false,none,doc+watcher,Modelo de voo,false
+SIMULATED RADIUS,feet,false,none,doc+watcher,Modelo de voo,false
+STALL ALPHA,radians,false,none,doc+watcher,Modelo de voo,false
+STATIC PITCH,radians,false,none,doc+watcher,Modelo de voo,false
+TYPICAL DESCENT RATE,feet per minute,false,none,doc+watcher,Modelo de voo,false
+WING AREA,square feet,false,none,doc+watcher,Modelo de voo,false
+WING FLEX PCT,percent over 100,false,none,doc+watcher,Modelo de voo,true
+WING SPAN,feet,false,none,doc+watcher,Modelo de voo,false
+YAW STRING ANGLE,radians,false,none,doc+watcher,Modelo de voo,false
+YAW STRING PCT EXTENDED,percent over 100,false,none,doc+watcher,Modelo de voo,false
+ZERO LIFT ALPHA,radians,false,none,doc+watcher,Modelo de voo,false
+CG AFT LIMIT,percent over 100,false,none,doc+watcher,Modelo de voo,false
+CG FEET,feet,false,none,doc+watcher,Modelo de voo,false
+CG FEET AFT LIMIT,feet,false,none,doc+watcher,Modelo de voo,false
+CG FEET LATERAL,feet,false,none,doc+watcher,Modelo de voo,false
+CG FEET LATERAL LEFT LIMIT,feet,false,none,doc+watcher,Modelo de voo,false
+CG FEET LATERAL RIGHT LIMIT,feet,false,none,doc+watcher,Modelo de voo,false
+CG FEET FWD LIMIT,feet,false,none,doc+watcher,Modelo de voo,false
+CG FWD LIMIT,percent over 100,false,none,doc+watcher,Modelo de voo,false
+CG MAX MACH,machs,false,none,doc+watcher,Modelo de voo,false
+CG MIN MACH,machs,false,none,doc+watcher,Modelo de voo,false
+CG PERCENT,percent over 100,false,none,doc+watcher,Modelo de voo,false
+CG PERCENT LATERAL,percent over 100,false,none,doc+watcher,Modelo de voo,false
+STATIC CG TO GROUND,feet,false,none,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT BANK,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT BANK EX1,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT HEADING,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT HEADING EX1,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY LEFT BEND,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY LEFT BEND EX1,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY LEFT DEPLOYMENT,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY LEFT DEPLOYMENT EX1,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY RIGHT BEND,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY RIGHT BEND EX1,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY RIGHT DEPLOYMENT,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY RIGHT DEPLOYMENT EX1,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY TOP HORIZONTAL,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY TOP HORIZONTAL EX1,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY TOP VERTICAL,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT JETWAY TOP VERTICAL EX1,percent,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT GOAL,percent over 100,false,generic,doc+watcher,Modelo de voo,true
+INTERACTIVE POINT GOAL EX1,percent over 100,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT OPEN,percent over 100,false,generic,doc+watcher,Modelo de voo,true
+INTERACTIVE POINT OPEN EX1,percent over 100,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT PITCH,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT PITCH EX1,degrees,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSX,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSX EX1,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSY,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSY EX1,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSZ,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT POSZ EX1,feet,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT TYPE,Enum,false,generic,doc+watcher,Modelo de voo,false
+INTERACTIVE POINT TYPE EX1,Enum,false,generic,doc+watcher,Modelo de voo,false
+IS ANY OPEN INTERACTIVE POINTS RISKING TO CAUSE CRASH,Boolean,false,none,doc+watcher,Modelo de voo,false
+EMPTY WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+EMPTY WEIGHT CROSS COUPLED MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+EMPTY WEIGHT PITCH MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+EMPTY WEIGHT ROLL MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+EMPTY WEIGHT YAW MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+MAX GROSS WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+MAX LANDING WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+MAX TAKEOFF WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+MAX ZERO FUEL WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+TOTAL WEIGHT,pounds,false,none,doc+watcher,Modelo de voo,false
+TOTAL WEIGHT CROSS COUPLED MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+TOTAL WEIGHT PITCH MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+TOTAL WEIGHT ROLL MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+TOTAL WEIGHT YAW MOI,slugs feet squared,false,none,doc+watcher,Modelo de voo,false
+FUEL CROSS FEED,Enum,false,engine,doc+watcher,Combustível,false
+FUEL DUMP ACTIVE,Bool,false,none,doc+watcher,Combustível,false
+FUEL DUMP SWITCH,Bool,false,none,doc+watcher,Combustível,false
+FUEL LEFT CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL LEFT QUANTITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL PUMP,number,false,none,doc+watcher,Combustível,false
+FUEL RIGHT CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL RIGHT QUANTITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL SELECTED QUANTITY,gallons,false,generic,doc+watcher,Combustível,false
+FUEL SELECTED QUANTITY PERCENT,percent over 100,false,generic,doc+watcher,Combustível,false
+FUEL SELECTED TRANSFER MODE,Enum,false,none,doc+watcher,Combustível,false
+FUEL TOTAL CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TOTAL QUANTITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TOTAL QUANTITY EX1,gallons,false,none,doc+watcher,Combustível,false
+FUEL TOTAL QUANTITY WEIGHT,pounds,false,none,doc+watcher,Combustível,false
+FUEL TOTAL QUANTITY WEIGHT EX1,pounds,false,none,doc+watcher,Combustível,false
+FUEL TRANSFER PUMP ON,Bool,false,generic,doc+watcher,Combustível,false
+FUEL WEIGHT PER GALLON,pounds,false,none,doc+watcher,Combustível,false
+NEW FUEL SYSTEM,Bool,false,none,doc+watcher,Combustível,false
+NUM FUEL SELECTORS,number,false,none,doc+watcher,Combustível,false
+UNLIMITED FUEL,Bool,false,none,doc+watcher,Combustível,false
+UNUSABLE FUEL TOTAL QUANTITY,gallons,false,none,doc+watcher,Combustível,false
+FUELSYSTEM ENGINE PRESSURE,kPa,false,engine,doc+watcher,Combustível,false
+FUELSYSTEM JUNCTION SETTING,Enum,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM LINE FUEL FLOW,gallons per hour,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM LINE FUEL LEVEL,gallons,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM LINE FUEL PRESSURE,kPa,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM PUMP ACTIVE,Bool,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM PUMP SWITCH,Enum,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM TANK CAPACITY,gallons,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM TANK USABLE CAPACITY,gallons,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM TANK LEVEL,percent over 100,false,generic,doc+watcher,Combustível,true
+FUELSYSTEM TANK QUANTITY,gallons,false,generic,doc+watcher,Combustível,true
+FUELSYSTEM TANK TOTAL QUANTITY,gallons,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM TANK WEIGHT,pounds,false,generic,doc+watcher,Combustível,true
+FUELSYSTEM TRIGGER STATUS,Bool,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM VALVE OPEN,percent over 100,false,generic,doc+watcher,Combustível,false
+FUELSYSTEM VALVE SWITCH,Bool,false,generic,doc+watcher,Combustível,false
+FUEL TANK CENTER CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK CENTER2 CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK CENTER3 CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK CENTER LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK CENTER2 LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK CENTER3 LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK CENTER QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK CENTER2 QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK CENTER3 QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK EXTERNAL1 CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK EXTERNAL2 CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK EXTERNAL1 LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK EXTERNAL2 LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK EXTERNAL1 QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK EXTERNAL2 QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT AUX CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK LEFT AUX LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT AUX QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT MAIN CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK LEFT MAIN LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT MAIN QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT TIP CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK LEFT TIP LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK LEFT TIP QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT AUX CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK RIGHT AUX LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT AUX QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT MAIN CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK RIGHT MAIN LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT MAIN QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT TIP CAPACITY,gallons,false,none,doc+watcher,Combustível,false
+FUEL TANK RIGHT TIP LEVEL,percent over 100,false,none,doc+watcher,Combustível,true
+FUEL TANK RIGHT TIP QUANTITY,gallons,false,none,doc+watcher,Combustível,true
+FUEL TANK SELECTOR,Enum,false,generic,doc+watcher,Combustível,false
+CONTRAILS CONDITIONS MET,Bool,false,none,doc+watcher,Aeronave diversos,false
+COVER GENERIC ON,Bool,false,cover,doc+watcher,Aeronave diversos,true
+COVER ON,Bool,false,cover,doc+watcher,Aeronave diversos,true
+IS SLEW ACTIVE,Bool,false,none,doc+watcher,Aeronave diversos,true
+IS SLEW ALLOWED,Bool,false,none,doc+watcher,Aeronave diversos,true
+IS USER SIM,Bool,false,none,doc+watcher,Aeronave diversos,false
+ON ANY RUNWAY,Bool,false,none,doc+watcher,Aeronave diversos,false
+PLANE IN PARKING STATE,Bool,false,none,doc+watcher,Aeronave diversos,false
+SURFACE CONDITION,Enum,false,none,doc+watcher,Aeronave diversos,false
+SURFACE INFO VALID,Bool,false,none,doc+watcher,Aeronave diversos,false
+SURFACE TYPE,Enum,false,none,doc+watcher,Aeronave diversos,false
+STRUCTURAL ICE PCT,percent over 100,false,none,doc+watcher,Aeronave diversos,false
+TITLE,,true,none,doc+watcher,Aeronave diversos,false
+LIVERY NAME,,true,none,doc+watcher,Aeronave diversos,false
+LIVERY FOLDER,,true,none,doc+watcher,Aeronave diversos,false
+WINDSHIELD RAIN EFFECT AVAILABLE,Bool,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION BODY X,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION BODY Y,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION BODY Z,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION WORLD X,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION WORLD Y,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+ACCELERATION WORLD Z,feet per second squared,false,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT AGL,feet,false,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT ALTITUDE ABOVE OBSTACLES,feet,false,none,doc+watcher,Aeronave diversos,false
+SURFACE RELATIVE GROUND SPEED,feet per second,false,none,doc+watcher,Aeronave diversos,false
+GROUND VELOCITY,knots,false,none,doc+watcher,Aeronave diversos,false
+PLANE ALTITUDE,feet,false,none,doc+watcher,Aeronave diversos,true
+PLANE ALT ABOVE GROUND,feet,false,none,doc+watcher,Aeronave diversos,true
+PLANE ALT ABOVE GROUND MINUS CG,feet,false,none,doc+watcher,Aeronave diversos,false
+PLANE BANK DEGREES,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE HEADING DEGREES GYRO,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE HEADING DEGREES MAGNETIC,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE HEADING DEGREES TRUE,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE LATITUDE,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE LONGITUDE,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE PITCH DEGREES,radians,false,none,doc+watcher,Aeronave diversos,true
+PLANE TOUCHDOWN BANK DEGREES,degrees,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN HEADING DEGREES MAGNETIC,degrees,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN HEADING DEGREES TRUE,degrees,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN LATITUDE,radians,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN LONGITUDE,radians,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN NORMAL VELOCITY,feet per second,false,none,doc+watcher,Aeronave diversos,false
+PLANE TOUCHDOWN PITCH DEGREES,degrees,false,none,doc+watcher,Aeronave diversos,false
+RELATIVE WIND VELOCITY BODY X,feet per second,false,none,doc+watcher,Aeronave diversos,false
+RELATIVE WIND VELOCITY BODY Y,feet per second,false,none,doc+watcher,Aeronave diversos,false
+RELATIVE WIND VELOCITY BODY Z,feet per second,false,none,doc+watcher,Aeronave diversos,false
+ROTATION ACCELERATION BODY X,radians per second squared,false,none,doc+watcher,Aeronave diversos,true
+ROTATION ACCELERATION BODY Y,radians per second squared,false,none,doc+watcher,Aeronave diversos,true
+ROTATION ACCELERATION BODY Z,radians per second squared,false,none,doc+watcher,Aeronave diversos,true
+ROTATION VELOCITY BODY X,feet per second,false,none,doc+watcher,Aeronave diversos,true
+ROTATION VELOCITY BODY Y,feet per second,false,none,doc+watcher,Aeronave diversos,true
+ROTATION VELOCITY BODY Z,feet per second,false,none,doc+watcher,Aeronave diversos,true
+SLOPE TO ATC RUNWAY,radians,false,none,doc+watcher,Aeronave diversos,false
+VELOCITY BODY X,feet per second,false,none,doc+watcher,Aeronave diversos,true
+VELOCITY BODY Y,feet per second,false,none,doc+watcher,Aeronave diversos,true
+VELOCITY BODY Z,feet per second,false,none,doc+watcher,Aeronave diversos,true
+VERTICAL SPEED,feet per second,false,none,doc+watcher,Aeronave diversos,true
+MASTER CAUTION ACKNOWLEDGED,Bool,false,none,doc+watcher,Aeronave diversos,true
+MASTER CAUTION ACTIVE,Bool,false,none,doc+watcher,Aeronave diversos,true
+MASTER WARNING ACKNOWLEDGED,Bool,false,none,doc+watcher,Aeronave diversos,true
+MASTER WARNING ACTIVE,Bool,false,none,doc+watcher,Aeronave diversos,true
+WARNING FUEL,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING FUEL LEFT,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING FUEL RIGHT,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING LOW HEIGHT,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING OIL PRESSURE,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING VACUUM,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING VACUUM LEFT,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING VACUUM RIGHT,Bool,false,none,doc+watcher,Aeronave diversos,false
+WARNING VOLTAGE,number,false,none,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR CHECK PROGRESSION,percent over 100,false,wear,doc+watcher,Aeronave diversos,true
+WEAR AND TEAR EXPOSED PARTS LEVEL,percent over 100,false,none,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL,percent over 100,false,none,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR IS FAILED,Bool,false,wear,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR IS WEAK,Bool,false,wear,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR LEVEL,percent over 100,false,wear,doc+watcher,Aeronave diversos,false
+WEAR AND TEAR OVERSTRESS DAMAGE RATE,percent over 100,false,wear,doc+watcher,Aeronave diversos,true
+WEAR AND TEAR OVERSTRESS FACTOR,percent over 100,false,wear,doc+watcher,Aeronave diversos,true
+WEAR AND TEAR WEAK VALUE,percent over 100,false,wear,doc+watcher,Aeronave diversos,false
+EYEPOINT POSITION,"`SIMCONNECT_DATA_XYZ` structure, feet",false,none,doc+watcher,Aeronave diversos,false
+STRUCT BODY ROTATION VELOCITY,"`SIMCONNECT_DATA_XYZ` structure, radians per second",false,none,doc+watcher,Aeronave diversos,false
+STRUCT BODY VELOCITY,"`SIMCONNECT_DATA_XYZ` structure, feet per second",false,none,doc+watcher,Aeronave diversos,false
+STRUCT EYEPOINT DYNAMIC ANGLE,"`SIMCONNECT_DATA_XYZ` structure, radians",false,none,doc+watcher,Aeronave diversos,false
+STRUCT EYEPOINT DYNAMIC OFFSET,"`SIMCONNECT_DATA_XYZ` structure, feet",false,none,doc+watcher,Aeronave diversos,false
+STRUCT LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,none,doc+watcher,Aeronave diversos,false
+STRUCT LATLONALTPBH,`SIMCONNECT_DATA_LATLONALT` structure,false,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT CATEGORY,,true,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT OBJECT CLASS,,true,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT WIND X,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT WIND Y,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRCRAFT WIND Z,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRSPEED BARBER POLE,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRSPEED INDICATED,knots,false,none,doc+watcher,Aeronave diversos,true
+AIRSPEED INDICATED THEORETICAL,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRSPEED MACH,mach,false,none,doc+watcher,Aeronave diversos,false
+AIRSPEED SELECT INDICATED OR TRUE,knots,false,none,doc+watcher,Aeronave diversos,false
+AIRSPEED TRUE,knots,false,none,doc+watcher,Aeronave diversos,true
+AIRSPEED TRUE RAW,knots,false,none,doc+watcher,Aeronave diversos,true
+BARBER POLE MACH,mach,false,none,doc+watcher,Aeronave diversos,false
+TOTAL VELOCITY,feet per second,false,none,doc+watcher,Aeronave diversos,false
+WINDSHIELD WIND VELOCITY,feet per second,false,none,doc+watcher,Aeronave diversos,false
+STANDARD ATM TEMPERATURE,rankine,false,none,doc+watcher,Aeronave diversos,false
+TOTAL AIR TEMPERATURE,celsius,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER CONTROL LEVERS X,position,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER CONTROL LEVERS Y,position,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER DIVE MODE ENABLED,Boolean,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER GLIDE MODE ENABLED,Boolean,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WINGS BRAKE ENABLED,Boolean,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WINGS BRAKE ACTIVE,Boolean,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WING HORIZONTAL TILT,percent over 100,false,generic,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WING PITCH,percent over 100,false,generic,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WING VERTICAL TILT,percent over 100,false,generic,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WINGS BLUR,percent over 100,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WINGS CLUTCH STATE,percent over 100,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WINGS FOLDING OPERATION ID,number,false,none,doc+watcher,Aeronave diversos,false
+ORNITHOPTER WORLD LIFT,pounds,false,none,doc+watcher,Aeronave diversos,false
+ADF ACTIVE FREQUENCY,Frequency ADF BCD32,false,generic,doc+watcher,Rádio e navegação,false
+ADF AVAILABLE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+ADF CARD,degrees,false,none,doc+watcher,Rádio e navegação,false
+ADF DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ADF EXT FREQUENCY,Frequency BCD16,false,none,doc+watcher,Rádio e navegação,false
+ADF FREQUENCY,Frequency BCD16,false,none,doc+watcher,Rádio e navegação,false
+ADF IDENT,,true,none,doc+watcher,Rádio e navegação,false
+ADF LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,generic,doc+watcher,Rádio e navegação,false
+ADF NAME,,true,generic,doc+watcher,Rádio e navegação,false
+ADF RADIAL,degrees,false,generic,doc+watcher,Rádio e navegação,false
+ADF RADIAL MAG,degrees,false,generic,doc+watcher,Rádio e navegação,false
+ADF SIGNAL,number,false,generic,doc+watcher,Rádio e navegação,false
+ADF SOUND,Bool,false,generic,doc+watcher,Rádio e navegação,false
+ADF STANDBY AVAILABLE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+ADF STANDBY FREQUENCY,Hz,false,generic,doc+watcher,Rádio e navegação,false
+ADF VOLUME,percent over 100,false,none,doc+watcher,Rádio e navegação,false
+ATC AIRLINE,,true,none,doc+watcher,Rádio e navegação,true
+ATC AIRPORT IS TOWERED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC ARRIVAL AIRPORT HAS ATIS,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC ARRIVAL AIRPORT IS TOWERED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC ASSIGNED ALTITUDE,feet,false,none,doc+watcher,Rádio e navegação,false
+ATC CLEARED IFR,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC CLEARED LANDING,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC CLEARED OVERFLIGHT CTR,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC CLEARED TAKEOFF,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC CLEARED TAXI,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC CURRENT WAYPOINT ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC DEPARTURE AIRPORT IS TOWERED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC DESIGNATED GATE ARRIVAL,,true,none,doc+watcher,Rádio e navegação,false
+ATC DESIGNATED GATE DEPARTURE,,true,none,doc+watcher,Rádio e navegação,false
+ATC DESIGNATED RUNWAY LANDING,,true,none,doc+watcher,Rádio e navegação,false
+ATC DESIGNATED RUNWAY TAKEOFF,,true,none,doc+watcher,Rádio e navegação,false
+ATC FIRST VFR ARRIVAL PATTERN WAYPOINT NAME,,true,none,doc+watcher,Rádio e navegação,false
+ATC FLIGHTPLAN DIFF ALT,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC FLIGHTPLAN DIFF DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC FLIGHTPLAN DIFF HEADING,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC FP ARRIVAL TRAFFIC PATTERN IS LEFTHANDED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC FP DEPARTURE TRAFFIC PATTERN IS LEFTHANDED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC FLIGHT NUMBER,,true,none,doc+watcher,Rádio e navegação,true
+ATC FUTURE AGENT DISTANCE,number,false,none,doc+watcher,Rádio e navegação,false
+ATC FUTURE AGENT FREQUENCY,number,false,none,doc+watcher,Rádio e navegação,false
+ATC FUTURE AGENT NAME,,true,none,doc+watcher,Rádio e navegação,false
+ATC FUTURE AGENT TYPE,number,false,none,doc+watcher,Rádio e navegação,false
+ATC HEAVY,Bool,false,none,doc+watcher,Rádio e navegação,true
+ATC ID,,true,none,doc+watcher,Rádio e navegação,true
+ATC IFR FP TO REQUEST,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC MISSION FP IFR,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC MODEL,,true,none,doc+watcher,Rádio e navegação,false
+ATC NAME,,true,none,doc+watcher,Rádio e navegação,true
+ATC NEXT WAYPOINT ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC NEXT WAYPOINT NAME,,true,none,doc+watcher,Rádio e navegação,false
+ATC ON PARKING SPOT,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC OVERFLYING AIRPORT UNANNOUNCED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC PREVIOUS WAYPOINT ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY AIRPORT NAME,,true,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY END DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY HEADING DEGREES TRUE,degrees,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY LENGTH,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY RELATIVE POSITION X,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY RELATIVE POSITION Y,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY RELATIVE POSITION Z,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY SELECTED,Bool,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY START DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY TDPOINT RELATIVE POSITION X,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY TDPOINT RELATIVE POSITION Y,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY TDPOINT RELATIVE POSITION Z,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC RUNWAY WIDTH,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC SUGGESTED MIN RWY LANDING,feet,false,none,doc+watcher,Rádio e navegação,false
+ATC SUGGESTED MIN RWY TAKEOFF,feet,false,none,doc+watcher,Rádio e navegação,false
+ATC TAXIPATH DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+ATC TYPE,,true,none,doc+watcher,Rádio e navegação,false
+ATC WAYPOINTS HIGHEST ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+COM1 STORED FREQUENCY,Frequency BCD16,false,none,doc+watcher,Rádio e navegação,false
+COM2 STORED FREQUENCY,Frequency BCD16,false,none,doc+watcher,Rádio e navegação,false
+COM3 STORED FREQUENCY,Hertz,false,none,doc+watcher,Rádio e navegação,false
+COM ACTIVE BEARING,degrees,false,generic,doc+watcher,Rádio e navegação,false
+COM ACTIVE DISTANCE,meters,false,generic,doc+watcher,Rádio e navegação,false
+COM ACTIVE FREQUENCY,Frequency BCD16,false,generic,doc+watcher,Rádio e navegação,false
+COM ACTIVE FREQ IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+COM ACTIVE FREQ TYPE,,true,generic,doc+watcher,Rádio e navegação,false
+COM ACTIVE LATLONALT,structure,false,generic,doc+watcher,Rádio e navegação,false
+COM AVAILABLE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+COM LATLONALT,number,false,generic,doc+watcher,Rádio e navegação,false
+COM RECEIVE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+COM RECEIVE ALL,Bool,false,none,doc+watcher,Rádio e navegação,false
+COM RECEIVE EX1,Bool,false,generic,doc+watcher,Rádio e navegação,false
+COM SPACING MODE,Enum,false,generic,doc+watcher,Rádio e navegação,false
+COM STANDBY FREQUENCY,Frequency BCD16,false,generic,doc+watcher,Rádio e navegação,false
+COM STANDBY FREQ IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+COM STANDBY FREQ TYPE,,true,generic,doc+watcher,Rádio e navegação,false
+COM STATUS,Enum,false,generic,doc+watcher,Rádio e navegação,false
+COM TEST,Bool,false,generic,doc+watcher,Rádio e navegação,false
+COM TRANSMIT,Bool,false,generic,doc+watcher,Rádio e navegação,false
+COM VOLUME,percent over 100,false,generic,doc+watcher,Rádio e navegação,false
+FLARM AVAILABLE,Boolean,false,none,doc+watcher,Rádio e navegação,true
+FLARM THREAT BEARING,degrees,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT DATA,structure,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT HEADING,degrees,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT RELATIVE ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT TIME TO COLLISION,seconds,false,none,doc+watcher,Rádio e navegação,false
+FLARM THREAT VERTICAL BEARING,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH AIRPORT ID,,true,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH APPROACH ID,,true,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH APPROACH INDEX,number,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH APPROACH TYPE,Enum,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH IS FINAL,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH IS MISSED,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH IS WP RUNWAY,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH MODE,Enum,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH SEGMENT TYPE,Enum,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH TIMEZONE DEVIATION,seconds,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH TRANSITION ID,,true,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH TRANSITION INDEX,number,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH WP COUNT,number,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH WP INDEX,number,false,none,doc+watcher,Rádio e navegação,false
+GPS APPROACH WP TYPE,Enum,false,none,doc+watcher,Rádio e navegação,false
+GPS CDI NEEDLE,number,false,none,doc+watcher,Rádio e navegação,false
+GPS CDI SCALING,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS COURSE TO STEER,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS DRIVES NAV1,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS ETA,seconds,false,none,doc+watcher,Rádio e navegação,false
+GPS ETE,seconds,false,none,doc+watcher,Rádio e navegação,false
+GPS FLIGHTPLAN TOTAL DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS FLIGHT PLAN WP COUNT,number,false,none,doc+watcher,Rádio e navegação,false
+GPS FLIGHT PLAN WP INDEX,number,false,none,doc+watcher,Rádio e navegação,false
+GPS GROUND MAGNETIC TRACK,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS GROUND SPEED,meters per second,false,none,doc+watcher,Rádio e navegação,false
+GPS GROUND TRUE HEADING,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS GROUND TRUE TRACK,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS GSI SCALING,meters,false,none,doc+watcher,Rádio e navegação,true
+GPS GSI NEEDLE,number,false,none,doc+watcher,Rádio e navegação,false
+GPS HAS GLIDEPATH,meters,false,none,doc+watcher,Rádio e navegação,true
+GPS HSI NEEDLE,number,false,none,doc,Rádio e navegação,false
+GPS IS ACTIVE FLIGHT PLAN,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS ACTIVE WAY POINT,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS ACTIVE WP LOCKED,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS APPROACH ACTIVE,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS APPROACH LOADED,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS ARRIVED,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS IS DIRECTTO FLIGHTPLAN,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS MAGVAR,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS OBS ACTIVE,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS OBS VALUE,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS OVERRIDDEN,Bool,false,none,doc+watcher,Rádio e navegação,true
+GPS POSITION ALT,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS POSITION LAT,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS POSITION LON,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS TARGET ALTITUDE,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS TARGET DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS VERTICAL ANGLE,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS VERTICAL ANGLE ERROR,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS VERTICAL ERROR,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS WP BEARING,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS WP CROSS TRK,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS WP DESIRED TRACK,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS WP DISTANCE,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS WP ETA,seconds,false,none,doc+watcher,Rádio e navegação,false
+GPS WP ETE,seconds,false,none,doc+watcher,Rádio e navegação,false
+GPS WP NEXT ALT,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS WP NEXT ID,,true,none,doc+watcher,Rádio e navegação,false
+GPS WP NEXT LAT,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS WP NEXT LON,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS WP PREV ALT,meters,false,none,doc+watcher,Rádio e navegação,false
+GPS WP PREV ID,,true,none,doc+watcher,Rádio e navegação,false
+GPS WP PREV LAT,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS WP PREV LON,degrees,false,none,doc+watcher,Rádio e navegação,false
+GPS WP PREV VALID,Bool,false,none,doc+watcher,Rádio e navegação,false
+GPS WP TRACK ANGLE ERROR,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS WP TRUE BEARING,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS WP TRUE REQ HDG,radians,false,none,doc+watcher,Rádio e navegação,false
+GPS WP VERTICAL SPEED,meters per second,false,none,doc+watcher,Rádio e navegação,false
+HSI BEARING,degrees,false,none,doc+watcher,Rádio e navegação,false
+HSI BEARING VALID,Bool,false,none,doc+watcher,Rádio e navegação,false
+HSI CDI NEEDLE,number,false,none,doc+watcher,Rádio e navegação,false
+HSI CDI NEEDLE VALID,Bool,false,none,doc+watcher,Rádio e navegação,false
+HSI DISTANCE,nautical miles,false,none,doc+watcher,Rádio e navegação,false
+HSI GSI NEEDLE,number,false,none,doc+watcher,Rádio e navegação,false
+HSI GSI NEEDLE VALID,Bool,false,none,doc+watcher,Rádio e navegação,false
+HSI HAS LOCALIZER,Bool,false,none,doc+watcher,Rádio e navegação,false
+HSI SPEED,knots,false,none,doc+watcher,Rádio e navegação,false
+HSI STATION IDENT,,true,none,doc+watcher,Rádio e navegação,false
+HSI TF FLAGS,Enum,false,none,doc+watcher,Rádio e navegação,false
+INNER MARKER,Bool,false,none,doc+watcher,Rádio e navegação,true
+INNER MARKER LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,none,doc+watcher,Rádio e navegação,false
+MARKER AVAILABLE,Bool,false,none,doc+watcher,Rádio e navegação,false
+MARKER BEACON SENSITIVITY HIGH,Bool,false,none,doc+watcher,Rádio e navegação,false
+MARKER BEACON STATE,Enum,false,none,doc+watcher,Rádio e navegação,true
+MARKER BEACON TEST MUTE,Bool,false,none,doc+watcher,Rádio e navegação,false
+MARKER SOUND,Bool,false,none,doc+watcher,Rádio e navegação,false
+MIDDLE MARKER,Bool,false,none,doc+watcher,Rádio e navegação,true
+MIDDLE MARKER LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,none,doc+watcher,Rádio e navegação,false
+OUTER MARKER,Bool,false,none,doc+watcher,Rádio e navegação,true
+OUTER MARKER LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,none,doc+watcher,Rádio e navegação,false
+NAV ACTIVE FREQUENCY,MHz,false,generic,doc+watcher,Rádio e navegação,false
+NAV AVAILABLE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV BACK COURSE FLAGS,flags,false,generic,doc+watcher,Rádio e navegação,false
+NAV CDI,number,false,generic,doc+watcher,Rádio e navegação,false
+NAV CLOSE DME,nautical miles,false,generic,doc+watcher,Rádio e navegação,false
+NAV CLOSE FREQUENCY,Hz,false,generic,doc+watcher,Rádio e navegação,false
+NAV CLOSE IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+NAV CLOSE LOCALIZER,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV CLOSE NAME,,true,generic,doc+watcher,Rádio e navegação,false
+NAV CODES,flags,false,generic,doc+watcher,Rádio e navegação,false
+NAV DME,nautical miles,false,generic,doc+watcher,Rádio e navegação,false
+NAV DMESPEED,knots,false,generic,doc+watcher,Rádio e navegação,false
+NAV DME LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,generic,doc+watcher,Rádio e navegação,false
+NAV FREQUENCY,Hz,false,generic,doc+watcher,Rádio e navegação,false
+NAV GLIDE SLOPE,number,false,generic,doc+watcher,Rádio e navegação,false
+NAV GLIDE SLOPE ERROR,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV GLIDE SLOPE LENGTH,meters,false,generic,doc+watcher,Rádio e navegação,false
+NAV GSI,number,false,generic,doc+watcher,Rádio e navegação,false
+NAV GS FLAG,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV GS LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,generic,doc+watcher,Rádio e navegação,false
+NAV GS LLAF64,structure,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS CLOSE DME,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS CLOSE LOCALIZER,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS DME,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS GLIDE SLOPE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS LOCALIZER,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS NAV,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV HAS TACAN,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+NAV LOCALIZER,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV LOC AIRPORT IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+NAV LOC RUNWAY DESIGNATOR,string,false,generic,doc+watcher,Rádio e navegação,false
+NAV LOC RUNWAY NUMBER,Enum,false,generic,doc+watcher,Rádio e navegação,false
+NAV MAGVAR,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV NAME,,true,generic,doc+watcher,Rádio e navegação,false
+NAV OBS,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV RADIAL,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV RADIAL ERROR,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV RAW GLIDE SLOPE,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV RELATIVE BEARING TO STATION,degrees,false,generic,doc+watcher,Rádio e navegação,false
+NAV SIGNAL,number,false,generic,doc+watcher,Rádio e navegação,false
+NAV SOUND,Bool,false,generic,doc+watcher,Rádio e navegação,false
+NAV STANDBY FREQUENCY,MHz,false,generic,doc+watcher,Rádio e navegação,false
+NAV TOFROM,Enum,false,generic,doc+watcher,Rádio e navegação,false
+NAV VOLUME,percent over 100,false,generic,doc+watcher,Rádio e navegação,false
+NAV VOR DISTANCE,meters,false,generic,doc+watcher,Rádio e navegação,false
+NAV VOR LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,generic,doc+watcher,Rádio e navegação,false
+NAV VOR LLAF64,structure,false,generic,doc+watcher,Rádio e navegação,false
+TACAN ACTIVE CHANNEL,number,false,generic,doc+watcher,Rádio e navegação,false
+TACAN ACTIVE MODE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+TACAN AVAILABLE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+TACAN DRIVES NAV1,Bool,false,none,doc+watcher,Rádio e navegação,false
+TACAN OBS,degrees,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STANDBY CHANNEL,number,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STANDBY MODE,Bool,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION CDI,number,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION DISTANCE,meters,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION IDENT,,true,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION LATLONALT,`SIMCONNECT_DATA_LATLONALT`structure,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION RADIAL,degrees angl16,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION RADIAL ERROR,degrees,false,generic,doc+watcher,Rádio e navegação,false
+TACAN STATION TOFROM,Enum,false,generic,doc+watcher,Rádio e navegação,false
+TACAN VOLUME,percent over 100,false,generic,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER BEARING,degrees,false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER DATA,structure,false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER DISTANCE,nautical miles,false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER NETWORK ID,number,false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER RELATIVE ALTITUDE,feet,false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER RELATIVE SPEED,"`SIMCONNECT_DATA_XYZ` structure, nmiles",false,none,doc+watcher,Rádio e navegação,false
+TCAS INTRUDER VERTICAL SPEED,feet per second,false,none,doc+watcher,Rádio e navegação,false
+TCAS MODE,number,false,none,doc+watcher,Rádio e navegação,false
+TCAS RECEIVED RESOLUTION ADVISORY,structure,false,generic,doc+watcher,Rádio e navegação,false
+TCAS SEND RESOLUTION ADVISORY,number,false,generic,doc+watcher,Rádio e navegação,true
+COPILOT TRANSMITTER TYPE,Enum,false,none,doc+watcher,Rádio e navegação,false
+COPILOT TRANSMITTING,Bool,false,none,doc+watcher,Rádio e navegação,false
+PILOT TRANSMITTER TYPE,Enum,false,none,doc+watcher,Rádio e navegação,false
+PILOT TRANSMITTING,Bool,false,none,doc+watcher,Rádio e navegação,false
+RADIOS AVAILABLE,number,false,none,doc+watcher,Rádio e navegação,false
+RADIO HEIGHT,feet,false,none,doc+watcher,Rádio e navegação,false
+TRANSPONDER AVAILABLE,Bool,false,none,doc+watcher,Rádio e navegação,false
+TRANSPONDER CODE,Bco16,false,generic,doc+watcher,Rádio e navegação,false
+TRANSPONDER IDENT,Bool,false,generic,doc+watcher,Rádio e navegação,true
+TRANSPONDER STATE,Enum,false,generic,doc+watcher,Rádio e navegação,true
+AIRSPEED TRUE CALIBRATE,degrees,false,none,doc+watcher,Sistemas,true
+ALTERNATE STATIC SOURCE OPEN,Bool,false,none,doc+watcher,Sistemas,false
+ANEMOMETER PCT RPM,percent over 100,false,none,doc+watcher,Sistemas,false
+ANGLE OF ATTACK INDICATOR,radians,false,none,doc+watcher,Sistemas,false
+ANNUNCIATOR SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+APPLY HEAT TO SYSTEMS,Bool,false,none,doc+watcher,Sistemas,true
+ATTITUDE BARS POSITION,percent over 100,false,none,doc+watcher,Sistemas,false
+ATTITUDE CAGE,Bool,false,none,doc+watcher,Sistemas,false
+ATTITUDE INDICATOR BANK DEGREES,radians,false,none,doc+watcher,Sistemas,false
+ATTITUDE INDICATOR PITCH DEGREES,radians,false,none,doc+watcher,Sistemas,false
+AUDIO PANEL AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+AUDIO PANEL VOLUME,percent,false,none,doc+watcher,Sistemas,false
+AUTOTHROTTLE ACTIVE,Bool,false,none,doc+watcher,Sistemas,false
+AUTO COORDINATION,Bool,false,none,doc+watcher,Sistemas,true
+AVIONICS MASTER SWITCH,Bool,false,generic,doc+watcher,Sistemas,false
+CABIN NO SMOKING ALERT SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+CABIN SEATBELTS ALERT SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+CANOPY OPEN,percent over 100,false,none,doc+watcher,Sistemas,true
+CARB HEAT AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+DELTA HEADING RATE,radians per second,false,none,doc+watcher,Sistemas,true
+DME SOUND,Bool,false,none,doc+watcher,Sistemas,false
+ELT ACTIVATED,Bool,false,none,doc+watcher,Sistemas,false
+EXTERNAL SYSTEM VALUE,number,false,none,doc+watcher,Sistemas,true
+FIRE BOTTLE DISCHARGED,Bool,false,none,doc+watcher,Sistemas,false
+FIRE BOTTLE SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+GLASSCOCKPIT AUTOMATIC BRIGHTNESS,percent over 100,false,none,doc+watcher,Sistemas,false
+GPWS SYSTEM ACTIVE,Bool,false,none,doc+watcher,Sistemas,true
+GPWS WARNING,Bool,false,none,doc+watcher,Sistemas,false
+GYRO DRIFT ERROR,radians,false,none,doc+watcher,Sistemas,false
+HAS STALL PROTECTION,Bool,false,none,doc+watcher,Sistemas,false
+HEADING INDICATOR,radians,false,none,doc+watcher,Sistemas,false
+INDICATED ALTITUDE,feet,false,none,doc+watcher,Sistemas,true
+INDICATED ALTITUDE CALIBRATED,feet,false,none,doc+watcher,Sistemas,false
+INDICATED ALTITUDE EX1,feet,false,none,doc+watcher,Sistemas,true
+INDUCTOR COMPASS HEADING REF,radians,false,none,doc+watcher,Sistemas,false
+INDUCTOR COMPASS PERCENT DEVIATION,percent over 100,false,none,doc+watcher,Sistemas,false
+INSTRUMENTS AVAILABLE,number,false,none,doc+watcher,Sistemas,false
+INTERCOM MODE,Enum,false,none,doc+watcher,Sistemas,false
+INTERCOM SYSTEM ACTIVE,Bool,false,none,doc+watcher,Sistemas,false
+IS ALTITUDE FREEZE ON,Bool,false,none,doc+watcher,Sistemas,false
+IS ATTITUDE FREEZE ON,Bool,false,none,doc+watcher,Sistemas,false
+IS LATITUDE LONGITUDE FREEZE ON,Bool,false,none,doc+watcher,Sistemas,false
+KOHLSMAN SETTING HG,"inch of mercury, inHg",false,generic,doc+watcher,Sistemas,false
+KOHLSMAN SETTING HG EX1,inch of mercury,false,generic,doc+watcher,Sistemas,false
+KOHLSMAN SETTING MB,millibars,false,generic,doc+watcher,Sistemas,false
+KOHLSMAN SETTING MB EX1,millibars,false,generic,doc+watcher,Sistemas,false
+KOHLSMAN SETTING STD,Bool,false,generic,doc+watcher,Sistemas,false
+MAGNETIC COMPASS,degrees,false,none,doc+watcher,Sistemas,false
+MANUAL FUEL PUMP HANDLE,percent over 100,false,none,doc+watcher,Sistemas,false
+OVERSPEED WARNING,Bool,false,none,doc+watcher,Sistemas,false
+PANEL ANTI ICE SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+PITOT ICE PCT,percent over 100,false,none,doc+watcher,Sistemas,false
+PITOT HEAT,Bool,false,none,doc+watcher,Sistemas,false
+PITOT HEAT SWITCH,Enum,false,generic,doc+watcher,Sistemas,false
+RAD INS SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+SELECTED DME,number,false,none,doc+watcher,Sistemas,false
+SMOKESYSTEM AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+SMOKE ENABLE,Bool,false,none,doc+watcher,Sistemas,true
+SPEAKER ACTIVE,Bool,false,none,doc+watcher,Sistemas,false
+STALL HORN AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+STALL PROTECTION OFF LIMIT,radians,false,none,doc+watcher,Sistemas,false
+STALL PROTECTION ON GOAL,radians,false,none,doc+watcher,Sistemas,false
+STALL PROTECTION ON LIMIT,radians,false,none,doc+watcher,Sistemas,false
+STALL PROTECTION SYSTEM YOKE SHAKER INTENSITY,percent over 100,false,none,doc+watcher,Sistemas,false
+STALL WARNING,Bool,false,none,doc+watcher,Sistemas,false
+STRUCTURAL DEICE SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+SUCTION PRESSURE,inHg,false,none,doc+watcher,Sistemas,true
+SYSTEMS AVAILABLE,number,false,none,doc+watcher,Sistemas,false
+TRUE AIRSPEED SELECTED,Bool,false,none,doc+watcher,Sistemas,true
+TURN COORDINATOR BALL,position 128,false,none,doc+watcher,Sistemas,false
+TURN COORDINATOR BALL INV,position 128,false,none,doc+watcher,Sistemas,false
+TURN INDICATOR RATE,radians per second,false,none,doc+watcher,Sistemas,false
+TURN INDICATOR SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+WINDSHIELD DEICE SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+WISKEY COMPASS INDICATION DEGREES,degrees,false,none,doc+watcher,Sistemas,true
+VARIOMETER MAC CREADY SETTING,meter per second,false,none,doc+watcher,Sistemas,true
+VARIOMETER NETTO,feet per second,false,none,doc+watcher,Sistemas,false
+VARIOMETER RATE,feet per second,false,none,doc+watcher,Sistemas,false
+VARIOMETER SPEED TO FLY,kilometers per hour,false,none,doc+watcher,Sistemas,false
+VARIOMETER SPEED TO FLY GLIDE RATIO,number,false,none,doc+watcher,Sistemas,false
+VARIOMETER SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+VARIOMETER TOTAL ENERGY,feet per second,false,none,doc+watcher,Sistemas,false
+WATER BALLAST TANK CAPACITY,pounds,false,generic,doc+watcher,Sistemas,false
+WATER BALLAST TANK NUMBER,number,false,none,doc+watcher,Sistemas,false
+WATER BALLAST TANK QUANTITY,pounds,false,generic,doc+watcher,Sistemas,true
+WATER BALLAST VALVE,Bool,false,none,doc+watcher,Sistemas,false
+WATER BALLAST VALVE FLOW RATE,gallons per hour,false,none,doc+watcher,Sistemas,false
+WATER BALLAST EVERY VALVE OPEN,Bool,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING DOOR FLOW,pounds per hour,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING DOOR FLOW VOLUME,gallons per hour,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING DOOR OPEN TARGET,percent,false,generic,doc+watcher,Sistemas,true
+LIQUID DROPPING DOOR OPEN VALUE,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING SCOOP FLOW,pounds per hour,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING SCOOP FLOW VOLUME,gallons per hour,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING SCOOP OPEN TARGET,percent,false,generic,doc+watcher,Sistemas,true
+LIQUID DROPPING SCOOP OPEN VALUE,percent over 100,false,generic,doc+watcher,Sistemas,true
+LIQUID DROPPING TANK CAPACITY,pounds,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK CAPACITY VOLUME,gallons,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK PCT FULL VOLUME,percent over 100,false,generic,doc+watcher,Sistemas,true
+LIQUID DROPPING TANK PCT FULL WEIGHT,percent over 100,false,generic,doc+watcher,Sistemas,true
+LIQUID DROPPING TANK TOTAL CAPACITY,pounds,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK TOTAL CAPACITY VOLUME,gallons,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK TOTAL WEIGHT,pounds,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK TOTAL CURRENT VOLUME,gallons,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK WEIGHT,pounds,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING TANK CURRENT VOLUME,gallons,false,generic,doc+watcher,Sistemas,false
+LIQUID DROPPING TOTAL DROPPED FLOW,pounds per hour,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TOTAL DROPPED FLOW VOLUME,gallons per hour,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TOTAL SCOOPED FLOW,pounds per hour,false,none,doc+watcher,Sistemas,false
+LIQUID DROPPING TOTAL SCOOPED FLOW VOLUME,gallons per hour,false,none,doc+watcher,Sistemas,false
+HAS ANY CABIN SIGNAL LIGHT,Bool,false,none,doc+watcher,Sistemas,false
+IS ANY INTERIOR LIGHT ON,Bool,false,none,doc+watcher,Sistemas,false
+LANDING LIGHT PBH,`SIMCONNECT_DATA_XYZ` structure,false,none,doc+watcher,Sistemas,false
+LIGHT AMBIENT COLOR START RGBA,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR START R,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR START G,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR START B,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR START A,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR END RGBA,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR END R,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR END G,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR END B,number,false,generic,doc+watcher,Sistemas,true
+LIGHT AMBIENT COLOR END A,number,false,generic,doc+watcher,Sistemas,true
+LIGHT BEACON,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT BEACON ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT BACKLIGHT INTENSITY,percent over 100,false,none,doc+watcher,Sistemas,true
+LIGHT BRAKE ON,Bool,false,none,doc+watcher,Sistemas,false
+LIGHT CABIN,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT CABIN ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT CABIN POWER SETTING,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIGHT GLARESHIELD,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT GLARESHIELD ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT GLARESHIELD POWER SETTING,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIGHT GYROLIGHT INTENSITY,percent over 100,false,none,doc+watcher,Sistemas,true
+LIGHT HEAD ON,Bool,false,none,doc+watcher,Sistemas,false
+LIGHT HEADLIGHT INTENSITY,percent over 100,false,none,doc+watcher,Sistemas,true
+LIGHT LANDING,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT LANDING ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT LOGO,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT LOGO ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT NAV,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT NAV ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT ON STATES,mask,false,none,doc+watcher,Sistemas,false
+LIGHT PANEL,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT PANEL ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT PANEL POWER SETTING,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIGHT PEDESTRAL,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT PEDESTRAL ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT PEDESTRAL POWER SETTING,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIGHT POTENTIOMETER,percent over 100,false,generic,doc+watcher,Sistemas,false
+LIGHT RECOGNITION,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT RECOGNITION ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT STATES,mask,false,none,doc+watcher,Sistemas,false
+LIGHT STROBE,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT STROBE ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT TAXI,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT TAXI ON,Bool,false,generic,doc+watcher,Sistemas,false
+LIGHT WING,Bool,false,generic,doc+watcher,Sistemas,true
+LIGHT WING ON,Bool,false,generic,doc+watcher,Sistemas,false
+MANUAL INSTRUMENT LIGHTS,Bool,false,none,doc+watcher,Sistemas,false
+STROBES AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+STROBE FLASH,number,false,none,doc+watcher,Sistemas,false
+HYDRAULIC ACCUMULATOR PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC ACCUMULATOR QUANTITY,liters,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC ACTUATOR ACTIVE,Boolean,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC ACTUATOR PCT INTEGRITY,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC ACTUATOR PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC COMPONENT LIQUID QUANTITY,liters,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC COMPONENT LIQUID QUANTITY RATIO,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC COMPONENT PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE INPUT SIDE LIQUID QUANTITY,liters,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE INPUT SIDE LIQUID QUANTITY RATIO,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE INPUT SIDE PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE OUTPUT SIDE LIQUID QUANTITY,liters,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE OUTPUT SIDE LIQUID QUANTITY RATIO,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC LINE OUTPUT SIDE PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC PTU ACTIVE,Boolean,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC PTU DIRECTION,Boolean,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC PTU PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC PUMP ACTIVE,Boolean,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC PUMP PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC RESERVOIR PERCENT,percent over 100,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC RESERVOIR PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC RESERVOIR QUANTITY,liters,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC SWITCH,Bool,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC SYSTEM INTEGRITY,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC VALVE ACTIVE,Boolean,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC VALVE POS,percent over 100,false,generic,doc+watcher,Sistemas,false
+HYDRAULIC VALVE TARGET POS,percent over 100,false,generic,doc+watcher,Sistemas,true
+HYDRAULIC PRESSURE,pound-force per square foot,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS AIRCRAFT PRESSURE,kilopascal,false,none,doc+watcher,Sistemas,false
+PNEUMATICS APU BLEED AIR,Bool,false,none,doc+watcher,Sistemas,false
+PNEUMATICS AREAS MAX TEMPERATURE,celsius,false,none,doc+watcher,Sistemas,false
+PNEUMATICS AREAS MIN TEMPERATURE,celsius,false,none,doc+watcher,Sistemas,false
+PNEUMATICS AREA TARGET TEMPERATURE,celsius,false,generic,doc+watcher,Sistemas,true
+PNEUMATICS AREA TARGET TEMPERATURE PCT,percent over 100,false,generic,doc+watcher,Sistemas,true
+PNEUMATICS AREA TEMPERATURE,celsius,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS CABIN ALTITUDE,feet,false,none,doc+watcher,Sistemas,false
+PNEUMATICS CABIN ALTITUDE RATE,feet per second,false,none,doc+watcher,Sistemas,false
+PNEUMATICS COMPONENT TEMPERATURE,celsius,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS COMPONENT NUMBER OF MOLES,number,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS COMPONENT PRESSURE,kPa,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS COMPONENT VOLUME,cubic meters,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS DIFFERENTIAL PRESSURE,psi,false,none,doc+watcher,Sistemas,false
+PNEUMATICS DUCT PRESSURE,psi,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS DUCT TEMPERATURE,celsius,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS ENGINE BLEED AIR,Bool,false,engine,doc+watcher,Sistemas,false
+PNEUMATICS ENGINE BLEED AIR PRESSURE,psi,false,engine,doc+watcher,Sistemas,false
+PNEUMATICS ENGINE BLEED AIR PRESSURE EX1,psi,false,engine,doc+watcher,Sistemas,false
+PNEUMATICS ENGINE BLEED AIR TEMPERATURE,celsius,false,engine,doc+watcher,Sistemas,false
+PNEUMATICS ENGINE BLEED FLOW RATIO,ratio,false,engine,doc+watcher,Sistemas,true
+PNEUMATICS FAN STATUS,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS FAN TARGET STATUS,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS FAN SWITCH,Bool,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS JUNCTION LINE OPENING STATUS,number,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW,percent over 100,false,generic,doc+watcher,Sistemas,true
+PNEUMATICS PACK FLOW AUTO,Bool,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW MODE,Enum,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW MODE VALUE,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW MODE VALUE HIGH,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW MODE VALUE LOW,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK FLOW MODE VALUE NORM,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK STATUS,Bool,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK SWITCH,Bool,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS PACK TEMPERATURE,celsius,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS TARGET CABIN ALTITUDE,feet,false,none,doc+watcher,Sistemas,false
+PNEUMATICS VALVE MODE,Enum,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS VALVE STATUS,percent over 100,false,generic,doc+watcher,Sistemas,false
+PNEUMATICS VALVE TARGET STATUS,percent over 100,false,generic,doc+watcher,Sistemas,true
+PNEUMATICS VALVE SWITCH,Bool,false,generic,doc+watcher,Sistemas,false
+PRESSURE ALTITUDE,meters,false,none,doc+watcher,Sistemas,false
+PRESSURIZATION CABIN ALTITUDE,feet,false,none,doc+watcher,Sistemas,false
+PRESSURIZATION CABIN ALTITUDE GOAL,feet,false,none,doc+watcher,Sistemas,false
+PRESSURIZATION CABIN ALTITUDE RATE,feet per second,false,none,doc+watcher,Sistemas,false
+PRESSURIZATION DUMP SWITCH,Bool,false,none,doc+watcher,Sistemas,false
+PRESSURIZATION PRESSURE DIFFERENTIAL,pound-force per square foot,false,none,doc+watcher,Sistemas,false
+PARTIAL PANEL ADF,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL AIRSPEED,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL ALTIMETER,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL ATTITUDE,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL AVIONICS,Enum,false,generic,doc+watcher,Sistemas,false
+PARTIAL PANEL COMM,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL COMPASS,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL ELECTRICAL,Enum,false,generic,doc+watcher,Sistemas,true
+PARTIAL PANEL ENGINE,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL FUEL INDICATOR,Enum,false,none,doc+watcher,Sistemas,false
+PARTIAL PANEL HEADING,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL NAV,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL PITOT,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL TRANSPONDER,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL TURN COORDINATOR,Enum,false,none,doc+watcher,Sistemas,false
+PARTIAL PANEL VACUUM,Enum,false,none,doc+watcher,Sistemas,true
+PARTIAL PANEL VERTICAL VELOCITY,Enum,false,none,doc+watcher,Sistemas,true
+DROPPABLE OBJECTS COUNT,number,false,generic,doc+watcher,Sistemas,false
+DROPPABLE OBJECTS TYPE,,true,generic,doc+watcher,Sistemas,true
+DROPPABLE OBJECTS UI NAME,,true,generic,doc+watcher,Sistemas,false
+PAYLOAD STATION COUNT,number,false,none,doc+watcher,Sistemas,false
+PAYLOAD STATION NAME,,true,generic,doc+watcher,Sistemas,false
+PAYLOAD STATION NUM SIMOBJECTS,number,false,generic,doc+watcher,Sistemas,false
+PAYLOAD STATION OBJECT,,true,generic,doc+watcher,Sistemas,false
+PAYLOAD STATION WEIGHT,pounds,false,generic,doc+watcher,Sistemas,true
+GRAPPLE HOOK SET,percent over 100,false,none,doc+watcher,Sistemas,true
+LEAD POLE SET,percent over 100,false,none,doc+watcher,Sistemas,true
+TOW CABLE RELEASE REASON,Enum,false,none,doc+watcher,Sistemas,false
+TOW CABLE TENSION,percent over 100,false,none,doc+watcher,Sistemas,false
+TOW CONNECTION,Bool,false,none,doc+watcher,Sistemas,false
+TOW PLANE CONNECTION,Bool,false,none,doc+watcher,Sistemas,false
+TOW RELEASE HANDLE,percent over 100,false,none,doc+watcher,Sistemas,false
+TOW WINCH CONNECTION,Bool,false,none,doc+watcher,Sistemas,false
+TAILHOOK HANDLE,Bool,false,none,doc+watcher,Sistemas,false
+TAILHOOK POSITION,percent over 100,false,none,doc+watcher,Sistemas,true
+NIGHT VISION AVAILABLE,Bool,false,none,doc+watcher,Sistemas,false
+NIGHT VISION DISPLAYED,Bool,false,none,doc+watcher,Sistemas,true
+NIGHT VISION INTENSITY,number,false,none,doc+watcher,Sistemas,true
+EXIT OPEN,percent over 100,false,none,doc+watcher,Sistemas,true
+EXIT POSX,feet,false,none,doc+watcher,Sistemas,false
+EXIT POSY,feet,false,none,doc+watcher,Sistemas,false
+EXIT POSZ,feet,false,none,doc+watcher,Sistemas,false
+EXIT TYPE,Enum,false,none,doc+watcher,Sistemas,false
+AIRCONDITIONINGUNIT HOSE DEPLOYED,percent over 100,false,none,watcher,,
+AIRCONDITIONINGUNIT HOSE END POSX,Bool,false,none,watcher,,
+AIRCONDITIONINGUNIT HOSE END POSZ,Bool,false,none,watcher,,
+AIRCONDITIONINGUNIT HOSE END RELATIVE HEADING,Bool,false,none,watcher,,
+AIRSPEED EQUIVALENT,knots,false,none,watcher,,
+AIRSTARTUNIT HOSE DEPLOYED,percent over 100,false,none,watcher,,
+AIRSTARTUNIT HOSE END POSX,Bool,false,none,watcher,,
+AIRSTARTUNIT HOSE END POSZ,Bool,false,none,watcher,,
+AIRSTARTUNIT HOSE END RELATIVE HEADING,Bool,false,none,watcher,,
+AMBIENT LIGHT SENSOR,number,false,none,watcher,,
+ASK ENTER AIRCRAFT,Bool,false,none,watcher,,
+ASK EXIT AIRCRAFT,Bool,false,none,watcher,,
+AUTOPILOT MAX BANK VELOCITY,radians,false,none,watcher,,
+BAGGAGECART LOAD CURRENT,percent over 100,false,none,watcher,,
+BAGGAGECART LOAD DELAY BETWEEN CARTS,seconds,false,none,watcher,,
+BAGGAGECART LOAD TARGET,percent over 100,false,none,watcher,,
+BLAST SHIELD POSITION,percent over 100,false,none,watcher,,
+BODY MASS,number,false,none,watcher,,
+BUS DOOR SIDE OPENING CURRENT,percent over 100,false,none,watcher,,
+BUS DOOR SIDE OPENING TARGET,percent over 100,false,none,watcher,,
+CABLE CAUGHT BY TAILHOOK,number,false,none,watcher,,
+CAN ENTER AIRCRAFT,Bool,false,none,watcher,,
+CAN EXIT AIRCRAFT,Bool,false,none,watcher,,
+CAN SELF LAUNCH,Bool,false,none,watcher,,
+CATAPULT STROKE POSITION,number,false,none,watcher,,
+CIRCUIT STANDY VACUUM ON,Bool,false,none,watcher,,
+CLOTH TYPE,number,false,none,watcher,,
+COLLECTIVE HANDLE POSITION,percent over 100,false,none,watcher,,
+COM ACTIVE FREQ NAME,,true,none,watcher,,
+COM RECIEVE ALL,Bool,false,none,watcher,,
+COM STANDBY FREQ NAME,,true,none,watcher,,
+CONTACT POINT GOAL,percent over 100,false,none,watcher,,
+CURRENT ALPHA,percent over 100,false,none,watcher,,
+DESIRED LOCAL DIRECTION RATIO,percent over 100,false,none,watcher,,
+DESIRED SPEED RATIO,percent over 100,false,none,watcher,,
+DUST DIRT PCT,percent over 100,false,none,watcher,,
+FADED PAINT PCT,percent over 100,false,none,watcher,,
+FAILURE ACTIVE,Bool,false,none,watcher,,
+FAILURE VALUE,number,false,none,watcher,,
+FLAPS EXTENSION TIME,seconds,false,none,watcher,,
+FLOLS HEIGHT,percent,false,none,watcher,,
+FLY ASSISTANT AI PILOTING LOCKED,,false,none,watcher,,
+FLY ASSISTANT LANDING RIBBONS ACTIVE,,false,none,watcher,,
+GEAR TOTAL PCT EXTENDED EX1,percent,false,none,watcher,,
+GLIDER WAITING PILOT TAKEOFF SIGNAL,Bool,false,none,watcher,,
+IS IN ACTIVE PAUSE,Bool,false,none,watcher,,
+IS IN CTR AREA,Bool,false,none,watcher,,
+IS IN PROHIBITED AREA,Bool,false,none,watcher,,
+LEAKS DIRT PCT,percent over 100,false,none,watcher,,
+MUD DIRT PCT,percent over 100,false,none,watcher,,
+OLD ENG STARTER,Enum,false,none,watcher,,
+ORNITHOPTER CONTROL LEVERS Z,position,false,none,watcher,,
+ORNITHOPTER WINGS ANIMATION PARAMETERS,percent over 100,false,none,watcher,,
+ORNITHOPTER WINGS FLAPPING FREQUENCY PCT,percent over 100,false,none,watcher,,
+PLASMA ON,Bool,false,none,watcher,,
+PNEUMATICS EXTERNAL UNIT ACTIVITY,percent over 100,false,none,watcher,,
+PNEUMATICS EXTERNAL UNIT SWITCH,Bool,false,none,watcher,,
+PNEUMATICS OUTLET EFFICIENCY,percent over 100,false,none,watcher,,
+PNEUMATICS OUTLET SWITCH,Bool,false,none,watcher,,
+PROP EXTENSION PCT,percent over 100,false,none,watcher,,
+PROP TYPE AVAILABLE,,false,none,watcher,,
+RACE LAST LAP TIME,number,false,none,watcher,,
+REGULAR DIRT PCT,percent over 100,false,none,watcher,,
+RENORACE CATEGORY,number,false,none,watcher,,
+ROOT MOTION INPUT,feet,false,none,watcher,,
+ROTOR BRAKE LOCK SWITCH,Bool,false,none,watcher,,
+RUDDER LOCK STATUS,Enum,false,none,watcher,,
+RUNWAY DIRT PCT,percent over 100,false,none,watcher,,
+SCRAPE DAMAGE PCT,percent over 100,false,none,watcher,,
+SPOILERONS LEFT POSITION,percent over 100,false,none,watcher,,
+SPOILERONS RIGHT POSITION,percent over 100,false,none,watcher,,
+SPOILERS WITHOUT SPOILERONS LEFT POSITION,percent over 100,false,none,watcher,,
+SPOILERS WITHOUT SPOILERONS RIGHT POSITION,percent over 100,false,none,watcher,,
+TURB ENG AFTERBURNER TOGGLE,Bool,false,none,watcher,,
+TURB ENG MAX TORQUE,foot pound,false,none,watcher,,
+TURB ENG POWER SCALAR,number,false,none,watcher,,
+UI CAN EXIT AIRCRAFT,Bool,false,none,watcher,,
+VERTICAL SPEED POSITION PCT,percent over 100,false,none,watcher,,
+YOKE LOCK STATUS,Enum,false,none,watcher,,
+YOKE X INIDICATOR,position 16k,false,none,watcher,,
+YOKE X POSITION LINEAR,position 16k,false,none,watcher,,
+YOKE X POSITION WITH AP LINEAR,position 16k,false,none,watcher,,
