@@ -1,6 +1,7 @@
 # Plano — Validação das SimVars e ligação com o desgaste por peça
 
 Criado em 2026-11-16 (Claude). Pré-requisito: ferramenta `FlightCareer.SimVarProbe` (tarefa SIMVAR-PROBE, **aprovada e mergeada** em 2026-11-16; uso em `tools/simvar_probe/README.md`). Primeira rodada no C152 parado: 4.750 leituras, 94 rejeitadas, 104 variando.
+Resultados do C152 (2026-11-16): `docs/plans/sensor-validation/probe-runs/matriz-C152.md`. O MSFS caiu 3 vezes durante a sondagem (mesmo erro interno; suspeita: `ATC *`/`AI *`); próximo teste com `--filter "^(?!ATC |AI )"`.
 
 ## Contexto
 - `docs/plans/sensor-research/simvars-msfs2024.csv`: 1.678 SimVars da documentação do SDK 2024, cruzadas com o SimvarWatcher e com o `sensor_registry.json`.
