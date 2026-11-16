@@ -28,6 +28,7 @@ namespace FlightCareer.Domain.Components
         public List<ComponentDefinition> Components { get; set; } = new();
         public ExternalEventSettings ExternalEvents { get; set; } = new();
         public CarbIcingSettings CarbIcing { get; set; } = new();
+        public TurbineDegradationConfig? TurbineDegradation { get; set; }
 
         /// <summary>Ajustes por modelo de aeronave (limites e classe do motor), casados por trecho do nome do modelo.</summary>
         public List<AircraftOverride> AircraftOverrides { get; set; } = new();

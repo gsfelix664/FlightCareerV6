@@ -166,6 +166,16 @@
     "recoverySeconds": 30.0
   },
 
+  "turbineDegradation": {
+    "startHealthPct": 60,
+    "maxN1LossPct": 5,
+    "maxFuelEfficiencyLossPct": 10,
+    "maxIttCoolingLossPct": 15,
+    "maxThrustEfficiencyLossPct": 8,
+    "writeToleranceStepPct": 0.5,
+    "source": "estimativa — calibrar no MSFS"
+  },
+
   "components": [
     {
       "kind": "Engine",

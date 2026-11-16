@@ -132,5 +132,53 @@ namespace FlightCareer.Tests.Components
 
             Assert.False(write);
         }
+
+        [Fact]
+        public void Catalog_BlocoTurbineDegradation_CarregaValores()
+        {
+            var catalog = ComponentCatalog.LoadDefault();
+            Assert.NotNull(catalog.TurbineDegradation);
+            Assert.Equal(60.0, catalog.TurbineDegradation.StartHealthPct);
+            Assert.Equal(5.0, catalog.TurbineDegradation.MaxN1LossPct);
+            Assert.Equal(10.0, catalog.TurbineDegradation.MaxFuelEfficiencyLossPct);
+            Assert.Equal(15.0, catalog.TurbineDegradation.MaxIttCoolingLossPct);
+            Assert.Equal(8.0, catalog.TurbineDegradation.MaxThrustEfficiencyLossPct);
+            Assert.Equal(0.5, catalog.TurbineDegradation.WriteToleranceStepPct);
+            Assert.Equal("estimativa — calibrar no MSFS", catalog.TurbineDegradation.Source);
+        }
+
+        [Fact]
+        public void Catalog_SemBloco_Desligado()
+        {
+            string jsonWithoutBlock = @"{
+                ""hazard"": { ""threshold"": 20.0, ""lambdaAtThreshold"": 0.02, ""lambdaAtZero"": 2.0 },
+                ""visibility"": { ""maxHalfWidth"": 25.0, ""growthPerHour"": 0.4, ""walkaroundHalfWidth"": 10.0, ""maxBias"": 0.6 },
+                ""landing"": { ""hardLandingFpm"": 400.0, ""severeLandingFpm"": 600.0, ""lateralLimitFps"": 5.0, ""gearDamagePer100Fpm"": 1.5, ""tireDamagePer100Fpm"": 2.0, ""gearSevereDamagePer100Fpm"": 5.0, ""airframeSevereDamagePer100Fpm"": 2.0, ""gearLateralDamagePerFps"": 1.2, ""tireLateralDamagePerFps"": 1.5, ""brakeEnergyLossPerHour"": 72.0, ""wetSurfaceMultiplier"": 1.8, ""oilLeakMinFpm"": 650.0, ""oilLeakChanceAt1000Fpm"": 0.5, ""oilLeakRatePerMin"": 3.5, ""crashFpm"": 1500.0, ""crashBankDeg"": 30.0, ""crashNoseDownDeg"": 15.0, ""crashNoseUpDeg"": 30.0, ""crashG"": 6.0, ""contactWindowBeforeSec"": 1.0, ""contactWindowAfterSec"": 0.5, ""minAirborneSec"": 0.5, ""traceBeforeSec"": 2.0 },
+                ""engineLimits"": {
+                    ""Piston"": { ""chtRedLine"": 240, ""chtYellowMin"": 220, ""oilTempRedLine"": 115, ""oilTempYellowMin"": 105, ""oilPressureMinRedLine"": 20, ""oilPressureYellowMin"": 30, ""oilPressureMaxRedLine"": 100, ""oilPressureYellowMax"": 90, ""rpmRedLine"": 2700, ""rpmYellowMin"": 2600 }
+                },
+                ""airframeLimits"": { ""flapsMaxSpeed"": 100, ""gearMaxSpeed"": 140, ""vne"": 160, ""maxPositiveG"": 3.8, ""maxNegativeG"": -1.5 },
+                ""components"": [
+                    {
+                        ""kind"": ""Engine"",
+                        ""name"": ""Motor"",
+                        ""appliesTo"": [ ""Piston"" ],
+                        ""critical"": true,
+                        ""weight"": 30,
+                        ""lifeHours"": { ""Piston"": 2000 },
+                        ""failureModes"": [
+                            { ""id"": ""engine.failure"", ""name"": ""Falha"", ""weight"": 100, ""critical"": true, ""effect"": ""EngineFailure"" }
+                        ]
+                    }
+                ]
+            }";
+
+            var catalog = ComponentCatalog.FromJson(jsonWithoutBlock);
+            Assert.Null(catalog.TurbineDegradation);
+
+            // Compute com config nula deve resultar em TurbineLosses.None
+            var losses = TurbineDegradation.Compute(10.0, 10.0, catalog.TurbineDegradation);
+            Assert.Equal(TurbineLosses.None, losses);
+        }
     }
 }
