@@ -2262,3 +2262,23 @@
   - 12 novos testes em `FlightQualityServiceTests.cs` cobrindo invariância de taxa de amostragem (1 Hz vs 4 Hz), taxa de aceleração de tempo (4×), pausas, sinal do pitch, distinção de carga, atenuação por turbulência, solavanco/derrapagem opcionais e escala de compatibilidade legada.
   - Build 0 erros, `dotnet test` 537/537 aprovados. Não testado no MSFS.
 - Revisão (Claude): penalidade acumulada por amostra com o peso do tipo de voo do momento (`ComfortPenaltyPoints`; antes valia o tipo do último pacote) e comentário de origem dos limites corrigido. 538/538 testes.
+
+## 2026-11-16 - Auto-start tira XP e caminhão de combustível cobrado (Gemini)
+- **Grupo de Notificação Observado no SimConnect (`GROUPS.ObservedPilotInputs = 3`)**:
+  - `SimConnectService`: adicionado grupo não-mascarável para interceptação passiva de comandos (`AddClientEventToNotificationGroup(..., maskable: false)` com prioridade `SIMCONNECT_GROUP_PRIORITY_DEFAULT`), monitorando `ENGINE_AUTO_START`, `ENGINE_AUTO_SHUTDOWN` e `REQUEST_FUEL_KEY` registrado na inicialização da conexão.
+  - Exposto evento `OnObservedEvent` e roteamento discriminado por `e.uGroupID` em `OnRecvEvent` (`ObservedPilotInputs` para `OnObservedEvent`; `MaskedPilotInputs` para `OnMaskedEvent`).
+- **Penalidade de Partida Automática (`Domain/Services/ProcedurePenalties.cs`)**:
+  - Implementada função pura `ProcedurePenalties.ApplyAutoStartPenalty(xp, autoStartUsed)` com constante `AutoStartXpPenaltyFraction = 0.10` (10% de redução, arredondado para baixo, não negativo).
+  - `FlightMonitor`: observa `ENGINE_AUTO_START` durante monitoramento ativo e sinaliza `_autoStartUsed = true` (com log no blackbox); reseta a cada início de voo e propaga para `FlightService.ProcessFlightFinishAsync`.
+  - `FlightService`: aplica penalidade ao `totalXP` antes de salvar e anexa o sufixo `" | Partida automática usada (−10% XP)"` à mensagem final.
+- **Cobrança do Caminhão de Combustível (`Domain/Fuel/FuelTruckDelivery.cs`)**:
+  - Implementada máquina de estados com relógio injetável `FuelTruckDelivery` (`Idle`, `Armed`, `Completed`, `Expired`) com tolerância de subida, detecção de estabilidade por 10 s, cancelamento/expiração por decolagem ou timeout de 10 min, tolerância a consumo/descidas e fechamento antecipado via `ForceComplete`.
+  - `FlightMonitor`: ao receber `REQUEST_FUEL_KEY` fora de voo no solo com aeronave vigiada, arma a entrega (`Arm`); atualiza continuamente a cada pacote de telemetria fora de voo; ao concluir (`Completed`), cobra a quantidade entregue ao preço do aeroporto atual do piloto (`FuelPriceService.GetCurrentPrice(fuelType, airportTier)`), cria transação financeira de despesa (`FinancialTransaction` "Combustível"), atualiza `PilotAircraft.FuelAmount` e `pilot.Balance`, notifica alerta no HUD e registra no blackbox.
+  - Ao iniciar monitoramento (`StartMonitoring`), se houver entrega armada com subida já medida, executa `ForceComplete` e realiza a cobrança antes da sincronização de combustível, evitando reversão da quantidade nos tanques do sim.
+- **Testes e Aceitação**:
+  - 14 novos testes unitários e de persistência:
+    - `ProcedurePenaltiesTests`: 100 → 90, 0 → 0, sem auto-start → inalterado, 7 → 6 e tratamento de valor negativo.
+    - `FuelTruckDeliveryTests`: subida de 20 gal com estabilidade de 10 s, ruído abaixo da tolerância, cancelamento por decolagem, timeout de 10 min, descida ignorada, `ForceComplete` com e sem subida, e relógio injetável com sobrecargas.
+    - `FlightPersistenceTests.FlightService_AutoStartUsed_ReducesXpAndMentionsInMessage`: valida redução de XP no logbook (`Flight.XP`), acúmulo no piloto (`pilot.ExperiencePoints`) e inclusão do sufixo na mensagem final.
+  - Build 0 erros, `dotnet test` 552/552 aprovados (538 baseline + 14 novos), `TelemetryDefinitionTests` 5/5 aprovados. Não testado no MSFS.
+- Revisão (Claude): `OnFuelTruckCharged` faz o `MainViewModel` recarregar saldo e aeronave (contexto longo); cobrança passa a ser `sim final − combustível do app`, aceitando o valor do sim. 552/552 testes. Não testado no MSFS.

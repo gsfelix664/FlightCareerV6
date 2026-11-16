@@ -79,6 +79,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Eventos:** use `SimConnectService.SendEvent(nome, dado)`, que mapeia cada evento uma única vez. Não chame `MapClientEventToSimEvent` de novo com o mesmo ID.
 - **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos diretos de pane de alternador, pneu, trem, flap, magneto ou pressurização: alternador usa desconexão do barramento `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` com parâmetros `(bus, alt)` via `SendEventEx` (`TransmitClientEvent_EX1`), deixando a chave física livre em ON com bateria descarregando; flaps usam escrita contínua da superfície (`WriteFlapSurfacePercent`), mantendo a alavanca livre e a superfície travada com leve tremor aerodinâmico; magnetos continuam forçando a chave pela SimVar (limitação do cockpit 3D); os demais atuam no app (`effect: None`).
 - **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
+- **Key Events observados sem mascarar:** use grupo próprio não mascarável (`GROUPS.ObservedPilotInputs = 3`, `maskable: false`, prioridade `SIMCONNECT_GROUP_PRIORITY_DEFAULT`). Eventos mapeados com `GetOrMapEvent` pertencem a um único grupo de notificação; roteie no `OnRecvEvent` por `e.uGroupID` (`OnObservedEvent` vs `OnMaskedEvent`). Atualmente observa `ENGINE_AUTO_START`, `ENGINE_AUTO_SHUTDOWN` e `REQUEST_FUEL_KEY`.
 - **SimVars escritas pelo app:** `ENG ON FIRE:1` (`SetEngineFire`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`SetOilLeakedPercent`).
 - Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
 - **SimVar com nome inválido desloca o struct:** o MSFS rejeita o datum (`NAME_UNRECOGNIZED`), o pacote fica menor e todos os campos seguintes chegam na posição errada (e o marshaling lê além do fim do pacote). Já aconteceu com `PARTIAL PANEL STATIC`, que **não existe** (não há SimVar do estado da tomada estática). O log `[SimConnect EXCEPTION]` agora mostra o nome rejeitado; `TelemetryDefinitionTests` confere a contagem de datums × campos.
@@ -162,6 +163,10 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - Separação carga × passageiro: em voos de carga apenas G e solavanco contam; bank, pitch e derrapagem são ignorados.
 - Turbulência × manobra: presença de vento vertical atmosférico (|vento| ≥ 5 ft/s) atenua o tempo de violação de G e solavanco para 0,25×.
 - Regras e pesos configuráveis via `FlightQualityRules` (injetável pelo construtor).
+
+### Economia, combustível e procedimentos (AUTOSTART-CAMINHAO)
+- **Partida automática (Ctrl+E / `ENGINE_AUTO_START`):** observada durante voo monitorado via `OnObservedEvent`. Não invalida o voo; aplica penalidade de 10% no XP total via `ProcedurePenalties.ApplyAutoStartPenalty` e acrescenta sufixo explicativo no resumo.
+- **Caminhão de combustível do sim (`REQUEST_FUEL_KEY` / `FuelTruckDelivery`):** observado no solo fora de voo com aeronave vigiada. Acompanha subida de combustível e estabilidade por 10 s; cobra a entrega ao preço do aeroporto atual do piloto (`FuelPriceService.GetCurrentPrice`), atualiza `PilotAircraft.FuelAmount` e lança `FinancialTransaction` ("Combustível"). Ao iniciar monitoramento com entrega armada, fecha via `ForceComplete` e cobra antes da sincronização de combustível, evitando devolução do valor antigo. Decolagem ou timeout de 10 min sem subida expiram sem cobrança; descidas são ignoradas.
 
 ## 8. Definição de pronto
 

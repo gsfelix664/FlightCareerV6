@@ -67,5 +67,67 @@ namespace FlightCareer.Tests.Components
             Assert.True(pilot!.Balance < balanceBefore, "o custo do voo 2 é descontado do saldo atual");
             Assert.True(pilot.Balance <= balanceBefore - 1, "o gasto de 2.000 do Hangar não pode ser desfeito pelo FlightService");
         }
+
+        [Fact]
+        public async Task FlightService_AutoStartUsed_ReducesXpAndMentionsInMessage()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+
+            var pilot1Id = Guid.NewGuid();
+            var pilot2Id = Guid.NewGuid();
+            var aircraft1Id = Guid.NewGuid();
+            var aircraft2Id = Guid.NewGuid();
+
+            await using (var setup = new AppDbContext(options))
+            {
+                await setup.Database.EnsureCreatedAsync();
+                var type = new AircraftType { Id = Guid.NewGuid(), Model = "C172SP G1000", Type = "Geral", FuelType = "Avgas", PurchasePrice = 400_000 };
+                setup.AircraftTypes.Add(type);
+                setup.Pilots.Add(new Pilot
+                {
+                    Id = pilot1Id, Name = "Piloto Manual", Balance = 10_000, ExperiencePoints = 0,
+                    Hangar = { new PilotAircraft { Id = aircraft1Id, AircraftTypeId = type.Id, Prefix = "PT-MAN", FuelAmount = 40 } }
+                });
+                setup.Pilots.Add(new Pilot
+                {
+                    Id = pilot2Id, Name = "Piloto AutoStart", Balance = 10_000, ExperiencePoints = 0,
+                    Hangar = { new PilotAircraft { Id = aircraft2Id, AircraftTypeId = type.Id, Prefix = "PT-AUT", FuelAmount = 40 } }
+                });
+                await setup.SaveChangesAsync();
+            }
+
+            // Voo sem auto-start
+            await using var serviceContext1 = new AppDbContext(options);
+            var service1 = new FlightService(serviceContext1, null!, null!);
+            var outcomeNormal = await service1.ProcessFlightFinishAsync(
+                pilot1Id, aircraft1Id, "SBSP", "SBRJ", DateTime.Now, 40, 30, 100,
+                new List<Mission>(), new FlightQualityService(), flightDurationMinutes: 60, autoStartUsed: false);
+
+            // Voo idêntico com auto-start
+            await using var serviceContext2 = new AppDbContext(options);
+            var service2 = new FlightService(serviceContext2, null!, null!);
+            var outcomeAutoStart = await service2.ProcessFlightFinishAsync(
+                pilot2Id, aircraft2Id, "SBSP", "SBRJ", DateTime.Now, 40, 30, 100,
+                new List<Mission>(), new FlightQualityService(), flightDurationMinutes: 60, autoStartUsed: true);
+
+            int expectedXp = ProcedurePenalties.ApplyAutoStartPenalty(outcomeNormal.XP, true);
+            Assert.True(outcomeNormal.XP > 0, "o voo normal deve render XP");
+            Assert.Equal(expectedXp, outcomeAutoStart.XP);
+            Assert.True(outcomeAutoStart.XP < outcomeNormal.XP, "auto-start deve ter menos XP que o normal");
+            Assert.Contains(" | Partida automática usada (−10% XP)", outcomeAutoStart.Message);
+            Assert.DoesNotContain("Partida automática usada", outcomeNormal.Message);
+
+            // Confere persistência no banco
+            await using var verifyContext = new AppDbContext(options);
+            var pilotAuto = await verifyContext.Pilots.FindAsync(pilot2Id);
+            var flightAuto = await verifyContext.Flights.FirstOrDefaultAsync(f => f.PilotId == pilot2Id);
+
+            Assert.NotNull(pilotAuto);
+            Assert.NotNull(flightAuto);
+            Assert.Equal(expectedXp, pilotAuto.ExperiencePoints);
+            Assert.Equal(expectedXp, flightAuto.XP);
+        }
     }
 }
