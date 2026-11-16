@@ -2004,3 +2004,5 @@
 - Fonte `ClassDefault` de propósito: mantém a reserva nativa (overstress do sim) ativa nesses limites de baixa confiança.
 - Sem Vfe no CAP-4 e no J-3 Cub (sem flap) e sem amperagem no CAP-4, J-3 e A400M. Índices elétricos (`elecMainBusIndex`, `elecAvionicsCircuitIndex`) **não** foram inventados: dependem da calibração no sim (`tools/aircraft_limits/calibrate.py`).
 - Build 0 erros; `dotnet test` 455/455. Não testado no MSFS.
+## 2026-11-16 - Regra de delegação: dados também vão para o Gemini (Claude)
+- `CLAUDE.md` e `tools/agents/global/CLAUDE.md`: catálogos e dados (JSON/CSV) com mais de ~20 linhas vão para o Gemini, com o critério na spec e revisão por amostragem; pesquisa, análise de documentação e planos continuam com o Claude (decisão do usuário).
