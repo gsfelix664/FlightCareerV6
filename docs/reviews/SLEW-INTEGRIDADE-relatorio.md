@@ -1,6 +1,6 @@
 # SLEW-INTEGRIDADE — Slew no solo permitido, voo invalidado no ar e detecção de congelamento
 
-**Branch:** feat/slew-integridade · **Commit:** pendente · **Data:** 2026-11-16
+**Branch:** feat/slew-integridade · **Commit:** 88a0c95 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar `FlightCareer.Domain/Integrity/SimIntegrityState.cs` e `FlightCareer.Domain/Integrity/SlewMonitor.cs` (lógica pura de slew e freeze com distâncias por Haversine).
