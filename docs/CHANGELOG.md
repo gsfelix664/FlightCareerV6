@@ -2143,6 +2143,11 @@
 ## 2026-11-16 - Análise dos Key Events elétricos do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/eventos-eletricos.md` (129 eventos): como enviar (panes e serviços) e receber (ações do piloto) Key Events; `BREAKER_*_SET` para pane por sistema rearmável, `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE` para fio rompido, barramento parcial, bateria fora do barramento, `SET_EXTERNAL_POWER` para a GPU contratada, luzes por `*_LIGHTS_SET` e eventos de APU. Preferir `_SET` a `_TOGGLE`.
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise dos Key Events de motor do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-motor.md`: parada por falta de combustível (`SHUTOFF_VALVE_OFF`, `SET_FUEL_VALVE_ENG*`), ignição da turbina, panes por mascaramento do comando do piloto (manete, governador, mistura, cowl flap, partida, reverso), cheque de magnetos e outros procedimentos recebidos do piloto. `ISOLATE_TURBINE_*` só serve ao DarkStar; as panes nativas de motor ficam na página de falhas.
+- `eventos-eletricos.md`: decisão do usuário de usar as duas panes elétricas (disjuntor rearmável e fio rompido).
+- Só documentação; nada testado no MSFS.
 ## 2026-11-16 - SLEW-INTEGRIDADE Slew no solo permitido, voo invalidado no ar e detecção de congelamento (Gemini)
 - **Regra de integridade do Slew e Congelamentos**:
   - Antes de iniciar o monitoramento: uso livre.
@@ -2163,3 +2168,16 @@
   - 1 novo teste em `TelemetryDefinitionTests.cs` conferindo a contagem e correspondência dos datums de `IntegrityStateRead` com os campos de `SimIntegrityState`.
   - Total: 500 testes aprovados, 0 falhas.
 
+
+## 2026-11-16 - Análise dos Key Events de comandos de voo do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-comandos.md`: compensador inoperante nativo (`*_TRIM_DISABLED_SET`) e compensador disparado, spoilers armados, auto-leme, e bloqueio do slew em voo por mascaramento de `SLEW_ON/SET/TOGGLE`.
+- `eventos-motor.md`/`eventos-comandos.md`: lembrete do princípio F4.2e (falhar o sistema sem mexer no comando; mascaramento abandonado para flap e alternador) e decisão do usuário sobre o auto-start (perde XP, não invalida).
+- Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise dos Key Events de combustível do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-combustivel.md`: `REPAIR_AND_REFUEL` e `ADD_FUEL_QUANTITY` como detecção de trapaça (invalidar e reaplicar panes), caminhão de combustível do sim (`REQUEST_FUEL_KEY`, decisão pendente), panes no sistema por `FUELSYSTEM_VALVE_SET`/`PUMP_SET`/`JUNCTION_SET` e procedimentos (seletor, alimentação cruzada, bombas, despejo).
+- Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise de seis páginas de Key Events do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-diversos.md` (sistemas gerais, instrumentos, aeronave diversos, rádio/navegação, diversos e câmera): panes no lado do sistema (atuador/válvula hidráulica, packs, deriva do giro, curso da bequilha), alarme nativo e ELT, serviços de solo pelo sim (pushback, GPU, catering, bagagem, jetway, escada), integridade (`BACK_TO_FLY`, resets, pausa, replay) e procedimentos recebidos do piloto. Câmera: nada útil.
+- Só documentação; nada testado no MSFS.
