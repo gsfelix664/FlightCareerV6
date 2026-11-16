@@ -315,7 +315,10 @@ namespace FlightCareer.SimVarProbe
                     {
                         _simConnect!.ClearDataDefinition(defId);
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"[SimVarProbe] Falha ao limpar definição da Fase A ({slot.Name}): {ex.Message}");
+                    }
                 }
             }
 
@@ -397,8 +400,10 @@ namespace FlightCareer.SimVarProbe
             _stringsCsvWriter.Flush();
 
             // Planejamento de blocos numéricos
-            var blocks = ProbeBlockPlanner.Plan(acceptedNumericSlots, blockSize: 200);
-            Console.WriteLine($"Blocos numéricos montados: {blocks.Count} (capacidade fixa: 200)");
+            // O struct ProbeBlockData tem 200 posições fixas: --block-size só pode reduzir o bloco.
+            int blockSize = Math.Clamp(_config.BlockSize, 1, 200);
+            var blocks = ProbeBlockPlanner.Plan(acceptedNumericSlots, blockSize: blockSize);
+            Console.WriteLine($"Blocos numéricos montados: {blocks.Count} (até {blockSize} variáveis por bloco)");
 
             // Registra blocos numéricos
             foreach (var block in blocks)
@@ -649,8 +654,9 @@ namespace FlightCareer.SimVarProbe
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Console.Error.WriteLine($"[SimVarProbe] Leitura do teclado encerrada: {ex.Message}");
                     break;
                 }
             }
@@ -889,7 +895,10 @@ namespace FlightCareer.SimVarProbe
                 {
                     _simConnect.Dispose();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimVarProbe] Falha ao fechar o SimConnect: {ex.Message}");
+                }
                 _simConnect = null;
             }
 
