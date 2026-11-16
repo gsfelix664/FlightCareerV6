@@ -3,6 +3,9 @@
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Engine Events](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/key-events/aircraft-engine-events/) do SDK 2024 (228 linhas: anti-gelo, manete de condição, combustível/mistura, magnetos, gerais, diversos, hélice, manete, turbina, partida). Nenhum marcado como obsoleto; alguns "Not used in the simulation" (`MAGNETO1..4_SET`, `STARTER_GEN`, `STARTER_OFF`, `STARTER_START`). Mesmas regras de `eventos-eletricos.md` (§ 1: enviar × receber, `_SET` × `_TOGGLE`, grupo mascarado).
 **Não há evento de pane de motor nesta página:** `TOGGLE_ENGINE1..4_FAILURE` e afins ficam na página de falhas (a analisar). `ISOLATE_TURBINE_*` anula empuxo e arrasto, mas a documentação diz que é **só para o DarkStar** — não usar.
 
+
+> **Princípio do projeto (decisão de 2026-11-15, F4.2e):** falhar o **sistema** sem mexer no comando do piloto — a alavanca/chave continua livre e o efeito vem do lado do sistema (superfície do flap escrita, alternador desconectado do barramento). O mascaramento de comandos (`MaskedPilotInputs`) **foi abandonado** para flap e alternador. As propostas de "mascarar" abaixo só valem se o usuário decidir abrir exceção; a preferência é o efeito no sistema (SimVar ou evento que age no sistema).
+
 ## 1. Resumo por área
 
 | Área | Eventos que mais rendem |
@@ -11,6 +14,7 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Engine Events](https://d
 | Panes (mascarar o comando do piloto) | **manete travada** (cabo do manete: mascarar `THROTTLE*`/`AXIS_THROTTLE*`), **governador da hélice travado** (mascarar `PROP_PITCH*`/`AXIS_PROPELLER*`), **mistura travada**, **cowl flap travado** (`COWLFLAP*`, `INC/DEC_COWL_FLAPS*`), anti-gelo do motor inoperante (`ANTI_ICE_*`) — mesmo mecanismo do flap e do alternador (`MaskedPilotInputs`) |
 | Procedimento (receber do piloto) | **cheque de magnetos** (`MAGNETO_LEFT/RIGHT/BOTH` no giro de motor), primer (`ENGINE_PRIMER`, `TOGGLE_PRIMER*`), bomba de combustível (`FUEL_PUMP`, `TOGGLE_ELECT_FUEL_PUMP*`), mistura (`MIXTURE_*`, `MIXTURE_SET_BEST`), partida (`STARTER*_SET`, `SET_STARTER*_HELD`, `TOGGLE_STARTER*`), **auto-start** (`ENGINE_AUTO_START`/`AUTO_SHUTDOWN`), embandeiramento e auto-feather (`TOGGLE_FEATHER_SWITCH*`, `TOGGLE_AUTOFEATHER_ARM`), reverso (`SET_REVERSE_THRUST_ON`, `THROTTLE_REVERSE_THRUST_*`), anti-gelo, degelo da hélice, sincronismo |
 | Missões/economia | detentes do manete nos jatos (`THROTTLE_DETENT_NEXT/PREV`, interceptáveis): decolagem reduzida × TOGA (já proposto em `variaveis-motor.md`) |
+- **Auto-start (decisão do usuário, 2026-11-16):** `ENGINE_AUTO_START`/`ENGINE_AUTO_SHUTDOWN` recebidos **não invalidam** o voo; o piloto **perde um pouco de XP** (valor no JSON de economia; sugestão 10 % do XP do voo, uma vez por voo; resumo mostra "Partida automática usada").
 
 ## 2. Tabela
 
@@ -66,8 +70,8 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Engine Events](https://d
 | `PLASMA_*`, `THRUST_VECTOR_*`, `AXIS_THRUST_VECTOR_*`, `TOGGLE_AFTERBURNER*`, `ENGINE`, `ENGINE_MASTER_*` | Não usar. |
 
 ## 3. Decisões para o usuário
-1. Panes por **mascaramento** de comando (manete, governador, mistura, cowl flap, partida, reverso): o piloto mexe e nada acontece, como num cabo partido. Implementar?
-2. **Auto-start** (Ctrl+E): sem efeito ou nota de procedimento menor?
+1. Panes de comando (manete, governador, mistura, cowl flap, partida, reverso): pelo princípio do projeto, preferir efeito no sistema (ex.: `THROTTLE INPUT BLOCKED BY UPPER BOUNDS`/`THROTTLE LOWER LIMIT` para perda de potência, `SHUTOFF_VALVE_OFF` para corte). Mascarar só com exceção aprovada.
+2. ~~Auto-start~~ **decidido:** perde XP, não invalida (ver § 1).
 3. Parada por falta de combustível por `SHUTOFF_VALVE_OFF` (evento) ou por `RECIP ENG FUEL AVAILABLE` (SimVar)? Testar os dois no MSFS e ficar com o que o sim mantém.
 
 ## 4. Próximos passos

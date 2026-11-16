@@ -2168,3 +2168,8 @@
   - 1 novo teste em `TelemetryDefinitionTests.cs` conferindo a contagem e correspondência dos datums de `IntegrityStateRead` com os campos de `SimIntegrityState`.
   - Total: 500 testes aprovados, 0 falhas.
 
+
+## 2026-11-16 - Análise dos Key Events de comandos de voo do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-comandos.md`: compensador inoperante nativo (`*_TRIM_DISABLED_SET`) e compensador disparado, spoilers armados, auto-leme, e bloqueio do slew em voo por mascaramento de `SLEW_ON/SET/TOGGLE`.
+- `eventos-motor.md`/`eventos-comandos.md`: lembrete do princípio F4.2e (falhar o sistema sem mexer no comando; mascaramento abandonado para flap e alternador) e decisão do usuário sobre o auto-start (perde XP, não invalida).
+- Só documentação; nada testado no MSFS.
