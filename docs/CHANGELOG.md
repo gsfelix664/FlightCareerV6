@@ -2059,3 +2059,7 @@
 ## 2026-11-16 - Análise das variáveis de modelo de voo do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/variaveis-modelo-voo.md` (99 SimVars): HUD (peso/CG, ângulo de ataque, Vr, portas), passageiros (solavanco por `SEMIBODY LOADFACTOR YDOT`, voo descoordenado), missões (capacidade útil, CG, planejamento, jetway, avião convencional), integridade (peso mudando em voo) e desgaste (acima do peso, fora do CG, porta aberta com risco).
 - 23 variáveis acrescentadas à lista do Watcher (`INTERACTIVE POINT OPEN` no lugar da obsoleta `EXIT OPEN`). Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis de combustível do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-combustivel.md` (72 SimVars): HUD por tanque e desbalanceamento, reserva no pouso, consumo real (o cálculo inicial − final falha com abastecimento pelo menu), `UNLIMITED FUEL` como trapaça, despejo cobrado, vazamento de combustível como pane (tanques graváveis) e a decisão pendente de o app gravar no sim o combustível comprado.
+- 13 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
