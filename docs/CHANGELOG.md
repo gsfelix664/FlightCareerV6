@@ -2090,3 +2090,33 @@
   - Movido `TurbineDegradationActuator` para `FlightCareer.Application/Services` para desacoplamento de UI e suporte pleno a testes com `ISimConnectService` falso em `FlightCareer.Tests`.
   - Novos testes unitários: atuador gravando em múltiplos motores (2 motores) e ciclo de recarga garantindo ausência de escrita no evento, gravação posterior em turbina e bloqueio em pistão.
   - Testes: 476 aprovados, 0 falhas.
+
+
+## 2026-11-16 - COMBUSTIVEL-REAL Consumo real, abastecimento gravado no sim e travas de combustível (Gemini)
+- **Decisões do usuário (2026-11-16):**
+  - Consumo cobrado pelo consumo real dos motores (`GENERAL ENG FUEL USED SINCE START:1..4`).
+  - Abastecimento do aplicativo gravado diretamente nos tanques do MSFS no solo com motores desligados.
+  - `UNLIMITED FUEL` ativado bloqueia o início do monitoramento e, se ligado em voo, invalida o voo.
+  - Abastecimento em voo (subida de combustível além da tolerância) invalida o voo sem pagamento da missão, cobrando o combustível consumido real.
+- **Domínio (`FlightCareer.Domain/Fuel/`)**:
+  - `FuelUsageAccumulator`: acumula incrementos por motor em libras, lida com reinício de motores (contador zera), valores inválidos e converte em galões via `weightPerGallon`.
+  - `FuelIntegrityMonitor`: detecta combustível ilimitado, abastecimento em voo e divergências no solo antes do voo.
+  - `FuelTankWritePlan`: distribui proporcionalmente o combustível desejado pela capacidade útil dos tanques sem exceder as capacidades individuais (sistema novo `FUELSYSTEM` e tanques legados).
+- **SimConnect e Interfaces (`ISimConnectService.cs`, `SimConnectService.cs`)**:
+  - Definição separada `FuelStateRead` e struct `SimFuelState` a 1 s contendo `UNLIMITED FUEL`, consumo por motor `:1..:4`, `NEW FUEL SYSTEM` e capacidades/quantidades dos tanques 1..8 e legados (`LEFT/RIGHT MAIN/AUX/TIP, CENTER/CENTER2/CENTER3`).
+  - Mapeadas 17 definições de escrita de tanques (`SetFuelTanks`).
+  - `GetActiveFuelTanks()` expõe os tanques presentes com capacidade útil > 0.
+- **Abastecimento e Hangar (`HangarViewModel.cs`, `RefuelViewModel.cs`)**:
+  - No abastecimento concluído, se conectado ao sim no solo com motores desligados, grava automaticamente a nova quantidade nos tanques do simulador.
+- **Travas no Monitoramento (`FlightMonitor.cs`)**:
+  - `StartMonitoring`: bloqueia se `UNLIMITED FUEL` = 1. Sincroniza automaticamente no solo se a quantidade no sim divergir do aplicativo além da tolerância, registrando no blackbox.
+  - Em voo: monitora integridade continuamente; `UNLIMITED FUEL` ou abastecimento em voo invalida o voo (`_flightInvalidated`).
+  - Pouso/Finalização: repassa o consumo real de `FuelUsageAccumulator` e o estado de invalidação para `FlightService`.
+- **Economia e Cobrança (`FlightService.cs`)**:
+  - `FuelUsed` calculado pelo consumo real dos motores (`realFuelUsed`).
+  - Conferência de divergência > 10% em relação a `(initialFuel - finalFuel)` registrada no blackbox.
+  - Voo invalidado: sem receita de missão nem conclusão de missões, cobrando despesa de combustível real e taxa de pouso.
+  - `PilotAircraft.FuelAmount` atualizado com o combustível final real do simulador.
+- **Testes xUnit**:
+  - 10 novos testes em `FuelDomainTests.cs` cobrindo acumulador com dois motores, reinício de motor (10 → 12 → 0,5 → 1 = 13 lb), descarte de NaN/inválidos, detecção de ilimitado, detecção de subida em voo, tolerância a ruído, divergência em solo, distribuição em asas (13/13 gal) com e sem excedente, suporte a tanques legados e fixture real de voo `c152-sbmt-snej-20261115.csv.gz`.
+  - Total: 486 testes aprovados, 0 falhas.
