@@ -3,7 +3,7 @@ using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 
-namespace FlightCareer.UI.Services
+namespace FlightCareer.Application.Services
 {
     /// <summary>
     /// Gerencia a gravação e conferência de perdas de motor a turbina no simulador de voo.
@@ -92,20 +92,12 @@ namespace FlightCareer.UI.Services
 
         private void HandleAircraftReloaded()
         {
-            // O simulador foi recarregado e zerou os valores. Reaplicar se o addon tinha perdas ativas.
-            for (int i = 1; i <= 4; i++)
+            // O simulador foi recarregado. Marcar como não gravados para que o próximo Apply regrave depois de conferir que é turbina.
+            for (int i = 0; i < 4; i++)
             {
-                int idx = i - 1;
-                if (_hasWritten[idx] && _lastTarget[idx] != null && !_lastTarget[idx].IsZero)
-                {
-                    _sim.SetTurbineLosses(i, _lastTarget[idx]);
-                    _lastWritten[idx] = _lastTarget[idx];
-                    _lastWriteTime[idx] = _clock();
-                }
-                else
-                {
-                    _lastWritten[idx] = TurbineLosses.None;
-                }
+                _lastWritten[i] = TurbineLosses.None;
+                _lastWriteTime[i] = default;
+                _hasWritten[i] = false;
             }
         }
 

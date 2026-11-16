@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FlightCareer.Application.Services;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 
@@ -221,7 +222,8 @@ namespace FlightCareer.UI.Services
 
             // 6. Efeitos contínuos (fogo, vazamento de óleo, enforcement)
             _actuator.Process(data, dtHours, Get(ComponentKind.Engine), Get(ComponentKind.Oil));
-            _turbineActuator.Apply(data, Get(ComponentKind.Engine), Get(ComponentKind.HotSection), 1);
+            int engineCount = _sim.TurbineEngineCount > 0 ? _sim.TurbineEngineCount : 1;
+            _turbineActuator.Apply(data, Get(ComponentKind.Engine), Get(ComponentKind.HotSection), engineCount);
         }
 
         public void ProcessLanding(double touchdownFpm, double lateralFps, bool wetSurface)

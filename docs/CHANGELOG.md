@@ -2074,3 +2074,12 @@
   - Criados 10 testes em `TurbineDegradationTests.cs` cobrindo cálculo linear, motor pior entre motor/seção quente para combustível, tolerância de arredondamento, regras de decisão de escrita e carregamento do catálogo com e sem o bloco.
   - Criado teste de validação de layout em `TelemetryDefinitionTests.cs` para os campos do struct de conferência.
   - Total: 474 testes aprovados, 0 falhas.
+
+## 2026-11-16 - TURB-DEGRADACAO-r2 Ajustes da revisão de degradação de turbina (Gemini)
+- **Correções da rodada 1 da revisão**:
+  - `NUMBER OF ENGINES` (unidade `Number`) adicionado ao final da definição de leitura de conferência `TurbineLossesRead` e struct `SimTurbineLossesState`; exposta propriedade `TurbineEngineCount` em `ISimConnectService` e `SimConnectService`; `ComponentFlightSession` agora repassa a contagem real de motores (fallback 1 se 0).
+  - `HandleAircraftReloaded`: removida escrita imediata no callback de recarga de aeronave. O método agora apenas marca os motores como não gravados (`_lastWritten = None`, `_lastWriteTime = default`, `_hasWritten = false`), delegando a gravação para o próximo `Apply` após a verificação de tipo de motor (turbina grava; pistão não grava).
+  - Removido método sem uso `SetDebugTurbineLosses` de produção em `SimConnectService`.
+  - Movido `TurbineDegradationActuator` para `FlightCareer.Application/Services` para desacoplamento de UI e suporte pleno a testes com `ISimConnectService` falso em `FlightCareer.Tests`.
+  - Novos testes unitários: atuador gravando em múltiplos motores (2 motores) e ciclo de recarga garantindo ausência de escrita no evento, gravação posterior em turbina e bloqueio em pistão.
+  - Testes: 476 aprovados, 0 falhas.

@@ -15,6 +15,7 @@ namespace FlightCareer.Application.Interfaces
         bool DebugMode { get; set; }
         bool IsConnected { get; }
         SimTelemetry CurrentData { get; }
+        int TurbineEngineCount { get; }
 
         void ResetCrashState();
         void SetDebugData(SimTelemetry data);

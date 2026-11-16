@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Entities;
+using FlightCareer.Application.Services;
 using Xunit;
 
 namespace FlightCareer.Tests.Components
@@ -179,6 +183,106 @@ namespace FlightCareer.Tests.Components
             // Compute com config nula deve resultar em TurbineLosses.None
             var losses = TurbineDegradation.Compute(10.0, 10.0, catalog.TurbineDegradation);
             Assert.Equal(TurbineLosses.None, losses);
+        }
+
+        [Fact]
+        public void Actuator_ComDoisMotores_GravaNosDois()
+        {
+            var fakeSim = new FakeSimConnectForTurbine();
+            var actuator = new TurbineDegradationActuator(fakeSim, _defaultConfig);
+
+            var telemetry = new SimTelemetry { EngineType = 1.0 }; // Turbina
+            var engine = new AircraftComponent { Health = 0.0 };
+            var hotSection = new AircraftComponent { Health = 0.0 };
+
+            actuator.Apply(telemetry, engine, hotSection, engineCount: 2);
+
+            Assert.Equal(2, fakeSim.WrittenLosses.Count);
+            Assert.True(fakeSim.WrittenLosses.ContainsKey(1));
+            Assert.True(fakeSim.WrittenLosses.ContainsKey(2));
+            Assert.Equal(5.0, fakeSim.WrittenLosses[1].N1LossPct);
+            Assert.Equal(5.0, fakeSim.WrittenLosses[2].N1LossPct);
+        }
+
+        [Fact]
+        public void Actuator_Recarga_NadaGravadoNoEvento_ProximoApplyTurbinaGrava_PistaoNaoGrava()
+        {
+            var fakeSim = new FakeSimConnectForTurbine();
+            DateTime currentTime = new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc);
+            var actuator = new TurbineDegradationActuator(fakeSim, _defaultConfig, () => currentTime);
+
+            var turbineTelemetry = new SimTelemetry { EngineType = 5.0 }; // Turboprop
+            var pistonTelemetry = new SimTelemetry { EngineType = 0.0 };  // Piston
+            var engine = new AircraftComponent { Health = 0.0 };
+            var hotSection = new AircraftComponent { Health = 0.0 };
+
+            // 1. Aplica perdas iniciais em turbina
+            actuator.Apply(turbineTelemetry, engine, hotSection, 1);
+            Assert.Equal(1, fakeSim.SetTurbineLossesCallCount);
+            fakeSim.SimLosses.Clear(); // Simula que o MSFS zerou SimVars na recarga
+
+            // 2. Evento de recarga da aeronave disparado
+            fakeSim.TriggerAircraftReloaded();
+
+            // Nada deve ter sido gravado durante o evento
+            Assert.Equal(1, fakeSim.SetTurbineLossesCallCount);
+
+            // 3. Próximo Apply com aeronave a pistão -> não grava
+            currentTime = currentTime.AddSeconds(10);
+            actuator.Apply(pistonTelemetry, engine, hotSection, 1);
+            Assert.Equal(1, fakeSim.SetTurbineLossesCallCount);
+
+            // 4. Próximo Apply com aeronave a turbina -> grava
+            currentTime = currentTime.AddSeconds(10);
+            actuator.Apply(turbineTelemetry, engine, hotSection, 1);
+            Assert.Equal(2, fakeSim.SetTurbineLossesCallCount);
+            Assert.Equal(5.0, fakeSim.WrittenLosses[1].N1LossPct);
+        }
+    }
+
+    public class FakeSimConnectForTurbine : ISimConnectService
+    {
+        public event EventHandler? OnConnected { add { } remove { } }
+        public event EventHandler? OnDisconnected { add { } remove { } }
+        public event EventHandler<SimTelemetry>? OnDataReceived { add { } remove { } }
+        public event EventHandler? OnCrashEvent { add { } remove { } }
+        public event Action? OnAircraftReloaded;
+
+        public bool IsCrashed { get; set; }
+        public bool DebugMode { get; set; }
+        public bool IsConnected { get; set; } = true;
+        public SimTelemetry CurrentData { get; set; }
+        public int TurbineEngineCount { get; set; } = 1;
+
+        public readonly Dictionary<int, TurbineLosses> WrittenLosses = new();
+        public readonly Dictionary<int, TurbineLosses> SimLosses = new();
+        public int SetTurbineLossesCallCount { get; set; }
+
+        public void TriggerAircraftReloaded() => OnAircraftReloaded?.Invoke();
+
+        public void ResetCrashState() { }
+        public void SetDebugData(SimTelemetry data) { CurrentData = data; }
+        public void Initialize(IntPtr windowHandle) { }
+        public void Connect() { }
+        public void Disconnect() { }
+        public void SetFailure(string eventName) { }
+        public void SendEvent(string eventName, uint data = 0) { }
+        public void ClearSimFailures() { }
+        public void SetEngineFire(bool isOnFire) { }
+        public void SetOilLeakedPercent(double percent) { }
+        public void SetAlternatorConnected(int alternatorIndex, bool connected) { }
+        public void WriteFlapSurfacePercent(double fraction) { }
+
+        public void SetTurbineLosses(int engineIndex, TurbineLosses losses)
+        {
+            SetTurbineLossesCallCount++;
+            WrittenLosses[engineIndex] = losses;
+            SimLosses[engineIndex] = losses;
+        }
+
+        public TurbineLosses GetTurbineLosses(int engineIndex)
+        {
+            return SimLosses.TryGetValue(engineIndex, out var val) ? val : TurbineLosses.None;
         }
     }
 }

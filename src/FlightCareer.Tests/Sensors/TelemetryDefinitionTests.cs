@@ -59,9 +59,9 @@ namespace FlightCareer.Tests.Sensors
                 .Select(m => m.Groups[1].Value)
                 .ToArray();
 
-            Assert.Equal(16, fields.Length);
-            // 4 chamadas de AddTurbineLossesDef no loop cobrindo os 4 motores
-            Assert.Equal(4, datums.Length);
+            Assert.Equal(17, fields.Length);
+            // 4 chamadas de AddTurbineLossesDef no loop cobrindo os 4 motores + 1 para NUMBER OF ENGINES
+            Assert.Equal(5, datums.Length);
         }
 
         [Fact]

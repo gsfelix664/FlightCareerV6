@@ -93,6 +93,8 @@ namespace FlightCareer.UI.Services
         public double FuelEfficiencyLoss4;
         public double IttCoolingLoss4;
         public double ThrustEfficiencyLoss4;
+
+        public double NumberOfEngines;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -343,6 +345,7 @@ namespace FlightCareer.UI.Services
                     AddTurbineLossesDef($"TURB ENG ITT COOLING EFFICIENCY LOSS:{i}");
                     AddTurbineLossesDef($"TURB ENG THRUST EFFICIENCY LOSS:{i}");
                 }
+                AddTurbineLossesDef("NUMBER OF ENGINES", "Number");
                 _simConnect.RegisterDataDefineStruct<SimTurbineLossesState>(DEFINITIONS.TurbineLossesRead);
 
                 // Inscrição no evento do sistema de Crash
@@ -445,9 +448,9 @@ namespace FlightCareer.UI.Services
             TrackDatum(datum);
         }
 
-        private void AddTurbineLossesDef(string datum)
+        private void AddTurbineLossesDef(string datum, string unit = "Percent")
         {
-            _simConnect?.AddToDataDefinition(DEFINITIONS.TurbineLossesRead, datum, "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            _simConnect?.AddToDataDefinition(DEFINITIONS.TurbineLossesRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
             TrackDatum(datum);
         }
 
@@ -789,6 +792,8 @@ namespace FlightCareer.UI.Services
 
         private SimTurbineLossesState _currentTurbineLosses;
 
+        public int TurbineEngineCount => _currentTurbineLosses.NumberOfEngines > 0 ? (int)Math.Round(_currentTurbineLosses.NumberOfEngines) : 0;
+
         public TurbineLosses GetTurbineLosses(int engineIndex)
         {
             return engineIndex switch
@@ -827,38 +832,6 @@ namespace FlightCareer.UI.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"SimConnect SetTurbineLosses Error: {ex.Message}");
-            }
-        }
-
-        public void SetDebugTurbineLosses(int engineIndex, TurbineLosses losses)
-        {
-            if (losses == null) return;
-            switch (engineIndex)
-            {
-                case 1:
-                    _currentTurbineLosses.N1Loss1 = losses.N1LossPct;
-                    _currentTurbineLosses.FuelEfficiencyLoss1 = losses.FuelEfficiencyLossPct;
-                    _currentTurbineLosses.IttCoolingLoss1 = losses.IttCoolingLossPct;
-                    _currentTurbineLosses.ThrustEfficiencyLoss1 = losses.ThrustEfficiencyLossPct;
-                    break;
-                case 2:
-                    _currentTurbineLosses.N1Loss2 = losses.N1LossPct;
-                    _currentTurbineLosses.FuelEfficiencyLoss2 = losses.FuelEfficiencyLossPct;
-                    _currentTurbineLosses.IttCoolingLoss2 = losses.IttCoolingLossPct;
-                    _currentTurbineLosses.ThrustEfficiencyLoss2 = losses.ThrustEfficiencyLossPct;
-                    break;
-                case 3:
-                    _currentTurbineLosses.N1Loss3 = losses.N1LossPct;
-                    _currentTurbineLosses.FuelEfficiencyLoss3 = losses.FuelEfficiencyLossPct;
-                    _currentTurbineLosses.IttCoolingLoss3 = losses.IttCoolingLossPct;
-                    _currentTurbineLosses.ThrustEfficiencyLoss3 = losses.ThrustEfficiencyLossPct;
-                    break;
-                case 4:
-                    _currentTurbineLosses.N1Loss4 = losses.N1LossPct;
-                    _currentTurbineLosses.FuelEfficiencyLoss4 = losses.FuelEfficiencyLossPct;
-                    _currentTurbineLosses.IttCoolingLoss4 = losses.IttCoolingLossPct;
-                    _currentTurbineLosses.ThrustEfficiencyLoss4 = losses.ThrustEfficiencyLossPct;
-                    break;
             }
         }
     }
