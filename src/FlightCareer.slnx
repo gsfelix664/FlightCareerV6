@@ -4,5 +4,6 @@
   <Project Path="FlightCareer.Infrastructure/FlightCareer.Infrastructure.csproj" />
   <Project Path="FlightCareer.Tests/FlightCareer.Tests.csproj" />
   <Project Path="FlightCareer.Replay/FlightCareer.Replay.csproj" />
+  <Project Path="FlightCareer.SimVarProbe/FlightCareer.SimVarProbe.csproj" />
   <Project Path="FlightCareer.UI/FlightCareer.UI.csproj" />
 </Solution>
