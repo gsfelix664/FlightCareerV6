@@ -7,11 +7,12 @@ using System.Windows;
 using System.Windows.Interop;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
 using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState }
     public enum DEFINITIONS
     {
         AircraftData, EngineFireState, OilLeakState, FailureState,
@@ -21,7 +22,14 @@ namespace FlightCareer.UI.Services
         WriteTurbineN1Loss1, WriteTurbineN1Loss2, WriteTurbineN1Loss3, WriteTurbineN1Loss4,
         WriteTurbineFuelLoss1, WriteTurbineFuelLoss2, WriteTurbineFuelLoss3, WriteTurbineFuelLoss4,
         WriteTurbineIttLoss1, WriteTurbineIttLoss2, WriteTurbineIttLoss3, WriteTurbineIttLoss4,
-        WriteTurbineThrustLoss1, WriteTurbineThrustLoss2, WriteTurbineThrustLoss3, WriteTurbineThrustLoss4
+        WriteTurbineThrustLoss1, WriteTurbineThrustLoss2, WriteTurbineThrustLoss3, WriteTurbineThrustLoss4,
+        FuelStateRead,
+        WriteFuelSystemTank1, WriteFuelSystemTank2, WriteFuelSystemTank3, WriteFuelSystemTank4,
+        WriteFuelSystemTank5, WriteFuelSystemTank6, WriteFuelSystemTank7, WriteFuelSystemTank8,
+        WriteFuelTankLeftMain, WriteFuelTankRightMain,
+        WriteFuelTankLeftAux, WriteFuelTankRightAux,
+        WriteFuelTankLeftTip, WriteFuelTankRightTip,
+        WriteFuelTankCenter, WriteFuelTankCenter2, WriteFuelTankCenter3
     }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
     public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
@@ -123,8 +131,12 @@ namespace FlightCareer.UI.Services
         public event Action<string, uint>? OnMaskedEvent;
         /// <summary>O simulador (re)carregou aeronave ou voo: as falhas do sim foram zeradas.</summary>
         public event Action? OnAircraftReloaded;
+        /// <summary>Estado de combustível e tanques atualizado a cada 1 s.</summary>
+        public event Action<SimFuelState>? OnFuelStateReceived;
 
         public SimFailureState? CurrentFailureState { get; private set; }
+        public SimFuelState CurrentFuelState => _currentFuelState;
+        private SimFuelState _currentFuelState;
 
         public bool IsCrashed { get; set; } = false;
 
@@ -348,6 +360,47 @@ namespace FlightCareer.UI.Services
                 AddTurbineLossesDef("NUMBER OF ENGINES", "Number");
                 _simConnect.RegisterDataDefineStruct<SimTurbineLossesState>(DEFINITIONS.TurbineLossesRead);
 
+                // Leitura do estado de combustível (UNLIMITED FUEL, consumo por motor e tanques)
+                AddFuelDef("UNLIMITED FUEL", "Bool");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:1", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:2", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:3", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:4", "Pounds");
+                AddFuelDef("NEW FUEL SYSTEM", "Bool");
+
+                for (int i = 1; i <= 8; i++)
+                {
+                    AddFuelDef($"FUELSYSTEM TANK USABLE CAPACITY:{i}", "Gallons");
+                    AddFuelDef($"FUELSYSTEM TANK QUANTITY:{i}", "Gallons");
+                }
+
+                AddFuelDef("FUEL TANK LEFT MAIN CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT MAIN QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT MAIN CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT MAIN QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT AUX CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT AUX QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT AUX CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT AUX QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT TIP CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT TIP QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT TIP CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT TIP QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER2 CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER2 QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER3 CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER3 QUANTITY", "Gallons");
+
+                _simConnect.RegisterDataDefineStruct<SimFuelState>(DEFINITIONS.FuelStateRead);
+
+                // Definições de escrita para tanques de combustível (mapeadas uma vez)
+                foreach (var (simVar, def) in FuelTankWriteDefs)
+                {
+                    AddWriteDef(def, simVar, "Gallons");
+                }
+
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
 
@@ -419,6 +472,10 @@ namespace FlightCareer.UI.Services
                 // Leitura de conferência de perdas de turbina a cada 1 s
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTurbineLosses, DEFINITIONS.TurbineLossesRead,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+
+                // Leitura do estado e tanques de combustível a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFuelState, DEFINITIONS.FuelStateRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
             }
             catch (Exception ex)
             {
@@ -454,6 +511,12 @@ namespace FlightCareer.UI.Services
             TrackDatum(datum);
         }
 
+        private void AddFuelDef(string datum, string unit)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.FuelStateRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
         private void TrackDatum(string datum)
         {
             if (_simConnect == null) return;
@@ -485,6 +548,7 @@ namespace FlightCareer.UI.Services
                 _nextEventId = FirstDynamicEventId;
                 CurrentFailureState = null;
                 _currentTurbineLosses = default;
+                _currentFuelState = default;
                 _untrackedToggles.Clear();
                 _alternatorTrackers.Clear();
                 _datumBySendId.Clear();
@@ -788,6 +852,11 @@ namespace FlightCareer.UI.Services
             {
                 _currentTurbineLosses = lossesState;
             }
+            else if (data.dwData[0] is SimFuelState fuelState)
+            {
+                _currentFuelState = fuelState;
+                OnFuelStateReceived?.Invoke(fuelState);
+            }
         }
 
         private SimTurbineLossesState _currentTurbineLosses;
@@ -832,6 +901,86 @@ namespace FlightCareer.UI.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"SimConnect SetTurbineLosses Error: {ex.Message}");
+            }
+        }
+
+        private static readonly Dictionary<string, DEFINITIONS> FuelTankWriteDefs = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "FUELSYSTEM TANK QUANTITY:1", DEFINITIONS.WriteFuelSystemTank1 },
+            { "FUELSYSTEM TANK QUANTITY:2", DEFINITIONS.WriteFuelSystemTank2 },
+            { "FUELSYSTEM TANK QUANTITY:3", DEFINITIONS.WriteFuelSystemTank3 },
+            { "FUELSYSTEM TANK QUANTITY:4", DEFINITIONS.WriteFuelSystemTank4 },
+            { "FUELSYSTEM TANK QUANTITY:5", DEFINITIONS.WriteFuelSystemTank5 },
+            { "FUELSYSTEM TANK QUANTITY:6", DEFINITIONS.WriteFuelSystemTank6 },
+            { "FUELSYSTEM TANK QUANTITY:7", DEFINITIONS.WriteFuelSystemTank7 },
+            { "FUELSYSTEM TANK QUANTITY:8", DEFINITIONS.WriteFuelSystemTank8 },
+            { "FUEL TANK LEFT MAIN QUANTITY", DEFINITIONS.WriteFuelTankLeftMain },
+            { "FUEL TANK RIGHT MAIN QUANTITY", DEFINITIONS.WriteFuelTankRightMain },
+            { "FUEL TANK LEFT AUX QUANTITY", DEFINITIONS.WriteFuelTankLeftAux },
+            { "FUEL TANK RIGHT AUX QUANTITY", DEFINITIONS.WriteFuelTankRightAux },
+            { "FUEL TANK LEFT TIP QUANTITY", DEFINITIONS.WriteFuelTankLeftTip },
+            { "FUEL TANK RIGHT TIP QUANTITY", DEFINITIONS.WriteFuelTankRightTip },
+            { "FUEL TANK CENTER QUANTITY", DEFINITIONS.WriteFuelTankCenter },
+            { "FUEL TANK CENTER2 QUANTITY", DEFINITIONS.WriteFuelTankCenter2 },
+            { "FUEL TANK CENTER3 QUANTITY", DEFINITIONS.WriteFuelTankCenter3 }
+        };
+
+        public IReadOnlyList<FuelTank> GetActiveFuelTanks()
+        {
+            var tanks = new List<FuelTank>();
+            var fuel = _currentFuelState;
+
+            if (fuel.NewFuelSystem > 0.5)
+            {
+                if (fuel.FuelSystemTankUsableCapacity1 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:1", fuel.FuelSystemTankUsableCapacity1, fuel.FuelSystemTankQuantity1));
+                if (fuel.FuelSystemTankUsableCapacity2 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:2", fuel.FuelSystemTankUsableCapacity2, fuel.FuelSystemTankQuantity2));
+                if (fuel.FuelSystemTankUsableCapacity3 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:3", fuel.FuelSystemTankUsableCapacity3, fuel.FuelSystemTankQuantity3));
+                if (fuel.FuelSystemTankUsableCapacity4 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:4", fuel.FuelSystemTankUsableCapacity4, fuel.FuelSystemTankQuantity4));
+                if (fuel.FuelSystemTankUsableCapacity5 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:5", fuel.FuelSystemTankUsableCapacity5, fuel.FuelSystemTankQuantity5));
+                if (fuel.FuelSystemTankUsableCapacity6 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:6", fuel.FuelSystemTankUsableCapacity6, fuel.FuelSystemTankQuantity6));
+                if (fuel.FuelSystemTankUsableCapacity7 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:7", fuel.FuelSystemTankUsableCapacity7, fuel.FuelSystemTankQuantity7));
+                if (fuel.FuelSystemTankUsableCapacity8 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:8", fuel.FuelSystemTankUsableCapacity8, fuel.FuelSystemTankQuantity8));
+            }
+            else
+            {
+                if (fuel.TankLeftMainCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT MAIN QUANTITY", fuel.TankLeftMainCapacity, fuel.TankLeftMainQuantity));
+                if (fuel.TankRightMainCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT MAIN QUANTITY", fuel.TankRightMainCapacity, fuel.TankRightMainQuantity));
+                if (fuel.TankLeftAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT AUX QUANTITY", fuel.TankLeftAuxCapacity, fuel.TankLeftAuxQuantity));
+                if (fuel.TankRightAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT AUX QUANTITY", fuel.TankRightAuxCapacity, fuel.TankRightAuxQuantity));
+                if (fuel.TankLeftTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT TIP CAPACITY", fuel.TankLeftTipCapacity, fuel.TankLeftTipQuantity));
+                if (fuel.TankRightTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT TIP QUANTITY", fuel.TankRightTipCapacity, fuel.TankRightTipQuantity));
+                if (fuel.TankCenterCapacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER QUANTITY", fuel.TankCenterCapacity, fuel.TankCenterQuantity));
+                if (fuel.TankCenter2Capacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER2 QUANTITY", fuel.TankCenter2Capacity, fuel.TankCenter2Quantity));
+                if (fuel.TankCenter3Capacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER3 QUANTITY", fuel.TankCenter3Capacity, fuel.TankCenter3Quantity));
+            }
+
+            return tanks;
+        }
+
+        public void SetFuelTanks(IReadOnlyList<(string simVar, double gallons)> tanks)
+        {
+            if (_simConnect == null || tanks == null || tanks.Count == 0) return;
+
+            foreach (var (simVar, gallons) in tanks)
+            {
+                if (string.IsNullOrWhiteSpace(simVar)) continue;
+
+                if (FuelTankWriteDefs.TryGetValue(simVar.Trim(), out var def))
+                {
+                    try
+                    {
+                        var val = new SimDoubleValue { Value = Math.Max(0.0, gallons) };
+                        _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"SimConnect SetFuelTanks Error para {simVar}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"[SimConnect] SimVar de tanque não mapeada para escrita: {simVar}");
+                }
             }
         }
     }

@@ -284,5 +284,15 @@ namespace FlightCareer.Tests.Components
         {
             return SimLosses.TryGetValue(engineIndex, out var val) ? val : TurbineLosses.None;
         }
+
+        public event Action<FlightCareer.Domain.Fuel.SimFuelState>? OnFuelStateReceived { add { } remove { } }
+        public FlightCareer.Domain.Fuel.SimFuelState CurrentFuelState { get; set; }
+        public readonly List<(string SimVar, double Gallons)> WrittenFuelTanks = new();
+        public IReadOnlyList<FlightCareer.Domain.Fuel.FuelTank> ActiveFuelTanks { get; set; } = Array.Empty<FlightCareer.Domain.Fuel.FuelTank>();
+        public IReadOnlyList<FlightCareer.Domain.Fuel.FuelTank> GetActiveFuelTanks() => ActiveFuelTanks;
+        public void SetFuelTanks(IReadOnlyList<(string simVar, double gallons)> tanks)
+        {
+            if (tanks != null) WrittenFuelTanks.AddRange(tanks);
+        }
     }
 }

@@ -1,5 +1,7 @@
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
 using System;
+using System.Collections.Generic;
 
 namespace FlightCareer.Application.Interfaces
 {
@@ -10,11 +12,13 @@ namespace FlightCareer.Application.Interfaces
         event EventHandler<SimTelemetry>? OnDataReceived;
         event EventHandler? OnCrashEvent;
         event Action? OnAircraftReloaded;
+        event Action<SimFuelState>? OnFuelStateReceived;
 
         bool IsCrashed { get; set; }
         bool DebugMode { get; set; }
         bool IsConnected { get; }
         SimTelemetry CurrentData { get; }
+        SimFuelState CurrentFuelState { get; }
         int TurbineEngineCount { get; }
 
         void ResetCrashState();
@@ -31,5 +35,7 @@ namespace FlightCareer.Application.Interfaces
         void WriteFlapSurfacePercent(double fraction);
         void SetTurbineLosses(int engineIndex, Domain.Components.TurbineLosses losses);
         Domain.Components.TurbineLosses GetTurbineLosses(int engineIndex);
+        IReadOnlyList<FuelTank> GetActiveFuelTanks();
+        void SetFuelTanks(IReadOnlyList<(string simVar, double gallons)> tanks);
     }
 }
