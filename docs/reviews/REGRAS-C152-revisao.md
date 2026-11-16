@@ -13,3 +13,21 @@ Conferido pelo revisor: build 0 erros; `dotnet test` 463/463. Aprovados sem ress
 ## Fora do escopo (continua)
 - Bug 5 do fuzz (`landingCycles`) e preencher limites que faltam no catálogo: decisão do usuário.
 - Não mexer nos arquivos quentes de SimConnect.
+
+---
+
+# Revisão REGRAS-C152 — rodada 2
+
+**Veredito: APROVADO** (com ressalvas abaixo, sem nova rodada)
+
+Conferido pelo revisor: build 0 erros; `dotnet test` 463/463; `fuzz --runs 1000 --seed 777`: 847 aprovados, 153 com limite ausente (categoria própria), **0 falhas**.
+
+- Item 1: as 14 falhas eram do gerador/plano (colisão de abusos no mesmo instante, cancelamento antes do toque, choque térmico desfeito no cruzeiro, EGT abaixo do limite). Classificação conferida por amostragem.
+- Item 2: abusos voltaram a ser sorteados em todas as aeronaves; limite ausente aparece por abuso, sem esconder os outros abusos do voo. Lista de aeronaves sem limite no relatório r2.
+- Item 3: tempos mínimos lidos do `wear_rules.json`.
+- Item 4: mudança mantida com justificativa real — `PartFlightTracker.DecorateSensorFrame` grava `eng-cht-cooling-rate` e `eng-cht-cooling-rate:1` no mesmo frame; na ordem antiga o choque térmico era avaliado como regra global (efeito em produção, agora por motor).
+
+## Ressalvas (para tarefa futura, não bloqueiam)
+1. Tolerância do gabarito por voo mais curto usa `0,05 %/h` fixo (`SyntheticFlightOracle`); trocar pela taxa natural real da peça.
+2. `FlapOverSpeed` em avião sem flap (CAP-4, J-3 Cub) conta como "limite ausente: vfe"; o oráculo deveria pular pelo recurso da aeronave.
+3. Os limites estimados de Vne/Vfe/alternador (merge `data/limites-estimados`) reduzem os "limite ausente"; rodar o fuzz de novo depois do merge.
