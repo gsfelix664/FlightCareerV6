@@ -1969,3 +1969,9 @@
   - Atualizados `AGENTS.md` e `src/FlightCareer.slnx`.
 - **Validação no MSFS**:
   - Testado no MSFS 2024 em tempo real com o Cessna C152 em solo: sondagem de 4.750 slots completada (4.656 aceitas, 94 rejeitadas) e gravação contínua em 23 blocos validada nos arquivos `report.csv`, `summary.txt`, `values.csv` e `strings.csv`.
+
+## 2026-11-16 - Lista de SimVars, revisão do SimVarProbe e primeiros testes no C152 (Claude)
+- `docs/plans/sensor-research/simvars-msfs2024.csv`: 1.678 SimVars da documentação do SDK 2024 cruzadas com o SimvarWatcher e com o registro; geradores em `tools/simvar_probe/` (`scrape_simvars.py`, `make_probe_list.py`, `build_matrix.py`) e arquivos do Watcher em `tools/simvar_probe/watcher/`.
+- Revisão da SIMVAR-PROBE (aprovada): `catch {}` silenciosos removidos e `--block-size` respeitado; rodada completa conferida no MSFS (C152 parado, sem deslocamento entre blocos).
+- Plano `docs/plans/validacao-simvars.md` (validação das SimVars, teste de panes/Key Events, ligação com as peças).
+- Testes do usuário no C152 (1 parado + 2 voos) em `docs/plans/sensor-validation/probe-runs/`, com matriz `matriz-C152.csv/.md`. Achados: `ELECTRICAL GENERATOR *` substitui `GENALT`; pontos de contato por índice funcionam; limites de G do sim ≠ POH; `ENG VIBRATION`, `GEAR SKIDDING FACTOR`, `SEMIBODY LOADFACTOR X/Z` e `MIN G FORCE` mortas no C152. O MSFS caiu 3 vezes com o mesmo erro interno durante a sondagem (suspeita: variáveis `ATC *`/`AI *` na troca de controle do ATC; não provado).
