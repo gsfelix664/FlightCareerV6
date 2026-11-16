@@ -1,38 +1,57 @@
-# Passagem de sessão (Claude) — 2026-11-16 (manhã)
+# Passagem de sessão (Claude) — 2026-11-16 (tarde, PC do escritório)
 
-Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `docs/agents/LICOES.md`, `docs/plans/validacao-simvars.md` (plano em andamento), `docs/plans/sensor-validation/probe-runs/matriz-C152.md` (resultado dos testes de hoje), `tools/simvar_probe/README.md`.
+Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `docs/agents/LICOES.md`, `docs/plans/validacao-simvars.md` e o índice de análises em `docs/plans/sensor-research/` (abaixo).
 
-## Próxima máquina: PC do escritório, **sem MSFS e sem SDK**
-- Build e testes funcionam sem o SDK: as DLLs do SimConnect estão versionadas em `src/FlightCareer.UI/` (o `FlightCareer.SimVarProbe` usa as mesmas).
-- Nada que precise do simulador roda lá: SimVarProbe, REC, Calibrar, SimvarWatcher, teste de panes. Trabalhar só com dados já gravados (matriz, fixtures de replay, voos sintéticos) e lógica testável.
-- Os logs de sensores e do probe ficam em `%LocalAppData%` de **esta** máquina; o que interessa já foi copiado para o repositório (abaixo).
+## Máquina e regras
+- **PC do escritório: sem MSFS e sem SDK.** Build e testes rodam (DLLs do SimConnect versionadas em `src/FlightCareer.UI/`). Nada que precise do simulador roda aqui.
+- **Divisão de trabalho (decisões do usuário, em `CLAUDE.md` e `tools/agents/global/CLAUDE.md`):** código **e dados** (catálogos JSON/CSV > ~20 linhas) vão para o Gemini com spec (`tools/agents/gemini-task.sh` em segundo plano); pesquisa, análise de documentação do SDK e planos ficam com o Claude. Claude revisa (`tools/agents/review-pack.sh`), roda build/testes, faz merge (`FC_ALLOW_PROTECTED=1`) e **push quando o usuário autorizar** (o push precisa de `FC_ALLOW_PROTECTED=1` também).
+- Depois de um pull que mude `tools/agents/global/`, rodar `tools/agents/install-global.sh` (foi rodado hoje aqui).
+- `docs/VARS.txt` e `REGRAS_tiers.txt` não rastreados são do usuário: não commitar nem apagar.
 
 ## Estado
-- Base `feat/component-health-system` em dia com o GitHub. Build 0 erros; `dotnet test` **455/455**.
-- `REGRAS_tiers.txt` na raiz: **não rastreado e não é dos agentes** (anotações do usuário sobre tiers de missão). Não commitar nem apagar sem perguntar.
-- Worktrees do Gemini nesta máquina (`../FLIGHTCAREERV6-gemini` em `feat/simvar-probe`, `../FLIGHTCAREERV6-gemini2`): limpos e já mergeados. No PC do escritório o `gemini-task.sh` cria o worktree de novo.
-- **Regras combinadas com o usuário (mantidas):** tudo vai para o Gemini (inclusive arquivos quentes) com spec passo a passo; o Claude revisa linha a linha, roda build/testes, faz o merge **e o push ao fim de cada trabalho** (`FC_ALLOW_PROTECTED=1` na base). `gemini-task.sh` sempre com `run_in_background`.
+- Base `feat/component-health-system` no GitHub em `7ebb15d` (+ este handoff). Build 0 erros; `dotnet test` **500/500**.
+- Worktree do Gemini `../FlightCareerV6-gemini` limpo (branches já mergeadas).
 
-## Feito hoje
-1. **Lista de SimVars do SDK 2024:** `docs/plans/sensor-research/simvars-msfs2024.csv` (1.678, com índice, unidade, gravável, se está no Watcher e no registro). Gerador: `tools/simvar_probe/scrape_simvars.py`.
-2. **Ferramentas de descoberta** (Developer Mode): Behaviors Debug (abas Variables e Input Events, Ctrl+G), debugs de sistema (índices elétricos), Wheels (pontos de contato), SimConnect Inspector (exceções do nosso app). Resumo no plano.
-3. **SimVarProbe** (SIMVAR-PROBE, Gemini, aprovado; revisão em `docs/reviews/SIMVAR-PROBE-revisao.md`): console que valida e grava ~4.750 leituras (ou ~11.100 com `--max-generic 20`) a cada 1 s, sem deslocamento entre blocos. Lista de entrada: `src/FlightCareer.Infrastructure/Data/simvar_probe_list.csv` (documentação ∪ lista interna do SimvarWatcher, 1.755). Gerador: `tools/simvar_probe/make_probe_list.py`.
-4. **Plano** `docs/plans/validacao-simvars.md` (passos 1, 1b panes/Key Events, 2 a 6).
-5. **Testes no MSFS (C152, usuário):** 1 rodada parada + 2 voos até ~580 ft. Resultados copiados para `docs/plans/sensor-validation/probe-runs/` (`report.csv`, `summary.txt`, `strings.csv`, `values.csv.gz`) e matriz `matriz-C152.csv` / `matriz-C152.md` (gerada por `tools/simvar_probe/build_matrix.py`).
-6. Arquivos do SimvarWatcher (`.simvars` do Top 25 e das candidatas de desgaste) em `tools/simvar_probe/watcher/`.
+## Feito hoje (código, tudo aprovado e mergeado; **nada testado no MSFS**)
+1. **REGRAS-C152** (2 rodadas): pontos de contato por roda (`-0..-2`), gerador 2024, `DYNAMIC PRESSURE`, G negativo funcionando, `egtMax` de classe, trem em escala 0–100, fuzz com categoria "limite ausente". Ressalvas abertas: tolerância 0,05 %/h no oráculo; `FlapOverSpeed` em avião sem flap conta como limite ausente.
+2. **Limites estimados** de Vne/Vfe/alternador em 42 aeronaves (`source: ClassDefault`, "estimativa — revisar").
+3. **TURB-DEGRADACAO** (2 rodadas): saúde de Motor/Seção quente vira `TURB ENG N1/FUEL EFFICIENCY/ITT COOLING/THRUST EFFICIENCY LOSS` gravados no sim, por motor (decisão do usuário reverteu "nada é gravado no sim" só para essas 4).
+4. **COMBUSTIVEL-REAL** (2 rodadas): consumo por `GENERAL ENG FUEL USED SINCE START` (soma incrementos, reinício de motor), combustível do app gravado nos tanques, sincronização automática no solo com conferência (3 tentativas), `UNLIMITED FUEL` trava o início, abastecimento em voo invalida o voo.
+5. **SLEW-INTEGRIDADE**: slew no solo até 1 km antes da decolagem (blackbox); no ar/acima do limite invalida; congelamentos em voo invalidam; `InvalidateFlight(motivo)` único. **Ressalva:** confirmar no MSFS que `SIM ON GROUND` fica 1 durante o slew no pátio.
 
-## Achados dos testes de hoje (C152)
-- **O MSFS caiu 3 vezes com o mesmo erro interno** (`0xc0000005`, offset `0x2fbae4c` em `FlightSimulator2024.exe` 1.9.24.0). Nos dois voos a queda veio ~1–1,5 min depois de `AI TRAFFIC STATE`=`STATE_TAKEOFF` e de `ATC FUTURE AGENT NAME` mudar (troca de controle do ATC); numa terceira vez caiu durante a fase A, entre lotes de `AI TRAFFIC *`. **Suspeita (não provada):** ler variáveis `ATC *` / `AI *` do avião do jogador. Próximo teste do usuário (só nesta máquina): `--filter "^(?!ATC |AI )"`. O registro do addon não lê essas famílias (só `ATC MODEL`/`ATC TYPE` uma vez no contexto).
-- **Validadas (variam de forma coerente):** `DYNAMIC PRESSURE`, deflexões de aileron/profundor/leme, `ELECTRICAL GENERATOR AMPS/VOLTAGE/ACTIVE:1` (substitui `GENALT`, que fica 0 em todos os índices), `CONTACT POINT COMPRESSION/IS ON GROUND/IS SKIDDING:0..2`, `COVER ON:0/2`, `CIRCUIT ON:3`, `ELECTRICAL BUS VOLTAGE:1`, `ENG OIL QUANTITY:1`, primer, freios, rodas, flaps, luzes, `SURFACE TYPE`, `SUCTION PRESSURE`, `GYRO DRIFT ERROR`, `TOTAL WEIGHT`, `CG PERCENT`, `GENERAL ENG PCT MAX RPM:1`, `GENERAL ENG ELAPSED TIME:1`, `WEAR AND TEAR LEVEL:39`, `LEAKS DIRT PCT`.
-- **Limites de G que o sim informa no C152:** +6/−4,8 (flap recolhido) e +4,2/−3,6 (flap baixado) — **não são os do POH** (+4,4/−1,76 utilitária). Servem só de reserva; POH continua com prioridade.
-- **Mortas no C152 (sempre 0):** `ENG VIBRATION`, `GEAR SKIDDING FACTOR`, `SEMIBODY LOADFACTOR X/Z`, `GENERAL ENG DAMAGE PERCENT:1` (sem abuso de rotação no voo; não conclusivo), `MIN G FORCE` (usada na regra `airframe_over_g_negative`).
-- `matriz-C152.md` lista os 31 sensores **usados em regras** que não variaram. Muitos são esperados num C152 (trem fixo, sem turbina, hidráulico ou pressurização); os que importam estão acima.
+## Feito hoje (documentação, em `docs/plans/sensor-research/`)
+- SimVars: `variaveis-diversos`, `-freios-trem`, `-comandos`, `-eletrica`, `-motor`, `-modelo-voo`, `-combustivel`, `-aeronave-diversos`, `-radio-navegacao`, `-sistemas`, `variaveis-obsoletas` (70 obsoletas; **`CRASH FLAG` e `GENERAL ENG FIRE DETECTED` ainda em produção**).
+- Key Events: `eventos-eletricos`, `-motor`, `-comandos`, `-combustivel`, `-diversos` (6 páginas).
+- API: `simconnect-api` (Flow API, `FlightSave`/`FlightLoad`, `FlightPlanLoad`, `ExecuteAction`).
+- Lista para o SimvarWatcher: `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars` (~260) e `flightcareer-candidatas-atc.simvars` (testar `ATC *` à parte: suspeita das quedas).
+- Planos novos: `docs/plans/taxas-aeroporto-servicos-solo.md`, `docs/plans/iluminacao-panes-disjuntor.md` (inclui flap: pane elétrica rearmável × mecânica), atualização em `simconnect-wb-deteccao-aeronave.md` (carga gravada em `PAYLOAD STATION WEIGHT`).
 
-## Próximos passos (no PC do escritório, sem simulador)
-1. **Revisar regras × peças × sensores com a matriz do C152** (passos 3 e 4 do plano): para cada regra de `wear_rules.json` que se aplica a pistão/trem fixo, conferir se os sensores dela variaram; trocar ou complementar os mortos (`ENG VIBRATION`, `GEAR SKIDDING FACTOR` → `CONTACT POINT SKIDDING FACTOR`/`IS SKIDDING` por roda; `MIN G FORCE` → `G FORCE` mínimo do voo; `GENALT` → `ELECTRICAL GENERATOR *`); corrigir a leitura dos pontos de contato (`:0..N`, hoje só `:1` por `perEngine`). Decisões na spec, implementação pelo Gemini, testes de replay com as fixtures existentes.
-2. **Bugs do fuzz** (`docs/reviews/FUZZ-revisao.md`, rodada 2): G negativo, `egtMax` em 35/46 aeronaves, gerador (trem 0–100, voos curtos). **Pergunte ao usuário antes** (autorização ainda não dada).
-3. Regras novas com as variáveis validadas (comando × Va com `DYNAMIC PRESSURE`, peso de pouso, CG) — também só com dados e testes.
-4. Extrair os Key Events de pane da documentação (plano › 1b) — só documentação, sem simulador.
+## Decisões do usuário registradas hoje
+- Fuzz dos bugs (G negativo, egtMax, gerador): feito junto da REGRAS-C152.
+- Regra de delegação: código e dados → Gemini.
+- Combustível: gravar no sim; `UNLIMITED FUEL` trava; abastecer em voo invalida; consumo por `FUEL USED SINCE START`; no solo **sincroniza sozinho**; caminhão do sim (`REQUEST_FUEL_KEY`) **cobra e aceita**.
+- Slew: no solo até 1 km; em voo **só invalida** (não bloquear).
+- Auto-start (Ctrl+E): **não invalida, perde um pouco de XP** (sugestão 10 %, a confirmar).
+- Panes elétricas: **as duas** (disjuntor rearmável `BREAKER_*_SET` e fio rompido `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE`).
+- Nada que dependa do ATC do sim (voo online).
+- Carga da missão nas estações (`PAYLOAD STATION WEIGHT`): prioridade.
+- Captura automática do pouso para o diário de bordo: aprovada.
+- "Continuar de onde parou" (`FlightSave`/`FlightLoad`): ideia do usuário, documentada.
 
-## Pendências que precisam do simulador (só nesta máquina)
-Teste com filtro ATC/IA; voos em outros aviões (C172, retrátil, turbo-hélice) com o SimVarProbe; abuso de rotação para provar `GENERAL ENG DAMAGE PERCENT`; modo de teste de panes (a implementar); preparação/cancelamento com eventos de partida (FIX-START-EVENTS); F4.2e (pane real de alternador e flap); pneu/trem com dano e pista de terra; crash declarado pelo sim.
+## Próximos passos (sem simulador), na ordem proposta
+1. **Fuzz em todas as 46 aeronaves** (`--aircraft all` no `FlightCareer.Replay`, resumo por avião) + ressalvas da REGRAS-C152 (tolerância pela taxa real da peça; pular Vfe em avião sem flap). Prometido ao usuário.
+2. **Nota dos passageiros por tempo** (`FlightQualityService` conta por pacote): segundos fora da faixa, pausa ignorada, turbulência × manobra (`SEMIBODY LOADFACTOR YDOT`, `TURN COORDINATOR BALL`, `INCIDENCE BETA` — só depois do Watcher; a lógica pode vir antes com dados atuais).
+3. **Auto-start → XP** e **caminhão de combustível cobrado** (lógica pura + integração fina).
+4. **Taxas de aeroporto F1** — depende das 5 decisões do plano (`taxas-aeroporto-servicos-solo.md` § 6).
+5. **Iluminação no Hangar** (só domínio).
+6. **Integridade pela Flow API** (troca do `CRASH FLAG`, teleporte, Back On Track, `REPAIR_AND_REFUEL`, resets) — código pronto, validação no MSFS.
+
+## Decisões ainda pendentes do usuário
+- `eventos-diversos.md` § 3 (resets/`BACK_TO_FLY` invalidam?; serviços de solo pelo sim; alarme nativo; extintor apaga o fogo do addon; capas/walkaround).
+- `eventos-comandos.md` § 3 (compensador inoperante/disparado; auto-leme = regra do auto-start?).
+- `eventos-combustivel.md` § 3 (panes `FUELSYSTEM_*`; `REPAIR_AND_REFUEL` invalida).
+- `simconnect-api.md` § 3 (continuar de onde parou; plano no GPS; Flow API; mensagens no sim; `FailureAction`).
+- Planos de taxas e de iluminação (§ decisões).
+
+## Pendências que precisam do simulador (máquina de casa)
+SimvarWatcher com as listas novas; SimVarProbe com `--filter "^(?!ATC |AI )"`; escrita de turbina, combustível (novo e legado), slew no pátio; teste de panes (modo de panes do SimVarProbe: `BREAKER_*_SET`, `PARTIAL PANEL *`, `FUELSYSTEM_*`, `HYDRAULIC_ACTUATOR_ACTIVE_SET`, trim disabled); `FlightSave`/`FlightLoad`; Flow API; voos em outros aviões; pendências antigas (F4.2e, crash declarado, pista de terra).
