@@ -2102,3 +2102,7 @@
 ## 2026-11-16 - Análise das variáveis de sistemas do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/variaveis-sistemas.md` (280 SimVars): painel parcial gravável como pane nativa por instrumento, vazamento hidráulico, congelamentos como trapaça, conforto de cabine (bola, sinais, razão e temperatura de cabine), luzes por fase e horas acesas, carga da missão gravada nas estações (`PAYLOAD STATION WEIGHT`) e tipos de missão futuros (combate a incêndio, reboque).
 - 37 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise dos Key Events elétricos do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-eletricos.md` (129 eventos): como enviar (panes e serviços) e receber (ações do piloto) Key Events; `BREAKER_*_SET` para pane por sistema rearmável, `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE` para fio rompido, barramento parcial, bateria fora do barramento, `SET_EXTERNAL_POWER` para a GPU contratada, luzes por `*_LIGHTS_SET` e eventos de APU. Preferir `_SET` a `_TOGGLE`.
+- Só documentação; nada testado no MSFS.
