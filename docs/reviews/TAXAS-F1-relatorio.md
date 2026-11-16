@@ -1,6 +1,6 @@
 # TAXAS-F1 — Catálogo de taxas de aeroporto e calculador (F1 do plano)
 
-**Branch:** feat/taxas-aeroporto-f1 · **Commit:** pendente · **Data:** 2026-11-16
+**Branch:** feat/taxas-aeroporto-f1 · **Commit:** ca97f4d · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar `src/FlightCareer.Infrastructure/Data/airport_fees.json` com schemaVersion, currency "$", note "estimativa — calibrar", sizeClasses (<12.500 lb light, 12.500-60.000 lb medium, >60.000 lb heavy), LANDING por tier (1: 250 + 0,035/lb, 2: 80 + 0,015/lb, 3: 25 + 0,005/lb, 4: 0), PAX_FEE (t1: 12, t2: 6, t3: 2, t4: 0), HANDLING (medium: 250 t1 / 150 t2; heavy: 1.500 t1 / 800 t2), NAV_TERMINAL ($3 por 1.000 lb MTOW para medium/heavy em t1-3), PARKING (franquia 2 h; t1: 5/40/200, t2: 3/25/120, t3: 1/10/50), countryOverrides e icaoOverrides vazios.
