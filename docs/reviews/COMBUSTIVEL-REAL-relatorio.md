@@ -1,6 +1,6 @@
 # COMBUSTIVEL-REAL — consumo real, abastecimento gravado no sim e travas contra combustível grátis
 
-**Branch:** feat/combustivel-real · **Commits:** bb06ce6, 9abcd18, 7117095, d2658c4, 3d14ca3 · **Data:** 2026-11-16
+**Branch:** feat/combustivel-real · **Commits:** bb06ce6, 9abcd18, 7117095, d2658c4, 3d14ca3, b028be6 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar a camada de domínio pura `FlightCareer.Domain/Fuel/` contendo:
