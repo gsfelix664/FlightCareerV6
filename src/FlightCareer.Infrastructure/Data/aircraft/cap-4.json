@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "CAP-4",
   "class": "Piston",
   "engineCount": 1,
@@ -48,10 +48,10 @@
     },
     {
       "key": "egtMax",
-      "value": 649.07,
+      "value": 893.52,
       "unit": "celsius",
-      "source": "SimVar",
-      "reference": "MAX EGT (20261115-0805-CAP-4.csv)",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar com POH: padrão da classe pistão; MAX EGT do sim (649,07 °C) é a escala do instrumento",
       "notes": null
     },
     {
