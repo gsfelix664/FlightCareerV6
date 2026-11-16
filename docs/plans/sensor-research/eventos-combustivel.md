@@ -46,7 +46,7 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Fuel System Events](http
 
 ## 3. Decisões para o usuário
 1. `REPAIR_AND_REFUEL` em voo invalida o voo e as panes são reaplicadas? (recomendado)
-2. Caminhão de combustível do sim (`REQUEST_FUEL_KEY`): o app ignora (sincroniza de volta) ou cobra e aceita?
+2. **Decidido (2026-11-16): cobra e aceita.** Caminhão de combustível do sim (`REQUEST_FUEL_KEY`): no solo antes do voo, o app detecta o evento e a subida da quantidade, **cobra a diferença ao preço do aeroporto** (`FuelPriceService`, transação "Combustível (caminhão do sim)"), atualiza `PilotAircraft.FuelAmount` e só então a sincronização da COMBUSTIVEL-REAL roda (sem devolver o valor antigo). Subida sem o evento continua sendo sincronizada de volta; em voo continua invalidando.
 3. Panes de válvula/bomba/linha pelos eventos `FUELSYSTEM_*` (efeito no sistema, sem mexer no seletor)?
 
 ## 4. Próximos passos

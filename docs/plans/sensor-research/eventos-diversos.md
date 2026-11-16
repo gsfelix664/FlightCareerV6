@@ -48,7 +48,7 @@ Regras de `eventos-eletricos.md` § 1 (enviar × receber, `_SET` × `_TOGGLE`) e
 - **Integridade:** `BACK_TO_FLY`, `SIM_RESET`, `SITUATION_RESET`, `RELOAD_USER_AIRCRAFT`, `FORCE_END`, `ABORT`, `EXIT`, `REPLAY_STOP`, `DEMO_*`.
 - **Pausa:** `PAUSE_SET/ON/OFF/TOGGLE` (complementa `MOTION SIMULATION`).
 - **Serviços:** `REQUEST_POWER_SUPPLY`, `REQUEST_CATERING`, `REQUEST_LUGGAGE`, `TOGGLE_JETWAY`, `TOGGLE_RAMPTRUCK` — o app chama o serviço comprado e cobra o que o piloto pediu pelo sim.
-- `CAPTURE_SCREENSHOT`: possível captura automática do pouso para o diário de bordo (ideia).
+- **`CAPTURE_SCREENSHOT` — aprovado pelo usuário (2026-11-16):** captura automática do pouso (logo depois do toque, de preferência numa vista externa) para o **diário de bordo** do voo. Testar onde o MSFS 2024 grava a imagem (pasta de capturas do sim/Xbox app) para o app copiar e ligar ao registro do voo; opção para desligar.
 - `AUTOCOORD_TOGGLE`/`AXIS_SENSOR_TOGGLE`: ajudas (mesma regra do auto-start/auto-leme, se o usuário quiser).
 - Personagem (`PC_*`), painéis, som, rótulos, debug, macros: não usar.
 

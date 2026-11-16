@@ -2185,3 +2185,4 @@
 ## 2026-11-16 - Estudo da API do SimConnect do MSFS 2024 (Claude)
 - Novo `docs/plans/sensor-research/simconnect-api.md` (Actions, Debug, Events And Data/Flow API, Flights, General, Input Events): "continuar de onde parou" com `FlightSave`/`FlightLoad` (ideia do usuário), plano da missão no GPS com `FlightPlanLoad`, Flow API para integridade e acidente (teleporte, Back On Track, replay, `PLANE_CRASH`), `ExecuteAction` (`FailureAction` com saúde, `RefillAction`, mensagens e destaque de instrumento dentro do sim), pinturas instaladas e atalho reservado.
 - Só documentação; nada testado no MSFS.
+- Decisões do usuário (2026-11-16): caminhão de combustível do sim **cobra e aceita** (`eventos-combustivel.md`); **captura automática do pouso** para o diário de bordo aprovada (`eventos-diversos.md`).
