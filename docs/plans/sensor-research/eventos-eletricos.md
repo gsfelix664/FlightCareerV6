@@ -62,7 +62,7 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Electrical Events](https
 | `APU_EXTINGUISH_FIRE` | gerador | Receber: extintor da APU disparado no fogo (procedimento; recarga cobrada). |
 
 ## 4. Decisões para o usuário
-1. Pane elétrica rearmável por `BREAKER_*_SET` (o addon reabre conforme a causa) **e** pane persistente por `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE` (fio rompido): usar os dois, como no plano do flap (§ 2.1)?
+1. **Decidido (2026-11-16): usar as duas** — pane elétrica rearmável por `BREAKER_*_SET` (o addon reabre conforme a causa) e pane persistente por `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE` (fio rompido), como no plano do flap (§ 2.1).
 2. GPU contratada no app conectada pelo addon com `SET_EXTERNAL_POWER`?
 3. Receber os eventos do piloto (rearme, luzes, bomba de vácuo, extintor) para a nota de procedimento?
 

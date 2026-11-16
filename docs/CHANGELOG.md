@@ -2143,3 +2143,8 @@
 ## 2026-11-16 - Análise dos Key Events elétricos do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/eventos-eletricos.md` (129 eventos): como enviar (panes e serviços) e receber (ações do piloto) Key Events; `BREAKER_*_SET` para pane por sistema rearmável, `ELECTRICAL_BUS_TO_CIRCUIT_CONNECTION_TOGGLE` para fio rompido, barramento parcial, bateria fora do barramento, `SET_EXTERNAL_POWER` para a GPU contratada, luzes por `*_LIGHTS_SET` e eventos de APU. Preferir `_SET` a `_TOGGLE`.
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise dos Key Events de motor do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-motor.md`: parada por falta de combustível (`SHUTOFF_VALVE_OFF`, `SET_FUEL_VALVE_ENG*`), ignição da turbina, panes por mascaramento do comando do piloto (manete, governador, mistura, cowl flap, partida, reverso), cheque de magnetos e outros procedimentos recebidos do piloto. `ISOLATE_TURBINE_*` só serve ao DarkStar; as panes nativas de motor ficam na página de falhas.
+- `eventos-eletricos.md`: decisão do usuário de usar as duas panes elétricas (disjuntor rearmável e fio rompido).
+- Só documentação; nada testado no MSFS.
