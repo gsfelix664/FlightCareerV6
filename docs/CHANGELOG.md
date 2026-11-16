@@ -2285,3 +2285,22 @@
 
 ## 2026-11-16 - Moeda genérica $ (Claude)
 - Decisão do usuário: valores em `$` genérico, base dólar, sem escrever "US$". O app já força a cultura en-US no `App.xaml.cs` (`:C2` → `$1,234.56`); as duas mensagens do caminhão de combustível que escreviam "R$" passam a usar `:C2`. Plano de taxas (`taxas-aeroporto-servicos-solo.md` § 6) atualizado com a decisão e as recomendações ainda a confirmar.
+
+## 2026-11-16 - Taxas de aeroporto F1: catálogo e calculador (Gemini)
+- **Catálogo de Taxas (`Infrastructure/Data/airport_fees.json`)**:
+  - Parâmetros por tier (1 a 4) e por porte da aeronave (`light` < 12.500 lb, `medium` 12.500–60.000 lb, `heavy` > 60.000 lb): taxa de pouso (`LANDING`), taxa de embarque por passageiro (`PAX_FEE`), taxa de handling/rampa (`HANDLING`), tarifa de navegação/terminal (`NAV_TERMINAL`) e taxa de estacionamento (`PARKING` com franquia de 2 h).
+  - Moeda genérica `$`, base dólar, com `countryOverrides` e `icaoOverrides` previstos.
+- **Domínio (`FlightCareer.Domain/Economy/`)**:
+  - `AirportFeeCatalog`: carregamento e validação de schema JSON (`LoadFromJson`), busca padrão multi-candidato (`LoadDefault`), singleton em cache (`Default`).
+  - `AircraftSizeClass` e classificador estático `AircraftSizeClassifier.Classify(mtowLbs)`.
+  - `FeeLine` e `FeeContext`: modelos imutáveis de entrada e saída com arredondamento em 2 casas decimais.
+  - `GroundServiceCalculator`: cálculo determinístico puro de taxas aeroportuárias (retornando lista vazia para Tier 4 rural/remoto).
+- **Integração no `FlightService`**:
+  - Substituição da fórmula inline de pouso pelo `GroundServiceCalculator.Calculate`, computando passageiros de missões concluídas no destino e indicador de missão ativa.
+  - Geração de `FinancialTransaction` individual para cada serviço com total > 0 (categorias "Taxa de Pouso", "Taxa de Embarque", "Handling", "Navegação/Terminal"), debitando o saldo do piloto.
+  - `outcome.LandingFee` mantém o nome por compatibilidade e consolida a soma de todas as taxas aeroportuárias; mensagem final do voo atualizada com `" | Taxas: {total:C2}"` quando houver taxas adicionais além do pouso.
+  - `CalculateLandingFee(airport, mtowLbs)` mantido para compatibilidade, delegando ao `GroundServiceCalculator`.
+- **Testes e Aceitação**:
+  - 24 novos testes unitários em `src/FlightCareer.Tests/Economy/AirportFeeTests.cs` cobrindo paridade com a fórmula legada de pouso por tier × peso, fronteiras de porte, taxa de passageiros, handling, navegação/terminal, estacionamento com franquia, tier 4, voo C152 em hub (~$332), jato comercial em hub (~$10.170) e integridade de carregamento do catálogo.
+  - 1 novo teste de persistência em `FlightPersistenceTests.cs` validando execução fim a fim com persistência de transações no SQLite por categoria e mensagem final.
+  - Build 0 erros, `dotnet test` 577/577 aprovados (552 baseline + 25 novos). Não testado no MSFS.

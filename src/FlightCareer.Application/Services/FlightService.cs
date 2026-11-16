@@ -1,4 +1,5 @@
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
 using FlightCareer.Domain.Utils;
@@ -264,6 +265,7 @@ namespace FlightCareer.Application.Services
 
                 int missionsDone = 0;
                 int missionsRemaining = 0;
+                int passengersCompleted = 0;
 
                 foreach (var mission in activeMissions)
                 {
@@ -273,6 +275,7 @@ namespace FlightCareer.Application.Services
                         double missionReward = mission.RewardMoney;
                         totalRevenue += missionReward;
                         missionsDone++;
+                        passengersCompleted += mission.PassengerCount;
                         
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null) _context.Missions.Remove(dbMission);
@@ -330,24 +333,59 @@ namespace FlightCareer.Application.Services
                     });
                 }
 
-                // Cálculo da Taxa de Pouso baseada no MTOW e classificação do aeroporto
+                // Cálculo das taxas aeroportuárias (Pouso, Embarque, Handling, Navegação/Terminal) via catálogo
                 double mtowLbs = AircraftWeightSpecs.GetMtow(aircraft.AircraftType?.Model, aircraft.AircraftType);
+                int feeTier = destAirport?.Tier ?? 4;
 
-                double landingFee = CalculateLandingFee(destAirport, mtowLbs);
-                if (landingFee > 0)
+                var feeContext = new FeeContext(
+                    feeTier,
+                    destinationIcao,
+                    mtowLbs,
+                    passengersCompleted,
+                    missionsDone > 0,
+                    parkedGameHours: 0.0
+                );
+
+                var fees = GroundServiceCalculator.Calculate(feeContext);
+                double totalFees = 0;
+                double landingOnlyFee = 0;
+
+                foreach (var fee in fees)
                 {
-                    pilot.Balance -= landingFee;
+                    if (fee.Total <= 0) continue;
+
+                    totalFees += fee.Total;
+                    if (fee.Code == "LANDING")
+                    {
+                        landingOnlyFee += fee.Total;
+                    }
+
+                    string category = fee.Code switch
+                    {
+                        "LANDING" => "Taxa de Pouso",
+                        "PAX_FEE" => "Taxa de Embarque",
+                        "HANDLING" => "Handling",
+                        "NAV_TERMINAL" => "Navegação/Terminal",
+                        "PARKING" => "Estacionamento",
+                        _ => fee.Description
+                    };
+
+                    pilot.Balance -= fee.Total;
                     _context.FinancialTransactions.Add(new FinancialTransaction
                     {
                         Id = Guid.NewGuid(),
                         PilotId = pilot.Id,
                         Date = DateTime.Now,
                         Type = TransactionType.Expense,
-                        Category = "Taxa de Pouso",
-                        Amount = landingFee,
-                        Description = $"Taxa de Pouso em {destinationIcao} (Tier {airportTier}, MTOW: {mtowLbs:N0} lbs)"
+                        Category = category,
+                        Amount = fee.Total,
+                        Description = fee.Description
                     });
                 }
+
+                // outcome.LandingFee mantém o nome para compatibilidade com DTO, HUD e persistência,
+                // mas passa a representar a soma consolidada de todas as taxas aeroportuárias do voo.
+                outcome.LandingFee = totalFees;
 
                 pilot.Balance += totalRevenue;
                 pilot.ExperiencePoints += totalXP;
@@ -375,7 +413,7 @@ namespace FlightCareer.Application.Services
                     outcome.Success = false;
                     outcome.Revenue = 0;
                     outcome.FuelCost = fuelCost;
-                    outcome.LandingFee = landingFee;
+                    outcome.LandingFee = totalFees;
                     outcome.XP = 0;
                     outcome.CompletedMissions = 0;
                     outcome.RemainingMissions = activeMissions.Count;
@@ -386,11 +424,15 @@ namespace FlightCareer.Application.Services
                 outcome.Success = true;
                 outcome.Revenue = totalRevenue;
                 outcome.FuelCost = fuelCost;
-                outcome.LandingFee = landingFee;
+                outcome.LandingFee = totalFees;
                 outcome.XP = totalXP;
                 outcome.CompletedMissions = missionsDone;
                 outcome.RemainingMissions = missionsRemaining;
                 outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2}";
+                if (totalFees > landingOnlyFee)
+                {
+                    outcome.Message += $" | Taxas: {totalFees:C2}";
+                }
                 if (autoStartUsed)
                 {
                     outcome.Message += " | Partida automática usada (−10% XP)";
@@ -412,19 +454,10 @@ namespace FlightCareer.Application.Services
                 return 0.0;
             }
 
-            return airport.Tier switch
-            {
-                // Tier 1: Grandes Hubs Internacionais (taxas elevadas proporcionais ao porte)
-                1 => Math.Round(250.0 + (mtowLbs * 0.035), 2),
-
-                // Tier 2: Regionais Médios / Capitais Estaduais
-                2 => Math.Round(80.0 + (mtowLbs * 0.015), 2),
-
-                // Tier 3: Aeródromos Municipais / Interior Pavimentado
-                3 => Math.Round(25.0 + (mtowLbs * 0.005), 2),
-
-                _ => 0.0
-            };
+            var context = new FeeContext(airport.Tier, airport.ICAO ?? string.Empty, mtowLbs, 0, false);
+            var fees = GroundServiceCalculator.Calculate(context);
+            var landing = fees.FirstOrDefault(f => f.Code == "LANDING");
+            return landing?.Total ?? 0.0;
         }
     }
 }
