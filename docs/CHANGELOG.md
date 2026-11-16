@@ -2063,3 +2063,7 @@
 ## 2026-11-16 - Análise das variáveis de combustível do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/variaveis-combustivel.md` (72 SimVars): HUD por tanque e desbalanceamento, reserva no pouso, consumo real (o cálculo inicial − final falha com abastecimento pelo menu), `UNLIMITED FUEL` como trapaça, despejo cobrado, vazamento de combustível como pane (tanques graváveis) e a decisão pendente de o app gravar no sim o combustível comprado.
 - 13 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis diversas da aeronave do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-aeronave-diversos.md` (116 SimVars): vento no eixo do avião e alertas no HUD, precisão do pouso (ponto e rumo do toque), manobras bruscas (taxas angulares), fim de missão no estacionamento, pintura/matrícula, capas e travas no walkaround, slew como trapaça e desgaste das partes expostas.
+- 22 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
