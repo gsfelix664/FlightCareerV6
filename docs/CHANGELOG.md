@@ -2207,3 +2207,23 @@
 - Bonanza G36, CAP-4, DA40NG e Robin DR400 tinham `egtMax` = 649,07 °C (1.200 °F) lido da SimVar `MAX EGT`, que é a escala do instrumento e não o limite do motor: o voo normal do fuzz ficava em excedência contínua de EGT. Agora usam o padrão da classe pistão (893,52 °C, `source: ClassDefault`, "estimativa — revisar com POH"); `dataVersion` incrementado.
 - `tools/aircraft_limits/merge_limits.py` descarta `MAX EGT` = 649,07 °C para a captura não regravar o valor. Decisão do usuário: os POHs reais serão revisados depois.
 - Build 0 erros, `dotnet test` 509/509, `python -m unittest` 48/48; fuzz do Robin DR400 (50 voos) sem falhas. Não testado no MSFS.
+
+## 2026-11-16 - Limites estimados, noElectrical e índices elétricos de teste no fuzz (Gemini)
+- **Feature `noElectrical`**:
+  - Nova constante `AircraftFeatures.NoElectrical = "noElectrical"` (grupo "Célula e sistemas adicionais") adicionada ao vocabulário fechado e ao enum de `_schema.json`.
+  - Atribuída feature `noElectrical` aos modelos Piper J-3 Cub e CAP-4 (`piper-j-3-cub.json` dataVersion 7, `cap-4.json` dataVersion 6).
+  - `SyntheticFlightPlan.Random` não sorteia os 3 abusos elétricos (`BatteryDischarging`, `ElectricalOverload`, `AvionicsMasterOnStart`) quando a aeronave tem `noElectrical`.
+  - `SyntheticFlightOracle.CheckMissingLimit` não reporta ausência de limite elétrico para aeronaves `noElectrical`. Em planos manuais com abuso elétrico nessas aeronaves, o gabarito é ignorado sem violação.
+- **Limites estimados no catálogo (`Infrastructure/Data/aircraft/*.json`)**:
+  - Preenchidos limites operacionais ausentes que possuem especificação de manual (voltagem `elecSystemVolts`, rotação `rpmRedline`, temperaturas `oilTempMax`, `ittMax`, `chtMax`, e corrente `alternatorRatedAmps` no A400M) em 44 arquivos JSON, com `source: "ClassDefault"`, referência padronizada (`"estimativa — atualizar pelo POH real: <base>"`) e `dataVersion` incrementado em +1.
+  - Índices elétricos (`elecMainBusIndex`, `elecAvionicsCircuitIndex`, `elecAvionicsBusAmpsIndex`) intencionalmente mantidos fora do catálogo do jogo.
+- **Índices elétricos de teste para Fuzz (`Domain/Replay/Synthetic/FuzzTestDefaults.cs`)**:
+  - Criada classe pura `FuzzTestDefaults.WithTestElectricalIndices(profile)` que devolve uma cópia do perfil injetando apenas os índices ausentes (`elecMainBusIndex` = 1, `elecAvionicsCircuitIndex` = 3, `elecAvionicsBusAmpsIndex` = 4) com `ClassDefault` e nota `"padrão de teste do fuzz — não usar no jogo"`. Modelos com `noElectrical` são retornados intactos.
+  - Aplicada exclusivamente no `RunFuzz` do CLI (`FlightCareer.Replay`) e nos testes xUnit de fuzz (`SyntheticFlightFuzzAllTests.cs`). Nunca usada pelo seeder, resolver ou UI.
+  - `SyntheticFlightGenerator.ResolveLimit` atualizado para priorizar limites definidos no perfil injetado antes da resolução externa.
+  - Atualizada mensagem de ajuda do CLI informando o uso de índices elétricos de teste.
+- **Testes e Validação**:
+  - 7 novos testes em `CatalogEstimatesTests.cs` cobrindo todas as regras de limites estimados, feature `noElectrical` e injeção de índices de teste.
+  - Suíte completa de 46 modelos no fuzz (`fuzz --aircraft all --runs 50`, 2.300 voos): **0 limites ausentes em todos os 46 modelos** (eliminando 100% das falhas por limite ausente, incluindo as 12 anteriores do 737 Max 8). 38 aeronaves com 100% de aprovação (50/50).
+  - Build 0 erros, `dotnet test` 516/516 aprovados, `python -m unittest` 48/48 aprovados. Não testado no MSFS.
+- Revisão (Claude): Dakota ainda tinha `egtMax` = 615,74 °C da escala do instrumento; trocado pelo padrão da classe e `merge_limits.py` passa a descartar EGT de pistão < 700 °C. Fuzz do Dakota, SR22 e Baron G58 sem falhas.

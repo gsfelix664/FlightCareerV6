@@ -157,6 +157,16 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 return violations;
             }
 
+            // Se o abuso for elétrico em aeronave sem sistema elétrico (noElectrical), abuso é inaplicável: gabarito ignorado sem violação
+            if ((abuse.Type == SyntheticAbuseType.BatteryDischarging ||
+                 abuse.Type == SyntheticAbuseType.ElectricalOverload ||
+                 abuse.Type == SyntheticAbuseType.AvionicsMasterOnStart) &&
+                profile?.Features != null &&
+                profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
+            {
+                return violations;
+            }
+
             // Se o perfil da aeronave foi fornecido, verifica se o limite operacional está presente no catálogo
             if (profile != null)
             {
@@ -312,11 +322,15 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     break;
 
                 case SyntheticAbuseType.BatteryDischarging:
+                    if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
+                        return null;
                     if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
                         return LimitKeys.ElecMainBusIndex;
                     break;
 
                 case SyntheticAbuseType.ElectricalOverload:
+                    if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
+                        return null;
                     if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.AlternatorRatedAmps, StringComparison.OrdinalIgnoreCase)))
                         return LimitKeys.AlternatorRatedAmps;
                     if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
@@ -324,6 +338,8 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     break;
 
                 case SyntheticAbuseType.AvionicsMasterOnStart:
+                    if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
+                        return null;
                     if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase)))
                         return LimitKeys.ElecAvionicsCircuitIndex;
                     break;

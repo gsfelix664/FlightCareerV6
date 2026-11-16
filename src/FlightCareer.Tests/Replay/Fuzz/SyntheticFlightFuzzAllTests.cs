@@ -299,8 +299,9 @@ namespace FlightCareer.Tests.Replay.Fuzz
 
             var allViolations = new List<string>();
 
-            foreach (var profile in allProfiles)
+            foreach (var rawProfile in allProfiles)
             {
+                var profile = FuzzTestDefaults.WithTestElectricalIndices(rawProfile);
                 for (int run = 0; run < 2; run++)
                 {
                     int seed = 5000 + run * 100;

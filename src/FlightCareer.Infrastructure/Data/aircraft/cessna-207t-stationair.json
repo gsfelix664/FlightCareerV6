@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Cessna 207T Stationair",
   "class": "Piston",
   "engineCount": 1,
@@ -60,6 +60,38 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-520-M",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-520-M",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 238.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-520-M",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 116.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-520-M",
+      "notes": null
     }
   ]
 }

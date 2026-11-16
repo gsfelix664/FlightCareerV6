@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Piper J-3 Cub",
   "class": "Piston",
   "engineCount": 1,
@@ -8,6 +8,7 @@
     "carbureted",
     "fixedGear",
     "fixedPitchProp",
+    "noElectrical",
     "noFlaps",
     "piston",
     "singleEngine",
@@ -25,6 +26,22 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: Vne 122 mph ≈ 106 KIAS (Piper J-3, valor típico)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2350.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental A-65",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 104.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental A-65",
+      "notes": null
     }
   ]
 }

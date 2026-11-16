@@ -39,6 +39,7 @@ namespace FlightCareer.Domain.Parts
         public const string Pressurized = "pressurized";
         public const string Apu = "apu";
         public const string ElectricHybrid = "electricHybrid";
+        public const string NoElectrical = "noElectrical";
 
         // Aviônicos e navegação
         public const string GlassCockpit = "glassCockpit";
@@ -99,6 +100,7 @@ namespace FlightCareer.Domain.Parts
             HydraulicGear,
             Apu,
             ElectricHybrid,
+            NoElectrical,
             GlassCockpit,
             Fms,
             Autopilot,

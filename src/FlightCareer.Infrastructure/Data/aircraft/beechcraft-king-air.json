@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
@@ -113,6 +113,30 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 110.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 820.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "notes": null
     }
   ]
 }

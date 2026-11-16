@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "CAP-4",
   "class": "Piston",
   "engineCount": 1,
@@ -8,6 +8,7 @@
     "carbureted",
     "fixedGear",
     "fixedPitchProp",
+    "noElectrical",
     "noFlaps",
     "piston",
     "singleEngine",
@@ -84,6 +85,14 @@
       "unit": "psi",
       "source": "POH",
       "reference": "Manual do Paulistinha CAP-4, Aeroclube de Sorocaba (jun. 2013), Sec. 2.7 (faixa vermelha abaixo de 10 PSI e acima de 60 PSI; imagem enviada pelo usuario em 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2500.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Franklin 65 hp (Paulistinha)",
       "notes": null
     }
   ]

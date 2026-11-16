@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 5,
+  "dataVersion": 6,
   "id": "C208B",
   "class": "Turboprop",
   "engineCount": 1,
@@ -64,6 +64,30 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: starter-gerador 200 A (C208B, típico)",
       "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-114A",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 104.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-114A",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 805.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-114A",
+      "notes": null
     }
   ]
 }
