@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "747-8i",
   "class": "Jet",
   "engineCount": 4,
@@ -96,6 +96,22 @@
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 6 (20261115-0818-747-8i.csv)",
       "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 365.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 365 KIAS / MMO 0,90 (Boeing 747-8, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

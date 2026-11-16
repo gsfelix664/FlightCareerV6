@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "PC-12 NGX",
   "class": "Turboprop",
   "engineCount": 1,
@@ -91,6 +91,14 @@
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 300.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: starter-gerador 300 A (PC-12, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

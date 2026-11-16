@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
@@ -143,6 +143,14 @@
       "source": "POH",
       "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (-1.52g, https://www.easa.europa.eu/en/downloads/44256/en)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 2 × 70 A (DA62, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

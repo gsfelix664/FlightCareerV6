@@ -1999,3 +1999,8 @@
 - `docs/plans/taxas-aeroporto-servicos-solo.md`: catálogo JSON de taxas por tier × porte (pouso, estacionamento, GPU, pushback, degelo, handling, taxa de embarque, catering, navegação), calculador puro no Application, serviços medidos no sim por tempo simulado, fases F1–F4 e decisões pendentes.
 - `docs/plans/iluminacao-panes-disjuntor.md`: panes por sistema via disjuntor/circuito/linha do sistema elétrico v2 (flap elétrico, GPS, piloto automático, transponder, barramento parcial, luzes) com mapa elétrico por aeronave e watchdog; grupo "Iluminação" no Hangar com lâmpadas e ligação com a MEL. Magneto continua fora do sistema elétrico.
 - Só planos; nada implementado nem testado no MSFS.
+## 2026-11-16 - Limites estimados de Vne, Vfe e alternador nas aeronaves sem POH (Claude)
+- 42 perfis em `Infrastructure/Data/aircraft/` ganharam `vne`, `vfe:n` e `alternatorRatedAmps` onde faltavam, com `source: ClassDefault`, `reference` começando por "estimativa — revisar" e `notes` "ESTIMATIVA — trocar pelo valor do POH/AFM". Valores aproximados de POH/AFM publicados e pesquisa rápida (vários não confirmados: 188, 404, 408, 787).
+- Fonte `ClassDefault` de propósito: mantém a reserva nativa (overstress do sim) ativa nesses limites de baixa confiança.
+- Sem Vfe no CAP-4 e no J-3 Cub (sem flap) e sem amperagem no CAP-4, J-3 e A400M. Índices elétricos (`elecMainBusIndex`, `elecAvionicsCircuitIndex`) **não** foram inventados: dependem da calibração no sim (`tools/aircraft_limits/calibrate.py`).
+- Build 0 erros; `dotnet test` 455/455. Não testado no MSFS.

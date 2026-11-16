@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "DHC-6-300 Twin",
   "class": "Turboprop",
   "engineCount": 2,
@@ -115,6 +115,14 @@
       "source": "POH",
       "reference": "MSFS 2024 DHC-6 Twin Otter AOM, Engine limitations p. 42 (IDLE Oil Press 40 Min, https://flightsimulator.azureedge.net/wp-content/uploads/2024/11/MSFS2024_DHC-6_TWIN_OTTER_AOM.pdf)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

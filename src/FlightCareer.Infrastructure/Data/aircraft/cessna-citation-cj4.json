@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
   "engineCount": 2,
@@ -83,6 +83,14 @@
       "source": "POH",
       "reference": "MSFS Cessna Citation CJ4 Operator's Guide v1, Sec. 2 p. 2-1 (Maximum N1 104.4%, https://flightsimulator.azureedge.net/wp-content/uploads/2023/02/Cessna-Citation-CJ4-User-Guide-v1.pdf)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

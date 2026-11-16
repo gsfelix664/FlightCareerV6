@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "A321",
   "class": "Jet",
   "engineCount": 2,
@@ -119,6 +119,14 @@
       "source": "POH",
       "reference": "Airbus FCOM DSC-27-20-10-20 P 5/16, load factor protection (-1 g clean; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }
