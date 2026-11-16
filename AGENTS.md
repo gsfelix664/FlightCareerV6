@@ -156,6 +156,13 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - `FlightCareer.SimVarProbe`: ferramenta de console que conecta ao MSFS, valida e sonda ~1.760 SimVars em duas fases (Fase A: ONCE por slot com detecção de `NAME_UNRECOGNIZED`; Fase B: gravação contínua em blocos de até 200 floats a cada 1 s e strings sob transição), gerando `report.csv`, `summary.txt`, `values.csv` e `strings.csv`. Guia em `tools/simvar_probe/README.md`.
 - Testado no MSFS (C152, 2026-11-14): leitura a ~0,43 s, valores coerentes, sem crash após o preenchimento até 256. F1.4 preparada: roteiro `docs/plans/sensor-validation/ROTEIRO.md` e `tools/analyze_sensor_log.py` (só biblioteca padrão; testes em `python -m unittest discover -s tools/tests`). F1.4b: primeiro voo do C152 analisado (`native-wear-C152.md`) e tabelas do portão 🔒 **aprovadas** em `native-wear-mapping.md` (2026-11-14) e calibração addon × nativo planejada (F1.4c, voos do usuário); depois o usuário voa a matriz A–I e o revisor aprova os relatórios.
 
+### Qualidade do voo e conforto de passageiros (NOTA-PASSAGEIROS)
+- `Domain/Services/FlightQualityService`: mede desconforto em segundos simulados fora da faixa (`simSeconds` × `SIMULATION RATE`, ignorando pausa e tempo no solo), independente da frequência de pacotes.
+- `FlightQualitySample`: amostra com atitude e acelerações, com sinal do pitch corrigido (`PitchUpDeg = -PlanePitch`, positivo com nariz para cima; penaliza nariz para cima > 20° ou nariz para baixo > 15°).
+- Separação carga × passageiro: em voos de carga apenas G e solavanco contam; bank, pitch e derrapagem são ignorados.
+- Turbulência × manobra: presença de vento vertical atmosférico (|vento| ≥ 5 ft/s) atenua o tempo de violação de G e solavanco para 0,25×.
+- Regras e pesos configuráveis via `FlightQualityRules` (injetável pelo construtor).
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

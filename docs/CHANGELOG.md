@@ -2243,3 +2243,22 @@
   - 9 novos testes unitários em `SyntheticGeneratorTemperatureAndFlapTests.cs` cobrindo `ChtScale`, `FlapSelector`, teste de baseline bit a bit para C152 e C172, e conferência de ausência de excedências de temperatura e flap em todos os 46 perfis em voo controle.
   - Fuzz testing em todos os modelos (`fuzz --aircraft all --runs 50`, 2.300 voos): **100% de aprovação (2.300/2.300 voos), 0 falhas e 0 limites ausentes em todos os 46 modelos do catálogo**.
   - Build 0 erros, `dotnet test` 525/525 aprovados. Não testado no MSFS.
+
+## 2026-11-16 - Nota dos passageiros por tempo simulado (Gemini)
+- **Desconforto medido por segundos simulados**:
+  - `FlightQualityService` passa a receber `ProcessSample(FlightQualitySample sample, bool isPaxFlight, double simSeconds)` medindo o desconforto em segundos acumulados fora dos limites operacionais, multiplicados por `SIMULATION RATE` e ignorando pausas/saltos.
+  - Mantida compatibilidade com chamadores legados através de `ProcessFrame(SimTelemetry data, bool isPaxFlight)` marcado como `[Obsolete]` e contagens derivadas `ComfortViolations` / `CargoViolations`.
+- **Sinal do pitch corrigido**:
+  - `PLANE PITCH DEGREES` do MSFS (negativo com nariz para cima) é invertido em `FlightQualitySample.FromTelemetry` (`PitchUpDeg = -data.PlanePitch`), eliminando o bug de sinal invertido. Desconforto aplicado apenas quando nariz para cima > 20° ou nariz para baixo > 15°.
+- **Diferenciação passageiro × carga**:
+  - Em voos de carga, manobras de inclinação lateral (bank), arfagem (pitch) e derrapagem (slip) não geram penalidade; apenas aceleração vertical (G) e solavancos (jerk) são contabilizados.
+- **Turbulência atmosférica**:
+  - Presença de velocidade de vento vertical `WindVerticalFps` (|vento| >= 5 ft/s) reduz o acúmulo de tempo de violação de G e solavanco para 0,25× (`TurbulenceFactor`), reconhecendo que a turbulência não é induzida por pilotagem brusca.
+- **Regras configuráveis**:
+  - Limites e pesos extraídos para o record `FlightQualityRules`, injetável via construtor (padrão com limites da FAA/IATA).
+- **Integração cirúrgica no `FlightMonitor`**:
+  - Atualizada chamada no monitor de qualidade para usar o tempo simulado `qualitySimSeconds = isPaused ? 0.0 : SimTimeStep.ToSimSeconds(dt, data.SimulationRate)`.
+- **Testes e Aceitação**:
+  - 12 novos testes em `FlightQualityServiceTests.cs` cobrindo invariância de taxa de amostragem (1 Hz vs 4 Hz), taxa de aceleração de tempo (4×), pausas, sinal do pitch, distinção de carga, atenuação por turbulência, solavanco/derrapagem opcionais e escala de compatibilidade legada.
+  - Build 0 erros, `dotnet test` 537/537 aprovados. Não testado no MSFS.
+- Revisão (Claude): penalidade acumulada por amostra com o peso do tipo de voo do momento (`ComfortPenaltyPoints`; antes valia o tipo do último pacote) e comentário de origem dos limites corrigido. 538/538 testes.
