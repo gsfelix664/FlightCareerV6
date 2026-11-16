@@ -2177,3 +2177,7 @@
 ## 2026-11-16 - Análise dos Key Events de combustível do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/eventos-combustivel.md`: `REPAIR_AND_REFUEL` e `ADD_FUEL_QUANTITY` como detecção de trapaça (invalidar e reaplicar panes), caminhão de combustível do sim (`REQUEST_FUEL_KEY`, decisão pendente), panes no sistema por `FUELSYSTEM_VALVE_SET`/`PUMP_SET`/`JUNCTION_SET` e procedimentos (seletor, alimentação cruzada, bombas, despejo).
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise de seis páginas de Key Events do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-diversos.md` (sistemas gerais, instrumentos, aeronave diversos, rádio/navegação, diversos e câmera): panes no lado do sistema (atuador/válvula hidráulica, packs, deriva do giro, curso da bequilha), alarme nativo e ELT, serviços de solo pelo sim (pushback, GPU, catering, bagagem, jetway, escada), integridade (`BACK_TO_FLY`, resets, pausa, replay) e procedimentos recebidos do piloto. Câmera: nada útil.
+- Só documentação; nada testado no MSFS.
