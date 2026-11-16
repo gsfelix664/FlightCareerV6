@@ -155,7 +155,7 @@ namespace FlightCareer.Domain.Parts
                 {
                     if (!DisablePerEngineSensorResolution && frame.Values.ContainsKey($"{sensorKey}:1"))
                     {
-                        // Sensor possui índice por motor no frame
+                        // Sensor possui índice por motor no frame (prioridade para avaliar por motor se disponível, ex: eng-cht-cooling-rate decorado por PartFlightTracker)
                         isPerEngineRule = true;
                     }
                     else if (frame.Values.ContainsKey(sensorKey))

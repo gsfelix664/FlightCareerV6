@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 
 namespace FlightCareer.Domain.Replay.Synthetic
 {
@@ -127,13 +129,25 @@ namespace FlightCareer.Domain.Replay.Synthetic
         public static IReadOnlyList<string> VerifyGroundTruth(
             FlightReplayResult controlResult,
             FlightReplayResult abusedResult,
-            SyntheticAbuseRecord abuse)
+            SyntheticAbuseRecord abuse,
+            AircraftLimitProfile? profile = null,
+            WearRuleCatalog? wearRuleCatalog = null)
         {
             if (controlResult == null) throw new ArgumentNullException(nameof(controlResult));
             if (abusedResult == null) throw new ArgumentNullException(nameof(abusedResult));
             if (abuse == null) throw new ArgumentNullException(nameof(abuse));
 
             var violations = new List<string>();
+
+            // Se o perfil da aeronave foi fornecido, verifica se o limite operacional está presente no catálogo
+            if (profile != null)
+            {
+                string? missingKey = CheckMissingLimit(abuse.Type, profile);
+                if (missingKey != null)
+                {
+                    return new[] { $"limite ausente: {missingKey}" };
+                }
+            }
 
             // Se o abuso não chegou a acontecer porque o voo encerrou antes do seu início
             double simDuration = abusedResult.TotalSimHours * 3600.0;
@@ -145,19 +159,29 @@ namespace FlightCareer.Domain.Replay.Synthetic
             // Se o abuso for de acumulador contínuo em tempo, verifica se coube no voo para acumular o threshold mínimo
             if (abuse.Type == SyntheticAbuseType.BatteryDischarging)
             {
+                double minDischargeMinutes = wearRuleCatalog?.Rules
+                    .FirstOrDefault(r => r.Metric == WearRuleMetrics.BatteryDeepDischargeMinutes)?
+                    .Bands.Min(b => b.Threshold) ?? 10.0;
+                double minRequiredSeconds = minDischargeMinutes * 60.0;
+
                 double activeSimSeconds = Math.Min(abuse.DurationSeconds, Math.Max(0.0, simDuration - abuse.StartSeconds));
-                if (activeSimSeconds < 600.0)
+                if (activeSimSeconds < minRequiredSeconds)
                 {
-                    // Descarga profunda exige no mínimo 10 minutos (600s) simulados para atingir threshold; não esperar evento
+                    // Descarga profunda exige threshold mínimo acumulado; não esperar evento
                     return violations;
                 }
             }
             else if (abuse.Type == SyntheticAbuseType.ElectricalOverload)
             {
+                double minOverloadMinutes = wearRuleCatalog?.Rules
+                    .FirstOrDefault(r => r.Metric == WearRuleMetrics.ElectricalOverloadMinutes)?
+                    .Bands.Min(b => b.Threshold) ?? 5.0;
+                double minRequiredSeconds = minOverloadMinutes * 60.0;
+
                 double activeSimSeconds = Math.Min(abuse.DurationSeconds, Math.Max(0.0, simDuration - abuse.StartSeconds));
-                if (activeSimSeconds < 300.0)
+                if (activeSimSeconds < minRequiredSeconds)
                 {
-                    // Sobrecarga elétrica exige no mínimo 5 minutos (300s) simulados para atingir threshold; não esperar evento
+                    // Sobrecarga elétrica exige threshold mínimo acumulado; não esperar evento
                     return violations;
                 }
             }
@@ -226,7 +250,15 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     const double minStrictLossDifference = 1e-6;
                     double lossDiff = abusedPart.HealthLoss - controlPart.HealthLoss;
 
-                    if (lossDiff < minStrictLossDifference)
+                    // Se o voo com abuso teve duração de simulação menor do que o controle (devido a perda de frames ou cancelamento),
+                    // compensa a perda de desgaste natural por tempo não percorrido
+                    double allowedTolerance = minStrictLossDifference;
+                    if (abusedResult.TotalSimHours < controlResult.TotalSimHours - 1e-5)
+                    {
+                        allowedTolerance = (abusedResult.TotalSimHours - controlResult.TotalSimHours) * 0.05;
+                    }
+
+                    if (lossDiff < allowedTolerance)
                     {
                         violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F4}%) não foi estritamente maior que no voo controle ({controlPart.HealthLoss:F4}%, diff={lossDiff:F6}%).");
                     }
@@ -234,6 +266,41 @@ namespace FlightCareer.Domain.Replay.Synthetic
             }
 
             return violations;
+        }
+
+        private static string? CheckMissingLimit(SyntheticAbuseType type, AircraftLimitProfile profile)
+        {
+            switch (type)
+            {
+                case SyntheticAbuseType.VneExceeded:
+                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.Vne, StringComparison.OrdinalIgnoreCase)))
+                        return LimitKeys.Vne;
+                    break;
+
+                case SyntheticAbuseType.FlapOverSpeed:
+                    if (!profile.Limits.Any(l => l.Key.StartsWith("vfe", StringComparison.OrdinalIgnoreCase)))
+                        return "vfe";
+                    break;
+
+                case SyntheticAbuseType.BatteryDischarging:
+                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
+                        return LimitKeys.ElecMainBusIndex;
+                    break;
+
+                case SyntheticAbuseType.ElectricalOverload:
+                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.AlternatorRatedAmps, StringComparison.OrdinalIgnoreCase)))
+                        return LimitKeys.AlternatorRatedAmps;
+                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
+                        return LimitKeys.ElecMainBusIndex;
+                    break;
+
+                case SyntheticAbuseType.AvionicsMasterOnStart:
+                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase)))
+                        return LimitKeys.ElecAvionicsCircuitIndex;
+                    break;
+            }
+
+            return null;
         }
 
         private static bool IsEventMetricMatchingRule(string ruleId, string metricKey)

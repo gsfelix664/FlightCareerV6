@@ -67,39 +67,13 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     SyntheticAbuseType.DataNanValues,
                     SyntheticAbuseType.DataFrameGap,
                     SyntheticAbuseType.DataSimPause,
-                    SyntheticAbuseType.DataCancelledMidFlight
+                    SyntheticAbuseType.DataCancelledMidFlight,
+                    SyntheticAbuseType.VneExceeded,
+                    SyntheticAbuseType.FlapOverSpeed,
+                    SyntheticAbuseType.BatteryDischarging,
+                    SyntheticAbuseType.ElectricalOverload,
+                    SyntheticAbuseType.AvionicsMasterOnStart
                 };
-
-                bool hasVne = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.Vne, StringComparison.OrdinalIgnoreCase));
-                bool hasVfe = profile.Limits.Any(l => l.Key.StartsWith("vfe", StringComparison.OrdinalIgnoreCase));
-
-                if (hasVne)
-                {
-                    candidateTypes.Add(SyntheticAbuseType.VneExceeded);
-                }
-
-                if (hasVfe)
-                {
-                    candidateTypes.Add(SyntheticAbuseType.FlapOverSpeed);
-                }
-
-                bool hasMainBus = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase));
-                bool hasAvionicsCircuit = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase));
-                bool hasRatedAmps = profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.AlternatorRatedAmps, StringComparison.OrdinalIgnoreCase));
-
-                if (hasMainBus)
-                {
-                    candidateTypes.Add(SyntheticAbuseType.BatteryDischarging);
-                    if (hasRatedAmps)
-                    {
-                        candidateTypes.Add(SyntheticAbuseType.ElectricalOverload);
-                    }
-                }
-
-                if (hasAvionicsCircuit)
-                {
-                    candidateTypes.Add(SyntheticAbuseType.AvionicsMasterOnStart);
-                }
 
                 if (isPiston)
                 {
@@ -118,6 +92,17 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 {
                     int typeIdx = (int)Math.Floor(rnd.NextDouble() * candidateTypes.Count);
                     var abuseType = candidateTypes[Math.Clamp(typeIdx, 0, candidateTypes.Count - 1)];
+
+                    // Evita conflitos físicos diretos no mesmo plano sintético:
+                    // 1. Descarga profunda e sobrecarga elétrica são estados de barramento opostos
+                    if (abuseType == SyntheticAbuseType.ElectricalOverload && abuses.Any(a => a.Type == SyntheticAbuseType.BatteryDischarging))
+                        continue;
+                    if (abuseType == SyntheticAbuseType.BatteryDischarging && abuses.Any(a => a.Type == SyntheticAbuseType.ElectricalOverload))
+                        continue;
+
+                    // 2. No máximo um cancelamento prematuro por voo
+                    if (abuseType == SyntheticAbuseType.DataCancelledMidFlight && abuses.Any(a => a.Type == SyntheticAbuseType.DataCancelledMidFlight))
+                        continue;
 
                     bool isEngineAbuse = abuseType switch
                     {
@@ -156,6 +141,48 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     }
                 }
 
+                // Se houver abusos concorrentes de G (PositiveG e NegativeG), separa seus instantes no tempo
+                var posG = abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.PositiveGExceeded);
+                var negG = abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.NegativeGExceeded);
+                if (posG != null && negG != null)
+                {
+                    double minNegGStart = posG.StartSeconds + posG.DurationSeconds + 3.0;
+                    if (negG.StartSeconds < minNegGStart)
+                    {
+                        abuses.Remove(negG);
+                        abuses.Add(new SyntheticAbuseRecord(
+                            negG.Type,
+                            minNegGStart,
+                            negG.DurationSeconds,
+                            negG.Intensity,
+                            negG.EngineIndex,
+                            negG.TargetRuleId,
+                            negG.TargetPartId,
+                            negG.Notes));
+
+                        if (minNegGStart + negG.DurationSeconds + 30.0 > duration)
+                        {
+                            duration = minNegGStart + negG.DurationSeconds + 30.0;
+                        }
+                    }
+                }
+
+                // Garante que o pouso duro coincida com o momento exato do toque da aeronave (0.90 * duration)
+                var hl = abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.HardLanding);
+                if (hl != null)
+                {
+                    abuses.Remove(hl);
+                    abuses.Add(new SyntheticAbuseRecord(
+                        hl.Type,
+                        duration * 0.90,
+                        hl.DurationSeconds,
+                        hl.Intensity,
+                        hl.EngineIndex,
+                        hl.TargetRuleId,
+                        hl.TargetPartId,
+                        hl.Notes));
+                }
+
                 // Garante que o cancelamento prematuro de voo ocorra após o término de abusos físicos anteriores
                 var cancelAbuse = abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.DataCancelledMidFlight);
                 if (cancelAbuse != null)
@@ -169,9 +196,9 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         }
                     }
 
+                    abuses.RemoveAll(a => a.Type == SyntheticAbuseType.DataCancelledMidFlight);
                     if (latestAbuseEnd > 0)
                     {
-                        abuses.Remove(cancelAbuse);
                         double cancelTime = latestAbuseEnd + 15.0;
                         abuses.Add(new SyntheticAbuseRecord(
                             cancelAbuse.Type,
@@ -280,21 +307,21 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     break;
 
                 case SyntheticAbuseType.PositiveGExceeded:
-                    startSec = totalDuration * 0.50;
+                    startSec = totalDuration * 0.46;
                     durationSec = 6.0 + rnd.NextDouble() * 8.0;
                     ruleId = "airframe_over_g_positive";
                     partId = "airframe.wing_structure";
                     break;
 
                 case SyntheticAbuseType.NegativeGExceeded:
-                    startSec = totalDuration * 0.50;
+                    startSec = totalDuration * 0.54;
                     durationSec = 5.0 + rnd.NextDouble() * 6.0;
                     ruleId = "airframe_over_g_negative";
                     partId = "airframe.wing_structure";
                     break;
 
                 case SyntheticAbuseType.HardLanding:
-                    startSec = totalDuration * 0.85;
+                    startSec = totalDuration * 0.90;
                     durationSec = 1.0;
                     intensity = 0.40 + rnd.NextDouble() * 0.40; // 40% a 80% acima do limite de fpm
                     ruleId = "touchdown_hard_landing";

@@ -62,6 +62,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
             double elecSystemVolts = ResolveLimit(LimitKeys.ElecSystemVolts, 28.0);
             double alternatorRatedAmps = ResolveLimit(LimitKeys.AlternatorRatedAmps, 60.0);
             double chtCoolingRateMax = ResolveLimit(LimitKeys.ChtCoolingRateMax, 28.0);
+            double egtMax = ResolveLimit(LimitKeys.EgtMax, 893.52);
 
             double vfe1 = ResolveLimit("vfe:1", 110.0);
             double vfe2 = ResolveLimit("vfe:2", 85.0);
@@ -332,7 +333,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = rpmRedline * 0.75 + (rnd.NextDouble() - 0.5) * 10.0;
                         oilPress[e] = 48.0;
-                        cht[e] = 155.0 + (rnd.NextDouble() - 0.5) * 1.0;
+                        if (thermalShockAbuse != null && t >= thermalShockAbuse.StartSeconds && t <= thermalShockAbuse.StartSeconds + thermalShockAbuse.DurationSeconds)
+                        {
+                            // Em choque térmico, preserva o resfriamento contínuo
+                        }
+                        else
+                        {
+                            cht[e] = 155.0 + (rnd.NextDouble() - 0.5) * 1.0;
+                        }
                         oilTemp[e] = 85.0 + (rnd.NextDouble() - 0.5) * 0.5;
                         egt[e] = 710.0;
                     }
@@ -482,7 +490,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                             break;
 
                         case SyntheticAbuseType.EgtHigh:
-                            ApplyToEngines(eTarget, eng => egt[eng] = 880.0 + abuse.Intensity * 50.0);
+                            ApplyToEngines(eTarget, eng => egt[eng] = egtMax * (1.0 + Math.Max(0.05, abuse.Intensity)));
                             break;
 
                         case SyntheticAbuseType.FlapOverSpeed:

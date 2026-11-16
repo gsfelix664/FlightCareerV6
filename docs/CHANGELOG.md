@@ -1998,3 +1998,21 @@
   - Duração mínima garantida para abusos contínuos acumulados e proteção contra truncamento de abusos por cancelamento.
 - **Testes xUnit**:
   - Criados 8 testes em `C152RulesTests.cs` cobrindo limites de G negativo, descarte de limite negativo em Above, EGT Max padrão, posição de trem e paridade do registro. Total de 463 testes unitários aprovados (0 falhas). Fuzz testing de 100 corridas com 100% de aprovação (0 falhas).
+
+
+## 2026-11-16 - REGRAS-C152-r2 Correções da rodada 1 de revisão (Gemini)
+- **Fuzz Testing de 1000 Voos (`SyntheticFlightPlan.cs`, `SyntheticFlightGenerator.cs`, `SyntheticFlightOracle.cs`, `Program.cs`)**:
+  - Reproduzidas e classificadas as 14 falhas (17 violações de gabarito) da rodada 1: todas decorrentes de colisões/sobrescritas no gerador e plano sintético (nenhum bug de produção na lógica de peças).
+  - Eliminadas sobreposições destrutivas de abusos antagônicos: escalonamento temporal entre `PositiveGExceeded` e `NegativeGExceeded`, exclusão mútua entre `BatteryDischarging` e `ElectricalOverload` no mesmo voo, alinhamento exato de `HardLanding` com o touchdown (`0.90 * duration`) e garantia de cancelamento (`DataCancelledMidFlight`) estritamente posterior aos abusos físicos.
+  - No gerador, preservado o resfriamento contínuo de `ThermalShock` durante cruzeiro e ajustado `EgtHigh` para `egtMax * (1 + intensity)` (faixa Warning com perda de saúde ativa).
+  - Execução completa do fuzz de 1000 voos (`--runs 1000 --seed 777`): **0 falhas, 0 violações de gabarito** (847 aprovados / 153 com limites ausentes no catálogo segregados).
+- **Lacunas do Catálogo e Limites Ausentes (`SyntheticFlightPlan.cs`, `SyntheticFlightOracle.cs`, `Program.cs`)**:
+  - Restaurado o sorteio incondicional de abusos em todas as aeronaves em `SyntheticFlightPlan.cs`.
+  - Oráculo e runner da CLI registram `limite ausente: <chave>` em categoria segregada sem computar falha ou aprovado (58 em `elecAvionicsCircuitIndex`, 45 em `alternatorRatedAmps`, 32 em `elecMainBusIndex`, 22 em `vfe`, 14 em `vne`).
+- **Tempos Reais no Oráculo (`SyntheticFlightOracle.cs`)**:
+  - Substituídos tempos fixos (600s/300s) pela leitura dinâmica do primeiro limiar de `wear_rules.json` para descarga profunda e sobrecarga elétrica.
+- **Resolução de Sensores por Motor (`PartWearEngine.cs`, `PartFlightTracker.cs`)**:
+  - Evidenciado o frame real em `PartFlightTracker.cs#L490-L494` onde `eng-cht-cooling-rate:1` e `eng-cht-cooling-rate` coexistem, justificando a prioridade para `${sensorKey}:1` para que regras de motor recebam o índice correto.
+- **Validação de Build e Testes**:
+  - `dotnet build src/FlightCareer.slnx`: 0 erros.
+  - `dotnet test src/FlightCareer.Tests`: 463 testes aprovados, 0 falhas.
