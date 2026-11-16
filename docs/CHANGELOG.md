@@ -1990,3 +1990,6 @@
 - Novo `docs/plans/sensor-research/variaveis-comandos.md` (96 SimVars de superfícies, compensadores, flaps, spoilers, manche e fly-by-wire) com usos para HUD, qualidade (suavidade dos comandos, voo fora de compensação), treino/diário (horas manuais × piloto automático) e desgaste/panes.
 - Achado: `FLAPS CURRENT SPEED LIMITATION` dá a Vfe do dente atual ao vivo (C152: 110 kt) e pode cobrir as 22 aeronaves sem `vfe` no catálogo.
 - 32 variáveis acrescentadas a `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars`. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Regra de delegação: dados também vão para o Gemini (Claude)
+- `CLAUDE.md` e `tools/agents/global/CLAUDE.md`: catálogos e dados (JSON/CSV) com mais de ~20 linhas vão para o Gemini, com o critério na spec e revisão por amostragem; pesquisa, análise de documentação e planos continuam com o Claude (decisão do usuário).
