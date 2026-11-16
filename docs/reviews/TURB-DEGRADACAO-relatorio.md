@@ -1,6 +1,6 @@
 # TURB-DEGRADACAO — Motor a turbina gasto vira perda de desempenho no MSFS
 
-**Branch:** feat/turb-degradacao · **Commit:** a ser registrado após este commit · **Data:** 2026-11-16
+**Branch:** feat/turb-degradacao · **Commit:** 552c1d0 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar `FlightCareer.Domain/Components/TurbineDegradation.cs` com os records e classes puras (`TurbineLosses`, `TurbineDegradationConfig`, `TurbineDegradation.Compute` e função pura de decisão de escrita `ShouldWrite`), cobrindo com testes xUnit determinísticos em `FlightCareer.Tests/Components/TurbineDegradationTests.cs`.
