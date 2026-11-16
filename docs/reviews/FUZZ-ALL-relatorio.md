@@ -1,6 +1,6 @@
 # FUZZ-ALL — Fuzz em todas as aeronaves e ressalvas do oráculo
 
-**Branch:** test/fuzz-all-aeronaves · **Commit:** pendente · **Data:** 2026-11-16
+**Branch:** test/fuzz-all-aeronaves · **Commit:** 6390c7d · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar feature `noFlaps` em `AircraftFeatures` e `_schema.json`, atribuindo aos modelos Piper J-3 Cub e CAP-4 com bump de `dataVersion`.
