@@ -17,7 +17,7 @@ Novo `Infrastructure/Data/airport_fees.json`, com valores por **tier** e por **p
 
 | Código | Serviço | Base de cobrança | Detecção | Obrigatório? |
 |---|---|---|---|---|
-| `LANDING` | Taxa de pouso | fixo + R$/lb MTOW (migrar o cálculo atual) | pouso no destino | sim (tier 1–3) |
+| `LANDING` | Taxa de pouso | fixo + $/lb MTOW (migrar o cálculo atual) | pouso no destino | sim (tier 1–3) |
 | `PARKING` | Estacionamento | por hora acima de uma franquia (ex.: 2 h), por porte | tempo entre o fim do voo e a próxima partida; `PLANE IN PARKING STATE` | sim |
 | `GPU` | Energia externa | por minuto conectado | `EXTERNAL POWER ON` | não (opcional, ou obrigatório em jatos sem APU ligada) |
 | `PUSHBACK` | Reboque/pushback | fixo por porte | `PUSHBACK STATE` (página de SimVars ainda não analisada) | jatos em gate |
@@ -47,11 +47,11 @@ Novo `Infrastructure/Data/airport_fees.json`, com valores por **tier** e por **p
 4. **F4 — Efeitos de jogo**: recusar degelo aumenta risco de gelo; catering/limpeza na nota dos passageiros; pernoite em hangar.
 
 ## 6. Decisões do usuário
-1. Moeda e escala dos valores (R$ como o resto da economia?) e quanto um voo de C152 num hub deve custar × um de jato.
-2. Limites de porte (leve/médio/pesado) e se a taxa de pouso continua linear no MTOW.
-3. Quais serviços são **obrigatórios** e quais o piloto escolhe (GPU, catering, degelo, hangar).
-4. Sobrescrita por país (ex.: Brasil com tabela ANAC) já na F1 ou depois.
-5. Estacionamento conta tempo real entre sessões ou só tempo de jogo?
+1. **Decidido (2026-11-16): moeda genérica `$`, base dólar, sem escrever "US$"** — igual ao resto do app (o `App.xaml.cs` força a cultura en-US, então `:C2` sai como `$1,234.56`). Valores do `airport_fees.json` em dólar. Escala sugerida: C152 num hub ≈ $300 no total; jato grande ≈ $15.000–30.000 (pouso + estacionamento + passageiros + handling). A taxa de pouso atual fica igual (teste de regressão).
+2. Porte — **recomendação (aguarda confirmação):** leve < 12.500 lb, médio 12.500–60.000 lb, pesado > 60.000 lb; taxa de pouso continua linear no MTOW (o porte serve para estacionamento, handling e serviços).
+3. Obrigatórios — **recomendação (aguarda confirmação):** pouso, estacionamento acima da franquia e taxa de embarque (missões de passageiros); handling obrigatório para jatos e turbo-hélices grandes em tier 1–2; GPU, catering, degelo e hangar opcionais (fases F2–F4).
+4. Sobrescrita por país — **recomendação (aguarda confirmação):** depois da F1, com o campo já previsto no JSON.
+5. Estacionamento — **recomendação (aguarda confirmação):** só tempo de jogo (parado no solo na sessão, acima de 2 h de franquia); app fechado não conta.
 
 ## 7. Testes previstos
 - `LandingFee_MesmoValorDoCalculoAtual_PorTier` (regressão).
