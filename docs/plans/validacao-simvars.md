@@ -46,7 +46,7 @@ Para cada peça de `parts_catalog.json`: sensor → regra em `wear_rules.json` �
 - `REJECTED TAKEOFF BRAKES ACTIVE`, `BRAKE * TEMPERATURE EFFECT` → freios.
 - Pontos de contato por roda (`IS ON GROUND`, `SKIDDING FACTOR`, `SURFACE TYPE`) → pneus e rolamentos por roda e por piso.
 - Disjuntores e conexões (`ALTERNATOR/BATTERY CONNECTION ON`, `LINE/BUS BREAKER PULLED`) → eventos de sobrecarga elétrica.
-- Turbina: `TURB ENG N1 LOSS`, `... EFFICIENCY LOSS` → só sensor/conferência (decisão de 2026-11-15: o addon é a fonte da verdade, o nativo não vira % de desgaste e nada é gravado no sim).
+- Turbina: `TURB ENG N1 LOSS`, `FUEL EFFICIENCY LOSS`, `ITT COOLING EFFICIENCY LOSS` e `THRUST EFFICIENCY LOSS` → gravadas no sim a partir da saúde de Motor e Seção quente via `TurbineDegradationActuator` (decisão de 2026-11-16: o addon é a fonte da verdade da saúde e grava perdas no sim para o piloto sentir a degradação).
 
 ## Passo 5 — Bugs do fuzz (precisa de autorização do usuário) — [CONCLUÍDO em 2026-11-16, tarefa REGRAS-C152]
 Resolvidos bugs 1–4 de `docs/reviews/FUZZ-revisao.md` (rodada 2):

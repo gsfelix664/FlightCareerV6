@@ -2055,3 +2055,22 @@
 - A documentação marca obsoletas com `class=obsolete`, que o extrator não capturava. Levantamento nas 15 páginas: 70 obsoletas, em `docs/plans/sensor-research/variaveis-obsoletas.md`.
 - Removidas das listas do Watcher: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `EXIT OPEN`; `ELEVATOR TRIM PCT` trocada por `EX1`. Aviso nas análises `variaveis-*.md` e no plano de validação.
 - Pendente (código, Gemini): `CRASH FLAG` e `GENERAL ENG FIRE DETECTED` ainda são lidos em produção; coluna `obsoleta` no extrator com teste.
+
+## 2026-11-16 - TURB-DEGRADACAO Degradação de motor a turbina gravada no MSFS (Gemini)
+- **Decisão do usuário (2026-11-16):** gravação no MSFS das 4 perdas de eficiência da turbina (`TURB ENG N1 LOSS`, `TURB ENG FUEL EFFICIENCY LOSS`, `TURB ENG ITT COOLING EFFICIENCY LOSS` e `TURB ENG THRUST EFFICIENCY LOSS`, unidade `Percent` 0–100, indexadas por motor `:1`..`:4`) calculadas a partir da saúde dos componentes Motor e Seção Quente, para que o desgaste do motor afete o desempenho em voo (ITT mais alta, maior consumo, menor empuxo).
+- **Domínio (`TurbineDegradation.cs`, `ComponentCatalog.cs`, `component_catalog.json`)**:
+  - `TurbineLosses`: record imutável com as 4 grandezas de perda, suporte a tolerância e constante `None`.
+  - `TurbineDegradationConfig`: limites parametrizados lidos de `component_catalog.json` (`startHealthPct: 60`, perdas máximas `maxN1LossPct: 5`, `maxFuelEfficiencyLossPct: 10`, `maxIttCoolingLossPct: 15`, `maxThrustEfficiencyLossPct: 8`, e passo de tolerância `writeToleranceStepPct: 0.5`). Ausência do bloco = desativado (`null`).
+  - `TurbineDegradation.Compute`: cálculo linear de fator `(startHealth - health) / startHealth` clampado em `[0, 1]` com arredondamento no passo de escrita.
+  - `TurbineDegradation.ShouldWrite`: função pura com proteção de intervalo mínimo de relógio (5 s) e detecção de alteração de alvo ou divergência da leitura no simulador.
+- **SimConnect e Interfaces (`SimConnectService.cs`, `ISimConnectService.cs`)**:
+  - Mapeadas 16 definições de escrita (4 SimVars × 4 motores) com struct `SimDoubleValue`.
+  - Mapeada definição separada de leitura (`TurbineLossesRead`) com struct `SimTurbineLossesState` para conferência periódica (1 s) sem alterar `SimTelemetry`.
+  - Métodos `SetTurbineLosses` e `GetTurbineLosses` adicionados a `SimConnectService` e `ISimConnectService`.
+- **Atuação em Voo (`TurbineDegradationActuator.cs`, `ComponentFlightSession.cs`)**:
+  - `TurbineDegradationActuator`: atua apenas em motores a turbina (`EngineType == 1.0` ou `5.0`), avalia perdas alvo, respeita janela de 5 s de relógio por motor, reaplica perdas em recarregamentos do simulador (`OnAircraftReloaded`) e zera em `Reset()` apenas motores onde o addon havia gravado perdas.
+  - Chamadas integradas em `ComponentFlightSession.ProcessTick` e `ComponentFlightSession.Reset`.
+- **Testes xUnit**:
+  - Criados 10 testes em `TurbineDegradationTests.cs` cobrindo cálculo linear, motor pior entre motor/seção quente para combustível, tolerância de arredondamento, regras de decisão de escrita e carregamento do catálogo com e sem o bloco.
+  - Criado teste de validação de layout em `TelemetryDefinitionTests.cs` para os campos do struct de conferência.
+  - Total: 474 testes aprovados, 0 falhas.

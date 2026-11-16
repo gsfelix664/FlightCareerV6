@@ -50,7 +50,7 @@ Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv
 ### Turbina
 | Variável | C152 | Hoje | Grav. | Uso proposto |
 |---|---|---|---|---|
-| `TURB ENG N1 LOSS`, `TURB ENG FUEL EFFICIENCY LOSS`, `TURB ENG ITT COOLING EFFICIENCY LOSS`, `TURB ENG THRUST EFFICIENCY LOSS` (por motor) | constante | — | **sim** | **Decisão do usuário:** em 2026-11-15 ficou "o addon é a fonte da verdade e nada é gravado no sim". Como são graváveis, a saúde da seção quente/compressor poderia virar **degradação de desempenho real** (ITT mais alta, mais consumo, menos empuxo) — motor gasto que o piloto sente. Hoje só leitura/conferência. |
+| `TURB ENG N1 LOSS`, `TURB ENG FUEL EFFICIENCY LOSS`, `TURB ENG ITT COOLING EFFICIENCY LOSS`, `TURB ENG THRUST EFFICIENCY LOSS` (por motor) | constante | — | **sim** | **Decidido (2026-11-16):** gravadas no sim via `TurbineDegradationActuator` a partir da saúde de Motor e Seção quente (`TurbineDegradation`). O addon continua como fonte da verdade da saúde e o sim recebe as perdas calculadas (ITT mais alta, mais consumo, menos empuxo). |
 | `TURB ENG CORRECTED N1/N2/FF`, `TURB ENG COMMANDED N1`, `TURB ENG THROTTLE COMMANDED N1` | constante | — | sim (corrected) | Jatos: monitorar margem (N1 comandado × real) = sinal de motor degradado; HUD. |
 | `TURB ENG HIGH/LOW IDLE` | constante | — | — | Contexto (marcha lenta alta/baixa). |
 | `TURB ENG JET THRUST`, `TURB ENG PRIMARY/REVERSE NOZZLE PERCENT`, `TURB ENG AFTERBURNER *` | constante | Reg (reverse) | — | Empuxo e reverso; pós-combustor fora da frota. |
@@ -74,5 +74,5 @@ Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv
 2. **Qualidade/pilotagem:** nota de "gestão do motor" (mistura, potência de cruzeiro, cowl flaps, carb heat) por tempo; lógica pura com testes de replay.
 3. **Economia:** Hobbs do sim como base de horas cobradas e combustível real consumido; FLX × TOGA nos jatos.
 4. **Panes:** falha do turbo e falta de combustível por SimVar gravável; perda parcial de potência por limite do manete (testar no sim).
-5. **Decisão do usuário:** gravar as perdas de eficiência da turbina a partir da saúde dos componentes (reverteria a decisão de 2026-11-15).
+5. **Decisão do usuário (CONCLUÍDO em 2026-11-16, TURB-DEGRADACAO):** gravadas as perdas de eficiência da turbina no sim a partir da saúde dos componentes via `TurbineDegradationActuator`.
 6. **No simulador (usuário):** bimotor (auto-feather, sync), turbo (falha do turbo), jato (detentes do manete, reverso), turbo-hélice (beta, trava de hélice).
