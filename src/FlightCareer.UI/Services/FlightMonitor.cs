@@ -34,6 +34,7 @@ namespace FlightCareer.UI.Services
         private readonly AircraftLimitResolver _limitResolver;
         private readonly PartFlightSession _parts;
         private readonly FuelUsageAccumulator _fuelAccumulator = new();
+        private readonly FuelSyncCoordinator _fuelSync = new();
         private FuelIntegrityMonitor? _fuelIntegrity;
         private bool _flightInvalidated;
         private string? _flightInvalidationReason;
@@ -44,6 +45,7 @@ namespace FlightCareer.UI.Services
         public bool IsFlightActive { get; private set; }
         public string CurrentStatus => _currentStatus;
         public PilotAircraft? CurrentAircraft => _aircraft;
+        public Guid? WatchedAircraftId => _aircraft?.Id ?? _watchedAircraft?.Id;
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
         private bool _hasTouchedDown;
@@ -414,6 +416,16 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        private bool DispatchFuelWrite(double targetFuel)
+        {
+            var activeTanks = _simConnect.GetActiveFuelTanks();
+            if (activeTanks.Count == 0) return false;
+            var plan = FuelTankWritePlan.Distribute(targetFuel, activeTanks);
+            if (plan.Allocations.Count == 0) return false;
+            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
+            return true;
+        }
+
         public bool StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
         {
             if (IsMonitoring) return false;
@@ -454,35 +466,26 @@ namespace FlightCareer.UI.Services
             double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
             double simFuel = _simConnect.CurrentData.FuelTotalGallons;
             double targetFuel = aircraft.FuelAmount;
+            bool isOnGround = _simConnect.CurrentData.IsOnGround;
 
-            if (Math.Abs(simFuel - targetFuel) > fuelTolerance)
+            _fuelSync.Reset();
+            _fuelSync.Start(targetFuel, simFuel, fuelTolerance, isOnGround);
+
+            if (_fuelSync.Status == FuelSyncStatus.Failed)
             {
-                double simBefore = simFuel;
-                bool syncSuccess = false;
+                OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível fora do solo.", true);
+                return false;
+            }
 
-                for (int attempt = 1; attempt <= 3; attempt++)
-                {
-                    var activeTanks = _simConnect.GetActiveFuelTanks();
-                    if (activeTanks.Count > 0)
-                    {
-                        var plan = FuelTankWritePlan.Distribute(targetFuel, activeTanks);
-                        if (plan.Allocations.Count > 0)
-                        {
-                            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
-                            syncSuccess = true;
-                        }
-                    }
-
-                    if (syncSuccess) break;
-                }
-
-                if (!syncSuccess)
+            if (_fuelSync.NeedsSimWrite)
+            {
+                bool wrote = DispatchFuelWrite(targetFuel);
+                if (!wrote)
                 {
                     OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível com os tanques do simulador.", true);
                     return false;
                 }
-
-                _telemetryLogger.LogEvent("COMBUSTIVEL", $"combustível sincronizado: sim {simBefore:F1} gal → app {targetFuel:F1} gal");
+                _fuelSync.NotifyWriteDispatched();
             }
 
             _pilot = pilot;
@@ -496,7 +499,10 @@ namespace FlightCareer.UI.Services
             _simConnect.ResetCrashState();
             LoadFlightComponents(aircraft);
             _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
-            _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
+            _fuelAccumulator.Reset();
+            _fuelIntegrity = _fuelSync.Status == FuelSyncStatus.Confirmed
+                ? new FuelIntegrityMonitor(fuelCapacity, fuelTolerance)
+                : null;
             _flightInvalidated = false;
             _flightInvalidationReason = null;
             _startConditionTime = null;
@@ -754,6 +760,36 @@ namespace FlightCareer.UI.Services
             foreach (var diag in _fuelAccumulator.DrainDiagnostics())
             {
                 _telemetryLogger.LogEvent("FUEL_ACCUMULATOR", diag);
+            }
+
+            if (_fuelSync.Status == FuelSyncStatus.Pending)
+            {
+                _fuelSync.Update(data.FuelTotalGallons, data.IsOnGround);
+
+                if (_fuelSync.NeedsSimWrite)
+                {
+                    DispatchFuelWrite(_fuelSync.TargetGallons);
+                    _fuelSync.NotifyWriteDispatched();
+                }
+
+                if (_fuelSync.Status == FuelSyncStatus.Confirmed)
+                {
+                    _telemetryLogger.LogEvent("COMBUSTIVEL", $"combustível sincronizado: sim {data.FuelTotalGallons:F1} gal → app {_fuelSync.TargetGallons:F1} gal");
+                    double fuelCapacity = _aircraft?.AircraftType?.FuelTankGallons ?? _simConnect.CurrentData.FuelTotalCapacity;
+                    double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
+                    _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
+                }
+                else if (_fuelSync.Status == FuelSyncStatus.Failed)
+                {
+                    OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível com os tanques do simulador.", true);
+                    StopMonitoring();
+                    return;
+                }
+                else
+                {
+                    _startConditionTime = null;
+                    return;
+                }
             }
 
             // Lógica de Início de Gravação: Quando ligar motores E soltar PB por 10 segundos

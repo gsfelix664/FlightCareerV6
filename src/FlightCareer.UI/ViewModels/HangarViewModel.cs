@@ -25,6 +25,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly ComponentCatalog _catalog;
         private readonly ISimConnectService? _simConnect;
+        private readonly Services.FlightMonitor? _flightMonitor;
         private readonly IRandomSource _random = new SystemRandomSource();
         private Guid _pilotId;
 
@@ -34,11 +35,16 @@ namespace FlightCareer.UI.ViewModels
 
         public string FleetCountText => Fleet.Count == 1 ? "1 aeronave" : $"{Fleet.Count} aeronaves";
 
-        public HangarViewModel(IDbContextFactory<AppDbContext> contextFactory, ComponentCatalog catalog, ISimConnectService? simConnect = null)
+        public HangarViewModel(
+            IDbContextFactory<AppDbContext> contextFactory,
+            ComponentCatalog catalog,
+            ISimConnectService? simConnect = null,
+            Services.FlightMonitor? flightMonitor = null)
         {
             _contextFactory = contextFactory;
             _catalog = catalog;
             _simConnect = simConnect;
+            _flightMonitor = flightMonitor;
         }
 
         public async Task InitializeAsync(Guid pilotId)
@@ -446,6 +452,7 @@ namespace FlightCareer.UI.ViewModels
         private void TryWriteFuelToSimulator(PilotAircraft aircraft)
         {
             if (_simConnect == null || !_simConnect.IsConnected) return;
+            if (_flightMonitor == null || _flightMonitor.WatchedAircraftId != aircraft.Id) return;
 
             var simData = _simConnect.CurrentData;
             bool onGround = simData.IsOnGround;

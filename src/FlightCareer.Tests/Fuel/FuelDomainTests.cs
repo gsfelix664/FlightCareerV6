@@ -253,5 +253,135 @@ namespace FlightCareer.Tests.Fuel
             Assert.True(discrepancy <= maxAllowedDiscrepancy,
                 $"Divergência de consumo ({discrepancy:F4} gal) excedeu 10% do consumo ({diffGallons:F4} gal). Acumulador: {accumulatorGallons:F4} gal.");
         }
+
+        [Fact]
+        public void Accumulator_Reset_DoisVoosSeguidos_ContaApenasSegundoVoo()
+        {
+            var acc = new FuelUsageAccumulator();
+
+            // Voo 1: consome 15 lb
+            acc.Update(new[] { 0.0 });
+            acc.Update(new[] { 10.0 });
+            acc.Update(new[] { 15.0 });
+            Assert.Equal(15.0, acc.TotalLbs);
+
+            // Fim do voo 1 / Início do voo 2: reset do acumulador
+            acc.Reset();
+            Assert.Equal(0.0, acc.TotalLbs);
+
+            // Voo 2: simula novo motor iniciando em 0 lb e consumindo 6 lb
+            acc.Update(new[] { 0.0 });
+            acc.Update(new[] { 6.0 });
+            Assert.Equal(6.0, acc.TotalLbs);
+
+            // Garante que os 15 lb do primeiro voo não foram cobrados
+            double galVoo2 = acc.TotalGallons(6.0);
+            Assert.Equal(1.0, galVoo2, 4);
+        }
+
+        [Fact]
+        public void SyncCoordinator_ValorInicialDentroDaTolerancia_ConfirmaImediatamente()
+        {
+            var coord = new FuelSyncCoordinator();
+            // Alvo 20 gal, sim 20.2 gal, tolerância 0.5 gal, no solo
+            coord.Start(targetGallons: 20.0, currentSimGallons: 20.2, tolerance: 0.5, isOnGround: true);
+
+            Assert.Equal(FuelSyncStatus.Confirmed, coord.Status);
+            Assert.False(coord.NeedsSimWrite);
+            Assert.Equal(0, coord.AttemptCount);
+        }
+
+        [Fact]
+        public void SyncCoordinator_DivergenciaForaDoSolo_FalhaImediatamente()
+        {
+            var coord = new FuelSyncCoordinator();
+            // Alvo 20 gal, sim 15.0 gal, no ar
+            coord.Start(targetGallons: 20.0, currentSimGallons: 15.0, tolerance: 0.5, isOnGround: false);
+
+            Assert.Equal(FuelSyncStatus.Failed, coord.Status);
+            Assert.False(coord.NeedsSimWrite);
+        }
+
+        [Fact]
+        public void SyncCoordinator_DivergenciaNoSolo_EscreveEConfirmaNoProximoTick()
+        {
+            var currentTime = new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc);
+            var coord = new FuelSyncCoordinator(() => currentTime);
+
+            // Início no solo com divergência (alvo 20 gal, sim 10 gal)
+            coord.Start(targetGallons: 20.0, currentSimGallons: 10.0, tolerance: 0.5, isOnGround: true);
+
+            Assert.Equal(FuelSyncStatus.Pending, coord.Status);
+            Assert.True(coord.NeedsSimWrite);
+            Assert.Equal(1, coord.AttemptCount);
+
+            // Dispara escrita no sim
+            coord.NotifyWriteDispatched();
+            Assert.False(coord.NeedsSimWrite);
+
+            // Próximo tick de telemetria após 1 segundo: leitura atualizou para 20.1 gal
+            currentTime = currentTime.AddSeconds(1);
+            coord.Update(currentSimGallons: 20.1, isOnGround: true);
+
+            Assert.Equal(FuelSyncStatus.Confirmed, coord.Status);
+            Assert.False(coord.NeedsSimWrite);
+        }
+
+        [Fact]
+        public void SyncCoordinator_Timeout5s_DisparaNovaTentativaAteTresVezes_E_Falha()
+        {
+            var currentTime = new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc);
+            var coord = new FuelSyncCoordinator(() => currentTime);
+
+            coord.Start(targetGallons: 20.0, currentSimGallons: 10.0, tolerance: 0.5, isOnGround: true);
+            Assert.Equal(1, coord.AttemptCount);
+            Assert.True(coord.NeedsSimWrite);
+            coord.NotifyWriteDispatched();
+
+            // Passam 4.9 segundos sem o simulador atualizar: continua pendente, sem reescrever
+            currentTime = currentTime.AddSeconds(4.9);
+            coord.Update(currentSimGallons: 10.0, isOnGround: true);
+            Assert.Equal(FuelSyncStatus.Pending, coord.Status);
+            Assert.False(coord.NeedsSimWrite);
+            Assert.Equal(1, coord.AttemptCount);
+
+            // Passam mais 0.2 segundos (total 5.1s): dispara tentativa 2
+            currentTime = currentTime.AddSeconds(0.2);
+            coord.Update(currentSimGallons: 10.0, isOnGround: true);
+            Assert.Equal(FuelSyncStatus.Pending, coord.Status);
+            Assert.True(coord.NeedsSimWrite);
+            Assert.Equal(2, coord.AttemptCount);
+            coord.NotifyWriteDispatched();
+
+            // Passam mais 5.1 segundos: dispara tentativa 3
+            currentTime = currentTime.AddSeconds(5.1);
+            coord.Update(currentSimGallons: 10.0, isOnGround: true);
+            Assert.Equal(FuelSyncStatus.Pending, coord.Status);
+            Assert.True(coord.NeedsSimWrite);
+            Assert.Equal(3, coord.AttemptCount);
+            coord.NotifyWriteDispatched();
+
+            // Passam mais 5.1 segundos sem convergir (total > 15s): esgota as 3 tentativas e falha
+            currentTime = currentTime.AddSeconds(5.1);
+            coord.Update(currentSimGallons: 10.0, isOnGround: true);
+            Assert.Equal(FuelSyncStatus.Failed, coord.Status);
+            Assert.False(coord.NeedsSimWrite);
+        }
+
+        [Fact]
+        public void SyncCoordinator_DecolaDuranteSincronizacaoPendente_Falha()
+        {
+            var currentTime = new DateTime(2026, 11, 16, 12, 0, 0, DateTimeKind.Utc);
+            var coord = new FuelSyncCoordinator(() => currentTime);
+
+            coord.Start(targetGallons: 20.0, currentSimGallons: 10.0, tolerance: 0.5, isOnGround: true);
+            coord.NotifyWriteDispatched();
+
+            // Aeronave decola antes da conferência concluir
+            currentTime = currentTime.AddSeconds(2);
+            coord.Update(currentSimGallons: 10.0, isOnGround: false);
+
+            Assert.Equal(FuelSyncStatus.Failed, coord.Status);
+        }
     }
 }

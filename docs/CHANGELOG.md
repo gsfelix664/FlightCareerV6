@@ -2120,3 +2120,12 @@
 - **Testes xUnit**:
   - 10 novos testes em `FuelDomainTests.cs` cobrindo acumulador com dois motores, reinício de motor (10 → 12 → 0,5 → 1 = 13 lb), descarte de NaN/inválidos, detecção de ilimitado, detecção de subida em voo, tolerância a ruído, divergência em solo, distribuição em asas (13/13 gal) com e sem excedente, suporte a tanques legados e fixture real de voo `c152-sbmt-snej-20261115.csv.gz`.
   - Total: 486 testes aprovados, 0 falhas.
+
+## 2026-11-16 - COMBUSTIVEL-REAL-r2 Correções da rodada 1 de revisão (Gemini)
+- **Correções da rodada 1**:
+  - `FuelUsageAccumulator.Reset()`: implementado método que zera os incrementos acumulados, últimos valores lidos por motor e diagnósticos; invocado no `FlightMonitor.StartMonitoring` para que o consumo de voos anteriores não seja cobrado no voo subsequente.
+  - Sincronização pendente com conferência assíncrona (`FuelSyncCoordinator`): criada classe pura no domínio com relógio injetável, tolerância e timeout de ~5 s por tentativa (máx 3 tentativas). A sincronização no `StartMonitoring` agora entra em modo pendente e só confirma após nova leitura dos pacotes do simulador no solo; se divergir após as tentativas, alerta "ERRO DE SINCRONIZAÇÃO" e chama `StopMonitoring`. A integridade (`FuelIntegrityMonitor`) só é ativada após a sincronização ser confirmada.
+  - Filtro de gravação no simulador por aeronave ativa: `FlightMonitor.WatchedAircraftId` expõe o id da aeronave ativa/vigiada; `HangarViewModel.TryWriteFuelToSimulator` e `RefuelViewModel` conferem se a aeronave abastecida corresponde à aeronave assistida antes de enviar escritas aos tanques do MSFS.
+  - Novos testes unitários: 6 testes em `FuelDomainTests.cs` validando o reset do acumulador entre voos e todas as ramificações de estado e tempo do `FuelSyncCoordinator`.
+  - Total: 492 testes aprovados, 0 falhas.
+

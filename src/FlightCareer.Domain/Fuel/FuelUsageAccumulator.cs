@@ -98,5 +98,16 @@ namespace FlightCareer.Domain.Fuel
             _diagnostics.Clear();
             return copy;
         }
+
+        /// <summary>
+        /// Zera os totais acumulados, os últimos valores registrados por motor e os diagnósticos.
+        /// Utilizado no início de cada voo monitorado.
+        /// </summary>
+        public void Reset()
+        {
+            _accumulatedByEngine.Clear();
+            _lastSeenByEngine.Clear();
+            _diagnostics.Clear();
+        }
     }
 }

@@ -16,6 +16,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly Pilot _pilot;
         private readonly Infrastructure.Persistence.AppDbContext _context;
         private readonly ISimConnectService? _simConnect;
+        private readonly Services.FlightMonitor? _flightMonitor;
 
         [ObservableProperty] private double _currentFuel;
         [ObservableProperty] private double _maxFuel;
@@ -27,12 +28,18 @@ namespace FlightCareer.UI.ViewModels
         public double TotalCost => GallonsToBuy * PricePerGallon;
         public string BalanceInfo => $"Saldo disponível: {_pilot.Balance:C2}";
 
-        public RefuelViewModel(PilotAircraftWrapper aircraftWrapper, Pilot pilot, Infrastructure.Persistence.AppDbContext context, ISimConnectService? simConnect = null)
+        public RefuelViewModel(
+            PilotAircraftWrapper aircraftWrapper,
+            Pilot pilot,
+            Infrastructure.Persistence.AppDbContext context,
+            ISimConnectService? simConnect = null,
+            Services.FlightMonitor? flightMonitor = null)
         {
             _aircraftWrapper = aircraftWrapper;
             _pilot = pilot;
             _context = context;
             _simConnect = simConnect;
+            _flightMonitor = flightMonitor;
 
             CurrentFuel = aircraftWrapper.Aircraft.FuelAmount;
             MaxFuel = aircraftWrapper.Aircraft.AircraftType?.FuelTankGallons ?? 0;
@@ -81,8 +88,9 @@ namespace FlightCareer.UI.ViewModels
             _context.FinancialTransactions.Add(transaction);
             await _context.SaveChangesAsync();
 
-            // Gravar combustível no simulador se a aeronave estiver conectada no solo e com motores desligados
-            if (_simConnect != null && _simConnect.IsConnected)
+            // Gravar combustível no simulador se a aeronave for a ativa/vigiada conectada no solo e com motores desligados
+            if (_simConnect != null && _simConnect.IsConnected &&
+                _flightMonitor != null && _flightMonitor.WatchedAircraftId == _aircraftWrapper.Aircraft.Id)
             {
                 var simData = _simConnect.CurrentData;
                 if (simData.IsOnGround && !simData.IsEngineRunning)
