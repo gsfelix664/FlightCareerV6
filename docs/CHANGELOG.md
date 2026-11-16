@@ -2181,3 +2181,7 @@
 ## 2026-11-16 - Análise de seis páginas de Key Events do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/eventos-diversos.md` (sistemas gerais, instrumentos, aeronave diversos, rádio/navegação, diversos e câmera): panes no lado do sistema (atuador/válvula hidráulica, packs, deriva do giro, curso da bequilha), alarme nativo e ELT, serviços de solo pelo sim (pushback, GPU, catering, bagagem, jetway, escada), integridade (`BACK_TO_FLY`, resets, pausa, replay) e procedimentos recebidos do piloto. Câmera: nada útil.
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Estudo da API do SimConnect do MSFS 2024 (Claude)
+- Novo `docs/plans/sensor-research/simconnect-api.md` (Actions, Debug, Events And Data/Flow API, Flights, General, Input Events): "continuar de onde parou" com `FlightSave`/`FlightLoad` (ideia do usuário), plano da missão no GPS com `FlightPlanLoad`, Flow API para integridade e acidente (teleporte, Back On Track, replay, `PLANE_CRASH`), `ExecuteAction` (`FailureAction` com saúde, `RefillAction`, mensagens e destaque de instrumento dentro do sim), pinturas instaladas e atalho reservado.
+- Só documentação; nada testado no MSFS.
