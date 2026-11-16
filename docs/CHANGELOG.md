@@ -2098,3 +2098,7 @@
 ## 2026-11-16 - Análise das variáveis de rádio e navegação do SDK 2024 (Claude)
 - Novo `docs/plans/sensor-research/variaveis-radio-navegacao.md` (278 SimVars): HUD (ETE, radioaltímetro, transponder), qualidade (precisão ILS/RNAV, autorizações do ATC, desvio do plano, código de emergência), missões (pista mínima por avião, comprimento/largura da pista, gate e chegada à vaga, aeroporto com torre) e matrícula/companhia/voo graváveis (`ATC ID`, `ATC AIRLINE`, `ATC FLIGHT NUMBER`).
 - `ATC *` em lista separada do Watcher (`flightcareer-candidatas-atc.simvars`) por causa da suspeita das quedas do MSFS; 18 variáveis de GPS/NAV/COM/transponder na lista principal. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis de sistemas do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-sistemas.md` (280 SimVars): painel parcial gravável como pane nativa por instrumento, vazamento hidráulico, congelamentos como trapaça, conforto de cabine (bola, sinais, razão e temperatura de cabine), luzes por fase e horas acesas, carga da missão gravada nas estações (`PAYLOAD STATION WEIGHT`) e tipos de missão futuros (combate a incêndio, reboque).
+- 37 variáveis acrescentadas à lista do Watcher. Só documentação; nada testado no MSFS.
