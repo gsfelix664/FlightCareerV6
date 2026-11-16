@@ -79,21 +79,19 @@ namespace FlightCareer.Domain.Replay.Synthetic
             }
 
             // 5. Horas simuladas acumuladas nas peças
-            // As peças operacionais ativas devem registrar as horas simuladas do voo (±1% ou ±0.002h)
+            // Todas as peças instaladas (não quebradas) devem registrar as horas simuladas do voo (±1% ou ±0.003h)
             if (result.TotalSimHours > 0.01)
             {
                 foreach (var part in result.Parts)
                 {
-                    // Peças de célula e motor que contam horas continuamente
-                    if (part.PartId.StartsWith("airframe.") || part.PartId.StartsWith("eng."))
+                    if (part.IsBroken) continue;
+
+                    double diff = Math.Abs(part.HoursSinceReplacement - result.TotalSimHours);
+                    double allowedTolerance = Math.Max(0.003, result.TotalSimHours * 0.01);
+                    if (diff > allowedTolerance)
                     {
-                        double diff = Math.Abs(part.HoursSinceReplacement - result.TotalSimHours);
-                        double allowedTolerance = Math.Max(0.003, result.TotalSimHours * 0.01);
-                        if (diff > allowedTolerance)
-                        {
-                            violations.Add($"Invariante violada: Horas da peça '{part.PartId}:{part.EngineIndex}' ({part.HoursSinceReplacement:F4}h) diferem das horas simuladas do voo ({result.TotalSimHours:F4}h, diff={diff:F4}h).");
-                            break;
-                        }
+                        violations.Add($"Invariante violada: Horas da peça '{part.PartId}:{part.EngineIndex}' ({part.HoursSinceReplacement:F4}h) diferem das horas simuladas do voo ({result.TotalSimHours:F4}h, diff={diff:F4}h).");
+                        break;
                     }
                 }
             }
@@ -141,7 +139,8 @@ namespace FlightCareer.Domain.Replay.Synthetic
             if (!string.IsNullOrWhiteSpace(abuse.TargetRuleId))
             {
                 bool ruleTriggered = abusedResult.Exceedances.Any(e => e.RuleId.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase)) ||
-                                     abusedResult.DerivedEvents.Any(e => e.MetricKey.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase)) ||
+                                     abusedResult.DerivedEvents.Any(e => e.MetricKey.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase) ||
+                                                                         IsEventMetricMatchingRule(abuse.TargetRuleId, e.MetricKey)) ||
                                      abusedResult.Inspections.Any(i => i.RuleId.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase));
 
                 if (!ruleTriggered)
@@ -158,38 +157,79 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     if (!targetEngineMatched)
                     {
                         bool derivedEngineMatched = abusedResult.DerivedEvents.Any(e =>
-                            e.MetricKey.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase) &&
+                            (e.MetricKey.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase) ||
+                             IsEventMetricMatchingRule(abuse.TargetRuleId, e.MetricKey)) &&
                             e.EngineIndex == abuse.EngineIndex);
 
                         if (!derivedEngineMatched)
                         {
-                            violations.Add($"Gabarito violado: Abuso '{abuse.Type}' no motor {abuse.EngineIndex} não registrou o evento/excedência para o motor correto.");
+                            bool inspectionMatched = abusedResult.Inspections.Any(i =>
+                                i.RuleId.Equals(abuse.TargetRuleId, StringComparison.OrdinalIgnoreCase) &&
+                                (i.TargetPartId.Contains($":{abuse.EngineIndex}") || i.Description.Contains($"Motor {abuse.EngineIndex}")));
+
+                            if (!inspectionMatched)
+                            {
+                                violations.Add($"Gabarito violado: Abuso '{abuse.Type}' no motor {abuse.EngineIndex} não registrou o evento/excedência para o motor correto.");
+                            }
                         }
                     }
                 }
             }
 
-            // 2. A perda na peça alvo deve ser maior ou igual à do voo controle
+            // 2. A perda na peça alvo deve ser estritamente maior que no voo controle quando a regra tem efeito
             if (!string.IsNullOrWhiteSpace(abuse.TargetPartId))
             {
                 var controlPart = controlResult.Parts.FirstOrDefault(p =>
                     p.PartId.Equals(abuse.TargetPartId, StringComparison.OrdinalIgnoreCase) &&
-                    (abuse.EngineIndex == 0 || p.EngineIndex == abuse.EngineIndex || p.EngineIndex == 0));
+                    p.EngineIndex == abuse.EngineIndex)
+                    ?? controlResult.Parts.FirstOrDefault(p =>
+                    p.PartId.Equals(abuse.TargetPartId, StringComparison.OrdinalIgnoreCase) &&
+                    p.EngineIndex == 0);
 
                 var abusedPart = abusedResult.Parts.FirstOrDefault(p =>
                     p.PartId.Equals(abuse.TargetPartId, StringComparison.OrdinalIgnoreCase) &&
-                    (abuse.EngineIndex == 0 || p.EngineIndex == abuse.EngineIndex || p.EngineIndex == 0));
+                    p.EngineIndex == abuse.EngineIndex)
+                    ?? abusedResult.Parts.FirstOrDefault(p =>
+                    p.PartId.Equals(abuse.TargetPartId, StringComparison.OrdinalIgnoreCase) &&
+                    p.EngineIndex == 0);
 
                 if (controlPart != null && abusedPart != null)
                 {
-                    if (abusedPart.HealthLoss < controlPart.HealthLoss - 1e-6)
+                    // Tolerância mínima documentada para incremento de dano estritamente positivo: 1e-6 %
+                    const double minStrictLossDifference = 1e-6;
+                    double lossDiff = abusedPart.HealthLoss - controlPart.HealthLoss;
+
+                    if (lossDiff < minStrictLossDifference)
                     {
-                        violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F3}%) foi menor que no voo controle ({controlPart.HealthLoss:F3}%).");
+                        violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F4}%) não foi estritamente maior que no voo controle ({controlPart.HealthLoss:F4}%, diff={lossDiff:F6}%).");
                     }
                 }
             }
 
             return violations;
+        }
+
+        private static bool IsEventMetricMatchingRule(string ruleId, string metricKey)
+        {
+            if (string.Equals(ruleId, "engine_starter_duty_cycle", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "starterSeconds", StringComparison.OrdinalIgnoreCase)) return true;
+
+            if (string.Equals(ruleId, "avionics_start_with_avionics_master_on", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "avionicsMasterStartSpikes", StringComparison.OrdinalIgnoreCase)) return true;
+
+            if (string.Equals(ruleId, "battery_deep_discharge_damage", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "batteryDeepDischargeMinutes", StringComparison.OrdinalIgnoreCase)) return true;
+
+            if (string.Equals(ruleId, "electrical_system_overload_amps", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "electricalOverloadMinutes", StringComparison.OrdinalIgnoreCase)) return true;
+
+            if (string.Equals(ruleId, "gear_cycle_stress", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "gearCycles", StringComparison.OrdinalIgnoreCase)) return true;
+
+            if (string.Equals(ruleId, "touchdown_hard_landing", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(metricKey, "touchdownFpm", StringComparison.OrdinalIgnoreCase)) return true;
+
+            return false;
         }
 
         /// <summary>

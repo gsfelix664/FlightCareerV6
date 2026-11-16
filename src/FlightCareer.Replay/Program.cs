@@ -202,6 +202,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("Opções do Fuzz:");
             Console.WriteLine("  --runs <n>               Número de voos sintéticos a executar (padrão 1000)");
             Console.WriteLine("  --seed <n>               Semente pseudoaleatória inicial");
+            Console.WriteLine("  --fast                   Modo rápido: valida apenas invariantes (sem voo controle e gabarito)");
         }
 
         private static int RunFuzz(string[] args)
@@ -209,6 +210,7 @@ namespace FlightCareer.Replay
             int runs = 1000;
             string? aircraftArg = null;
             int? baseSeedArg = null;
+            bool fastMode = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -225,9 +227,13 @@ namespace FlightCareer.Replay
                 {
                     if (int.TryParse(args[++i], out int s)) baseSeedArg = s;
                 }
+                else if (arg.Equals("--fast", StringComparison.OrdinalIgnoreCase))
+                {
+                    fastMode = true;
+                }
                 else if (arg.Equals("-h", StringComparison.OrdinalIgnoreCase) || arg.Equals("--help", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine("Uso: FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]");
+                    Console.WriteLine("Uso: FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>] [--fast]");
                     return 0;
                 }
             }
@@ -238,6 +244,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("================================================================================");
             Console.WriteLine($"Corridas planejadas: {runs}");
             Console.WriteLine($"Semente base       : {baseSeed}");
+            Console.WriteLine($"Modo               : {(fastMode ? "Rápido (apenas invariantes)" : "Completo (Invariantes + Gabarito com Voo-Controle)")}");
             if (!string.IsNullOrWhiteSpace(aircraftArg))
             {
                 Console.WriteLine($"Aeronave alvo      : {aircraftArg}");
@@ -315,7 +322,35 @@ namespace FlightCareer.Replay
                     profile.EngineCount,
                     activationMode: ReplayActivationMode.GameLike);
 
-                var violations = SyntheticFlightOracle.VerifyInvariants(flight, result);
+                var violations = new List<string>();
+                violations.AddRange(SyntheticFlightOracle.VerifyInvariants(flight, result));
+
+                if (!fastMode && flight.GroundTruth.InjectedAbuses.Count > 0)
+                {
+                    var controlPlan = new SyntheticFlightPlan
+                    {
+                        TotalDurationSeconds = plan.TotalDurationSeconds,
+                        SimRateSegments = plan.SimRateSegments,
+                        Abuses = Array.Empty<SyntheticAbuseRecord>()
+                    };
+
+                    var controlFlight = generator.Generate(scenario, controlPlan, new SystemRandomSource(currentSeed));
+                    var controlResult = replayer.Run(
+                        controlFlight.Frames,
+                        controlFlight.Touchdowns,
+                        profile,
+                        profile.Features,
+                        profile.EngineCount,
+                        activationMode: ReplayActivationMode.GameLike);
+
+                    violations.AddRange(SyntheticFlightOracle.VerifyInvariants(controlFlight, controlResult));
+
+                    foreach (var abuse in flight.GroundTruth.InjectedAbuses)
+                    {
+                        var gtViolations = SyntheticFlightOracle.VerifyGroundTruth(controlResult, result, abuse);
+                        violations.AddRange(gtViolations);
+                    }
+                }
 
                 if (violations.Count == 0)
                 {

@@ -100,6 +100,12 @@ namespace FlightCareer.Domain.Replay.Synthetic
             // Encontra abusos específicos para interceptação
             var hardLandingAbuse = plan.Abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.HardLanding);
             var longStartAbuse = plan.Abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.LongStart);
+            if (longStartAbuse != null)
+            {
+                tStart = Math.Max(tStart, longStartAbuse.StartSeconds + longStartAbuse.DurationSeconds + 3.0);
+                tTaxiOut = Math.Max(tTaxiOut, tStart + 20.0);
+                tTakeoff = Math.Max(tTakeoff, tTaxiOut + 30.0);
+            }
             var avionicsStartAbuse = plan.Abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.AvionicsMasterOnStart);
             var thermalShockAbuse = plan.Abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.ThermalShock);
             var cancelAbuse = plan.Abuses.FirstOrDefault(a => a.Type == SyntheticAbuseType.DataCancelledMidFlight);
@@ -584,7 +590,8 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         int engIdx = ExtractEngineIndex(key);
                         val = alternator[engIdx] ? 1.0 : 0.0;
                     }
-                    else if (key.StartsWith("elec-main-bus-voltage", StringComparison.OrdinalIgnoreCase))
+                    else if (key.StartsWith("elec-main-bus-voltage", StringComparison.OrdinalIgnoreCase) ||
+                             key.StartsWith("elec-bus-voltage-", StringComparison.OrdinalIgnoreCase))
                     {
                         val = busVoltage;
                     }

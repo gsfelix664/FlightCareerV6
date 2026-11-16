@@ -63,6 +63,11 @@ namespace FlightCareer.Domain.Parts
         private readonly Dictionary<int, bool> _engineWasCombustion = new();
         private readonly Dictionary<int, double> _engineCombustionTimeSeconds = new();
 
+        /// <summary>
+        /// Ponto de teste para testes de mutação / fuzz: desativa a resolução de sensores com sufixo :n (ex.: chave:1).
+        /// </summary>
+        public bool DisablePerEngineSensorResolution { get; set; }
+
         public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog)
         {
             _partCatalog = partCatalog ?? throw new ArgumentNullException(nameof(partCatalog));
@@ -152,7 +157,7 @@ namespace FlightCareer.Domain.Parts
                     {
                         // Sensor global com chave exata disponível
                     }
-                    else if (frame.Values.ContainsKey($"{sensorKey}:1"))
+                    else if (!DisablePerEngineSensorResolution && frame.Values.ContainsKey($"{sensorKey}:1"))
                     {
                         // Sensor possui índice por motor no frame
                         isPerEngineRule = true;

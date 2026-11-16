@@ -57,7 +57,6 @@ namespace FlightCareer.Domain.Replay.Synthetic
             {
                 var candidateTypes = new List<SyntheticAbuseType>
                 {
-                    SyntheticAbuseType.RpmOverspeed,
                     SyntheticAbuseType.OilTempOverheat,
                     SyntheticAbuseType.OilPressureLow,
                     SyntheticAbuseType.FlapOverSpeed,
@@ -78,6 +77,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
                 if (isPiston)
                 {
+                    candidateTypes.Add(SyntheticAbuseType.RpmOverspeed);
                     candidateTypes.Add(SyntheticAbuseType.ChtOverheat);
                     candidateTypes.Add(SyntheticAbuseType.ThermalShock);
                     candidateTypes.Add(SyntheticAbuseType.EgtHigh);
@@ -93,16 +93,41 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     int typeIdx = (int)Math.Floor(rnd.NextDouble() * candidateTypes.Count);
                     var abuseType = candidateTypes[Math.Clamp(typeIdx, 0, candidateTypes.Count - 1)];
 
-                    int targetEngine = 1;
-                    if (engineCount > 1)
+                    bool isEngineAbuse = abuseType switch
                     {
-                        // Sorteia motor 1..engineCount
-                        targetEngine = 1 + (int)Math.Floor(rnd.NextDouble() * engineCount);
-                        targetEngine = Math.Clamp(targetEngine, 1, engineCount);
+                        SyntheticAbuseType.RpmOverspeed => true,
+                        SyntheticAbuseType.ChtOverheat => true,
+                        SyntheticAbuseType.OilTempOverheat => true,
+                        SyntheticAbuseType.OilPressureLow => true,
+                        SyntheticAbuseType.ThermalShock => true,
+                        SyntheticAbuseType.EgtHigh => true,
+                        SyntheticAbuseType.LongStart => true,
+                        SyntheticAbuseType.AvionicsMasterOnStart => true,
+                        _ => false
+                    };
+
+                    int targetEngine = 0;
+                    if (isEngineAbuse)
+                    {
+                        targetEngine = 1;
+                        if (engineCount > 1)
+                        {
+                            targetEngine = 1 + (int)Math.Floor(rnd.NextDouble() * engineCount);
+                            targetEngine = Math.Clamp(targetEngine, 1, engineCount);
+                        }
                     }
 
                     var record = CreateAbuseRecord(abuseType, duration, targetEngine, rnd);
                     abuses.Add(record);
+                }
+
+                // Garante duração suficiente para acomodar os abusos sorteados (ex.: descarga ou sobrecarga longa)
+                foreach (var ab in abuses)
+                {
+                    if (ab.StartSeconds + ab.DurationSeconds + 30.0 > duration)
+                    {
+                        duration = ab.StartSeconds + ab.DurationSeconds + 30.0;
+                    }
                 }
             }
 
@@ -126,115 +151,115 @@ namespace FlightCareer.Domain.Replay.Synthetic
             {
                 case SyntheticAbuseType.LongStart:
                     startSec = 15.0;
-                    durationSec = 35.0 + rnd.NextDouble() * 10.0; // > 30 s
-                    ruleId = "starter_crank_time";
-                    partId = "eng.starter";
+                    durationSec = 38.0 + rnd.NextDouble() * 5.0; // > 35 s para disparar warning
+                    ruleId = "engine_starter_duty_cycle";
+                    partId = "engine.starter";
                     break;
 
                 case SyntheticAbuseType.AvionicsMasterOnStart:
                     startSec = 15.0;
                     durationSec = 10.0;
                     ruleId = "avionics_start_with_avionics_master_on";
-                    partId = "elec.avionics";
+                    partId = "avionics.com_nav_radios";
                     break;
 
                 case SyntheticAbuseType.RpmOverspeed:
                     startSec = totalDuration * 0.45;
-                    durationSec = 15.0 + rnd.NextDouble() * 20.0;
+                    durationSec = 18.0 + rnd.NextDouble() * 15.0;
                     ruleId = "piston_rpm_overspeed";
-                    partId = "eng.pistons";
+                    partId = "engine.cylinders";
                     break;
 
                 case SyntheticAbuseType.ChtOverheat:
                     startSec = totalDuration * 0.40;
-                    durationSec = 20.0 + rnd.NextDouble() * 30.0;
-                    ruleId = "cylinder_cht_overheat";
-                    partId = "eng.cylinders";
+                    durationSec = 25.0 + rnd.NextDouble() * 25.0;
+                    ruleId = "piston_cht_overheat";
+                    partId = "engine.cylinders";
                     break;
 
                 case SyntheticAbuseType.OilTempOverheat:
                     startSec = totalDuration * 0.40;
                     durationSec = 25.0 + rnd.NextDouble() * 25.0;
-                    ruleId = "engine_oil_temperature_high";
-                    partId = "oil.lines";
+                    ruleId = "oil_temperature_high";
+                    partId = "oil.cooler";
                     break;
 
                 case SyntheticAbuseType.OilPressureLow:
                     startSec = totalDuration * 0.45; // em cruzeiro, bem após os 30s de motor ligado
-                    durationSec = 20.0 + rnd.NextDouble() * 25.0;
+                    durationSec = 25.0 + rnd.NextDouble() * 25.0;
                     ruleId = "oil_pressure_low";
-                    partId = "eng.bearings";
+                    partId = "engine.crankshaft";
                     break;
 
                 case SyntheticAbuseType.ThermalShock:
                     startSec = totalDuration * 0.65; // em descida
                     durationSec = 60.0;
                     ruleId = "piston_shock_cooling";
-                    partId = "eng.cylinders";
+                    partId = "engine.cylinders";
                     break;
 
                 case SyntheticAbuseType.EgtHigh:
                     startSec = totalDuration * 0.50;
-                    durationSec = 20.0 + rnd.NextDouble() * 20.0;
-                    ruleId = "exhaust_egt_overtemp";
-                    partId = "eng.exhaust";
+                    durationSec = 25.0 + rnd.NextDouble() * 20.0;
+                    ruleId = "piston_egt_excess";
+                    partId = "engine.valves";
                     break;
 
                 case SyntheticAbuseType.FlapOverSpeed:
                     startSec = totalDuration * 0.75; // aproximação com flap
-                    durationSec = 15.0 + rnd.NextDouble() * 15.0;
-                    ruleId = "flaps_overspeed_band";
+                    durationSec = 20.0 + rnd.NextDouble() * 15.0;
+                    ruleId = "flap_overspeed_vfe";
                     partId = "airframe.flaps";
                     break;
 
                 case SyntheticAbuseType.VneExceeded:
                     startSec = totalDuration * 0.60;
-                    durationSec = 10.0 + rnd.NextDouble() * 15.0;
-                    ruleId = "airframe_overspeed_vne";
-                    partId = "airframe.structure";
+                    durationSec = 15.0 + rnd.NextDouble() * 15.0;
+                    ruleId = "vne_airspeed_exceedance";
+                    partId = "airframe.wing_structure";
                     break;
 
                 case SyntheticAbuseType.PositiveGExceeded:
                     startSec = totalDuration * 0.50;
-                    durationSec = 5.0 + rnd.NextDouble() * 8.0;
-                    ruleId = "airframe_positive_g_exceedance";
-                    partId = "airframe.wings";
+                    durationSec = 6.0 + rnd.NextDouble() * 8.0;
+                    ruleId = "airframe_over_g_positive";
+                    partId = "airframe.wing_structure";
                     break;
 
                 case SyntheticAbuseType.NegativeGExceeded:
                     startSec = totalDuration * 0.50;
-                    durationSec = 4.0 + rnd.NextDouble() * 6.0;
-                    ruleId = "airframe_negative_g_exceedance";
-                    partId = "airframe.wings";
+                    durationSec = 5.0 + rnd.NextDouble() * 6.0;
+                    ruleId = "airframe_over_g_negative";
+                    partId = "airframe.wing_structure";
                     break;
 
                 case SyntheticAbuseType.HardLanding:
                     startSec = totalDuration * 0.85;
                     durationSec = 1.0;
-                    intensity = 0.30 + rnd.NextDouble() * 0.50; // 30% a 80% acima do limite de fpm
+                    intensity = 0.40 + rnd.NextDouble() * 0.40; // 40% a 80% acima do limite de fpm
                     ruleId = "touchdown_hard_landing";
                     partId = "gear.main_struts";
                     break;
 
                 case SyntheticAbuseType.BatteryDischarging:
-                    startSec = totalDuration * 0.20;
-                    durationSec = 600.0; // longo para atingir minutos de descarga profunda se duração permitir
-                    ruleId = "battery_deep_discharge";
-                    partId = "elec.battery";
+                    startSec = 30.0;
+                    durationSec = 650.0; // longo para atingir > 10 min de descarga profunda
+                    ruleId = "battery_deep_discharge_damage";
+                    partId = "electrical.battery";
                     break;
 
                 case SyntheticAbuseType.ElectricalOverload:
-                    startSec = totalDuration * 0.25;
-                    durationSec = 350.0;
+                    startSec = 40.0;
+                    durationSec = 350.0; // > 5 min de sobrecarga
                     ruleId = "electrical_system_overload_amps";
-                    partId = "elec.alternator";
+                    partId = "electrical.alternator";
                     break;
 
                 case SyntheticAbuseType.GearCycles:
                     startSec = totalDuration * 0.50;
                     durationSec = 30.0;
-                    ruleId = "gear_excessive_cycling";
-                    partId = "gear.actuators";
+                    ruleId = "gear_cycle_stress";
+                    partId = "gear.actuator";
                     break;
 
                 case SyntheticAbuseType.DataCancelledMidFlight:
