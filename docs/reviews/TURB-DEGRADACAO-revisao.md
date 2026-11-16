@@ -11,3 +11,16 @@ Conferido pelo revisor: build 0 erros; `dotnet test` 474/474. Aprovados: `Turbin
 
 ## Fora do escopo (continua)
 - `SimTelemetry.cs`, `FlightMonitor.cs`, `PersistentFailureService.cs`.
+
+---
+
+# Revisão TURB-DEGRADACAO — rodada 2
+
+**Veredito: APROVADO**
+
+Conferido pelo revisor: build 0 erros; `dotnet test` 476/476.
+1. `NUMBER OF ENGINES` no fim da definição `TurbineLossesRead`, exposto como `TurbineEngineCount`; a sessão passa o valor (fallback 1). Teste com 2 motores.
+2. `HandleAircraftReloaded` só marca os motores como não gravados; o próximo `Apply` regrava depois de conferir turbina. Teste do ciclo de recarga.
+3. `SetDebugTurbineLosses` removido.
+
+Ressalva: o atuador ficou em `Application/Services` (depende só de `ISimConnectService`, ok). Não testado no MSFS: toda a escrita; roteiro no relatório da rodada 1.
