@@ -1975,3 +1975,26 @@
 - Revisão da SIMVAR-PROBE (aprovada): `catch {}` silenciosos removidos e `--block-size` respeitado; rodada completa conferida no MSFS (C152 parado, sem deslocamento entre blocos).
 - Plano `docs/plans/validacao-simvars.md` (validação das SimVars, teste de panes/Key Events, ligação com as peças).
 - Testes do usuário no C152 (1 parado + 2 voos) em `docs/plans/sensor-validation/probe-runs/`, com matriz `matriz-C152.csv/.md`. Achados: `ELECTRICAL GENERATOR *` substitui `GENALT`; pontos de contato por índice funcionam; limites de G do sim ≠ POH; `ENG VIBRATION`, `GEAR SKIDDING FACTOR`, `SEMIBODY LOADFACTOR X/Z` e `MIN G FORCE` mortas no C152. O MSFS caiu 3 vezes com o mesmo erro interno durante a sondagem (suspeita: variáveis `ATC *`/`AI *` na troca de controle do ATC; não provado).
+
+## 2026-11-16 - REGRAS-C152 Regras e sensores do C152 e correções de fuzz (Gemini)
+- **Registro de Sensores (`sensor_registry.json`, `sensor-inventory.md`, `SensorRegistryTests.cs`)**:
+  - Pontos de contato de trem e derrapagem convertidos de `perEngine: true` para sensores explícitos por roda com `perEngine: false`: `gear-contact-point-compression-0/-1/-2` (`CONTACT POINT COMPRESSION:0..2`) e `gear-contact-point-is-skidding-0/-1/-2` (`CONTACT POINT IS SKIDDING:0..2`).
+  - Adicionados sensores de contato com solo por roda `gear-contact-point-on-ground-0/-1/-2` (`CONTACT POINT IS ON GROUND:0..2`).
+  - Adicionadas variáveis ativas de gerador elétrico MSFS 2024 `elec-generator-amps`, `elec-generator-voltage`, `elec-generator-active` (`perEngine: true`). Chaves legadas `elec-genalt-*` preservadas.
+  - Adicionada pressão dinâmica `af-dynamic-pressure` (`DYNAMIC PRESSURE`, unidade `pound-force per square foot`).
+  - Preservadas variáveis que não variaram no C152 (`eng-vibration`, `gear-skidding-factor`, `af-min-g-force`) para continuidade de gravação e prova em outros modelos.
+- **Catálogo de Regras e Peças (`wear_rules.json`, `parts_catalog.json`)**:
+  - `airframe_over_g_negative`: simplificado para usar exclusivamente `["af-g-force"]` (desacoplado de `af-min-g-force`).
+  - `touchdown_hard_landing` e `landing_cycle_structural_stress`: sensores atualizados para rodas principais (`gear-contact-point-compression-1` e `-2`).
+  - Peças atualizadas com novas chaves por roda e geradores elétricos.
+- **Domínio (`PartWearEngine.cs`, `PartEventDeriver.cs`, `_class_defaults.json`)**:
+  - `PartWearEngine`: suporte completo a limites negativos quando `Direction == LimitDirection.Below` (cálculo de excesso sem inversão, ordenação de faixas por `limit * Threshold` decrescente, e emissão de diagnóstico quando limite negativo for usado com `Above`).
+  - Resolução de sensores por motor prioriza `${sensorKey}:1` sobre chave desindexada global.
+  - `PartEventDeriver`: corrigido limiar de posição de trem para percentual 0–100 (`isUp <= 10.0`, `isDown >= 90.0`) e adicionado fallback por `gear-contact-point-on-ground-*` na detecção de solo.
+  - `_class_defaults.json`: adicionado `egtMax` padrão = 893.52 °C para classe `Piston`.
+- **Fuzz Testing e Replay (`SyntheticFlightGenerator.cs`, `SyntheticFlightPlan.cs`, `SyntheticFlightOracle.cs`, `Program.cs`)**:
+  - Posição do trem em percentual (0–100) e geração determinística dos novos sensores (`0..2`, gerador, pressão dinâmica).
+  - Sincronização do voo controle e validação de gabarito para voos cancelados prematuramente.
+  - Duração mínima garantida para abusos contínuos acumulados e proteção contra truncamento de abusos por cancelamento.
+- **Testes xUnit**:
+  - Criados 8 testes em `C152RulesTests.cs` cobrindo limites de G negativo, descarte de limite negativo em Above, EGT Max padrão, posição de trem e paridade do registro. Total de 463 testes unitários aprovados (0 falhas). Fuzz testing de 100 corridas com 100% de aprovação (0 falhas).

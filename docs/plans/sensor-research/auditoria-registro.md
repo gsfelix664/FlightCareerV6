@@ -97,3 +97,21 @@ Como resultado, o código atual lê apenas o trem principal esquerdo (`:1`), ign
    - Contato 2 → Alimenta `landinggear.main_struts` (direito), `tires.main_right_tire` e `brakes.discs_linings_right`.
 3. **Detecção de Tailstrike:**
    - Adicionar `gear-contact-point-tail-compression` (`CONTACT POINT COMPRESSION:N` onde N é o scrape point traseiro, tipicamente ponto 3 ou 4) ou ler `TAILHOOK POSITION` / ângulo de arfagem no toque para dano na antepara traseira (`fuselage.pressure_bulkheads`).
+
+---
+
+## 7. Implementação e Alinhamento na Tarefa REGRAS-C152 (2026-11-16)
+
+Conforme comprovado pela matriz de sondagem do Cessna 152 (`docs/plans/sensor-validation/probe-runs/matriz-C152.md`), as seguintes correções foram integradas:
+1. **Contact Points por Ponto de Contato Fixo (`perEngine: false`):**
+   - `gear-contact-point-compression-0`, `-1`, `-2` (`CONTACT POINT COMPRESSION:0..2`)
+   - `gear-contact-point-is-skidding-0`, `-1`, `-2` (`CONTACT POINT IS SKIDDING:0..2`)
+   - `gear-contact-point-on-ground-0`, `-1`, `-2` (`CONTACT POINT IS ON GROUND:0..2`)
+   - Substituto para `CONTACT POINT SKIDDING FACTOR:0..5` que se manteve constante 0 no C152.
+2. **Geradores Elétricos MSFS 2024 (`perEngine: true`):**
+   - `elec-generator-amps`, `elec-generator-voltage`, `elec-generator-active` ativos no MSFS 2024.
+   - As chaves `elec-genalt-*` foram mantidas no registro para compatibilidade com aeronaves legadas.
+3. **Pressão Dinâmica (`perEngine: false`):**
+   - `af-dynamic-pressure` (`DYNAMIC PRESSURE`, unidade `pound-force per square foot`).
+4. **Sensores Mortos no C152 Mantidos no Registro:**
+   - `eng-vibration`, `gear-skidding-factor` e `af-min-g-force` continuam no registro (podem operar em outros modelos e o gravador continua coletando dados), mas as regras de desgaste foram desacopladas deles (ex.: `airframe_over_g_negative` usa exclusivamente `af-g-force`).
