@@ -1990,3 +1990,7 @@
 - Novo `docs/plans/sensor-research/variaveis-comandos.md` (96 SimVars de superfícies, compensadores, flaps, spoilers, manche e fly-by-wire) com usos para HUD, qualidade (suavidade dos comandos, voo fora de compensação), treino/diário (horas manuais × piloto automático) e desgaste/panes.
 - Achado: `FLAPS CURRENT SPEED LIMITATION` dá a Vfe do dente atual ao vivo (C152: 110 kt) e pode cobrir as 22 aeronaves sem `vfe` no catálogo.
 - 32 variáveis acrescentadas a `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars`. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis do sistema elétrico do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-eletrica.md` (111 SimVars) com usos para HUD (bateria, gerador, GPU, APU), passageiros (sinais de cabine), economia (GPU, APU), integridade (disjuntor/alternador religado) e desgaste/panes (sobrecarga por amperes do gerador, ciclos de motor de flap/trem, disjuntores como pane por sistema).
+- 35 variáveis acrescentadas a `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars`. Só documentação; nada testado no MSFS.
