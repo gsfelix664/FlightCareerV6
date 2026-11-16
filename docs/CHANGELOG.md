@@ -2173,3 +2173,7 @@
 - Novo `docs/plans/sensor-research/eventos-comandos.md`: compensador inoperante nativo (`*_TRIM_DISABLED_SET`) e compensador disparado, spoilers armados, auto-leme, e bloqueio do slew em voo por mascaramento de `SLEW_ON/SET/TOGGLE`.
 - `eventos-motor.md`/`eventos-comandos.md`: lembrete do princípio F4.2e (falhar o sistema sem mexer no comando; mascaramento abandonado para flap e alternador) e decisão do usuário sobre o auto-start (perde XP, não invalida).
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise dos Key Events de combustível do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/eventos-combustivel.md`: `REPAIR_AND_REFUEL` e `ADD_FUEL_QUANTITY` como detecção de trapaça (invalidar e reaplicar panes), caminhão de combustível do sim (`REQUEST_FUEL_KEY`, decisão pendente), panes no sistema por `FUELSYSTEM_VALVE_SET`/`PUMP_SET`/`JUNCTION_SET` e procedimentos (seletor, alimentação cruzada, bombas, despejo).
+- Só documentação; nada testado no MSFS.
