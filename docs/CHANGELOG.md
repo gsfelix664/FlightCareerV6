@@ -2055,3 +2055,7 @@
 - A documentação marca obsoletas com `class=obsolete`, que o extrator não capturava. Levantamento nas 15 páginas: 70 obsoletas, em `docs/plans/sensor-research/variaveis-obsoletas.md`.
 - Removidas das listas do Watcher: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `EXIT OPEN`; `ELEVATOR TRIM PCT` trocada por `EX1`. Aviso nas análises `variaveis-*.md` e no plano de validação.
 - Pendente (código, Gemini): `CRASH FLAG` e `GENERAL ENG FIRE DETECTED` ainda são lidos em produção; coluna `obsoleta` no extrator com teste.
+
+## 2026-11-16 - Análise das variáveis de modelo de voo do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-modelo-voo.md` (99 SimVars): HUD (peso/CG, ângulo de ataque, Vr, portas), passageiros (solavanco por `SEMIBODY LOADFACTOR YDOT`, voo descoordenado), missões (capacidade útil, CG, planejamento, jetway, avião convencional), integridade (peso mudando em voo) e desgaste (acima do peso, fora do CG, porta aberta com risco).
+- 23 variáveis acrescentadas à lista do Watcher (`INTERACTIVE POINT OPEN` no lugar da obsoleta `EXIT OPEN`). Só documentação; nada testado no MSFS.
