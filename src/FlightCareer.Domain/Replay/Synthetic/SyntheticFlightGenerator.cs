@@ -64,16 +64,26 @@ namespace FlightCareer.Domain.Replay.Synthetic
             double chtCoolingRateMax = ResolveLimit(LimitKeys.ChtCoolingRateMax, 28.0);
             double egtMax = ResolveLimit(LimitKeys.EgtMax, 893.52);
 
-            double vfe1 = ResolveLimit("vfe:1", 110.0);
-            double vfe2 = ResolveLimit("vfe:2", 85.0);
+            var flapSelection = SyntheticFlapSelector.Select(profile, ResolveLimit);
+            int approachFlapIndex = flapSelection.FlapIndex;
+            double approachVfe = flapSelection.Vfe;
+
             int avionicsCircuitIdx = (int)Math.Round(ResolveLimit("elecAvionicsCircuitIndex", 0.0));
+
+            // Escala de CHT para respeitar limites de motores refrigerados a líquido (ex: DA40NG, DA62, Flight Design CT)
+            // Com chtMax >= 205.9 a escala é 1.0 e o voo é idêntico ao anterior bit a bit.
+            double chtScale = Math.Min(1.0, 0.85 * chtMax / 175.0);
+
+            // Escala de proteção para óleo e EGT se algum modelo tiver pico normal >= 0.90 do limite
+            double oilScale = (90.0 >= 0.90 * oilTempMax) ? Math.Min(1.0, 0.85 * oilTempMax / 90.0) : 1.0;
+            double egtScale = (730.0 >= 0.90 * egtMax) ? Math.Min(1.0, 0.85 * egtMax / 730.0) : 1.0;
 
             // Velocidades nominais calibradas com base nos limites para voo normal sem excedências
             double normalCruiseIas = Math.Min(vno * 0.72, va * 0.80);
             if (normalCruiseIas <= 40.0) normalCruiseIas = 85.0;
             double normalClimbIas = Math.Min(normalCruiseIas * 0.75, 75.0);
             double normalDescentIas = normalCruiseIas * 0.90;
-            double normalApproachIas = Math.Min(vfe2 * 0.85, normalCruiseIas * 0.65);
+            double normalApproachIas = Math.Min(approachVfe * 0.85, normalCruiseIas * 0.65);
 
             // 3. Fases e linha de tempo do voo
             double totalDuration = Math.Max(120.0, plan.TotalDurationSeconds);
@@ -264,9 +274,9 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = 1050.0 + (rnd.NextDouble() - 0.5) * 15.0;
                         oilPress[e] = 45.0 + (rnd.NextDouble() - 0.5) * 2.0;
-                        cht[e] = Math.Min(120.0, cht[e] + 0.35);
-                        oilTemp[e] = Math.Min(70.0, oilTemp[e] + 0.20);
-                        egt[e] = 600.0;
+                        cht[e] = Math.Min(120.0 * chtScale, cht[e] + 0.35);
+                        oilTemp[e] = Math.Min(70.0 * oilScale, oilTemp[e] + 0.20);
+                        egt[e] = 600.0 * egtScale;
                     }
 
                     busVoltage = elecSystemVolts;
@@ -286,9 +296,9 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = rpmRedline * 0.94 + (rnd.NextDouble() - 0.5) * 10.0;
                         oilPress[e] = 52.0;
-                        cht[e] = Math.Min(165.0, cht[e] + 0.5);
-                        oilTemp[e] = Math.Min(85.0, oilTemp[e] + 0.3);
-                        egt[e] = 720.0;
+                        cht[e] = Math.Min(165.0 * chtScale, cht[e] + 0.5);
+                        oilTemp[e] = Math.Min(85.0 * oilScale, oilTemp[e] + 0.3);
+                        egt[e] = 720.0 * egtScale;
                     }
 
                     if (!onGround)
@@ -314,9 +324,9 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         alternator[e] = true;
                         rpm[e] = rpmRedline * 0.90 + (rnd.NextDouble() - 0.5) * 10.0;
                         oilPress[e] = 50.0;
-                        cht[e] = Math.Min(175.0, cht[e] + 0.2);
-                        oilTemp[e] = Math.Min(90.0, oilTemp[e] + 0.15);
-                        egt[e] = 730.0;
+                        cht[e] = Math.Min(175.0 * chtScale, cht[e] + 0.2);
+                        oilTemp[e] = Math.Min(90.0 * oilScale, oilTemp[e] + 0.15);
+                        egt[e] = 730.0 * egtScale;
                     }
                 }
                 else if (t < tCruise)
@@ -339,10 +349,10 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         }
                         else
                         {
-                            cht[e] = 155.0 + (rnd.NextDouble() - 0.5) * 1.0;
+                            cht[e] = (155.0 + (rnd.NextDouble() - 0.5) * 1.0) * chtScale;
                         }
-                        oilTemp[e] = 85.0 + (rnd.NextDouble() - 0.5) * 0.5;
-                        egt[e] = 710.0;
+                        oilTemp[e] = (85.0 + (rnd.NextDouble() - 0.5) * 0.5) * oilScale;
+                        egt[e] = 710.0 * egtScale;
                     }
                 }
                 else if (t < tDescent)
@@ -361,14 +371,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
                         oilPress[e] = 42.0;
                         if (thermalShockAbuse != null && t >= thermalShockAbuse.StartSeconds)
                         {
-                            cht[e] = Math.Max(50.0, cht[e] - 0.15);
+                            cht[e] = Math.Max(50.0 * chtScale, cht[e] - 0.15);
                         }
                         else
                         {
-                            cht[e] = Math.Max(130.0, cht[e] - 0.15);
+                            cht[e] = Math.Max(130.0 * chtScale, cht[e] - 0.15);
                         }
-                        oilTemp[e] = Math.Max(75.0, oilTemp[e] - 0.10);
-                        egt[e] = 650.0;
+                        oilTemp[e] = Math.Max(75.0 * oilScale, oilTemp[e] - 0.10);
+                        egt[e] = 650.0 * egtScale;
                     }
                 }
                 else if (t < tTouchdown)
@@ -378,7 +388,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     vsFpm = -450.0;
                     altitude = Math.Max(50.0, altitude + vsFpm * (dtStep / 60.0));
                     ias = normalApproachIas + (rnd.NextDouble() - 0.5) * 2.0;
-                    flapIndex = 2;
+                    flapIndex = approachFlapIndex;
                     flapPercent = 1.0;
                     if (isRetractable) gearPosition = 100.0;
 
@@ -485,7 +495,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                             ApplyToEngines(eTarget, eng =>
                             {
                                 double shockRatePerSec = (chtCoolingRateMax + 20.0) / 60.0;
-                                cht[eng] = Math.Max(50.0, cht[eng] - shockRatePerSec * dtStep);
+                                cht[eng] = Math.Max(50.0 * chtScale, cht[eng] - shockRatePerSec * dtStep);
                             });
                             break;
 
@@ -494,9 +504,9 @@ namespace FlightCareer.Domain.Replay.Synthetic
                             break;
 
                         case SyntheticAbuseType.FlapOverSpeed:
-                            flapIndex = 2;
+                            flapIndex = approachFlapIndex;
                             flapPercent = 1.0;
-                            ias = vfe2 + 15.0 + abuse.Intensity * 20.0;
+                            ias = approachVfe + 15.0 + abuse.Intensity * 20.0;
                             break;
 
                         case SyntheticAbuseType.VneExceeded:
