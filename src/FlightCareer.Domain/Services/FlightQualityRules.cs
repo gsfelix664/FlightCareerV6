@@ -4,10 +4,9 @@ namespace FlightCareer.Domain.Services
 {
     /// <summary>
     /// Limites operacionais de conforto e pesos de penalidade por segundo simulado.
-    /// Origem dos limites:
-    /// - G (0,4 a 1,6): envelope de conforto de passageiros da FAA/IATA.
-    /// - Bank (30°): inclinação padrão de curva suave de passageiro.
-    /// - Pitch (nariz para cima 20°, para baixo 15°): conforto de cabine de passageiros.
+    /// Origem: G, bank, pitch e pesos de 0,1/0,05 são os valores do código antigo (contagem por pacote a ~1 Hz),
+    /// mantidos para não mudar a escala da nota; os demais são estimativas. Todos a calibrar com voos reais.
+    /// - G (0,4 a 1,6), bank (30°), pitch (nariz para cima 20°, para baixo 15°): herdados do código antigo.
     /// - Jerk (YDOT 2,0 /s): solavanco vertical excessivo (desconforto e enjoo).
     /// - Slip (Beta 5°): ângulo de derrapagem / voo descoordenado.
     /// - Vento vertical (5 ft/s): corrente vertical atmosférica indicativa de turbulência.

@@ -18,3 +18,4 @@ Se a lição virar regra geral do projeto, o revisor move para `AGENTS.md` e apa
 - 2026-11-16 (REGRAS-C152): no gerador de voos sintéticos, abusos que mexem na mesma grandeza (G±, estado elétrico) ou que encerram o voo (cancelamento) não podem cair no mesmo instante nem antes do evento esperado; separe no tempo ou torne exclusivos.
 - 2026-11-16 (FUZZ-ALL): comando de reprodução impresso tem que ser executado uma vez e conferido: se o voo depende do índice da corrida (não só da semente), o comando precisa recriar o mesmo índice.
 - 2026-11-16 (CATALOGO-PADROES): antes de explicar uma falha no relatório, confira o dado no arquivo (ex.: o valor do limite no JSON); hipótese não conferida não vai como fato.
+- 2026-11-16 (NOTA-PASSAGEIROS): não cite fonte (FAA, IATA, fabricante) em comentário ou relatório sem tê-la conferido; valor herdado ou estimado se descreve como tal.

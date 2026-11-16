@@ -331,5 +331,18 @@ namespace FlightCareer.Tests.Quality
             Assert.Equal(99.9, svc.GetQualityScore(), 1);
 #pragma warning restore CS0618
         }
+
+        [Fact]
+        public void MixedFlight_PaxThenCargo_EachSecondWeightedByItsType()
+        {
+            var svc = new FlightQualityService();
+            var highG = new FlightQualitySample(OnGround: false, GForce: 1.8, BankDeg: 0, PitchUpDeg: 2);
+
+            for (int i = 0; i < 10; i++) svc.ProcessSample(highG, isPaxFlight: true, simSeconds: 1.0);
+            for (int i = 0; i < 10; i++) svc.ProcessSample(highG, isPaxFlight: false, simSeconds: 1.0);
+
+            // 10 s × 0,1 (passageiro) + 10 s × 0,05 (carga) = 1,5 ponto
+            Assert.Equal(98.5, svc.GetQualityScore(), 3);
+        }
     }
 }

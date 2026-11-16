@@ -23,6 +23,9 @@ namespace FlightCareer.Domain.Services
         public double MaxPitch { get; private set; }
         public double TouchdownFPM { get; private set; }
 
+        /// <summary>Pontos de conforto perdidos, somados a cada amostra com o peso do tipo de voo daquele momento.</summary>
+        public double ComfortPenaltyPoints { get; private set; }
+
         [Obsolete("Use os acumulados em segundos (GSeconds, BankSeconds, etc.)")]
         public int ComfortViolations => (int)Math.Round(BankSeconds + PitchSeconds + (IsPaxFlight ? GSeconds + JerkSeconds + SlipSeconds : 0));
 
@@ -48,6 +51,7 @@ namespace FlightCareer.Domain.Services
             MaxBank = 0;
             MaxPitch = 0;
             TouchdownFPM = 0;
+            ComfortPenaltyPoints = 0;
         }
 
         [Obsolete("Use ProcessSample com FlightQualitySample e segundos simulados")]
@@ -83,12 +87,14 @@ namespace FlightCareer.Domain.Services
             if (sample.GForce > _rules.MaxGForce || sample.GForce < _rules.MinGForce)
             {
                 GSeconds += accelSimSeconds;
+                ComfortPenaltyPoints += accelSimSeconds * (isPaxFlight ? _rules.PaxGWeight : _rules.CargoGWeight);
             }
 
             // Monitorar Jerk (solavanco vertical)
             if (sample.LoadFactorYDot.HasValue && Math.Abs(sample.LoadFactorYDot.Value) > _rules.JerkThreshold)
             {
                 JerkSeconds += accelSimSeconds;
+                ComfortPenaltyPoints += accelSimSeconds * (isPaxFlight ? _rules.PaxJerkWeight : _rules.CargoJerkWeight);
             }
 
             // Em voos de carga, manobras de atitude e derrapagem não incomodam
@@ -98,18 +104,21 @@ namespace FlightCareer.Domain.Services
                 if (absBank > _rules.MaxBankDeg)
                 {
                     BankSeconds += simSeconds;
+                    ComfortPenaltyPoints += simSeconds * _rules.PaxBankWeight;
                 }
 
                 // Monitorar Pitch (Nariz para cima > 20° ou nariz para baixo > 15°)
                 if (sample.PitchUpDeg > _rules.PitchUpMaxDeg || sample.PitchUpDeg < -_rules.PitchDownMaxDeg)
                 {
                     PitchSeconds += simSeconds;
+                    ComfortPenaltyPoints += simSeconds * _rules.PaxPitchWeight;
                 }
 
                 // Monitorar Derrapagem (Slip / Beta)
                 if (sample.BetaDeg.HasValue && Math.Abs(sample.BetaDeg.Value) > _rules.SlipThresholdDeg)
                 {
                     SlipSeconds += simSeconds;
+                    ComfortPenaltyPoints += simSeconds * _rules.PaxSlipWeight;
                 }
             }
         }
@@ -141,22 +150,7 @@ namespace FlightCareer.Domain.Services
                 else score -= 60;
             }
 
-            double penalty;
-            if (IsPaxFlight)
-            {
-                penalty = (GSeconds * _rules.PaxGWeight)
-                        + (BankSeconds * _rules.PaxBankWeight)
-                        + (PitchSeconds * _rules.PaxPitchWeight)
-                        + (JerkSeconds * _rules.PaxJerkWeight)
-                        + (SlipSeconds * _rules.PaxSlipWeight);
-            }
-            else
-            {
-                penalty = (GSeconds * _rules.CargoGWeight)
-                        + (JerkSeconds * _rules.CargoJerkWeight);
-            }
-
-            score -= penalty;
+            score -= ComfortPenaltyPoints;
 
             return Math.Max(0, Math.Min(100.0, score));
         }

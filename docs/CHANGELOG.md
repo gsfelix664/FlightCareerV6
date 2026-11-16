@@ -2261,3 +2261,4 @@
 - **Testes e Aceitação**:
   - 12 novos testes em `FlightQualityServiceTests.cs` cobrindo invariância de taxa de amostragem (1 Hz vs 4 Hz), taxa de aceleração de tempo (4×), pausas, sinal do pitch, distinção de carga, atenuação por turbulência, solavanco/derrapagem opcionais e escala de compatibilidade legada.
   - Build 0 erros, `dotnet test` 537/537 aprovados. Não testado no MSFS.
+- Revisão (Claude): penalidade acumulada por amostra com o peso do tipo de voo do momento (`ComfortPenaltyPoints`; antes valia o tipo do último pacote) e comentário de origem dos limites corrigido. 538/538 testes.
