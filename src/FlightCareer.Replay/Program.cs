@@ -394,7 +394,8 @@ namespace FlightCareer.Replay
                         File.WriteAllText(tdFile, JsonSerializer.Serialize(flight.Touchdowns, JsonOpts));
 
                         string gtFile = Path.Combine(failureDir, $"{baseName}.groundtruth.json");
-                        string reproduceCmd = $"dotnet run --project src/FlightCareer.Replay -- fuzz --aircraft \"{profile.AircraftId}\" --seed {currentSeed} --runs 1";
+                        // abuseCount depende do índice da corrida: reproduz com a mesma semente base e a corrida como a última
+                        string reproduceCmd = $"dotnet run --project src/FlightCareer.Replay -- fuzz --aircraft \"{profile.AircraftId}\" --seed {currentSeed - runIndex} --runs {runIndex + 1}";
                         var failureInfo = new
                         {
                             seed = currentSeed,
