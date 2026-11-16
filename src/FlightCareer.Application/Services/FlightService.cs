@@ -48,7 +48,8 @@ namespace FlightCareer.Application.Services
             double? oilCondition = null,
             double? realFuelUsed = null,
             bool isFlightInvalidated = false,
-            string? invalidationReason = null)
+            string? invalidationReason = null,
+            bool autoStartUsed = false)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -259,6 +260,7 @@ namespace FlightCareer.Application.Services
                 int baseXP = outcome.FlightTimeMinutes + (int)(distanceNM * 0.5);
                 int tierBonusXP = (int)(baseXP * (airportTier * 0.2)); 
                 int totalXP = (int)((baseXP + tierBonusXP) * qualityMultiplier);
+                totalXP = ProcedurePenalties.ApplyAutoStartPenalty(totalXP, autoStartUsed);
 
                 int missionsDone = 0;
                 int missionsRemaining = 0;
@@ -389,6 +391,10 @@ namespace FlightCareer.Application.Services
                 outcome.CompletedMissions = missionsDone;
                 outcome.RemainingMissions = missionsRemaining;
                 outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2}";
+                if (autoStartUsed)
+                {
+                    outcome.Message += " | Partida automática usada (−10% XP)";
+                }
                 return outcome;
             }
             catch (Exception ex)

@@ -34,7 +34,7 @@ namespace FlightCareer.UI.Services
         IntegrityStateRead
     }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
-    public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
+    public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2, ObservedPilotInputs = 3 }
 
     /// <summary>
     /// Leitura rápida (~5-10 Hz) usada pelas panes persistentes (vigilância + detecção de panes nativas).
@@ -131,6 +131,8 @@ namespace FlightCareer.UI.Services
         public event Action<SimFastFlightState>? OnFastFlightReceived;
         /// <summary>Comando do piloto interceptado (mascarado) antes de chegar à aeronave.</summary>
         public event Action<string, uint>? OnMaskedEvent;
+        /// <summary>Comando do piloto observado sem mascaramento (auto-start, caminhão de combustível, etc.).</summary>
+        public event Action<string, uint>? OnObservedEvent;
         /// <summary>O simulador (re)carregou aeronave ou voo: as falhas do sim foram zeradas.</summary>
         public event Action? OnAircraftReloaded;
         /// <summary>Estado de combustível e tanques atualizado a cada 1 s.</summary>
@@ -441,6 +443,7 @@ namespace FlightCareer.UI.Services
                     IsCrashed = false;
                     _reconnectTimer?.Stop();
                     ApplyMaskedEvents();
+                    ApplyObservedEvents();
                     OnConnected?.Invoke(this, EventArgs.Empty);
                     OnSimConnectReady?.Invoke(_simConnect);
                 };
@@ -458,8 +461,15 @@ namespace FlightCareer.UI.Services
                     }
                     else if (e.uEventID >= FirstDynamicEventId && _eventNames.TryGetValue(e.uEventID, out var name))
                     {
-                        // Só chegam aqui eventos do grupo mascarado: o comando já foi bloqueado pelo SimConnect
-                        OnMaskedEvent?.Invoke(name, e.dwData);
+                        if (e.uGroupID == (uint)GROUPS.ObservedPilotInputs)
+                        {
+                            OnObservedEvent?.Invoke(name, e.dwData);
+                        }
+                        else
+                        {
+                            // Só chegam aqui eventos do grupo mascarado: o comando já foi bloqueado pelo SimConnect
+                            OnMaskedEvent?.Invoke(name, e.dwData);
+                        }
                     }
                 };
 
@@ -790,6 +800,23 @@ namespace FlightCareer.UI.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"[SimConnect] Falha ao aplicar mascaramento: {ex.Message}");
+            }
+        }
+
+        private void ApplyObservedEvents()
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _simConnect.ClearNotificationGroup(GROUPS.ObservedPilotInputs);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("ENGINE_AUTO_START"), false);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("ENGINE_AUTO_SHUTDOWN"), false);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("REQUEST_FUEL_KEY"), false);
+                _simConnect.SetNotificationGroupPriority(GROUPS.ObservedPilotInputs, SimConnect.SIMCONNECT_GROUP_PRIORITY_DEFAULT);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] Falha ao aplicar eventos observados: {ex.Message}");
             }
         }
 
