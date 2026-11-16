@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
@@ -32,6 +33,10 @@ namespace FlightCareer.UI.Services
         private readonly WearRuleCatalog _wearRules;
         private readonly AircraftLimitResolver _limitResolver;
         private readonly PartFlightSession _parts;
+        private readonly FuelUsageAccumulator _fuelAccumulator = new();
+        private FuelIntegrityMonitor? _fuelIntegrity;
+        private bool _flightInvalidated;
+        private string? _flightInvalidationReason;
         private TouchdownEvent? _lastTouchdownEvent;
         private string _currentStatus = "PREPARAÇÃO";
 
@@ -439,6 +444,47 @@ namespace FlightCareer.UI.Services
                 return false;
             }
 
+            if (_simConnect.CurrentFuelState.UnlimitedFuel > 0.5)
+            {
+                OnAlert?.Invoke("COMBUSTÍVEL ILIMITADO", "Desligue o combustível ilimitado nas opções do simulador para voar na carreira.", true);
+                return false;
+            }
+
+            double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? _simConnect.CurrentData.FuelTotalCapacity;
+            double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
+            double simFuel = _simConnect.CurrentData.FuelTotalGallons;
+            double targetFuel = aircraft.FuelAmount;
+
+            if (Math.Abs(simFuel - targetFuel) > fuelTolerance)
+            {
+                double simBefore = simFuel;
+                bool syncSuccess = false;
+
+                for (int attempt = 1; attempt <= 3; attempt++)
+                {
+                    var activeTanks = _simConnect.GetActiveFuelTanks();
+                    if (activeTanks.Count > 0)
+                    {
+                        var plan = FuelTankWritePlan.Distribute(targetFuel, activeTanks);
+                        if (plan.Allocations.Count > 0)
+                        {
+                            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
+                            syncSuccess = true;
+                        }
+                    }
+
+                    if (syncSuccess) break;
+                }
+
+                if (!syncSuccess)
+                {
+                    OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível com os tanques do simulador.", true);
+                    return false;
+                }
+
+                _telemetryLogger.LogEvent("COMBUSTIVEL", $"combustível sincronizado: sim {simBefore:F1} gal → app {targetFuel:F1} gal");
+            }
+
             _pilot = pilot;
             _aircraft = aircraft;
             _activeMissions = missions;
@@ -450,6 +496,9 @@ namespace FlightCareer.UI.Services
             _simConnect.ResetCrashState();
             LoadFlightComponents(aircraft);
             _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
+            _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
+            _flightInvalidated = false;
+            _flightInvalidationReason = null;
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
@@ -693,6 +742,20 @@ namespace FlightCareer.UI.Services
             if (!IsMonitoring) return;
             _lastData = data;
 
+            var fuelState = _simConnect.CurrentFuelState;
+            _fuelAccumulator.Update(new[]
+            {
+                fuelState.FuelUsedSinceStart1,
+                fuelState.FuelUsedSinceStart2,
+                fuelState.FuelUsedSinceStart3,
+                fuelState.FuelUsedSinceStart4
+            });
+
+            foreach (var diag in _fuelAccumulator.DrainDiagnostics())
+            {
+                _telemetryLogger.LogEvent("FUEL_ACCUMULATOR", diag);
+            }
+
             // Lógica de Início de Gravação: Quando ligar motores E soltar PB por 10 segundos
             if (!IsFlightActive)
             {
@@ -747,6 +810,31 @@ namespace FlightCareer.UI.Services
             {
                 // Salto (pausa/travamento) limitado no tempo real, antes do sim rate (antes cortava em 1 s por pacote)
                 _simulatedFlightTimeSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
+            }
+
+            // --- MONITORAMENTO DE INTEGRIDADE DE COMBUSTÍVEL EM VOO ---
+            if (_fuelIntegrity != null)
+            {
+                var integrityEvents = _fuelIntegrity.Update(
+                    simFuelTotalGal: data.FuelTotalGallons,
+                    unlimitedFuel: fuelState.UnlimitedFuel > 0.5,
+                    simOnGround: data.IsOnGround,
+                    simulatedTimeSeconds: _simulatedFlightTimeSeconds
+                );
+
+                foreach (var evt in integrityEvents)
+                {
+                    if (evt.Type == FuelIntegrityEventType.UnlimitedFuelActive || evt.Type == FuelIntegrityEventType.InFlightRefueling)
+                    {
+                        if (!_flightInvalidated)
+                        {
+                            _flightInvalidated = true;
+                            _flightInvalidationReason = evt.Message;
+                            _telemetryLogger.LogEvent("INTEGRIDADE", $"Voo invalidado: {evt.Message}");
+                            OnAlert?.Invoke("VOO INVALIDADO", "Voo invalidado: combustível alterado em voo", true);
+                        }
+                    }
+                }
             }
 
             // Panes nativas do MSFS (ENG FAILED, fogo, dano de motor/flap/trem, freios, vácuo) são detectadas pelo
@@ -1157,6 +1245,7 @@ namespace FlightCareer.UI.Services
 
             double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
             double finalFuel = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+            double realFuelUsed = _fuelAccumulator.TotalGallons(data.FuelWeightPerGallon);
 
             // Componentes primeiro: o FlightService grava as colunas antigas (já sincronizadas) e as horas
             try
@@ -1191,7 +1280,10 @@ namespace FlightCareer.UI.Services
                 nearestDistance,
                 flightDurationMinutes,
                 _aircraft.MagnetosCondition,
-                _aircraft.OilCondition
+                _aircraft.OilCondition,
+                realFuelUsed: realFuelUsed,
+                isFlightInvalidated: _flightInvalidated,
+                invalidationReason: _flightInvalidationReason
             );
 
             OnFlightFinished?.Invoke(outcome);
