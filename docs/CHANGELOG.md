@@ -2227,3 +2227,19 @@
   - Suíte completa de 46 modelos no fuzz (`fuzz --aircraft all --runs 50`, 2.300 voos): **0 limites ausentes em todos os 46 modelos** (eliminando 100% das falhas por limite ausente, incluindo as 12 anteriores do 737 Max 8). 38 aeronaves com 100% de aprovação (50/50).
   - Build 0 erros, `dotnet test` 516/516 aprovados, `python -m unittest` 48/48 aprovados. Não testado no MSFS.
 - Revisão (Claude): Dakota ainda tinha `egtMax` = 615,74 °C da escala do instrumento; trocado pelo padrão da classe e `merge_limits.py` passa a descartar EGT de pistão < 700 °C. Fuzz do Dakota, SR22 e Baron G58 sem falhas.
+
+## 2026-11-16 - Gerador sintético respeita CHT e Vfe por avião (Gemini)
+- **Escala proporcional de CHT (`chtScale`)**:
+  - `SyntheticFlightGenerator`: calculada escala `chtScale = Math.Min(1.0, 0.85 * chtMax / 175.0)` aplicada a todos os alvos, tetos e pisos do voo normal (120, 165, 175, 155 ± 0,5, 50, 130) e piso do choque térmico (50). Mantidas inalteradas a temperatura inicial ambiente (20 °C) e a injeção de sobreaquecimento de CHT (`chtMax + ...`).
+  - Para aeronaves com `chtMax >= 205,9` °C (como C152 e C172), `chtScale = 1,0`, mantendo o voo estritamente idêntico bit a bit e determinístico.
+  - Em motores refrigerados a líquido (Diamond DA40NG diesel com `chtMax = 105`, DA62 diesel com `121,29`, Flight Design CT Rotax com `120`), o pico do voo normal permanece em 85% do limite, abaixo dos limiares de caution (0,92 e 0,95) das regras de desgaste contínuo.
+- **Proteção de temperaturas normais de Óleo e EGT**:
+  - Conferidos limites de todos os 46 modelos contra picos normais de óleo (90 °C) e EGT (730 °C).
+  - Aplicada proteção para 85% do limite quando o pico normal for `>= 0,90` do limite (`oilScale` para DHC-6 Twin Otter com `oilTempMax = 99,0` e `egtScale` para C400 Corvalis com `egtMax = 782,41`), mantendo escala 1,0 para todos os demais modelos do catálogo. ITT não é gerado pelo voo sintético.
+- **Seleção de dente de flap existente (`SyntheticFlapSelector`)**:
+  - Nova classe pura `SyntheticFlapSelector` (`FlightCareer.Domain/Replay/Synthetic/SyntheticFlapSelector.cs`): seleciona dente e Vfe com prioridade: 1) dente 2 se o perfil contiver `vfe:2`; 2) menor dente `n >= 2` com `vfe:n` no perfil (A330-200 -> 4, A400M -> 3, ES30 -> 3); 3) dente 1 se contiver `vfe:1`; 4) fallback para dente 2 com `ResolveLimit("vfe", 85)`.
+  - Integrada em `SyntheticFlightGenerator` no cálculo de `normalApproachIas`, flap de aproximação e velocidade/dente do abuso `FlapOverSpeed`, garantindo que o `PartWearEngine` localize o limite `vfe:n` correto correspondente ao dente acionado.
+- **Testes e Aceitação**:
+  - 9 novos testes unitários em `SyntheticGeneratorTemperatureAndFlapTests.cs` cobrindo `ChtScale`, `FlapSelector`, teste de baseline bit a bit para C152 e C172, e conferência de ausência de excedências de temperatura e flap em todos os 46 perfis em voo controle.
+  - Fuzz testing em todos os modelos (`fuzz --aircraft all --runs 50`, 2.300 voos): **100% de aprovação (2.300/2.300 voos), 0 falhas e 0 limites ausentes em todos os 46 modelos do catálogo**.
+  - Build 0 erros, `dotnet test` 525/525 aprovados. Não testado no MSFS.
