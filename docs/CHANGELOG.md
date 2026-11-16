@@ -2202,3 +2202,8 @@
 - **Testes xUnit**:
   - 9 novos testes em `SyntheticFlightFuzzAllTests.cs` cobrindo feature `noFlaps`, ressalvas 1 e 2 do oráculo, agregação e ordenação de `FuzzRunSummary`, carregamento de perfis do catálogo e validação rápida de invariantes em todos os 46 modelos.
   - Total: 509 testes aprovados, 0 falhas.
+
+## 2026-11-16 - egtMax pelo padrão da classe em 4 aviões a pistão (Claude)
+- Bonanza G36, CAP-4, DA40NG e Robin DR400 tinham `egtMax` = 649,07 °C (1.200 °F) lido da SimVar `MAX EGT`, que é a escala do instrumento e não o limite do motor: o voo normal do fuzz ficava em excedência contínua de EGT. Agora usam o padrão da classe pistão (893,52 °C, `source: ClassDefault`, "estimativa — revisar com POH"); `dataVersion` incrementado.
+- `tools/aircraft_limits/merge_limits.py` descarta `MAX EGT` = 649,07 °C para a captura não regravar o valor. Decisão do usuário: os POHs reais serão revisados depois.
+- Build 0 erros, `dotnet test` 509/509, `python -m unittest` 48/48; fuzz do Robin DR400 (50 voos) sem falhas. Não testado no MSFS.
