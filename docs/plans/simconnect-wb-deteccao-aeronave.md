@@ -221,3 +221,11 @@ Ao implementar este plano, o agente executor deve:
 - [ ] Registrar a conclusão da implementação no `GEMINI.md`.
 
 ---
+
+## Atualização 2026-11-16 (Claude) — carga gravada pelo app
+`PAYLOAD STATION WEIGHT:n` é **gravável** no SDK 2024 e variou no C152 (`docs/plans/sensor-research/variaveis-sistemas.md`). O usuário marcou como prioridade ("extremamente útil"). Em vez de o piloto configurar a carga no menu do sim e o app conferir:
+1. Ler o mapa das estações do avião no início (`PAYLOAD STATION COUNT`, `PAYLOAD STATION NAME:n`, `PAYLOAD STATION OBJECT:n`): piloto, copiloto, fileiras de passageiros, bagageiros/porões.
+2. **Gravar** o peso da missão: piloto (perfil do piloto), passageiros (peso padrão por passageiro × quantidade, distribuídos pelas fileiras) e carga/bagagem nos bagageiros, respeitando o limite de cada estação.
+3. Conferir: `TOTAL WEIGHT` × MTOW e `CG PERCENT` × `CG FWD/AFT LIMIT` (página de modelo de voo) antes de liberar a decolagem; fora do envelope = NO-GO com motivo no briefing.
+4. Com o combustível também gravado pela COMBUSTIVEL-REAL, peso e CG do sim passam a ser exatamente os da missão (o "BUG CRÍTICO #2" de cálculo de payload deixa de depender do piloto).
+Só no solo, motores desligados; testar a escrita por avião no MSFS (nomes e quantidade de estações mudam por aeronave). Implementação: spec para o Gemini quando este plano for retomado.
