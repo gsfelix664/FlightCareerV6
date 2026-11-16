@@ -46,6 +46,25 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void TurbineLossesState_DatumCount_MatchesSimTurbineLossesStateFields()
+        {
+            string source = File.ReadAllText(FindSimConnectService());
+            var datums = Regex.Matches(source, @"\bAddTurbineLossesDef\(\s*\$?[""]([^""]+)[""]")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            var match = Regex.Match(source, @"struct\s+SimTurbineLossesState\s*\{([^}]+)\}");
+            Assert.True(match.Success);
+            var fields = Regex.Matches(match.Groups[1].Value, @"public\s+double\s+(\w+)\s*;")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            Assert.Equal(17, fields.Length);
+            // 4 chamadas de AddTurbineLossesDef no loop cobrindo os 4 motores + 1 para NUMBER OF ENGINES
+            Assert.Equal(5, datums.Length);
+        }
+
+        [Fact]
         public void TelemetryDefinitions_UseNoKnownInvalidSimVar()
         {
             string source = File.ReadAllText(FindSimConnectService());

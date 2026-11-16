@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FlightCareer.Application.Services;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 
@@ -20,6 +21,7 @@ namespace FlightCareer.UI.Services
         private readonly ComponentCatalog _catalog;
         private readonly IRandomSource _random;
         private readonly SimFailureActuator _actuator;
+        private readonly TurbineDegradationActuator _turbineActuator;
         private readonly List<FlightFailureRecord> _history = new();
 
         private List<AircraftComponent> _components = new();
@@ -39,6 +41,7 @@ namespace FlightCareer.UI.Services
             _random = random ?? new SystemRandomSource();
             _actuator = new SimFailureActuator(sim, _random);
             _actuator.OnRecord += Emit;
+            _turbineActuator = new TurbineDegradationActuator(sim, catalog.TurbineDegradation);
             _carbIce = new CarbIcingMonitor(catalog.CarbIcing);
         }
 
@@ -94,6 +97,7 @@ namespace FlightCareer.UI.Services
         {
             _history.Clear();
             _actuator.Reset(clearSimState);
+            _turbineActuator.Reset();
             _crashApplied = false;
             _oilLeakFromLandingChecked = false;
             // Recria os motores de desgaste/pane para zerar o estado interno (CHT anterior, starter, panes do voo)
@@ -218,6 +222,8 @@ namespace FlightCareer.UI.Services
 
             // 6. Efeitos contínuos (fogo, vazamento de óleo, enforcement)
             _actuator.Process(data, dtHours, Get(ComponentKind.Engine), Get(ComponentKind.Oil));
+            int engineCount = _sim.TurbineEngineCount > 0 ? _sim.TurbineEngineCount : 1;
+            _turbineActuator.Apply(data, Get(ComponentKind.Engine), Get(ComponentKind.HotSection), engineCount);
         }
 
         public void ProcessLanding(double touchdownFpm, double lateralFps, bool wetSurface)

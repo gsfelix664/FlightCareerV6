@@ -9,11 +9,13 @@ namespace FlightCareer.Application.Interfaces
         event EventHandler? OnDisconnected;
         event EventHandler<SimTelemetry>? OnDataReceived;
         event EventHandler? OnCrashEvent;
+        event Action? OnAircraftReloaded;
 
         bool IsCrashed { get; set; }
         bool DebugMode { get; set; }
         bool IsConnected { get; }
         SimTelemetry CurrentData { get; }
+        int TurbineEngineCount { get; }
 
         void ResetCrashState();
         void SetDebugData(SimTelemetry data);
@@ -27,5 +29,7 @@ namespace FlightCareer.Application.Interfaces
         void SetOilLeakedPercent(double percent);
         void SetAlternatorConnected(int alternatorIndex, bool connected);
         void WriteFlapSurfacePercent(double fraction);
+        void SetTurbineLosses(int engineIndex, Domain.Components.TurbineLosses losses);
+        Domain.Components.TurbineLosses GetTurbineLosses(int engineIndex);
     }
 }
