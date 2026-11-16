@@ -152,8 +152,8 @@ namespace FlightCareer.Domain.Parts
             {
                 if (TryGetGearPosition(frame, out double gearPos))
                 {
-                    bool isUp = gearPos <= 10.0 || (gearPos <= 0.1 && gearPos >= 0.0);
-                    bool isDown = gearPos >= 90.0 || (gearPos >= 0.9 && gearPos <= 1.01);
+                    bool isUp = gearPos <= 10.0;
+                    bool isDown = gearPos >= 90.0;
 
                     if (isUp)
                     {
@@ -413,6 +413,27 @@ namespace FlightCareer.Domain.Parts
                 frame.Values.TryGetValue("sim-on-ground", out simOnGround))
             {
                 onGround = simOnGround >= 0.5;
+                return true;
+            }
+
+            // Fallback para on-ground por ponto de contato / roda (qualquer roda = 1 -> no solo)
+            bool foundOnGroundKey = false;
+            bool anyWheelOnGround = false;
+            foreach (var kvp in frame.Values)
+            {
+                if (kvp.Key.StartsWith("gear-contact-point-on-ground", StringComparison.OrdinalIgnoreCase))
+                {
+                    foundOnGroundKey = true;
+                    if (kvp.Value >= 0.5)
+                    {
+                        anyWheelOnGround = true;
+                    }
+                }
+            }
+
+            if (foundOnGroundKey)
+            {
+                onGround = anyWheelOnGround;
                 return true;
             }
 
