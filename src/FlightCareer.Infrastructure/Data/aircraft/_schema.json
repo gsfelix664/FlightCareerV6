@@ -63,7 +63,8 @@
           "pressurized",
           "hydraulicGear",
           "apu",
-          "electricHybrid"
+          "electricHybrid",
+          "noFlaps"
         ]
       }
     },

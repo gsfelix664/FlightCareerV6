@@ -12,6 +12,16 @@ namespace FlightCareer.Domain.Replay.Synthetic
     public static class SyntheticFlightOracle
     {
         /// <summary>
+        /// Incremento mínimo estritamente positivo esperado de dano em relação ao controle para voos de mesma duração.
+        /// </summary>
+        private const double MinStrictLossDifference = 1e-6;
+
+        /// <summary>
+        /// Folga de 1% para acomodar a não linearidade do desgaste natural ao comparar voos de durações desiguais.
+        /// </summary>
+        private const double ScaledControlToleranceRatio = 0.01;
+
+        /// <summary>
         /// Valida todas as invariantes universais que qualquer voo (com ou sem abusos) deve obedecer.
         /// Retorna a lista de violações encontradas (vazia se 100% aprovado).
         /// </summary>
@@ -139,6 +149,14 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
             var violations = new List<string>();
 
+            // Se o abuso for FlapOverSpeed em aeronave sem flaps (noFlaps), abuso é inaplicável: gabarito ignorado sem violação
+            if (abuse.Type == SyntheticAbuseType.FlapOverSpeed &&
+                profile?.Features != null &&
+                profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoFlaps, StringComparison.OrdinalIgnoreCase)))
+            {
+                return violations;
+            }
+
             // Se o perfil da aeronave foi fornecido, verifica se o limite operacional está presente no catálogo
             if (profile != null)
             {
@@ -246,21 +264,30 @@ namespace FlightCareer.Domain.Replay.Synthetic
 
                 if (controlPart != null && abusedPart != null)
                 {
-                    // Tolerância mínima documentada para incremento de dano estritamente positivo: 1e-6 %
-                    const double minStrictLossDifference = 1e-6;
-                    double lossDiff = abusedPart.HealthLoss - controlPart.HealthLoss;
+                    double controlHours = controlResult.TotalSimHours;
+                    double abusedHours = abusedResult.TotalSimHours;
 
-                    // Se o voo com abuso teve duração de simulação menor do que o controle (devido a perda de frames ou cancelamento),
-                    // compensa a perda de desgaste natural por tempo não percorrido
-                    double allowedTolerance = minStrictLossDifference;
-                    if (abusedResult.TotalSimHours < controlResult.TotalSimHours - 1e-5)
+                    // Se o voo com abuso teve duração de simulação menor que o controle (ex: cancelamento prematuro ou gap),
+                    // compara contra a perda do controle escalada pela fração de tempo percorrida
+                    if (abusedHours < controlHours - 1e-5)
                     {
-                        allowedTolerance = (abusedResult.TotalSimHours - controlResult.TotalSimHours) * 0.05;
+                        double scaledControl = controlHours > 0.0
+                            ? controlPart.HealthLoss * (abusedHours / controlHours)
+                            : controlPart.HealthLoss;
+                        double lossDiff = abusedPart.HealthLoss - scaledControl;
+
+                        if (lossDiff < -ScaledControlToleranceRatio * scaledControl)
+                        {
+                            violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F4}%) foi inferior ao controle escalado ({scaledControl:F4}%, diff={lossDiff:F6}%) em comparação escalada por duração menor ({abusedHours:F2}h vs {controlHours:F2}h).");
+                        }
                     }
-
-                    if (lossDiff < allowedTolerance)
+                    else
                     {
-                        violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F4}%) não foi estritamente maior que no voo controle ({controlPart.HealthLoss:F4}%, diff={lossDiff:F6}%).");
+                        double lossDiff = abusedPart.HealthLoss - controlPart.HealthLoss;
+                        if (lossDiff < MinStrictLossDifference)
+                        {
+                            violations.Add($"Gabarito violado: Perda na peça '{abuse.TargetPartId}' com abuso ({abusedPart.HealthLoss:F4}%) não foi estritamente maior que no voo controle ({controlPart.HealthLoss:F4}%, diff={lossDiff:F6}%).");
+                        }
                     }
                 }
             }
@@ -278,6 +305,8 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     break;
 
                 case SyntheticAbuseType.FlapOverSpeed:
+                    if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoFlaps, StringComparison.OrdinalIgnoreCase)))
+                        return null;
                     if (!profile.Limits.Any(l => l.Key.StartsWith("vfe", StringComparison.OrdinalIgnoreCase)))
                         return "vfe";
                     break;
