@@ -55,6 +55,14 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: orientação comum do setor de ~50 °F/min (27,8 °C/min) de resfriamento da CHT; documento do fabricante não confirmado (a Lycoming SI 1094 trata de empobrecimento da mistura)",
       "notes": "Taxa máxima recomendada de choque térmico para motores a pistão refrigerados a ar"
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: MAX EGT informado pelo MSFS no C152 (≈1640 °F)",
+      "notes": null
     }
   ],
   "Turboprop": [
