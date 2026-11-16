@@ -2226,3 +2226,4 @@
   - 7 novos testes em `CatalogEstimatesTests.cs` cobrindo todas as regras de limites estimados, feature `noElectrical` e injeção de índices de teste.
   - Suíte completa de 46 modelos no fuzz (`fuzz --aircraft all --runs 50`, 2.300 voos): **0 limites ausentes em todos os 46 modelos** (eliminando 100% das falhas por limite ausente, incluindo as 12 anteriores do 737 Max 8). 38 aeronaves com 100% de aprovação (50/50).
   - Build 0 erros, `dotnet test` 516/516 aprovados, `python -m unittest` 48/48 aprovados. Não testado no MSFS.
+- Revisão (Claude): Dakota ainda tinha `egtMax` = 615,74 °C da escala do instrumento; trocado pelo padrão da classe e `merge_limits.py` passa a descartar EGT de pistão < 700 °C. Fuzz do Dakota, SR22 e Baron G58 sem falhas.

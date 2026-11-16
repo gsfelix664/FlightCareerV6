@@ -124,9 +124,9 @@ def load_title_overrides(map_path):
 UNRELIABLE_UNLESS_PISTON = {"egtMax", "oilTempMax", "chtMax"}
 UNRELIABLE_FOR_JETS = {"vne", "vs0", "vs1"}
 MAX_PLAUSIBLE_VLE_KNOTS = 400.0
-# MAX EGT = 649,07 °C (1.200 °F) em Bonanza G36, CAP-4, DA40NG e DR400 é a escala do instrumento,
-# não o limite do motor (FUZZ-ALL, 2026-11-16): fica o padrão da classe até a revisão pelo POH.
-GAUGE_SCALE_EGT_CELSIUS = 649.07
+# MAX EGT de pistão abaixo de 700 °C (649,07 °C em G36, CAP-4, DA40NG e DR400; 615,74 °C no Dakota)
+# é a escala do instrumento, não o limite do motor (FUZZ-ALL, 2026-11-16): fica o padrão da classe até o POH.
+MIN_PLAUSIBLE_PISTON_EGT_CELSIUS = 700.0
 
 
 def drop_implausible(candidates):
@@ -135,7 +135,7 @@ def drop_implausible(candidates):
     limit = vne if vne is not None else MAX_PLAUSIBLE_VLE_KNOTS
     return [c for c in candidates
             if not (c["key"] == "vle" and c["value"] > limit)
-            and not (c["key"] == "egtMax" and abs(c["value"] - GAUGE_SCALE_EGT_CELSIUS) < 0.05)]
+            and not (c["key"] == "egtMax" and c["value"] < MIN_PLAUSIBLE_PISTON_EGT_CELSIUS)]
 
 
 def find_json_file_for_aircraft(out_dir, aircraft_id):
