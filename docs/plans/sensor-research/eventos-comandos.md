@@ -56,7 +56,7 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Flight Control Events](h
 | `CHVPP_*`, `CENTER_NT361_CHECK`, `MOUSE_AS_YOKE_*`, `FLAPS_DETENTS_SET`, `*_CONCORDE_*` | Não usar (hardware antigo / sem uso no sim). |
 
 ## 3. Decisões para o usuário
-1. **Bloquear o slew em voo** (mascarar `SLEW_ON/SET/TOGGLE` depois da decolagem), mantendo a invalidação como reserva?
+1. **Decidido (2026-11-16): só invalidar** — o slew em voo **não** é bloqueado; `SLEW_ON/SET/TOGGLE` podem ser recebidos apenas para registro, e a regra continua a da SLEW-INTEGRIDADE (invalidação).
 2. **Compensador:** pane de trim inoperante (`*_TRIM_DISABLED_SET`) e compensador disparado (trim indo ao batente até o piloto cortar)?
 3. **Auto-leme:** mesma regra do auto-start (perde XP, não invalida)?
 4. Superfície travada: não fazer (recomendação) ou fazer só a versão leve (curso limitado)?
