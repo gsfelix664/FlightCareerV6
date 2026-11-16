@@ -45,11 +45,29 @@ namespace FlightCareer.Application.Services
             double nearestDistance = 0.0,
             double flightDurationMinutes = 0.0,
             double? magnetosCondition = null,
-            double? oilCondition = null)
+            double? oilCondition = null,
+            double? realFuelUsed = null,
+            bool isFlightInvalidated = false,
+            string? invalidationReason = null)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
                 : Math.Max(1, (int)(DateTime.Now - startTime).TotalMinutes);
+
+            double fuelDifference = Math.Max(0, initialFuel - finalFuel);
+            double resolvedFuelUsed = (realFuelUsed.HasValue && realFuelUsed.Value >= 0)
+                ? realFuelUsed.Value
+                : fuelDifference;
+
+            // Conferência: diferença > 10% entre consumo real e (inicial - final)
+            if (realFuelUsed.HasValue && resolvedFuelUsed > 0.05)
+            {
+                double discrepancy = Math.Abs(resolvedFuelUsed - fuelDifference);
+                if (discrepancy / resolvedFuelUsed > 0.10)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Combustível Blackbox] Divergência > 10% entre consumo real ({resolvedFuelUsed:F2} gal) e inicial-final ({fuelDifference:F2} gal).");
+                }
+            }
 
             var outcome = new FlightOutcome
             {
@@ -57,7 +75,7 @@ namespace FlightCareer.Application.Services
                 Destination = destinationIcao,
                 DistanceNM = distanceNM,
                 FlightTimeMinutes = durationMinutes,
-                FuelUsed = Math.Max(0, initialFuel - finalFuel)
+                FuelUsed = Math.Round(resolvedFuelUsed, 2)
             };
 
             if (distanceNM < 0.01) 
@@ -247,7 +265,7 @@ namespace FlightCareer.Application.Services
 
                 foreach (var mission in activeMissions)
                 {
-                    if (mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
+                    if (!isFlightInvalidated && mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
                     {
                         // PAGAMENTO INTEGRAL (Independente da qualidade, exceto se crashar)
                         double missionReward = mission.RewardMoney;
@@ -349,6 +367,19 @@ namespace FlightCareer.Application.Services
                 _context.Flights.Add(flight);
 
                 await _context.SaveChangesAsync();
+
+                if (isFlightInvalidated)
+                {
+                    outcome.Success = false;
+                    outcome.Revenue = 0;
+                    outcome.FuelCost = fuelCost;
+                    outcome.LandingFee = landingFee;
+                    outcome.XP = 0;
+                    outcome.CompletedMissions = 0;
+                    outcome.RemainingMissions = activeMissions.Count;
+                    outcome.Message = invalidationReason ?? "Voo invalidado: combustível alterado em voo.";
+                    return outcome;
+                }
 
                 outcome.Success = true;
                 outcome.Revenue = totalRevenue;

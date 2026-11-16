@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
 using FlightCareer.Infrastructure.Services;
 using System;
+using System.Linq;
 using System.Windows;
 
 namespace FlightCareer.UI.ViewModels
@@ -12,6 +15,8 @@ namespace FlightCareer.UI.ViewModels
         private readonly PilotAircraftWrapper _aircraftWrapper;
         private readonly Pilot _pilot;
         private readonly Infrastructure.Persistence.AppDbContext _context;
+        private readonly ISimConnectService? _simConnect;
+        private readonly Services.FlightMonitor? _flightMonitor;
 
         [ObservableProperty] private double _currentFuel;
         [ObservableProperty] private double _maxFuel;
@@ -23,11 +28,18 @@ namespace FlightCareer.UI.ViewModels
         public double TotalCost => GallonsToBuy * PricePerGallon;
         public string BalanceInfo => $"Saldo disponível: {_pilot.Balance:C2}";
 
-        public RefuelViewModel(PilotAircraftWrapper aircraftWrapper, Pilot pilot, Infrastructure.Persistence.AppDbContext context)
+        public RefuelViewModel(
+            PilotAircraftWrapper aircraftWrapper,
+            Pilot pilot,
+            Infrastructure.Persistence.AppDbContext context,
+            ISimConnectService? simConnect = null,
+            Services.FlightMonitor? flightMonitor = null)
         {
             _aircraftWrapper = aircraftWrapper;
             _pilot = pilot;
             _context = context;
+            _simConnect = simConnect;
+            _flightMonitor = flightMonitor;
 
             CurrentFuel = aircraftWrapper.Aircraft.FuelAmount;
             MaxFuel = aircraftWrapper.Aircraft.AircraftType?.FuelTankGallons ?? 0;
@@ -75,6 +87,25 @@ namespace FlightCareer.UI.ViewModels
 
             _context.FinancialTransactions.Add(transaction);
             await _context.SaveChangesAsync();
+
+            // Gravar combustível no simulador se a aeronave for a ativa/vigiada conectada no solo e com motores desligados
+            if (_simConnect != null && _simConnect.IsConnected &&
+                _flightMonitor != null && _flightMonitor.WatchedAircraftId == _aircraftWrapper.Aircraft.Id)
+            {
+                var simData = _simConnect.CurrentData;
+                if (simData.IsOnGround && !simData.IsEngineRunning)
+                {
+                    var activeTanks = _simConnect.GetActiveFuelTanks();
+                    if (activeTanks.Count > 0)
+                    {
+                        var plan = FuelTankWritePlan.Distribute(_aircraftWrapper.Aircraft.FuelAmount, activeTanks);
+                        if (plan.Allocations.Count > 0)
+                        {
+                            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
+                        }
+                    }
+                }
+            }
 
             MessageBox.Show($"Abastecimento concluído! Total: {TotalCost:C2}");
             window.DialogResult = true;
