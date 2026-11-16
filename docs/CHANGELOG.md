@@ -1985,3 +1985,8 @@
 - Novo `docs/plans/sensor-research/variaveis-freios-trem.md`: as 86 SimVars de freios, pontos de contato e trem cruzadas com a matriz do C152, com usos para HUD, qualidade do pouso (ordem do toque por roda, quiques, frenagem brusca), missões (piso por roda, tipo de trem), integridade e desgaste/panes (SimVars graváveis de trem/freio como efeito de pane, a testar).
 - Achado: `BRAKE LEFT/RIGHT WEIGHT REMAINING` variou no C152 (desgaste nativo das pastilhas), entra na calibração addon × nativo.
 - Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Análise das variáveis de comandos de voo do SDK 2024 (Claude)
+- Novo `docs/plans/sensor-research/variaveis-comandos.md` (96 SimVars de superfícies, compensadores, flaps, spoilers, manche e fly-by-wire) com usos para HUD, qualidade (suavidade dos comandos, voo fora de compensação), treino/diário (horas manuais × piloto automático) e desgaste/panes.
+- Achado: `FLAPS CURRENT SPEED LIMITATION` dá a Vfe do dente atual ao vivo (C152: 110 kt) e pode cobrir as 22 aeronaves sem `vfe` no catálogo.
+- 32 variáveis acrescentadas a `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars`. Só documentação; nada testado no MSFS.
