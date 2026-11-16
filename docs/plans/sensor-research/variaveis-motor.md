@@ -30,8 +30,8 @@ Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv
 | `SHUTOFF VALVE PULLED`, `MASTER IGNITION SWITCH` | constante | — | — | **Treino/procedimento:** corte de combustível no fogo do motor (checklist de emergência). |
 | `THROTTLE LOWER LIMIT`, `THROTTLE INPUT BLOCKED BY UPPER/LOWER BOUNDS` | constante | — | sim (bloqueios) | **Pane:** limitar o curso do manete = **perda parcial de potência** no sim (hoje só existe no app, `effect: None`). Testar. |
 | `FULL THROTTLE THRUST TO WEIGHT RATIO`, `PROP THRUST:n` | varia | — | — | Desempenho (missões de pista curta/peso); baixa prioridade. |
-| `COWL FLAPS:n` / `RECIP ENG COWL FLAP POSITION:n` | constante (C152 não tem) | Reg (recip) | sim (recip) | **Qualidade:** fechado na descida/aberto na subida (CHT); **pane:** cowl flap travado. |
-| `ENGINE PRIMER`, `ENGINE CONTROL SELECT`, `ENGINE MIXURE AVAILABLE` | constante | — | — | Contexto/partida; baixa prioridade. |
+| ~~`COWL FLAPS:n`~~ (obsoleta) / `RECIP ENG COWL FLAP POSITION:n` | constante (C152 não tem) | Reg (recip) | sim (recip) | **Qualidade:** fechado na descida/aberto na subida (CHT); **pane:** cowl flap travado. |
+| ~~`ENGINE PRIMER`~~ (obsoleta), `ENGINE CONTROL SELECT`, ~~`ENGINE MIXURE AVAILABLE`~~ (obsoleta) | constante | — | — | Contexto/partida; baixa prioridade. |
 | `BLEED AIR ENGINE:n`, `BLEED AIR SOURCE CONTROL:n` | constante | — | — | Jatos/turbo-hélices: sangria e pressurização (página de pressurização). |
 
 ### Pistão

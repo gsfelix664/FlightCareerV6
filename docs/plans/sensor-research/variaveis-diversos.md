@@ -16,7 +16,7 @@ Regra do plano `validacao-simvars.md`: nada entra no registro sem prova na matri
 | Qualidade do voo / passageiros | `AMBIENT WIND Y` e `ENV CLOUD DENSITY` (turbulência: separar culpa do piloto × tempo), `AMBIENT IN CLOUD`, `AMBIENT PRECIP RATE`, `VELOCITY WORLD Y` (razão de descida real), `MOTION SIMULATION` (não contar pausa) |
 | Missões e economia | `DENSITY ALTITUDE` (performance e peso máximo), `AMBIENT VISIBILITY`/`AMBIENT IN CLOUD` (VFR × IFR, bônus de tempo ruim), `AMBIENT PRECIP STATE`, `GROUND ALTITUDE` (pouso fora de aeroporto), `CATEGORY` |
 | Integridade da carreira (anti-trapaça) | `REALISM CRASH DETECTION`, `REALISM CRASH WITH OTHERS`, `REALISM`, `MOTION SIMULATION`, `SIM DISABLED`, `USER INPUT ENABLED`, `VELOCITY WORLD X/Y/Z` (teletransporte/slew) |
-| Desgaste e panes | `CRASH SEQUENCE`, `AMBIENT TEMPERATURE` contínua, `AMBIENT IN CLOUD` + temperatura (gelo), `AMBIENT PRECIP RATE`, `AMBIENT IN SMOKE`/`ENV SMOKE DENSITY` (a doc diz que fumaça aumenta o wear and tear nativo), `DENSITY ALTITUDE` |
+| Desgaste e panes | ~~`CRASH SEQUENCE`~~ (obsoleta), `AMBIENT TEMPERATURE` contínua, `AMBIENT IN CLOUD` + temperatura (gelo), `AMBIENT PRECIP RATE`, `AMBIENT IN SMOKE`/`ENV SMOKE DENSITY` (a doc diz que fumaça aumenta o wear and tear nativo), `DENSITY ALTITUDE` |
 | Diário de bordo / blackbox | `AMBIENT *` resumidos por fase (METAR "vivido" no voo), `MAGVAR`, `GROUND ALTITUDE` |
 
 ## 2. Tabela completa (o que interessa)
@@ -36,8 +36,8 @@ Regra do plano `validacao-simvars.md`: nada entra no registro sem prova na matri
 | `AMBIENT PRECIP STATE` / `RATE` | máscara / mm | constante / varia | Tel, Ctx (state) | chuva/neve | — | bônus por tempo ruim; pista contaminada | — | gelo no carburador e pitot; `RATE` dá a intensidade |
 | `AMBIENT IN SMOKE` / `ENV SMOKE DENSITY` | bool / 0–1 | constante | — | aviso de fumaça | — | — | — | **a doc diz que fumaça aumenta o wear and tear nativo**; calculado na câmera, não no avião (cuidado) |
 | `STRUCT AMBIENT WIND` | struct | constante | — | — | — | — | — | — (usar `AMBIENT WIND X/Y/Z`) |
-| `CRASH FLAG` | enum | constante | Reg, Fail | — | — | — | — | já usado (pane nativa) |
-| `CRASH SEQUENCE` | enum | constante | — | — | — | perda total e sinistro do seguro (F4.2b) | — | início e fim do crash: complemento do `CRASH FLAG` |
+| ~~`CRASH FLAG`~~ (obsoleta) | enum | constante | Reg, Fail | — | — | — | — | ainda usado em produção (pane nativa): trocar pelo evento `Crashed` (ver `variaveis-obsoletas.md`) |
+| ~~`CRASH SEQUENCE`~~ (obsoleta) | enum | constante | — | — | — | perda total e sinistro do seguro (F4.2b) | — | início e fim do crash: complemento do `CRASH FLAG` |
 | `REALISM CRASH DETECTION` | bool | constante | — | aviso "detecção de crash desligada" | — | multiplicador de recompensa por realismo (ideia) | **crash desligado = `CRASH FLAG` nunca dispara**; o app julga o acidente sozinho (toque, G) | — |
 | `REALISM CRASH WITH OTHERS` | bool | constante | — | — | — | — | idem para colisão com tráfego | — |
 | `REALISM` | número | constante | — | — | — | multiplicador por realismo (decidir) | registrar no blackbox | — |
@@ -48,7 +48,7 @@ Regra do plano `validacao-simvars.md`: nada entra no registro sem prova na matri
 | `VELOCITY WORLD X/Y/Z`, `TOTAL WORLD VELOCITY` | ft/s | varia | — | — | `VELOCITY WORLD Y` no toque = razão de descida independente da atitude | — | **teletransporte/slew**: posição pula sem velocidade compatível → anular voo ou marcar | — |
 | `MAGVAR` | ° | varia | — | rumo magnético da pista de destino (componente de vento) | — | — | — | — |
 | `CATEGORY` | string | constante | — | — | — | barrar helicóptero/balão em missões de avião (hoje: `ATC TYPE`) | — | — |
-| `STRUCT DAMAGEVISIBLE` | ? | constante | — | — | — | — | — | sem documentação; ler depois de crash/impacto para descobrir |
+| ~~`STRUCT DAMAGEVISIBLE`~~ (obsoleta) | ? | constante | — | — | — | — | — | sem documentação; ler depois de crash/impacto para descobrir |
 
 ## 3. Não usar
 - **`AI *` (13):** suspeita das 3 quedas do MSFS no SimVarProbe (`HANDOFF.md`). Fora do registro até o teste com `--filter "^(?!ATC |AI )"`.
