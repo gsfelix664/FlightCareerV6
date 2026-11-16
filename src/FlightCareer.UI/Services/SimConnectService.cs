@@ -11,8 +11,18 @@ using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight }
-    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight, WriteFlapsLeftPercent, WriteFlapsRightPercent }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses }
+    public enum DEFINITIONS
+    {
+        AircraftData, EngineFireState, OilLeakState, FailureState,
+        WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight,
+        WriteFlapsLeftPercent, WriteFlapsRightPercent,
+        TurbineLossesRead,
+        WriteTurbineN1Loss1, WriteTurbineN1Loss2, WriteTurbineN1Loss3, WriteTurbineN1Loss4,
+        WriteTurbineFuelLoss1, WriteTurbineFuelLoss2, WriteTurbineFuelLoss3, WriteTurbineFuelLoss4,
+        WriteTurbineIttLoss1, WriteTurbineIttLoss2, WriteTurbineIttLoss3, WriteTurbineIttLoss4,
+        WriteTurbineThrustLoss1, WriteTurbineThrustLoss2, WriteTurbineThrustLoss3, WriteTurbineThrustLoss4
+    }
     public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
     public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2 }
 
@@ -56,6 +66,33 @@ namespace FlightCareer.UI.Services
         public double Bank;              // PLANE BANK DEGREES
         public double Airspeed;          // AIRSPEED INDICATED (kt)
         public double GroundSpeed;       // GROUND VELOCITY (kt)
+    }
+
+    /// <summary>
+    /// Leitura de conferência das perdas de turbina gravadas no simulador (motores 1..4).
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SimTurbineLossesState
+    {
+        public double N1Loss1;
+        public double FuelEfficiencyLoss1;
+        public double IttCoolingLoss1;
+        public double ThrustEfficiencyLoss1;
+
+        public double N1Loss2;
+        public double FuelEfficiencyLoss2;
+        public double IttCoolingLoss2;
+        public double ThrustEfficiencyLoss2;
+
+        public double N1Loss3;
+        public double FuelEfficiencyLoss3;
+        public double IttCoolingLoss3;
+        public double ThrustEfficiencyLoss3;
+
+        public double N1Loss4;
+        public double FuelEfficiencyLoss4;
+        public double IttCoolingLoss4;
+        public double ThrustEfficiencyLoss4;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -289,6 +326,25 @@ namespace FlightCareer.UI.Services
                 _simConnect.AddToDataDefinition(DEFINITIONS.OilLeakState, "GENERAL ENG OIL LEAKED PERCENT:1", "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.OilLeakState);
 
+                // Definições de escrita para perdas de motor a turbina (motores 1..4)
+                for (int i = 1; i <= 4; i++)
+                {
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineN1Loss1 + (i - 1)), $"TURB ENG N1 LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineFuelLoss1 + (i - 1)), $"TURB ENG FUEL EFFICIENCY LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineIttLoss1 + (i - 1)), $"TURB ENG ITT COOLING EFFICIENCY LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineThrustLoss1 + (i - 1)), $"TURB ENG THRUST EFFICIENCY LOSS:{i}", "Percent");
+                }
+
+                // Leitura de conferência das perdas de turbina gravadas no simulador (motores 1..4)
+                for (int i = 1; i <= 4; i++)
+                {
+                    AddTurbineLossesDef($"TURB ENG N1 LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG FUEL EFFICIENCY LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG ITT COOLING EFFICIENCY LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG THRUST EFFICIENCY LOSS:{i}");
+                }
+                _simConnect.RegisterDataDefineStruct<SimTurbineLossesState>(DEFINITIONS.TurbineLossesRead);
+
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
 
@@ -356,6 +412,10 @@ namespace FlightCareer.UI.Services
                 // A cada 2 frames (~20–30 Hz conforme o FPS): o toque e o pico de G duram frações de segundo
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFastFlight, DEFINITIONS.FastFlight,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 2, 0);
+
+                // Leitura de conferência de perdas de turbina a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTurbineLosses, DEFINITIONS.TurbineLossesRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
             }
             catch (Exception ex)
             {
@@ -382,6 +442,12 @@ namespace FlightCareer.UI.Services
         private void AddFastDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.FastFlight, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddTurbineLossesDef(string datum)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.TurbineLossesRead, datum, "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
             TrackDatum(datum);
         }
 
@@ -415,6 +481,7 @@ namespace FlightCareer.UI.Services
                 _eventNames.Clear();
                 _nextEventId = FirstDynamicEventId;
                 CurrentFailureState = null;
+                _currentTurbineLosses = default;
                 _untrackedToggles.Clear();
                 _alternatorTrackers.Clear();
                 _datumBySendId.Clear();
@@ -713,6 +780,85 @@ namespace FlightCareer.UI.Services
             else if (data.dwData[0] is SimFastFlightState fast)
             {
                 OnFastFlightReceived?.Invoke(fast);
+            }
+            else if (data.dwData[0] is SimTurbineLossesState lossesState)
+            {
+                _currentTurbineLosses = lossesState;
+            }
+        }
+
+        private SimTurbineLossesState _currentTurbineLosses;
+
+        public TurbineLosses GetTurbineLosses(int engineIndex)
+        {
+            return engineIndex switch
+            {
+                1 => new TurbineLosses(_currentTurbineLosses.N1Loss1, _currentTurbineLosses.FuelEfficiencyLoss1, _currentTurbineLosses.IttCoolingLoss1, _currentTurbineLosses.ThrustEfficiencyLoss1),
+                2 => new TurbineLosses(_currentTurbineLosses.N1Loss2, _currentTurbineLosses.FuelEfficiencyLoss2, _currentTurbineLosses.IttCoolingLoss2, _currentTurbineLosses.ThrustEfficiencyLoss2),
+                3 => new TurbineLosses(_currentTurbineLosses.N1Loss3, _currentTurbineLosses.FuelEfficiencyLoss3, _currentTurbineLosses.IttCoolingLoss3, _currentTurbineLosses.ThrustEfficiencyLoss3),
+                4 => new TurbineLosses(_currentTurbineLosses.N1Loss4, _currentTurbineLosses.FuelEfficiencyLoss4, _currentTurbineLosses.IttCoolingLoss4, _currentTurbineLosses.ThrustEfficiencyLoss4),
+                _ => TurbineLosses.None
+            };
+        }
+
+        public void SetTurbineLosses(int engineIndex, TurbineLosses losses)
+        {
+            if (_simConnect == null) return;
+            if (engineIndex < 1 || engineIndex > 4) return;
+            if (losses == null) return;
+
+            try
+            {
+                var n1Def = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineN1Loss1 + (engineIndex - 1));
+                var fuelDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineFuelLoss1 + (engineIndex - 1));
+                var ittDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineIttLoss1 + (engineIndex - 1));
+                var thrustDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineThrustLoss1 + (engineIndex - 1));
+
+                var n1Val = new SimDoubleValue { Value = Math.Clamp(losses.N1LossPct, 0.0, 100.0) };
+                var fuelVal = new SimDoubleValue { Value = Math.Clamp(losses.FuelEfficiencyLossPct, 0.0, 100.0) };
+                var ittVal = new SimDoubleValue { Value = Math.Clamp(losses.IttCoolingLossPct, 0.0, 100.0) };
+                var thrustVal = new SimDoubleValue { Value = Math.Clamp(losses.ThrustEfficiencyLossPct, 0.0, 100.0) };
+
+                _simConnect.SetDataOnSimObject(n1Def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, n1Val);
+                _simConnect.SetDataOnSimObject(fuelDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, fuelVal);
+                _simConnect.SetDataOnSimObject(ittDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, ittVal);
+                _simConnect.SetDataOnSimObject(thrustDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, thrustVal);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetTurbineLosses Error: {ex.Message}");
+            }
+        }
+
+        public void SetDebugTurbineLosses(int engineIndex, TurbineLosses losses)
+        {
+            if (losses == null) return;
+            switch (engineIndex)
+            {
+                case 1:
+                    _currentTurbineLosses.N1Loss1 = losses.N1LossPct;
+                    _currentTurbineLosses.FuelEfficiencyLoss1 = losses.FuelEfficiencyLossPct;
+                    _currentTurbineLosses.IttCoolingLoss1 = losses.IttCoolingLossPct;
+                    _currentTurbineLosses.ThrustEfficiencyLoss1 = losses.ThrustEfficiencyLossPct;
+                    break;
+                case 2:
+                    _currentTurbineLosses.N1Loss2 = losses.N1LossPct;
+                    _currentTurbineLosses.FuelEfficiencyLoss2 = losses.FuelEfficiencyLossPct;
+                    _currentTurbineLosses.IttCoolingLoss2 = losses.IttCoolingLossPct;
+                    _currentTurbineLosses.ThrustEfficiencyLoss2 = losses.ThrustEfficiencyLossPct;
+                    break;
+                case 3:
+                    _currentTurbineLosses.N1Loss3 = losses.N1LossPct;
+                    _currentTurbineLosses.FuelEfficiencyLoss3 = losses.FuelEfficiencyLossPct;
+                    _currentTurbineLosses.IttCoolingLoss3 = losses.IttCoolingLossPct;
+                    _currentTurbineLosses.ThrustEfficiencyLoss3 = losses.ThrustEfficiencyLossPct;
+                    break;
+                case 4:
+                    _currentTurbineLosses.N1Loss4 = losses.N1LossPct;
+                    _currentTurbineLosses.FuelEfficiencyLoss4 = losses.FuelEfficiencyLossPct;
+                    _currentTurbineLosses.IttCoolingLoss4 = losses.IttCoolingLossPct;
+                    _currentTurbineLosses.ThrustEfficiencyLoss4 = losses.ThrustEfficiencyLossPct;
+                    break;
             }
         }
     }
