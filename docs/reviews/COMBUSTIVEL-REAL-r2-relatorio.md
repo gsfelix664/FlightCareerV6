@@ -1,6 +1,6 @@
 # COMBUSTIVEL-REAL-r2 — correções da revisão rodada 1
 
-**Branch:** feat/combustivel-real · **Commit:** <PENDING_COMMIT> · **Data:** 2026-11-16
+**Branch:** feat/combustivel-real · **Commit:** 4efb8c0 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Item 1: Acrescentar método `Reset()` em `FuelUsageAccumulator` (limpando dicionários acumulados, últimos valores lidos por motor e diagnósticos) e invocá-lo em `FlightMonitor.StartMonitoring` junto ao reset da integridade. Criar teste demonstrando dois voos seguidos no mesmo acumulador após `Reset`.
