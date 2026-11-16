@@ -153,14 +153,14 @@ namespace FlightCareer.Domain.Parts
 
                 foreach (var sensorKey in rule.Sensors)
                 {
-                    if (frame.Values.ContainsKey(sensorKey))
-                    {
-                        // Sensor global com chave exata disponível
-                    }
-                    else if (!DisablePerEngineSensorResolution && frame.Values.ContainsKey($"{sensorKey}:1"))
+                    if (!DisablePerEngineSensorResolution && frame.Values.ContainsKey($"{sensorKey}:1"))
                     {
                         // Sensor possui índice por motor no frame
                         isPerEngineRule = true;
+                    }
+                    else if (frame.Values.ContainsKey(sensorKey))
+                    {
+                        // Sensor global com chave exata disponível
                     }
                     else
                     {
@@ -173,9 +173,15 @@ namespace FlightCareer.Domain.Parts
 
                 // Resolução do limite operacional aplicável
                 var limitInfo = ResolveLimit(rule, frame, resolver, profile);
-                if (limitInfo == null || limitInfo.Value <= 0)
+                if (limitInfo == null || double.IsNaN(limitInfo.Value) || double.IsInfinity(limitInfo.Value) || limitInfo.Value == 0.0)
                 {
-                    // Sem limite resolvido: regra não pode avaliar estresse
+                    // Sem limite resolvido ou limite zero/inválido: regra não pode avaliar estresse
+                    continue;
+                }
+
+                if (limitInfo.Value < 0.0 && rule.Direction == LimitDirection.Above)
+                {
+                    diagnostics.Add($"[PartWearEngine] Regra '{rule.Id}' possui direção Above com limite negativo ({limitInfo.Value}). Regra ignorada.");
                     continue;
                 }
 
@@ -327,7 +333,7 @@ namespace FlightCareer.Domain.Parts
                             : Math.Min(prevPeak, measuredVal);
                         _exceedancePeaks[trackingKey] = currentPeak;
 
-                        double excessPct = limitVal > 0 ? Math.Abs((measuredVal - limitVal) / limitVal) * 100.0 : 0.0;
+                        double excessPct = limitVal != 0.0 ? Math.Abs((measuredVal - limitVal) / limitVal) * 100.0 : 0.0;
 
                         // Aplica multiplicador e perda percentual nas peças da faixa
                         foreach (var bandPart in activeBand.Parts)
@@ -383,7 +389,7 @@ namespace FlightCareer.Domain.Parts
                             {
                                 double damageInTick = (bandPart.LossPerHourPct * dtSimHours);
                                 string sourceStr = nativeOverstressActive
-                                    ? (measuredVal >= limitVal ? "Simulador+Addon" : "Simulador")
+                                    ? ((rule.Direction == LimitDirection.Above ? measuredVal >= limitVal : measuredVal <= limitVal) ? "Simulador+Addon" : "Simulador")
                                     : "Addon";
 
                                 string targetId = engIdx.HasValue ? $"{bandPart.PartId}:{engIdx.Value}" : bandPart.PartId;
@@ -646,27 +652,30 @@ namespace FlightCareer.Domain.Parts
 
         private static WearRuleBand? EvaluateActiveBand(WearRule rule, double value, double limit)
         {
-            if (limit <= 0) return null;
+            if (double.IsNaN(limit) || double.IsInfinity(limit) || limit == 0.0 || (limit < 0.0 && rule.Direction == LimitDirection.Above))
+            {
+                return null;
+            }
 
             if (rule.Direction == LimitDirection.Above)
             {
                 // Ordena por threshold crescente (ex.: caution 0.97, warning 1.00, severe 1.08)
                 // A última banda cujo threshold foi superado é a faixa mais severa ativa
                 return rule.Bands
-                    .OrderBy(b => b.Threshold)
+                    .OrderBy(b => limit * b.Threshold)
                     .LastOrDefault(b => value >= (limit * b.Threshold));
             }
             else
             {
-                // Ordena por threshold decrescente (ex.: caution 1.00, warning 0.80, severe 0.50)
-                // A última banda cujo threshold foi cruzado para baixo é a mais severa
+                // Ordena por corte físico decrescente (ex.: caution 20, warning 16, severe 10; ou caution -1.34, warning -1.52, severe -1.75)
+                // A última banda cujo corte foi cruzado para baixo é a mais severa
                 return rule.Bands
-                    .OrderByDescending(b => b.Threshold)
+                    .OrderByDescending(b => limit * b.Threshold)
                     .LastOrDefault(b => value <= (limit * b.Threshold));
             }
         }
 
-        private static int DetectEngineCount(SensorFrame frame)
+        internal static int DetectEngineCount(SensorFrame frame)
         {
             int maxEngine = 1;
             foreach (var key in frame.Values.Keys)
