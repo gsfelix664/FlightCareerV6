@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "737 Max 8",
   "class": "Jet",
   "engineCount": 2,
@@ -88,6 +88,30 @@
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 8 (20261115-0817-737_Max_8_Passengers.csv)",
       "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 340.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 340 KIAS / MMO 0,82 (Boeing 737 MAX, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 1: 250 KIAS (placard típico 737)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

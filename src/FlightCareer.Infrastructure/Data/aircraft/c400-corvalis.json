@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "C400 Corvalis",
   "class": "Piston",
   "engineCount": 1,
@@ -90,6 +90,14 @@
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0800-C400_Corvalis.csv)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 100.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 100 A (Corvalis, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

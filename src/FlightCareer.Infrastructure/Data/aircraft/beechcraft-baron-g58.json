@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Beechcraft Baron G58",
   "class": "Piston",
   "engineCount": 2,
@@ -32,6 +32,38 @@
       "source": "POH",
       "reference": "Beechcraft Baron G58 POH, Sec. 2 (156 KIAS)",
       "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 223.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Vne 223 KIAS (Baron G58 POH, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Aproximação 15°: 152 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 122.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Total 30°: 122 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 100.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 2 × 100 A (Baron G58, típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

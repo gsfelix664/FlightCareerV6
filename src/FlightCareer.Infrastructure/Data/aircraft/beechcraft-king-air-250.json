@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Beechcraft King Air 250",
   "class": "Turboprop",
   "engineCount": 2,
@@ -29,5 +29,38 @@
     "title": [],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 259.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 259 KIAS (King Air 250, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Aproximação: 200 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 157.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Total: 157 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    }
+  ]
 }

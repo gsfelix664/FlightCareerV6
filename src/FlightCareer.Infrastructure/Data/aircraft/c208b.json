@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "C208B",
   "class": "Turboprop",
   "engineCount": 1,
@@ -24,5 +24,46 @@
     "title": [],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 175.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 175 KIAS (C208B, notas de treinamento)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 175.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 10°: 175 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 150.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 20°: 150 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:3",
+      "value": 125.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps total: 125 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 200.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: starter-gerador 200 A (C208B, típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    }
+  ]
 }

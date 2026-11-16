@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
@@ -105,6 +105,14 @@
       "source": "POH",
       "reference": "King Air 350 POH, Sec. 2 (181 KIAS)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

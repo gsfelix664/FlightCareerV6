@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Pilatus PC-24",
   "class": "Jet",
   "engineCount": 2,
@@ -34,5 +34,46 @@
     "title": [],
     "atcModel": []
   },
-  "limits": []
+  "limits": [
+    {
+      "key": "vne",
+      "value": 290.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO ≈ 290 KIAS / MMO 0,74 (PC-24, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 240.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 1: ≈240 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 2: ≈200 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:3",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Flaps 3: ≈180 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    }
+  ]
 }

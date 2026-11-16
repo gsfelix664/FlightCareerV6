@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "ES30",
   "class": "Turboprop",
   "engineCount": 4,
@@ -83,6 +83,14 @@
       "source": "SimVar",
       "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0815-ES30_Passengers.csv)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

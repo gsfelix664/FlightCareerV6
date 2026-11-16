@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "A310",
   "class": "Jet",
   "engineCount": 2,
@@ -97,6 +97,22 @@
       "source": "POH",
       "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLO 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
       "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 360.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 360 KIAS / MMO 0,84 (Airbus A310, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

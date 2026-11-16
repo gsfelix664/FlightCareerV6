@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Diamond DA40NG",
   "class": "Piston",
   "engineCount": 1,
@@ -130,6 +130,14 @@
       "source": "POH",
       "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (-1.52g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

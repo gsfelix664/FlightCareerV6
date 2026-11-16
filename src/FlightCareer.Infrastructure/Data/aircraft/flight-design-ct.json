@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Flight Design CT",
   "class": "Piston",
   "engineCount": 1,
@@ -134,6 +134,14 @@
       "source": "POH",
       "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (-2g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 20.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: ≈20 A (Rotax 912, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }

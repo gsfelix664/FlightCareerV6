@@ -1990,3 +1990,9 @@
 - Novo `docs/plans/sensor-research/variaveis-comandos.md` (96 SimVars de superfícies, compensadores, flaps, spoilers, manche e fly-by-wire) com usos para HUD, qualidade (suavidade dos comandos, voo fora de compensação), treino/diário (horas manuais × piloto automático) e desgaste/panes.
 - Achado: `FLAPS CURRENT SPEED LIMITATION` dá a Vfe do dente atual ao vivo (C152: 110 kt) e pode cobrir as 22 aeronaves sem `vfe` no catálogo.
 - 32 variáveis acrescentadas a `tools/simvar_probe/watcher/flightcareer-candidatas-hud-qualidade.simvars`. Só documentação; nada testado no MSFS.
+
+## 2026-11-16 - Limites estimados de Vne, Vfe e alternador nas aeronaves sem POH (Claude)
+- 42 perfis em `Infrastructure/Data/aircraft/` ganharam `vne`, `vfe:n` e `alternatorRatedAmps` onde faltavam, com `source: ClassDefault`, `reference` começando por "estimativa — revisar" e `notes` "ESTIMATIVA — trocar pelo valor do POH/AFM". Valores aproximados de POH/AFM publicados e pesquisa rápida (vários não confirmados: 188, 404, 408, 787).
+- Fonte `ClassDefault` de propósito: mantém a reserva nativa (overstress do sim) ativa nesses limites de baixa confiança.
+- Sem Vfe no CAP-4 e no J-3 Cub (sem flap) e sem amperagem no CAP-4, J-3 e A400M. Índices elétricos (`elecMainBusIndex`, `elecAvionicsCircuitIndex`) **não** foram inventados: dependem da calibração no sim (`tools/aircraft_limits/calibrate.py`).
+- Build 0 erros; `dotnet test` 455/455. Não testado no MSFS.

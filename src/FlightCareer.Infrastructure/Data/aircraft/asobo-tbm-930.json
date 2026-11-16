@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 4,
+  "dataVersion": 5,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
   "engineCount": 1,
@@ -161,6 +161,14 @@
       "source": "POH",
       "reference": "Daher TBM 930 Pilot Operating Handbook, Sec. 2 (158 KIAS)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 200.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: starter-gerador 200 A (TBM, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
     }
   ]
 }
