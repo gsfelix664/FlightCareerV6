@@ -2186,3 +2186,19 @@
 - Novo `docs/plans/sensor-research/simconnect-api.md` (Actions, Debug, Events And Data/Flow API, Flights, General, Input Events): "continuar de onde parou" com `FlightSave`/`FlightLoad` (ideia do usuário), plano da missão no GPS com `FlightPlanLoad`, Flow API para integridade e acidente (teleporte, Back On Track, replay, `PLANE_CRASH`), `ExecuteAction` (`FailureAction` com saúde, `RefillAction`, mensagens e destaque de instrumento dentro do sim), pinturas instaladas e atalho reservado.
 - Só documentação; nada testado no MSFS.
 - Decisões do usuário (2026-11-16): caminhão de combustível do sim **cobra e aceita** (`eventos-combustivel.md`); **captura automática do pouso** para o diário de bordo aprovada (`eventos-diversos.md`).
+
+## 2026-11-16 - Fuzz em todas as aeronaves (Gemini)
+- **Feature `noFlaps` e ressalva 2**:
+  - Nova constante `AircraftFeatures.NoFlaps = "noFlaps"` (grupo "Aerodinâmica e superfícies") adicionada ao vocabulário fechado e ao enum de `_schema.json`.
+  - Atribuída feature `noFlaps` aos perfis `piper-j-3-cub.json` (dataVersion 6) e `cap-4.json` (dataVersion 5).
+  - `SyntheticFlightPlan.Random` não sorteia `FlapOverSpeed` quando o perfil tem `noFlaps`.
+  - `SyntheticFlightOracle.CheckMissingLimit` não reporta ausência de limite `vfe` para aeronaves `noFlaps`. Em planos manuais com `FlapOverSpeed` em aeronaves `noFlaps`, o gabarito é ignorado sem violação.
+- **Ressalva 1 do Oráculo (desgaste natural proporcional)**:
+  - Substituída a tolerância fixa de 0.05 %/h por comparação escalada pela taxa real da peça (`scaledControl = controlPart.HealthLoss * (abusedHours / controlHours)`) quando `abusedHours < controlHours - 1e-5`, com folga de 1% (`ScaledControlToleranceRatio = 0.01`) para não linearidade.
+- **CLI `FlightCareer.Replay fuzz --aircraft all` e Agregação**:
+  - Nova classe pura `FuzzRunSummary` no Domain consolidando estatísticas e ordenando resumos por falhas decrescentes.
+  - CLI suporta `--aircraft all` (50 voos padrão por aeronave em todas as 46 aeronaves do catálogo, ordenadas por `AircraftId`) e mantém compatibilidade com modelo único ou padrão de 4 modelos.
+  - Semente e abusos idênticos bit a bit por aeronave (`seed = baseSeed + run`), com campo `reproduce` adicionado ao `groundtruth.json` despejado em falhas e tratamento de erro sem catch silencioso.
+- **Testes xUnit**:
+  - 9 novos testes em `SyntheticFlightFuzzAllTests.cs` cobrindo feature `noFlaps`, ressalvas 1 e 2 do oráculo, agregação e ordenação de `FuzzRunSummary`, carregamento de perfis do catálogo e validação rápida de invariantes em todos os 46 modelos.
+  - Total: 509 testes aprovados, 0 falhas.

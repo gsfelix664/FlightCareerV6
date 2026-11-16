@@ -50,6 +50,7 @@ namespace FlightCareer.Domain.Parts
         public const string Slats = "slats";
         public const string Spoilers = "spoilers";
         public const string ThsTrim = "thsTrim";
+        public const string NoFlaps = "noFlaps";
 
         // Sistemas de proteção e trem
         public const string DeIceBoots = "deIceBoots";
@@ -105,6 +106,7 @@ namespace FlightCareer.Domain.Parts
             Slats,
             Spoilers,
             ThsTrim,
+            NoFlaps,
             DeIceBoots,
             BleedAntiIce,
             Antiskid,
