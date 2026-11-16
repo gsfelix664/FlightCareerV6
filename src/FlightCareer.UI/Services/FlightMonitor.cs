@@ -89,6 +89,8 @@ namespace FlightCareer.UI.Services
         public event Action<FlightOutcome>? OnFlightFinished;
         public event Action<PilotAircraft>? OnTotalLoss;
         public event Action? OnMonitoringCancelled;
+        /// <summary>Caminhão de combustível cobrado em outro contexto: quem guarda piloto/aeronave em contexto longo deve recarregar (id da aeronave).</summary>
+        public event Action<Guid>? OnFuelTruckCharged;
 
         /// <summary>Desgaste e panes por componente do voo atual.</summary>
         public ComponentFlightSession Failures => _failures;
@@ -465,24 +467,32 @@ namespace FlightCareer.UI.Services
                 var aircraftId = WatchedAircraftId;
                 if (aircraftId.HasValue)
                 {
-                    ProcessFuelTruckDelivery(aircraftId.Value, _fuelTruck.DeliveredGallons);
+                    ProcessFuelTruckDelivery(aircraftId.Value, _fuelTruck.MaxGallons);
                 }
             }
         }
 
-        private void ProcessFuelTruckDelivery(Guid aircraftId, double deliveredGallons)
+        /// <returns>Novo combustível da aeronave gravado no banco, ou null se nada foi cobrado.</returns>
+        /// <param name="simFinalGallons">Combustível no sim depois do caminhão: vira o valor do app ("cobra e aceita").</param>
+        private double? ProcessFuelTruckDelivery(Guid aircraftId, double simFinalGallons)
         {
-            if (deliveredGallons <= 0) return;
             try
             {
                 using var context = _contextFactory.CreateDbContext();
                 var aircraft = context.PilotAircrafts
                     .Include(a => a.AircraftType)
                     .FirstOrDefault(a => a.Id == aircraftId);
-                if (aircraft == null) return;
+                if (aircraft == null) return null;
+
+                // Cobra o que o app ainda não tinha pago (sim final − combustível do app), não a subida medida no sim:
+                // se o sim não estava sincronizado, a subida medida daria combustível de graça ou cobraria a mais
+                double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? simFinalGallons;
+                double newFuel = Math.Min(fuelCapacity, simFinalGallons);
+                double deliveredGallons = Math.Round(newFuel - aircraft.FuelAmount, 2);
+                if (deliveredGallons <= 0) return null;
 
                 var pilot = context.Pilots.FirstOrDefault(p => p.Id == aircraft.PilotId);
-                if (pilot == null) return;
+                if (pilot == null) return null;
 
                 int airportTier = 3;
                 if (!string.IsNullOrEmpty(pilot.CurrentAirportICAO))
@@ -498,8 +508,7 @@ namespace FlightCareer.UI.Services
                 double pricePerGallon = FlightCareer.Application.Services.FuelPriceService.GetCurrentPrice(fuelType, airportTier);
                 double cost = Math.Round(deliveredGallons * pricePerGallon, 2);
 
-                double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? (aircraft.FuelAmount + deliveredGallons);
-                aircraft.FuelAmount = Math.Min(fuelCapacity, aircraft.FuelAmount + deliveredGallons);
+                aircraft.FuelAmount = newFuel;
 
                 pilot.Balance -= cost;
                 context.FinancialTransactions.Add(new FinancialTransaction
@@ -529,10 +538,13 @@ namespace FlightCareer.UI.Services
 
                 _telemetryLogger.LogEvent("COMBUSTIVEL_CAMINHAO", $"{deliveredGallons:F1} gal cobrados (R$ {cost:N2}) a R$ {pricePerGallon:N2}/gal");
                 OnAlert?.Invoke("ABASTECIMENTO", $"Caminhão: {deliveredGallons:F1} gal cobrados (R$ {cost:N2})", false);
+                OnFuelTruckCharged?.Invoke(aircraftId);
+                return aircraft.FuelAmount;
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[FlightMonitor] Erro ao processar cobrança do caminhão de combustível: {ex.Message}");
+                return null;
             }
         }
 
@@ -580,10 +592,11 @@ namespace FlightCareer.UI.Services
                 _fuelTruck.ForceComplete(currentSimFuel);
                 if (_fuelTruck.Status == FuelTruckDeliveryStatus.Completed)
                 {
-                    ProcessFuelTruckDelivery(aircraft.Id, _fuelTruck.DeliveredGallons);
-                    if (_watchedAircraft != null && _watchedAircraft.Id == aircraft.Id)
+                    // A aeronave recebida aqui é a do contexto longo do MainViewModel: atualizar em memória evita que a
+                    // sincronização devolva o valor antigo e que um SaveChanges posterior regrave o combustível velho
+                    if (ProcessFuelTruckDelivery(aircraft.Id, _fuelTruck.MaxGallons) is double newFuel)
                     {
-                        aircraft.FuelAmount = _watchedAircraft.FuelAmount;
+                        aircraft.FuelAmount = newFuel;
                     }
                 }
             }

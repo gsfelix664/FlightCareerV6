@@ -357,6 +357,28 @@ namespace FlightCareer.UI.ViewModels
             _flightMonitor.OnFlightFinished += OnFlightFinished;
             _flightMonitor.OnTotalLoss += OnTotalLoss;
             _flightMonitor.OnMonitoringCancelled += OnMonitoringCancelled;
+            _flightMonitor.OnFuelTruckCharged += aircraftId =>
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() => RefreshAfterFuelTruckAsync(aircraftId));
+        }
+
+        /// <summary>
+        /// O caminhão de combustível foi cobrado em outro contexto: recarrega saldo e aeronave rastreados por este
+        /// contexto longo, para que um SaveChanges posterior não grave valores antigos (AGENTS.md › 6).
+        /// </summary>
+        private async Task RefreshAfterFuelTruckAsync(Guid aircraftId)
+        {
+            try
+            {
+                await RefreshPilotBalanceAsync();
+                // Em voo monitorado a mesma entidade é a do FlightMonitor (já atualizada em memória): não recarregar
+                if (_flightMonitor.IsMonitoring) return;
+                var tracked = _context.PilotAircrafts.Local.FirstOrDefault(a => a.Id == aircraftId);
+                if (tracked != null) await _context.Entry(tracked).ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainViewModel] Falha ao recarregar após o caminhão de combustível: {ex.Message}");
+            }
         }
 
         private void OnMonitoringCancelled()
