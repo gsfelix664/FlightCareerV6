@@ -1,5 +1,7 @@
 # Variáveis do sistema elétrico do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Electrics Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-electrics-variables/) do SDK 2024 (111 SimVars: barramentos, baterias, disjuntores, circuitos, geradores, relés, energia externa, linhas, alternador, APU).
 Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv`. O C152 usa o **sistema elétrico novo** (v2, `NEW ELECTRICAL SYSTEM`): as variáveis legadas (`GENALT`, `MAIN BUS`, `AVIONICS BUS`, `BATTERY BUS`, `HOT BATTERY BUS`, `OLD CHARGING AMPS`) ficam 0 e só servem a aviões com sistema legado.
 Índices v2+: barramento, bateria, circuito e gerador aceitam **nome ou índice**; os índices mudam por aeronave (Developer Mode › Electrical System Debug).
@@ -53,7 +55,7 @@ Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv
 | `CIRCUIT TRANSPONDER ON`, `CIRCUIT COM ON`, `CIRCUIT NAV ON`, `CIRCUIT NAVCOM1..3 ON`, `CIRCUIT MARKER BEACON ON` | varia | — | **HUD/missões:** transponder e rádios alimentados (missão IFR/espaço controlado); confirmação de pane de aviônicos. |
 | `CIRCUIT AUTOPILOT ON`, `CIRCUIT AVIONICS ON`, `CIRCUIT GENERAL PANEL ON` | varia / constante | — | Piloto automático e aviônicos alimentados: confirmação de pane e horas de piloto automático. |
 | `CIRCUIT STALL WARNING ON`, `CIRCUIT GEAR WARNING ON` | constante | — | Aviso de estol/trem inoperante = pane de segurança (NO-GO na MEL futura). |
-| `CIRCUIT PROP SYNC ON`, `CIRCUIT AUTO FEATHER ON`, `CIRCUIT HYDRAULIC PUMP/VALVE ON`, `CIRCUIT STANDBY VACUUM ON`, `CIRCUIT AUTO BRAKES ON` | constante | — | Bimotores/turbo-hélices/jatos: procedimentos (auto feather na decolagem) e panes por sistema. Provar nesses aviões. |
+| `CIRCUIT PROP SYNC ON`, `CIRCUIT AUTO FEATHER ON`, `CIRCUIT HYDRAULIC PUMP/VALVE ON`, ~~`CIRCUIT STANDBY VACUUM ON`~~ (obsoleta), `CIRCUIT AUTO BRAKES ON` | constante | — | Bimotores/turbo-hélices/jatos: procedimentos (auto feather na decolagem) e panes por sistema. Provar nesses aviões. |
 | `CIRCUIT SWITCH ON:n` | varia (`:2`, `:5..7`) | — | Chave de cada circuito; **gravável**. |
 | `CIRCUIT BREAKER PULLED:n`, `BREAKER *` (ADF, ALTFLD, AUTOPILOT, AVNBUS1/2, AVNFAN, FLAP, GPS, INST, INSTLTS, LTS PWR, NAVCOM1..4, TURNCOORD, WARN, XPNDR) | constante | Reg (circuit) | **Pane por sistema:** puxar o disjuntor certo = GPS, piloto automático, transponder, rádio, flap ou instrumentos inoperantes (próxima fase do `AGENTS.md`: "disjuntores por aeronave"). **Gravável**; testar escrita e se o piloto consegue rearmar (então o watchdog reaplica, como no magneto). |
 | `ELECTRICAL CIRCUIT EXISTS:n` | constante | — | **Contexto:** mapear quais circuitos o avião tem antes de escolher a pane. |

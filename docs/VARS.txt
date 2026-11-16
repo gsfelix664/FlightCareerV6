@@ -1,0 +1,191 @@
+https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/simulation-variable-units/
+
+MISC
+
+GROUND ALTITUDE	N/A	Altitude of surface.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Meters
+
+MAGVAR	N/A	Magnetic variation.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Degrees
+
+MISSION SCORE	N/A		Number	
+
+MOTION SIMULATION	N/A	This will be TRUE when the motion simulation for the user aircraft is active and FALSE when it is inactive. The motion simulation for the user aircraft is paused when:
+The user is in the menu screens
+During the RTC phase when starting a flight in the air (when on the ground the motion simulation is not active).
+The aircraft is in free flight and the flight is paused or the aircraft is on Active Pause.	Bool
+
+REALISM	N/A	General realism percent.	Number	
+
+REALISM CRASH DETECTION	N/A	TRUE indicates crash detection is turned on.	Bool	
+
+REALISM CRASH WITH OTHERS	N/A	TRUE indicates crashing with other aircraft is possible.	Bool
+
+SIM ON GROUND	N/A	On ground flag.
+NOTE
+This is available in multiplayer to all far aircraft. See here for more information: Note On SimVars In Multiplayer.
+Bool
+
+TOTAL WORLD VELOCITY	N/A	Speed relative to the earths center.	Feet per second	
+
+VELOCITY WORLD X	N/A	Speed relative to earth, in East/West direction.
+NOTE
+This is available in multiplayer to all far aircraft. See here for more information: Note On SimVars In Multiplayer.
+Feet per second
+
+VELOCITY WORLD Y	N/A	Speed relative to earth, in vertical direction.
+NOTE
+This is available in multiplayer to all far aircraft. See here for more information: Note On SimVars In Multiplayer.
+Feet per second	
+
+VELOCITY WORLD Z	N/A	Speed relative to earth, in North/South direction.
+NOTE
+This is available in multiplayer to all far aircraft. See here for more information: Note On SimVars In Multiplayer.
+Feet per second
+
+AMBIENT DENSITY	N/A	Ambient density.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Slugs per cubic feet
+
+AMBIENT IN CLOUD	N/A	TRUE if the aircraft is in a cloud.
+
+AMBIENT IN SMOKE	N/A	TRUE if the camera position is flying through smoke. Note that if this is TRUE, then the aircraft will be taking increased Wear and Tear damage.
+NOTE
+This SimVar will always be calculated from the camera position, regardless of where the user aircraft is, or what aircraft is selected.
+
+AMBIENT PRECIP RATE	N/A	The current precipitation rate.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+millimeters of water
+
+AMBIENT PRECIP STATE	N/A	The current state of precipitation.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Mask:
+2 = None
+4 = Rain
+8 = Snow
+
+AMBIENT PRESSURE	N/A	Ambient pressure.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Inches of mercury, inHg
+
+AMBIENT TEMPERATURE	N/A	Ambient temperature.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Celsius
+
+AMBIENT VISIBILITY	N/A	Ambient visibility (only measures ambient particle visibility - related to ambient density).	Meters
+
+AMBIENT WIND DIRECTION	N/A	Wind direction, relative to true north.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Degrees
+
+AMBIENT WIND VELOCITY	N/A	Wind velocity.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Knots
+
+AMBIENT WIND X	N/A	Wind component in East/West direction.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Meters per second
+
+AMBIENT WIND Y	N/A	Wind component in vertical direction.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Meters per second
+
+AMBIENT WIND Z	N/A	Wind component in North/South direction.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Meters per second
+
+BAROMETER PRESSURE	N/A	Barometric pressure.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Millibars
+
+DENSITY ALTITUDE	N/A	The density altitude is the altitude relative to standard atmospheric conditions at which the air density would be equal to the indicated air density at the place of observation. The calculation is as follows:
+density_altitude = pressure_altitude + 118.8 * (outside_air_temp - ISA_temp)	ft
+
+ENV CLOUD DENSITY	N/A	This SimVar returns the current density of the clouds at the position of the user aircraft. Density is expressed as a value between 0 and 1, where 0 is no clouds, and 1 is very dense cloud.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Percent Over 100
+
+ENV SMOKE DENSITY	N/A	This SimVar returns the current density of any smoke at the position of the camera. Density is expressed as a value between 0 and 1, where 0 is no smoke, and 1 is very dense smoke. Note that if this value is greater than 0 then the user aircraft will be taking Wear and Tear damage, and the higher the value the more damage will be taken.
+NOTE
+This SimVar will always be calculated from the camera position, regardless of where the user aircraft is, or what aircraft is selected.
+Percent Over 100
+
+SEA LEVEL AMBIENT TEMPERATURE	N/A	The ambient temperature of the air at sea level.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Celsius
+
+SEA LEVEL PRESSURE	N/A	Barometric pressure at sea level.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Millibars
+
+STRUCT AMBIENT WIND	N/A	X (latitude), Y (vertical) and Z (longitude) components of the wind.
+NOTE
+This SimVar will always be calculated from the user aircraft position, regardless of where the camera is, or what aircraft is selected.
+Feet per second
+
+Aircraft Brake And Landing Gear Variables
+
+ANTISKID BRAKES ACTIVE	N/A	True if antiskid brakes active. This can be set using the AntiSkidActive parameter.	Bool
+
+AUTOBRAKES ACTIVE	N/A	Whether or not the AutoBrakes are currently active.	Bool
+
+AUTO BRAKE SWITCH CB	N/A	Auto brake switch position	Number
+
+BRAKE DEPENDENT HYDRAULIC PRESSURE	N/A	Brake dependent hydraulic pressure reading	Pounds per square foot (psf)
+
+BRAKE INDICATOR	N/A	Brake on indication	Position (0 to 16K)
+0 = off
+16K = full
+
+BRAKE LEFT POSITION	N/A	Percent left brake	Position (0 to 32K)
+0 = off
+32K = full
+
+BRAKE LEFT POSITION EX1	N/A	Triggers a brake pressure increase on the left brake regardless of the value passed.	Position (0 to 32K)
+0 = off
+32K = full
+
+BRAKE LEFT TEMPERATURE	N/A	The current temperature - in degrees kelvin - of the left brake.	Kelvin
+
+BRAKE LEFT TEMPERATURE EFFECT	N/A	The current efficiency of the left brake, based on the current brake temperature.	Percent Over 100
+
+BRAKE LEFT WEIGHT REMAINING	N/A	The current weight remaining of the left brake, ie: how worn the left brake is.	Percent Over 100	
+
+BRAKE PARKING INDICATOR	N/A	Parking brake indicator	Bool
+
+BRAKE PARKING POSITION	N/A	Gets the parking brake position - either on (true) or off (false).	Bool
+
+BRAKE RIGHT POSITION	N/A	Percent right brake	Position (0 to 32K)
+0 = off
+32K = full
+
+BRAKE RIGHT POSITION EX1	N/A	Triggers a brake pressure increase on the right brake regardless of the value passed.	Position (0 to 32K)
+0 = off
+32K = full
+BRAKE RIGHT TEMPERATURE	N/A	The current temperature - in degrees kelvin - of the right brake.	Kelvin	
+BRAKE RIGHT TEMPERATURE EFFECT	N/A	The current efficiency of the right brake, based on the current brake temperature.	Percent Over 100	
+BRAKE RIGHT WEIGHT REMAINING	N/A	The current weight remaining of the right brake, ie: how worn the right brake is.	Percent Over 100	
+PARKING BRAKE AVAILABLE	N/A	Whether or not the aircraft has a parking brake.	Bool	
+REJECTED TAKEOFF BRAKES ACTIVE	N/A	Whether or not the rejected takeoff brakes are currently active.	Bool	
+TOE BRAKES AVAILABLE	N/A	True if toe brakes are available	Bool
+
+
+

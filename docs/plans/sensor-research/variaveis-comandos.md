@@ -1,5 +1,7 @@
 # Variáveis de comandos de voo do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Control Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-control-variables/) do SDK 2024 (96 SimVars: ailerons, profundor, leme, compensadores, flaps, spoilers, manche, fly-by-wire, asa dobrável, porta-aviões, Concorde).
 Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv`. O C152 não tem compensador de aileron/leme, spoiler, slat nem fly-by-wire: "constante" nesses grupos é esperado.
 
@@ -28,8 +30,8 @@ Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv
 ### Compensadores
 | Variável | C152 | Hoje | Grav. | Uso proposto |
 |---|---|---|---|---|
-| `ELEVATOR TRIM POSITION` / `ELEVATOR TRIM PCT` | varia | Reg (position) | sim (position) | **HUD/treino:** compensador fora da faixa de decolagem na corrida → aviso e nota. **Qualidade:** voo fora de compensação (manche longe do centro por minutos em voo nivelado). **Pane:** escrever = **compensador disparado** (trim runaway), pane clássica que o SDK não tem como evento. |
-| `ELEVATOR TRIM INDICATOR`, `... PCT EX1/EX2` | varia | — | EX2 | Variantes; usar só uma (`PCT`). |
+| `ELEVATOR TRIM POSITION` / `ELEVATOR TRIM PCT EX1` (a `ELEVATOR TRIM PCT` é legada) | varia | Reg (position) | sim (position) | **HUD/treino:** compensador fora da faixa de decolagem na corrida → aviso e nota. **Qualidade:** voo fora de compensação (manche longe do centro por minutos em voo nivelado). **Pane:** escrever = **compensador disparado** (trim runaway), pane clássica que o SDK não tem como evento. |
+| `ELEVATOR TRIM INDICATOR`, `... PCT EX2` | varia | — | EX2 | Variantes; usar só `PCT EX1`. |
 | `ELEVATOR TRIM UP/DOWN LIMIT`, `MIN/MAX/NEUTRAL` | constante | — | — | **Contexto:** normalizar o compensador e definir a faixa de decolagem por aeronave. |
 | `AILERON TRIM PCT`, `RUDDER TRIM PCT` | constante (C152 não tem) | Reg | sim | Já em regra; provar num avião que tenha. Graváveis: compensador lateral/direcional disparado. |
 | `* TRIM DISABLED` | constante | — | — | Compensador inoperante (pane nativa ou de aeronave) → detectar. |

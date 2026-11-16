@@ -1,5 +1,7 @@
 # Variáveis de freios e trem de pouso do MSFS 2024 — usos no FlightCareer
 
+> **Atenção (2026-11-16):** esta análise foi feita antes de detectar as variáveis marcadas como obsoletas na documentação. Confira `variaveis-obsoletas.md` antes de usar qualquer item (ex.: `CRASH FLAG`, `CRASH SEQUENCE`, `STRUCT DAMAGEVISIBLE`, `SEMIBODY LOADFACTOR X/Z`, `COWL FLAPS`, `ENGINE PRIMER`, `ELEVATOR TRIM PCT` → `EX1`).
+
 Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Brake And Landing Gear Variables](https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-brake-and-landing-gear-variables/) do SDK 2024 (86 SimVars, `simvars-msfs2024.csv`).
 Mesmo formato de `variaveis-diversos.md`. **C152** = `probe-runs/matriz-C152.csv` (3 rodadas, trem fixo, voos curtos): muitas "constantes" aqui são esperadas num C152 (trem fixo, sem autobrake, sem antiskid, sem flutuadores) e precisam ser provadas num retrátil, num jato e num anfíbio.
 **Hoje**: `Tel` (`SimTelemetry`), `Ctx` (contexto), `Reg` (`sensor_registry.json`), `Fail` (panes). **Grav.** = o SDK permite escrever.
