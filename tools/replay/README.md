@@ -37,3 +37,27 @@ python tools/replay/make_fixture.py "%LocalAppData%\FlightCareer\sensor-logs\202
 O script gera:
 1. `<nome>.csv.gz`: telemetria filtrada e comprimida;
 2. `<nome>.touchdowns.json`: lista de toques extraída das linhas `TOQUE:` do blackbox.
+
+## 3. Fuzz Testing Procedural com Voos Sintéticos
+
+O subcomando `fuzz` gera centenas de voos sintéticos realistas e reprodutíveis (via semente), injeta abusos operacionais e falhas de dados com gabarito de rastreio, e verifica se todas as invariantes fundamentais (saúde, horas simuladas, ausência de NaN, diagnósticos únicos, monotonicidade) foram rigorosamente respeitadas:
+
+```bash
+dotnet run --project src/FlightCareer.Replay -- fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]
+```
+
+### Opções:
+- `--runs <n>`: Número de voos sintéticos procedurais a simular (padrão 1000).
+- `--aircraft <modelo>`: Restringe os voos a um modelo específico (ex.: `"Cessna C152"`, `"C172SP G1000"`, `"Beechcraft Baron G58"`, `"Asobo TBM 930"`). Se omitido, distribui as corridas entre as classes representativas.
+- `--seed <n>`: Semente pseudoaleatória inicial determinística.
+
+### Artefatos de Falha:
+Para cada voo em que uma invariante for violada, a ferramenta grava automaticamente os artefatos de reprodução em `%LocalAppData%\FlightCareer\fuzz-failures\`:
+- `<base>.csv`: telemetria sintética exportada no mesmo padrão RFC 4180 do gravador do simulador.
+- `<base>.touchdowns.json`: lista de toques injetados.
+- `<base>.groundtruth.json`: gabarito dos abusos planejados e detalhes das violações detectadas.
+
+Para reproduzir e depurar um voo com falha detectado pelo fuzz, basta reabrir o CSV com o próprio comando de replay:
+```bash
+dotnet run --project src/FlightCareer.Replay -- "%LocalAppData%\FlightCareer\fuzz-failures\<arquivo>.csv" --touchdowns "%LocalAppData%\FlightCareer\fuzz-failures\<arquivo>.touchdowns.json" --aircraft "<modelo>"
+```

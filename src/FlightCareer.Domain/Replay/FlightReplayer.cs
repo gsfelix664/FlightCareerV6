@@ -86,6 +86,11 @@ namespace FlightCareer.Domain.Replay
         private readonly WearRuleCatalog _wearRuleCatalog;
         private readonly AircraftLimitResolver _resolver;
 
+        /// <summary>
+        /// Ponto de teste para testes de mutação / fuzz: desativa a resolução de sensores com sufixo :n.
+        /// </summary>
+        public bool DisablePerEngineSensorResolution { get; set; }
+
         public FlightReplayer(
             PartCatalog partsCatalog,
             WearRuleCatalog wearRuleCatalog,
@@ -173,7 +178,10 @@ namespace FlightCareer.Domain.Replay
 
             var initialHealthMap = parts.ToDictionary(p => (p.PartId, p.EngineIndex), p => p.Health);
 
-            var tracker = new PartFlightTracker(_partsCatalog, _wearRuleCatalog, _resolver);
+            var tracker = new PartFlightTracker(_partsCatalog, _wearRuleCatalog, _resolver)
+            {
+                DisablePerEngineSensorResolution = DisablePerEngineSensorResolution
+            };
             tracker.Begin(parts, profile, effectiveFeatures);
 
             if (frames == null || frames.Count == 0)

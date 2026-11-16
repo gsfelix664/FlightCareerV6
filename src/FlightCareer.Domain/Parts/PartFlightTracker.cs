@@ -49,6 +49,15 @@ namespace FlightCareer.Domain.Parts
         public bool IsActive => _parts.Count > 0;
         public bool HasPreflightChanges { get; private set; }
         public IReadOnlyList<AircraftPart> Parts => _parts;
+
+        /// <summary>
+        /// Ponto de teste para testes de mutação / fuzz: desativa a resolução de sensores com sufixo :n no motor.
+        /// </summary>
+        public bool DisablePerEngineSensorResolution
+        {
+            get => _wearEngine.DisablePerEngineSensorResolution;
+            set => _wearEngine.DisablePerEngineSensorResolution = value;
+        }
         public IReadOnlyList<DerivedPartEvent> LastDerivedEvents { get; private set; } = Array.Empty<DerivedPartEvent>();
 
         public void Begin(IEnumerable<AircraftPart> copies, AircraftLimitProfile? profile, IReadOnlyList<string>? features)

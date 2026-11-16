@@ -1924,3 +1924,23 @@
   - 332 testes xUnit aprovados com 0 falhas; 48 testes Python aprovados.
 - **Não testado no MSFS**:
   - O caminho do `FlightMonitor` ao vivo com o simulador (observação de eventos na preparação e cancelamento com peças modificadas) não foi testado no MSFS.
+
+## 2026-11-15 - Voos sintéticos procedurais e Fuzz Testing (Gemini)
+- **Gerador Procedural de Voos Sintéticos (`FlightCareer.Domain.Replay.Synthetic.SyntheticFlightGenerator`)**:
+  - Geração determinística de telemetria baseada em semente (`IRandomSource`) com física procedural coerente particionada em 9 fases: cold & dark, partida a frio, táxi out, corrida de decolagem, subida, cruzeiro, descida, aproximação com flaps e toque/táxi in/corte.
+  - Chaves dos frames derivadas exclusivamente do layout real (`SensorLayout.Build`) com o número de motores e perfil da aeronave, eliminando riscos de divergência de chaves de telemetria.
+  - Injeção controlada de abusos operacionais (sobrevelocidade de RPM, superaquecimento de CHT/óleo, baixa pressão de óleo, choque térmico, sobretemperatura de EGT, sobrevelocidade de flaps e Vne, excedência de fator de carga positivo e negativo, pouso duro, partida prolongada, partida com aviônicos ligados, descarga profunda de bateria, sobrecarga de alternador e ciclos de trem retrátil) e anomalias de dados (sensores ausentes, valores NaN, gaps temporais > 10 s, pausas do simulador e cancelamento prematuro).
+  - Metadados de rastreio e gabarito estruturados via `SyntheticGroundTruth` e `SyntheticFlightPlan`.
+- **Oráculo de Invariantes e Propriedades Metamórficas (`SyntheticFlightOracle`)**:
+  - Validação universal de invariantes: saúde de peças em `[0, 100]` estritamente não-crescente no voo, horas simuladas coincidentes com a telemetria (±1%), ciclos de pouso atribuídos apenas às peças pertinentes, diagnósticos estritamente únicos e ausência de `NaN`/`Infinity`.
+  - Validação de gabarito: conferência de que abusos injetados disparam as regras e peças esperadas no motor correto e geram maior perda em relação ao voo controle correspondente.
+  - Validação metamórfica: invariância de perda sob sim rate acelerada (1x vs 4x), isolamento entre motores em bimotores e monotonicidade (abuso mais intenso acarreta perda maior ou igual).
+- **Subcomando CLI de Fuzz (`FlightCareer.Replay fuzz`)**:
+  - Execução em lote de voos sintéticos (`--runs N [--aircraft <modelo>] [--seed <n>]`) com round-robin por classes representativas (`Cessna C152`, `C172SP G1000`, `Beechcraft Baron G58`, `Asobo TBM 930`).
+  - Resumo estatístico de violações e exportação automática de artefatos de falha (`.csv` RFC 4180 + `.touchdowns.json` + `.groundtruth.json`) em `%LocalAppData%\FlightCareer\fuzz-failures\` para depuração direta via comando de replay.
+  - Execução de 1.000 voos sintéticos completada com 1.000/1.000 voos aprovados (100,0%) e 0 falhas a ~7 voos/s.
+- **Suíte de Testes Automatizados xUnit**:
+  - Novos testes em `FlightCareer.Tests.Replay.Fuzz.SyntheticFlightFuzzTests`: 100 corridas fixas cobrindo as 4 aeronaves de teste, testes de gabarito para todos os tipos de abusos, determinismo bit a bit e propriedades metamórficas.
+  - 439 testes xUnit aprovados com 0 falhas; 48 testes Python aprovados.
+- **Não testado no MSFS**:
+  - O motor de fuzz e replay é pura lógica de teste e simulação sintética sem conexão ao vivo com o SimConnect.
