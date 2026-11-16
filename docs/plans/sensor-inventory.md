@@ -133,6 +133,7 @@ Convenções:
 | `GENERAL ENG MASTER ALTERNATOR:N` ✅ (só leitura) | bool | chave do alternador |
 | `ELECTRICAL GENALT BUS VOLTAGE:N`, `ELECTRICAL GENALT BUS AMPS:N` | volts / amperes | alternador/gerador |
 | `ELECTRICAL GENALT LOAD:N` | percent | **sobrecarga do alternador** |
+| `ELECTRICAL GENERATOR AMPS:N`, `ELECTRICAL GENERATOR VOLTAGE:N`, `ELECTRICAL GENERATOR ACTIVE:N` | amperes / volts / bool | gerador elétrico moderno MSFS 2024 |
 | `ELECTRICAL MAIN BUS VOLTAGE` | volts | regulador de voltagem |
 | `ELECTRICAL BATTERY VOLTAGE`, `ELECTRICAL BATTERY LOAD`, `ELECTRICAL BATTERY LEVEL` | volts / amperes / percent | bateria (descarga profunda) |
 | `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | percent over 100 | bateria |
@@ -175,8 +176,8 @@ Convenções:
 |---|---|---|
 | `PLANE TOUCHDOWN NORMAL VELOCITY` | feet per second | amortecedores, estrutura do trem, pneus |
 | `PLANE TOUCHDOWN BANK DEGREES`, `PLANE TOUCHDOWN PITCH DEGREES` | degrees | pouso em uma roda / tail strike |
-| `CONTACT POINT COMPRESSION:N` | position | **amortecedor (fim de curso)** |
-| `CONTACT POINT IS SKIDDING:N`, `GEAR IS SKIDDING`, `GEAR SKIDDING FACTOR` | bool / percent | **pneus (derrapagem, frenagem travada)** |
+| `CONTACT POINT COMPRESSION:0`, `CONTACT POINT COMPRESSION:1`, `CONTACT POINT COMPRESSION:2` | position | **amortecedor por ponto de contato (fim de curso)** |
+| `CONTACT POINT IS SKIDDING:0`, `CONTACT POINT IS SKIDDING:1`, `CONTACT POINT IS SKIDDING:2`, `CONTACT POINT IS ON GROUND:0`, `CONTACT POINT IS ON GROUND:1`, `CONTACT POINT IS ON GROUND:2`, `GEAR IS SKIDDING`, `GEAR SKIDDING FACTOR` | bool / percent | **pneus e pontos de contato (derrapagem, solo)** |
 | `WHEEL RPM`, `LEFT WHEEL RPM`, `RIGHT WHEEL RPM` | rpm | pneus (spin-up no toque) |
 | `GEAR POSITION`, `GEAR HANDLE POSITION`, `GEAR TOTAL PCT EXTENDED` | percent | atuador do trem (ciclos) |
 | `GEAR HYDRAULIC PRESSURE` | psf | hidráulico do trem |
@@ -193,6 +194,7 @@ Convenções:
 | SimVar | Unidade | Dica de peça |
 |---|---|---|
 | `G FORCE` ✅, `MAX G FORCE`, `MIN G FORCE` | gforce | estrutura (asa, longarina) |
+| `DYNAMIC PRESSURE` | pound-force per square foot | pressão dinâmica / limites estruturais |
 | `SEMIBODY LOADFACTOR Y` | number | estrutura |
 | `WING FLEX PCT` | percent over 100 | estrutura (flexão de asa) |
 | `AIRSPEED INDICATED` ✅, `AIRSPEED TRUE`, `AIRSPEED MACH` | knots / mach | estrutura (Vne/Mmo) |

@@ -52,6 +52,9 @@
     "elec-genalt-bus-voltage",
     "elec-genalt-bus-amps",
     "elec-genalt-load",
+    "elec-generator-amps",
+    "elec-generator-voltage",
+    "elec-generator-active",
     "elec-battery-load"
   ],
   "08b-alternador-on": [
@@ -59,6 +62,9 @@
     "elec-genalt-bus-voltage",
     "elec-genalt-bus-amps",
     "elec-genalt-load",
+    "elec-generator-amps",
+    "elec-generator-voltage",
+    "elec-generator-active",
     "elec-battery-load"
   ],
   "09-trem-ciclo": [
@@ -68,11 +74,13 @@
   ],
   "10a-pouso-normal": [
     "gear-plane-touchdown-normal-velocity",
-    "gear-contact-point-compression"
+    "gear-contact-point-compression-1",
+    "gear-contact-point-compression-2"
   ],
   "10b-pouso-firme": [
     "gear-plane-touchdown-normal-velocity",
-    "gear-contact-point-compression",
+    "gear-contact-point-compression-1",
+    "gear-contact-point-compression-2",
     "af-g-force"
   ],
   "11-freio-pouso": [
