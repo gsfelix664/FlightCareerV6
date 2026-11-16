@@ -1,6 +1,6 @@
 # AUTOSTART-CAMINHAO — Auto-start tira XP e caminhão de combustível do sim é cobrado
 
-**Branch:** feat/autostart-caminhao · **Commit:** <pendente> · **Data:** 2026-11-16
+**Branch:** feat/autostart-caminhao · **Commit:** 9c67ae3 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 - Criar `Domain/Services/ProcedurePenalties.cs` com `AutoStartXpPenaltyFraction = 0.10` e função pura `ApplyAutoStartPenalty(xp, autoStartUsed)`.
