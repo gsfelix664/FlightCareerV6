@@ -1,6 +1,6 @@
 # GERADOR-CHT-VFE — Gerador de voos sintéticos respeitando CHT e Vfe de cada avião
 
-**Branch:** fix/gerador-cht-vfe · **Commit:** pendente · **Data:** 2026-11-16
+**Branch:** fix/gerador-cht-vfe · **Commit:** b09e142 · **Data:** 2026-11-16
 
 ## Plano (antes de codar)
 1. **Dente de flap existente (`SyntheticFlapSelector`):** Criar classe pura em `FlightCareer.Domain/Replay/Synthetic/SyntheticFlapSelector.cs` implementando a lógica de seleção de flap por prioridade (`vfe:2` -> menor `n >= 2` com `vfe:n` -> `vfe:1` -> dente 2 com `ResolveLimit("vfe", 85)`). Integrar em `SyntheticFlightGenerator.cs` no cálculo de `normalApproachIas`, fase de aproximação e abuso `FlapOverSpeed`.
