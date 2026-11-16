@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Views;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ namespace FlightCareer.UI.ViewModels
     {
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly ComponentCatalog _catalog;
+        private readonly ISimConnectService? _simConnect;
         private readonly IRandomSource _random = new SystemRandomSource();
         private Guid _pilotId;
 
@@ -31,10 +34,11 @@ namespace FlightCareer.UI.ViewModels
 
         public string FleetCountText => Fleet.Count == 1 ? "1 aeronave" : $"{Fleet.Count} aeronaves";
 
-        public HangarViewModel(IDbContextFactory<AppDbContext> contextFactory, ComponentCatalog catalog)
+        public HangarViewModel(IDbContextFactory<AppDbContext> contextFactory, ComponentCatalog catalog, ISimConnectService? simConnect = null)
         {
             _contextFactory = contextFactory;
             _catalog = catalog;
+            _simConnect = simConnect;
         }
 
         public async Task InitializeAsync(Guid pilotId)
@@ -435,6 +439,30 @@ namespace FlightCareer.UI.ViewModels
                 (aircraft, _) => aircraft.FuelAmount = target,
                 category: "Combustível",
                 successMessage: $"Tanques com {target:F1} gal.");
+
+            TryWriteFuelToSimulator(SelectedAircraft.Aircraft);
+        }
+
+        private void TryWriteFuelToSimulator(PilotAircraft aircraft)
+        {
+            if (_simConnect == null || !_simConnect.IsConnected) return;
+
+            var simData = _simConnect.CurrentData;
+            bool onGround = simData.SimOnGround;
+            bool engineRunning = simData.GeneralEngCombustion > 0;
+
+            if (onGround && !engineRunning)
+            {
+                var activeTanks = _simConnect.GetActiveFuelTanks();
+                if (activeTanks.Count > 0)
+                {
+                    var plan = FuelTankWritePlan.Distribute(aircraft.FuelAmount, activeTanks);
+                    if (plan.Allocations.Count > 0)
+                    {
+                        _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
+                    }
+                }
+            }
         }
 
         [RelayCommand]
