@@ -1,6 +1,6 @@
 # Plano — Taxas de aeroporto e serviços de solo
 
-Criado em 2026-11-16 (Claude). Status: **proposta**, aguardando decisões do usuário (§ 6).
+Criado em 2026-11-16 (Claude). Status: **decidido** (§ 6, 2026-11-16); F1 em implementação.
 Origem: análise das SimVars (`docs/plans/sensor-research/variaveis-eletrica.md`, `variaveis-diversos.md`): GPU, APU, estacionamento e clima podem ser detectados no sim e cobrados.
 
 ## 1. Objetivo
@@ -48,10 +48,10 @@ Novo `Infrastructure/Data/airport_fees.json`, com valores por **tier** e por **p
 
 ## 6. Decisões do usuário
 1. **Decidido (2026-11-16): moeda genérica `$`, base dólar, sem escrever "US$"** — igual ao resto do app (o `App.xaml.cs` força a cultura en-US, então `:C2` sai como `$1,234.56`). Valores do `airport_fees.json` em dólar. Escala sugerida: C152 num hub ≈ $300 no total; jato grande ≈ $15.000–30.000 (pouso + estacionamento + passageiros + handling). A taxa de pouso atual fica igual (teste de regressão).
-2. Porte — **recomendação (aguarda confirmação):** leve < 12.500 lb, médio 12.500–60.000 lb, pesado > 60.000 lb; taxa de pouso continua linear no MTOW (o porte serve para estacionamento, handling e serviços).
-3. Obrigatórios — **recomendação (aguarda confirmação):** pouso, estacionamento acima da franquia e taxa de embarque (missões de passageiros); handling obrigatório para jatos e turbo-hélices grandes em tier 1–2; GPU, catering, degelo e hangar opcionais (fases F2–F4).
-4. Sobrescrita por país — **recomendação (aguarda confirmação):** depois da F1, com o campo já previsto no JSON.
-5. Estacionamento — **recomendação (aguarda confirmação):** só tempo de jogo (parado no solo na sessão, acima de 2 h de franquia); app fechado não conta.
+2. Porte — **decidido (2026-11-16):** leve < 12.500 lb, médio 12.500–60.000 lb, pesado > 60.000 lb; taxa de pouso continua linear no MTOW (o porte serve para estacionamento, handling e serviços).
+3. Obrigatórios — **decidido (2026-11-16):** pouso, estacionamento acima da franquia e taxa de embarque (missões de passageiros); handling obrigatório para jatos e turbo-hélices grandes em tier 1–2; GPU, catering, degelo e hangar opcionais (fases F2–F4).
+4. Sobrescrita por país — **decidido (2026-11-16):** depois da F1, com o campo já previsto no JSON.
+5. Estacionamento — **decidido (2026-11-16):** só tempo de jogo (parado no solo na sessão, acima de 2 h de franquia); app fechado não conta.
 
 ## 7. Testes previstos
 - `LandingFee_MesmoValorDoCalculoAtual_PorTier` (regressão).
