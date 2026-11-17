@@ -72,8 +72,8 @@ namespace FlightCareer.Domain.Parts
                 }
 
                 string message = category == LightingMelCategory.NoGoNight
-                    ? $"{def.Name} queimada: voo noturno não permitido (aviso)"
-                    : $"{def.Name} queimada: permitido apenas voo diurno (aviso)";
+                    ? $"{def.Name}: lâmpada queimada — voo noturno não permitido (aviso)"
+                    : $"{def.Name}: lâmpada queimada — permitido apenas voo diurno (aviso)";
 
                 items.Add(new LightingMelItem(part.PartId, def.Name, category, message));
             }
