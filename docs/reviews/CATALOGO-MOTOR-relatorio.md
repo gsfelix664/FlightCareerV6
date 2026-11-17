@@ -1,6 +1,6 @@
 # CATALOGO-MOTOR — Calibração do grupo Motor, remoção de peça antiga e J-3/CAP-4
 
-**Branch:** feat/catalogo-motor · **Commit:** (a registrar) · **Data:** 2026-11-17
+**Branch:** feat/catalogo-motor · **Commit:** 6b0e515 · **Data:** 2026-11-17
 
 ## Plano (antes de codar)
 - Remover `electrical.external_lighting` de `parts_catalog.json` (154 -> 153 peças).
