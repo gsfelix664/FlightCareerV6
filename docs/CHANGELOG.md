@@ -2345,3 +2345,23 @@
   - Build 0 erros, `dotnet test` 594/594 aprovados (577 baseline + 17 novos).
   - Fuzz testing com 920 voos (46 aeronaves × 20 corridas) 100% aprovados, 0 falhas.
   - Sem atuação no simulador (MSFS); não testado no MSFS.
+
+## 2026-11-17 - Calibração do motor, J-3/CAP-4 e remoção da iluminação antiga (Gemini)
+- **Calibração do Grupo Motor (`parts_catalog.json`)**:
+  - Aplicada a calibração do usuário (decisões de 2026-11-17) às 18 peças do grupo Motor: `engine.cylinders` (250 h, $1.600, 8 h MO, 4–14 h parada), `engine.crankshaft` (350 h, $2.200, 12 h MO, 6–18 h parada), `engine.valves` (150 h, $550, 5 h MO, 3–10 h parada), `engine.carburetor` (180 h, $500, 2 h MO, 3–10 h parada), `engine.fuel_injectors` (200 h, $650, 3 h MO, 3–10 h parada), `engine.turbocharger` (180 h, $1.400, 4 h MO, 4–12 h parada), `engine.starter` (200 h, 150 cic, $320, 1,5 h MO, 2–8 h parada), `engine.coolant_system` (200 h, $680, 3 h MO, 3–10 h parada), `engine.compressor` (500 h, $11.500, 10 h MO, 6–18 h parada), `engine.reduction_gearbox` (400 h, $6.500, 7 h MO, 4–14 h parada), `engine.fan` (600 h, 400 cic, $16.000, 8 h MO, 6–18 h parada), `engine.thrust_reverser` (300 cic, $7.800, 5 h MO, 4–12 h parada; horas removidas), `engine.mounts_trusses` (650 h, $2.800, 6 h MO, 4–12 h parada), `engine.cowling_nacelle` (1.000 h, $3.200, 4 h MO, 3–8 h parada), `engine.air_intake_filter` (80 h, $220, 1 h MO, 1–2 h parada), `engine.pneumatic_starter` (250 cic, $5.600, 3 h MO, 2–5 h parada), `engine.fadec_eec` (800 h, $8.500, 3 h MO, 2–6 h parada) e `engine.apu_core` (450 h, $12.000, 8 h MO, 4–12 h parada).
+  - Todas as 18 peças atualizadas com `lifeSource: "calibração do usuário 2026-11-17"`.
+- **Remoção de Peça Antiga e Restrições de Features (`parts_catalog.json`)**:
+  - Removida a peça redundante `electrical.external_lighting` do catálogo (154 → 153 peças), sendo totalmente substituída pelas 6 lâmpadas halógenas do grupo Iluminação (`lights.*`).
+  - Adicionado `"none": ["noElectrical"]` a todas as peças dos grupos Elétrico e Aviônicos, exceto `avionics.analog_flight_instruments` (velocímetro, altímetro e VSI mecânicos de pitot-estática presentes em aeronaves sem sistema elétrico).
+  - Adicionado `"none": ["noFlaps"]` à peça `airframe.flaps`.
+- **Limpeza no Provisionamento (`AircraftPartProvisioner`)**:
+  - `EnsurePartsAsync` agora remove do banco de forma idempotente quaisquer peças instaladas que não existam mais no catálogo ou que deixaram de se aplicar às características do modelo da aeronave (ex.: peças elétricas e flaps em J-3/CAP-4), emitindo log de auditoria via `Debug.WriteLine`.
+- **Documentação e Balanceamento**:
+  - Atualizado `docs/plans/lista-pecas-hangar.md` refletindo o catálogo consolidado com 153 peças, nova calibração do grupo Motor e contagens limpas para CAP-4 e Piper J-3 Cub (54 peças cada).
+  - Atualizadas as faixas-alvo de custo de manutenção simulado em `economy_targets.json` para acomodar os novos valores reais de desgaste/h decorrentes da redução das vidas úteis do motor.
+- **Testes e Verificação**:
+  - Adicionados testes unitários: `Catalogo_SemExternalLighting`, `Catalogo_NoElectrical_SemPecasEletricas`, `Catalogo_NoFlaps_SemFlap`, `Catalogo_Motor_CalibracaoDoUsuario`, `Provisioner_RemovePecasQueNaoSeAplicam` e `Provisioner_RemovePecaForaDoCatalogo`.
+  - `dotnet build src/FlightCareer.slnx`: 0 erros.
+  - `dotnet test src/FlightCareer.Tests`: 600/600 aprovados (100%).
+  - `fuzz --aircraft all --runs 20`: 920 voos procedurais em 46 aeronaves aprovados (100%), 0 falhas.
+  - Não testado no MSFS.

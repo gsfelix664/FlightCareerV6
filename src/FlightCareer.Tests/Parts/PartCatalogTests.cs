@@ -40,8 +40,8 @@ namespace FlightCareer.Tests.Parts
         {
             var validSensors = LoadValidSensors();
 
-            // Deve conter exatamente 154 peças (148 originais + 6 peças do grupo Iluminação)
-            Assert.Equal(154, Catalog.Parts.Count);
+            // Deve conter exatamente 153 peças (147 originais + 6 peças do grupo Iluminação)
+            Assert.Equal(153, Catalog.Parts.Count);
             Assert.InRange(Catalog.Parts.Count, 130, 180);
 
             // Valida sem lançar exceções (IDs únicos, grupo no vocabulário, LifeHours/LifeCycles, LifeSource e sensores existentes)
@@ -58,7 +58,8 @@ namespace FlightCareer.Tests.Parts
                 Assert.Equal(part.Id.ToLowerInvariant(), part.Id);
                 Assert.True(PartGroup.All.Contains(part.Group));
                 Assert.False(string.IsNullOrWhiteSpace(part.LifeSource));
-                Assert.StartsWith("estimativa — revisar", part.LifeSource);
+                Assert.True(part.LifeSource.StartsWith("estimativa — revisar") || part.LifeSource.StartsWith("calibração do usuário"),
+                    $"Peça '{part.Id}' tem LifeSource inesperado: '{part.LifeSource}'");
                 Assert.True(part.LifeHours > 0 || (part.LifeCycles.HasValue && part.LifeCycles.Value > 0));
                 Assert.True(part.PartPrice >= 0);
                 Assert.True(part.LaborHours >= 0);
@@ -328,7 +329,14 @@ namespace FlightCareer.Tests.Parts
                 Assert.True(parts.Any(p => p.Group == PartGroup.Trem), $"Aeronave '{profile.AircraftId}' sem peças de Trem.");
                 Assert.True(parts.Any(p => p.Group == PartGroup.Pneus), $"Aeronave '{profile.AircraftId}' sem peças de Pneus.");
                 Assert.True(parts.Any(p => p.Group == PartGroup.Freios), $"Aeronave '{profile.AircraftId}' sem peças de Freios.");
-                Assert.True(parts.Any(p => p.Group == PartGroup.Eletrico), $"Aeronave '{profile.AircraftId}' sem peças de Elétrico.");
+                if (profile.Features.Contains(AircraftFeatures.NoElectrical))
+                {
+                    Assert.False(parts.Any(p => p.Group == PartGroup.Eletrico), $"Aeronave '{profile.AircraftId}' possui peças de Elétrico indevidamente.");
+                }
+                else
+                {
+                    Assert.True(parts.Any(p => p.Group == PartGroup.Eletrico), $"Aeronave '{profile.AircraftId}' sem peças de Elétrico.");
+                }
                 Assert.True(parts.Any(p => p.Group == PartGroup.Oleo), $"Aeronave '{profile.AircraftId}' sem peças de Óleo.");
 
                 // Conforme a classe:
@@ -753,6 +761,91 @@ namespace FlightCareer.Tests.Parts
             Assert.Contains(b748Parts, p => p.Id == "fire.apu_extinguisher");
             Assert.Contains(b748Parts, p => p.Id == "emergency.ice_detector");
             Assert.DoesNotContain(b748Parts, p => p.Id == "gear.skis");
+        }
+
+        [Fact]
+        public void Catalogo_SemExternalLighting()
+        {
+            Assert.Null(Catalog.Find("electrical.external_lighting"));
+            Assert.DoesNotContain(Catalog.Parts, p => p.Id == "electrical.external_lighting");
+        }
+
+        [Fact]
+        public void Catalogo_NoElectrical_SemPecasEletricas()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles();
+
+            var cubProfile = profiles.First(p => p.AircraftId.Equals("Piper J-3 Cub", StringComparison.OrdinalIgnoreCase));
+            var capProfile = profiles.First(p => p.AircraftId.Equals("CAP-4", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var profile in new[] { cubProfile, capProfile })
+            {
+                var parts = Catalog.PartsFor(profile.Features);
+
+                // Nenhuma peça do grupo Elétrico
+                Assert.DoesNotContain(parts, p => p.Group == PartGroup.Eletrico);
+
+                // Nenhuma peça do grupo Iluminação
+                Assert.DoesNotContain(parts, p => p.Group == PartGroup.Iluminacao);
+
+                // No grupo Aviônicos, apenas analog_flight_instruments é permitida
+                var avionicsParts = parts.Where(p => p.Group == PartGroup.Avionicos).ToList();
+                Assert.All(avionicsParts, p => Assert.Equal("avionics.analog_flight_instruments", p.Id));
+                Assert.Contains(parts, p => p.Id == "avionics.analog_flight_instruments");
+            }
+        }
+
+        [Fact]
+        public void Catalogo_NoFlaps_SemFlap()
+        {
+            var loader = new AircraftLimitCatalogLoader();
+            var profiles = loader.LoadProfiles();
+
+            var cubProfile = profiles.First(p => p.AircraftId.Equals("Piper J-3 Cub", StringComparison.OrdinalIgnoreCase));
+            var capProfile = profiles.First(p => p.AircraftId.Equals("CAP-4", StringComparison.OrdinalIgnoreCase));
+
+            foreach (var profile in new[] { cubProfile, capProfile })
+            {
+                var parts = Catalog.PartsFor(profile.Features);
+                Assert.DoesNotContain(parts, p => p.Id == "airframe.flaps");
+            }
+        }
+
+        [Fact]
+        public void Catalogo_Motor_CalibracaoDoUsuario()
+        {
+            var cyl = Catalog.Get("engine.cylinders")!;
+            Assert.Equal(250, cyl.LifeHours);
+            Assert.Null(cyl.LifeCycles);
+            Assert.Equal(1600m, cyl.PartPrice);
+            Assert.Equal(8.0, cyl.LaborHours);
+            Assert.Equal(new[] { 4.0, 14.0 }, cyl.DowntimeHours);
+            Assert.Equal("calibração do usuário 2026-11-17", cyl.LifeSource);
+
+            var starter = Catalog.Get("engine.starter")!;
+            Assert.Equal(200, starter.LifeHours);
+            Assert.Equal(150, starter.LifeCycles);
+            Assert.Equal(320m, starter.PartPrice);
+            Assert.Equal(1.5, starter.LaborHours);
+            Assert.Equal(new[] { 2.0, 8.0 }, starter.DowntimeHours);
+            Assert.Equal("calibração do usuário 2026-11-17", starter.LifeSource);
+
+            var fan = Catalog.Get("engine.fan")!;
+            Assert.Equal(600, fan.LifeHours);
+            Assert.Equal(400, fan.LifeCycles);
+            Assert.Equal(16000m, fan.PartPrice);
+            Assert.Equal(8.0, fan.LaborHours);
+            Assert.Equal(new[] { 6.0, 18.0 }, fan.DowntimeHours);
+            Assert.Equal("calibração do usuário 2026-11-17", fan.LifeSource);
+
+            var rev = Catalog.Get("engine.thrust_reverser")!;
+            Assert.Equal(0.0, rev.LifeHours);
+            Assert.Equal(300, rev.LifeCycles);
+            Assert.Equal(7800m, rev.PartPrice);
+            Assert.Equal(5.0, rev.LaborHours);
+            Assert.Equal(new[] { 4.0, 12.0 }, rev.DowntimeHours);
+            Assert.Equal("calibração do usuário 2026-11-17", rev.LifeSource);
         }
     }
 }
