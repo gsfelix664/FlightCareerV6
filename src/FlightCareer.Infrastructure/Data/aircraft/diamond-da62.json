@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
@@ -158,6 +158,14 @@
       "unit": "volts",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: Austro AE330",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 136.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Diamond DA62 Airplane Flight Manual (AFM); não conferido no POH)",
       "notes": null
     }
   ]

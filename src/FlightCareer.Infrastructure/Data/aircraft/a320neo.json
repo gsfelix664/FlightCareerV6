@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "A320neo",
   "class": "Jet",
   "engineCount": 2,
@@ -140,18 +140,34 @@
     },
     {
       "key": "oilTempMax",
-      "value": 155.0,
+      "value": 140.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: CFM LEAP-1A",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
       "notes": null
     },
     {
       "key": "ittMax",
       "value": 1060.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: CFM LEAP-1A",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 112.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 145.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
       "notes": null
     }
   ]

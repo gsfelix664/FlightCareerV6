@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "C208B",
   "class": "Turboprop",
   "engineCount": 1,
@@ -29,33 +29,33 @@
       "key": "vne",
       "value": 175.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: VMO 175 KIAS (C208B, notas de treinamento)",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:1",
       "value": 175.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps 10°: 175 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:2",
       "value": 150.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps 20°: 150 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:3",
       "value": 125.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps total: 125 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
     },
     {
       "key": "alternatorRatedAmps",
@@ -75,18 +75,66 @@
     },
     {
       "key": "oilTempMax",
-      "value": 104.0,
+      "value": 105.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: PT6A-114A",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
       "notes": null
     },
     {
       "key": "ittMax",
-      "value": 805.0,
+      "value": 850.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: PT6A-114A",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 148.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 61.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 78.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1900.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 208B (675 / EX) POH / AFM; não conferido no POH)",
       "notes": null
     }
   ]

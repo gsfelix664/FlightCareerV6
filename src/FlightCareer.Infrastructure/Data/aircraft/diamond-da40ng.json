@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Diamond DA40NG",
   "class": "Piston",
   "engineCount": 1,
@@ -145,6 +145,14 @@
       "unit": "volts",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: Austro AE300",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 112.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Diamond DA40 NG Airplane Flight Manual (AFM); não conferido no POH)",
       "notes": null
     }
   ]

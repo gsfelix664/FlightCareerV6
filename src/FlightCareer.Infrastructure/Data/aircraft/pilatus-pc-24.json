@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Pilatus PC-24",
   "class": "Jet",
   "engineCount": 2,
@@ -39,33 +39,33 @@
       "key": "vne",
       "value": 290.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: VMO ≈ 290 KIAS / MMO 0,74 (PC-24, aproximado)",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:1",
-      "value": 240.0,
+      "value": 200.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps 1: ≈240 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:2",
       "value": 200.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps 2: ≈200 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
     },
     {
       "key": "vfe:3",
-      "value": 180.0,
+      "value": 140.0,
       "unit": "knots",
-      "source": "ClassDefault",
-      "reference": "estimativa — revisar: Flaps 3: ≈180 KIAS",
-      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
     },
     {
       "key": "alternatorRatedAmps",
@@ -85,18 +85,74 @@
     },
     {
       "key": "oilTempMax",
-      "value": 149.0,
+      "value": 135.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: Williams FJ44-4A-QPM",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
       "notes": null
     },
     {
       "key": "ittMax",
-      "value": 875.0,
+      "value": 855.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: Williams FJ44-4A-QPM",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 81.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 105.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.74,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.68,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
       "notes": null
     }
   ]

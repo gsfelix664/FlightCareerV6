@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "NXCub",
   "class": "Piston",
   "engineCount": 1,
@@ -115,8 +115,40 @@
       "key": "rpmRedline",
       "value": 2700.0,
       "unit": "rpm",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: CubCrafters CC340",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara CubCrafters CC19-180 (NXCub) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 108.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara CubCrafters CC19-180 (NXCub) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 93.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara CubCrafters CC19-180 (NXCub) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara CubCrafters CC19-180 (NXCub) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara CubCrafters CC19-180 (NXCub) POH / AFM; não conferido no POH)",
       "notes": null
     }
   ]

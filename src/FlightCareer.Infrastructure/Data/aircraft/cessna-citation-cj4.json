@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
   "engineCount": 2,
@@ -102,18 +102,58 @@
     },
     {
       "key": "oilTempMax",
-      "value": 149.0,
+      "value": 135.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: Williams FJ44-4A (óleo: limite do CJ3 FJ44-3A)",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
       "notes": null
     },
     {
       "key": "ittMax",
-      "value": 875.0,
+      "value": 855.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: Williams FJ44-4A (óleo: limite do CJ3 FJ44-3A)",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 109.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
       "notes": null
     }
   ]
