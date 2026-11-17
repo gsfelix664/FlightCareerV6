@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -117,10 +119,40 @@ namespace FlightCareer.UI.ViewModels
         public bool CanRepair => RepairCost > 0;
         public string RepairButtonText => CanRepair ? $"Reparar · {RepairCost:C0}" : "Em dia";
 
+        public ObservableCollection<FlaggedPartViewModel> FlaggedParts { get; } = new();
+        public bool HasFlaggedParts => FlaggedParts.Count > 0;
+
+        public void SetFlaggedParts(IEnumerable<FlaggedPartViewModel> parts)
+        {
+            FlaggedParts.Clear();
+            if (parts != null)
+            {
+                foreach (var p in parts) FlaggedParts.Add(p);
+            }
+            OnPropertyChanged(nameof(HasFlaggedParts));
+        }
+
         public void Refresh(double airframeHours)
         {
             _airframeHours = airframeHours;
             OnPropertyChanged(string.Empty);
+        }
+    }
+
+    /// <summary>Peça com atenção para exibição de chip de aviso no card de componente.</summary>
+    public sealed class FlaggedPartViewModel
+    {
+        public string Name { get; }
+        public PartFlag Level { get; }
+        public string Reason { get; }
+        public SolidColorBrush Brush => Level == PartFlag.Broken ? HangarPalette.Red : HangarPalette.Amber;
+        public string Icon => "!";
+
+        public FlaggedPartViewModel(string name, PartFlag level, string reason)
+        {
+            Name = name;
+            Level = level;
+            Reason = reason;
         }
     }
 }

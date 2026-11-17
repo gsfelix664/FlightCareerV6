@@ -103,5 +103,88 @@ namespace FlightCareer.Tests.Components
                 Assert.Null(open[0].ResolvedAtUtc);
             }
         }
+
+        [Fact]
+        public async Task Banco_antigo_sem_FlaggedAirframeHours_recebe_coluna_e_grava_peca()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+            var pilotId = Guid.NewGuid();
+            var aircraftId = Guid.NewGuid();
+            var partId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                // Recria a tabela AircraftParts sem a coluna FlaggedAirframeHours para simular banco antigo
+                await db.Database.ExecuteSqlRawAsync("DROP TABLE AircraftParts;");
+                await db.Database.ExecuteSqlRawAsync(@"CREATE TABLE AircraftParts (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    PartId TEXT NOT NULL,
+                    EngineIndex INTEGER NOT NULL DEFAULT 0,
+                    Health REAL NOT NULL,
+                    HoursSinceReplacement REAL NOT NULL,
+                    CyclesSinceReplacement INTEGER NOT NULL,
+                    LastReplacedAtUtc TEXT NOT NULL,
+                    LastReplacedAirframeHours REAL NOT NULL,
+                    Flag INTEGER NOT NULL,
+                    FlaggedBy INTEGER NOT NULL,
+                    FlaggedAtUtc TEXT NULL,
+                    IsBroken INTEGER NOT NULL,
+                    BrokenAtUtc TEXT NULL,
+                    LastShopServiceAtUtc TEXT NULL,
+                    LastShopServiceAirframeHours REAL NULL,
+                    LastShopServiceCycles INTEGER NULL
+                );");
+
+                var c172 = new AircraftType { Id = Guid.NewGuid(), Model = "C172 Skyhawk", Type = "Geral", FuelType = "Avgas" };
+                db.AircraftTypes.Add(c172);
+                db.Pilots.Add(new Pilot { Id = pilotId, Name = "Teste" });
+                await db.SaveChangesAsync();
+
+                await db.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO PilotAircrafts (Id, PilotId, AircraftTypeId, PurchaseDate, CurrentAirframeHours, Prefix, EngineCondition, TiresCondition, AirframeCondition, AvionicsCondition, LandingsCount, FuelAmount, CurrentLocationICAO, EngineTboRemainingHours, HoursUntilNext50hInspection, HoursUntilNext100hInspection, HoursUntilNext500hInspection, MagnetosCondition, OilCondition, IsInterdicted, InterdictionReason, Configuration) " +
+                    "VALUES ({0}, {1}, {2}, '2026-01-01', 1200, 'PP-AAA', 70, 60, 90, 85, 400, 30, 'SBSP', 1000, 10, 60, 300, 75, 45, 0, '', 'Passageiro')",
+                    aircraftId, pilotId, c172.Id);
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                // Aplica migração que adiciona FlaggedAirframeHours
+                await db.EnsureSchemaUpdatedAsync();
+
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = partId,
+                    PilotAircraftId = aircraftId,
+                    PartId = "engine.cylinders",
+                    EngineIndex = 0,
+                    Health = 85.0,
+                    HoursSinceReplacement = 90.0,
+                    CyclesSinceReplacement = 40,
+                    LastReplacedAtUtc = DateTime.UtcNow,
+                    LastReplacedAirframeHours = 1110.0,
+                    Flag = PartFlag.Suspect,
+                    FlaggedBy = PartFlagSource.Inspection,
+                    FlaggedAtUtc = DateTime.UtcNow,
+                    FlaggedAirframeHours = 1200.0,
+                    IsBroken = false
+                });
+
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                var part = await db.AircraftParts.FirstOrDefaultAsync(p => p.Id == partId);
+                Assert.NotNull(part);
+                Assert.Equal(PartFlag.Suspect, part.Flag);
+                Assert.Equal(PartFlagSource.Inspection, part.FlaggedBy);
+                Assert.Equal(1200.0, part.FlaggedAirframeHours);
+            }
+        }
     }
 }

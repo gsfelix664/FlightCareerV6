@@ -393,6 +393,26 @@
                                                         <TextBlock Text="  ·  " Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
                                                         <TextBlock Text="{Binding VisibilityText}" Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
                                                     </StackPanel>
+
+                                                    <!-- Chips de peças com atenção após inspeção -->
+                                                    <ItemsControl ItemsSource="{Binding FlaggedParts}" Margin="0,6,0,0"
+                                                                  Visibility="{Binding HasFlaggedParts, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <ItemsControl.ItemsPanel>
+                                                            <ItemsPanelTemplate>
+                                                                <WrapPanel Orientation="Horizontal"/>
+                                                            </ItemsPanelTemplate>
+                                                        </ItemsControl.ItemsPanel>
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <Border Background="{StaticResource HgBase}" BorderBrush="{Binding Brush}" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,4" ToolTip="{Binding Reason}">
+                                                                    <StackPanel Orientation="Horizontal">
+                                                                        <TextBlock Text="{Binding Icon}" Foreground="{Binding Brush}" FontWeight="Bold" FontSize="11.5" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                                                                        <TextBlock Text="{Binding Name}" Foreground="{StaticResource HgText}" FontSize="11" FontFamily="{StaticResource HgSans}" VerticalAlignment="Center"/>
+                                                                    </StackPanel>
+                                                                </Border>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
                                                 </StackPanel>
 
                                                 <Button Grid.Column="1" Style="{StaticResource HgSecondary}" VerticalAlignment="Center" MinWidth="140"
