@@ -1,6 +1,6 @@
 # HANGAR-ICONES — Exclamação amarela / vermelha das peças após inspeção
 
-**Branch:** feat/hangar-icones · **Commit:** pendente · **Data:** 2026-11-17
+**Branch:** feat/hangar-icones · **Commit:** 7f6505e · **Data:** 2026-11-17
 
 ## Plano (antes de codar)
 - Adicionar `Broken = 2` a `PartFlag` e `FlaggedAirframeHours` a `AircraftPart` com migração SQLite em `AppDbContext`.
