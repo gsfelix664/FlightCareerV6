@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Beechcraft Bonanza G36",
   "class": "Piston",
   "engineCount": 1,
@@ -134,6 +134,14 @@
       "unit": "volts",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 154.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Bonanza G36 POH / AFM; não conferido no POH)",
       "notes": null
     }
   ]

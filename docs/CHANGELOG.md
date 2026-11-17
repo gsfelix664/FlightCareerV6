@@ -2304,3 +2304,18 @@
   - 24 novos testes unitários em `src/FlightCareer.Tests/Economy/AirportFeeTests.cs` cobrindo paridade com a fórmula legada de pouso por tier × peso, fronteiras de porte, taxa de passageiros, handling, navegação/terminal, estacionamento com franquia, tier 4, voo C152 em hub (~$332), jato comercial em hub (~$10.170) e integridade de carregamento do catálogo.
   - 1 novo teste de persistência em `FlightPersistenceTests.cs` validando execução fim a fim com persistência de transações no SQLite por categoria e mensagem final.
   - Build 0 erros, `dotnet test` 577/577 aprovados (552 baseline + 25 novos). Não testado no MSFS.
+
+## 2026-11-17 - Limites do aircraft_limits-v4 nos perfis (Gemini)
+- **Preenchimento de Limites Faltantes e ClassDefault (LIMITES-V4)**:
+  - Processado o arquivo `tools/aircraft_limits/sources/aircraft_limits-v4.json` (30 modelos fornecidos pelo usuário, não conferidos no POH real).
+  - Mapeamento: 19 modelos com correspondência exata no catálogo (17 com limites faltantes ou ClassDefault atualizados; C152 e C172SP G1000 já 100% POH/SimVar sem alterações), 8 sem correspondência no catálogo (Dreamlifter, A330-900, SF50, XCub tailwheel, ICON A5, VL-3, PC-6, Savage Cub) e 3 com correspondência duvidosa não utilizados (CTSL × CT, CAP 10 × CAP-4, DR400/100 × DR400).
+  - 130 novas linhas de limites geradas em `tools/aircraft_limits/poh_values.csv` com referência explícita `"aircraft_limits-v4.json (usuário, 2026-11-17; declara <operational_manual>; não conferido no POH)"`.
+  - Consolidação via `merge_limits.py`: 17 perfis atualizados (`737-max-8`, `a320neo`, `a330-belugaxl`, `asobo-tbm-930`, `atr-42-600`, `atr-72-600`, `beechcraft-baron-g58`, `beechcraft-bonanza-g36`, `beechcraft-king-air-c90gtx`, `beechcraft-king-air`, `c208b`, `cessna-citation-cj4`, `diamond-da40ng`, `diamond-da62`, `nxcub`, `pc-12-ngx`, `pilatus-pc-24`), com incremento de `dataVersion`.
+  - Nenhum valor existente de fonte POH, SimVar, Cfg ou NativeOnset foi alterado ou sobrescrito.
+  - Identificadas 2 divergências > 5% com POHs existentes (mantidos os valores POH originais): King Air B350 (`vne` atual 245 kt vs v4 263 kt, 7,3%) e DA62 (`vle` atual 201 kt vs v4 156 kt, 22,4%).
+- **Testes e Verificação**:
+  - `dotnet build src/FlightCareer.slnx`: 0 erros.
+  - `dotnet test src/FlightCareer.Tests`: 577/577 aprovados (100%).
+  - `dotnet run --project src/FlightCareer.Replay -- fuzz --aircraft all --runs 20`: 920 voos procedurais em 46 aeronaves aprovados (100%), 0 limites ausentes, 0 falhas.
+  - `python -m unittest discover -s tools/tests`: 48/48 aprovados.
+

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Asobo TBM 930",
   "class": "Turboprop",
   "engineCount": 1,
@@ -176,6 +176,14 @@
       "unit": "volts",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: PT6A-66D",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.65,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Daher TBM 930 Pilot's Operating Handbook (POH); não conferido no POH)",
       "notes": null
     }
   ]

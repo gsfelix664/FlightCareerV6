@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
@@ -126,16 +126,40 @@
       "key": "oilTempMax",
       "value": 110.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
       "notes": null
     },
     {
       "key": "ittMax",
       "value": 820.0,
       "unit": "celsius",
-      "source": "ClassDefault",
-      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.17,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.27,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
       "notes": null
     }
   ]
