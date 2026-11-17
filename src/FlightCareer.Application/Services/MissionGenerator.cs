@@ -12,13 +12,41 @@ namespace FlightCareer.Application.Services
     {
         private readonly IAppDbContext _context;
         private readonly IHubDataService _hubService;
-        private readonly Random _random = new();
+        private readonly Random _random;
         private bool? _hasSimScenery;
+        private DateTime? _currentReferenceTime;
 
-        public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null)
+        public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null, Random? random = null)
         {
             _context = context;
             _hubService = hubService ?? new HubDataService();
+            _random = random ?? new Random();
+        }
+
+        public MissionGenerator(IAppDbContext context, IHubDataService? hubService, FlightCareer.Domain.Components.IRandomSource randomSource)
+            : this(context, hubService, new RandomAdapter(randomSource))
+        {
+        }
+
+        private sealed class RandomAdapter : Random
+        {
+            private readonly FlightCareer.Domain.Components.IRandomSource _source;
+            public RandomAdapter(FlightCareer.Domain.Components.IRandomSource source) => _source = source ?? throw new ArgumentNullException(nameof(source));
+            public override double NextDouble() => _source.NextDouble();
+            public override int Next() => (int)(_source.NextDouble() * int.MaxValue);
+            public override int Next(int maxValue)
+            {
+                if (maxValue < 0) throw new ArgumentOutOfRangeException(nameof(maxValue));
+                if (maxValue == 0) return 0;
+                return (int)(_source.NextDouble() * maxValue);
+            }
+            public override int Next(int minValue, int maxValue)
+            {
+                if (minValue > maxValue) throw new ArgumentOutOfRangeException(nameof(minValue));
+                if (minValue == maxValue) return minValue;
+                long range = (long)maxValue - minValue;
+                return (int)(minValue + (_source.NextDouble() * range));
+            }
         }
 
         private async Task<bool> HasSimSceneryAsync()
@@ -30,12 +58,14 @@ namespace FlightCareer.Application.Services
             return _hasSimScenery.Value;
         }
 
-        public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport)
+        public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport, DateTime? referenceTime = null)
         {
             _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
+            var now = referenceTime ?? DateTime.Now;
+            _currentReferenceTime = now;
             // 1. Limpar missões expiradas (que não foram aceitas)
             var expired = await _context.Missions
-                .Where(m => !m.IsAccepted && m.ExpirationTime < DateTime.Now)
+                .Where(m => !m.IsAccepted && m.ExpirationTime < now)
                 .ToListAsync();
             
             if (expired.Any())
@@ -48,6 +78,9 @@ namespace FlightCareer.Application.Services
             // Se as missões existentes forem muito antigas, removemos algumas aleatoriamente
             var currentMktMissions = await _context.Missions
                 .Where(m => m.OriginICAO == currentAirport.ICAO && !m.IsAccepted)
+                .OrderBy(m => m.DestinationICAO)
+                .ThenBy(m => m.PayloadLbs)
+                .ThenBy(m => m.RewardMoney)
                 .ToListAsync();
 
             if (currentMktMissions.Any())
@@ -72,6 +105,9 @@ namespace FlightCareer.Application.Services
                     // Atualiza a lista local após a remoção
                     currentMktMissions = await _context.Missions
                         .Where(m => m.OriginICAO == currentAirport.ICAO && !m.IsAccepted)
+                        .OrderBy(m => m.DestinationICAO)
+                        .ThenBy(m => m.PayloadLbs)
+                        .ThenBy(m => m.RewardMoney)
                         .ToListAsync();
                 }
             }
@@ -193,6 +229,7 @@ namespace FlightCareer.Application.Services
                 .Where(a => a.ICAO != origin.ICAO)
                 .Where(a => a.Latitude >= origin.Latitude - maxDeg && a.Latitude <= origin.Latitude + maxDeg)
                 .Where(a => a.Longitude >= origin.Longitude - maxDeg && a.Longitude <= origin.Longitude + maxDeg)
+                .OrderBy(a => a.ICAO)
                 .Take(500)
                 .ToListAsync();
 
@@ -377,7 +414,7 @@ namespace FlightCareer.Application.Services
                 Urgency = sub.Urgency,
                 RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
-                ExpirationTime = DateTime.Now.AddHours(_random.Next(sub.MinExpHours, sub.MaxExpHours + 1)),
+                ExpirationTime = (_currentReferenceTime ?? DateTime.Now).AddHours(_random.Next(sub.MinExpHours, sub.MaxExpHours + 1)),
                 RequiredCategory = requiredCategory,
                 RequiredTier = (CompanyTier)(int)requiredCategory,
                 MissionCategoryType = categoryType
