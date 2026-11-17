@@ -1,0 +1,10 @@
+{
+  "_nota": "Calibracoes do usuario (2026-11-17) a aplicar depois do merge da CATALOGO-MOTOR. Campos: lifeHours, lifeCycles, calendarLifeMonths, partPrice, laborHours, downtimeHours. priceScalesWithAircraft, NO-GO e WA inalterados (conferido: iguais ao catalogo).",
+  "oil.lubricant":      {"lifeHours": 35,  "calendarLifeMonths": 3, "partPrice": 130,  "laborHours": 1,   "downtimeHours": [1, 2]},
+  "oil.filter":         {"lifeHours": 35,  "partPrice": 35,   "laborHours": 0.5, "downtimeHours": [1, 2]},
+  "oil.turbine_oil":    {"lifeHours": 200, "calendarLifeMonths": 3, "partPrice": 240,  "laborHours": 1,   "downtimeHours": [1, 3]},
+  "oil.turbine_filter": {"lifeHours": 150, "partPrice": 140,  "laborHours": 1,   "downtimeHours": [1, 3]},
+  "oil.cooler":         {"lifeHours": 350, "partPrice": 520,  "laborHours": 2,   "downtimeHours": [2, 4]},
+  "oil.pump":           {"lifeHours": 300, "partPrice": 850,  "laborHours": 4,   "downtimeHours": [2, 4]},
+  "oil.turbine_pump":   {"lifeHours": 500, "partPrice": 2100, "laborHours": 5,   "downtimeHours": [2, 4]}
+}
