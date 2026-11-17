@@ -29,6 +29,13 @@ Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `do
 - Taxas de aeroporto (§ 6 do plano): porte leve/médio/pesado (12.500 / 60.000 lb); obrigatórios pouso, estacionamento acima de 2 h, embarque; handling médio/pesado tier 1–2; GPU/catering/degelo/hangar opcionais; tabela por país depois; estacionamento só em tempo de jogo.
 - Auto-start: −10 % XP (valor sugerido; constante `ProcedurePenalties.AutoStartXpPenaltyFraction`).
 
+## Atualização 2026-11-17 (manhã)
+- Mergeados e aprovados: **LIMITES-V4** (130 limites do `tools/aircraft_limits/sources/aircraft_limits-v4.json`, fonte do usuário não conferida, em 17 perfis; nenhum POH alterado) e **LUZES-F2** (grupo Iluminação: 6 lâmpadas halógenas com `usageSensor`, `minorPart`, queima por taxa, `LightingMel` só avisa; sem atuação no sim). Testes 594/594; fuzz ok.
+- Decisões do usuário (2026-11-17): iluminação = peças dentro do Elétrico; tudo halógena; MEL noturna só avisa.
+- Pendente de decisão: `electrical.external_lighting` duplica as lâmpadas (remover ou virar fiação/chaves); `vlo` = extensão (convenção atual) ou menor entre extensão e recolhimento; aeronaves duvidosas do v4 (CTSL×CT, CAP 10×CAP-4, DR400/100×DR400).
+- Lista de peças para o usuário revisar: `docs/plans/lista-pecas-hangar.md`.
+- Próximo sem simulador: item 4 abaixo (J-3/CAP-4 recebem 12 peças elétricas/aviônicos e `airframe.flaps`), depois Taxas F3.
+
 ## Próximos passos (sem simulador), na ordem proposta
 1. **Iluminação no Hangar** (só domínio) — plano `docs/plans/iluminacao-panes-disjuntor.md`.
 2. **Taxas F3** (interface): estimativa das taxas no briefing, extrato por categoria nas finanças, recibo no fim do voo.
