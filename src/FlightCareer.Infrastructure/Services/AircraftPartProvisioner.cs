@@ -65,8 +65,9 @@ namespace FlightCareer.Infrastructure.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para perfil '{model}': {ex.Message}");
-                    features = new List<string>();
+                    // Sem features confiáveis, a limpeza apagaria peças reais: pula esta aeronave.
+                    Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para perfil '{model}': {ex.Message}. Provisionamento e limpeza ignorados.");
+                    continue;
                 }
 
                 var applicableParts = _catalog.PartsFor(features);
