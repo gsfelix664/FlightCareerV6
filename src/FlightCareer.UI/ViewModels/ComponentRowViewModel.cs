@@ -76,6 +76,7 @@ namespace FlightCareer.UI.ViewModels
         public bool IsExact => Range.IsExact;
         public string RangeText => Range.ToString();
         public SolidColorBrush Brush => HangarPalette.ForHealth(Range.Mid);
+        public Geometry IconGeometry => HangarIcons.For(Kind);
 
         // Barra: [preenchido 0..Min][faixa Min..Max][vazio Max..100]
         public GridLength FillWidth => new(Math.Max(0, Range.Min), GridUnitType.Star);

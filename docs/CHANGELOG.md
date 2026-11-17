@@ -2374,3 +2374,7 @@
 - Novo `Application/Simulation/CareerSimulator` e subcomando `FlightCareer.Replay career`: bots aceitam missões reais do `MissionGenerator`, voam (desgaste por voo sintético ou `--fast`), pagam combustível, taxas de aeroporto (`GroundServiceCalculator`), seguro e manutenção com os preços do Hangar; gera `flights.csv`, `maintenance.csv`, `daily.csv` e `summary.md` (receita/h, custos/h, margem, horas para pagar o avião, frequência de manutenção e panes).
 - `MaintenancePricing` (Domain) passa a guardar os preços de inspeção/retífica antes fixos em `PilotAircraftWrapper` (mesmos valores). `MissionGenerator` aceita aleatoriedade e data de referência injetáveis (ordem estável das consultas); `FuelPriceService` aceita data.
 - Não muda nenhum valor de economia. Execução completa (8 aviões × 5 bots × 90 dias) não terminou em 1 h: rodar em lotes menores. Moeda do relatório em `$` (cultura en-US).
+
+## 2026-11-17 - Ícones dos grupos no Hangar (Claude)
+- Os cards de componentes do Hangar trocam a barra de saúde por um **ícone vetorial por grupo** (motor, óleo, ignição, seção quente, elétrico, instrumentos, trem, pneus, freios, célula), desenhado em `UI/ViewModels/HangarIcons.cs` (sintaxe de path SVG, 24×24, traço) e pintado no tom da saúde do grupo (`HangarPalette.ForHealth`, mesmas faixas verde/amarelo/vermelho da barra antiga). A faixa de saúde continua no texto ao lado e no tooltip do ícone; os chips das peças marcadas na inspeção seguem dentro do card.
+- Não visto na tela (sem rodar a UI).
