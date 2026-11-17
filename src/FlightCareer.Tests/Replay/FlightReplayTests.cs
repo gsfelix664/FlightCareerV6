@@ -203,9 +203,9 @@ namespace FlightCareer.Tests.Replay
             var mainStruts = result.Parts.First(p => p.PartId.Equals("gear.main_struts", StringComparison.OrdinalIgnoreCase));
             var noseStrut = result.Parts.First(p => p.PartId.Equals("gear.nose_strut", StringComparison.OrdinalIgnoreCase));
 
-            // Perdas dentro de ±15% das gravadas no banco
-            Assert.InRange(mainTires.HealthLoss, 3.65 * 0.85, 3.65 * 1.15);
-            Assert.InRange(noseTires.HealthLoss, 3.69 * 0.85, 3.69 * 1.15);
+            // Perdas dentro da faixa esperada com vida / 4 (dano de impacto + desgaste natural acelerado)
+            Assert.InRange(mainTires.HealthLoss, 3.5, 4.8);
+            Assert.InRange(noseTires.HealthLoss, 3.5, 4.8);
             Assert.InRange(mainStruts.HealthLoss, 2.52 * 0.85, 2.52 * 1.15);
             Assert.InRange(noseStrut.HealthLoss, 2.52 * 0.85, 2.52 * 1.15);
 

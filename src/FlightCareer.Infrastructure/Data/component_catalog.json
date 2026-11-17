@@ -183,15 +183,15 @@
       "appliesTo": [ "Piston", "Turboprop", "Jet" ],
       "critical": true,
       "weight": 30,
-      "lifeHours": { "Piston": 1800, "Turboprop": 3600, "Jet": 5000 },
+      "lifeHours": { "Piston": 450, "Turboprop": 900, "Jet": 900 },
       "naturalLossOverLife": 70,
       "yellowLossPerHour": 3,
       "redLossPerHour": 60,
       "hazardScale": 1.0,
       "walkaroundVisible": false,
       "serviceName": "Retífica do motor (overhaul)",
-      "repairCostFactor": 0.2,       // fração do preço da aeronave nova para 0 → 100%
-      "minFullRepairCost": 25000,
+      "repairCostFactor": 0.05,       // fração do preço da aeronave nova para 0 → 100%
+      "minFullRepairCost": 6250,
       "failureModes": [
         { "id": "engine.power_loss", "name": "Perda parcial de potência", "weight": 50, "critical": false, "effect": "None", "damage": 5,
           "description": "Desgaste interno reduz a potência disponível. Reduza a carga e pouse no aeródromo mais próximo." },

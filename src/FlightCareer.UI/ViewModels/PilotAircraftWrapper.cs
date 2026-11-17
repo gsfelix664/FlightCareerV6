@@ -137,25 +137,25 @@ namespace FlightCareer.UI.ViewModels
         public bool IsInterdicted => Aircraft.IsInterdicted;
         public string InterdictionReason => Aircraft.InterdictionReason;
 
-        public SolidColorBrush Brush50h => DueBrush(HoursUntilNext50hInspection, 5);
-        public SolidColorBrush Brush100h => DueBrush(HoursUntilNext100hInspection, 10);
-        public SolidColorBrush Brush500h => DueBrush(HoursUntilNext500hInspection, 10);
-        public SolidColorBrush BrushTbo => DueBrush(EngineTboRemainingHours, 50);
+        public SolidColorBrush Brush50h => DueBrush(HoursUntilNext50hInspection, 1.2);
+        public SolidColorBrush Brush100h => DueBrush(HoursUntilNext100hInspection, 2.5);
+        public SolidColorBrush Brush500h => DueBrush(HoursUntilNext500hInspection, 12.5);
+        public SolidColorBrush BrushTbo => DueBrush(EngineTboRemainingHours, 12.5);
 
         private static SolidColorBrush DueBrush(double remaining, double warn) =>
             remaining <= 0 ? HangarPalette.Red : remaining <= warn ? HangarPalette.Amber : HangarPalette.Green;
 
         public double EngineLifeHours => _catalog.Get(ComponentKind.Engine).LifeHoursFor(EngineClass);
 
-        public double Cost50hInspection => 850.0;
-        public double Cost100hInspection => 2500.0;
-        public double Cost500hInspection => 1450.0;
-        public double CostOverhaul => Math.Max(25000.0, Math.Round(PurchasePrice * 0.20, 2));
+        public double Cost50hInspection => 212.50;
+        public double Cost100hInspection => 625.0;
+        public double Cost500hInspection => 362.50;
+        public double CostOverhaul => Math.Max(6250.0, Math.Round(PurchasePrice * 0.05, 2));
         public double CostToggleConfiguration => 1200.0;
 
-        public string Text50h => $"Fazer 50 h · {Cost50hInspection:C0}";
-        public string Text100h => $"Fazer 100 h · {Cost100hInspection:C0}";
-        public string Text500h => $"Fazer 500 h · {Cost500hInspection:C0}";
+        public string Text50h => $"Troca de óleo · {Cost50hInspection:C0}";
+        public string Text100h => $"Inspeção anual · {Cost100hInspection:C0}";
+        public string Text500h => $"Revisão de ignição · {Cost500hInspection:C0}";
         public string TextOverhaul => $"Retífica · {CostOverhaul:C0}";
         public string TextToggleConfiguration => $"Converter · {CostToggleConfiguration:C0}";
         public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";

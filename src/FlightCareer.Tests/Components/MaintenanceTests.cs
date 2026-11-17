@@ -91,12 +91,12 @@ namespace FlightCareer.Tests.Components
         public void Status_avisa_manutencao_proxima()
         {
             var (aircraft, comps) = Fresh();
-            aircraft.HoursUntilNext50hInspection = 3;
+            aircraft.HoursUntilNext50hInspection = 1.0;
 
             var status = AircraftStatusEvaluator.Evaluate(aircraft, comps, Catalog, EngineClass.Piston);
 
             Assert.Equal(AircraftStatusLevel.MaintenanceDue, status.Level);
-            Assert.Contains("50 h", status.Detail);
+            Assert.Contains("óleo", status.Detail);
         }
 
         [Fact]

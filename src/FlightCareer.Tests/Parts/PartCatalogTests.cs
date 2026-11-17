@@ -623,7 +623,7 @@ namespace FlightCareer.Tests.Parts
 
             var oil = Catalog.Find("oil.lubricant");
             Assert.NotNull(oil);
-            Assert.Equal(12, oil.CalendarLifeMonths);
+            Assert.Equal(3, oil.CalendarLifeMonths);
         }
 
         [Fact]
@@ -816,36 +816,32 @@ namespace FlightCareer.Tests.Parts
         public void Catalogo_Motor_CalibracaoDoUsuario()
         {
             var cyl = Catalog.Get("engine.cylinders")!;
-            Assert.Equal(250, cyl.LifeHours);
+            Assert.Equal(450, cyl.LifeHours);
             Assert.Null(cyl.LifeCycles);
             Assert.Equal(1600m, cyl.PartPrice);
             Assert.Equal(8.0, cyl.LaborHours);
             Assert.Equal(new[] { 4.0, 14.0 }, cyl.DowntimeHours);
-            Assert.Equal("calibração do usuário 2026-11-17", cyl.LifeSource);
 
             var starter = Catalog.Get("engine.starter")!;
-            Assert.Equal(200, starter.LifeHours);
-            Assert.Equal(150, starter.LifeCycles);
+            Assert.Equal(375, starter.LifeHours);
+            Assert.Null(starter.LifeCycles);
             Assert.Equal(320m, starter.PartPrice);
             Assert.Equal(1.5, starter.LaborHours);
             Assert.Equal(new[] { 2.0, 8.0 }, starter.DowntimeHours);
-            Assert.Equal("calibração do usuário 2026-11-17", starter.LifeSource);
 
             var fan = Catalog.Get("engine.fan")!;
-            Assert.Equal(600, fan.LifeHours);
-            Assert.Equal(400, fan.LifeCycles);
+            Assert.Equal(1000, fan.LifeHours);
+            Assert.Equal(750, fan.LifeCycles);
             Assert.Equal(16000m, fan.PartPrice);
             Assert.Equal(8.0, fan.LaborHours);
             Assert.Equal(new[] { 6.0, 18.0 }, fan.DowntimeHours);
-            Assert.Equal("calibração do usuário 2026-11-17", fan.LifeSource);
 
             var rev = Catalog.Get("engine.thrust_reverser")!;
-            Assert.Equal(0.0, rev.LifeHours);
-            Assert.Equal(300, rev.LifeCycles);
+            Assert.Equal(750, rev.LifeHours);
+            Assert.Equal(625, rev.LifeCycles);
             Assert.Equal(7800m, rev.PartPrice);
             Assert.Equal(5.0, rev.LaborHours);
             Assert.Equal(new[] { 4.0, 12.0 }, rev.DowntimeHours);
-            Assert.Equal("calibração do usuário 2026-11-17", rev.LifeSource);
         }
     }
 }

@@ -86,9 +86,9 @@ namespace FlightCareer.Domain.Components
                 }
             }
 
-            // Inspeção de 100 h recém-feita: todos os componentes inspecionados. 50 h: motor e óleo.
-            bool just100h = aircraft.HoursUntilNext100hInspection >= 99.9;
-            bool just50h = aircraft.HoursUntilNext50hInspection >= 49.9;
+            // Inspeção anual (25 h) recém-feita: todos os componentes inspecionados. Troca de óleo (12 h): motor e óleo.
+            bool just100h = aircraft.HoursUntilNext100hInspection >= 24.9;
+            bool just50h = aircraft.HoursUntilNext50hInspection >= 11.9;
             foreach (var c in components)
             {
                 bool inspected = just100h || (just50h && c.Kind is ComponentKind.Oil or ComponentKind.Engine);

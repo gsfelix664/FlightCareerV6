@@ -418,7 +418,7 @@
 
                                 <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="Inspeção de 50 h (óleo)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="Troca de óleo (12 h)" Style="{StaticResource HgLabel}"/>
                                         <TextBlock Text="{Binding HoursUntilNext50hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush50h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text50h}" IsEnabled="{Binding CanService}"
@@ -428,7 +428,7 @@
 
                                 <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="Inspeção de 100 h (obrigatória)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="Inspeção anual (25 h, obrigatória)" Style="{StaticResource HgLabel}"/>
                                         <TextBlock Text="{Binding HoursUntilNext100hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush100h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text100h}" IsEnabled="{Binding CanService}"
@@ -438,7 +438,7 @@
 
                                 <Grid Margin="0,0,0,12" Visibility="{Binding IsPiston, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <StackPanel>
-                                        <TextBlock Text="Revisão de 500 h (magnetos e velas)" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="Revisão de ignição (125 h, magnetos e velas)" Style="{StaticResource HgLabel}"/>
                                         <TextBlock Text="{Binding HoursUntilNext500hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush500h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text500h}" IsEnabled="{Binding CanService}"

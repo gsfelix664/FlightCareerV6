@@ -358,7 +358,7 @@ namespace FlightCareer.Infrastructure.Services
                     CurrentAirframeHours = listing.AirframeHours,
                     FuelAmount = listing.FuelAmount,
                     CurrentLocationICAO = pilot.CurrentAirportICAO,
-                    EngineTboRemainingHours = Math.Max(100.0, listing.TboHours - listing.TsmoHours)
+                    EngineTboRemainingHours = Math.Max(25.0, listing.TboHours - listing.TsmoHours)
                 };
 
                 // Provisiona peças coerentes com o estado da aeronave comprada (F2.3 - Decisão 3)
@@ -516,8 +516,9 @@ namespace FlightCareer.Infrastructure.Services
                     AirframeHours = aircraft.CurrentAirframeHours,
                     YearOfManufacture = year,
                     TboHours = (aircraft.AircraftType.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
-                                aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 3600.0 : 1800.0,
-                    TsmoHours = Math.Max(0, 1800.0 - aircraft.EngineTboRemainingHours),
+                                aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 450.0,
+                    TsmoHours = Math.Max(0, ((aircraft.AircraftType.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
+                                              aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 450.0) - aircraft.EngineTboRemainingHours),
                     StructuralIncidentHistory = "Aeronave operada pela frota da companhia",
                     FuelAmount = aircraft.FuelAmount,
                     BaseMarketValue = baseVal,
@@ -593,7 +594,7 @@ namespace FlightCareer.Infrastructure.Services
             double hours = _random.Next(120, 9500);
 
             double tbo = (type.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
-                          type.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 3600.0 : 1800.0;
+                          type.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 450.0;
             double tsmo = Math.Round(_random.NextDouble() * Math.Min(tbo, hours % tbo == 0 ? tbo : hours % tbo), 1);
 
             double fuel = Math.Round(_random.NextDouble() * type.FuelTankGallons, 1);
