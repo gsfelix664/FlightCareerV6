@@ -551,6 +551,12 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 // -------------------------------------------------------------------------
                 // MAPEAMENTO NO FRAME COM BASE NO LAYOUT REAL (SEM CHAVES À MÃO)
                 // -------------------------------------------------------------------------
+                bool hasElectrical = !featSet.Contains("noElectrical");
+                bool isTaxiToShutdown = hasElectrical && t >= tStart && masterBattery && combustion.Any(c => c);
+                double postTouchdownTaxi = t >= tTouchdown ? (t - tTouchdown) / (tShutdown - tTouchdown) : 0.0;
+                bool isLightTaxi = hasElectrical && ((t >= tStart && t < tTaxiOut) || (t >= tTouchdown && postTouchdownTaxi < 0.70 && masterBattery));
+                bool isLightLanding = hasElectrical && ((t >= tTaxiOut && t < tTakeoff) || (t >= tDescent && t <= tTouchdown));
+
                 var frameValues = new Dictionary<string, double>(slotLookup.Count, StringComparer.OrdinalIgnoreCase);
 
                 foreach (var slot in allSlots)
@@ -650,6 +656,30 @@ namespace FlightCareer.Domain.Replay.Synthetic
                     else if (key.Equals("elec-total-load-amps", StringComparison.OrdinalIgnoreCase))
                     {
                         val = loadAmps;
+                    }
+                    else if (key.Equals("light-landing-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = isLightLanding ? 1.0 : 0.0;
+                    }
+                    else if (key.Equals("light-taxi-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = isLightTaxi ? 1.0 : 0.0;
+                    }
+                    else if (key.Equals("light-nav-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = isTaxiToShutdown ? 1.0 : 0.0;
+                    }
+                    else if (key.Equals("light-strobe-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = isTaxiToShutdown ? 1.0 : 0.0;
+                    }
+                    else if (key.Equals("light-beacon-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = isTaxiToShutdown ? 1.0 : 0.0;
+                    }
+                    else if (key.Equals("light-panel-on", StringComparison.OrdinalIgnoreCase))
+                    {
+                        val = 0.0;
                     }
                     else if (key.StartsWith("eng-combustion", StringComparison.OrdinalIgnoreCase))
                     {

@@ -40,8 +40,8 @@ namespace FlightCareer.Tests.Parts
         {
             var validSensors = LoadValidSensors();
 
-            // Deve conter exatamente 148 peças conforme a especificação F2.1c (eliminação de 4 sobreposições)
-            Assert.Equal(148, Catalog.Parts.Count);
+            // Deve conter exatamente 154 peças (148 originais + 6 peças do grupo Iluminação)
+            Assert.Equal(154, Catalog.Parts.Count);
             Assert.InRange(Catalog.Parts.Count, 130, 180);
 
             // Valida sem lançar exceções (IDs únicos, grupo no vocabulário, LifeHours/LifeCycles, LifeSource e sensores existentes)
@@ -574,9 +574,9 @@ namespace FlightCareer.Tests.Parts
         }
 
         [Fact]
-        public void PartGroups_All22GroupsHaveParts()
+        public void PartGroups_AllGroupsHaveParts()
         {
-            Assert.Equal(22, PartGroup.All.Count);
+            Assert.Equal(23, PartGroup.All.Count);
 
             foreach (var group in PartGroup.All)
             {

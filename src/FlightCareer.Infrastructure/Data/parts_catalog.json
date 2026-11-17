@@ -4408,6 +4408,222 @@
       ],
       "failureEffect": "Vazamento em compartimento estanque ou falha de trem retrátil anfíbio (NO-GO na água)",
       "calendarLifeMonths": 60
+    },
+    {
+      "id": "lights.landing",
+      "name": "Farol de pouso",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 300,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-landing-on",
+      "damagePerOnCyclePct": 0.05,
+      "partPrice": 60,
+      "priceScalesWithAircraft": false,
+      "laborHours": 0.5,
+      "sensors": [
+        "light-landing-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "lights.taxi",
+      "name": "Farol de táxi",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 300,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-taxi-on",
+      "damagePerOnCyclePct": 0.05,
+      "partPrice": 60,
+      "priceScalesWithAircraft": false,
+      "laborHours": 0.5,
+      "sensors": [
+        "light-taxi-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "lights.nav",
+      "name": "Luzes de navegação",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 1000,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-nav-on",
+      "damagePerOnCyclePct": 0.02,
+      "partPrice": 40,
+      "priceScalesWithAircraft": false,
+      "laborHours": 0.5,
+      "sensors": [
+        "light-nav-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "lights.strobe",
+      "name": "Luzes estroboscópicas (anticolisão)",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 1000,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-strobe-on",
+      "damagePerOnCyclePct": 0.03,
+      "partPrice": 250,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.0,
+      "sensors": [
+        "light-strobe-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "lights.beacon",
+      "name": "Beacon (anticolisão)",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 1000,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-beacon-on",
+      "damagePerOnCyclePct": 0.03,
+      "partPrice": 120,
+      "priceScalesWithAircraft": false,
+      "laborHours": 0.5,
+      "sensors": [
+        "light-beacon-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
+    },
+    {
+      "id": "lights.panel",
+      "name": "Iluminação do painel",
+      "group": "Iluminação",
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "perEngine": false,
+      "lifeHours": 2000,
+      "lifeCycles": null,
+      "visibleOnWalkaround": true,
+      "blocksFlightWhenBroken": false,
+      "minorPart": true,
+      "failsByUsageRate": true,
+      "usageSensor": "light-panel-on",
+      "damagePerOnCyclePct": 0.01,
+      "partPrice": 50,
+      "priceScalesWithAircraft": false,
+      "laborHours": 1.0,
+      "sensors": [
+        "light-panel-on"
+      ],
+      "lifeSource": "estimativa — revisar (lâmpada halógena típica)",
+      "repairCostPctOfAircraft": [
+        0.0005,
+        0.002
+      ],
+      "downtimeHours": [
+        0.5,
+        1.0
+      ],
+      "failureEffect": "Lâmpada queimada (luz apagada)",
+      "calendarLifeMonths": null
     }
   ]
 }

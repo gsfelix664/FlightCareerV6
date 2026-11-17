@@ -136,6 +136,19 @@ namespace FlightCareer.Domain.Parts
                         }
                     }
                 }
+
+                if ((part.FailsByUsageRate || part.DamagePerOnCyclePct > 0) && string.IsNullOrWhiteSpace(part.UsageSensor))
+                {
+                    throw new InvalidDataException($"Peça '{part.Id}' requer 'usageSensor' preenchido quando failsByUsageRate ou damagePerOnCyclePct > 0.");
+                }
+
+                if (validSensorKeys != null && !string.IsNullOrWhiteSpace(part.UsageSensor))
+                {
+                    if (!validSensorKeys.Contains(part.UsageSensor))
+                    {
+                        throw new InvalidDataException($"Peça '{part.Id}' referencia usageSensor '{part.UsageSensor}' que não existe no registro de sensores.");
+                    }
+                }
             }
         }
 
@@ -162,7 +175,11 @@ namespace FlightCareer.Domain.Parts
                 d.RepairCostPctOfAircraft,
                 d.DowntimeHours,
                 d.FailureEffect,
-                d.CalendarLifeMonths
+                d.CalendarLifeMonths,
+                d.UsageSensor,
+                d.DamagePerOnCyclePct,
+                d.FailsByUsageRate,
+                d.MinorPart
             )).ToList() ?? new List<PartDefinition>();
 
             return new PartCatalog(parts);
@@ -218,6 +235,10 @@ namespace FlightCareer.Domain.Parts
             public List<double>? DowntimeHours { get; set; }
             public string? FailureEffect { get; set; }
             public int? CalendarLifeMonths { get; set; }
+            public string? UsageSensor { get; set; }
+            public double DamagePerOnCyclePct { get; set; }
+            public bool FailsByUsageRate { get; set; }
+            public bool MinorPart { get; set; }
         }
 
         private class AppliesToDto

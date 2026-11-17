@@ -148,6 +148,12 @@ Convenções:
 | `CIRCUIT ON:1`, `CIRCUIT ON:2`, `CIRCUIT ON:3`, `CIRCUIT ON:4`, `CIRCUIT ON:5`, `CIRCUIT ON:6`, `CIRCUIT ON:7`, `CIRCUIT ON:8`, `CIRCUIT ON:9`, `CIRCUIT ON:10` | bool | circuitos v2+ (energização dos circuitos 1 a 10) |
 | `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada v2+ (1) |
 | `ELECTRICAL MAIN BUS VOLTAGE:1` | volts | barramento principal legado v1.00 (controle/conferência) |
+| `LIGHT LANDING ON` | bool | iluminação (farol de pouso) |
+| `LIGHT TAXI ON` | bool | iluminação (farol de táxi) |
+| `LIGHT NAV ON` | bool | iluminação (luzes de navegação) |
+| `LIGHT STROBE ON` | bool | iluminação (luzes estroboscópicas) |
+| `LIGHT BEACON ON` | bool | iluminação (beacon) |
+| `LIGHT PANEL ON` | bool | iluminação (painel de instrumentos) |
 
 ## 7. Vácuo, pitot, estática e gelo
 
