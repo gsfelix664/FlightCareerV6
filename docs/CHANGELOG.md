@@ -2369,3 +2369,8 @@
   - Build 0 erros, `dotnet test` 607/607 aprovados (594 baseline + 13 novos).
   - Fuzz testing com 230 voos (46 aeronaves × 5 corridas) 100% aprovados, 0 falhas.
   - Não testado visualmente na UI WPF em execução (verificação estática e por testes unitários/integração).
+
+## 2026-11-17 - Simulador de carreira com bots (Gemini, revisado pelo Claude)
+- Novo `Application/Simulation/CareerSimulator` e subcomando `FlightCareer.Replay career`: bots aceitam missões reais do `MissionGenerator`, voam (desgaste por voo sintético ou `--fast`), pagam combustível, taxas de aeroporto (`GroundServiceCalculator`), seguro e manutenção com os preços do Hangar; gera `flights.csv`, `maintenance.csv`, `daily.csv` e `summary.md` (receita/h, custos/h, margem, horas para pagar o avião, frequência de manutenção e panes).
+- `MaintenancePricing` (Domain) passa a guardar os preços de inspeção/retífica antes fixos em `PilotAircraftWrapper` (mesmos valores). `MissionGenerator` aceita aleatoriedade e data de referência injetáveis (ordem estável das consultas); `FuelPriceService` aceita data.
+- Não muda nenhum valor de economia. Execução completa (8 aviões × 5 bots × 90 dias) não terminou em 1 h: rodar em lotes menores. Moeda do relatório em `$` (cultura en-US).

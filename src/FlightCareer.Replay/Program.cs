@@ -45,6 +45,8 @@ namespace FlightCareer.Replay
 
             if (args[0].Equals("career", StringComparison.OrdinalIgnoreCase))
             {
+                // Moeda genérica $ (decisão do usuário): o app força en-US; o relatório segue o mesmo padrão.
+                System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
                 return RunCareer(args.Skip(1).ToArray());
             }
 
