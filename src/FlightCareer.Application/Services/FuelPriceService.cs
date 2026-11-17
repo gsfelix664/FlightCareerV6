@@ -12,17 +12,20 @@ namespace FlightCareer.Application.Services
         private const double BaseJetAPrice = 5.40;  // Jet A-1
 
         public static double GetCurrentPrice(string fuelType, int airportTier = 3)
+            => GetCurrentPrice(fuelType, airportTier, DateTime.Today);
+
+        public static double GetCurrentPrice(string fuelType, int airportTier, DateTime asOfDate)
         {
             double basePrice = fuelType.ToUpper().Contains("JET") ? BaseJetAPrice : BaseAvgasPrice;
             
             // 1. Calcular Inflação (Dobrar em 10 anos = 3650 dias)
-            double daysPassed = (DateTime.Today - ProjectStartDate).TotalDays;
+            double daysPassed = (asOfDate.Date - ProjectStartDate).TotalDays;
             double inflationFactor = Math.Pow(2, daysPassed / 3650.0);
             
             double inflatedPrice = basePrice * inflationFactor;
 
             // 2. Variação Diária (+/- 3%) usando a data como semente
-            var rng = new Random(DateTime.Today.Year * 1000 + DateTime.Today.DayOfYear);
+            var rng = new Random(asOfDate.Year * 1000 + asOfDate.DayOfYear);
             double dailyVariation = 0.97 + (rng.NextDouble() * 0.06);
 
             // 3. Diferencial Logístico por Porte do Aeródromo

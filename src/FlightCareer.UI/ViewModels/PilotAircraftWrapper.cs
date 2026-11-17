@@ -148,11 +148,11 @@ namespace FlightCareer.UI.ViewModels
 
         public double EngineLifeHours => _catalog.Get(ComponentKind.Engine).LifeHoursFor(EngineClass);
 
-        public double Cost50hInspection => 850.0;
-        public double Cost100hInspection => 2500.0;
-        public double Cost500hInspection => 1450.0;
-        public double CostOverhaul => Math.Max(25000.0, Math.Round(PurchasePrice * 0.20, 2));
-        public double CostToggleConfiguration => 1200.0;
+        public double Cost50hInspection => MaintenancePricing.Cost50hInspection;
+        public double Cost100hInspection => MaintenancePricing.Cost100hInspection;
+        public double Cost500hInspection => MaintenancePricing.Cost500hInspection;
+        public double CostOverhaul => MaintenancePricing.CalculateOverhaulCost(PurchasePrice);
+        public double CostToggleConfiguration => MaintenancePricing.CostToggleConfiguration;
 
         public string Text50h => $"Fazer 50 h · {Cost50hInspection:C0}";
         public string Text100h => $"Fazer 100 h · {Cost100hInspection:C0}";

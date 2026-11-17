@@ -5,5 +5,8 @@ namespace FlightCareer.Infrastructure.Services
     {
         public static double GetCurrentPrice(string fuelType, int airportTier = 3)
             => FlightCareer.Application.Services.FuelPriceService.GetCurrentPrice(fuelType, airportTier);
+
+        public static double GetCurrentPrice(string fuelType, int airportTier, System.DateTime asOfDate)
+            => FlightCareer.Application.Services.FuelPriceService.GetCurrentPrice(fuelType, airportTier, asOfDate);
     }
 }

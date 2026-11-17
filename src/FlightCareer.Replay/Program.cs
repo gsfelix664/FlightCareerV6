@@ -5,14 +5,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using FlightCareer.Application.Services;
+using FlightCareer.Application.Simulation;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Replay;
 using FlightCareer.Domain.Replay.Synthetic;
 using FlightCareer.Domain.Sensors;
+using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.Infrastructure.Replay;
 using FlightCareer.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightCareer.Replay
 {
@@ -37,6 +41,11 @@ namespace FlightCareer.Replay
             if (args[0].Equals("fuzz", StringComparison.OrdinalIgnoreCase))
             {
                 return RunFuzz(args.Skip(1).ToArray());
+            }
+
+            if (args[0].Equals("career", StringComparison.OrdinalIgnoreCase))
+            {
+                return RunCareer(args.Skip(1).ToArray());
             }
 
             string? csvPath = null;
@@ -190,6 +199,7 @@ namespace FlightCareer.Replay
         {
             Console.WriteLine("Uso: FlightCareer.Replay <csv|csv.gz> [opções]");
             Console.WriteLine("     FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo|all>] [--seed <n>] [--fast]");
+            Console.WriteLine("     FlightCareer.Replay career --aircraft <modelos> [--bots <n>] [--days <n>] [--hours-per-day <n>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]");
             Console.WriteLine();
             Console.WriteLine("Opções de Replay:");
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");
@@ -753,6 +763,159 @@ namespace FlightCareer.Replay
                 }
             }
             Console.WriteLine("================================================================================");
+        }
+
+        private static int RunCareer(string[] args)
+        {
+            string? aircraftArg = null;
+            int bots = 5;
+            int days = 90;
+            double hoursPerDay = 2.0;
+            int seed = 1;
+            string policy = "best";
+            bool fastMode = false;
+            string? outDir = null;
+            string? initialHub = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i];
+                if (arg.Equals("--aircraft", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    aircraftArg = args[++i];
+                }
+                else if (arg.Equals("--bots", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int b) && b > 0) bots = b;
+                }
+                else if (arg.Equals("--days", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int d) && d > 0) days = d;
+                }
+                else if (arg.Equals("--hours-per-day", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (double.TryParse(args[++i], NumberStyles.Any, CultureInfo.InvariantCulture, out double h) && h > 0) hoursPerDay = h;
+                }
+                else if (arg.Equals("--seed", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int s)) seed = s;
+                }
+                else if (arg.Equals("--policy", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    policy = args[++i];
+                }
+                else if (arg.Equals("--fast", StringComparison.OrdinalIgnoreCase))
+                {
+                    fastMode = true;
+                }
+                else if (arg.Equals("--out", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    outDir = args[++i];
+                }
+                else if (arg.Equals("--initial-hub", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    initialHub = args[++i];
+                }
+                else if (arg.Equals("-h", StringComparison.OrdinalIgnoreCase) || arg.Equals("--help", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Uso: FlightCareer.Replay career --aircraft <modelos> [--bots <n>] [--days <n>] [--hours-per-day <n>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]");
+                    return 0;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(aircraftArg))
+            {
+                Console.Error.WriteLine("Erro: --aircraft não informado. Especifique os modelos separados por vírgula.");
+                return 1;
+            }
+
+            var aircraftModels = aircraftArg.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (aircraftModels.Length == 0)
+            {
+                Console.Error.WriteLine("Erro: Nenhuma aeronave válida especificada em --aircraft.");
+                return 1;
+            }
+
+            string tempDbFile = Path.Combine(Path.GetTempPath(), $"career_sim_{Guid.NewGuid():N}.db");
+            var dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlite($"Data Source={tempDbFile}")
+                .Options;
+
+            try
+            {
+                Console.WriteLine($"[ECON-SIM] Preparando banco de dados temporário em {tempDbFile}...");
+                using (var setupDb = new AppDbContext(dbOptions))
+                {
+                    setupDb.Database.EnsureCreated();
+                    setupDb.EnsureSchemaUpdatedAsync().GetAwaiter().GetResult();
+                    var seeder = new DataSeeder(setupDb);
+                    seeder.SeedAsync((msg, pct) => Console.WriteLine($"  {msg} ({pct * 100:F0}%)")).GetAwaiter().GetResult();
+                }
+
+                Console.WriteLine("[ECON-SIM] Carregando catálogos operacionais...");
+                var partsCatalog = PartCatalog.LoadDefault();
+                var wearRuleCatalog = WearRuleCatalog.LoadDefault();
+                var componentCatalog = ComponentCatalog.LoadDefault();
+                var limitLoader = new AircraftLimitCatalogLoader();
+                var resolver = limitLoader.CreateResolver();
+                var hubService = new HubDataService();
+
+                var simulator = new CareerSimulator(
+                    () => new AppDbContext(dbOptions),
+                    componentCatalog,
+                    partsCatalog,
+                    wearRuleCatalog,
+                    resolver,
+                    hubService);
+
+                var simOptions = new CareerSimulationOptions
+                {
+                    AircraftModels = aircraftModels,
+                    BotsPerAircraft = bots,
+                    Days = days,
+                    HoursPerDay = hoursPerDay,
+                    Seed = seed,
+                    Policy = policy,
+                    FastMode = fastMode,
+                    OutputDirectory = outDir,
+                    InitialHub = initialHub,
+                    LogCallback = msg => Console.WriteLine(msg)
+                };
+
+                var result = simulator.RunAsync(simOptions).GetAwaiter().GetResult();
+
+                Console.WriteLine();
+                Console.WriteLine("===============================================================================");
+                Console.WriteLine("                          SIMULAÇÃO ECON-SIM CONCLUÍDA                         ");
+                Console.WriteLine("===============================================================================");
+                Console.WriteLine($"Total de voos registrados: {result.Flights.Count:N0}");
+                Console.WriteLine($"Total de eventos de manutenção: {result.Maintenance.Count:N0}");
+                Console.WriteLine($"Diretório dos relatórios: {result.OutputDirectory}");
+                Console.WriteLine("Arquivos gerados: flights.csv, maintenance.csv, daily.csv, summary.md");
+                Console.WriteLine();
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[ECON-SIM] Erro fatal durante a execução: {ex.Message}");
+                Console.Error.WriteLine(ex.StackTrace);
+                return 1;
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempDbFile))
+                    {
+                        File.Delete(tempDbFile);
+                    }
+                }
+                catch
+                {
+                    // Ignora falha de exclusão de arquivo temporário
+                }
+            }
         }
     }
 }
