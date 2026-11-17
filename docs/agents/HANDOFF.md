@@ -14,7 +14,8 @@ Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `do
   1. **LIMITES-V4** — 130 limites do `tools/aircraft_limits/sources/aircraft_limits-v4.json` (fonte do usuário, não conferida) em 17 perfis; nenhum POH alterado.
   2. **LUZES-F2** — grupo Iluminação (6 lâmpadas halógenas, desgaste só acesa, queima por taxa, `minorPart`, `LightingMel` só avisa); sem atuação no sim.
   3. **HANGAR-ICONES** — Hangar não lista peças; após inspeção/walkaround, chips com exclamação amarela (vida ≥ 90 %, vencida ou saúde < 40 %) ou vermelha (quebrada) até o próximo voo. **Não visto na tela.**
-  4. **ECON-SIM** — `FlightCareer.Replay career` (bots × missões reais × custos do jogo → `summary.md`). Funciona (C152, 3 dias, 23 s), mas a rodada grande (8 aviões × 5 bots × 90 dias) **não terminou em ~1 h**: rodar por avião ou otimizar antes.
+  4. **Ícones dos grupos no Hangar** (Claude) — a barra de saúde virou ícone vetorial por grupo, verde/amarelo/vermelho pelas mesmas faixas; **não visto na tela** (confira no sábado).
+  5. **ECON-SIM** — `FlightCareer.Replay career` (bots × missões reais × custos do jogo → `summary.md`). Funciona (C152, 3 dias, 23 s), mas a rodada grande (8 aviões × 5 bots × 90 dias) **não terminou em ~1 h**: rodar por avião ou otimizar antes.
 - Lista de peças para o usuário: `docs/plans/lista-pecas-hangar.md` (ainda com os valores antigos; será regenerada pela CALIBRA-F4).
 
 ## Branches pendentes (no GitHub, **não mergeadas**)

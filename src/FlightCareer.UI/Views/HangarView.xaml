@@ -349,10 +349,24 @@
                                         <Border BorderBrush="{StaticResource HgBorder}" BorderThickness="0,1,0,0" Padding="0,10">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <StackPanel Grid.Column="0" Margin="0,0,14,0">
+
+                                                <!-- Ícone do grupo no tom da saúde (verde / amarelo / vermelho) -->
+                                                <Grid Grid.Column="0" Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Top"
+                                                      ToolTip="{Binding RangeText}">
+                                                    <Border Background="{Binding Brush}" Opacity="0.12" CornerRadius="10"/>
+                                                    <Border BorderBrush="{Binding Brush}" BorderThickness="1" Opacity="0.45" CornerRadius="10"/>
+                                                    <Viewbox Width="24" Height="24">
+                                                        <Path Data="{Binding IconGeometry}" Stroke="{Binding Brush}" StrokeThickness="1.6"
+                                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                              Width="24" Height="24" Stretch="None"/>
+                                                    </Viewbox>
+                                                </Grid>
+
+                                                <StackPanel Grid.Column="1" Margin="0,0,14,0">
                                                     <Grid>
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock Text="{Binding Name}" Foreground="{StaticResource HgText}" FontFamily="{StaticResource HgSans}" FontWeight="SemiBold" FontSize="13"/>
@@ -365,29 +379,7 @@
                                                         <TextBlock Text="{Binding RangeText}" HorizontalAlignment="Right" Foreground="{Binding Brush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="13"/>
                                                     </Grid>
 
-                                                    <!-- Barra com faixa oculta e marcas de 20% / 30% -->
-                                                    <Grid Height="9" Margin="0,6,0,5">
-                                                        <Border Background="{StaticResource HgBase}" CornerRadius="4.5"/>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="{Binding FillWidth}"/>
-                                                                <ColumnDefinition Width="{Binding BandWidth}"/>
-                                                                <ColumnDefinition Width="{Binding EmptyWidth}"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <Border Grid.Column="0" Background="{Binding Brush}" CornerRadius="4.5,0,0,4.5"/>
-                                                            <Border Grid.Column="1" Background="{Binding Brush}" Opacity="0.3"/>
-                                                        </Grid>
-                                                        <Grid IsHitTestVisible="False">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="20*"/>
-                                                                <ColumnDefinition Width="10*"/>
-                                                                <ColumnDefinition Width="70*"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <Border Grid.Column="1" BorderBrush="#99FF5252" BorderThickness="1,0,0,0"/>
-                                                            <Border Grid.Column="2" BorderBrush="#99FFB300" BorderThickness="1,0,0,0"/>
-                                                        </Grid>
-                                                    </Grid>
-
+                                                    <Border Height="4"/>
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="{Binding LifeText}" Foreground="{Binding LifeBrush}" FontSize="11.5"/>
                                                         <TextBlock Text="  ·  " Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
@@ -415,7 +407,7 @@
                                                     </ItemsControl>
                                                 </StackPanel>
 
-                                                <Button Grid.Column="1" Style="{StaticResource HgSecondary}" VerticalAlignment="Center" MinWidth="140"
+                                                <Button Grid.Column="2" Style="{StaticResource HgSecondary}" VerticalAlignment="Center" MinWidth="140"
                                                         Content="{Binding RepairButtonText}" IsEnabled="{Binding CanRepair}"
                                                         Command="{Binding RepairCommand}" CommandParameter="{Binding}"
                                                         ToolTip="{Binding ServiceName}"/>
