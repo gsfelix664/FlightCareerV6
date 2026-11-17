@@ -3043,6 +3043,48 @@
       "unit": "percent over 100",
       "group": "native-wear-spike",
       "perEngine": false
+    },
+    {
+      "key": "light-landing-on",
+      "simVar": "LIGHT LANDING ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-taxi-on",
+      "simVar": "LIGHT TAXI ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-nav-on",
+      "simVar": "LIGHT NAV ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-strobe-on",
+      "simVar": "LIGHT STROBE ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-beacon-on",
+      "simVar": "LIGHT BEACON ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-panel-on",
+      "simVar": "LIGHT PANEL ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
     }
   ]
 }

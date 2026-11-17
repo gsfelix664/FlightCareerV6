@@ -97,6 +97,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 foreach (var part in result.Parts)
                 {
                     if (part.IsBroken) continue;
+                    if (part.PartId.StartsWith("lights.", StringComparison.OrdinalIgnoreCase)) continue;
 
                     double diff = Math.Abs(part.HoursSinceReplacement - result.TotalSimHours);
                     double allowedTolerance = Math.Max(0.003, result.TotalSimHours * 0.01);

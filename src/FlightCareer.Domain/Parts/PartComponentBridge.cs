@@ -55,7 +55,8 @@ namespace FlightCareer.Domain.Parts
                     [PartGroup.Cabine] = nameof(ComponentKind.Airframe),
                     [PartGroup.Oxigenio] = nameof(ComponentKind.Airframe),
                     [PartGroup.Fogo] = nameof(ComponentKind.Airframe),
-                    [PartGroup.Emergencia] = nameof(ComponentKind.Airframe)
+                    [PartGroup.Emergencia] = nameof(ComponentKind.Airframe),
+                    [PartGroup.Iluminacao] = nameof(ComponentKind.Electrical)
                 },
                 Aggregation = new PartAggregationSettings
                 {
@@ -83,13 +84,24 @@ namespace FlightCareer.Domain.Parts
 
         /// <summary>
         /// Calcula a saúde agregada (mínimo ponderado) de uma coleção de peças pertencentes a um componente.
+        /// Peças marcadas como MinorPart entram apenas na média e não participam do cálculo do mínimo.
         /// </summary>
-        public static double AggregateHealth(IReadOnlyList<AircraftPart> parts, PartAggregationSettings? settings = null)
+        public static double AggregateHealth(
+            IReadOnlyList<AircraftPart> parts,
+            PartCatalog? catalog,
+            PartAggregationSettings? settings = null)
         {
             if (parts == null || parts.Count == 0) return 100.0;
             settings ??= new PartAggregationSettings();
 
-            double min = parts.Min(p => p.Health);
+            var nonMinorParts = catalog != null
+                ? parts.Where(p => catalog.Get(p.PartId)?.MinorPart != true).ToList()
+                : parts;
+
+            double min = nonMinorParts.Count > 0
+                ? nonMinorParts.Min(p => p.Health)
+                : parts.Min(p => p.Health);
+
             double avg = parts.Average(p => p.Health);
 
             double totalWeight = settings.MinWeight + settings.AverageWeight;
@@ -98,6 +110,15 @@ namespace FlightCareer.Domain.Parts
             double weighted = ((min * settings.MinWeight) + (avg * settings.AverageWeight)) / totalWeight;
             return Math.Clamp(Math.Round(weighted, 2), 0.0, 100.0);
         }
+
+        public static double AggregateHealth(IReadOnlyList<AircraftPart> parts, PartAggregationSettings? settings = null)
+            => AggregateHealth(parts, null, settings);
+
+        public static double AggregateHealth(
+            IReadOnlyList<AircraftPart> parts,
+            PartAggregationSettings? settings,
+            PartCatalog? catalog)
+            => AggregateHealth(parts, catalog, settings);
 
         /// <summary>
         /// Atualiza as barras de componente (AircraftComponent) e as colunas legadas de PilotAircraft
@@ -145,7 +166,7 @@ namespace FlightCareer.Domain.Parts
             {
                 if (partsByKind.TryGetValue(comp.Kind, out var matchingParts) && matchingParts.Count > 0)
                 {
-                    double newHealth = AggregateHealth(matchingParts, mapping.Aggregation);
+                    double newHealth = AggregateHealth(matchingParts, partCatalog, mapping.Aggregation);
                     if (Math.Abs(comp.Health - newHealth) > 0.001)
                     {
                         comp.Health = newHealth;
@@ -204,7 +225,7 @@ namespace FlightCareer.Domain.Parts
                 if (!partsByKind.TryGetValue(comp.Kind, out var groupParts) || groupParts.Count == 0)
                     continue;
 
-                double aggregate = AggregateHealth(groupParts, mapping.Aggregation);
+                double aggregate = AggregateHealth(groupParts, partCatalog, mapping.Aggregation);
 
                 if (comp.Health > aggregate + 0.5)
                 {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Sensors;
@@ -57,21 +58,24 @@ namespace FlightCareer.Domain.Parts
     {
         private readonly PartCatalog _partCatalog;
         private readonly WearRuleCatalog _wearRuleCatalog;
+        private readonly IRandomSource _random;
         private readonly Dictionary<string, double> _exceedanceDurations = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, double> _exceedancePeaks = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _triggeredInspections = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<int, bool> _engineWasCombustion = new();
         private readonly Dictionary<int, double> _engineCombustionTimeSeconds = new();
+        private readonly Dictionary<string, bool> _previousSensorActive = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Ponto de teste para testes de mutação / fuzz: desativa a resolução de sensores com sufixo :n (ex.: chave:1).
         /// </summary>
         public bool DisablePerEngineSensorResolution { get; set; }
 
-        public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog)
+        public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog, IRandomSource? random = null)
         {
             _partCatalog = partCatalog ?? throw new ArgumentNullException(nameof(partCatalog));
             _wearRuleCatalog = wearRuleCatalog ?? throw new ArgumentNullException(nameof(wearRuleCatalog));
+            _random = random ?? new FlightCareer.Domain.Components.SystemRandomSource();
         }
 
         public void ResetExceedanceTracking()
@@ -81,6 +85,7 @@ namespace FlightCareer.Domain.Parts
             _triggeredInspections.Clear();
             _engineWasCombustion.Clear();
             _engineCombustionTimeSeconds.Clear();
+            _previousSensorActive.Clear();
         }
 
         /// <summary>
@@ -466,13 +471,59 @@ namespace FlightCareer.Domain.Parts
                 }
             }
 
-            // 2. Aplica o desgaste nas peças individuais (normal + estresse)
+            // 2. Aplica o desgaste nas peças individuais (normal + estresse + uso)
             foreach (var part in parts)
             {
                 if (part.IsBroken) continue;
 
                 var def = _partCatalog.Get(part.PartId);
                 if (def == null) continue;
+
+                // Peças condicionadas a sensor de uso (ex.: lâmpadas com usageSensor)
+                if (!string.IsNullOrWhiteSpace(def.UsageSensor))
+                {
+                    bool hasSensor = frame.Values.TryGetValue(def.UsageSensor, out double sensorVal);
+                    bool isUsageActive = hasSensor && sensorVal >= 0.5;
+
+                    if (hasSensor)
+                    {
+                        var cycleKey = $"{part.PartId}:{part.EngineIndex}";
+                        if (_previousSensorActive.TryGetValue(cycleKey, out bool wasActive))
+                        {
+                            if (!wasActive && isUsageActive && def.DamagePerOnCyclePct > 0)
+                            {
+                                part.Health = Math.Clamp(part.Health - def.DamagePerOnCyclePct, 0.0, 100.0);
+                            }
+                        }
+                        _previousSensorActive[cycleKey] = isUsageActive;
+                    }
+
+                    if (!isUsageActive)
+                    {
+                        // Sensor ausente ou desligado: sem desgaste natural, sem horas acesas, sem sorteio
+                        continue;
+                    }
+
+                    // Luz acesa: desgasta por horas de uso
+                    double lightRatePerHour = def.LifeHours > 0 ? (70.0 / def.LifeHours) : 0.0;
+                    part.HoursSinceReplacement += dtSimHours;
+
+                    double lightLossPct = lightRatePerHour * dtSimHours;
+                    part.Health = Math.Clamp(part.Health - lightLossPct, 0.0, 100.0);
+
+                    // Pane por taxa horária enquanto acesa
+                    if (def.FailsByUsageRate)
+                    {
+                        if (UsageFailureModel.Roll(part.Health, dtSimHours, _random))
+                        {
+                            part.IsBroken = true;
+                            part.Health = 0.0;
+                            diagnostics.Add($"Lâmpada queimada: {def.Name}");
+                        }
+                    }
+
+                    continue;
+                }
 
                 // Desgaste natural normal (100 -> ~30% ao longo de LifeHours)
                 // Taxa horária normal = 70.0 / LifeHours

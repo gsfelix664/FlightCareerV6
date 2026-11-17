@@ -2319,3 +2319,29 @@
   - `dotnet run --project src/FlightCareer.Replay -- fuzz --aircraft all --runs 20`: 920 voos procedurais em 46 aeronaves aprovados (100%), 0 limites ausentes, 0 falhas.
   - `python -m unittest discover -s tools/tests`: 48/48 aprovados.
 
+## 2026-11-17 - Iluminação como peças (Gemini)
+- **Grupo de Peças Iluminação e Mapeamento (`PartGroup.Iluminacao`)**:
+  - Adicionado o 23º grupo de peças `PartGroup.Iluminacao = "Iluminação"`, mapeado para o componente `Electrical` em `part_component_mapping.json` e no fallback de `PartComponentBridge.CreateDefault()`.
+  - 6 peças de lâmpadas halógenas adicionadas em `parts_catalog.json`: `lights.landing` (300 h, $60), `lights.taxi` (300 h, $60), `lights.nav` (1.000 h, $40), `lights.strobe` (1.000 h, $250), `lights.beacon` (1.000 h, $120), `lights.panel` (2.000 h, $50), com `appliesTo: { "none": ["noElectrical"] }`, `visibleOnWalkaround: true`, `minorPart: true`, `failsByUsageRate: true`.
+- **Desgaste por Uso e Ciclos de Liga (`Domain/Parts/PartWearEngine.cs`)**:
+  - `PartDefinition` e loader de catálogo estendidos com `usageSensor`, `damagePerOnCyclePct`, `failsByUsageRate` e `minorPart`, com validação de obrigatoriedade de `usageSensor` e existência no registro de sensores.
+  - O desgaste natural de peças com `usageSensor` corre exclusivamente quando o sensor no frame está ativo (`>= 0,5`), acumulando horas acesas em tempo simulado (`dtSimHours`). Sensor ausente ou desligado não aplica desgaste nem lança exceção.
+  - Detecção de ciclo de acendimento (transição 0 → 1) aplicando `damagePerOnCyclePct`, ignorando a primeira leitura do voo.
+- **Probabilidade de Pane por Taxa de Uso (`Domain/Parts/UsageFailureModel.cs`)**:
+  - Curva de taxa horária $\lambda(h)$ reaproveitando `FailureEngine.HazardPerHour` ($\lambda = 0$ para saúde $\ge 20\%$; crescimento exponencial suave até 2,0 falhas/h em 0%).
+  - Sorteio determinístico $p = 1 - e^{-\lambda \cdot dt}$ via `IRandomSource` enquanto a luz está acesa. Saúde $\le 0\%$ enquanto acesa causa queima certa (`IsBroken = true`, `Health = 0`).
+  - Emissão de diagnóstico único por voo para o blackbox (`"Lâmpada queimada: <nome>"`). Peça queimada não desgasta mais nem sorteia novas falhas.
+- **Isolamento de Barra e Danos (`minorPart`)**:
+  - Peças com `minorPart = true` entram apenas na média da agregação de saúde da barra do componente em `PartComponentBridge.AggregateHealth`, sem afetar o mínimo.
+  - `PartFlightTracker.DamageGroup` poupa peças `minorPart` de danos originados do componente Elétrico. `ClampGroup` continua atuando normalmente.
+- **Avisos da MEL Noturna (`Domain/Parts/LightingMel.cs`)**:
+  - Avaliação de lâmpadas queimadas do grupo Iluminação: `lights.nav`, `lights.strobe` e `lights.panel` classificadas como `NoGoNight`; `lights.beacon` classificada como `NoGoNight` se a strobe estiver quebrada/ausente, ou `DayOnly` se a strobe estiver operacional; `lights.landing` e `lights.taxi` classificadas como `DayOnly`.
+- **Sensores e Fuzz Testing**:
+  - Adicionados 6 sensores elétricos (`light-landing-on`, `light-taxi-on`, `light-nav-on`, `light-strobe-on`, `light-beacon-on`, `light-panel-on`) ao final de `sensor_registry.json` e sincronizados na seção Elétrico de `docs/plans/sensor-inventory.md`.
+  - `SyntheticFlightGenerator` preenche os estados realistas das luzes ao longo das fases de voo (táxi, decolagem, cruzeiro, aproximação e corte).
+  - `SyntheticFlightOracle` atualizado para verificar horas acesas para peças `lights.*`.
+- **Testes e Aceitação**:
+  - 17 novos testes em `src/FlightCareer.Tests/Parts/LightingPartsTests.cs`.
+  - Build 0 erros, `dotnet test` 594/594 aprovados (577 baseline + 17 novos).
+  - Fuzz testing com 920 voos (46 aeronaves × 20 corridas) 100% aprovados, 0 falhas.
+  - Sem atuação no simulador (MSFS); não testado no MSFS.

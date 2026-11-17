@@ -38,12 +38,13 @@ namespace FlightCareer.Domain.Parts
         public PartFlightTracker(
             PartCatalog partsCatalog,
             WearRuleCatalog wearRuleCatalog,
-            AircraftLimitResolver resolver)
+            AircraftLimitResolver resolver,
+            IRandomSource? random = null)
         {
             _partsCatalog = partsCatalog ?? throw new ArgumentNullException(nameof(partsCatalog));
             _wearRuleCatalog = wearRuleCatalog ?? throw new ArgumentNullException(nameof(wearRuleCatalog));
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _wearEngine = new PartWearEngine(_partsCatalog, _wearRuleCatalog);
+            _wearEngine = new PartWearEngine(_partsCatalog, _wearRuleCatalog, random);
         }
 
         public bool IsActive => _parts.Count > 0;
@@ -390,6 +391,8 @@ namespace FlightCareer.Domain.Parts
             foreach (var part in GetPartsByComponentKind(kind))
             {
                 if (part.IsBroken) continue;
+                var def = _partsCatalog.Get(part.PartId);
+                if (def != null && def.MinorPart) continue;
                 part.Health = Math.Clamp(part.Health - amount, 0.0, 100.0);
             }
         }

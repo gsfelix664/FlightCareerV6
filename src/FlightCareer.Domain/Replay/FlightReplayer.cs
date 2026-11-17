@@ -91,6 +91,9 @@ namespace FlightCareer.Domain.Replay
         /// </summary>
         public bool DisablePerEngineSensorResolution { get; set; }
 
+        /// <summary>Semente do sorteio das peças (queima por uso) para replays determinísticos.</summary>
+        public int RandomSeed { get; set; }
+
         public FlightReplayer(
             PartCatalog partsCatalog,
             WearRuleCatalog wearRuleCatalog,
@@ -178,7 +181,8 @@ namespace FlightCareer.Domain.Replay
 
             var initialHealthMap = parts.ToDictionary(p => (p.PartId, p.EngineIndex), p => p.Health);
 
-            var tracker = new PartFlightTracker(_partsCatalog, _wearRuleCatalog, _resolver)
+            // Semente fixa: sorteios por peça (ex.: queima de lâmpada) precisam ser reproduzíveis no replay e no fuzz.
+            var tracker = new PartFlightTracker(_partsCatalog, _wearRuleCatalog, _resolver, new FlightCareer.Domain.Components.SystemRandomSource(RandomSeed))
             {
                 DisablePerEngineSensorResolution = DisablePerEngineSensorResolution
             };

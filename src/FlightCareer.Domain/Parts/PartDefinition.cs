@@ -26,6 +26,10 @@ namespace FlightCareer.Domain.Parts
         public IReadOnlyList<double>? DowntimeHours { get; init; }
         public string? FailureEffect { get; init; }
         public int? CalendarLifeMonths { get; init; }
+        public string? UsageSensor { get; init; }
+        public double DamagePerOnCyclePct { get; init; }
+        public bool FailsByUsageRate { get; init; }
+        public bool MinorPart { get; init; }
 
         public PartDefinition() { }
 
@@ -47,7 +51,11 @@ namespace FlightCareer.Domain.Parts
             IReadOnlyList<double>? repairCostPctOfAircraft = null,
             IReadOnlyList<double>? downtimeHours = null,
             string? failureEffect = null,
-            int? calendarLifeMonths = null)
+            int? calendarLifeMonths = null,
+            string? usageSensor = null,
+            double damagePerOnCyclePct = 0.0,
+            bool failsByUsageRate = false,
+            bool minorPart = false)
         {
             Id = id;
             Name = name;
@@ -67,6 +75,10 @@ namespace FlightCareer.Domain.Parts
             DowntimeHours = downtimeHours;
             FailureEffect = failureEffect;
             CalendarLifeMonths = calendarLifeMonths;
+            UsageSensor = usageSensor;
+            DamagePerOnCyclePct = damagePerOnCyclePct;
+            FailsByUsageRate = failsByUsageRate;
+            MinorPart = minorPart;
         }
     }
 }
