@@ -1,6 +1,6 @@
 # LIMITES-V4 — Preencher limites faltantes do catálogo com aircraft_limits-v4.json
 
-**Branch:** feat/limites-v4 · **Commit:** 98bcad7 · **Data:** 2026-11-17
+**Branch:** feat/limites-v4 · **Commit:** ea7c622 · **Data:** 2026-11-17
 
 ## Plano (antes de codar)
 1. Inspecionar as 30 aeronaves de `aircraft_limits-v4.json` e mapear cada uma para os 46 `aircraftId` do catálogo em `src/FlightCareer.Infrastructure/Data/aircraft/`.
