@@ -2345,3 +2345,27 @@
   - Build 0 erros, `dotnet test` 594/594 aprovados (577 baseline + 17 novos).
   - Fuzz testing com 920 voos (46 aeronaves × 20 corridas) 100% aprovados, 0 falhas.
   - Sem atuação no simulador (MSFS); não testado no MSFS.
+
+## 2026-11-17 - Exclamação das peças no Hangar após inspeção (Gemini)
+- **Sinalização de Peças no Hangar (HANGAR-ICONES)**:
+  - Adicionado `Broken = 2` ao enum `PartFlag` e a propriedade `double? FlaggedAirframeHours` em `AircraftPart`, com migração de coluna no SQLite em `AppDbContext.EnsureSchemaUpdatedAsync`.
+  - Criada a classe `Domain/Parts/PartInspectionFlags.cs` contendo a lógica pura de avaliação de peças (`Evaluate`), inspeção com escopo (`ApplyInspection`), limpeza pós-reparo (`ClearForKinds`) e visibilidade transitória até o próximo voo (`IsVisible`).
+  - Regras de marcação:
+    - Vermelha (`PartFlag.Broken`): peça com `IsBroken = true` ("Quebrada").
+    - Amarela (`PartFlag.Suspect`): horas acumuladas $\ge 90\%$ de `LifeHours` ("Vida: X / Y h" ou "Vida vencida: X / Y h"); ciclos $\ge 90\%$ de `LifeCycles`; meses $\ge 90\%$ de `CalendarLifeMonths`; ou saúde $< 40\%$ ("Desgaste avançado"). Peças normais e sem aviso recebem `PartFlag.None`.
+  - **Interface do Hangar (`ComponentRowViewModel`, `PilotAircraftWrapper`, `HangarView.xaml`)**:
+    - Cada card de componente exibe chips horizontais (`WrapPanel`) com ícone de exclamação e nome da peça (+ `(motor n)` se `perEngine` em aeronave multimotor) em cores correspondentes (amarelo `#FFB300` e vermelho `#FF5252`), com `ToolTip` contendo o motivo exato. Lista vazia não ocupa espaço visual.
+    - O Hangar carrega as peças do avião selecionado em contexto de curta duração e filtra apenas peças visíveis (`IsVisible`), garantindo que o alerta permaneça até a realização do próximo voo (quando a aeronave acumula horas).
+  - **Inspeções e Serviços no Hangar (`HangarViewModel`)**:
+    - Inspeção de 50 h: avalia peças dos componentes Motor e Óleo.
+    - Inspeção de 100 h: avalia todas as peças da aeronave.
+    - Revisão de 500 h: avalia peças do componente Ignição.
+    - Walkaround: avalia peças marcadas com `VisibleOnWalkaround`.
+    - Mensagens de sucesso das inspeções ganham o sufixo `" — N peça(s) com atenção"` quando $N > 0$.
+    - Reparo de componente e Overhaul limpam as sinalizações das peças dos componentes reparados (`ClearForKinds`).
+- **Testes e Aceitação**:
+  - 12 novos testes unitários em `src/FlightCareer.Tests/Parts/PartInspectionFlagsTests.cs`.
+  - 1 novo teste de migração e persistência em `src/FlightCareer.Tests/Components/ComponentPersistenceTests.cs` (`Banco_antigo_sem_FlaggedAirframeHours_recebe_coluna_e_grava_peca`).
+  - Build 0 erros, `dotnet test` 607/607 aprovados (594 baseline + 13 novos).
+  - Fuzz testing com 230 voos (46 aeronaves × 5 corridas) 100% aprovados, 0 falhas.
+  - Não testado visualmente na UI WPF em execução (verificação estática e por testes unitários/integração).

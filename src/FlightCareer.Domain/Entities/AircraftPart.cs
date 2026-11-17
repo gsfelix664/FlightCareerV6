@@ -8,7 +8,8 @@ namespace FlightCareer.Domain.Entities
     public enum PartFlag
     {
         None = 0,
-        Suspect = 1
+        Suspect = 1,
+        Broken = 2
     }
 
     /// <summary>
@@ -75,5 +76,8 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Ciclos totais da aeronave no momento do último serviço de oficina nesta peça.</summary>
         public int? LastShopServiceCycles { get; set; }
+
+        /// <summary>Horas totais de célula da aeronave no momento da marcação (inspeção ou walkaround).</summary>
+        public double? FlaggedAirframeHours { get; set; }
     }
 }

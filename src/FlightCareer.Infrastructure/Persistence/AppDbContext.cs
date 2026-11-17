@@ -268,6 +268,7 @@ namespace FlightCareer.Infrastructure.Persistence
                     LastShopServiceAtUtc TEXT NULL,
                     LastShopServiceAirframeHours REAL NULL,
                     LastShopServiceCycles INTEGER NULL,
+                    FlaggedAirframeHours REAL NULL,
                     CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
                 );",
                 "DROP INDEX IF EXISTS IX_AircraftParts_PilotAircraftId_PartId;",
@@ -280,7 +281,8 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAirframeCycles INTEGER NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
-                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;"
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;"
             };
 
             foreach (var stmt in migrationStatements)
