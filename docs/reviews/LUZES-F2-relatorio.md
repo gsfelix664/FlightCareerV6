@@ -1,6 +1,6 @@
 # LUZES-F2 — Iluminação como peças (domínio + catálogos)
 
-**Branch:** feat/luzes-pecas · **Commit:** pendente · **Data:** 2026-11-17
+**Branch:** feat/luzes-pecas · **Commit:** 517953f · **Data:** 2026-11-17
 
 ## Plano (antes de codar)
 - Adicionar grupo `Iluminação` em `PartGroup.cs` e mapear para `Electrical` em `part_component_mapping.json`.
