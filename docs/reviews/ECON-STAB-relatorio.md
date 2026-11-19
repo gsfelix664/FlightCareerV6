@@ -103,3 +103,60 @@ dotnet run --project src/FlightCareer.Replay -- career-stab --days 60 --bots 2 -
 - **Subida de categoria:** Adotamos transição de categoria por horas de voo simuladas (Cat 1: 0h, Cat 2: 20h, Cat 3: 100h, Cat 4: 250h, Cat 5: 500h). O custo de cada licença/checkride foi estimado e deduzido no saldo do piloto no momento da transição. Se houver valores fixos específicos no POH ou regras de carreira para as licenças, podem ser calibrados no catálogo.
 - **Cache de missões:** Implementamos um cache por chave `(ICAO, Dia)` na geração em memória de missões para evitar gerar centenas de milhares de rotas redundantes quando vários bots visitam o mesmo aeródromo na mesma data.
 - **Bateria completa:** Conforme instruído no spec, a bateria completa (720 dias × 3 dificuldades × 3 políticas × 5 bots) fica sob encargo do revisor; a amostra de 60 dias está consolidada e pronta.
+
+## Correções da Revisão (Claude, 2026-11-19)
+
+### 1. Desgaste e falhas de peças físicas no modo `--fast`
+- **Provisionamento por catálogo:** Aeronaves inicial e adquiridas provisionam peças com `_partCatalog.PartsFor(features)`, instanciando peças por motor quando `perEngine` (`ResolveAircraftConfiguration`).
+- **Desgaste contínuo por voo:** Desgaste natural calculado a `(70 / lifeHours) × horas × 1.15` acumulando `HoursSinceReplacement` e `CyclesSinceReplacement`. Lâmpadas com `usageSensor` respeitam a fração acesa (nav/strobe/beacon 100 %, landing/taxi 15 %, painel 0 %).
+- **Ponte e danos:** Barras legadas de componentes atualizadas via `PartComponentBridge.AggregateHealth` **antes** de `FailureEngine.Evaluate`. Danos de falhas do motor de panes roteados diretamente para as peças instaladas do grupo (`ApplyFailureDamage`, poupando `minorPart`).
+- **Interdições e panes:** Peças com `def.BlocksFlightWhenBroken` que quebram ou panes com interdição NO-GO colocam a aeronave em parada e exigem substituição de peças.
+
+### 2. Manutenção pelas regras do Hangar (`PartReplacementPlanner`)
+- **Políticas cauteloso e equilibrado:**
+  - Inspeção anual (25 h / 100 h): executam o plano completo (`PartReplacementPlanner.Plan(parts, ...)`) para todos os grupos, substituindo qualquer peça gasta (< 80 %) a preço cheio + mão de obra, somando o downtime à parada da aeronave e restaurando as peças a 100 % (`PartReplacementPlanner.Apply`).
+  - Troca de óleo (12 h / 50 h): trocam óleo e filtro a preço cheio + mão de obra das peças aplicáveis (`oil.lubricant`, `oil.filter`), além da taxa regulatória do serviço.
+  - Overhaul (TBO): substituição completa das peças de motor, óleo, ignição e seção quente.
+- **Política agressiva:**
+  - Adia manutenções preventivas; só troca peças estritamente quebradas ou NO-GO quando a aeronave fica parada.
+  - Regra de falência: se houver peça NO-GO quebrada com saldo negativo e o bot não conseguir cobrir o plano de troca de peças, a falência é decretada imediatamente.
+
+### 3. Métricas de peças trocadas e custos nos relatórios
+- Adicionadas métricas de troca de peças nos relatórios `stability.md` e `stability.csv`:
+  - `Peças/h ($)` e `custo_pecas_hora`: custo por hora decorrente da substituição física de peças.
+  - `Peças/100h` e `pecas_trocadas_100h`: contagem de peças trocadas normalizada por 100 h voadas.
+  - Tabela dedicada de detalhamento de custos operacionais por hora (Combustível, Taxas, Troca de Peças, Manutenção Geral e Seguro).
+
+### 4. Amostra Medida após Correções (`--days 60 --bots 2 --difficulty medium --policy all --fast`)
+
+Comando executado:
+```bash
+dotnet run --project src/FlightCareer.Replay -- career-stab --days 60 --bots 2 --difficulty medium --policy all --fast
+```
+
+**Tempo decorrido:** 4.8 s (seeding e simulação de 60 dias para 3 políticas × 2 bots).
+
+#### Indicadores Consolidados (Dia 30 e Dia 60)
+| Dificuldade | Política | Falidos (%) | Dia Falência | Saldo Mediano ($) | Patrimônio Mediano ($) | Classe | Cat. | Rec/h ($) | Custo/h ($) | Peças/h ($) | Margem (%) | Manut/100h | Peças/100h | Panes/100h | Parado (dias) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Medium (D30) | agressivo | 0% | - | $111,321 | $158,121 | A | 1 | $968 | $266 | $0 | 72.5% | 0.0 | 0.0 | 0.0 | 0.0 |
+| Medium (D30) | cauteloso | 0% | - | $108,759 | $155,559 | A | 1 | $968 | $425 | $146 | 56.1% | 6.2 | 24.8 | 0.0 | 0.0 |
+| Medium (D30) | equilibrado | 0% | - | $108,759 | $155,559 | A | 1 | $968 | $425 | $146 | 56.1% | 6.2 | 24.8 | 0.0 | 0.0 |
+| Medium (D60) | agressivo | 0% | - | $110,721 | $157,521 | A | 1 | $968 | $304 | $0 | 68.7% | 0.0 | 0.0 | 0.0 | 0.0 |
+| Medium (D60) | cauteloso | 0% | - | $108,159 | $154,959 | A | 1 | $968 | $462 | $146 | 52.2% | 6.2 | 24.8 | 0.0 | 0.0 |
+| Medium (D60) | equilibrado | 0% | - | $108,159 | $154,959 | A | 1 | $968 | $462 | $146 | 52.2% | 6.2 | 24.8 | 0.0 | 0.0 |
+
+#### Detalhamento de Custos Operacionais por Hora (Dia 30 e Dia 60)
+| Dificuldade | Política | Combustível/h ($) | Taxas/h ($) | Troca Peças/h ($) | Manutenção Geral/h ($) | Seguro/h ($) | Custo Total/h ($) |
+|---|---|---|---|---|---|---|---|
+| Medium (D30) | agressivo | $39.93 | $189.18 | $0.00 | $0.00 | $37.20 | $266.31 |
+| Medium (D30) | cauteloso | $39.93 | $189.18 | $145.68 | $158.86 | $37.20 | $425.17 |
+| Medium (D30) | equilibrado | $39.93 | $189.18 | $145.68 | $158.86 | $37.20 | $425.17 |
+| Medium (D60) | agressivo | $39.93 | $189.18 | $0.00 | $0.00 | $74.39 | $303.51 |
+| Medium (D60) | cauteloso | $39.93 | $189.18 | $145.68 | $158.86 | $74.39 | $462.36 |
+| Medium (D60) | equilibrado | $39.93 | $189.18 | $145.68 | $158.86 | $74.39 | $462.36 |
+
+### 5. Verificação e Testes
+- `dotnet build src/FlightCareer.slnx`: 0 erros, 0 avisos novos.
+- `dotnet test src/FlightCareer.Tests`: 645 aprovados, 0 falhas (novo teste `Progression_DesgasteETrocaDePecas_MedidosComSucesso` aprovado).
+- `fuzz --aircraft all --runs 5`: 230/230 voos aprovados em 46 aeronaves (100%), 0 falhas.

@@ -188,6 +188,40 @@ namespace FlightCareer.Tests.Economy
             Assert.False(m5.RequiredCategory <= pilotCat);
         }
 
+        [Fact]
+        public async Task Progression_DesgasteETrocaDePecas_MedidosComSucesso()
+        {
+            var (options, tempDb) = await CreateTestEnvironmentAsync();
+            try
+            {
+                var simOptions = new CareerProgressionOptions
+                {
+                    Days = 30,
+                    BotsPerGroup = 1,
+                    Difficulty = "medium",
+                    Policy = "equilibrado",
+                    Seed = 123,
+                    FastMode = true,
+                    OutputDirectory = Path.Combine(Path.GetTempPath(), $"stab_test_parts_{Guid.NewGuid():N}")
+                };
+
+                var simulator = new CareerProgressionSimulator(() => new AppDbContext(options));
+                var result = await simulator.RunAsync(simOptions);
+
+                Assert.NotEmpty(result.Snapshots);
+                var snap = result.Snapshots.Last();
+                Assert.True(snap.TotalHours > 10.0, "Bot deve voar mais de 10h em 30 dias.");
+                Assert.True(snap.MaintCostPerHour > 0, "Deve haver custos de manutenção com troca de peças/inspeções.");
+                Assert.True(snap.PartsReplacedPer100h > 0 || snap.MaintPer100h > 0, "Deve haver eventos de manutenção ou peças trocadas.");
+
+                if (Directory.Exists(simOptions.OutputDirectory)) Directory.Delete(simOptions.OutputDirectory, true);
+            }
+            finally
+            {
+                CleanupDb(tempDb);
+            }
+        }
+
         private static async Task<(DbContextOptions<AppDbContext> Options, string TempDb)> CreateTestEnvironmentAsync()
         {
             string tempDb = Path.Combine(Path.GetTempPath(), $"career_stab_test_{Guid.NewGuid():N}.db");

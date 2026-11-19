@@ -2486,3 +2486,19 @@
   - `dotnet test src/FlightCareer.Tests`: 639/639 aprovados (100 %).
   - Fuzz testing CLI (`fuzz --aircraft all --runs 5`): 230 voos em 46 modelos aprovados com 100 % e 0 falhas.
   - Não testado na tela do app nem no MSFS.
+
+## 2026-11-19 - ECON-STAB: Desgaste e manutenção de peças na progressão de carreira (Gemini)
+- **Desgaste e Vida de Peças em Carreira (`CareerProgressionSimulator.cs`)**:
+  - Peças instaladas por bot provisionadas pelo catálogo com suporte a `perEngine` e features técnicas do modelo.
+  - A cada voo no modo `--fast`: desgaste natural a `(70 / lifeHours) × horas × 1.15`, acúmulo de horas e ciclos; lâmpadas halógenas condicionadas ao `usageSensor` (nav/strobe/beacon 100%, pouso/táxi 15%, painel 0%).
+  - Barra dos componentes sincronizada com o agregado das peças (`PartComponentBridge.AggregateHealth`) antes do `FailureEngine.Evaluate`.
+  - Danos de panes roteados para as peças físicas do grupo do modo de falha (`DamageGroup`).
+  - Interdição NO-GO por panes ou quebra de peças que bloqueiam voo (`BlocksFlightWhenBroken`), resolvida via substituição de peças.
+- **Manutenção pelas Regras do Hangar (`PartReplacementPlanner`)**:
+  - `cauteloso` e `equilibrado`: plano completo (`PartReplacementPlanner.Plan`) na inspeção anual (25 h / 100 h), substituindo peças < 80% ou com alertas a preço cheio; troca de óleo e filtro a cada 12 h / 50 h pagando peças e taxa de serviço.
+  - `agressivo`: adia manutenções preventivas; ao ficar parado, substitui apenas peças estritamente quebradas ou NO-GO; falência imediata se houver peça NO-GO quebrada com saldo negativo e sem fundos para troca.
+- **Relatórios Consolidados (`stability.md` e `stability.csv`)**:
+  - Adicionadas métricas de custo de troca de peças por hora (`Peças/h ($)` e `custo_pecas_hora`), peças trocadas por 100 h (`Peças/100h` e `pecas_trocadas_100h`) e tabela de detalhamento dos custos operacionais por hora (combustível, taxas, troca de peças, manutenção geral, seguro).
+- **Testes**:
+  - Novo teste `Progression_DesgasteETrocaDePecas_MedidosComSucesso` em `CareerProgressionTests.cs`.
+  - Build 0 erros, `dotnet test` 645/645 aprovados, `fuzz --aircraft all --runs 5` (230 voos em 46 modelos) 100% aprovados.
