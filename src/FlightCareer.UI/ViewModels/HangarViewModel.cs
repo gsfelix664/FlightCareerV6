@@ -645,7 +645,7 @@ namespace FlightCareer.UI.ViewModels
                 (aircraft, _) =>
                 {
                     var clock = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
-                    aircraft.InsuranceExpirationDate = InsuranceService.CalculateNewExpirationDate(aircraft.InsuranceExpirationDate, clock);
+                    aircraft.InsuranceExpirationDate = FlightCareer.Application.Services.InsuranceService.CalculateNewExpirationDate(aircraft.InsuranceExpirationDate, clock);
                 },
                 category: "Seguro",
                 successMessage: "Seguro contratado por 30 dias de carreira.");
