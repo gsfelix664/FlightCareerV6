@@ -1,6 +1,6 @@
 # CALIBRA-F4b — Calibração do usuário em todas as peças, multiplicador de preço por classe, TBO e textos
 
-**Branch:** feat/calibra-f4 · **Commit:** pendente · **Data:** 2026-11-19
+**Branch:** feat/calibra-f4 · **Commit:** 3436d34 · **Data:** 2026-11-19
 
 ## Plano (antes de codar)
 - Mover a lógica de resolução de classes de aeronaves (A–J) para `Domain/Economy/AircraftEconomyClass.cs` com método `Resolve` e multiplicadores por classe (`GetPartPriceMultiplier`).
