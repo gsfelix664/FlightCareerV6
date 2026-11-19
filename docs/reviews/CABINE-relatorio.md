@@ -1,6 +1,6 @@
 # CABINE — Conversão passageiro ↔ carga com efeito real
 
-**Branch:** feat/cabine · **Commit:** 2bf2dd2 · **Data:** 2026-11-19
+**Branch:** feat/cabine · **Commit:** b4830cd · **Data:** 2026-11-19
 
 ## Plano (antes de codar)
 1. **Feature `convertibleCabin` no vocabulário fechado**:
