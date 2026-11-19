@@ -1,4 +1,15 @@
-# Passagem de sessão (Claude) — 2026-11-17 (manhã, PC do escritório)
+# Passagem de sessão (Claude) — 2026-11-19 (PC do escritório)
+
+## Atualização 2026-11-19 (vale sobre o que está abaixo)
+- Base `feat/component-health-system` no GitHub; build 0 erros; `dotnet test` 655/655; **nada testado no MSFS nem visto na tela**.
+- Mergeados hoje (todos aprovados): correção do **R$ → $** (cultura en-US no construtor do `App`; antes caía no `async OnStartup`), **CALIBRA-F4b** (as 153 peças com a calibração do usuário `docs/agents/specs/calibracao-pecas-usuario-2026-11-19.json`; preço = base × multiplicador da classe A 0,75…J 5,5; TBO 500/900 h; inspeções 12/25/125 h; DA62 Vle 156, King Air 350 Vne 263), junto com **CATALOGO-MOTOR** e **CALIBRA-F4**; **CALENDARIO-JOGO** (`CareerClock`: só avança com voo + 0,5 h e oficina; seguro e vida em meses usam ele); **REPARO-PECAS** (troca a preço cheio só peças gastas); **CABINE** (conversão só em `convertibleCabin`, custo/parada por porte, efeito nas missões); **ECON-STAB** (`FlightCareer.Replay career-stab`, carreira completa com compra/venda, 3 dificuldades × 3 estilos). Decisões do arquivo do usuário (`docs/tarefas_sem_IA.md`) registradas nos § 3 dos planos de eventos/combustível/API/iluminação.
+- **Análise da economia:** `docs/plans/economia-estabilidade.md` — quem faz manutenção certa vai à falência e quem adia enriquece (limite de troca 80 % alto demais; pane só abaixo de 20 %; seguro 12 %/ano); margens 60–95 %; dificuldade só muda o saldo. Propostas A–F e **5 decisões do usuário** pendentes antes do rebalanceamento.
+- Pendentes conhecidos: multiplicadores por classe duplicados (código e `economy_targets.json`) — ler do JSON; `FlightService.ProcessFlightCancellationAsync` não está ligado (cancelamento não avança o relógio); queda de utilização após o upgrade na simulação (investigar, plano › F); teste do tempo acelerado no MSFS (`ROTEIRO.md` › 8).
+- Lição nova: `dotnet test` não compila a UI — sempre `dotnet build src/FlightCareer.slnx` (com o app aberto, `-p:OutDir=<pasta temporária>`).
+
+---
+
+(Histórico de 2026-11-17)
 
 Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `docs/agents/LICOES.md` (lição nova: não relaxar metas/oráculos) e os vereditos em `docs/reviews/`. As specs desta sessão estão em `docs/agents/specs/` (as próximas também devem ser copiadas para lá ao delegar).
 

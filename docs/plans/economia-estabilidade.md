@@ -1,0 +1,53 @@
+# Plano — Estabilidade da economia da carreira (análise da ECON-STAB)
+
+Criado em 2026-11-19 (Claude). Status: **análise feita, aguardando decisões do usuário (§ 4)**.
+Fonte: `FlightCareer.Replay career-stab --days 720 --bots 3 --difficulty all --policy all --fast` (27 carreiras, 45 min), com a calibração do usuário (real ÷ 4), preço por classe, reparo por troca de peça, calendário de carreira e cabine já na base. Bots começam como o jogador (saldo da dificuldade + C152), voam ~2,5 h/dia, compram o próximo avião da escada A→J e vendem o anterior.
+
+## 1. Resultado (mediana de 3 bots por grupo)
+
+| Dificuldade / estilo | Dia 30 | Dia 180 | Dia 720 |
+|---|---|---|---|
+| **Médio, agressivo** (adia manutenção, compra logo) | $179 mil, C152 | $2,9 mi, classe F (1ª compra ~dia 75) | **$15,8 mi**, classe G — 0 falências |
+| **Médio, cauteloso** (manutenção em dia, reserva) | $176 mil | $2,0 mi, classe E | **3/3 falidos**, classe F |
+| **Médio, equilibrado** | $170 mil | 2/3 falidos | 3/3 falidos |
+| **Difícil, agressivo** | $98 mil | $2,8 mi, classe F | **$15,9 mi**, classe G — 0 falências |
+| **Difícil, cauteloso / equilibrado** | $94 mil / $74 mil | $1,2 mi / 2 de 3 falidos | **3/3 falidos** |
+| **Fácil** (todos) | $1 bi | $1 bi, classe F | $0,9 bi, classe J (avião de linha no 2º ano) |
+
+Outros números: receita/h C152 ~$1.100 → turbohélice F/G $6.000–11.000; margem operacional 60–95 % (meta do usuário 35–55 %); quem segue a manutenção troca **85–100 peças / 100 h**, o agressivo **~9**; panes do agressivo ~0,5–1,5 / 100 h.
+
+## 2. Diagnóstico
+
+1. **Fazer manutenção certa é punido, adiar é premiado.** O agressivo enriquece; quem segue a manutenção quebra. Causas:
+   - **Limite do reparo (REPARO-PECAS) alto demais:** troca toda peça abaixo de 80 % de saúde. Como o desgaste natural vai de 100 % a ~30 % ao longo da vida, **80 % = só ~29 % da vida gasta**: o jogador troca peças com 70 % de vida pela frente, ~3,5× mais que o necessário.
+   - **Negligência quase não tem consequência:** o risco de pane só começa abaixo de 20 % de saúde (~1,14× a vida); peça com vida vencida mas saúde 25–30 % não dá pane. O agressivo só paga a inspeção anual obrigatória e troca o que quebra.
+2. **Depois do upgrade, os bots voam pouco** (0,6–1 h/dia no 2º ano, contra 2,5 no começo) e o **seguro come o caixa**: o seguro é **1 % do valor do avião por mês (12 %/ano)** — um turbohélice de $4 mi paga $40 mil/mês voando ou não. Seguro real de casco em aviação geral costuma ficar em poucos % ao ano (valor de referência, não conferido). Falta investigar se a falta de voo após o upgrade é do jogo (pouca missão compatível com a classe/categoria nova perto) ou do simulador.
+3. **Pagamento alto para o custo:** margens de 60–95 %. Com a meta de payback do usuário (C152 em 40–60 h, turbohélice em 100–150 h), o patrimônio **dobra a cada ~50 dias de jogo** — é por construção "ficar rico rápido". As duas metas (payback curto × não enriquecer rápido) são incompatíveis; é preciso escolher uma curva de progressão.
+4. **Dificuldade só muda o saldo inicial:** Médio e Difícil convergem em ~2 meses (mesmo resultado no dia 180/720); Fácil com $1 bi é modo livre.
+5. A inflação do combustível (×2 em 10 anos) não pesou em 2 anos de jogo.
+
+## 3. Proposta (para decidir)
+
+| # | Mudança | Efeito esperado |
+|---|---|---|
+| A | Reparo troca só o que a inspeção marca: **vida ≥ 90 %** (h/ciclos/meses), **saúde < 40 %** ou quebrada (o mesmo critério da exclamação amarela/vermelha). | Cauteloso deixa de trocar peça "nova"; custo de manutenção cai ~3×. |
+| B | **Risco de pane também pela vida vencida**: acima de 100 % da vida, λ cresce com o excesso (ex.: λ = 0,02 × 4^((h_vida − 1)/0,25) por hora). Inspeção anual vencida já interdita; TBO vencido também deve interditar (confirmar). | Adiar manutenção passa a ter risco real. |
+| C | **Seguro**: de 1 %/mês para ~2 %/ano (≈ 0,17 %/mês), mantendo a franquia; avião parado sem voar no mês paga 50 %. | Fim da falência por custo fixo depois do upgrade. |
+| D | **Curva de progressão** como meta (no lugar do payback curto): Médio — 1º upgrade em ~60–90 dias de jogo, turbohélice (F) em ~1 ano, jato/linha só no 3º ano; Difícil ~1,5× mais lento; patrimônio do agressivo ≤ 20× o inicial no 1º ano. Ajusta-se a taxa base e a tarifa por milha das missões por classe até a ECON-STAB cair nessa curva. | Progressão controlada, sem enriquecer rápido. |
+| E | **Dificuldade mexe na economia**, não só no saldo: Fácil $1 mi (não $1 bi), pagamento ×1,25, custos ×0,8; Médio ×1; Difícil pagamento ×0,85, custos ×1,15, panes ×1,25. | As três dificuldades viram curvas diferentes. |
+| F | Investigar a queda de voo depois do upgrade (missões compatíveis por classe/categoria e alcance do reposicionamento). | Separar defeito do simulador de falta de missão no jogo. |
+
+Ordem sugerida: A + B + C (regras) → rodar ECON-STAB → F → D + E (pagamento e dificuldade) → ECON-STAB de novo até a curva de D.
+
+## 4. Decisões do usuário
+1. Aprova A (critério de troca = critério da inspeção)?
+2. Aprova B (pane por vida vencida) e TBO vencido interditando?
+3. Seguro (C): taxa anual e desconto de avião parado.
+4. Curva de progressão (D): os marcos do Médio e quanto mais lento é o Difícil.
+5. Dificuldade (E): saldo do Fácil e multiplicadores.
+
+## 5. Como reproduzir
+```bash
+dotnet run --project src/FlightCareer.Replay -- career-stab --days 720 --bots 3 --seed 1 --difficulty all --policy all --fast
+```
+(~45 min; relatório em `%LocalAppData%/FlightCareer/career-sim/`.)
