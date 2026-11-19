@@ -76,6 +76,7 @@ namespace FlightCareer.Domain.Parts
         public const string Skis = "skis";
         public const string Wipers = "wipers";
         public const string IceDetector = "iceDetector";
+        public const string ConvertibleCabin = "convertibleCabin";
 
         /// <summary>
         /// Todas as características válidas no vocabulário fechado.
@@ -126,7 +127,8 @@ namespace FlightCareer.Domain.Parts
             Floats,
             Skis,
             Wipers,
-            IceDetector
+            IceDetector,
+            ConvertibleCabin
         };
 
         /// <summary>

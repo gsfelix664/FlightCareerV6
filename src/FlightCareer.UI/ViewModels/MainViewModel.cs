@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
@@ -760,6 +761,31 @@ namespace FlightCareer.UI.ViewModels
             if (activeAircraft?.AircraftType != null)
             {
                 var type = activeAircraft.AircraftType;
+                var effectiveCap = CabinConversion.GetEffectiveCapacity(type.MaxPax, type.MaxPayloadLbs, activeAircraft.Configuration);
+
+                if (CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount > 0))
+                {
+                    System.Windows.MessageBox.Show(
+                        $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para CARGA (sem assentos de passageiros).\n\n" +
+                        $"Para aceitar contratos com passageiros, alterne a configuração da cabine para Passageiro no Hangar.",
+                        "Configuração Incompatível",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                if (!CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveCap.MaxCargoLbs))
+                {
+                    System.Windows.MessageBox.Show(
+                        $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para PASSAGEIRO.\n\n" +
+                        $"Contratos de carga pura estão limitados à capacidade do bagageiro ({effectiveCap.MaxCargoLbs:N0} LBS).\n" +
+                        $"Para transportar cargas maiores, alterne a configuração da cabine para Carga no Hangar.",
+                        "Configuração Incompatível",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
                 double totalBatchPayload = itemsToAccept.Sum(m => m.PayloadLbs);
                 int totalBatchPax = itemsToAccept.Sum(m => m.PassengerCount);
 
@@ -859,9 +885,16 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            if (ActiveMissions.Any(m => m.PassengerCount > 0) && aircraft.Configuration.Contains("Carga"))
+            if (ActiveMissions.Any(m => m.PassengerCount > 0) && CabinConversion.IsCargoConfiguration(aircraft.Configuration))
             {
                 System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            var effectiveFlightCap = CabinConversion.GetEffectiveCapacity(aircraft.AircraftType?.MaxPax ?? 0, aircraft.AircraftType?.MaxPayloadLbs ?? 0, aircraft.Configuration);
+            if (!CabinConversion.IsCargoConfiguration(aircraft.Configuration) && ActiveMissions.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveFlightCap.MaxCargoLbs))
+            {
+                System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está em configuração PASSAGEIRO e possui contrato de carga que excede o bagageiro ({effectiveFlightCap.MaxCargoLbs:N0} LBS).\n\nConverta a cabine para Carga no Hangar para transportar este volume.", "Carga Excede Capacidade de Bagagem", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 

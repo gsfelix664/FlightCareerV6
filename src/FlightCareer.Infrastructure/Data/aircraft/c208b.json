@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "C208B",
   "class": "Turboprop",
   "engineCount": 1,
@@ -8,6 +8,7 @@
     "autopilot",
     "bleedAir",
     "constantSpeedProp",
+    "convertibleCabin",
     "deIceBoots",
     "fixedGear",
     "glassCockpit",

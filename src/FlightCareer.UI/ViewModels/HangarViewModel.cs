@@ -101,7 +101,7 @@ namespace FlightCareer.UI.ViewModels
             var repair = RepairComponentCommand;
             var wrapped = pilot.Hangar
                 .OrderBy(a => a.Prefix)
-                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a)) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a), HasConvertibleCabin(a)) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
             // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
@@ -154,6 +154,14 @@ namespace FlightCareer.UI.ViewModels
             int engineCount = profile?.EngineCount ?? 1;
             double price = a.AircraftType?.PurchasePrice ?? 0.0;
             return AircraftEconomyClass.Resolve(model, engineClass.ToString(), engineCount, features, price);
+        }
+
+        private bool HasConvertibleCabin(PilotAircraft a)
+        {
+            var model = a.AircraftType?.Model ?? string.Empty;
+            var profile = _limitResolver?.FindById(model) ?? _limitResolver?.FindProfile(model, model);
+            var features = profile?.Features ?? Array.Empty<string>();
+            return CabinConversion.HasConvertibleCabin(features);
         }
 
         // ------------------------------------------------------------------ Infraestrutura de serviços
@@ -749,15 +757,24 @@ namespace FlightCareer.UI.ViewModels
         private async Task ToggleConfiguration()
         {
             if (!CanOperate() || SelectedAircraft == null) return;
+            if (!SelectedAircraft.HasConvertibleCabin)
+            {
+                ThemedDialog.Info("Cabine não conversível", "Esta aeronave não possui cabine conversível.", DialogKind.Warning);
+                return;
+            }
             string current = SelectedAircraft.Configuration;
-            string next = current.Contains("Carga") ? "Passageiro" : "Carga (Sem Assentos)";
+            string next = CabinConversion.GetNextConfiguration(current);
+            double cost = SelectedAircraft.CostToggleConfiguration;
+            double downtime = SelectedAircraft.DowntimeToggleConfiguration;
+
             await RunPaidServiceAsync(
                 "Conversão de cabine",
                 $"Converter {SelectedAircraft.Prefix} de '{current}' para '{next}'.",
-                SelectedAircraft.CostToggleConfiguration,
+                cost,
                 $"CONVERSÃO CABINE ({next})",
                 (aircraft, _) => aircraft.Configuration = next,
-                successMessage: $"Cabine convertida para: {next}.");
+                successMessage: $"Cabine convertida para: {next}.",
+                downtimeHours: downtime);
         }
 
         // ------------------------------------------------------------------ Abastecimento e seguro
