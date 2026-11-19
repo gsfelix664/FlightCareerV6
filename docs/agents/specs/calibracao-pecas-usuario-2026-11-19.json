@@ -1,0 +1,2465 @@
+{
+ "_nota": "Calibração do usuário (2026-11-19, docs/tarefas_sem_IA.md): valores reais ÷ 4 com pisos, assumidos como reais. Campos: lifeHours/lifeCycles/calendarLifeMonths (null = sem esse limite), partPrice, priceScalesWithAircraft (× na tabela), laborHours, downtimeHours, blocksFlightWhenBroken (NO-GO), visibleOnWalkaround (WA), failureEffect. appliesTo NÃO vem daqui (exceto engine.air_intake_filter = só pistão).",
+ "partPriceMultiplierByClass": {
+  "A": 0.75,
+  "B": 1.25,
+  "C": 1.25,
+  "D": 1.25,
+  "E": 1.5,
+  "F": 1.75,
+  "G": 1.75,
+  "H": 2.5,
+  "I": 3.25,
+  "J": 5.5
+ },
+ "parts": {
+  "airframe.flaps": {
+   "lifeHours": null,
+   "lifeCycles": 2000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 1200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Assimetria ou travamento de flap na decolagem/pouso",
+   "realReference": "8000 cic"
+  },
+  "airframe.flight_controls": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Folga ou travamento nos comandos primários de cabine",
+   "realReference": "12000 h"
+  },
+  "airframe.wing_structure": {
+   "lifeHours": 10000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 8500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 40.0,
+   "downtimeHours": [
+    24.0,
+    72.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Fadiga na longarina / interdição estrutural (AOG)",
+   "realReference": "40000 h"
+  },
+  "avionics.adc": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 5.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de airspeed/altitude no PFD ou dados de ar degradados",
+   "realReference": "16000 h"
+  },
+  "avionics.ahrs_irs": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Bandeira ATT/HDG no PFD ou perda de alinhamento inercial",
+   "realReference": "16000 h"
+  },
+  "avionics.analog_flight_instruments": {
+   "lifeHours": 2250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Indicação travada ou cápsula aneroide danificada",
+   "realReference": "9000 h"
+  },
+  "avionics.audio_panel": {
+   "lifeHours": 4500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de intercom ou seleção de canal secundário COM",
+   "realReference": "18000 h"
+  },
+  "avionics.autopilot_servos": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Desengate involuntário do AP ou servo travado (fora de RVSM)",
+   "realReference": "10000 h"
+  },
+  "avionics.com_nav_radios": {
+   "lifeHours": 4500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de um canal COM ou recepção VOR/ILS (MEL: restrição IFR)",
+   "realReference": "18000 h"
+  },
+  "avionics.flight_recorders_elt": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 12,
+   "partPrice": 450.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Bateria do ELT vencida / falha de gravação de parâmetros",
+   "realReference": "16k h · 48 m"
+  },
+  "avionics.fms_computer": {
+   "lifeHours": 6250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 6500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    8.0,
+    20.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de cálculo LNAV/VNAV / tela inoperante da CDU",
+   "realReference": "25000 h"
+  },
+  "avionics.glass_displays": {
+   "lifeHours": 3500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Tela apagada, flicker ou perda de instrumentos primários",
+   "realReference": "14000 h"
+  },
+  "avionics.gps_receiver": {
+   "lifeHours": 5000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de posição por satélite GPS / navegação RNP/RNAV",
+   "realReference": "20000 h"
+  },
+  "avionics.standby_instruments": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Apagão da tela do instrumento de reserva integrado",
+   "realReference": "16000 h"
+  },
+  "avionics.tcas_egpws": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Inoperância de avisos sonoros/visuais de tráfego e terreno",
+   "realReference": "16000 h"
+  },
+  "avionics.transponder": {
+   "lifeHours": 5000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de squawk / vigilância radar (restrição em espaço aéreo controlado)",
+   "realReference": "20000 h"
+  },
+  "avionics.weather_radar": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de detecção meteorológica (proibido entrar em IMC convectivo)",
+   "realReference": "10000 h"
+  },
+  "brakes.master_cylinders": {
+   "lifeHours": null,
+   "lifeCycles": 750.0,
+   "calendarLifeMonths": 18,
+   "partPrice": 280.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Vazamento de fluido hidráulico / falha de frenagem nos pedais",
+   "realReference": "3000 cic · 72 m"
+  },
+  "brakes.pads_discs": {
+   "lifeHours": null,
+   "lifeCycles": 150.0,
+   "calendarLifeMonths": null,
+   "partPrice": 350.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.5,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Desgaste além do limite / perda de eficiência de frenagem",
+   "realReference": "600 cic"
+  },
+  "cabin.galley": {
+   "lifeHours": 3500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 6000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha elétrica de fornos/aquecedores ou travamento da copa",
+   "realReference": "14000 h"
+  },
+  "cabin.in_flight_entertainment": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 7000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Telas de assento inoperantes / degradação da experiência",
+   "realReference": "10000 h"
+  },
+  "cabin.lavatory": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Entupimento ou vazamento (restrição para voos longos)",
+   "realReference": "10000 h"
+  },
+  "cabin.passenger_seats": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 15,
+   "partPrice": 4000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Desgaste de estofamento, falha de reclinação e perda de conforto",
+   "realReference": "16k h · 60 m"
+  },
+  "electrical.alternator": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 350.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de geração / descarga da bateria em voo",
+   "realReference": "2000 h"
+  },
+  "electrical.apu_generator": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 7500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Sem geração elétrica da APU (requer GPU externa)",
+   "realReference": "10000 h"
+  },
+  "electrical.battery": {
+   "lifeHours": 350.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 6,
+   "partPrice": 220.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 1.5,
+   "downtimeHours": [
+    1.0,
+    3.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de energia de partida e reserva DC",
+   "realReference": "1400 h · 24 m"
+  },
+  "electrical.circuit_breakers_relays": {
+   "lifeHours": 4500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Desarme espúrio ou falha de isolamento de barramento elétrico",
+   "realReference": "18000 h"
+  },
+  "electrical.idg": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 30000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de geração AC principal / desconexão do IDG",
+   "realReference": "16000 h"
+  },
+  "electrical.inverter_converter": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda do barramento AC essencial / instrumentos IFR",
+   "realReference": "8000 h"
+  },
+  "electrical.rat": {
+   "lifeHours": 6250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 22000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de desdobramento ou geração de emergência",
+   "realReference": "25000 h"
+  },
+  "electrical.standby_battery": {
+   "lifeHours": 400.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 6,
+   "partPrice": 380.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Incapacidade de suprir barramento essencial em pane",
+   "realReference": "1600 h · 24 m"
+  },
+  "electrical.starter_generator": {
+   "lifeHours": 300.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha na partida ou perda de geração DC do motor",
+   "realReference": "1200 h"
+  },
+  "electrical.tru_transformer_rectifier": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de conversão AC/DC e isolamento de barramentoelectrical.external_lightingSistema de iluminação externa (pouso/strobes/nav)todas375 h (1500 h)250 (1.000)21–2nãonãoLuzes externas inoperantes (restrição para voo noturno)",
+   "realReference": "15000 h"
+  },
+  "electrical.voltage_regulator": {
+   "lifeHours": 1250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 450.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Sobretensão (overvoltage) ou desarme do gerador",
+   "realReference": "5000 h"
+  },
+  "electrical.wiring_harness": {
+   "lifeHours": 5000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Curto-circuito / falha intermitente de barramento",
+   "realReference": "20000 h"
+  },
+  "emergency.evacuation_slides": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 9,
+   "partPrice": 12000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "SLIDE DISARMED permanente ou garrafa descarregada (NO-GO)",
+   "realReference": "15k h · 36 m"
+  },
+  "emergency.ice_detector": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    5.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Falha do aviso ICE DETECTED; exige observação visual de gelo",
+   "realReference": "10000 h"
+  },
+  "emergency.life_vests_rafts": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 9,
+   "partPrice": 3000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Coletes/botes vencidos; restrição para rotas sobre a água",
+   "realReference": "12k h · 36 m"
+  },
+  "emergency.windshield_wipers": {
+   "lifeHours": 1000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 6,
+   "partPrice": 600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    1.0,
+    3.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Palheta rasgada ou motor travado (restrição sob chuva forte)",
+   "realReference": "4k h · 24 m"
+  },
+  "empennage.control_cables": {
+   "lifeHours": 2500.0,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 950.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de tensão nos cabos / resposta lenta da cauda",
+   "realReference": "10k h · 10k cic"
+  },
+  "empennage.elevator": {
+   "lifeHours": 6000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 14.0,
+   "downtimeHours": [
+    12.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Profundor travado ou excursão limitada de arfagem",
+   "realReference": "24000 h"
+  },
+  "empennage.hinges_counterweights": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 550.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Folga excessiva nos mancais / risco de flutter em voo",
+   "realReference": "6000 h"
+  },
+  "empennage.rudder": {
+   "lifeHours": 6000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 14.0,
+   "downtimeHours": [
+    12.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Deformação do leme ou resposta assimétrica de guinada",
+   "realReference": "24000 h"
+  },
+  "empennage.stabilizers": {
+   "lifeHours": 12500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 32.0,
+   "downtimeHours": [
+    48.0,
+    120.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Trinca estrutural nos estabilizadores / interdição (AOG)",
+   "realReference": "50000 h"
+  },
+  "empennage.trim_actuator": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Compensador travado ou movimento descontrolado (runaway)",
+   "realReference": "6000 h"
+  },
+  "engine.air_intake_filter": {
+   "lifeHours": 125.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 75.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Obstrução do fluxo de admissão / perda de potência",
+   "realReference": "500 h"
+  },
+  "engine.apu_core": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 30000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 16.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha na APU (requer GPU externa para partida/elétrica)",
+   "realReference": "10000 h"
+  },
+  "engine.carburetor": {
+   "lifeHours": 450.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 450.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "1800 h"
+  },
+  "engine.compressor": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 45000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 20.0,
+   "downtimeHours": [
+    12.0,
+    48.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "15000 h"
+  },
+  "engine.coolant_system": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 700.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Superaquecimento / perda de potência de motor",
+   "realReference": "2000 h"
+  },
+  "engine.cowling_nacelle": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Trinca em painel de carenagem / arrasto parasita",
+   "realReference": "16000 h"
+  },
+  "engine.crankshaft": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2100.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 24.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "2000 h"
+  },
+  "engine.cylinders": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 16.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "2000 h"
+  },
+  "engine.fadec_eec": {
+   "lifeHours": 6250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 25000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Degradação para modo manual / flutuação de empuxo",
+   "realReference": "25000 h"
+  },
+  "engine.fan": {
+   "lifeHours": 5000.0,
+   "lifeCycles": 3750.0,
+   "calendarLifeMonths": null,
+   "partPrice": 65000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 16.0,
+   "downtimeHours": [
+    12.0,
+    48.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vibração severa / perda de potência de motor",
+   "realReference": "20k h · 15k cic"
+  },
+  "engine.fuel_injectors": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 650.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 5.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "2000 h"
+  },
+  "engine.mounts_trusses": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 14.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Vibração excessiva e risco estrutural de fixação",
+   "realReference": "12000 h"
+  },
+  "engine.pneumatic_starter": {
+   "lifeHours": null,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 6500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de partida pneumática / recusa de acionamento",
+   "realReference": "10000 cic"
+  },
+  "engine.reduction_gearbox": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 22500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 14.0,
+   "downtimeHours": [
+    12.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "10000 h"
+  },
+  "engine.starter": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 300.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.5,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de partida elétrica / recusa de acionamento",
+   "realReference": "2000 h"
+  },
+  "engine.thrust_reverser": {
+   "lifeHours": null,
+   "lifeCycles": 3000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 28000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Reversor inoperante (MEL: penalidade em pista molhada)",
+   "realReference": "12000 cic"
+  },
+  "engine.turbocharger": {
+   "lifeHours": 450.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "1800 h"
+  },
+  "engine.valves": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    8.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de potência ou falha mecânica de motor",
+   "realReference": "2000 h"
+  },
+  "fire.apu_extinguisher": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 15,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "APU FIRE DISCH inoperante; APU bloqueada para uso",
+   "realReference": "12k h · 60 m"
+  },
+  "fire.cabin_extinguishers": {
+   "lifeHours": 4000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 12,
+   "partPrice": 120.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Extintor portátil descarregado ou com validade vencida (NO-GO)Emergência (4)idPeçaAplica-se aVida (Real ÷ 4)Preço Base (Real ÷ 4)MO (h)Parada (h)NO-GOWAEfeito ao quebrar",
+   "realReference": "16k h · 48 m"
+  },
+  "fire.engine_detection": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha do laço sensor (FIRE LOOP FAULT) ou alarme falso (NO-GO)",
+   "realReference": "12000 h"
+  },
+  "fire.engine_extinguisher_bottles": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 15,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Garrafa descarregada ou squib pirotécnico vencido (NO-GO)",
+   "realReference": "15k h · 60 m"
+  },
+  "fuel.aux_pump": {
+   "lifeHours": 800.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 350.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.5,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de pressão auxiliar / cavitação em altitude",
+   "realReference": "3200 h"
+  },
+  "fuel.crossfeed_valve": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Válvula travada aberta ou fechada (impede balanceamento)",
+   "realReference": "10000 h"
+  },
+  "fuel.engine_pump": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 300.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Queda de pressão de combustível / apagamento do motor",
+   "realReference": "2000 h"
+  },
+  "fuel.fcu": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 8000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Flutuação de N1/Ng, hot start ou falha de alimentação",
+   "realReference": "8000 h"
+  },
+  "fuel.filter_gascolator": {
+   "lifeHours": 100.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 30.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Obstrução do fluxo de combustível / presença de água",
+   "realReference": "400 h"
+  },
+  "fuel.fire_shutoff_valve": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1100.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de isolamento de combustível em emergência de fogo",
+   "realReference": "12000 h"
+  },
+  "fuel.fohe": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    6.0,
+    14.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Congelamento de combustível em altitude / contaminação óleo-fuel",
+   "realReference": "12000 h"
+  },
+  "fuel.fqis_sensors": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 850.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Indicação errática ou travada de combustível nos tanques",
+   "realReference": "8000 h"
+  },
+  "fuel.selector_valve": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 300.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Travamento na troca de tanques ou entrada falsa de ar",
+   "realReference": "6000 h"
+  },
+  "fuselage.antennas": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 750.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Perda de sensibilidade ou estática na recepção COM/NAV/GPS",
+   "realReference": "15000 h"
+  },
+  "fuselage.cargo_doors_latches": {
+   "lifeHours": null,
+   "lifeCycles": 3000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Alerta DOOR OPEN ou falha no travamento da porta de carga",
+   "realReference": "12000 cic"
+  },
+  "fuselage.doors_seals": {
+   "lifeHours": null,
+   "lifeCycles": 2000.0,
+   "calendarLifeMonths": 15,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento de pressurização ou alerta de porta destravada",
+   "realReference": "8k cic · 60 m"
+  },
+  "fuselage.frames_bulkheads": {
+   "lifeHours": 11250.0,
+   "lifeCycles": 11250.0,
+   "calendarLifeMonths": null,
+   "partPrice": 9000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 48.0,
+   "downtimeHours": [
+    48.0,
+    120.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Deformação permanente de caverna / interdição mandatória",
+   "realReference": "45k h · 45k cic"
+  },
+  "fuselage.longerons_stringers": {
+   "lifeHours": 12500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 8500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 52.0,
+   "downtimeHours": [
+    60.0,
+    150.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Trinca em longarina primária de fuselagem / AOG",
+   "realReference": "50000 h"
+  },
+  "fuselage.pressure_bulkheads": {
+   "lifeHours": null,
+   "lifeCycles": 12500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 15000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 60.0,
+   "downtimeHours": [
+    60.0,
+    140.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Fadiga crítica na antepara / risco de descompressão (AOG)",
+   "realReference": "50000 cic"
+  },
+  "fuselage.radome": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Atenuação de eco radar ou dano de erosão no radome",
+   "realReference": "12000 h"
+  },
+  "fuselage.skin_fairings": {
+   "lifeHours": 7500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 18.0,
+   "downtimeHours": [
+    16.0,
+    40.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Dano na carenagem / aumento de arrasto aerodinâmico",
+   "realReference": "30000 h"
+  },
+  "fuselage.windshield_windows": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Trinca no para-brisa, arco elétrico ou delaminação",
+   "realReference": "8000 h"
+  },
+  "gear.actuator": {
+   "lifeHours": null,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de recolhimento/baixamento ou travamento (downlock)",
+   "realReference": "10000 cic"
+  },
+  "gear.antiskid_system": {
+   "lifeHours": null,
+   "lifeCycles": 1500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 4000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Inoperância do antiskid/autobrake (MEL: restrição de pista)",
+   "realReference": "6000 cic"
+  },
+  "gear.doors_mechanisms": {
+   "lifeHours": null,
+   "lifeCycles": 3000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 1100.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Porta do trem emperrada aberta causando arrasto parasita",
+   "realReference": "12000 cic"
+  },
+  "gear.floats": {
+   "lifeHours": null,
+   "lifeCycles": 1000.0,
+   "calendarLifeMonths": 18,
+   "partPrice": 8500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento em compartimento estanque ou falha do trem anfíbio",
+   "realReference": "4000 cic · 72 m"
+  },
+  "gear.main_struts": {
+   "lifeHours": null,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": 30,
+   "partPrice": 2200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento de fluido/nitrogênio ou colapso no pouso",
+   "realReference": "10k cic · 120 m"
+  },
+  "gear.nose_strut": {
+   "lifeHours": null,
+   "lifeCycles": 2000.0,
+   "calendarLifeMonths": 30,
+   "partPrice": 1600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 5.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Shimmy violento ou colapso do trem dianteiro",
+   "realReference": "8k cic · 120 m"
+  },
+  "gear.nosewheel_steering": {
+   "lifeHours": null,
+   "lifeCycles": 1500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 950.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Perda de controle direcional no táxi ou vibração intensa",
+   "realReference": "6000 cic"
+  },
+  "gear.skis": {
+   "lifeHours": null,
+   "lifeCycles": 600.0,
+   "calendarLifeMonths": 15,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Trincas na prancha ou travamento do atuador hidráulico do esqui",
+   "realReference": "2400 cic · 60 m"
+  },
+  "gear.tailwheel_assembly": {
+   "lifeHours": null,
+   "lifeCycles": 750.0,
+   "calendarLifeMonths": null,
+   "partPrice": 350.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Destravamento / shimmy de bequilha e perda de controle no solo",
+   "realReference": "3000 cic"
+  },
+  "gear.trunnions_side_stays": {
+   "lifeHours": null,
+   "lifeCycles": 5000.0,
+   "calendarLifeMonths": 36,
+   "partPrice": 6500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 24.0,
+   "downtimeHours": [
+    24.0,
+    72.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Trinca por fadiga / colapso estrutural do trem de pouso",
+   "realReference": "20k cic · 144 m"
+  },
+  "gear.wheels_bearings": {
+   "lifeHours": null,
+   "lifeCycles": 350.0,
+   "calendarLifeMonths": null,
+   "partPrice": 400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Superaquecimento de rolamento ou travamento de roda no pouso",
+   "realReference": "1400 cic"
+  },
+  "hotsection.combustor": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 40000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 20.0,
+   "downtimeHours": [
+    24.0,
+    72.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Trinca térmica / perda de empuxo e risco de fogo",
+   "realReference": "8000 h"
+  },
+  "hotsection.fuel_nozzles": {
+   "lifeHours": 300.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Pulverização irregular / ponto quente (hot spot) na câmara",
+   "realReference": "1200 h"
+  },
+  "hotsection.igniters": {
+   "lifeHours": 450.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 250.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de centelha / recusa de partida da turbina",
+   "realReference": "1800 h"
+  },
+  "hotsection.ignition_exciters": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1500.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de redundância de ignição / falha de partida",
+   "realReference": "10000 h"
+  },
+  "hotsection.ngv": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 35000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 18.0,
+   "downtimeHours": [
+    16.0,
+    48.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Erosão térmica / queda de EGT margin e rendimento",
+   "realReference": "6000 h"
+  },
+  "hotsection.turbine_blades": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 60000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 25.0,
+   "downtimeHours": [
+    24.0,
+    72.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Degradação térmica severa / perda de rendimento e vibração",
+   "realReference": "6000 h"
+  },
+  "hydraulic.accumulators": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 24,
+   "partPrice": 1200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    3.0,
+    8.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de reserva de pressão para freios de emergência/parking",
+   "realReference": "10k h · 96 m"
+  },
+  "hydraulic.electric_pump": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda da bomba hidráulica auxiliar de reserva e solo",
+   "realReference": "10000 h"
+  },
+  "hydraulic.filters_valves": {
+   "lifeHours": 300.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 250.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Filtro hidráulico colmatado (bypass) / atuação lenta",
+   "realReference": "1200 h"
+  },
+  "hydraulic.lines_fittings": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 18,
+   "partPrice": 1400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento externo de fluido hidráulico / perda de pressão",
+   "realReference": "8k h · 72 m"
+  },
+  "hydraulic.ptu": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 12000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    14.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Inoperância de transferência entre sistemas hidráulicos",
+   "realReference": "15000 h"
+  },
+  "hydraulic.pump": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de pressão no sistema hidráulico principal",
+   "realReference": "8000 h"
+  },
+  "ignition.glow_plugs": {
+   "lifeHours": 150.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 80.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    1.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Dificuldade ou recusa de partida a frio (diesel)",
+   "realReference": "600 h"
+  },
+  "ignition.magneto_left": {
+   "lifeHours": 250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 325.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.5,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Queda de RPM / perda de redundância de ignição",
+   "realReference": "1000 h"
+  },
+  "ignition.magneto_right": {
+   "lifeHours": 250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 325.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.5,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Queda de RPM / perda de redundância de ignição",
+   "realReference": "1000 h"
+  },
+  "ignition.spark_plugs": {
+   "lifeHours": 125.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 140.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    1.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de ignição / funcionamento irregular (rough running)",
+   "realReference": "500 h"
+  },
+  "instruments.gyro_horizon": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Precessão excessiva ou tombamento do horizonte artificial",
+   "realReference": "2000 h"
+  },
+  "instruments.pitot_tube": {
+   "lifeHours": 900.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 300.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Falha do aquecimento ou obstrução / leitura errônea de IAS",
+   "realReference": "3600 h"
+  },
+  "instruments.static_ports": {
+   "lifeHours": 2000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 2.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Erro de altitude (altímetro), VSI e velocidade indicada",
+   "realReference": "8000 h"
+  },
+  "instruments.vacuum_pump": {
+   "lifeHours": 150.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 175.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de sucção / tombamento dos giros a vácuo (AI e DG)",
+   "realReference": "600 h"
+  },
+  "lights.beacon": {
+   "lifeHours": 750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 140.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 0.5,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Beacon queimado (MEL: proibido acionamento/voo noturno)",
+   "realReference": "3000 h"
+  },
+  "lights.landing": {
+   "lifeHours": 250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 65.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 0.5,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Farol de pouso queimado (MEL: proibido pouso noturno sem farol)",
+   "realReference": "1000 h"
+  },
+  "lights.nav": {
+   "lifeHours": 400.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 45.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 0.5,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Luz de navegação queimada (MEL: proibido voo noturno)",
+   "realReference": "1600 h"
+  },
+  "lights.panel": {
+   "lifeHours": 1000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 60.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha na retroiluminação dos instrumentos (MEL: restrição IFR/noturna)",
+   "realReference": "4000 h"
+  },
+  "lights.strobe": {
+   "lifeHours": 600.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 220.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Strobe inoperante (MEL: restrição noturna / espaço aéreo)",
+   "realReference": "2400 h"
+  },
+  "lights.taxi": {
+   "lifeHours": 250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 65.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 0.5,
+   "downtimeHours": [
+    0.5,
+    1.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Farol de táxi queimado (MEL: restrição de táxi noturno)",
+   "realReference": "1000 h"
+  },
+  "oil.cooler": {
+   "lifeHours": 1250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 650.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento externo ou superaquecimento do óleo",
+   "realReference": "5000 h"
+  },
+  "oil.filter": {
+   "lifeHours": 25.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 15.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 0.5,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Bypass de impurezas / desgaste acelerado do motor",
+   "realReference": "50 h — piso"
+  },
+  "oil.lubricant": {
+   "lifeHours": 25.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 3,
+   "partPrice": 35.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.5,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Degradação térmica / perda de lubrificação",
+   "realReference": "50 h · 6 m — piso"
+  },
+  "oil.pump": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 550.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda total de pressão de óleo do motor",
+   "realReference": "2000 h"
+  },
+  "oil.turbine_filter": {
+   "lifeHours": 200.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 85.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    3.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Obstrução de fluxo / queda de pressão de óleo",
+   "realReference": "800 h"
+  },
+  "oil.turbine_oil": {
+   "lifeHours": 250.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 6,
+   "partPrice": 110.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    3.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Superaquecimento de mancais / perda de lubrificação",
+   "realReference": "1000 h · 24 m"
+  },
+  "oil.turbine_pump": {
+   "lifeHours": 3750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de pressão de óleo e falha de rolamentos",
+   "realReference": "15000 h"
+  },
+  "oxygen.crew_cylinder": {
+   "lifeHours": null,
+   "lifeCycles": null,
+   "calendarLifeMonths": 15,
+   "partPrice": 900.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Pressão insuficiente ou teste hidrostático vencido (NO-GO)",
+   "realReference": "60 m — calendárico"
+  },
+  "oxygen.masks_regulators": {
+   "lifeHours": 1500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 18,
+   "partPrice": 1000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    4.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento nas máscaras quick-donning ou falha no regulador",
+   "realReference": "6k h · 72 m"
+  },
+  "oxygen.passenger_system": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 30,
+   "partPrice": 4000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Geradores químicos vencidos ou falha nas linhas de passageiros",
+   "realReference": "12k h · 120 m"
+  },
+  "pneumatic.air_cycle_machine": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 12000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    8.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Desarme de pack de refrigeração / limitação de teto operacionalCabine (4)idPeçaAplica-se aVida (Real ÷ 4)Preço Base (Real ÷ 4)MO (h)Parada (h)NO-GOWAEfeito ao quebrar",
+   "realReference": "12000 h"
+  },
+  "pneumatic.bleed_valves": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 5000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    10.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Válvula de sangria presa fechada / BLEED TRIP OFF",
+   "realReference": "10000 h"
+  },
+  "pneumatic.ducts_leak_detection": {
+   "lifeHours": 3500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 3500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Alarme de vazamento pneumático / BLEED DUCT LEAK",
+   "realReference": "14000 h"
+  },
+  "pneumatic.precooler": {
+   "lifeHours": 3500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 8000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 8.0,
+   "downtimeHours": [
+    6.0,
+    14.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Superaquecimento do duto de sangria / BLEED OVERHEAT",
+   "realReference": "14000 h"
+  },
+  "pressurization.outflow_valve": {
+   "lifeHours": 3750.0,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 5500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    6.0,
+    16.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de controle ou capacidade de pressurização",
+   "realReference": "15k h · 10k cic"
+  },
+  "pressurization.safety_relief_valves": {
+   "lifeHours": null,
+   "lifeCycles": 5000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 2200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 3.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Vazamento de cabine ou risco de sobrepressão estruturalFuselagem (9)idPeçaAplica-se aVida (Real ÷ 4)Preço Base (Real ÷ 4)MO (h)Parada (h)NO-GOWAEfeito ao quebrar",
+   "realReference": "20000 cic"
+  },
+  "propeller.blades": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 18,
+   "partPrice": 2000.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vibração severa de hélice / perda de tração",
+   "realReference": "2000 h · 72 m"
+  },
+  "propeller.deice_boots": {
+   "lifeHours": 450.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 12,
+   "partPrice": 800.0,
+   "priceScalesWithAircraft": false,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    2.0,
+    6.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Falha de degelo / vibração por acúmulo assimétrico de gelo",
+   "realReference": "1800 h · 48 m"
+  },
+  "propeller.governor": {
+   "lifeHours": 500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 700.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 4.0,
+   "downtimeHours": [
+    4.0,
+    12.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Disparo de RPM (overspeed) / oscilação de passo",
+   "realReference": "2000 h"
+  },
+  "propeller.pitch_feathering": {
+   "lifeHours": 550.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 18,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 6.0,
+   "downtimeHours": [
+    6.0,
+    18.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Perda de controle de passo ou falha ao embandeirar",
+   "realReference": "2200 h · 72 m"
+  },
+  "tires.main": {
+   "lifeHours": null,
+   "lifeCycles": 75.0,
+   "calendarLifeMonths": 12,
+   "partPrice": 180.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 1.5,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Estouro, desgaste no limite (lona exposta) ou perda de pressão",
+   "realReference": "300 cic · 48 m"
+  },
+  "tires.nose": {
+   "lifeHours": null,
+   "lifeCycles": 60.0,
+   "calendarLifeMonths": 12,
+   "partPrice": 90.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 1.0,
+   "downtimeHours": [
+    1.0,
+    2.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Estouro, shimmy ou perda de pressão no pneu direcionalFreios (3)idPeçaAplica-se aVida (Real ÷ 4)Preço Base (Real ÷ 4)MO (h)Parada (h)NO-GOWAEfeito ao quebrar",
+   "realReference": "240 cic · 48 m"
+  },
+  "wing.ailerons": {
+   "lifeHours": 4500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 16.0,
+   "downtimeHours": [
+    12.0,
+    30.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Resposta assimétrica ou travamento do controle lateral",
+   "realReference": "18000 h"
+  },
+  "wing.bleed_anti_ice": {
+   "lifeHours": 2500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2600.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 18.0,
+   "downtimeHours": [
+    16.0,
+    36.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Válvula de sangria travada / inoperância do antigelo alar",
+   "realReference": "10000 h"
+  },
+  "wing.deice_boots": {
+   "lifeHours": 600.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 12,
+   "partPrice": 1400.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 12.0,
+   "downtimeHours": [
+    12.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Perfuração ou ressecamento da bota (restrição para gelo)",
+   "realReference": "2400 h · 48 m"
+  },
+  "wing.ribs_skin": {
+   "lifeHours": 8750.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 2500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 28.0,
+   "downtimeHours": [
+    24.0,
+    48.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Deformação do perfil alar / aumento de arrasto parasita",
+   "realReference": "35000 h"
+  },
+  "wing.root_fittings": {
+   "lifeHours": 12500.0,
+   "lifeCycles": 12500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 4500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 40.0,
+   "downtimeHours": [
+    36.0,
+    96.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": false,
+   "failureEffect": "Trinca de fadiga na junção asa-fuselagem / AOG",
+   "realReference": "50k h · 50k cic"
+  },
+  "wing.slats": {
+   "lifeHours": null,
+   "lifeCycles": 2500.0,
+   "calendarLifeMonths": null,
+   "partPrice": 3200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 22.0,
+   "downtimeHours": [
+    16.0,
+    40.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Assimetria ou travamento de slat no bordo de ataque",
+   "realReference": "10000 cic"
+  },
+  "wing.spoilers": {
+   "lifeHours": null,
+   "lifeCycles": 2000.0,
+   "calendarLifeMonths": null,
+   "partPrice": 2200.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 14.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Spoiler travado ou falha de atuação (MEL: penalidade de pouso)",
+   "realReference": "8000 cic"
+  },
+  "wing.tanks_sealant": {
+   "lifeHours": 3000.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": 30,
+   "partPrice": 1800.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 20.0,
+   "downtimeHours": [
+    16.0,
+    40.0
+   ],
+   "blocksFlightWhenBroken": true,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Vazamento de combustível alar através do selante",
+   "realReference": "12k h · 120 m"
+  },
+  "wing.tips_winglets": {
+   "lifeHours": 7500.0,
+   "lifeCycles": null,
+   "calendarLifeMonths": null,
+   "partPrice": 1500.0,
+   "priceScalesWithAircraft": true,
+   "laborHours": 10.0,
+   "downtimeHours": [
+    8.0,
+    24.0
+   ],
+   "blocksFlightWhenBroken": false,
+   "visibleOnWalkaround": true,
+   "failureEffect": "Dano na ponta de asa / aumento de arrasto induzido",
+   "realReference": "30000 h"
+  }
+ }
+}
