@@ -2447,3 +2447,24 @@
   - Build 0 erros, `dotnet test` 618/618 aprovados.
   - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.
   - Não testado no MSFS.
+
+## 2026-11-19 - Reparo por troca de peça (Gemini)
+- **Planejador de Troca de Peças (`Domain/Parts/PartReplacementPlanner.cs`)**:
+  - Nova lógica pura de substituição física de peças inteiras no Hangar a preço integral + mão de obra: na aviação real não se troca 5 % de freio, troca-se a peça física inteira (100 %) pagando preço cheio.
+  - Critérios de elegibilidade: peças com `Health < 80.0`, `IsBroken == true`, ou sinalizadas em inspeção (`PartInspectionFlags.Evaluate(...).Level != None` ou flag ativa).
+  - Custo = soma de (preço cheio da peça + mão de obra) por instância física (peças por motor contam individualmente).
+  - Parada na oficina = maior tempo de downtime entre as peças trocadas (oficina em paralelo).
+  - Ao aplicar (`Apply` / `ApplyToParts`): peça volta a 100 % de saúde, `IsBroken` = false, horas e ciclos zerados, contadores `LastReplaced*` e `LastShopService*` atualizados e marcas de inspeção limpas.
+- **Hangar e MVVM (`HangarViewModel.cs`, `ComponentRowViewModel.cs`, `PilotAircraftWrapper.cs`)**:
+  - Para aeronaves com peças (`PartComponentBridge.HasParts`): o custo e texto do botão de reparo de cada linha vêm do plano (`"Trocar N peças · $X"` ou `"Em dia"` se nenhuma peça do grupo estiver gasta).
+  - Diálogo de confirmação lista cada peça a trocar, seu motivo específico ("Saúde X %", "Vida: X / Y h", "Quebrada") e o custo.
+  - Ao confirmar: cobra o valor do plano, aplica a substituição física apenas nas peças do plano, recalcula a barra do componente diretamente pelo agregado (`SyncComponentsFromParts`), garantindo barra = agregado (eliminando qualquer reconciliação gratuita no voo seguinte), e avança o relógio de carreira pela parada do serviço.
+  - "Reparar tudo" consolida os planos de todos os grupos com peças gastas e aplica o maior downtime entre todos os itens.
+  - Retífica (overhaul) e troca de óleo/revisões mantêm os preços dos pacotes e aplicam a troca física a 100 % em todas as peças dos respectivos grupos (motor, seção quente, óleo, ignição).
+  - Aeronaves sem peças mantêm 100 % da compatibilidade com o comportamento legado.
+- **Testes e Verificação**:
+  - Nova suíte de testes unitários em `src/FlightCareer.Tests/Parts/PartReplacementPlannerTests.cs` cobrindo todos os cenários da spec: freio sem peça gasta ("Em dia"), peça < 80 % trocada a preço cheio, vida vencida, peça quebrada, peças por motor contando instâncias, parada máxima em paralelo, zeramento de horas/ciclos na aplicação, barra = agregado pós-troca sem reconciliação gratuita, e overhaul restaurando todas as peças do motor/óleo.
+  - `dotnet build src/FlightCareer.slnx`: 0 erros.
+  - `dotnet test src/FlightCareer.Tests`: 639/639 aprovados (100 %).
+  - Fuzz testing CLI (`fuzz --aircraft all --runs 5`): 230 voos em 46 modelos aprovados com 100 % e 0 falhas.
+  - Não testado na tela do app nem no MSFS.

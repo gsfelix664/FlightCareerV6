@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Parts;
 
 namespace FlightCareer.UI.ViewModels
 {
@@ -116,9 +117,40 @@ namespace FlightCareer.UI.ViewModels
             }
         }
 
-        public double RepairCost => ComponentMaintenance.RepairCost(Definition, Component, _purchasePrice);
-        public bool CanRepair => RepairCost > 0;
-        public string RepairButtonText => CanRepair ? $"Reparar · {RepairCost:C0}" : "Em dia";
+        private PartReplacementPlan? _replacementPlan;
+        public PartReplacementPlan? ReplacementPlan => _replacementPlan;
+
+        public void SetReplacementPlan(PartReplacementPlan? plan)
+        {
+            _replacementPlan = plan;
+            OnPropertyChanged(nameof(ReplacementPlan));
+            OnPropertyChanged(nameof(RepairCost));
+            OnPropertyChanged(nameof(CanRepair));
+            OnPropertyChanged(nameof(RepairButtonText));
+        }
+
+        public double RepairCost => _replacementPlan != null
+            ? _replacementPlan.TotalCost
+            : ComponentMaintenance.RepairCost(Definition, Component, _purchasePrice);
+
+        public bool CanRepair => _replacementPlan != null
+            ? _replacementPlan.Items.Count > 0
+            : RepairCost > 0;
+
+        public string RepairButtonText
+        {
+            get
+            {
+                if (_replacementPlan != null)
+                {
+                    if (_replacementPlan.Items.Count == 0) return "Em dia";
+                    string pecas = _replacementPlan.Items.Count == 1 ? "1 peça" : $"{_replacementPlan.Items.Count} peças";
+                    return $"Trocar {pecas} · {RepairCost:C0}";
+                }
+
+                return CanRepair ? $"Reparar · {RepairCost:C0}" : "Em dia";
+            }
+        }
 
         public ObservableCollection<FlaggedPartViewModel> FlaggedParts { get; } = new();
         public bool HasFlaggedParts => FlaggedParts.Count > 0;
