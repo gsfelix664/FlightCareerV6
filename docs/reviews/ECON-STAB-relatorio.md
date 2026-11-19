@@ -1,6 +1,6 @@
 # ECON-STAB — Simulação da carreira completa e estabilidade econômica
 
-**Branch:** feat/econ-stab · **Commit:** (pendente) · **Data:** 2026-11-19
+**Branch:** feat/econ-stab · **Commit:** 301a461 · **Data:** 2026-11-19
 
 ## Plano (antes de codar)
 - Extrair a configuração inicial do piloto/C152 para `CareerStart` no Domain e atualizar `CreatePilotViewModel`.
