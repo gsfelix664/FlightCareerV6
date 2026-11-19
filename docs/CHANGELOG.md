@@ -2378,3 +2378,6 @@
 ## 2026-11-17 - Ícones dos grupos no Hangar (Claude)
 - Os cards de componentes do Hangar trocam a barra de saúde por um **ícone vetorial por grupo** (motor, óleo, ignição, seção quente, elétrico, instrumentos, trem, pneus, freios, célula), desenhado em `UI/ViewModels/HangarIcons.cs` (sintaxe de path SVG, 24×24, traço) e pintado no tom da saúde do grupo (`HangarPalette.ForHealth`, mesmas faixas verde/amarelo/vermelho da barra antiga). A faixa de saúde continua no texto ao lado e no tooltip do ícone; os chips das peças marcadas na inspeção seguem dentro do card.
 - Não visto na tela (sem rodar a UI).
+
+## 2026-11-19 - Moeda $ no thread da UI (Claude)
+- A cultura en-US era aplicada dentro do `async void OnStartup`; no .NET a cultura atual segue o contexto assíncrono, então depois do primeiro `await` o thread da UI voltava à cultura do Windows e os valores `:C` apareciam como "R$ 1.200" (Hangar, conversão de cabine, reparos). Agora é aplicada no construtor do `App`, antes de qualquer código assíncrono. Não conferido na tela.
