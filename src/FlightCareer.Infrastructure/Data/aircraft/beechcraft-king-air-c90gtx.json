@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Beechcraft King Air C90GTx",
   "class": "Turboprop",
   "engineCount": 2,
@@ -8,6 +8,7 @@
     "autopilot",
     "bleedAir",
     "constantSpeedProp",
+    "convertibleCabin",
     "deIceBoots",
     "fireProtection",
     "fms",

@@ -228,7 +228,7 @@
                     <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="CRUZEIRO " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding CruiseSpeedKts, StringFormat={}{0} kt}" Style="{StaticResource HgValue}"/></StackPanel></Border>
                     <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="ALCANCE " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding RangeNM, StringFormat={}{0} nm}" Style="{StaticResource HgValue}"/></StackPanel></Border>
                     <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="MTOW " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding MTOW, StringFormat={}{0:N0} lbs}" Style="{StaticResource HgValue}"/></StackPanel></Border>
-                    <Border Style="{StaticResource HgChip}"><StackPanel Orientation="Horizontal"><TextBlock Text="CABINE " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding Configuration}" Style="{StaticResource HgValue}"/></StackPanel></Border>
+                    <Border Style="{StaticResource HgChip}" Visibility="{Binding HasConvertibleCabin, Converter={StaticResource BooleanToVisibilityConverter}}"><StackPanel Orientation="Horizontal"><TextBlock Text="CABINE " Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding Configuration}" Style="{StaticResource HgValue}"/></StackPanel></Border>
                 </WrapPanel>
 
                 <!-- Status -->
@@ -515,11 +515,11 @@
                         </Border>
 
                         <!-- Cabine -->
-                        <Border Style="{StaticResource HgCard}">
+                        <Border Style="{StaticResource HgCard}" Visibility="{Binding HasConvertibleCabin, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid>
                                 <StackPanel>
                                     <TextBlock Text="CONFIGURAÇÃO DA CABINE" Style="{StaticResource HgCardTitle}" Margin="0,0,0,6"/>
-                                    <TextBlock Text="{Binding Configuration}" Style="{StaticResource HgValue}" Foreground="{StaticResource HgCyan}"/>
+                                    <TextBlock Text="{Binding ConfigurationDisplayText}" Style="{StaticResource HgValue}" Foreground="{StaticResource HgCyan}"/>
                                 </StackPanel>
                                 <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding TextToggleConfiguration}" IsEnabled="{Binding CanService}"
                                         Command="{Binding DataContext.ToggleConfigurationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>

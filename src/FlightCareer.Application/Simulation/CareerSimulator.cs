@@ -319,12 +319,11 @@ namespace FlightCareer.Application.Simulation
                                     (mgDb as IDisposable)?.Dispose();
                                 }
 
-                                // Filtra missões compatíveis com a aeronave
+                                // Filtra missões compatíveis com a aeronave e configuração de cabine
                                 var compatible = new List<Mission>();
                                 foreach (var m in availableMissions)
                                 {
-                                    if (m.PayloadLbs > aType.MaxPayloadLbs) continue;
-                                    if (m.PassengerCount > aType.MaxPax) continue;
+                                    if (!CabinConversion.IsMissionCompatible(pilotAircraft.Configuration, aType.MaxPax, aType.MaxPayloadLbs, m.PassengerCount, m.PayloadLbs, m.LuggageWeightLbs, m.CargoWeightLbs, aType.HasConvertibleCabin)) continue;
                                     if (m.DistanceNM > aType.RangeNM) continue;
 
                                     if (!airportLookup.TryGetValue(m.DestinationICAO, out var destAp)) continue;
