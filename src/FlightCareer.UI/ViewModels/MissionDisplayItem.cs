@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Infrastructure.Services;
 using System;
@@ -343,8 +344,18 @@ namespace FlightCareer.UI.ViewModels
                 double speed = type?.CruiseSpeedKts > 0 ? type.CruiseSpeedKts : 110.0;
                 double gph = type?.FuelConsumptionGPH > 0 ? type.FuelConsumptionGPH : 8.0;
                 double maxPayload = type?.MaxPayloadLbs > 0 ? type.MaxPayloadLbs : 500.0;
+                int maxPax = type?.MaxPax ?? 0;
+                bool hasConvertible = type?.HasConvertibleCabin ?? false;
 
-                IsOverweight = mission.PayloadLbs > maxPayload;
+                IsOverweight = !CabinConversion.IsMissionCompatible(
+                    activeAircraft.Configuration,
+                    maxPax,
+                    maxPayload,
+                    mission.PassengerCount,
+                    mission.PayloadLbs,
+                    mission.LuggageWeightLbs,
+                    mission.CargoWeightLbs,
+                    hasConvertible);
 
                 double hours = Math.Max(0.1, mission.DistanceNM / speed);
                 int totalMinutes = (int)Math.Round(hours * 60.0);

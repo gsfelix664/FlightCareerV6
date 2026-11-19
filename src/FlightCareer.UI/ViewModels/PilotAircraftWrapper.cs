@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Services;
@@ -54,13 +55,15 @@ namespace FlightCareer.UI.ViewModels
             IRelayCommand<ComponentRowViewModel> repairCommand,
             DateTime? careerClock = null,
             PartCatalog? partCatalog = null,
-            string? classKey = null)
+            string? classKey = null,
+            bool hasConvertibleCabin = false)
         {
             Aircraft = aircraft;
             _catalog = catalog;
             _careerClock = careerClock;
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
             _classKey = classKey;
+            HasConvertibleCabin = (aircraft.AircraftType?.HasConvertibleCabin == true) || hasConvertibleCabin;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
 
             var order = catalog.Components.Select(d => d.Kind).ToList();
@@ -83,6 +86,7 @@ namespace FlightCareer.UI.ViewModels
         public double FuelCapacity => Aircraft.AircraftType?.FuelTankGallons ?? 0;
         public string FuelType => Aircraft.AircraftType?.FuelType ?? "AVGAS";
         public int MaxPax => Aircraft.AircraftType?.MaxPax ?? 0;
+        public int MaxPayloadLbs => Aircraft.AircraftType?.MaxPayloadLbs ?? 0;
         public int CruiseSpeedKts => Aircraft.AircraftType?.CruiseSpeedKts ?? 0;
         public int RangeNM => Aircraft.AircraftType?.RangeNM ?? 0;
         public string Location => string.IsNullOrEmpty(Aircraft.CurrentLocationICAO) ? "—" : Aircraft.CurrentLocationICAO;
@@ -96,7 +100,14 @@ namespace FlightCareer.UI.ViewModels
             _ => "JATO"
         };
         public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
-        public bool IsCargoConfig => Configuration.Contains("Carga");
+        public bool IsCargoConfig => CabinConversion.IsCargoConfiguration(Configuration);
+        public bool HasConvertibleCabin { get; }
+        public CabinCapacity EffectiveCapacity => CabinConversion.GetEffectiveCapacity(MaxPax, MaxPayloadLbs, Configuration, HasConvertibleCabin);
+        public string ConfigurationDisplayText => !HasConvertibleCabin
+            ? $"Passageiro: até {EffectiveCapacity.MaxPax} PAX e {EffectiveCapacity.MaxCargoLbs:N0} lb"
+            : (IsCargoConfig
+                ? $"Carga: até {EffectiveCapacity.MaxCargoLbs:N0} lb"
+                : $"Passageiro: até {EffectiveCapacity.MaxPax} PAX e {EffectiveCapacity.MaxCargoLbs:N0} lb bagagem");
 
         [ObservableProperty] private bool _isActive;
 
@@ -184,13 +195,15 @@ namespace FlightCareer.UI.ViewModels
         public double Cost100hInspection => MaintenancePricing.Cost100hInspection;
         public double Cost500hInspection => MaintenancePricing.Cost500hInspection;
         public double CostOverhaul => MaintenancePricing.CalculateOverhaulCost(PurchasePrice);
-        public double CostToggleConfiguration => MaintenancePricing.CostToggleConfiguration;
+        public double CostToggleConfiguration => CabinConversion.GetCost(MTOW);
+        public double DowntimeToggleConfiguration => CabinConversion.GetDowntimeHours(MTOW);
+        public string TargetConfigurationName => IsCargoConfig ? "Passageiro" : "Carga";
 
         public string Text50h => $"Troca de óleo · {Cost50hInspection:C0}";
         public string Text100h => $"Inspeção anual · {Cost100hInspection:C0}";
         public string Text500h => $"Revisão de ignição · {Cost500hInspection:C0}";
         public string TextOverhaul => $"Retífica · {CostOverhaul:C0}";
-        public string TextToggleConfiguration => $"Converter · {CostToggleConfiguration:C0}";
+        public string TextToggleConfiguration => $"Converter para {TargetConfigurationName} · {CostToggleConfiguration:C0} · {DowntimeToggleConfiguration:F0} h";
         public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";
 
         // --- Abastecimento ---

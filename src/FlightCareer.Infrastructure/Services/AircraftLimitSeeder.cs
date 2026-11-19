@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -118,6 +119,20 @@ namespace FlightCareer.Infrastructure.Services
                             Notes = l.Notes
                         });
                     }
+                    appliedCount++;
+                }
+            }
+
+            // Sincroniza HasConvertibleCabin em AircraftTypes para bancos existentes ou novos perfis
+            var resolver = new AircraftLimitResolver(profiles, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+            var aircraftTypes = await db.AircraftTypes.ToListAsync();
+            foreach (var at in aircraftTypes)
+            {
+                var matched = resolver.FindById(at.Model) ?? resolver.FindProfile(at.Model, at.Model);
+                bool hasConvertible = matched != null && matched.Features.Contains(AircraftFeatures.ConvertibleCabin, StringComparer.OrdinalIgnoreCase);
+                if (at.HasConvertibleCabin != hasConvertible)
+                {
+                    at.HasConvertibleCabin = hasConvertible;
                     appliedCount++;
                 }
             }

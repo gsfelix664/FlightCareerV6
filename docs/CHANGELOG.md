@@ -2502,3 +2502,29 @@
 - **Testes**:
   - Novo teste `Progression_DesgasteETrocaDePecas_MedidosComSucesso` em `CareerProgressionTests.cs`.
   - Build 0 erros, `dotnet test` 645/645 aprovados, `fuzz --aircraft all --runs 5` (230 voos em 46 modelos) 100% aprovados.
+
+## 2026-11-19 - Conversão de cabine (Gemini)
+- **Feature `convertibleCabin` no vocabulário fechado (`AircraftFeatures.cs`, `_schema.json`)**:
+  - Nova característica `AircraftFeatures.ConvertibleCabin = "convertibleCabin"` adicionada ao vocabulário fechado e ao enum de `_schema.json`.
+  - Atribuída aos 11 modelos conversíveis da especificação em `Data/aircraft/*.json`: `c208b`, `pc-12-ngx`, `beechcraft-king-air`, `beechcraft-king-air-c90gtx`, `beechcraft-king-air-250`, `dhc-6-300-twin`, `atr-42-600`, `atr-72-600`, `cessna-408-skycourier`, `cessna-404-titan` e `cessna-207t-stationair`. Demais aeronaves sem a feature têm o card e o chip de cabine ocultados no Hangar.
+- **Economia e Operação de Cabine (`Domain/Economy/CabinConversion.cs`)**:
+  - Nova lógica pura de regras e cálculos de conversão de cabine sem dependência de UI ou banco.
+  - Custo e tempo de parada (downtime) por porte da aeronave (`AircraftSizeClass` / MTOW): Leve ($800 / 4 h), Médio ($3.000 / 8 h) e Pesado ($12.000 / 24 h), avançando o relógio de carreira (`CareerClock`).
+  - Cálculo de capacidade efetiva de passageiros e carga (`CabinCapacity`):
+    - Configuração Passageiro: passageiros até `PaxMax`, carga limitada a 25% de `CargaMax` (bagageiro).
+    - Configuração Carga: passageiros = 0, carga expandida até `CargaMax + (PaxMax × 170 lb)` com teto máximo de `CargaMax × 1,3`.
+  - Validador centralizado de compatibilidade de missão (`IsMissionCompatible`): na configuração Carga, rejeita qualquer missão com passageiros; na configuração Passageiro, rejeita missões de carga com peso superior ao limite de bagagem e missões com passageiros excedendo o número de assentos ou carga de bagageiro.
+- **Filtros e Travas de Missão (`CareerSimulator.cs`, `MissionDisplayItem.cs`, `MainViewModel.cs`)**:
+  - Simulação de carreira dos bots (`CareerSimulator`): filtro de missões compatíveis agora usa `CabinConversion.IsMissionCompatible`, impedindo aceitação de passageiros em cargueiros e carga excessiva em aviões de passageiros.
+  - Quadro de contratos (`MissionDisplayItem`): `IsOverweight` avaliado contra a capacidade da cabine ativa, permitindo ao filtro "Carga Compatível" ocultar automaticamente contratos incompatíveis.
+  - Validação de aceite e início de voo (`MainViewModel.AcceptSelectedMissionsAsync` e `StartFlight`): alertas informativos e bloqueio de decolagem caso o manifesto selecionado contenha passageiros em avião cargueiro ou carga acima do limite de bagagem em avião de passageiros.
+- **Hangar e Interface (`PilotAircraftWrapper.cs`, `HangarViewModel.cs`, `HangarView.xaml`)**:
+  - `PilotAircraftWrapper`: expõe `HasConvertibleCabin`, `CostToggleConfiguration`, `DowntimeToggleConfiguration`, `TextToggleConfiguration` (ex: "Converter para Carga · $3,000 · 8 h") e `ConfigurationDisplayText` (ex: "Carga: até 4.797 lb").
+  - `HangarViewModel`: comando `ToggleConfigurationCommand` valida a presença da feature `convertibleCabin`, executa o serviço pago e passa `downtimeHours` para avanço do `CareerClock`.
+  - `HangarView`: card de configuração de cabine e chip de cabine do cabeçalho vinculados a `HasConvertibleCabin` (somem se a aeronave não suportar conversão).
+- **Testes e Verificação**:
+  - Nova suíte de testes unitários `CabinConversionTests.cs` cobrindo: `Cabin_SemFeature_NaoConverte`, `Cabin_CustoEParadaPorPorte`, `Cabin_CapacidadeCarga`, `Cabin_CapacidadePassageiro`, `Missions_ConfigCarga_SemPassageiros`, `Missions_ConfigPassageiro_CargaLimitada` e `Missions_AviaoNaoConversivel_RegraAntiga`.
+  - Teste de integração `Seeder_UpdatesAircraftType_HasConvertibleCabin` em `SeederTests.cs` validando sincronização idempotente de `AircraftType.HasConvertibleCabin`.
+  - `dotnet build src/FlightCareer.slnx`: 0 erros.
+  - `dotnet test src/FlightCareer.Tests`: 647/647 aprovados (100%).
+  - Não testado na tela do app nem no MSFS.

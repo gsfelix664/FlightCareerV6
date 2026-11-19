@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "ATR 42-600",
   "class": "Turboprop",
   "engineCount": 2,
@@ -9,6 +9,7 @@
     "autopilot",
     "bleedAir",
     "constantSpeedProp",
+    "convertibleCabin",
     "deIceBoots",
     "fadec",
     "fireProtection",

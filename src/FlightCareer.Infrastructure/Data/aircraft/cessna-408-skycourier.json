@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "Cessna 408 SkyCourier",
   "class": "Turboprop",
   "engineCount": 2,
@@ -8,6 +8,7 @@
     "autopilot",
     "bleedAir",
     "constantSpeedProp",
+    "convertibleCabin",
     "deIceBoots",
     "fireProtection",
     "fixedGear",

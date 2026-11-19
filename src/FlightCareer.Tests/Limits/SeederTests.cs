@@ -199,5 +199,60 @@ namespace FlightCareer.Tests.Limits
                 Assert.True(any);
             }
         }
+
+        [Fact]
+        public async Task Seeder_UpdatesAircraftType_HasConvertibleCabin()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+
+            Guid c208Id = Guid.NewGuid();
+            Guid c152Id = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                // Simula inserção prévia de aeronaves sem flag de conversível
+                db.AircraftTypes.Add(new Domain.Entities.AircraftType
+                {
+                    Id = c208Id,
+                    Model = "C208B",
+                    Type = "Geral",
+                    HasConvertibleCabin = false
+                });
+
+                db.AircraftTypes.Add(new Domain.Entities.AircraftType
+                {
+                    Id = c152Id,
+                    Model = "Cessna C152",
+                    Type = "Geral",
+                    HasConvertibleCabin = false
+                });
+
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                var seeder = new AircraftLimitSeeder(db);
+                int applied = await seeder.SeedLimitsAsync();
+                Assert.True(applied > 0);
+
+                var c208 = await db.AircraftTypes.FindAsync(c208Id);
+                var c152 = await db.AircraftTypes.FindAsync(c152Id);
+
+                Assert.NotNull(c208);
+                Assert.NotNull(c152);
+
+                Assert.True(c208.HasConvertibleCabin);
+                Assert.False(c152.HasConvertibleCabin);
+
+                // Execução subsequente: idempotente
+                int second = await seeder.SeedLimitsAsync();
+                Assert.Equal(0, second);
+            }
+        }
     }
 }
