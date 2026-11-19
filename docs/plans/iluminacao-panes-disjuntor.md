@@ -87,6 +87,8 @@ São duas panes diferentes, com causa, sintoma, procedimento e reparo diferentes
 4. Flap: confirmar as duas panes (elétrica por disjuntor/fusível e mecânica por travamento), o rearme único e o sorteio transitória × persistente (§ 2.1).
 5. O piloto pode "rearmar" um disjuntor em pane uma vez (como na vida real, com risco) ou o watchdog sempre puxa de novo?
 
+**Decididas pelo usuário (2026-11-17):** 1. Iluminação = peças dentro do Elétrico. 2. Tudo halógena (sem campo LED). 3. MEL noturna só avisa por ora. 4 e 5 (flap elétrico × mecânico e rearme) continuam abertos.
+
 ## 8. Testes previstos
 - `ElectricalMap_SemMapa_UsaEfeitoAtual`.
 - `Watchdog_DisjuntorRearmado_Reaplica` (lógica pura do estado desejado × lido).
