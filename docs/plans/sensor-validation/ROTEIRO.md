@@ -423,3 +423,17 @@ Permite transformar voos reais gravados com o REC em **fixtures de teste automat
 
 
 
+
+## 8. Teste de tempo acelerado (SIMULATION RATE) — pendente
+
+Objetivo: confirmar no MSFS que horas, desgaste e relógio de carreira contam o **tempo simulado** (tempo real × `SIMULATION RATE`, `SimTimeStep`), como o código promete. Não testado no MSFS até 2026-11-19.
+
+1. No Hangar, anote: horas de célula, horas até a troca de óleo / inspeção anual / revisão de ignição, TBO restante, "Dia da carreira" e saldo.
+2. Voo monitorado curto (C152 ou C172) em cruzeiro estável a **4×** por ~15 min reais (= ~1 h simulada). Volte a 1× para o pouso.
+3. Depois do voo, confira no Hangar:
+   - horas de célula e TBO andaram ~1 h (não 15 min); contadores das inspeções descontaram ~1 h;
+   - "Dia da carreira" andou ~1 h de voo + 0,5 h de solo;
+   - combustível cobrado ≈ consumo de 1 h (o MSFS acelera o consumo);
+   - no blackbox, nenhum trecho perdido (intervalos > 10 s reais entre pacotes contam como pausa).
+4. Repita a 16× por ~4 min reais (= ~1 h simulada) e compare.
+5. Limites para checar no log: taxa acima de 128× vale 128× (`SimTimeStep.MaxSimRate`); pausa pelo menu não deve somar horas.
