@@ -35,6 +35,13 @@ Criado em 2026-11-16 (Claude). Fontes (SDK 2024, `simconnect/api-reference/`): [
 4. Alertas dentro do sim (`DialogAction` com texto e som, destaque do instrumento, vibração do controle) junto com o HUD.
 5. `FailureAction` com `HealthPercent`: testar como alternativa às panes por `TOGGLE_*` (enums não documentados).
 
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+1. **`FlightSave`/`FlightLoad`:** só no solo (parado, freio de estacionamento, motores cortados); depois do load o app reaplica combustível, payload e panes do banco.
+2. **`FlightPlanLoad`:** padrão no briefing, com opção "Carregar rota no GPS do simulador" (marcada); **só origem e destino da perna ativa**, sem rota completa.
+3. **Flow API:** teleporte e Back On Track após o off-block ou em voo invalidam como o slew; `PLANE_CRASH` encerra como acidente (aeronave AOG, seguro/resgate), com ~10 s de carência no carregamento.
+4. **Alertas no sim (modular por nível de realismo):** vibração do controle em voo (toque duro, estol, overspeed, pneu); destaque de instrumento só no modo assistido; `DialogAction` só no solo (em voo, só som curto).
+5. **`FailureAction` com `HealthPercent`:** testar como camada complementar (`IFailureDriver`, estratégia por sistema registrada no JSON da aeronave), com `TOGGLE_*`/`FUELSYSTEM_*` como fallback.
+
 ## 4. Próximos passos
 1. Testes no MSFS: `FlightSave` ao fim de um voo + `FlightLoad` pelo app; `SubscribeToFlowEvent` (teleporte pelo mapa, Back On Track, replay, crash); `ExecuteAction` com `DialogAction` e `FailureAction`; `FlightPlanLoad` com um `.PLN` simples.
 2. Spec para o Gemini da Flow API (integridade e acidente) — encaixa na SLEW-INTEGRIDADE e na troca do `CRASH FLAG`.

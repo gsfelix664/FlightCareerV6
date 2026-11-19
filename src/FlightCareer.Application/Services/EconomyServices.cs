@@ -1,4 +1,5 @@
 using System;
+using FlightCareer.Domain.Entities;
 
 namespace FlightCareer.Application.Services
 {
@@ -65,6 +66,26 @@ namespace FlightCareer.Application.Services
         public static double CalculatePayout(double basePrice)
         {
             return Math.Round(basePrice * PAYOUT_RATE, 2);
+        }
+
+        /// <summary>
+        /// Verifica se a aeronave possui seguro ativo contra o relógio de carreira informado.
+        /// </summary>
+        public static bool IsInsured(PilotAircraft aircraft, DateTime careerClock)
+        {
+            return aircraft.InsuranceExpirationDate.HasValue && aircraft.InsuranceExpirationDate.Value > careerClock;
+        }
+
+        /// <summary>
+        /// Calcula a nova data de validade de 30 dias de seguro a partir do relógio de carreira.
+        /// Se já houver seguro ativo, estende por mais 30 dias a partir da validade atual.
+        /// </summary>
+        public static DateTime CalculateNewExpirationDate(DateTime? currentExpiration, DateTime careerClock)
+        {
+            var baseDate = currentExpiration.HasValue && currentExpiration.Value > careerClock
+                ? currentExpiration.Value
+                : careerClock;
+            return baseDate.AddDays(30);
         }
     }
 

@@ -186,5 +186,51 @@ namespace FlightCareer.Tests.Components
                 Assert.Equal(1200.0, part.FlaggedAirframeHours);
             }
         }
+
+        [Fact]
+        public async Task Banco_antigo_recebe_coluna_CareerClockUtc_na_tabela_Pilots()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+            var pilotId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                // Simula tabela de pilotos em banco antigo sem a coluna CareerClockUtc
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE Pilots DROP COLUMN CareerClockUtc;");
+
+                // Insere piloto legado sem relógio de carreira
+                await db.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO Pilots (Id, Name, CompanyName, InitialBaseICAO, CurrentAirportICAO, Balance, Difficulty, TotalHours, ExperiencePoints, Rank, PilotCategory, HasPPLicense, HasCPLicense, HasIFRRating, HasMultiEngineRating, HasATPLicense, HasCFIInstructor) " +
+                    "VALUES ({0}, 'Piloto Legado', 'Voe Bem', 'SBMT', 'SBMT', 50000, 0, 100, 500, 'Private Pilot', 1, 1, 0, 0, 0, 0, 0)",
+                    pilotId);
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                // Aplica EnsureSchemaUpdatedAsync, que adiciona a coluna e inicializa com timestamp UTC
+                await db.EnsureSchemaUpdatedAsync();
+                await db.EnsureSchemaUpdatedAsync(); // Idempotente
+
+                var pilot = await db.Pilots.FirstOrDefaultAsync(p => p.Id == pilotId);
+                Assert.NotNull(pilot);
+                Assert.True(pilot.CareerClockUtc > DateTime.MinValue, "CareerClockUtc deve ser preenchido pela migração.");
+
+                // Testa persistência e atualização normal
+                var advancedClock = pilot.CareerClockUtc.AddHours(12.0);
+                pilot.CareerClockUtc = advancedClock;
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                var pilot = await db.Pilots.FirstOrDefaultAsync(p => p.Id == pilotId);
+                Assert.NotNull(pilot);
+                Assert.True(pilot.CareerClockUtc > DateTime.MinValue);
+            }
+        }
     }
 }

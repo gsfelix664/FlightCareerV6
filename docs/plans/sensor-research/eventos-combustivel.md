@@ -49,6 +49,11 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Fuel System Events](http
 2. **Decidido (2026-11-16): cobra e aceita.** Caminhão de combustível do sim (`REQUEST_FUEL_KEY`): no solo antes do voo, o app detecta o evento e a subida da quantidade, **cobra a diferença ao preço do aeroporto** (`FuelPriceService`, transação "Combustível (caminhão do sim)"), atualiza `PilotAircraft.FuelAmount` e só então a sincronização da COMBUSTIVEL-REAL roda (sem devolver o valor antigo). Subida sem o evento continua sendo sincronizada de volta; em voo continua invalidando.
 3. Panes de válvula/bomba/linha pelos eventos `FUELSYSTEM_*` (efeito no sistema, sem mexer no seletor)?
 
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+1. **`REPAIR_AND_REFUEL` em voo ou após o off-block:** invalida o voo e reinjeta o combustível do banco e as panes. No solo antes do voo: não invalida, mas a COMBUSTIVEL-REAL devolve o combustível do banco e reaplica as panes.
+2. (complemento) Caminhão: janela autorizada aberta no `REQUEST_FUEL_KEY` (solo, motores cortados), rollback suspenso enquanto sobe, cobrança quando estabiliza ~3 s.
+3. **Panes `FUELSYSTEM_*`:** sim — bomba (`FUELSYSTEM_PUMP_OFF/SET`) e válvula/linha (`FUELSYSTEM_VALVE_CLOSE/SET`) atuam na camada interna, sem mexer no seletor da cabine.
+
 ## 4. Próximos passos
 1. Teste no MSFS: `FUELSYSTEM_VALVE_SET`/`PUMP_SET` no C172 (índices pelo Fuel System Debug), receber `REPAIR_AND_REFUEL` e `ADD_FUEL_QUANTITY`, caminhão de combustível numa vaga.
 2. Mapa de combustível por aeronave (válvulas internas × seletor, bombas), junto com o mapa elétrico.

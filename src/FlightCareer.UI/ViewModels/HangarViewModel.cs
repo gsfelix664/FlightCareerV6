@@ -5,6 +5,7 @@ using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
 using FlightCareer.Domain.Parts;
+using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Views;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,8 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private ObservableCollection<PilotAircraftWrapper> _fleet = new();
         [ObservableProperty] private PilotAircraftWrapper? _selectedAircraft;
         [ObservableProperty] private bool _isMonitoring;
+        [ObservableProperty] private string _careerDateText = string.Empty;
+        private DateTime _careerClock = DateTime.UtcNow;
 
         public string FleetCountText => Fleet.Count == 1 ? "1 aeronave" : $"{Fleet.Count} aeronaves";
 
@@ -66,6 +69,9 @@ namespace FlightCareer.UI.ViewModels
                 .FirstOrDefaultAsync(p => p.Id == _pilotId);
             if (pilot == null) return;
 
+            _careerClock = pilot.CareerClockUtc;
+            CareerDateText = $"Dia da carreira: {_careerClock:dd/MM/yyyy}";
+
             // Aeronaves novas (compra / criação de piloto) recebem componentes; danos gravados fora do voo
             // (ex.: crash no pouso pelo FlightService) são aplicados às barras.
             bool changed = false;
@@ -89,7 +95,7 @@ namespace FlightCareer.UI.ViewModels
             var repair = RepairComponentCommand;
             var wrapped = pilot.Hangar
                 .OrderBy(a => a.Prefix)
-                .Select(a => new PilotAircraftWrapper(a, _catalog, repair) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
             // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
@@ -157,7 +163,7 @@ namespace FlightCareer.UI.ViewModels
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
             Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
-            Func<AppDbContext, Task>? applyInContext = null, Func<int>? getFlaggedCount = null)
+            Func<AppDbContext, Task>? applyInContext = null, Func<int>? getFlaggedCount = null, double downtimeHours = 0.0)
         {
             if (SelectedAircraft == null) return false;
             var aircraftId = SelectedAircraft.Aircraft.Id;
@@ -180,6 +186,15 @@ namespace FlightCareer.UI.ViewModels
             }
 
             pilot.Balance -= cost;
+            aircraft.Pilot = pilot;
+
+            if (downtimeHours > 0.0)
+            {
+                pilot.CareerClockUtc = CareerClock.Advance(pilot.CareerClockUtc, downtimeHours);
+                _careerClock = pilot.CareerClockUtc;
+                CareerDateText = $"Dia da carreira: {_careerClock:dd/MM/yyyy}";
+            }
+
             apply(aircraft, aircraft.Components);
             if (applyInContext != null) await applyInContext(context);
             LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
@@ -233,10 +248,47 @@ namespace FlightCareer.UI.ViewModels
         private double Hours(PilotAircraft a) => a.CurrentAirframeHours;
         private AircraftComponent? Find(List<AircraftComponent> list, ComponentKind kind) => list.FirstOrDefault(c => c.Kind == kind);
 
-        private void RepairKind(PilotAircraft aircraft, List<AircraftComponent> components, ComponentKind kind)
+        private void RepairKind(PilotAircraft aircraft, List<AircraftComponent> components, ComponentKind kind, DateTime? careerNow = null)
         {
             var c = Find(components, kind);
             if (c != null) ComponentMaintenance.Repair(c, Hours(aircraft), _random, _catalog.Visibility);
+
+            var mapping = PartComponentMapping.CreateDefault();
+            var now = careerNow ?? aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+            foreach (var part in aircraft.Parts)
+            {
+                var def = _partCatalog.Get(part.PartId);
+                if (def == null) continue;
+                if (mapping.ResolveComponentKind(def.Group) == kind)
+                {
+                    part.Health = 100.0;
+                    part.HoursSinceReplacement = 0.0;
+                    part.CyclesSinceReplacement = 0;
+                    part.LastReplacedAirframeHours = Hours(aircraft);
+                    part.LastReplacedAtUtc = now;
+                    part.IsBroken = false;
+                    part.BrokenAtUtc = null;
+                }
+            }
+        }
+
+        private double ResolveDowntimeForKind(ComponentKind kind)
+        {
+            if (kind == ComponentKind.Engine) return 24.0;
+            var mapping = PartComponentMapping.CreateDefault();
+            double maxDowntime = 0.0;
+            if (SelectedAircraft != null)
+            {
+                foreach (var part in SelectedAircraft.Aircraft.Parts)
+                {
+                    var def = _partCatalog.Get(part.PartId);
+                    if (def != null && mapping.ResolveComponentKind(def.Group) == kind && def.DowntimeHours != null && def.DowntimeHours.Count > 0)
+                    {
+                        maxDowntime = Math.Max(maxDowntime, def.DowntimeHours.Max());
+                    }
+                }
+            }
+            return maxDowntime > 0.0 ? maxDowntime : CareerClock.DefaultRepairDowntimeHours;
         }
 
         /// <summary>Efeitos regulatórios de reparar certos componentes (contadores das inspeções e TBO).</summary>
@@ -287,7 +339,8 @@ namespace FlightCareer.UI.ViewModels
                     ApplyRegulatoryReset(aircraft, kind);
                 },
                 kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
-                successMessage: $"{row.Name} restaurado(a) a 100%.");
+                successMessage: $"{row.Name} restaurado(a) a 100%.",
+                downtimeHours: ResolveDowntimeForKind(kind));
         }
 
         // ------------------------------------------------------------------ Panes persistentes
@@ -333,7 +386,8 @@ namespace FlightCareer.UI.ViewModels
                         d.IsResolved = true;
                         d.ResolvedAtUtc = DateTime.UtcNow;
                     }
-                });
+                },
+                downtimeHours: CareerClock.DefaultRepairDowntimeHours);
         }
 
         [RelayCommand]
@@ -359,7 +413,8 @@ namespace FlightCareer.UI.ViewModels
                     }
                     PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, kinds);
                 },
-                successMessage: "Todos os componentes foram restaurados a 100%.");
+                successMessage: "Todos os componentes foram restaurados a 100%.",
+                downtimeHours: rows.Select(r => ResolveDowntimeForKind(r.Kind)).DefaultIfEmpty(CareerClock.DefaultRepairDowntimeHours).Max());
         }
 
         [RelayCommand]
@@ -370,6 +425,7 @@ namespace FlightCareer.UI.ViewModels
 
             await using var context = await _contextFactory.CreateDbContextAsync();
             var aircraft = await context.PilotAircrafts
+                .Include(a => a.Pilot)
                 .Include(a => a.Components)
                 .Include(a => a.Parts)
                 .FirstOrDefaultAsync(a => a.Id == aircraftId);
@@ -382,7 +438,7 @@ namespace FlightCareer.UI.ViewModels
                 def => def.VisibleOnWalkaround,
                 PartFlagSource.Walkaround,
                 aircraft.CurrentAirframeHours,
-                DateTime.UtcNow);
+                aircraft.Pilot?.CareerClockUtc ?? _careerClock);
 
             await context.SaveChangesAsync();
             await LoadFleetAsync(aircraftId);
@@ -425,10 +481,11 @@ namespace FlightCareer.UI.ViewModels
                         def => mapping.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        DateTime.UtcNow);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
                 successMessage: "Troca de óleo concluída.",
-                getFlaggedCount: () => flagged);
+                getFlaggedCount: () => flagged,
+                downtimeHours: CareerClock.Inspection50hDowntimeHours);
         }
 
         [RelayCommand]
@@ -455,10 +512,11 @@ namespace FlightCareer.UI.ViewModels
                         _ => true,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        DateTime.UtcNow);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
                 successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.",
-                getFlaggedCount: () => flagged);
+                getFlaggedCount: () => flagged,
+                downtimeHours: CareerClock.Inspection100hDowntimeHours);
         }
 
         [RelayCommand]
@@ -483,10 +541,11 @@ namespace FlightCareer.UI.ViewModels
                         def => mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        DateTime.UtcNow);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
                 successMessage: "Revisão de ignição concluída.",
-                getFlaggedCount: () => flagged);
+                getFlaggedCount: () => flagged,
+                downtimeHours: CareerClock.Inspection500hDowntimeHours);
         }
 
         [RelayCommand]
@@ -512,7 +571,8 @@ namespace FlightCareer.UI.ViewModels
                     ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
                 },
                 kind: DialogKind.Warning,
-                successMessage: "Overhaul concluído. Motor retificado.");
+                successMessage: "Overhaul concluído. Motor retificado.",
+                downtimeHours: CareerClock.OverhaulDowntimeHours);
         }
 
         [RelayCommand]
@@ -584,11 +644,11 @@ namespace FlightCareer.UI.ViewModels
                 "CONTRATAÇÃO SEGURO",
                 (aircraft, _) =>
                 {
-                    var baseDate = aircraft.InsuranceExpirationDate > DateTime.Now ? aircraft.InsuranceExpirationDate!.Value : DateTime.Now;
-                    aircraft.InsuranceExpirationDate = baseDate.AddDays(30);
+                    var clock = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                    aircraft.InsuranceExpirationDate = FlightCareer.Application.Services.InsuranceService.CalculateNewExpirationDate(aircraft.InsuranceExpirationDate, clock);
                 },
                 category: "Seguro",
-                successMessage: "Seguro contratado.");
+                successMessage: "Seguro contratado por 30 dias de carreira.");
         }
 
         [RelayCommand]

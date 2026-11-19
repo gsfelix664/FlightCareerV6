@@ -24,6 +24,12 @@ namespace FlightCareer.Domain.Entities
         public string Rank { get; set; } = "Student Pilot";
         public Guid? ActiveAircraftId { get; set; }
 
+        /// <summary>
+        /// Relógio simulado de carreira UTC. Avança somente com tempo voado e paradas de oficina no Hangar,
+        /// nunca pelo relógio do computador, para não penalizar jogadores inativos na vida real.
+        /// </summary>
+        public DateTime CareerClockUtc { get; set; } = DateTime.UtcNow;
+
         // Progressão Regulatória da Empresa (Categorias 1 a 5)
         public PilotCategory PilotCategory { get; set; } = PilotCategory.Category1_FlightSchool;
 

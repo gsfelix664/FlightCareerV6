@@ -174,6 +174,10 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Partida automática (Ctrl+E / `ENGINE_AUTO_START`):** observada durante voo monitorado via `OnObservedEvent`. Não invalida o voo; aplica penalidade de 10% no XP total via `ProcedurePenalties.ApplyAutoStartPenalty` e acrescenta sufixo explicativo no resumo.
 - **Caminhão de combustível do sim (`REQUEST_FUEL_KEY` / `FuelTruckDelivery`):** observado no solo fora de voo com aeronave vigiada. Acompanha subida de combustível e estabilidade por 10 s; cobra a entrega ao preço do aeroporto atual do piloto (`FuelPriceService.GetCurrentPrice`), atualiza `PilotAircraft.FuelAmount` e lança `FinancialTransaction` ("Combustível"). Ao iniciar monitoramento com entrega armada, fecha via `ForceComplete` e cobra antes da sincronização de combustível, evitando devolução do valor antigo. Decolagem ou timeout de 10 min sem subida expiram sem cobrança; descidas são ignoradas.
 
+### Calendário de jogo e relógio de carreira (CALENDARIO-JOGO)
+- **Relógio de carreira (`Pilot.CareerClockUtc` / `CareerClock`):** avança exclusivamente com tempo voado (duração simulada do voo + 0,5 h de solo/turnaround via `CareerClock.AdvanceFlight`) e tempo de parada de oficina no Hangar (inspeções e serviços: 50h/12,5h → 2 h, 100h/25h → 8 h, 500h/125h → 6 h, retífica → 72 h; reparos com base em `downtimeHours` das peças ou 2 h padrão via `CareerClock.Advance`). Nunca avança com o simulador fechado ou pelo relógio do Windows, evitando penalizar jogadores inativos.
+- **Vida em meses de peças e Seguro aeronáutico:** a vida por calendário das peças (`PartDefinition.CalendarLifeMonths`) avaliada em `PartInspectionFlags.Evaluate` e a contratação/expiração de seguro de 30 dias (`InsuranceService.IsInsured`, `CalculateNewExpirationDate`, `PilotAircraftWrapper.IsInsured`) comparam suas validades contra o relógio de carreira (`CareerClockUtc`). A data de carreira é exibida no painel da frota no Hangar (`Dia da carreira: dd/MM/yyyy`).
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

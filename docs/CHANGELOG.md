@@ -2424,3 +2424,26 @@
   - `docs/plans/lista-pecas-hangar.md` regenerado com os 153 componentes e contagens por modelo.
   - Novos testes unitários: `PartPricing_MultiplicadorPorClasse`, `Catalogo_CalibracaoDoUsuario`, `Tbo_Pistao500_Turbina900` e atualização de `Catalogo_Motor_CalibracaoDoUsuario`, `MaintenancePricing_MesmosValoresDaUI`, `PartEconomyBalanceTests` (ambos verdes dentro das faixas originais de meta econômica).
   - Build 0 erros, `dotnet test` 624/624 aprovados (100%), fuzz testing em 46 aeronaves (230 voos) 100% aprovados sem violações.
+
+## 2026-11-19 - Calendário de jogo (Gemini)
+- **Relógio de Carreira Simulada (`Domain/Services/CareerClock.cs`)**:
+  - Implementado o relógio de carreira por piloto (`Pilot.CareerClockUtc`), desvinculando prazos e seguros do relógio do Windows para não penalizar jogadores que passam semanas sem abrir o simulador.
+  - Regras de avanço puras em `CareerClock`:
+    - Fim de voo ou cancelamento ativo: avança pela duração simulada do voo na célula + 0,5 h de solo/turnaround (`AdvanceFlight`).
+    - Paradas de oficina no Hangar: avança pelo tempo de indisponibilidade (`downtimeHours` das peças reparadas ou 2,0 h padrão; inspeção 50h/12,5h acelerada → 2 h; inspeção 100h/25h acelerada → 8 h; revisão 500h/125h acelerada → 6 h; retífica de motor/TBO → 72 h).
+    - O relógio nunca avança com o simulador ou aplicativo fechados.
+- **Integração com Peças e Inspeções (`Domain/Parts/PartInspectionFlags.cs`)**:
+  - Parâmetro de data renomeado para `careerNow` em `Evaluate` e `ApplyInspection`.
+  - Avaliação de vida por meses (`CalendarLifeMonths`) agora compara o tempo transcorrido a partir de `part.LastReplacedAtUtc` contra o relógio de carreira.
+  - Substituições e provisionamento de peças gravam `LastReplacedAtUtc` usando o relógio de carreira.
+- **Seguro Aeronáutico e Interface do Hangar (`HangarViewModel`, `PilotAircraftWrapper`, `HangarView.xaml`)**:
+  - A contratação e renovação de apólice de 30 dias de seguro (`InsuranceService.CalculateNewExpirationDate`) e a verificação de cobertura (`InsuranceService.IsInsured`, `PilotAircraftWrapper.IsInsured`) usam estritamente o relógio de carreira.
+  - O cabeçalho de frota do Hangar exibe discretamente a data atual de carreira (`Dia da carreira: dd/MM/yyyy`).
+- **Banco de Dados e Persistência (`AppDbContext.EnsureSchemaUpdatedAsync`)**:
+  - Adicionada coluna `CareerClockUtc TEXT NULL` na tabela `Pilots` com backfill automático para a data atual em bancos legados.
+- **Testes e Aceitação**:
+  - 5 novos testes unitários em `src/FlightCareer.Tests/Services/CareerClockTests.cs`.
+  - 1 novo teste de migração de banco legado em `src/FlightCareer.Tests/Components/ComponentPersistenceTests.cs`.
+  - Build 0 erros, `dotnet test` 618/618 aprovados.
+  - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.
+  - Não testado no MSFS.
