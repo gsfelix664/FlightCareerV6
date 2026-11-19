@@ -284,6 +284,13 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;",
 
+                // Compressão de tempo ÷ 4: limites regulatórios de inspeção e TBO para carreiras existentes (CALIBRA-F4)
+                "UPDATE PilotAircrafts SET HoursUntilNext50hInspection = 12.0 WHERE HoursUntilNext50hInspection > 12.0;",
+                "UPDATE PilotAircrafts SET HoursUntilNext100hInspection = 25.0 WHERE HoursUntilNext100hInspection > 25.0;",
+                "UPDATE PilotAircrafts SET HoursUntilNext500hInspection = 125.0 WHERE HoursUntilNext500hInspection > 125.0;",
+                "UPDATE PilotAircrafts SET EngineTboRemainingHours = 900.0 WHERE EngineTboRemainingHours > 900.0 AND (EXISTS (SELECT 1 FROM AircraftComponents ac WHERE ac.PilotAircraftId = PilotAircrafts.Id AND ac.Kind = 3) OR EXISTS (SELECT 1 FROM AircraftTypes at WHERE at.Id = PilotAircrafts.AircraftTypeId AND (at.FuelType LIKE '%JET%' OR at.Type LIKE '%Turboprop%' OR at.Type LIKE '%Jet%')));",
+                "UPDATE PilotAircrafts SET EngineTboRemainingHours = 500.0 WHERE EngineTboRemainingHours > 500.0 AND NOT (EXISTS (SELECT 1 FROM AircraftComponents ac WHERE ac.PilotAircraftId = PilotAircrafts.Id AND ac.Kind = 3) OR EXISTS (SELECT 1 FROM AircraftTypes at WHERE at.Id = PilotAircrafts.AircraftTypeId AND (at.FuelType LIKE '%JET%' OR at.Type LIKE '%Turboprop%' OR at.Type LIKE '%Jet%')));",
+
                 // Relógio de carreira por piloto (CALENDARIO-JOGO)
                 "ALTER TABLE Pilots ADD COLUMN CareerClockUtc TEXT NULL;",
                 "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';"

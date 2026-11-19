@@ -153,7 +153,8 @@ namespace FlightCareer.Tests.Parts
             Assert.True(actualCylLoss >= normalCylLoss * 3.0, $"Desgaste {actualCylLoss:F4} deveria ser >= {normalCylLoss * 3.0:F4}");
 
             // Pneus não sofrem com calor do CHT do motor
-            double normalTiresLoss = (70.0 / PartsCatalog.Get("tires.main")!.LifeHours) * tenMinutesHours;
+            var tireDef = PartsCatalog.Get("tires.main")!;
+            double normalTiresLoss = tireDef.LifeHours > 0 ? (70.0 / tireDef.LifeHours) * tenMinutesHours : 0.0;
             double actualTiresLoss = 100.0 - tiresPart.Health;
             Assert.Equal(normalTiresLoss, actualTiresLoss, 4);
 

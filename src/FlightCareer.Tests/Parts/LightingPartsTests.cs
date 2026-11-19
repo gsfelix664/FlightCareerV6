@@ -64,7 +64,7 @@ namespace FlightCareer.Tests.Parts
             var part = new AircraftPart { PartId = "lights.landing", Health = 100.0, HoursSinceReplacement = 0.0 };
 
             // Com light-landing-on = 1.0 (aceso) e 1h simulada:
-            // Perda esperada: 70.0 / 300.0 = 0.23333333333333334 %
+            // Perda esperada: 70.0 / 75.0 = 0.9333333333333333 % (vida comprimida por 4: 300 / 4 = 75 h)
             var frameAceso = CreateFrame(new Dictionary<string, double>
             {
                 ["light-landing-on"] = 1.0
@@ -72,7 +72,7 @@ namespace FlightCareer.Tests.Parts
 
             engine.ApplyTick(new[] { part }, frameAceso, 1.0, Array.Empty<string>(), null, null);
 
-            double expectedLoss = 70.0 / 300.0;
+            double expectedLoss = 70.0 / DefaultPartsCatalog.Get("lights.landing")!.LifeHours;
             Assert.Equal(100.0 - expectedLoss, part.Health, precision: 5);
             Assert.Equal(1.0, part.HoursSinceReplacement, precision: 5);
 

@@ -139,7 +139,7 @@ namespace FlightCareer.Application.Services
                 else if (aircraft.HoursUntilNext100hInspection <= 0)
                 {
                     aircraft.IsInterdicted = true;
-                    aircraft.InterdictionReason = "Inspeção Regulatória de 100 Horas Vencida";
+                    aircraft.InterdictionReason = "Inspeção Anual Vencida";
                 }
                 
                 // 2. Atualizar Piloto

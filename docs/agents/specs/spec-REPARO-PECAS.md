@@ -13,6 +13,9 @@ Decisão do usuário (2026-11-19): "na vida real não tem como trocar apenas 5 %
 - Marcas da inspeção: `Domain/Parts/PartInspectionFlags.Evaluate` (amarelo: vida ≥ 90 % h/ciclos/meses ou saúde < 40 %; vermelho: quebrada).
 - Calendário de carreira (`CareerClock`, CALENDARIO-JOGO): serviços com tempo parado avançam o relógio — use-o se já estiver na base.
 
+- Já na base: `HangarViewModel.RepairKind` (da CALENDARIO-JOGO) zera **todas** as peças do grupo cobrando o preço proporcional antigo, e `ResolveDowntimeForKind` dá a parada; substitua isso pelo plano abaixo. Preço da peça hoje: `PartPricing.CalculatePartPrice(def, classKey)` com a classe de `Domain/Economy/AircraftEconomyClass`. Relógio: `CareerClock` + parâmetro `downtimeHours` do `RunPaidServiceAsync`.
+- Rode **`dotnet build src/FlightCareer.slnx`** (o `dotnet test` não compila a UI — lição 2026-11-19).
+
 ## Contrato
 - **Novo** `Domain/Parts/PartReplacementPlanner.cs` (lógica pura):
   ```csharp

@@ -315,7 +315,7 @@ namespace FlightCareer.UI.ViewModels
                 else if (_aircraft.HoursUntilNext100hInspection <= 0)
                 {
                     _aircraft.IsInterdicted = true;
-                    _aircraft.InterdictionReason = "Inspeção de 100h Vencida durante Translado";
+                    _aircraft.InterdictionReason = "Inspeção Anual Vencida durante Translado";
                 }
 
                 // 4. Registrar transação financeira

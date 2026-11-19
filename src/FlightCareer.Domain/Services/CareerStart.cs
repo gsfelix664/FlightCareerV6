@@ -14,9 +14,10 @@ namespace FlightCareer.Domain.Services
 
         public const double DefaultStartingAirframeHours = 5000.0;
         public const double DefaultStartingFuelFraction = 0.5;
-        public const double DefaultStartingTboRemainingHours = 1800.0;
-        public const double DefaultStarting50hHours = 50.0;
-        public const double DefaultStarting100hHours = 100.0;
+        public const double DefaultStartingTboRemainingHours = FlightCareer.Domain.Components.MaintenancePricing.PistonTboHours;
+        public const double DefaultStarting50hHours = FlightCareer.Domain.Components.MaintenancePricing.OilChangeIntervalHours;
+        public const double DefaultStarting100hHours = FlightCareer.Domain.Components.MaintenancePricing.AnnualInspectionIntervalHours;
+        public const double DefaultStarting500hHours = FlightCareer.Domain.Components.MaintenancePricing.IgnitionRevisionIntervalHours;
 
         public static double GetInitialBalance(DifficultyMode difficulty) => difficulty switch
         {

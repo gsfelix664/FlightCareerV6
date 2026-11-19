@@ -185,7 +185,7 @@ namespace FlightCareer.Application.Simulation
                         double airframeHours = CareerStart.DefaultStartingAirframeHours;
                         double hoursUntil50h = CareerStart.DefaultStarting50hHours;
                         double hoursUntil100h = CareerStart.DefaultStarting100hHours;
-                        double hoursUntil500h = 500.0;
+                        double hoursUntil500h = MaintenancePricing.IgnitionRevisionIntervalHours;
                         double tboRemaining = CareerStart.DefaultStartingTboRemainingHours;
                         double remainingDowntimeHours = 0.0;
                         var currentAirport = defaultHub;
@@ -593,7 +593,7 @@ namespace FlightCareer.Application.Simulation
                 balance -= cost;
                 cumMaintCost += cost;
                 maintEvents++;
-                hoursUntil100h = 100.0;
+                hoursUntil100h = MaintenancePricing.AnnualInspectionIntervalHours;
                 remainingDowntimeHours += CareerClock.Inspection100hDowntimeHours;
             }
 
@@ -609,7 +609,7 @@ namespace FlightCareer.Application.Simulation
                 balance -= cost;
                 cumMaintCost += cost;
                 maintEvents++;
-                tboRemaining = 1800.0;
+                tboRemaining = MaintenancePricing.TboHoursFor(EngineClassResolver.FromAircraftType(aircraftType));
                 remainingDowntimeHours += CareerClock.OverhaulDowntimeHours;
             }
 
@@ -629,7 +629,7 @@ namespace FlightCareer.Application.Simulation
                     balance -= cost;
                     cumMaintCost += cost;
                     maintEvents++;
-                    hoursUntil50h = 50.0;
+                    hoursUntil50h = MaintenancePricing.OilChangeIntervalHours;
                     remainingDowntimeHours += CareerClock.Inspection50hDowntimeHours;
                 }
             }
@@ -642,7 +642,7 @@ namespace FlightCareer.Application.Simulation
                     balance -= cost;
                     cumMaintCost += cost;
                     maintEvents++;
-                    hoursUntil500h = 500.0;
+                    hoursUntil500h = MaintenancePricing.IgnitionRevisionIntervalHours;
                     remainingDowntimeHours += CareerClock.Inspection500hDowntimeHours;
                 }
             }
@@ -743,10 +743,10 @@ namespace FlightCareer.Application.Simulation
                 }
 
                 airframeHours = (chosenBuyPrice == newPrice) ? 0.0 : 2500.0;
-                hoursUntil50h = 50.0;
-                hoursUntil100h = 100.0;
-                hoursUntil500h = 500.0;
-                tboRemaining = 1800.0;
+                hoursUntil50h = MaintenancePricing.OilChangeIntervalHours;
+                hoursUntil100h = MaintenancePricing.AnnualInspectionIntervalHours;
+                hoursUntil500h = MaintenancePricing.IgnitionRevisionIntervalHours;
+                tboRemaining = MaintenancePricing.TboHoursFor(EngineClassResolver.FromAircraftType(targetType));
             }
         }
 

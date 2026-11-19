@@ -2,8 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Persistence;
@@ -27,6 +29,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly ComponentCatalog _catalog;
         private readonly PartCatalog _partCatalog;
+        private readonly AircraftLimitResolver? _limitResolver;
         private readonly ISimConnectService? _simConnect;
         private readonly Services.FlightMonitor? _flightMonitor;
         private readonly IRandomSource _random = new SystemRandomSource();
@@ -45,13 +48,15 @@ namespace FlightCareer.UI.ViewModels
             ComponentCatalog catalog,
             ISimConnectService? simConnect = null,
             Services.FlightMonitor? flightMonitor = null,
-            PartCatalog? partCatalog = null)
+            PartCatalog? partCatalog = null,
+            AircraftLimitResolver? limitResolver = null)
         {
             _contextFactory = contextFactory;
             _catalog = catalog;
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
+            _limitResolver = limitResolver;
         }
 
         public async Task InitializeAsync(Guid pilotId)
@@ -66,6 +71,7 @@ namespace FlightCareer.UI.ViewModels
             var pilot = await context.Pilots
                 .Include(p => p.Hangar).ThenInclude(a => a.AircraftType)
                 .Include(p => p.Hangar).ThenInclude(a => a.Components)
+                .Include(p => p.Hangar).ThenInclude(a => a.Parts)
                 .FirstOrDefaultAsync(p => p.Id == _pilotId);
             if (pilot == null) return;
 
@@ -95,7 +101,7 @@ namespace FlightCareer.UI.ViewModels
             var repair = RepairComponentCommand;
             var wrapped = pilot.Hangar
                 .OrderBy(a => a.Prefix)
-                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a)) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
             // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
@@ -137,6 +143,17 @@ namespace FlightCareer.UI.ViewModels
             {
                 System.Diagnostics.Debug.WriteLine($"[Hangar] Erro ao carregar peças marcadas: {ex.Message}");
             }
+        }
+
+        private string ResolveClassKey(PilotAircraft a)
+        {
+            var model = a.AircraftType?.Model ?? string.Empty;
+            var engineClass = _catalog.ResolveEngineClass(a.AircraftType);
+            var profile = _limitResolver?.FindById(model) ?? _limitResolver?.FindProfile(model, model);
+            var features = profile?.Features ?? Array.Empty<string>();
+            int engineCount = profile?.EngineCount ?? 1;
+            double price = a.AircraftType?.PurchasePrice ?? 0.0;
+            return AircraftEconomyClass.Resolve(model, engineClass.ToString(), engineCount, features, price);
         }
 
         // ------------------------------------------------------------------ Infraestrutura de serviços
@@ -301,7 +318,7 @@ namespace FlightCareer.UI.ViewModels
                     aircraft.EngineTboRemainingHours = _catalog.Get(ComponentKind.Engine).LifeHoursFor(engineClass);
                     break;
                 case ComponentKind.Ignition:
-                    aircraft.HoursUntilNext500hInspection = 500.0;
+                    aircraft.HoursUntilNext500hInspection = MaintenancePricing.IgnitionRevisionIntervalHours;
                     break;
             }
             ClearInterdictionIfResolved(aircraft);
@@ -321,26 +338,64 @@ namespace FlightCareer.UI.ViewModels
         [RelayCommand]
         private async Task RepairComponent(ComponentRowViewModel? row)
         {
-            if (row == null || !CanOperate() || !row.CanRepair) return;
+            if (row == null || !CanOperate() || !row.CanRepair || SelectedAircraft == null) return;
             var kind = row.Kind;
             string extra = kind == ComponentKind.Engine
                 ? "\nO motor volta a 0 h desde o overhaul e o TBO é restaurado."
                 : string.Empty;
 
-            await RunPaidServiceAsync(
-                row.ServiceName,
-                $"{row.ServiceName} em {SelectedAircraft!.Prefix}: {row.Name.ToLowerInvariant()} de {row.RangeText} para 100%.{extra}",
-                row.RepairCost,
-                row.ServiceName.ToUpperInvariant(),
-                (aircraft, components) =>
+            if (PartComponentBridge.HasParts(SelectedAircraft.Aircraft))
+            {
+                var plan = row.ReplacementPlan;
+                if (plan == null || plan.Items.Count == 0) return;
+
+                int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+                string list = string.Join("\n", plan.Items.Select(i =>
                 {
-                    RepairKind(aircraft, components, kind);
-                    PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind> { kind });
-                    ApplyRegulatoryReset(aircraft, kind);
-                },
-                kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
-                successMessage: $"{row.Name} restaurado(a) a 100%.",
-                downtimeHours: ResolveDowntimeForKind(kind));
+                    string name = (i.Def.PerEngine && engineCount > 1 && i.Part.EngineIndex > 0)
+                        ? $"{i.Def.Name} (motor {i.Part.EngineIndex})"
+                        : i.Def.Name;
+                    return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
+                }));
+
+                await RunPaidServiceAsync(
+                    row.ServiceName,
+                    $"{row.ServiceName} em {SelectedAircraft.Prefix}:\n{list}{extra}",
+                    plan.TotalCost,
+                    row.ServiceName.ToUpperInvariant(),
+                    (aircraft, components) =>
+                    {
+                        var partIds = plan.Items.Select(i => i.Part.Id).ToHashSet();
+                        var partsToApply = aircraft.Parts.Where(p => partIds.Contains(p.Id)).ToList();
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                        if (kind == ComponentKind.Engine)
+                        {
+                            ApplyRegulatoryReset(aircraft, kind);
+                        }
+                    },
+                    kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
+                    successMessage: $"{row.Name}: {plan.Items.Count} peça(s) substituída(s) a 100%.",
+                    downtimeHours: plan.DowntimeHours);
+            }
+            else
+            {
+                await RunPaidServiceAsync(
+                    row.ServiceName,
+                    $"{row.ServiceName} em {SelectedAircraft.Prefix}: {row.Name.ToLowerInvariant()} de {row.RangeText} para 100%.{extra}",
+                    row.RepairCost,
+                    row.ServiceName.ToUpperInvariant(),
+                    (aircraft, components) =>
+                    {
+                        RepairKind(aircraft, components, kind);
+                        PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind> { kind });
+                        ApplyRegulatoryReset(aircraft, kind);
+                    },
+                    kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
+                    successMessage: $"{row.Name} restaurado(a) a 100%.",
+                    downtimeHours: ResolveDowntimeForKind(kind));
+            }
         }
 
         // ------------------------------------------------------------------ Panes persistentes
@@ -394,27 +449,72 @@ namespace FlightCareer.UI.ViewModels
         private async Task RepairAll()
         {
             if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.HasRepairs) return;
-            var rows = SelectedAircraft.Components.Where(r => r.CanRepair).ToList();
-            string list = string.Join("\n", rows.Select(r => $"• {r.Name}: {r.RangeText} → 100% ({r.RepairCost:C0})"));
 
-            await RunPaidServiceAsync(
-                "Reparar tudo",
-                $"Serviços em {SelectedAircraft.Prefix}:\n{list}",
-                SelectedAircraft.TotalRepairCost,
-                "REPARO COMPLETO",
-                (aircraft, components) =>
+            if (PartComponentBridge.HasParts(SelectedAircraft.Aircraft))
+            {
+                var rows = SelectedAircraft.Components
+                    .Where(r => r.CanRepair && r.ReplacementPlan != null && r.ReplacementPlan.Items.Count > 0)
+                    .ToList();
+                if (rows.Count == 0) return;
+
+                var allItems = rows.SelectMany(r => r.ReplacementPlan!.Items).ToList();
+                double totalCost = Math.Round(allItems.Sum(i => i.PartPrice + i.LaborCost), 2);
+                double maxDowntime = allItems.Count > 0 ? allItems.Max(i => i.DowntimeHours) : 0.0;
+
+                int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+                string list = string.Join("\n", allItems.Select(i =>
                 {
-                    var kinds = new HashSet<ComponentKind>();
-                    foreach (var r in rows)
+                    string name = (i.Def.PerEngine && engineCount > 1 && i.Part.EngineIndex > 0)
+                        ? $"{i.Def.Name} (motor {i.Part.EngineIndex})"
+                        : i.Def.Name;
+                    return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
+                }));
+
+                await RunPaidServiceAsync(
+                    "Reparar tudo",
+                    $"Serviços em {SelectedAircraft.Prefix}:\n{list}",
+                    totalCost,
+                    "REPARO COMPLETO",
+                    (aircraft, components) =>
                     {
-                        RepairKind(aircraft, components, r.Kind);
-                        ApplyRegulatoryReset(aircraft, r.Kind);
-                        kinds.Add(r.Kind);
-                    }
-                    PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, kinds);
-                },
-                successMessage: "Todos os componentes foram restaurados a 100%.",
-                downtimeHours: rows.Select(r => ResolveDowntimeForKind(r.Kind)).DefaultIfEmpty(CareerClock.DefaultRepairDowntimeHours).Max());
+                        var partIds = allItems.Select(i => i.Part.Id).ToHashSet();
+                        var partsToApply = aircraft.Parts.Where(p => partIds.Contains(p.Id)).ToList();
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+
+                        foreach (var r in rows)
+                        {
+                            ApplyRegulatoryReset(aircraft, r.Kind);
+                        }
+                    },
+                    successMessage: $"{allItems.Count} peça(s) substituída(s) a 100%.",
+                    downtimeHours: maxDowntime);
+            }
+            else
+            {
+                var rows = SelectedAircraft.Components.Where(r => r.CanRepair).ToList();
+                string list = string.Join("\n", rows.Select(r => $"• {r.Name}: {r.RangeText} → 100% ({r.RepairCost:C0})"));
+
+                await RunPaidServiceAsync(
+                    "Reparar tudo",
+                    $"Serviços em {SelectedAircraft.Prefix}:\n{list}",
+                    SelectedAircraft.TotalRepairCost,
+                    "REPARO COMPLETO",
+                    (aircraft, components) =>
+                    {
+                        var kinds = new HashSet<ComponentKind>();
+                        foreach (var r in rows)
+                        {
+                            RepairKind(aircraft, components, r.Kind);
+                            ApplyRegulatoryReset(aircraft, r.Kind);
+                            kinds.Add(r.Kind);
+                        }
+                        PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, kinds);
+                    },
+                    successMessage: "Todos os componentes foram restaurados a 100%.",
+                    downtimeHours: rows.Select(r => ResolveDowntimeForKind(r.Kind)).DefaultIfEmpty(CareerClock.DefaultRepairDowntimeHours).Max());
+            }
         }
 
         [RelayCommand]
@@ -463,27 +563,44 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Inspeção de 50 horas",
+                "Troca de óleo (12 h)",
                 "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a 100% e o motor tem a saúde medida com exatidão.",
                 SelectedAircraft.Cost50hInspection,
-                "INSPEÇÃO 50H",
+                "TROCA DE ÓLEO",
                 (aircraft, components) =>
                 {
-                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    if (PartComponentBridge.HasParts(aircraft))
+                    {
+                        var mapping = PartComponentMapping.CreateDefault();
+                        var oilParts = aircraft.Parts.Where(p =>
+                        {
+                            var def = _partCatalog.Get(p.PartId);
+                            return def != null && mapping.ResolveComponentKind(def.Group) == ComponentKind.Oil;
+                        }).ToList();
+
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(oilParts, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                    }
+                    else
+                    {
+                        RepairKind(aircraft, components, ComponentKind.Oil);
+                    }
+
                     ComponentMaintenance.Inspect(components.Where(c => c.Kind is ComponentKind.Engine or ComponentKind.Oil), Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    aircraft.HoursUntilNext50hInspection = MaintenancePricing.OilChangeIntervalHours;
                     ClearInterdictionIfResolved(aircraft);
 
-                    var mapping = PartComponentMapping.CreateDefault();
+                    var mappingInspection = PartComponentMapping.CreateDefault();
                     flagged = PartInspectionFlags.ApplyInspection(
                         aircraft.Parts,
                         _partCatalog,
-                        def => mapping.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
+                        def => mappingInspection.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Inspeção de 50 horas concluída.",
+                successMessage: "Troca de óleo concluída.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection50hDowntimeHours);
         }
@@ -494,16 +611,33 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Inspeção de 100 horas",
-                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de 100 h e 50 h são zerados. Reparos encontrados são orçados à parte.",
+                "Inspeção anual (25 h)",
+                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de inspeção anual (25 h) e troca de óleo (12 h) são zerados. Reparos encontrados são orçados à parte.",
                 SelectedAircraft.Cost100hInspection,
-                "INSPEÇÃO REGULATÓRIA 100H",
+                "INSPEÇÃO ANUAL (25 H)",
                 (aircraft, components) =>
                 {
-                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    if (PartComponentBridge.HasParts(aircraft))
+                    {
+                        var mapping = PartComponentMapping.CreateDefault();
+                        var oilParts = aircraft.Parts.Where(p =>
+                        {
+                            var def = _partCatalog.Get(p.PartId);
+                            return def != null && mapping.ResolveComponentKind(def.Group) == ComponentKind.Oil;
+                        }).ToList();
+
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(oilParts, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                    }
+                    else
+                    {
+                        RepairKind(aircraft, components, ComponentKind.Oil);
+                    }
+
                     ComponentMaintenance.Inspect(components, Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext100hInspection = 100.0;
-                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    aircraft.HoursUntilNext100hInspection = MaintenancePricing.AnnualInspectionIntervalHours;
+                    aircraft.HoursUntilNext50hInspection = MaintenancePricing.OilChangeIntervalHours;
                     ClearInterdictionIfResolved(aircraft);
 
                     flagged = PartInspectionFlags.ApplyInspection(
@@ -514,7 +648,7 @@ namespace FlightCareer.UI.ViewModels
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Inspeção de 100 horas concluída. Veja as barras: agora todos os valores são exatos.",
+                successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection100hDowntimeHours);
         }
@@ -525,16 +659,32 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.IsPiston) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Revisão de 500 horas",
+                "Revisão de ignição (125 h)",
                 "Revisão dos magnetos, platinados e troca de velas. A ignição volta a 100%.",
                 SelectedAircraft.Cost500hInspection,
-                "REVISÃO 500H / MAGNETOS",
+                "REVISÃO DE IGNIÇÃO",
                 (aircraft, components) =>
                 {
-                    RepairKind(aircraft, components, ComponentKind.Ignition);
-                    ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
-
                     var mapping = PartComponentMapping.CreateDefault();
+                    if (PartComponentBridge.HasParts(aircraft))
+                    {
+                        var ignParts = aircraft.Parts.Where(p =>
+                        {
+                            var def = _partCatalog.Get(p.PartId);
+                            return def != null && mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition;
+                        }).ToList();
+
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(ignParts, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                        ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
+                    }
+                    else
+                    {
+                        RepairKind(aircraft, components, ComponentKind.Ignition);
+                        ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
+                    }
+
                     flagged = PartInspectionFlags.ApplyInspection(
                         aircraft.Parts,
                         _partCatalog,
@@ -543,7 +693,7 @@ namespace FlightCareer.UI.ViewModels
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Revisão de 500 horas concluída.",
+                successMessage: "Revisão de ignição concluída.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection500hDowntimeHours);
         }
@@ -559,16 +709,36 @@ namespace FlightCareer.UI.ViewModels
                 "RETÍFICA GERAL / OVERHAUL TBO",
                 (aircraft, components) =>
                 {
-                    RepairKind(aircraft, components, ComponentKind.Engine);
-                    RepairKind(aircraft, components, ComponentKind.HotSection);
-                    RepairKind(aircraft, components, ComponentKind.Oil);
+                    if (PartComponentBridge.HasParts(aircraft))
+                    {
+                        var mapping = PartComponentMapping.CreateDefault();
+                        var overhaulParts = aircraft.Parts.Where(p =>
+                        {
+                            var def = _partCatalog.Get(p.PartId);
+                            if (def == null) return false;
+                            var kind = mapping.ResolveComponentKind(def.Group);
+                            return kind is ComponentKind.Engine or ComponentKind.HotSection or ComponentKind.Oil;
+                        }).ToList();
+
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(overhaulParts, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                        ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
+                    }
+                    else
+                    {
+                        RepairKind(aircraft, components, ComponentKind.Engine);
+                        RepairKind(aircraft, components, ComponentKind.HotSection);
+                        RepairKind(aircraft, components, ComponentKind.Oil);
+                        ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
+                    }
+
                     PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind>
                     {
                         ComponentKind.Engine,
                         ComponentKind.HotSection,
                         ComponentKind.Oil
                     });
-                    ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
                 },
                 kind: DialogKind.Warning,
                 successMessage: "Overhaul concluído. Motor retificado.",

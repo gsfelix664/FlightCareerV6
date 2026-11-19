@@ -21,6 +21,8 @@ namespace FlightCareer.UI.ViewModels
     public partial class PilotAircraftWrapper : ObservableObject
     {
         private readonly ComponentCatalog _catalog;
+        private readonly PartCatalog _partCatalog;
+        private readonly string? _classKey;
 
         public PilotAircraft Aircraft { get; }
         public EngineClass EngineClass { get; }
@@ -41,15 +43,24 @@ namespace FlightCareer.UI.ViewModels
                     OnPropertyChanged(nameof(InsuranceBrush));
                     OnPropertyChanged(nameof(InsuranceExpiryText));
                     OnPropertyChanged(nameof(InsuranceButtonText));
+                    UpdateReplacementPlans();
                 }
             }
         }
 
-        public PilotAircraftWrapper(PilotAircraft aircraft, ComponentCatalog catalog, IRelayCommand<ComponentRowViewModel> repairCommand, DateTime? careerClock = null)
+        public PilotAircraftWrapper(
+            PilotAircraft aircraft,
+            ComponentCatalog catalog,
+            IRelayCommand<ComponentRowViewModel> repairCommand,
+            DateTime? careerClock = null,
+            PartCatalog? partCatalog = null,
+            string? classKey = null)
         {
             Aircraft = aircraft;
             _catalog = catalog;
             _careerClock = careerClock;
+            _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
+            _classKey = classKey;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
 
             var order = catalog.Components.Select(d => d.Kind).ToList();
@@ -61,6 +72,7 @@ namespace FlightCareer.UI.ViewModels
             }
 
             _targetFuel = aircraft.FuelAmount;
+            UpdateReplacementPlans();
         }
 
         // --- Identificação ---
@@ -158,10 +170,10 @@ namespace FlightCareer.UI.ViewModels
         public bool IsInterdicted => Aircraft.IsInterdicted;
         public string InterdictionReason => Aircraft.InterdictionReason;
 
-        public SolidColorBrush Brush50h => DueBrush(HoursUntilNext50hInspection, 5);
-        public SolidColorBrush Brush100h => DueBrush(HoursUntilNext100hInspection, 10);
-        public SolidColorBrush Brush500h => DueBrush(HoursUntilNext500hInspection, 10);
-        public SolidColorBrush BrushTbo => DueBrush(EngineTboRemainingHours, 50);
+        public SolidColorBrush Brush50h => DueBrush(HoursUntilNext50hInspection, 1.2);
+        public SolidColorBrush Brush100h => DueBrush(HoursUntilNext100hInspection, 2.5);
+        public SolidColorBrush Brush500h => DueBrush(HoursUntilNext500hInspection, 12.5);
+        public SolidColorBrush BrushTbo => DueBrush(EngineTboRemainingHours, 12.5);
 
         private static SolidColorBrush DueBrush(double remaining, double warn) =>
             remaining <= 0 ? HangarPalette.Red : remaining <= warn ? HangarPalette.Amber : HangarPalette.Green;
@@ -174,9 +186,9 @@ namespace FlightCareer.UI.ViewModels
         public double CostOverhaul => MaintenancePricing.CalculateOverhaulCost(PurchasePrice);
         public double CostToggleConfiguration => MaintenancePricing.CostToggleConfiguration;
 
-        public string Text50h => $"Fazer 50 h · {Cost50hInspection:C0}";
-        public string Text100h => $"Fazer 100 h · {Cost100hInspection:C0}";
-        public string Text500h => $"Fazer 500 h · {Cost500hInspection:C0}";
+        public string Text50h => $"Troca de óleo · {Cost50hInspection:C0}";
+        public string Text100h => $"Inspeção anual · {Cost100hInspection:C0}";
+        public string Text500h => $"Revisão de ignição · {Cost500hInspection:C0}";
         public string TextOverhaul => $"Retífica · {CostOverhaul:C0}";
         public string TextToggleConfiguration => $"Converter · {CostToggleConfiguration:C0}";
         public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";
@@ -261,11 +273,65 @@ namespace FlightCareer.UI.ViewModels
                     row.SetFlaggedParts(Array.Empty<FlaggedPartViewModel>());
                 }
             }
+
+            UpdateReplacementPlans();
+        }
+
+        /// <summary>
+        /// Atualiza os planos de substituição física de peças para cada linha de componente.
+        /// </summary>
+        public void UpdateReplacementPlans()
+        {
+            bool hasParts = PartComponentBridge.HasParts(Aircraft);
+            if (!hasParts)
+            {
+                foreach (var row in Components)
+                {
+                    row.SetReplacementPlan(null);
+                }
+                return;
+            }
+
+            var mapping = PartComponentMapping.CreateDefault();
+            var partsByKind = new Dictionary<ComponentKind, List<AircraftPart>>();
+            foreach (var part in Aircraft.Parts)
+            {
+                var def = _partCatalog.Get(part.PartId);
+                if (def == null) continue;
+                var kind = mapping.ResolveComponentKind(def.Group);
+                if (kind.HasValue)
+                {
+                    if (!partsByKind.TryGetValue(kind.Value, out var list))
+                    {
+                        list = new List<AircraftPart>();
+                        partsByKind[kind.Value] = list;
+                    }
+                    list.Add(part);
+                }
+            }
+
+            foreach (var row in Components)
+            {
+                if (partsByKind.TryGetValue(row.Kind, out var groupParts))
+                {
+                    var plan = PartReplacementPlanner.Plan(groupParts, _partCatalog, _classKey, CareerClock);
+                    row.SetReplacementPlan(plan);
+                }
+                else
+                {
+                    row.SetReplacementPlan(new PartReplacementPlan(Array.Empty<PartReplacementItem>(), 0.0, 0.0));
+                }
+            }
+
+            OnPropertyChanged(nameof(TotalRepairCost));
+            OnPropertyChanged(nameof(HasRepairs));
+            OnPropertyChanged(nameof(RepairAllText));
         }
 
         /// <summary>Recalcula tudo após um serviço ou recarga.</summary>
         public void Refresh()
         {
+            UpdateReplacementPlans();
             foreach (var row in Components) row.Refresh(Aircraft.CurrentAirframeHours);
             if (TargetFuel < Aircraft.FuelAmount) TargetFuel = Aircraft.FuelAmount;
             OnPropertyChanged(string.Empty);

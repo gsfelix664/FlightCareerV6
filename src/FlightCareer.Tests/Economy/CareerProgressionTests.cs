@@ -30,9 +30,9 @@ namespace FlightCareer.Tests.Economy
 
             Assert.Equal(5000.0, CareerStart.DefaultStartingAirframeHours);
             Assert.Equal(0.5, CareerStart.DefaultStartingFuelFraction);
-            Assert.Equal(1800.0, CareerStart.DefaultStartingTboRemainingHours);
-            Assert.Equal(50.0, CareerStart.DefaultStarting50hHours);
-            Assert.Equal(100.0, CareerStart.DefaultStarting100hHours);
+            Assert.Equal(500.0, CareerStart.DefaultStartingTboRemainingHours);
+            Assert.Equal(12.0, CareerStart.DefaultStarting50hHours);
+            Assert.Equal(25.0, CareerStart.DefaultStarting100hHours);
         }
 
         [Fact]

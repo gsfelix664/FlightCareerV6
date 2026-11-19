@@ -96,6 +96,7 @@ namespace FlightCareer.UI.ViewModels
                     EngineTboRemainingHours = CareerStart.DefaultStartingTboRemainingHours,
                     HoursUntilNext50hInspection = CareerStart.DefaultStarting50hHours,
                     HoursUntilNext100hInspection = CareerStart.DefaultStarting100hHours,
+                    HoursUntilNext500hInspection = CareerStart.DefaultStarting500hHours,
                     IsInterdicted = false,
                     InterdictionReason = string.Empty,
                     Configuration = "Passageiro"

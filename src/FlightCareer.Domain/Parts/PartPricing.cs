@@ -1,5 +1,6 @@
 using System;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 
 namespace FlightCareer.Domain.Parts
 {
@@ -15,17 +16,17 @@ namespace FlightCareer.Domain.Parts
         double DowntimeHours);
 
     /// <summary>
-    /// Precificação e tempo de manutenção de peças individuais (F2.3 - Decisão 4).
+    /// Precificação e tempo de manutenção de peças individuais (F2.3 e CALIBRA-F4b).
+    /// Preço base multiplicado pelo multiplicador da classe econômica quando escala com a aeronave.
     /// </summary>
     public static class PartPricing
     {
         public const double DefaultLaborRatePerHour = 100.0;
 
         /// <summary>
-        /// Retorna o teto de preço por peça física com base no porte da aeronave (F2.3).
-        /// Impede que peças de jatos comerciais atinjam valores astronômicos (ex: pneus a $100k+),
-        /// mantendo a ordem de grandeza real de custo direto de manutenção (US$ 1.000 - 2.500/h para narrowbodies).
+        /// Retorna o teto de preço por peça física com base no porte da aeronave (F2.3 - Legado mantido para referência).
         /// </summary>
+        [Obsolete("Legado F2.3: substituído por multiplicador por classe econômica em CALIBRA-F4b.")]
         public static double GetClassPartPriceCap(double aircraftValue)
         {
             if (aircraftValue <= 2_000_000.0) return 30_000.0;       // Pistão (Classes A, B, C, D, E)
@@ -35,15 +36,13 @@ namespace FlightCareer.Domain.Parts
         }
 
         /// <summary>
-        /// Calcula o preço unitário da peça física:
+        /// Calcula o preço unitário da peça física (CALIBRA-F4b):
         /// - PartPrice fixo quando PriceScalesWithAircraft == false.
-        /// - max(PartPrice, min(valor da aeronave × repairCostPctOfAircraft sorteado na faixa, teto da classe)) quando escala.
+        /// - PartPrice × multiplicador da classe quando PriceScalesWithAircraft == true.
         /// </summary>
         public static double CalculatePartPrice(
             PartDefinition def,
-            double aircraftValue,
-            IRandomSource? random = null,
-            double? maxCap = null)
+            double classMultiplier = 1.0)
         {
             if (def == null) return 0.0;
             double basePrice = (double)def.PartPrice;
@@ -53,21 +52,21 @@ namespace FlightCareer.Domain.Parts
                 return Math.Round(basePrice, 2);
             }
 
-            if (def.RepairCostPctOfAircraft != null && def.RepairCostPctOfAircraft.Count >= 2 && aircraftValue > 0)
-            {
-                double minPct = def.RepairCostPctOfAircraft[0];
-                double maxPct = def.RepairCostPctOfAircraft[1];
-                double roll = random != null ? random.NextDouble() : 0.5;
-                double pct = minPct + (roll * (maxPct - minPct));
+            double mult = classMultiplier > 0 ? classMultiplier : 1.0;
+            return Math.Round(basePrice * mult, 2);
+        }
 
-                double scaledCost = aircraftValue * (pct / 100.0);
-                double cap = maxCap ?? GetClassPartPriceCap(aircraftValue);
-                double finalPrice = Math.Max(basePrice, Math.Min(scaledCost, cap));
-
-                return Math.Round(finalPrice, 2);
-            }
-
-            return Math.Round(basePrice, 2);
+        /// <summary>
+        /// Calcula o preço unitário da peça física resolvendo o multiplicador a partir da chave da classe (A a J).
+        /// </summary>
+        public static double CalculatePartPrice(
+            PartDefinition def,
+            string? classKey)
+        {
+            double mult = !string.IsNullOrWhiteSpace(classKey)
+                ? AircraftEconomyClass.GetPartPriceMultiplier(classKey)
+                : 1.0;
+            return CalculatePartPrice(def, mult);
         }
 
         /// <summary>
@@ -103,16 +102,15 @@ namespace FlightCareer.Domain.Parts
         }
 
         /// <summary>
-        /// Gera o detalhamento financeiro completo para substituição da peça.
+        /// Gera o detalhamento financeiro completo para substituição da peça a partir do multiplicador da classe.
         /// </summary>
         public static PartCostBreakdown CalculateBreakdown(
             PartDefinition def,
-            double aircraftValue,
+            double classMultiplier = 1.0,
             IRandomSource? random = null,
-            double laborRatePerHour = DefaultLaborRatePerHour,
-            double? maxCap = null)
+            double laborRatePerHour = DefaultLaborRatePerHour)
         {
-            double partPrice = CalculatePartPrice(def, aircraftValue, random, maxCap);
+            double partPrice = CalculatePartPrice(def, classMultiplier);
             double laborCost = CalculateLaborCost(def, laborRatePerHour);
             double total = Math.Round(partPrice + laborCost, 2);
             double downtime = CalculateDowntimeHours(def, random);
@@ -124,6 +122,21 @@ namespace FlightCareer.Domain.Parts
                 laborCost,
                 total,
                 downtime);
+        }
+
+        /// <summary>
+        /// Gera o detalhamento financeiro completo para substituição da peça a partir da chave da classe (A a J).
+        /// </summary>
+        public static PartCostBreakdown CalculateBreakdown(
+            PartDefinition def,
+            string? classKey,
+            IRandomSource? random = null,
+            double laborRatePerHour = DefaultLaborRatePerHour)
+        {
+            double mult = !string.IsNullOrWhiteSpace(classKey)
+                ? AircraftEconomyClass.GetPartPriceMultiplier(classKey)
+                : 1.0;
+            return CalculateBreakdown(def, mult, random, laborRatePerHour);
         }
     }
 }

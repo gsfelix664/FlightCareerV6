@@ -5,6 +5,7 @@
       "example": "C152, J-3 Cub, DR400",
       "minCostPerHour": 30.0,
       "maxCostPerHour": 120.0,
+      "partPriceMultiplier": 0.75,
       "source": "estimativa — revisar"
     },
     "B": {
@@ -12,6 +13,7 @@
       "example": "Bonanza G36, SR22, C172SP",
       "minCostPerHour": 80.0,
       "maxCostPerHour": 250.0,
+      "partPriceMultiplier": 1.25,
       "source": "estimativa — revisar"
     },
     "C": {
@@ -19,6 +21,7 @@
       "example": "SR22T, C400 Corvalis, C207T",
       "minCostPerHour": 80.0,
       "maxCostPerHour": 250.0,
+      "partPriceMultiplier": 1.25,
       "source": "estimativa — revisar"
     },
     "D": {
@@ -26,6 +29,7 @@
       "example": "DA40 NG, DA62",
       "minCostPerHour": 80.0,
       "maxCostPerHour": 250.0,
+      "partPriceMultiplier": 1.25,
       "source": "estimativa — revisar"
     },
     "E": {
@@ -33,6 +37,7 @@
       "example": "Baron G58, C404 Titan, DA62",
       "minCostPerHour": 150.0,
       "maxCostPerHour": 550.0,
+      "partPriceMultiplier": 1.5,
       "source": "estimativa — revisar"
     },
     "F": {
@@ -40,6 +45,7 @@
       "example": "TBM 930, PC-12, C208B",
       "minCostPerHour": 250.0,
       "maxCostPerHour": 900.0,
+      "partPriceMultiplier": 1.75,
       "source": "estimativa — revisar"
     },
     "G": {
@@ -47,6 +53,7 @@
       "example": "King Air 350, ATR 42/72, DHC-6, ES30",
       "minCostPerHour": 450.0,
       "maxCostPerHour": 2500.0,
+      "partPriceMultiplier": 1.75,
       "source": "estimativa — revisar"
     },
     "H": {
@@ -54,6 +61,7 @@
       "example": "CJ4, Longitude, PC-24",
       "minCostPerHour": 800.0,
       "maxCostPerHour": 2000.0,
+      "partPriceMultiplier": 2.5,
       "source": "estimativa — revisar"
     },
     "I": {
@@ -61,6 +69,7 @@
       "example": "A320neo, 737 MAX 8, A321",
       "minCostPerHour": 1000.0,
       "maxCostPerHour": 2500.0,
+      "partPriceMultiplier": 3.25,
       "source": "estimativa — revisar"
     },
     "J": {
@@ -68,6 +77,7 @@
       "example": "747-8i, A330-200, A330-300, 787-10",
       "minCostPerHour": 2500.0,
       "maxCostPerHour": 6000.0,
+      "partPriceMultiplier": 5.5,
       "source": "estimativa — revisar"
     }
   }
