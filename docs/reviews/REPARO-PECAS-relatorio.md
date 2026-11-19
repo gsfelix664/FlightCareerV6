@@ -1,6 +1,6 @@
 # REPARO-PECAS — Reparo no Hangar troca peças inteiras (preço cheio)
 
-**Branch:** feat/reparo-pecas · **Commit:** pendente · **Data:** 2026-11-19
+**Branch:** feat/reparo-pecas · **Commit:** 03f9246 · **Data:** 2026-11-19
 
 ## Plano (antes de codar)
 - Criar `Domain/Parts/PartReplacementPlanner.cs` com tipos `PartReplacementItem` e `PartReplacementPlan`, limites (`ReplaceBelowHealthPct = 80.0`), métodos `Plan` e `Apply`/`ApplyToParts`.
