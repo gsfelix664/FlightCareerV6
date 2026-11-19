@@ -20,9 +20,11 @@ namespace FlightCareer.UI
     {
         public IServiceProvider ServiceProvider { get; private set; } = null!;
 
-        protected override async void OnStartup(StartupEventArgs e)
+        public App()
         {
-            // Forçar cultura en-US para garantir que valores monetários apareçam como $ (USD) mundialmente
+            // Forçar cultura en-US (moeda genérica $) ANTES de qualquer código assíncrono.
+            // Definida dentro do async OnStartup, a cultura ficava presa ao contexto assíncrono do método
+            // e o thread da UI voltava à cultura do Windows (pt-BR → "R$ 1.200") depois do primeiro await.
             var culture = new System.Globalization.CultureInfo("en-US");
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
@@ -30,6 +32,10 @@ namespace FlightCareer.UI
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
             FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(
                 System.Windows.Markup.XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+        }
+
+        protected override async void OnStartup(StartupEventArgs e)
+        {
 
             // Tratamento global de erros para capturar o 0xc000041d
             DispatcherUnhandledException += (s, args) =>
