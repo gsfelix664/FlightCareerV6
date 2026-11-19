@@ -313,6 +313,32 @@ namespace FlightCareer.Application.Simulation
                                     }
 
                                     // Filtra missões permitidas para a categoria do piloto e capacidade do avião
+                                    // Mesmo filtro de compatibilidade usado para escolher o destino do reposicionamento
+                                    bool IsCompatibleMission(Mission mm)
+                                    {
+                                        if (mm.RequiredCategory > category) return false;
+                                        if (mm.PayloadLbs > currentAircraftType.MaxPayloadLbs) return false;
+                                        if (mm.PassengerCount > currentAircraftType.MaxPax) return false;
+                                        if (mm.DistanceNM > currentAircraftType.RangeNM) return false;
+                                        if (!airportLookup.TryGetValue(mm.DestinationICAO, out var dAp)) return false;
+                                        if (currentAircraftType.MinRunwayLength >= 7000 && dAp.Tier > 1) return false;
+                                        if (currentAircraftType.MinRunwayLength >= 4500 && dAp.Tier > 2) return false;
+                                        if (currentAircraftType.MinRunwayLength >= 2500 && dAp.Tier > 3) return false;
+                                        return true;
+                                    }
+
+                                    List<Mission> MissionsAt(Airport ap)
+                                    {
+                                        var key = (ap.ICAO, day);
+                                        if (!missionCache.TryGetValue(key, out var list))
+                                        {
+                                            int seedAp = unchecked((ap.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80);
+                                            missionCache[key] = list;
+                                        }
+                                        return list;
+                                    }
+
                                     var compatible = new List<Mission>();
                                     foreach (var m in availableMissions)
                                     {
@@ -351,7 +377,23 @@ namespace FlightCareer.Application.Simulation
                                             .OrderBy(x => x.Dist)
                                             .ToList();
 
-                                        var bestHub = candidateHubs.FirstOrDefault(x => x.Dist <= currentAircraftType.RangeNM).Hub
+                                        // Revisor (2026-11-19): reposicionar para onde HÁ trabalho, como um jogador faria —
+                                        // a base inicial primeiro, depois os aeroportos mais próximos (Tier ≤ 3) com missão compatível hoje.
+                                        Airport? bestHub = null;
+                                        var probe = new List<Airport>();
+                                        if (defaultHub != null && !string.Equals(defaultHub.ICAO, currentAirport.ICAO, StringComparison.OrdinalIgnoreCase)) probe.Add(defaultHub);
+                                        probe.AddRange(allAirports
+                                            .Where(a => a.Tier <= 3 && !string.Equals(a.ICAO, currentAirport.ICAO, StringComparison.OrdinalIgnoreCase))
+                                            .Select(a => (Ap: a, Dist: MissionGenerator.CalculateDistance(currentAirport.Latitude, currentAirport.Longitude, a.Latitude, a.Longitude)))
+                                            .Where(x => x.Dist <= currentAircraftType.RangeNM)
+                                            .OrderBy(x => x.Dist)
+                                            .Take(12)
+                                            .Select(x => x.Ap));
+                                        foreach (var cand in probe)
+                                        {
+                                            if (MissionsAt(cand).Any(IsCompatibleMission)) { bestHub = cand; break; }
+                                        }
+                                        bestHub ??= candidateHubs.FirstOrDefault(x => x.Dist <= currentAircraftType.RangeNM).Hub
                                                       ?? candidateHubs.FirstOrDefault().Hub
                                                       ?? defaultHub;
 

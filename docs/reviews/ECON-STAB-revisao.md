@@ -22,3 +22,9 @@ Bateria completa (`career-stab --days 720 --bots 5 --difficulty all --policy all
 4. **Sanidade no relatório:** acrescente horas voadas por marco e voos por dia na tabela; alerta automático "bot parado" se um bot sobrevivente voar < 50 % das horas/dia configuradas.
 5. Teste novo: `Progression_BotVoaHorasPorDiaAoLongoDoTempo` (1 bot, Médio, 60 dias: horas voadas ≥ 0,8 × 60 × 2 h) e `Progression_BotsComSementesDiferentes`.
 Rode a amostra `--days 60 --bots 2 --difficulty medium --policy all --fast` e mostre as horas voadas no relatório.
+
+## Rodada 3 — APROVADO com ajuste do revisor (Claude, 2026-11-19)
+- Executor corrigiu continuidade, sementes por bot e compra; bateria de 720 dias (3 bots × 9 grupos) ainda mostrava ~0,5 h/dia depois do 1º mês: o reposicionamento ia ao hub Tier ≤ 2 mais próximo **sem conferir se lá havia missão compatível** (na categoria 1 só há instrução, em aeroportos com escola), e o dia terminava.
+- Ajuste do revisor: o reposicionamento tenta a base inicial e os 12 aeroportos Tier ≤ 3 mais próximos dentro do alcance e vai ao primeiro com missão compatível hoje (mesmo filtro da escolha de missão). Amostra Médio/cauteloso, 120 dias: 324 h voadas (~2,7 h/dia), contra ~0,5 h/dia antes.
+- Build 0 erros; `dotnet test` 655/655.
+- Limite: a bateria de 720 dias com 3 bots/grupo leva ~30–60 min em `--fast`.
