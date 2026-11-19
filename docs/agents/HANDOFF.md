@@ -40,7 +40,7 @@ Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `do
 3. Conferir no POH: DA62 Vle (201 × 156 kt), King Air 350 Vne (245 × 263); variantes CTSL × CT, CAP 10 × CAP-4, DR400/100 × DR400.
 4. Decisões: Vlo (extensão × menor entre extensão e recolhimento); auto-leme com −10 % XP?; calendário de jogo?; § 3 de `eventos-diversos.md`, `eventos-comandos.md`, `eventos-combustivel.md`, `simconnect-api.md`.
 5. Abrir o app e conferir os chips do Hangar após uma inspeção.
-6. Em casa (MSFS): Ctrl+E e caminhão chegam ao SimConnect; sinal do `PLANE PITCH DEGREES`; pausa pelo menu na nota; mapa elétrico (Developer Mode › Electrical System Debug) de C152, C172, Baron e TBM para o plano de iluminação F1.
+6. Em casa (MSFS): Ctrl+E e caminhão chegam ao SimConnect; sinal do `PLANE PITCH DEGREES`; pausa pelo menu na nota; mapa elétrico (Developer Mode › Electrical System Debug) de C152, C172, Baron e TBM para o plano de iluminação F1. **Tempo acelerado:** voo a 4× e 16× para confirmar que horas, desgaste, inspeções, TBO e relógio de carreira contam o tempo simulado (`docs/plans/sensor-validation/ROTEIRO.md` › 8).
 
 ## Pendências antigas que precisam do simulador
 - SimvarWatcher com as listas novas; SimVarProbe com `--filter "^(?!ATC |AI )"`; escrita de turbina, combustível, slew; teste de panes (`BREAKER_*_SET`, `PARTIAL PANEL *`, `FUELSYSTEM_*`, `HYDRAULIC_ACTUATOR_ACTIVE_SET`, trim disabled); `FlightSave`/`FlightLoad`; Flow API; índices elétricos reais por avião; voos em outros aviões; F4.2e, crash declarado, pista de terra.
