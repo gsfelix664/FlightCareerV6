@@ -11,6 +11,9 @@ Decisão do usuário (2026-11-19): melhorar a mecânica (não remover).
 - Capacidades: `Infrastructure/CSV/aircrafts.csv` (`PaxMax`, `CargaMax(lbs)`). Porte: `Domain/Economy/AircraftSizeClassifier` (leve/médio/pesado, 12.500 / 60.000 lb).
 - Features por aeronave: `Data/aircraft/<modelo>.json` › `features` (vocabulário fechado em `Domain/Parts/AircraftFeatures.cs`).
 
+- Relógio de carreira já existe (`Domain/Services/CareerClock`, parâmetro `downtimeHours` do `RunPaidServiceAsync` no Hangar). Preços de serviço ficam em `Domain/Components/MaintenancePricing` (`CostToggleConfiguration` hoje 1.200).
+- Rode `dotnet build src/FlightCareer.slnx` (o `dotnet test` não compila a UI).
+
 ## Contrato
 - Feature nova `convertibleCabin` (no vocabulário) nos perfis: `c208b`, `pc-12-ngx`, `beechcraft-king-air`, `beechcraft-king-air-c90gtx`, `beechcraft-king-air-250`, `dhc-6-300-twin`, `atr-42-600`, `atr-72-600`, `cessna-408-skycourier`, `cessna-404-titan`, `cessna-207t-stationair`. Sem a feature: o card de cabine some do Hangar.
 - **Novo** `Domain/Economy/CabinConversion.cs` (lógica pura): custo e parada por porte — leve $800 / 4 h, médio $3.000 / 8 h, pesado $12.000 / 24 h (valores de jogo, documentados como estimativa); capacidade efetiva:
