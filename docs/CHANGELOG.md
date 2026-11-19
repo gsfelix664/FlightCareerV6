@@ -2404,3 +2404,21 @@
   - Build 0 erros, `dotnet test` 618/618 aprovados.
   - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.
   - Não testado no MSFS.
+
+## 2026-11-19 - Simulação de estabilidade da carreira (Gemini)
+- **Extração da Inicialização de Carreira (`Domain/Services/CareerStart.cs`)**:
+  - Centralizado o saldo inicial por dificuldade (`Easy` $1.000.000.000, `Medium` $100.000, `Hard` $10.000) e parâmetros iniciais da aeronave (C152 com 5.000 h de célula, meio tanque, TBO 1.800 h, 50 h para próxima inspeção 50h, 100 h para inspeção 100h).
+  - Atualizado `CreatePilotViewModel` para consumir `CareerStart`.
+- **Avaliação Pura de Mercado (`Domain/Economy/AircraftValuation.cs`)**:
+  - Extraído o método estático e puro `CalculateBaseMarketValue`, eliminando dependências de banco e permitindo avaliações rápidas em memória.
+- **Geração de Missões em Memória (`MissionGenerator.GenerateMissionsInMemory`)**:
+  - Suporte completo a geração de contratos em memória com cache por aeroporto/dia, desacoplado de `DbContext` e sem chamadas a `SaveChangesAsync`.
+- **Simulador de Progressão e Estabilidade (`Application/Simulation/CareerProgressionSimulator.cs` e CLI `career-stab`)**:
+  - Modelação de carreira completa com progressão por escada de aeronaves (Classes A→B→E→F→G→H→I→J), respeito às homologações de categoria do piloto (Categorias 1 a 5), políticas cauteloso/equilibrado/agressivo com reservas de caixa operacionais (3 meses, 1 mês ou 0), venda com 8% de taxa de corretagem, quebras e panes via `FailureEngine`, inflação de 10 anos sobre o combustível e detecção estrita de falência.
+  - Relatório `stability.md` com tabela detalhada por marco (Dias 30, 180 e 720), alertas automáticos (falência precoce, enriquecimento rápido, estagnação, inflação come margem) e exportação tabular `stability.csv`.
+- **Comando CLI**:
+  - Adicionado subcomando `career-stab` ao `FlightCareer.Replay`, com salvamento em `%LocalAppData%/FlightCareer/career-sim/`.
+- **Testes e Aceitação**:
+  - 5 novos testes unitários em `src/FlightCareer.Tests/Economy/CareerProgressionTests.cs` (CareerStart, determinismo estrito, reserva de compra, falência e restrição de categorias).
+  - Build 0 erros, `dotnet test` 623/623 aprovados.
+  - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.

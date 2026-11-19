@@ -43,6 +43,7 @@ dotnet run --project src/FlightCareer.SimVarProbe [--probe-only] [--duration <se
 dotnet run --project src/FlightCareer.Replay -- <csv|csv.gz> [--aircraft <modelo>]
 dotnet run --project src/FlightCareer.Replay -- fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]
 dotnet run --project src/FlightCareer.Replay -- career --aircraft "<modelo>,<modelo>" [--bots <n>] [--days <n>] [--hours-per-day <h>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]
+dotnet run --project src/FlightCareer.Replay -- career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]
 ```
 
 - Use o `dotnet` do PATH. Não fixe caminhos de usuário (`C:\Users\<nome>\...`).
