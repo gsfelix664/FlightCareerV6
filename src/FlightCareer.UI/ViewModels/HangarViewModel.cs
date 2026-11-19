@@ -158,6 +158,7 @@ namespace FlightCareer.UI.ViewModels
 
         private bool HasConvertibleCabin(PilotAircraft a)
         {
+            if (a.AircraftType?.HasConvertibleCabin == true) return true;
             var model = a.AircraftType?.Model ?? string.Empty;
             var profile = _limitResolver?.FindById(model) ?? _limitResolver?.FindProfile(model, model);
             var features = profile?.Features ?? Array.Empty<string>();

@@ -110,9 +110,16 @@ namespace FlightCareer.Domain.Economy
 
         /// <summary>
         /// Calcula a capacidade efetiva (PAX e carga em lbs) para a configuração atual da cabine.
+        /// Caso a aeronave não possua cabine conversível (<paramref name="hasConvertibleCabin"/> = false),
+        /// aplica-se a regra padrão de fábrica (PAX até MaxPax e carga até MaxPayloadLbs).
         /// </summary>
-        public static CabinCapacity GetEffectiveCapacity(int maxPax, double maxPayloadLbs, string? configuration)
+        public static CabinCapacity GetEffectiveCapacity(int maxPax, double maxPayloadLbs, string? configuration, bool hasConvertibleCabin = true)
         {
+            if (!hasConvertibleCabin)
+            {
+                return new CabinCapacity(maxPax, maxPayloadLbs);
+            }
+
             if (IsCargoConfiguration(configuration))
             {
                 // Carga: pax = 0; carga até CargaMax + PaxMax × 170 lb, sem passar de CargaMax × 1,3
@@ -132,10 +139,25 @@ namespace FlightCareer.Domain.Economy
 
         /// <summary>
         /// Valida se uma missão é compatível com a configuração atual da cabine.
+        /// Caso a aeronave não possua cabine conversível (<paramref name="hasConvertibleCabin"/> = false),
+        /// aplica-se a regra original direta (pax ≤ MaxPax e payload ≤ MaxPayloadLbs).
         /// </summary>
-        public static bool IsMissionCompatible(string? configuration, int maxPax, double maxPayloadLbs, int missionPax, double missionPayloadLbs, double luggageWeightLbs = 0.0, double cargoWeightLbs = 0.0)
+        public static bool IsMissionCompatible(
+            string? configuration,
+            int maxPax,
+            double maxPayloadLbs,
+            int missionPax,
+            double missionPayloadLbs,
+            double luggageWeightLbs = 0.0,
+            double cargoWeightLbs = 0.0,
+            bool hasConvertibleCabin = true)
         {
-            var capacity = GetEffectiveCapacity(maxPax, maxPayloadLbs, configuration);
+            if (!hasConvertibleCabin)
+            {
+                return missionPax <= maxPax && missionPayloadLbs <= maxPayloadLbs;
+            }
+
+            var capacity = GetEffectiveCapacity(maxPax, maxPayloadLbs, configuration, hasConvertibleCabin: true);
 
             if (IsCargoConfiguration(configuration))
             {

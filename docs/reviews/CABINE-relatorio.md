@@ -56,17 +56,29 @@ O filtro foi centralizado em `FlightCareer.Domain.Economy.CabinConversion.IsMiss
 - [x] Sem a feature: card e chip de cabine somem do Hangar (`Visibility="{Binding HasConvertibleCabin...}"`).
 - [x] `Domain/Economy/CabinConversion.cs` (lógica pura): custo e parada por porte ($800/4h, $3.000/8h, $12.000/24h) e capacidade efetiva calculada rigorosamente conforme spec.
 - [x] Missões: na configuração Carga não recebe/aceita passageiros; na Passageiro, carga acima do limite de bagagem fica fora.
+- [x] Aeronaves não conversíveis mantêm regra original de missão (carga pura até MaxPayloadLbs e passageiros até MaxPax sem restrição de bagagem de 25%).
+- [x] Coluna `HasConvertibleCabin` adicionada a `AircraftTypes` com migração DDL e populada via `AircraftLimitSeeder` e `DataSeeder`.
 - [x] Hangar: botão com custo e parada ("Converter para Carga · $3,000 · 8 h"), avanço do relógio de carreira (`CareerClock`), e texto com capacidade efetiva ("Carga: até 4.797 lb").
-- [x] Build 0 erros; `dotnet test` 100% aprovado (645/645 testes).
+- [x] Build 0 erros; `dotnet test` 100% aprovado (647/647 testes).
 - [x] CHANGELOG atualizado com `## 2026-11-19 - Conversão de cabine (Gemini)`.
 - [x] `AGENTS.md` › 7 atualizado.
 
+## Correções da revisão (Claude, 2026-11-19)
+1. **Regressão em aeronaves sem cabine conversível corrigida**:
+   - `AircraftType.HasConvertibleCabin`: adicionada propriedade na entidade e coluna no banco (`ALTER TABLE AircraftTypes ADD COLUMN HasConvertibleCabin INTEGER NOT NULL DEFAULT 0;`).
+   - Sincronização automática em `DataSeeder.SeedAircraftsAsync` (ao carregar do CSV) e em `AircraftLimitSeeder.SeedInternalAsync` (atualizando registros existentes na inicialização a partir dos perfis de limite).
+   - `CabinConversion.GetEffectiveCapacity` e `CabinConversion.IsMissionCompatible`: adicionado parâmetro `hasConvertibleCabin` (padrão `true`). Quando `false`, aplica-se a regra original direta (`pax <= MaxPax` e `payload <= MaxPayloadLbs`), permitindo que C152, 737, etc. aceitem carga pura e bagagens até o payload total.
+   - `CareerSimulator.cs` e `MissionDisplayItem.cs`: atualizados para repassar `aType.HasConvertibleCabin` diretamente da entidade carregada, sem consultas extras.
+   - `MainViewModel.cs`: alterações cirúrgicas mantendo as mensagens originais intactas, aplicando as travas de incompatibilidade de cabine apenas quando `type.HasConvertibleCabin == true`.
+   - Teste unitário adicionado: `Missions_AviaoNaoConversivel_RegraAntiga` validando C152 aceitando carga pura de 472 lb e passageiro com bagagem até o limite.
+   - Teste de integração adicionado: `Seeder_UpdatesAircraftType_HasConvertibleCabin` em `SeederTests.cs` validando atualização e idempotência.
+
 ## Build e testes
 - `dotnet build src/FlightCareer.slnx`: 0 erros, 15 avisos (vulnerabilidades conhecidas em pacotes legados de SQLite/SqlClient).
-- `dotnet test src/FlightCareer.Tests`: 645 aprovados, 0 falhas (6 testes novos em `CabinConversionTests`: `Cabin_SemFeature_NaoConverte`, `Cabin_CustoEParadaPorPorte`, `Cabin_CapacidadePassageiro`, `Cabin_CapacidadeCarga`, `Missions_ConfigCarga_SemPassageiros`, `Missions_ConfigPassageiro_CargaLimitada`).
+- `dotnet test src/FlightCareer.Tests`: 647 aprovados, 0 falhas (novos: `Missions_AviaoNaoConversivel_RegraAntiga`, `Seeder_UpdatesAircraftType_HasConvertibleCabin`).
 
 ## Não testado
 - Não testado na tela do app nem no MSFS (modo não interativo headless).
 
 ## Dúvidas e decisões para o revisor
-- Nenhuma dúvida impeditiva. A implementação seguiu rigorosamente a especificação técnica e o contrato de dados.
+- Nenhuma dúvida impeditiva. Correções da revisão 100% atendidas.

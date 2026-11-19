@@ -176,5 +176,32 @@ namespace FlightCareer.Tests.Economy
             // Missão de passageiros com bagagem/carga excedendo limite do bagageiro (> 922.5 lbs): NÃO permitida
             Assert.False(CabinConversion.IsMissionCompatible(config, maxPax, maxPayload, missionPax: 8, missionPayloadLbs: 8 * 170 + 1200, luggageWeightLbs: 1200));
         }
+
+        [Fact]
+        public void Missions_AviaoNaoConversivel_RegraAntiga()
+        {
+            // Cessna C152: MaxPax = 2, MaxPayloadLbs = 530, não conversível
+            const string config = "Passageiro";
+            const int maxPax = 2;
+            const double maxPayload = 530.0;
+            const bool hasConvertible = false;
+
+            // Capacidade efetiva sem conversível deve manter regra antiga (pax até MaxPax, carga até MaxPayloadLbs)
+            var cap = CabinConversion.GetEffectiveCapacity(maxPax, maxPayload, config, hasConvertibleCabin: hasConvertible);
+            Assert.Equal(2, cap.MaxPax);
+            Assert.Equal(530.0, cap.MaxCargoLbs);
+
+            // Carga pura de 472 lb (acima de 25% de 530 = 132.5 lb): DEVE ser aceita na aeronave não conversível
+            Assert.True(CabinConversion.IsMissionCompatible(config, maxPax, maxPayload, missionPax: 0, missionPayloadLbs: 472.0, hasConvertibleCabin: hasConvertible));
+
+            // 1 PAX + bagagem até o payload (ex: 170 lb pax + 302 lb bagagem = 472 lb payload total): DEVE ser aceito
+            Assert.True(CabinConversion.IsMissionCompatible(config, maxPax, maxPayload, missionPax: 1, missionPayloadLbs: 472.0, luggageWeightLbs: 302.0, hasConvertibleCabin: hasConvertible));
+
+            // Carga pura excedendo o payload total (> 530 lb): NÃO aceito
+            Assert.False(CabinConversion.IsMissionCompatible(config, maxPax, maxPayload, missionPax: 0, missionPayloadLbs: 550.0, hasConvertibleCabin: hasConvertible));
+
+            // Passageiros acima de MaxPax (> 2 PAX): NÃO aceito
+            Assert.False(CabinConversion.IsMissionCompatible(config, maxPax, maxPayload, missionPax: 3, missionPayloadLbs: 510.0, hasConvertibleCabin: hasConvertible));
+        }
     }
 }

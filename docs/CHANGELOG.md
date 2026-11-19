@@ -2489,7 +2489,8 @@
   - `HangarViewModel`: comando `ToggleConfigurationCommand` valida a presença da feature `convertibleCabin`, executa o serviço pago e passa `downtimeHours` para avanço do `CareerClock`.
   - `HangarView`: card de configuração de cabine e chip de cabine do cabeçalho vinculados a `HasConvertibleCabin` (somem se a aeronave não suportar conversão).
 - **Testes e Verificação**:
-  - Nova suíte de testes unitários `CabinConversionTests.cs` cobrindo: `Cabin_SemFeature_NaoConverte`, `Cabin_CustoEParadaPorPorte`, `Cabin_CapacidadeCarga`, `Cabin_CapacidadePassageiro`, `Missions_ConfigCarga_SemPassageiros` e `Missions_ConfigPassageiro_CargaLimitada`.
+  - Nova suíte de testes unitários `CabinConversionTests.cs` cobrindo: `Cabin_SemFeature_NaoConverte`, `Cabin_CustoEParadaPorPorte`, `Cabin_CapacidadeCarga`, `Cabin_CapacidadePassageiro`, `Missions_ConfigCarga_SemPassageiros`, `Missions_ConfigPassageiro_CargaLimitada` e `Missions_AviaoNaoConversivel_RegraAntiga`.
+  - Teste de integração `Seeder_UpdatesAircraftType_HasConvertibleCabin` em `SeederTests.cs` validando sincronização idempotente de `AircraftType.HasConvertibleCabin`.
   - `dotnet build src/FlightCareer.slnx`: 0 erros.
-  - `dotnet test src/FlightCareer.Tests`: 645/645 aprovados (100%).
+  - `dotnet test src/FlightCareer.Tests`: 647/647 aprovados (100%).
   - Não testado na tela do app nem no MSFS.

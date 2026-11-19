@@ -63,7 +63,7 @@ namespace FlightCareer.UI.ViewModels
             _careerClock = careerClock;
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
             _classKey = classKey;
-            HasConvertibleCabin = hasConvertibleCabin;
+            HasConvertibleCabin = (aircraft.AircraftType?.HasConvertibleCabin == true) || hasConvertibleCabin;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
 
             var order = catalog.Components.Select(d => d.Kind).ToList();
@@ -102,10 +102,12 @@ namespace FlightCareer.UI.ViewModels
         public string Configuration => string.IsNullOrEmpty(Aircraft.Configuration) ? "Passageiro" : Aircraft.Configuration;
         public bool IsCargoConfig => CabinConversion.IsCargoConfiguration(Configuration);
         public bool HasConvertibleCabin { get; }
-        public CabinCapacity EffectiveCapacity => CabinConversion.GetEffectiveCapacity(MaxPax, MaxPayloadLbs, Configuration);
-        public string ConfigurationDisplayText => IsCargoConfig
-            ? $"Carga: até {EffectiveCapacity.MaxCargoLbs:N0} lb"
-            : $"Passageiro: até {EffectiveCapacity.MaxPax} PAX e {EffectiveCapacity.MaxCargoLbs:N0} lb bagagem";
+        public CabinCapacity EffectiveCapacity => CabinConversion.GetEffectiveCapacity(MaxPax, MaxPayloadLbs, Configuration, HasConvertibleCabin);
+        public string ConfigurationDisplayText => !HasConvertibleCabin
+            ? $"Passageiro: até {EffectiveCapacity.MaxPax} PAX e {EffectiveCapacity.MaxCargoLbs:N0} lb"
+            : (IsCargoConfig
+                ? $"Carga: até {EffectiveCapacity.MaxCargoLbs:N0} lb"
+                : $"Passageiro: até {EffectiveCapacity.MaxPax} PAX e {EffectiveCapacity.MaxCargoLbs:N0} lb bagagem");
 
         [ObservableProperty] private bool _isActive;
 

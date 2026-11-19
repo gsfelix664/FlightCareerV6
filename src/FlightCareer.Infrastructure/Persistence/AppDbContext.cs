@@ -293,7 +293,10 @@ namespace FlightCareer.Infrastructure.Persistence
 
                 // Relógio de carreira por piloto (CALENDARIO-JOGO)
                 "ALTER TABLE Pilots ADD COLUMN CareerClockUtc TEXT NULL;",
-                "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';"
+                "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';",
+
+                // Cabine conversível por tipo de aeronave (CABINE)
+                "ALTER TABLE AircraftTypes ADD COLUMN HasConvertibleCabin INTEGER NOT NULL DEFAULT 0;"
             };
 
             foreach (var stmt in migrationStatements)
