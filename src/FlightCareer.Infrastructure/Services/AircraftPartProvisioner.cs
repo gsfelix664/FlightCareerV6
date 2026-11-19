@@ -37,6 +37,7 @@ namespace FlightCareer.Infrastructure.Services
         public async Task<int> EnsurePartsAsync(IAppDbContext db)
         {
             var aircraft = await db.PilotAircrafts
+                .Include(a => a.Pilot)
                 .Include(a => a.AircraftType)
                 .Include(a => a.Parts)
                 .ToListAsync();
@@ -93,7 +94,7 @@ namespace FlightCareer.Infrastructure.Services
                                     Health = 100.0,
                                     HoursSinceReplacement = 0.0,
                                     CyclesSinceReplacement = 0,
-                                    LastReplacedAtUtc = DateTime.UtcNow,
+                                    LastReplacedAtUtc = a.Pilot?.CareerClockUtc ?? DateTime.UtcNow,
                                     LastReplacedAirframeHours = a.CurrentAirframeHours,
                                     Flag = PartFlag.None,
                                     FlaggedBy = PartFlagSource.None,
@@ -117,7 +118,7 @@ namespace FlightCareer.Infrastructure.Services
                                 Health = 100.0,
                                 HoursSinceReplacement = 0.0,
                                 CyclesSinceReplacement = 0,
-                                LastReplacedAtUtc = DateTime.UtcNow,
+                                LastReplacedAtUtc = a.Pilot?.CareerClockUtc ?? DateTime.UtcNow,
                                 LastReplacedAirframeHours = a.CurrentAirframeHours,
                                 Flag = PartFlag.None,
                                 FlaggedBy = PartFlagSource.None,

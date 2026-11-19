@@ -26,10 +26,30 @@ namespace FlightCareer.UI.ViewModels
         public EngineClass EngineClass { get; }
         public ObservableCollection<ComponentRowViewModel> Components { get; } = new();
 
-        public PilotAircraftWrapper(PilotAircraft aircraft, ComponentCatalog catalog, IRelayCommand<ComponentRowViewModel> repairCommand)
+        private DateTime? _careerClock;
+        public DateTime CareerClock
+        {
+            get => _careerClock ?? Aircraft.Pilot?.CareerClockUtc ?? DateTime.UtcNow;
+            set
+            {
+                if (_careerClock != value)
+                {
+                    _careerClock = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsInsured));
+                    OnPropertyChanged(nameof(InsuranceStatusText));
+                    OnPropertyChanged(nameof(InsuranceBrush));
+                    OnPropertyChanged(nameof(InsuranceExpiryText));
+                    OnPropertyChanged(nameof(InsuranceButtonText));
+                }
+            }
+        }
+
+        public PilotAircraftWrapper(PilotAircraft aircraft, ComponentCatalog catalog, IRelayCommand<ComponentRowViewModel> repairCommand, DateTime? careerClock = null)
         {
             Aircraft = aircraft;
             _catalog = catalog;
+            _careerClock = careerClock;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
 
             var order = catalog.Components.Select(d => d.Kind).ToList();
@@ -183,11 +203,11 @@ namespace FlightCareer.UI.ViewModels
         public double InsurancePremium => InsuranceService.CalculateMonthlyPremium(PurchasePrice);
         public double InsuranceDeductible => InsuranceService.CalculateDeductible(PurchasePrice);
         public double InsurancePayout => InsuranceService.CalculatePayout(PurchasePrice);
-        public bool IsInsured => Aircraft.InsuranceExpirationDate > DateTime.Now;
+        public bool IsInsured => InsuranceService.IsInsured(Aircraft, CareerClock);
         public string InsuranceStatusText => IsInsured ? "ATIVO" : "INATIVO";
         public SolidColorBrush InsuranceBrush => IsInsured ? HangarPalette.Green : HangarPalette.Red;
         public string InsuranceExpiryText => IsInsured
-            ? $"vence em {Aircraft.InsuranceExpirationDate:dd/MM/yyyy} ({(Aircraft.InsuranceExpirationDate!.Value - DateTime.Now).TotalDays:F0} dias)"
+            ? $"vence em {Aircraft.InsuranceExpirationDate:dd/MM/yyyy} ({(Aircraft.InsuranceExpirationDate!.Value - CareerClock).TotalDays:F0} dias)"
             : "sem cobertura";
         public string InsuranceButtonText => IsInsured ? $"Renovar +30 dias · {InsurancePremium:C0}" : $"Contratar 30 dias · {InsurancePremium:C0}";
 
@@ -215,7 +235,7 @@ namespace FlightCareer.UI.ViewModels
                     ? $"{def.Name} (motor {part.EngineIndex})"
                     : def.Name;
 
-                var eval = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
+                var eval = PartInspectionFlags.Evaluate(part, def, CareerClock);
                 string reason = !string.IsNullOrEmpty(eval.Reason)
                     ? eval.Reason
                     : (part.Flag == PartFlag.Broken ? "Quebrada" : "Atenção recomendada");

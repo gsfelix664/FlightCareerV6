@@ -282,7 +282,11 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;",
-                "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;"
+                "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;",
+
+                // Relógio de carreira por piloto (CALENDARIO-JOGO)
+                "ALTER TABLE Pilots ADD COLUMN CareerClockUtc TEXT NULL;",
+                "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';"
             };
 
             foreach (var stmt in migrationStatements)

@@ -47,7 +47,7 @@ namespace FlightCareer.Domain.Entities
         /// <summary>Ciclos/pousos acumulados desde a última substituição/instalação.</summary>
         public int CyclesSinceReplacement { get; set; }
 
-        /// <summary>Data UTC da última substituição.</summary>
+        /// <summary>Data no relógio de carreira (CareerClockUtc) da última substituição (mantém o nome LastReplacedAtUtc por compatibilidade de schema).</summary>
         public DateTime LastReplacedAtUtc { get; set; } = DateTime.UtcNow;
 
         /// <summary>Horas totais de célula da aeronave no momento da última substituição.</summary>
