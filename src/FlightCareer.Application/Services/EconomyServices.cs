@@ -36,6 +36,13 @@ namespace FlightCareer.Application.Services
         }
     }
 
+    public static class EconomyServices
+    {
+        public static double CalculateMonthlyPremium(double basePrice) => InsuranceService.CalculateMonthlyPremium(basePrice);
+        public static double CalculateDeductible(double basePrice) => InsuranceService.CalculateDeductible(basePrice);
+        public static double CalculatePayout(double basePrice) => InsuranceService.CalculatePayout(basePrice);
+    }
+
     public static class InsuranceService
     {
         private const double MONTHLY_RATE = 0.01; // 1% do valor da aeronave

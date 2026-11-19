@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Services;
 using System;
@@ -147,11 +148,11 @@ namespace FlightCareer.UI.ViewModels
 
         public double EngineLifeHours => _catalog.Get(ComponentKind.Engine).LifeHoursFor(EngineClass);
 
-        public double Cost50hInspection => 212.50;
-        public double Cost100hInspection => 625.0;
-        public double Cost500hInspection => 362.50;
-        public double CostOverhaul => Math.Max(6250.0, Math.Round(PurchasePrice * 0.05, 2));
-        public double CostToggleConfiguration => 1200.0;
+        public double Cost50hInspection => MaintenancePricing.Cost50hInspection;
+        public double Cost100hInspection => MaintenancePricing.Cost100hInspection;
+        public double Cost500hInspection => MaintenancePricing.Cost500hInspection;
+        public double CostOverhaul => MaintenancePricing.CalculateOverhaulCost(PurchasePrice);
+        public double CostToggleConfiguration => MaintenancePricing.CostToggleConfiguration;
 
         public string Text50h => $"Troca de óleo · {Cost50hInspection:C0}";
         public string Text100h => $"Inspeção anual · {Cost100hInspection:C0}";
@@ -189,6 +190,58 @@ namespace FlightCareer.UI.ViewModels
             ? $"vence em {Aircraft.InsuranceExpirationDate:dd/MM/yyyy} ({(Aircraft.InsuranceExpirationDate!.Value - DateTime.Now).TotalDays:F0} dias)"
             : "sem cobertura";
         public string InsuranceButtonText => IsInsured ? $"Renovar +30 dias · {InsurancePremium:C0}" : $"Contratar 30 dias · {InsurancePremium:C0}";
+
+        /// <summary>Atualiza as peças com atenção visíveis em cada card de componente.</summary>
+        public void SetFlaggedParts(IEnumerable<AircraftPart> parts, PartCatalog partCatalog)
+        {
+            var partsList = parts?.ToList() ?? new List<AircraftPart>();
+            int maxEngineCount = partsList.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+            var mapping = PartComponentMapping.CreateDefault();
+
+            var flaggedByKind = new Dictionary<ComponentKind, List<FlaggedPartViewModel>>();
+
+            foreach (var part in partsList)
+            {
+                if (!PartInspectionFlags.IsVisible(part, Aircraft.CurrentAirframeHours))
+                    continue;
+
+                var def = partCatalog.Get(part.PartId);
+                if (def == null) continue;
+
+                var kind = mapping.ResolveComponentKind(def.Group);
+                if (!kind.HasValue) continue;
+
+                string name = (def.PerEngine && maxEngineCount > 1 && part.EngineIndex > 0)
+                    ? $"{def.Name} (motor {part.EngineIndex})"
+                    : def.Name;
+
+                var eval = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
+                string reason = !string.IsNullOrEmpty(eval.Reason)
+                    ? eval.Reason
+                    : (part.Flag == PartFlag.Broken ? "Quebrada" : "Atenção recomendada");
+
+                var item = new FlaggedPartViewModel(name, part.Flag, reason);
+
+                if (!flaggedByKind.TryGetValue(kind.Value, out var list))
+                {
+                    list = new List<FlaggedPartViewModel>();
+                    flaggedByKind[kind.Value] = list;
+                }
+                list.Add(item);
+            }
+
+            foreach (var row in Components)
+            {
+                if (flaggedByKind.TryGetValue(row.Kind, out var list))
+                {
+                    row.SetFlaggedParts(list);
+                }
+                else
+                {
+                    row.SetFlaggedParts(Array.Empty<FlaggedPartViewModel>());
+                }
+            }
+        }
 
         /// <summary>Recalcula tudo após um serviço ou recarga.</summary>
         public void Refresh()

@@ -2365,3 +2365,39 @@
   - `dotnet test src/FlightCareer.Tests`: 600/600 aprovados (100%).
   - `fuzz --aircraft all --runs 20`: 920 voos procedurais em 46 aeronaves aprovados (100%), 0 falhas.
   - Não testado no MSFS.
+
+## 2026-11-17 - Exclamação das peças no Hangar após inspeção (Gemini)
+- **Sinalização de Peças no Hangar (HANGAR-ICONES)**:
+  - Adicionado `Broken = 2` ao enum `PartFlag` e a propriedade `double? FlaggedAirframeHours` em `AircraftPart`, com migração de coluna no SQLite em `AppDbContext.EnsureSchemaUpdatedAsync`.
+  - Criada a classe `Domain/Parts/PartInspectionFlags.cs` contendo a lógica pura de avaliação de peças (`Evaluate`), inspeção com escopo (`ApplyInspection`), limpeza pós-reparo (`ClearForKinds`) e visibilidade transitória até o próximo voo (`IsVisible`).
+  - Regras de marcação:
+    - Vermelha (`PartFlag.Broken`): peça com `IsBroken = true` ("Quebrada").
+    - Amarela (`PartFlag.Suspect`): horas acumuladas $\ge 90\%$ de `LifeHours` ("Vida: X / Y h" ou "Vida vencida: X / Y h"); ciclos $\ge 90\%$ de `LifeCycles`; meses $\ge 90\%$ de `CalendarLifeMonths`; ou saúde $< 40\%$ ("Desgaste avançado"). Peças normais e sem aviso recebem `PartFlag.None`.
+  - **Interface do Hangar (`ComponentRowViewModel`, `PilotAircraftWrapper`, `HangarView.xaml`)**:
+    - Cada card de componente exibe chips horizontais (`WrapPanel`) com ícone de exclamação e nome da peça (+ `(motor n)` se `perEngine` em aeronave multimotor) em cores correspondentes (amarelo `#FFB300` e vermelho `#FF5252`), com `ToolTip` contendo o motivo exato. Lista vazia não ocupa espaço visual.
+    - O Hangar carrega as peças do avião selecionado em contexto de curta duração e filtra apenas peças visíveis (`IsVisible`), garantindo que o alerta permaneça até a realização do próximo voo (quando a aeronave acumula horas).
+  - **Inspeções e Serviços no Hangar (`HangarViewModel`)**:
+    - Inspeção de 50 h: avalia peças dos componentes Motor e Óleo.
+    - Inspeção de 100 h: avalia todas as peças da aeronave.
+    - Revisão de 500 h: avalia peças do componente Ignição.
+    - Walkaround: avalia peças marcadas com `VisibleOnWalkaround`.
+    - Mensagens de sucesso das inspeções ganham o sufixo `" — N peça(s) com atenção"` quando $N > 0$.
+    - Reparo de componente e Overhaul limpam as sinalizações das peças dos componentes reparados (`ClearForKinds`).
+- **Testes e Aceitação**:
+  - 12 novos testes unitários em `src/FlightCareer.Tests/Parts/PartInspectionFlagsTests.cs`.
+  - 1 novo teste de migração e persistência em `src/FlightCareer.Tests/Components/ComponentPersistenceTests.cs` (`Banco_antigo_sem_FlaggedAirframeHours_recebe_coluna_e_grava_peca`).
+  - Build 0 erros, `dotnet test` 607/607 aprovados (594 baseline + 13 novos).
+  - Fuzz testing com 230 voos (46 aeronaves × 5 corridas) 100% aprovados, 0 falhas.
+  - Não testado visualmente na UI WPF em execução (verificação estática e por testes unitários/integração).
+
+## 2026-11-17 - Simulador de carreira com bots (Gemini, revisado pelo Claude)
+- Novo `Application/Simulation/CareerSimulator` e subcomando `FlightCareer.Replay career`: bots aceitam missões reais do `MissionGenerator`, voam (desgaste por voo sintético ou `--fast`), pagam combustível, taxas de aeroporto (`GroundServiceCalculator`), seguro e manutenção com os preços do Hangar; gera `flights.csv`, `maintenance.csv`, `daily.csv` e `summary.md` (receita/h, custos/h, margem, horas para pagar o avião, frequência de manutenção e panes).
+- `MaintenancePricing` (Domain) passa a guardar os preços de inspeção/retífica antes fixos em `PilotAircraftWrapper` (mesmos valores). `MissionGenerator` aceita aleatoriedade e data de referência injetáveis (ordem estável das consultas); `FuelPriceService` aceita data.
+- Não muda nenhum valor de economia. Execução completa (8 aviões × 5 bots × 90 dias) não terminou em 1 h: rodar em lotes menores. Moeda do relatório em `$` (cultura en-US).
+
+## 2026-11-17 - Ícones dos grupos no Hangar (Claude)
+- Os cards de componentes do Hangar trocam a barra de saúde por um **ícone vetorial por grupo** (motor, óleo, ignição, seção quente, elétrico, instrumentos, trem, pneus, freios, célula), desenhado em `UI/ViewModels/HangarIcons.cs` (sintaxe de path SVG, 24×24, traço) e pintado no tom da saúde do grupo (`HangarPalette.ForHealth`, mesmas faixas verde/amarelo/vermelho da barra antiga). A faixa de saúde continua no texto ao lado e no tooltip do ícone; os chips das peças marcadas na inspeção seguem dentro do card.
+- Não visto na tela (sem rodar a UI).
+
+## 2026-11-19 - Moeda $ no thread da UI (Claude)
+- A cultura en-US era aplicada dentro do `async void OnStartup`; no .NET a cultura atual segue o contexto assíncrono, então depois do primeiro `await` o thread da UI voltava à cultura do Windows e os valores `:C` apareciam como "R$ 1.200" (Hangar, conversão de cabine, reparos). Agora é aplicada no construtor do `App`, antes de qualquer código assíncrono. Não conferido na tela.

@@ -4,6 +4,7 @@ using FlightCareer.Application.Interfaces;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Views;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace FlightCareer.UI.ViewModels
     {
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
         private readonly ComponentCatalog _catalog;
+        private readonly PartCatalog _partCatalog;
         private readonly ISimConnectService? _simConnect;
         private readonly Services.FlightMonitor? _flightMonitor;
         private readonly IRandomSource _random = new SystemRandomSource();
@@ -39,12 +41,14 @@ namespace FlightCareer.UI.ViewModels
             IDbContextFactory<AppDbContext> contextFactory,
             ComponentCatalog catalog,
             ISimConnectService? simConnect = null,
-            Services.FlightMonitor? flightMonitor = null)
+            Services.FlightMonitor? flightMonitor = null,
+            PartCatalog? partCatalog = null)
         {
             _contextFactory = contextFactory;
             _catalog = catalog;
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
+            _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
         }
 
         public async Task InitializeAsync(Guid pilotId)
@@ -100,6 +104,33 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(FleetCountText));
             var selectId = keepSelection ?? SelectedAircraft?.Aircraft.Id ?? pilot.ActiveAircraftId;
             SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == selectId) ?? Fleet.FirstOrDefault();
+            await LoadFlaggedPartsForSelectedAircraftAsync();
+        }
+
+        partial void OnSelectedAircraftChanged(PilotAircraftWrapper? value)
+        {
+            if (value != null)
+            {
+                _ = LoadFlaggedPartsForSelectedAircraftAsync();
+            }
+        }
+
+        private async Task LoadFlaggedPartsForSelectedAircraftAsync()
+        {
+            if (SelectedAircraft == null) return;
+            var aircraftId = SelectedAircraft.Aircraft.Id;
+            try
+            {
+                await using var context = await _contextFactory.CreateDbContextAsync();
+                var parts = await context.AircraftParts.AsNoTracking()
+                    .Where(p => p.PilotAircraftId == aircraftId && p.Flag != PartFlag.None)
+                    .ToListAsync();
+                SelectedAircraft.SetFlaggedParts(parts, _partCatalog);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Hangar] Erro ao carregar peças marcadas: {ex.Message}");
+            }
         }
 
         // ------------------------------------------------------------------ Infraestrutura de serviços
@@ -126,7 +157,7 @@ namespace FlightCareer.UI.ViewModels
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
             Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
-            Func<AppDbContext, Task>? applyInContext = null)
+            Func<AppDbContext, Task>? applyInContext = null, Func<int>? getFlaggedCount = null)
         {
             if (SelectedAircraft == null) return false;
             var aircraftId = SelectedAircraft.Aircraft.Id;
@@ -138,6 +169,7 @@ namespace FlightCareer.UI.ViewModels
             var aircraft = await context.PilotAircrafts
                 .Include(a => a.AircraftType)
                 .Include(a => a.Components)
+                .Include(a => a.Parts)
                 .FirstOrDefaultAsync(a => a.Id == aircraftId);
             if (pilot == null || aircraft == null) return false;
 
@@ -170,7 +202,18 @@ namespace FlightCareer.UI.ViewModels
             await LoadFleetAsync(aircraftId);
             await RefreshMainBalanceAsync();
 
-            if (successMessage != null) ThemedDialog.Info(title, successMessage, DialogKind.Success);
+            if (successMessage != null)
+            {
+                if (getFlaggedCount != null)
+                {
+                    int n = getFlaggedCount();
+                    if (n > 0)
+                    {
+                        successMessage = $"{successMessage.TrimEnd('.')} — {n} peça(s) com atenção.";
+                    }
+                }
+                ThemedDialog.Info(title, successMessage, DialogKind.Success);
+            }
             return true;
         }
 
@@ -240,6 +283,7 @@ namespace FlightCareer.UI.ViewModels
                 (aircraft, components) =>
                 {
                     RepairKind(aircraft, components, kind);
+                    PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind> { kind });
                     ApplyRegulatoryReset(aircraft, kind);
                 },
                 kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
@@ -306,11 +350,14 @@ namespace FlightCareer.UI.ViewModels
                 "REPARO COMPLETO",
                 (aircraft, components) =>
                 {
+                    var kinds = new HashSet<ComponentKind>();
                     foreach (var r in rows)
                     {
                         RepairKind(aircraft, components, r.Kind);
                         ApplyRegulatoryReset(aircraft, r.Kind);
+                        kinds.Add(r.Kind);
                     }
+                    PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, kinds);
                 },
                 successMessage: "Todos os componentes foram restaurados a 100%.");
         }
@@ -322,18 +369,34 @@ namespace FlightCareer.UI.ViewModels
             var aircraftId = SelectedAircraft.Aircraft.Id;
 
             await using var context = await _contextFactory.CreateDbContextAsync();
-            var aircraft = await context.PilotAircrafts.Include(a => a.Components).FirstOrDefaultAsync(a => a.Id == aircraftId);
+            var aircraft = await context.PilotAircrafts
+                .Include(a => a.Components)
+                .Include(a => a.Parts)
+                .FirstOrDefaultAsync(a => a.Id == aircraftId);
             if (aircraft == null) return;
 
             int narrowed = ComponentMaintenance.Walkaround(aircraft.Components, _catalog, aircraft.CurrentAirframeHours, _random);
+            int flagged = PartInspectionFlags.ApplyInspection(
+                aircraft.Parts,
+                _partCatalog,
+                def => def.VisibleOnWalkaround,
+                PartFlagSource.Walkaround,
+                aircraft.CurrentAirframeHours,
+                DateTime.UtcNow);
+
             await context.SaveChangesAsync();
             await LoadFleetAsync(aircraftId);
 
-            ThemedDialog.Info("Walkaround",
-                narrowed > 0
-                    ? $"Inspeção visual concluída: {narrowed} componente(s) estimados com mais precisão (pneus, freios, trem, óleo e célula). Motor e sistemas só são avaliados nas inspeções de oficina."
-                    : "Nada novo a observar: os componentes visíveis por fora já estão com estimativa recente.",
-                DialogKind.Success);
+            string msg = narrowed > 0
+                ? $"Inspeção visual concluída: {narrowed} componente(s) estimados com mais precisão (pneus, freios, trem, óleo e célula). Motor e sistemas só são avaliados nas inspeções de oficina."
+                : "Nada novo a observar: os componentes visíveis por fora já estão com estimativa recente.";
+
+            if (flagged > 0)
+            {
+                msg = $"{msg.TrimEnd('.')} — {flagged} peça(s) com atenção.";
+            }
+
+            ThemedDialog.Info("Walkaround", msg, DialogKind.Success);
         }
 
         // ------------------------------------------------------------------ Inspeções e TBO
@@ -342,6 +405,7 @@ namespace FlightCareer.UI.ViewModels
         private async Task Perform50hInspection()
         {
             if (!CanOperate() || SelectedAircraft == null) return;
+            int flagged = 0;
             await RunPaidServiceAsync(
                 "Troca de óleo (12 h)",
                 "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a 100% e o motor tem a saúde medida com exatidão.",
@@ -353,14 +417,25 @@ namespace FlightCareer.UI.ViewModels
                     ComponentMaintenance.Inspect(components.Where(c => c.Kind is ComponentKind.Engine or ComponentKind.Oil), Hours(aircraft), _random, _catalog.Visibility);
                     aircraft.HoursUntilNext50hInspection = 12.0;
                     ClearInterdictionIfResolved(aircraft);
+
+                    var mapping = PartComponentMapping.CreateDefault();
+                    flagged = PartInspectionFlags.ApplyInspection(
+                        aircraft.Parts,
+                        _partCatalog,
+                        def => mapping.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
+                        PartFlagSource.Inspection,
+                        Hours(aircraft),
+                        DateTime.UtcNow);
                 },
-                successMessage: "Troca de óleo concluída.");
+                successMessage: "Troca de óleo concluída.",
+                getFlaggedCount: () => flagged);
         }
 
         [RelayCommand]
         private async Task Perform100hInspection()
         {
             if (!CanOperate() || SelectedAircraft == null) return;
+            int flagged = 0;
             await RunPaidServiceAsync(
                 "Inspeção anual (25 h)",
                 "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de inspeção anual (25 h) e troca de óleo (12 h) são zerados. Reparos encontrados são orçados à parte.",
@@ -373,14 +448,24 @@ namespace FlightCareer.UI.ViewModels
                     aircraft.HoursUntilNext100hInspection = 25.0;
                     aircraft.HoursUntilNext50hInspection = 12.0;
                     ClearInterdictionIfResolved(aircraft);
+
+                    flagged = PartInspectionFlags.ApplyInspection(
+                        aircraft.Parts,
+                        _partCatalog,
+                        _ => true,
+                        PartFlagSource.Inspection,
+                        Hours(aircraft),
+                        DateTime.UtcNow);
                 },
-                successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.");
+                successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.",
+                getFlaggedCount: () => flagged);
         }
 
         [RelayCommand]
         private async Task Perform500hInspection()
         {
             if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.IsPiston) return;
+            int flagged = 0;
             await RunPaidServiceAsync(
                 "Revisão de ignição (125 h)",
                 "Revisão dos magnetos, platinados e troca de velas. A ignição volta a 100%.",
@@ -390,8 +475,18 @@ namespace FlightCareer.UI.ViewModels
                 {
                     RepairKind(aircraft, components, ComponentKind.Ignition);
                     ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
+
+                    var mapping = PartComponentMapping.CreateDefault();
+                    flagged = PartInspectionFlags.ApplyInspection(
+                        aircraft.Parts,
+                        _partCatalog,
+                        def => mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition,
+                        PartFlagSource.Inspection,
+                        Hours(aircraft),
+                        DateTime.UtcNow);
                 },
-                successMessage: "Revisão de ignição concluída.");
+                successMessage: "Revisão de ignição concluída.",
+                getFlaggedCount: () => flagged);
         }
 
         [RelayCommand]
@@ -408,6 +503,12 @@ namespace FlightCareer.UI.ViewModels
                     RepairKind(aircraft, components, ComponentKind.Engine);
                     RepairKind(aircraft, components, ComponentKind.HotSection);
                     RepairKind(aircraft, components, ComponentKind.Oil);
+                    PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind>
+                    {
+                        ComponentKind.Engine,
+                        ComponentKind.HotSection,
+                        ComponentKind.Oil
+                    });
                     ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
                 },
                 kind: DialogKind.Warning,
