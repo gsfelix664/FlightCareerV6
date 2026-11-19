@@ -1,6 +1,6 @@
 # CALENDARIO-JOGO — Relógio de carreira para tudo que é medido em dias/meses
 
-**Branch:** feat/calendario-jogo · **Commit:** <pendente> · **Data:** 2026-11-19
+**Branch:** feat/calendario-jogo · **Commit:** 8cc6b38 · **Data:** 2026-11-19
 
 ## Plano (antes de codar)
 - Criar a classe de lógica pura `Domain/Services/CareerClock.cs` com métodos `Advance` e `AdvanceFlight`, além de constantes documentadas para tempos de solo e paradas de oficina (50h/12,5h -> 2h; 100h/25h -> 8h; 500h/125h -> 6h; retífica -> 72h; solo pós-voo -> 0,5h).
