@@ -60,7 +60,7 @@ namespace FlightCareer.Tests.Parts
                 Assert.False(string.IsNullOrWhiteSpace(part.LifeSource));
                 Assert.True(part.LifeSource.StartsWith("estimativa — revisar") || part.LifeSource.StartsWith("calibração do usuário"),
                     $"Peça '{part.Id}' tem LifeSource inesperado: '{part.LifeSource}'");
-                Assert.True(part.LifeHours > 0 || (part.LifeCycles.HasValue && part.LifeCycles.Value > 0));
+                Assert.True(part.LifeHours > 0 || (part.LifeCycles.HasValue && part.LifeCycles.Value > 0) || (part.CalendarLifeMonths.HasValue && part.CalendarLifeMonths.Value > 0));
                 Assert.True(part.PartPrice >= 0);
                 Assert.True(part.LaborHours >= 0);
 
@@ -599,27 +599,27 @@ namespace FlightCareer.Tests.Parts
             // Peças de envelhecimento estacionário do Adendo 4
             var mainBattery = Catalog.Find("electrical.battery");
             Assert.NotNull(mainBattery);
-            Assert.Equal(24, mainBattery.CalendarLifeMonths);
+            Assert.Equal(6, mainBattery.CalendarLifeMonths);
 
             var mainTire = Catalog.Find("tires.main");
             Assert.NotNull(mainTire);
-            Assert.Equal(48, mainTire.CalendarLifeMonths);
+            Assert.Equal(12, mainTire.CalendarLifeMonths);
 
             var hydLines = Catalog.Find("hydraulic.lines_fittings");
             Assert.NotNull(hydLines);
-            Assert.Equal(60, hydLines.CalendarLifeMonths);
+            Assert.Equal(18, hydLines.CalendarLifeMonths);
 
             var crewO2 = Catalog.Find("oxygen.crew_cylinder");
             Assert.NotNull(crewO2);
-            Assert.Equal(60, crewO2.CalendarLifeMonths);
+            Assert.Equal(15, crewO2.CalendarLifeMonths);
 
             var fireBottles = Catalog.Find("fire.engine_extinguisher_bottles");
             Assert.NotNull(fireBottles);
-            Assert.Equal(60, fireBottles.CalendarLifeMonths);
+            Assert.Equal(15, fireBottles.CalendarLifeMonths);
 
             var elt = Catalog.Find("avionics.flight_recorders_elt");
             Assert.NotNull(elt);
-            Assert.Equal(24, elt.CalendarLifeMonths);
+            Assert.Equal(12, elt.CalendarLifeMonths);
 
             var oil = Catalog.Find("oil.lubricant");
             Assert.NotNull(oil);
@@ -816,32 +816,94 @@ namespace FlightCareer.Tests.Parts
         public void Catalogo_Motor_CalibracaoDoUsuario()
         {
             var cyl = Catalog.Get("engine.cylinders")!;
-            Assert.Equal(450, cyl.LifeHours);
+            Assert.Equal(500, cyl.LifeHours);
             Assert.Null(cyl.LifeCycles);
             Assert.Equal(1600m, cyl.PartPrice);
-            Assert.Equal(8.0, cyl.LaborHours);
-            Assert.Equal(new[] { 4.0, 14.0 }, cyl.DowntimeHours);
+            Assert.Equal(16.0, cyl.LaborHours);
+            Assert.Equal(new[] { 8.0, 36.0 }, cyl.DowntimeHours);
 
             var starter = Catalog.Get("engine.starter")!;
-            Assert.Equal(375, starter.LifeHours);
+            Assert.Equal(500, starter.LifeHours);
             Assert.Null(starter.LifeCycles);
-            Assert.Equal(320m, starter.PartPrice);
-            Assert.Equal(1.5, starter.LaborHours);
-            Assert.Equal(new[] { 2.0, 8.0 }, starter.DowntimeHours);
+            Assert.Equal(300m, starter.PartPrice);
+            Assert.Equal(2.5, starter.LaborHours);
+            Assert.Equal(new[] { 4.0, 12.0 }, starter.DowntimeHours);
 
             var fan = Catalog.Get("engine.fan")!;
-            Assert.Equal(1000, fan.LifeHours);
-            Assert.Equal(750, fan.LifeCycles);
-            Assert.Equal(16000m, fan.PartPrice);
-            Assert.Equal(8.0, fan.LaborHours);
-            Assert.Equal(new[] { 6.0, 18.0 }, fan.DowntimeHours);
+            Assert.Equal(5000, fan.LifeHours);
+            Assert.Equal(3750, fan.LifeCycles);
+            Assert.Equal(65000m, fan.PartPrice);
+            Assert.Equal(16.0, fan.LaborHours);
+            Assert.Equal(new[] { 12.0, 48.0 }, fan.DowntimeHours);
 
             var rev = Catalog.Get("engine.thrust_reverser")!;
-            Assert.Equal(750, rev.LifeHours);
-            Assert.Equal(625, rev.LifeCycles);
-            Assert.Equal(7800m, rev.PartPrice);
-            Assert.Equal(5.0, rev.LaborHours);
-            Assert.Equal(new[] { 4.0, 12.0 }, rev.DowntimeHours);
+            Assert.Equal(0, rev.LifeHours);
+            Assert.Equal(3000, rev.LifeCycles);
+            Assert.Equal(28000m, rev.PartPrice);
+            Assert.Equal(10.0, rev.LaborHours);
+            Assert.Equal(new[] { 8.0, 24.0 }, rev.DowntimeHours);
+        }
+
+        [Fact]
+        public void Catalogo_CalibracaoDoUsuario()
+        {
+            // 5 peças de grupos distintos conferidas contra a calibração do usuário (2026-11-19)
+            // 1. Asa (wing): airframe.flaps (NO-GO, WA, só ciclos)
+            var flaps = Catalog.Get("airframe.flaps")!;
+            Assert.Equal(0, flaps.LifeHours);
+            Assert.Equal(2000, flaps.LifeCycles);
+            Assert.Equal(1200m, flaps.PartPrice);
+            Assert.True(flaps.PriceScalesWithAircraft);
+            Assert.Equal(8.0, flaps.LaborHours);
+            Assert.Equal(new[] { 8.0, 24.0 }, flaps.DowntimeHours);
+            Assert.True(flaps.BlocksFlightWhenBroken);
+            Assert.True(flaps.VisibleOnWalkaround);
+            Assert.Contains("Assimetria ou travamento", flaps.FailureEffect);
+
+            // 2. Aviônicos (avionics): avionics.adc (NO-GO, não WA)
+            var adc = Catalog.Get("avionics.adc")!;
+            Assert.Equal(4000, adc.LifeHours);
+            Assert.Null(adc.LifeCycles);
+            Assert.Equal(2000m, adc.PartPrice);
+            Assert.True(adc.PriceScalesWithAircraft);
+            Assert.Equal(5.0, adc.LaborHours);
+            Assert.Equal(new[] { 2.0, 6.0 }, adc.DowntimeHours);
+            Assert.True(adc.BlocksFlightWhenBroken);
+            Assert.False(adc.VisibleOnWalkaround);
+
+            // 3. Óleo (oil): oil.lubricant (NO-GO, WA, calendário 3 meses)
+            var oil = Catalog.Get("oil.lubricant")!;
+            Assert.Equal(25.0, oil.LifeHours);
+            Assert.Equal(3, oil.CalendarLifeMonths);
+            Assert.Equal(35m, oil.PartPrice);
+            Assert.False(oil.PriceScalesWithAircraft);
+            Assert.Equal(1.5, oil.LaborHours);
+            Assert.Equal(new[] { 1.0, 2.0 }, oil.DowntimeHours);
+            Assert.True(oil.BlocksFlightWhenBroken);
+            Assert.True(oil.VisibleOnWalkaround);
+
+            // 4. Trem de pouso (landing_gear): gear.main_struts (NO-GO, WA, ciclos + calendário)
+            var gear = Catalog.Get("gear.main_struts")!;
+            Assert.Equal(0, gear.LifeHours);
+            Assert.Equal(2500, gear.LifeCycles);
+            Assert.Equal(30, gear.CalendarLifeMonths);
+            Assert.Equal(2200m, gear.PartPrice);
+            Assert.True(gear.PriceScalesWithAircraft);
+            Assert.Equal(6.0, gear.LaborHours);
+            Assert.Equal(new[] { 6.0, 16.0 }, gear.DowntimeHours);
+            Assert.True(gear.BlocksFlightWhenBroken);
+            Assert.True(gear.VisibleOnWalkaround);
+
+            // 5. Iluminação (lights): lights.landing (não NO-GO, WA)
+            var light = Catalog.Get("lights.landing")!;
+            Assert.Equal(250, light.LifeHours);
+            Assert.Null(light.LifeCycles);
+            Assert.Equal(65m, light.PartPrice);
+            Assert.True(light.PriceScalesWithAircraft);
+            Assert.Equal(0.5, light.LaborHours);
+            Assert.Equal(new[] { 0.5, 1.0 }, light.DowntimeHours);
+            Assert.False(light.BlocksFlightWhenBroken);
+            Assert.True(light.VisibleOnWalkaround);
         }
     }
 }

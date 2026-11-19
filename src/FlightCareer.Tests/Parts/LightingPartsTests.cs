@@ -72,7 +72,7 @@ namespace FlightCareer.Tests.Parts
 
             engine.ApplyTick(new[] { part }, frameAceso, 1.0, Array.Empty<string>(), null, null);
 
-            double expectedLoss = 70.0 / 75.0;
+            double expectedLoss = 70.0 / DefaultPartsCatalog.Get("lights.landing")!.LifeHours;
             Assert.Equal(100.0 - expectedLoss, part.Health, precision: 5);
             Assert.Equal(1.0, part.HoursSinceReplacement, precision: 5);
 

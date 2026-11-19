@@ -91,9 +91,9 @@ namespace FlightCareer.Domain.Parts
 
                 part.AppliesTo.ValidateVocabulary(part.Id);
 
-                if (part.LifeHours <= 0 && (!part.LifeCycles.HasValue || part.LifeCycles.Value <= 0))
+                if (part.LifeHours <= 0 && (!part.LifeCycles.HasValue || part.LifeCycles.Value <= 0) && (!part.CalendarLifeMonths.HasValue || part.CalendarLifeMonths.Value <= 0))
                 {
-                    throw new InvalidDataException($"Peça '{part.Id}' deve ter LifeHours > 0 ou LifeCycles > 0.");
+                    throw new InvalidDataException($"Peça '{part.Id}' deve ter LifeHours > 0, LifeCycles > 0 ou CalendarLifeMonths > 0.");
                 }
 
                 if (string.IsNullOrWhiteSpace(part.LifeSource))
@@ -162,7 +162,7 @@ namespace FlightCareer.Domain.Parts
                 d.Name,
                 d.Group,
                 new PartAppliesTo(d.AppliesTo?.All, d.AppliesTo?.Any, d.AppliesTo?.None),
-                d.LifeHours,
+                d.LifeHours ?? 0.0,
                 d.LifeCycles,
                 d.VisibleOnWalkaround,
                 d.BlocksFlightWhenBroken,
@@ -221,7 +221,7 @@ namespace FlightCareer.Domain.Parts
             public string Name { get; set; } = string.Empty;
             public string Group { get; set; } = string.Empty;
             public AppliesToDto? AppliesTo { get; set; }
-            public double LifeHours { get; set; }
+            public double? LifeHours { get; set; }
             public int? LifeCycles { get; set; }
             public bool VisibleOnWalkaround { get; set; }
             public bool BlocksFlightWhenBroken { get; set; }

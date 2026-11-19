@@ -183,7 +183,7 @@
       "appliesTo": [ "Piston", "Turboprop", "Jet" ],
       "critical": true,
       "weight": 30,
-      "lifeHours": { "Piston": 450, "Turboprop": 900, "Jet": 900 },
+      "lifeHours": { "Piston": 500, "Turboprop": 900, "Jet": 900 },
       "naturalLossOverLife": 70,
       "yellowLossPerHour": 3,
       "redLossPerHour": 60,

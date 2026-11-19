@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -30,32 +32,32 @@ namespace FlightCareer.Tests.Components
             var parts = doc.RootElement.GetProperty("parts").EnumerateArray()
                 .ToDictionary(p => p.GetProperty("id").GetString()!);
 
-            // 1. Célula / Estrutura da asa (airframe.wing_structure): original 12.000 h -> 3.000 h
+            // 1. Célula / Estrutura da asa (airframe.wing_structure): 10.000 h na calibração do usuário
             var wing = parts["airframe.wing_structure"];
-            Assert.Equal(3000.0, wing.GetProperty("lifeHours").GetDouble());
-            Assert.True(wing.GetProperty("calendarLifeMonths").ValueKind == JsonValueKind.Null);
+            Assert.Equal(10000.0, wing.GetProperty("lifeHours").GetDouble());
+            Assert.False(wing.TryGetProperty("calendarLifeMonths", out var calProp) && calProp.ValueKind != JsonValueKind.Null);
 
-            // 2. Trem de pouso (gear.main_struts): original 4.000 h -> 1.000 h; 3.000 ciclos -> 750 ciclos
+            // 2. Trem de pouso (gear.main_struts): 2.500 ciclos, 30 meses na calibração do usuário
             var gear = parts["gear.main_struts"];
-            Assert.Equal(1000.0, gear.GetProperty("lifeHours").GetDouble());
-            Assert.Equal(750, gear.GetProperty("lifeCycles").GetInt32());
-            Assert.True(gear.GetProperty("calendarLifeMonths").ValueKind == JsonValueKind.Null);
+            Assert.False(gear.TryGetProperty("lifeHours", out var lhProp) && lhProp.ValueKind != JsonValueKind.Null);
+            Assert.Equal(2500, gear.GetProperty("lifeCycles").GetInt32());
+            Assert.Equal(30, gear.GetProperty("calendarLifeMonths").GetInt32());
 
-            // 3. Instrumentos (instruments.pitot_tube): original 3.000 h -> 750 h
+            // 3. Instrumentos (instruments.pitot_tube): 900 h na calibração do usuário
             var pitot = parts["instruments.pitot_tube"];
-            Assert.Equal(750.0, pitot.GetProperty("lifeHours").GetDouble());
-            Assert.True(pitot.GetProperty("calendarLifeMonths").ValueKind == JsonValueKind.Null);
+            Assert.Equal(900.0, pitot.GetProperty("lifeHours").GetDouble());
+            Assert.False(pitot.TryGetProperty("calendarLifeMonths", out var pitotCal) && pitotCal.ValueKind != JsonValueKind.Null);
 
-            // 4. Óleo lubrificante (oil.lubricant): original 50 h -> 12.5 h; calendário exceção = 3 meses
+            // 4. Óleo lubrificante (oil.lubricant): 25 h; calendário exceção = 3 meses
             var oil = parts["oil.lubricant"];
-            Assert.Equal(12.5, oil.GetProperty("lifeHours").GetDouble());
+            Assert.Equal(25.0, oil.GetProperty("lifeHours").GetDouble());
             Assert.Equal(3, oil.GetProperty("calendarLifeMonths").GetInt32());
 
-            // 5. Iluminação (lights.landing): original 300 h -> 75 h; sem ciclos e sem calendário
+            // 5. Iluminação (lights.landing): 250 h na calibração do usuário; sem ciclos e sem calendário
             var light = parts["lights.landing"];
-            Assert.Equal(75.0, light.GetProperty("lifeHours").GetDouble());
-            Assert.True(light.GetProperty("lifeCycles").ValueKind == JsonValueKind.Null);
-            Assert.True(light.GetProperty("calendarLifeMonths").ValueKind == JsonValueKind.Null);
+            Assert.Equal(250.0, light.GetProperty("lifeHours").GetDouble());
+            Assert.False(light.TryGetProperty("lifeCycles", out var lcProp) && lcProp.ValueKind != JsonValueKind.Null);
+            Assert.False(light.TryGetProperty("calendarLifeMonths", out var calProp2) && calProp2.ValueKind != JsonValueKind.Null);
         }
 
         [Fact]
@@ -79,17 +81,17 @@ namespace FlightCareer.Tests.Components
         }
 
         [Fact]
-        public void Tbo_Pistao450_Turbina900()
+        public void Tbo_Pistao500_Turbina900()
         {
             var catalog = TestData.Catalog;
             var engineDef = catalog.Get(ComponentKind.Engine);
 
-            Assert.Equal(450.0, engineDef.LifeHoursFor(EngineClass.Piston));
+            Assert.Equal(500.0, engineDef.LifeHoursFor(EngineClass.Piston));
             Assert.Equal(900.0, engineDef.LifeHoursFor(EngineClass.Turboprop));
             Assert.Equal(900.0, engineDef.LifeHoursFor(EngineClass.Jet));
 
             var aircraft = new PilotAircraft();
-            Assert.Equal(450.0, aircraft.EngineTboRemainingHours);
+            Assert.Equal(500.0, aircraft.EngineTboRemainingHours);
         }
 
         [Fact]
@@ -180,8 +182,8 @@ namespace FlightCareer.Tests.Components
                 Assert.NotNull(pLoaded);
                 Assert.NotNull(jLoaded);
 
-                // Pistão: TBO limitado a 450, 50h limitada a 12, 100h limitada a 25, 500h limitada a 125
-                Assert.Equal(450.0, pLoaded.EngineTboRemainingHours);
+                // Pistão: TBO limitado a 500, 50h limitada a 12, 100h limitada a 25, 500h limitada a 125
+                Assert.Equal(500.0, pLoaded.EngineTboRemainingHours);
                 Assert.Equal(12.0, pLoaded.HoursUntilNext50hInspection);
                 Assert.Equal(25.0, pLoaded.HoursUntilNext100hInspection);
                 Assert.Equal(125.0, pLoaded.HoursUntilNext500hInspection);
@@ -199,7 +201,7 @@ namespace FlightCareer.Tests.Components
                 var pLoaded2 = await context.PilotAircrafts.FindAsync(aircraftPistao.Id);
                 var jLoaded2 = await context.PilotAircrafts.FindAsync(aircraftTurbina.Id);
 
-                Assert.Equal(450.0, pLoaded2!.EngineTboRemainingHours);
+                Assert.Equal(500.0, pLoaded2!.EngineTboRemainingHours);
                 Assert.Equal(12.0, pLoaded2.HoursUntilNext50hInspection);
                 Assert.Equal(25.0, pLoaded2.HoursUntilNext100hInspection);
                 Assert.Equal(125.0, pLoaded2.HoursUntilNext500hInspection);
@@ -209,6 +211,44 @@ namespace FlightCareer.Tests.Components
                 Assert.Equal(25.0, jLoaded2.HoursUntilNext100hInspection);
                 Assert.Equal(125.0, jLoaded2.HoursUntilNext500hInspection);
             }
+        }
+
+        [Fact]
+        public void PartPricing_MultiplicadorPorClasse()
+        {
+            // C152 -> Classe A -> Multiplicador 0.75
+            string c152Class = AircraftEconomyClass.Resolve("Cessna C152", "Piston", 1, new[] { "carbureted", "fixedPitchProp" }, 45_000.0);
+            Assert.Equal("A", c152Class);
+            Assert.Equal(0.75, AircraftEconomyClass.GetPartPriceMultiplier(c152Class));
+
+            // Boeing 737 Max 8 -> Classe I -> Multiplicador 3.25
+            string b737Class = AircraftEconomyClass.Resolve("737 Max 8", "Jet", 2, new[] { "jet", "pressurized" }, 121_600_000.0);
+            Assert.Equal("I", b737Class);
+            Assert.Equal(3.25, AircraftEconomyClass.GetPartPriceMultiplier(b737Class));
+
+            // Peça que escala: base $1000
+            var scalingDef = new PartDefinition(
+                "test.scaling", "Peça que escala", "engine", new PartAppliesTo(),
+                1000, null, true, true, 1000m, 2.0, Array.Empty<string>(), "Manual",
+                priceScalesWithAircraft: true);
+
+            // C152: 1000 * 0.75 = 750
+            double priceC152 = PartPricing.CalculatePartPrice(scalingDef, c152Class);
+            Assert.Equal(750.0, priceC152);
+
+            // 737: 1000 * 3.25 = 3250
+            double price737 = PartPricing.CalculatePartPrice(scalingDef, b737Class);
+            Assert.Equal(3250.0, price737);
+
+            // Peça sem escala (preço fixo $300)
+            var fixedDef = new PartDefinition(
+                "test.fixed", "Peça fixa", "engine", new PartAppliesTo(),
+                500, null, true, true, 300m, 1.5, Array.Empty<string>(), "Manual",
+                priceScalesWithAircraft: false);
+
+            Assert.Equal(300.0, PartPricing.CalculatePartPrice(fixedDef, c152Class));
+            Assert.Equal(300.0, PartPricing.CalculatePartPrice(fixedDef, b737Class));
+            Assert.Equal(300.0, PartPricing.CalculatePartPrice(fixedDef, 1.0));
         }
     }
 }

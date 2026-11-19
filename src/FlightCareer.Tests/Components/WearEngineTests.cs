@@ -13,7 +13,7 @@ namespace FlightCareer.Tests.Components
         }
 
         [Theory]
-        [InlineData(ComponentKind.Engine, 450.0)]
+        [InlineData(ComponentKind.Engine, 500.0)]
         [InlineData(ComponentKind.Oil, 50.0)]
         [InlineData(ComponentKind.Ignition, 500.0)]
         [InlineData(ComponentKind.Electrical, 1500.0)]
@@ -92,7 +92,7 @@ namespace FlightCareer.Tests.Components
             Fly(wear, comps, warm, 1.0, 1.0 / 3600.0);
 
             double loss = 100 - comps.Get(ComponentKind.Engine).Health;
-            Assert.InRange(loss, 3.1, 3.25); // 3%/h amarelo + 70/450 natural
+            Assert.InRange(loss, 3.1, 3.25); // 3%/h amarelo + 70/500 natural
         }
 
         [Fact]

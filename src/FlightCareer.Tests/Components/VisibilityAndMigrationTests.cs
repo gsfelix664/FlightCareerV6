@@ -111,7 +111,7 @@ namespace FlightCareer.Tests.Components
             Assert.Equal(9, comps.Count);
             Assert.All(comps, c => Assert.Equal(aircraft.Id, c.PilotAircraftId));
             Assert.Equal(72.0, comps.Get(ComponentKind.Engine).Health);
-            Assert.Equal(100.0, comps.Get(ComponentKind.Engine).HoursSinceOverhaul, 6);
+            Assert.Equal(150.0, comps.Get(ComponentKind.Engine).HoursSinceOverhaul, 6);
             Assert.Equal(7.0, comps.Get(ComponentKind.Oil).HoursSinceOverhaul, 6);
             Assert.Equal(15.0, comps.Get(ComponentKind.Ignition).HoursSinceOverhaul, 6);
             Assert.Equal(55.0, comps.Get(ComponentKind.Brakes).Health);

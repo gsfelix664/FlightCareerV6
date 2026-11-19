@@ -75,25 +75,24 @@ namespace FlightCareer.Tests.Parts
                 500, null, true, true, 200m, 1.0, Array.Empty<string>(), "Manual",
                 priceScalesWithAircraft: false);
 
-            double priceFixedSmall = PartPricing.CalculatePartPrice(fixedDef, 50_000.0);
-            double priceFixedBig = PartPricing.CalculatePartPrice(fixedDef, 25_000_000.0);
+            double priceFixedSmall = PartPricing.CalculatePartPrice(fixedDef, 0.75);
+            double priceFixedBig = PartPricing.CalculatePartPrice(fixedDef, 5.5);
             Assert.Equal(200.0, priceFixedSmall);
             Assert.Equal(200.0, priceFixedBig);
 
-            // Peça que escala: 0.4% a 0.8% do valor da aeronave, com piso em $1500
+            // Peça que escala: base $1500 × multiplicador da classe (CALIBRA-F4b)
             var scalingDef = new PartDefinition(
                 "avionics.pfd_display", "PFD", PartGroup.Avionicos, new PartAppliesTo(),
                 6000, null, false, true, 1500m, 3.0, Array.Empty<string>(), "Manual",
-                priceScalesWithAircraft: true,
-                repairCostPctOfAircraft: new[] { 0.40, 0.80 });
+                priceScalesWithAircraft: true);
 
-            // Em aeronave barata ($100.000): 0.4% = $400, 0.8% = $800. Piso de $1500 vence!
-            double priceSmall = PartPricing.CalculatePartPrice(scalingDef, 100_000.0);
-            Assert.Equal(1500.0, priceSmall);
+            // Classe A (mult 0.75): 1500 * 0.75 = 1125.0
+            double priceSmall = PartPricing.CalculatePartPrice(scalingDef, 0.75);
+            Assert.Equal(1125.0, priceSmall);
 
-            // Em jato caro ($10.000.000): 0.4% = $40.000, 0.8% = $80.000. Escala vence!
-            double priceBig = PartPricing.CalculatePartPrice(scalingDef, 10_000_000.0);
-            Assert.InRange(priceBig, 40_000.0, 80_000.0);
+            // Classe I (mult 3.25): 1500 * 3.25 = 4875.0
+            double priceBig = PartPricing.CalculatePartPrice(scalingDef, 3.25);
+            Assert.Equal(4875.0, priceBig);
 
             // Mão de obra e downtime
             double laborCost = PartPricing.CalculateLaborCost(scalingDef, 100.0);

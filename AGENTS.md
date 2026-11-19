@@ -138,8 +138,9 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Próxima fase:** MEL, manutenção com tempo parado (downtime real com limite ~24 h e opção expressa), peças por componente e resgate fora de aeroporto. Avaliar aviônicos (disjuntores por aeronave no MSFS 2024).
 
 ### Manutenção
-- Inspeções de 50 h (óleo), 100 h (interdita se vencida), 500 h (magnetos) e overhaul (TBO) no `HangarViewModel`. As horas são descontadas no fim do voo pelo `FlightService`.
-- TBO: 1.800 h pistão. Turbina: 3.500 h no legado, 3.600 h no mercado e no catálogo novo (inconsistência conhecida, a unificar na fase 2).
+- Inspeções periódicas com fator de compressão regulatória ÷ 4: **12 h** (Troca de óleo, revela saúde exata de motor e óleo), **25 h** (Inspeção anual obrigatória, interdita aeronave se vencida, revela saúde de todos os componentes), **125 h** (Revisão de ignição/magnetos para pistão) e overhaul (TBO) no `HangarViewModel`. Custos por evento divididos por 4 para preservar o custo por hora ($212,50 / $625,00 / $362,50). As horas são descontadas no fim do voo pelo `FlightService`.
+- TBO unificado: **500 h** para motores a pistão e **900 h** para turbinas (turboprop e jet). Overhaul a 5% do valor da aeronave com piso de $6.250.
+- Precificação de peças físicas individuais (`PartPricing`): preço base × multiplicador da classe econômica (Classes A a J: A 0,75 · B 1,25 · C 1,25 · D 1,25 · E 1,5 · F 1,75 · G 1,75 · H 2,5 · I 3,25 · J 5,5) quando a peça escala com o porte da aeronave; preço fixo nas peças sem escala. Substitui o cálculo anterior por % do valor do avião. Mão de obra $100/h.
 
 ### Outros sistemas
 - Missões procedurais por Tier e região (`MissionGenerator`, `MissionRules`, `hubs_data.json`); multi-leg; ferry.

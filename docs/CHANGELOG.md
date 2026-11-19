@@ -2401,3 +2401,26 @@
 
 ## 2026-11-19 - Moeda $ no thread da UI (Claude)
 - A cultura en-US era aplicada dentro do `async void OnStartup`; no .NET a cultura atual segue o contexto assíncrono, então depois do primeiro `await` o thread da UI voltava à cultura do Windows e os valores `:C` apareciam como "R$ 1.200" (Hangar, conversão de cabine, reparos). Agora é aplicada no construtor do `App`, antes de qualquer código assíncrono. Não conferido na tela.
+
+## 2026-11-19 - Calibração do usuário, preço por classe, TBO 500/900 (Gemini)
+- **Calibração do usuário (`parts_catalog.json`)**:
+  - Aplicada a calibração com fator de compressão regulatória ÷ 4 a todas as 153 peças do catálogo (`calibracao-pecas-usuario-2026-11-19.json`), cobrindo `lifeHours`, `lifeCycles`, `calendarLifeMonths` (null removido/adicionado), `partPrice`, `priceScalesWithAircraft`, `laborHours`, `downtimeHours`, `blocksFlightWhenBroken` (NO-GO), `visibleOnWalkaround` (WA), `failureEffect` e `lifeSource` = "calibração do usuário 2026-11-19 (real ÷ 4)".
+  - Restrito `engine.air_intake_filter` a `{ "all": ["piston"] }`.
+  - Suporte completo no carregador e motor de desgaste a peças com vida exclusivamente por ciclos ou calendárica sem divisão por zero nem exceção de parsing.
+- **Precificação por classe econômica (`Domain/Economy/AircraftEconomyClass`, `Domain/Parts/PartPricing`)**:
+  - Mapeamento centralizado de classes econômicas (Classes A a J) e resolução a partir de motorização, quantidade de motores, features e preço.
+  - Multiplicadores de preço por classe: A 0,75 · B 1,25 · C 1,25 · D 1,25 · E 1,5 · F 1,75 · G 1,75 · H 2,5 · I 3,25 · J 5,5 gravados em `economy_targets.json`.
+  - Cálculo de preço em `PartPricing.CalculatePartPrice`: se `PriceScalesWithAircraft`, preço = `partPrice × multiplicador da classe`; senão `partPrice`. Removido uso de `repairCostPctOfAircraft` e `GetClassPartPriceCap`.
+  - `PartEconomySimulator`, `CareerSimulator` e testes adaptados para o modelo de multiplicador por classe.
+- **TBO e Inspeções periódicas**:
+  - TBO unificado em 500 h para motores a pistão e 900 h para turbinas (`component_catalog.json`, `PilotAircraft`, `MarketSimulationService`, `MarketOffer`, `CreatePilotViewModel`).
+  - Migração de banco no `AppDbContext.EnsureSchemaUpdatedAsync` atualizando `EngineTboRemainingHours > 500.0` para 500.0 h em frotas existentes de pistão.
+  - Inspeções com fator de compressão ÷ 4: troca de óleo 12 h ($212,50), inspeção anual 25 h ($625,00) e revisão de ignição 125 h ($362,50). Retífica a 5% do valor da aeronave (mínimo $6.250). Textos do Hangar e simuladores alinhados.
+- **Limites de POH**:
+  - Diamond DA62: `vle` = 156 kt (POH/AFM do usuário 2026-11-19), dataVersion 8.
+  - Beechcraft King Air: `vne` = 263 kt (POH/AFM do usuário 2026-11-19), dataVersion 8.
+  - `tools/aircraft_limits/poh_values.csv` atualizado para ambos os modelos.
+- **Documentação e Testes**:
+  - `docs/plans/lista-pecas-hangar.md` regenerado com os 153 componentes e contagens por modelo.
+  - Novos testes unitários: `PartPricing_MultiplicadorPorClasse`, `Catalogo_CalibracaoDoUsuario`, `Tbo_Pistao500_Turbina900` e atualização de `Catalogo_Motor_CalibracaoDoUsuario`, `MaintenancePricing_MesmosValoresDaUI`, `PartEconomyBalanceTests` (ambos verdes dentro das faixas originais de meta econômica).
+  - Build 0 erros, `dotnet test` 624/624 aprovados (100%), fuzz testing em 46 aeronaves (230 voos) 100% aprovados sem violações.

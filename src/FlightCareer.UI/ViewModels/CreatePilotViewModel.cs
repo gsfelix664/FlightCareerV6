@@ -98,7 +98,7 @@ namespace FlightCareer.UI.ViewModels
                     AirframeCondition = 100,
                     FuelAmount = c152.FuelTankGallons / 2, // Começa com meio tanque
                     CurrentLocationICAO = pilot.InitialBaseICAO,
-                    EngineTboRemainingHours = 450,
+                    EngineTboRemainingHours = 500,
                     HoursUntilNext50hInspection = 12,
                     HoursUntilNext100hInspection = 25,
                     HoursUntilNext500hInspection = 125,

@@ -22,7 +22,7 @@ namespace FlightCareer.Domain.Entities
         public DateTime? InsuranceExpirationDate { get; set; }
 
         // Manutenção Regulatória & TBO
-        public double EngineTboRemainingHours { get; set; } = 450; // Horas restantes para overhaul do motor
+        public double EngineTboRemainingHours { get; set; } = 500; // Horas restantes para overhaul do motor
         public double HoursUntilNext50hInspection { get; set; } = 12;  // Troca de óleo (antiga 50h)
         public double HoursUntilNext100hInspection { get; set; } = 25; // Inspeção anual (antiga 100h)
         public double HoursUntilNext500hInspection { get; set; } = 125;  // Revisão de ignição (antiga 500h)
