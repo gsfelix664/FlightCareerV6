@@ -62,6 +62,13 @@ Regras de `eventos-eletricos.md` § 1 (enviar × receber, `_SET` × `_TOGGLE`) e
 4. Fogo: o extintor do piloto (`EXTINGUISH_ENGINE_FIRE`) apaga o fogo progressivo do addon conforme o estágio?
 5. Capas/calços no pernoite e `TOOLS_QUICK_PREFLIGHT` (walkaround pulado): efeito?
 
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+1. **Integridade:** em voo ou após o off-block, `SIM_RESET`, `SITUATION_RESET`, `RELOAD_USER_AIRCRAFT` e `REPAIR_AND_REFUEL` invalidam o voo e reaplicam o estado do banco (combustível, desgaste, panes). `BACK_TO_FLY` sozinho não invalida: serve de auditoria (compara posição, altitude, combustível e panes com o último tick válido). Ignorar `RELOAD_USER_AIRCRAFT`/`SITUATION_RESET` nos primeiros 10–15 s da sessão (posicionamento inicial).
+2. **Serviços de solo — modelo híbrido:** o piloto compra o pacote no briefing e o app chama os eventos ao parar no gate (no solo, freio de estacionamento e motores cortados); serviço pedido direto no sim é cobrado avulso com ~20 % de acréscimo. Pushback grátis até ~5.700 kg (empurrado à mão).
+3. **Alarme nativo:** pane degradada → `MASTER_CAUTION_SET`; pane crítica (fogo, motor, despressurização, perda de barramento) → `MASTER_WARNING_SET`. Flag por aeronave no JSON para desligar em aviões de estudo cujo WASM sobrescreve o alarme.
+4. **Fogo × extintor por estágio:** estágio 1 (0–20 s) corte + `EXTINGUISH_ENGINE_FIRE` apaga (motor fica inoperante); estágio 2 (20–45 s) o 1º disparo volta ao estágio 1, precisa do 2º disparo ou corte total; estágio 3 (> 45 s) o extintor só reduz o dano, pouso imediato. Cada disparo esvazia a garrafa (persistido; recarga na oficina).
+5. **Capas/calços e walkaround:** capas/calços no pernoite zeram o desgaste ambiental do tempo parado; esquecidos aumentam a chance de pane latente (pitot obstruído, bateria descarregada, dano por rajada). `TOOLS_QUICK_PREFLIGHT` (walkaround pulado) não multa, mas tira o bônus: peças críticas (< 15 %) continuam ocultas até falharem; walkaround completo as revela antes da partida.
+
 ## 4. Próximos passos
 1. Teste no MSFS: `HYDRAULIC_ACTUATOR_ACTIVE_SET` num retrátil, `PNEUMATICS_PACK_SET` num pressurizado, `GYRO_DRIFT_SET`, `NOSE_WHEEL_STEERING_LIMIT_SET`, `MASTER_CAUTION_SET`, `ELT_SET`, pushback (`TOGGLE_PUSHBACK`/`TUG_*`), `REQUEST_POWER_SUPPLY`, receber `BACK_TO_FLY`/`SIM_RESET`/`PAUSE_SET`.
 2. CSV de Key Events (`keyevents-msfs2024.csv`) com coluna "usado pelo addon", gerado do extrator `scrape_events.py` (mover para `tools/simvar_probe/`).
