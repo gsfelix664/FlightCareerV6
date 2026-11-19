@@ -9,3 +9,8 @@
    - Testes: `Missions_AviaoNaoConversivel_RegraAntiga` (C152: carga 472 lb aceita; pax 1 + bagagem aceita até o payload) e os atuais continuam.
 2. `MainViewModel.cs` é arquivo quente: mudanças mínimas, só nos pontos de filtro/aceite; mantenha as mensagens.
 3. Rode `dotnet build src/FlightCareer.slnx` antes do relatório.
+
+## Rodada 2 — APROVADO (Claude, 2026-11-19)
+- `AircraftType.HasConvertibleCabin` (coluna + `ALTER TABLE`, preenchida pelo perfil no seeder); `CabinConversion` com regra de fábrica quando não conversível; `MainViewModel` (quente) lido: mudanças só nos filtros de aceite e início do voo, mensagens mantidas.
+- Build 0 erros; `dotnet test` 647/647.
+- Observação: carreiras antigas com um avião não conversível marcado "Carga" passam a ser tratadas pela regra de fábrica (a conversão nesses aviões deixou de existir). Não testado na tela.
