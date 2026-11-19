@@ -170,6 +170,9 @@ namespace FlightCareer.Application.Services
                             if (dbMission != null) _context.Missions.Remove(dbMission);
                         }
                     }
+
+                    // Avança relógio de carreira (duração voada + solo)
+                    pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
                     await _context.SaveChangesAsync();
                     
                     outcome.Success = false;
@@ -390,6 +393,7 @@ namespace FlightCareer.Application.Services
                 pilot.Balance += totalRevenue;
                 pilot.ExperiencePoints += totalXP;
                 pilot.TotalHours += hours;
+                pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
 
                 // 4. Registrar Voo no Logbook
                 var flight = new Flight
@@ -458,6 +462,28 @@ namespace FlightCareer.Application.Services
             var fees = GroundServiceCalculator.Calculate(context);
             var landing = fees.FirstOrDefault(f => f.Code == "LANDING");
             return landing?.Total ?? 0.0;
+        }
+
+        /// <summary>
+        /// Processa o cancelamento de um voo monitorado após ter ficado ativo:
+        /// avança o relógio de carreira pela duração simulada voada mais 0,5 h de solo/turnaround.
+        /// </summary>
+        public async Task ProcessFlightCancellationAsync(Guid pilotId, double flightDurationHours)
+        {
+            try
+            {
+                _context.ChangeTracker.Clear();
+                var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Id == pilotId);
+                if (pilot != null)
+                {
+                    pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, flightDurationHours);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[FlightService] Erro ao avançar relógio de carreira no cancelamento: {ex.Message}");
+            }
         }
     }
 }

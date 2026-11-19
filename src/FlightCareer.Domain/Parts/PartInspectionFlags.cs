@@ -16,7 +16,7 @@ namespace FlightCareer.Domain.Parts
         public const double LifeWarningFraction = 0.9;   // ≥ 90 % da vida (h, ciclos ou meses)
         public const double LowHealthPct = 40.0;          // saúde abaixo disso = amarelo
 
-        public static PartFlagResult Evaluate(AircraftPart part, PartDefinition def, DateTime nowUtc)
+        public static PartFlagResult Evaluate(AircraftPart part, PartDefinition def, DateTime careerNow)
         {
             if (part == null || def == null)
             {
@@ -48,10 +48,10 @@ namespace FlightCareer.Domain.Parts
                 return new PartFlagResult(PartFlag.Suspect, reason);
             }
 
-            // 3. Meses desde LastReplacedAtUtc >= 90% de CalendarLifeMonths
+            // 3. Meses desde LastReplacedAtUtc >= 90% de CalendarLifeMonths (no relógio de carreira)
             if (def.CalendarLifeMonths.HasValue && def.CalendarLifeMonths.Value > 0)
             {
-                double elapsedDays = Math.Max(0.0, (nowUtc - part.LastReplacedAtUtc).TotalDays);
+                double elapsedDays = Math.Max(0.0, (careerNow - part.LastReplacedAtUtc).TotalDays);
                 double months = elapsedDays / 30.4375;
                 if (months >= def.CalendarLifeMonths.Value * LifeWarningFraction)
                 {
@@ -80,7 +80,7 @@ namespace FlightCareer.Domain.Parts
             Func<PartDefinition, bool> inScope,
             PartFlagSource source,
             double airframeHours,
-            DateTime nowUtc)
+            DateTime careerNow)
         {
             if (parts == null || catalog == null || inScope == null) return 0;
 
@@ -90,13 +90,13 @@ namespace FlightCareer.Domain.Parts
                 var def = catalog.Get(part.PartId);
                 if (def == null || !inScope(def)) continue;
 
-                var result = Evaluate(part, def, nowUtc);
+                var result = Evaluate(part, def, careerNow);
                 part.Flag = result.Level;
 
                 if (result.Level != PartFlag.None)
                 {
                     part.FlaggedBy = source;
-                    part.FlaggedAtUtc = nowUtc;
+                    part.FlaggedAtUtc = careerNow;
                     part.FlaggedAirframeHours = airframeHours;
                     flaggedCount++;
                 }
