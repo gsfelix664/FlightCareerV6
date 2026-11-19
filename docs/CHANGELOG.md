@@ -2528,3 +2528,24 @@
   - `dotnet build src/FlightCareer.slnx`: 0 erros.
   - `dotnet test src/FlightCareer.Tests`: 647/647 aprovados (100%).
   - Não testado na tela do app nem no MSFS.
+
+## 2026-11-19 - ECON-STAB: Continuidade de voos, diversificação de bots e validação de carreira (Gemini)
+- **Continuidade de voo dos bots e voo de reposicionamento (Ferry)**:
+  - Eliminação da paralisação de bots em aeródromos sem contratos compatíveis.
+  - Voo de reposicionamento (Ferry, sem receita, pagando combustível e tarifas regulatórias) para o Hub mais próximo (Tier 1 ou 2 com pista compatível com a aeronave) quando não houver missões disponíveis.
+  - Voo de instrução/treinamento local para escolas de aviação (CIAC) quando o bot já estiver no Hub e não houver contratos comerciais no dia (1,0 h a $220/h de receita cobrindo combustível e taxas).
+  - Continuidade do loop diário de voos até o cumprimento da meta configurada (`options.HoursPerDay`), elevando as horas voadas para o ritmo real de operação (~85 h a 116 h em 60 dias).
+- **Sementes individuais e diversificação de rotas**:
+  - Método determinístico `CareerProgressionSimulator.DeriveBotSeed(...)` combinando semente base, dificuldade, política e índice do bot.
+  - Cache de missões por chave de aeroporto e dia `(ICAO, dia)` gerado com semente independente de quem o visita primeiro.
+  - Seleção estocástica ponderada entre as top 3 missões compatíveis, gerando trajetórias e patrimônios distintos para cada bot (faixas [Mín - Máx] reais).
+- **Escada de compra de aeronaves e categorias**:
+  - Resolução de configuração de aeronaves `ResolveAircraftConfiguration` tornada estática.
+  - Promoção de categoria (Cat 1 ➔ Cat 2) atingida aos 40 h de voo e 2.500 XP com pagamento da taxa de homologação ($35.000).
+  - Motivo de bloqueio de compra informado explicitamente nos relatórios quando a categoria ou saldo com reserva impedem a aquisição.
+- **Métricas e sanidade no relatório (`stability.md`, `stability.csv`)**:
+  - Adicionadas colunas `Horas Voadas` e `Voos/Dia` nas tabelas consolidadas.
+  - Alerta automático `Bot Parado` ativado caso algum bot ativo registre média inferior a 50 % da meta diária configurada (0 alertas na amostra).
+- **Testes**:
+  - Novos testes unitários `Progression_BotVoaHorasPorDiaAoLongoDoTempo` e `Progression_BotsComSementesDiferentes` em `CareerProgressionTests.cs`.
+  - Build 0 erros, `dotnet test` 655/655 aprovados (100 %), `fuzz --aircraft all --runs 5` 230/230 voos aprovados (100 %) em 46 aeronaves.

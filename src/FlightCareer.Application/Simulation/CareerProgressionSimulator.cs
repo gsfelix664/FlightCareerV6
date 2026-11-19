@@ -47,6 +47,7 @@ namespace FlightCareer.Application.Simulation
         public PilotCategory PilotCategory { get; init; }
         public int? FirstPurchaseDay { get; init; }
         public double TotalHours { get; init; }
+        public int TotalFlights { get; init; }
         public double RevenuePerHour { get; init; }
         public double FuelCostPerHour { get; init; }
         public double FeesPerHour { get; init; }
@@ -168,7 +169,7 @@ namespace FlightCareer.Application.Simulation
 
                     for (int botNum = 1; botNum <= options.BotsPerGroup; botNum++)
                     {
-                        int botSeed = options.Seed + (groupIndex * 1000) + botNum;
+                        int botSeed = DeriveBotSeed(options.Seed, difficulty, policy, botNum);
                         var rnd = new SystemRandomSource(botSeed);
                         var sysRnd = new Random(botSeed);
 
@@ -176,6 +177,7 @@ namespace FlightCareer.Application.Simulation
                         double balance = CareerStart.GetInitialBalance(difficulty);
                         var category = PilotCategory.Category1_FlightSchool;
                         double totalHours = 0.0;
+                        int totalFlights = 0;
                         int totalXP = 0;
                         bool isBankrupt = false;
                         int? bankruptcyDay = null;
@@ -250,6 +252,7 @@ namespace FlightCareer.Application.Simulation
                                         category,
                                         firstPurchaseDay,
                                         totalHours,
+                                        totalFlights,
                                         cumRevenue,
                                         cumFuelCost,
                                         cumFees,
@@ -289,20 +292,23 @@ namespace FlightCareer.Application.Simulation
                             if (isAvailable)
                             {
                                 double dayHoursFlown = 0.0;
+                                bool attemptedFerryToday = false;
 
                                 while (dayHoursFlown < options.HoursPerDay && !isBankrupt)
                                 {
-                                    // Obter missões geradas para o aeroporto neste dia
+                                    // Obter missões geradas para o aeroporto neste dia (com semente determinística do aeródromo)
                                     var cacheKey = (currentAirport.ICAO, day);
                                     if (!missionCache.TryGetValue(cacheKey, out var availableMissions))
                                     {
+                                        int apSeed = unchecked((currentAirport.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                        var apRnd = new Random(apSeed & 0x7FFFFFFF);
                                         availableMissions = MissionGenerator.GenerateMissionsInMemory(
                                             currentAirport,
                                             allAirports,
                                             _hubDataService,
-                                            sysRnd,
+                                            apRnd,
                                             simulatedDate,
-                                            countOverride: 40);
+                                            countOverride: 80);
                                         missionCache[cacheKey] = availableMissions;
                                     }
 
@@ -327,15 +333,150 @@ namespace FlightCareer.Application.Simulation
 
                                     if (compatible.Count == 0)
                                     {
-                                        // Sem missões compatíveis hoje; repouso
-                                        break;
+                                        if (attemptedFerryToday)
+                                        {
+                                            // Já reposicionou ou treinou hoje; encerra o dia
+                                            break;
+                                        }
+                                        attemptedFerryToday = true;
+
+                                        // Voo de reposicionamento (Ferry, sem receita, pagando combustível e taxas) para o hub mais próximo com missões
+                                        var candidateHubs = allAirports
+                                            .Where(a => a.Tier <= 2 &&
+                                                        !string.Equals(a.ICAO, currentAirport.ICAO, StringComparison.OrdinalIgnoreCase) &&
+                                                        (currentAircraftType.MinRunwayLength < 2500 || a.Tier <= 3) &&
+                                                        (currentAircraftType.MinRunwayLength < 4500 || a.Tier <= 2) &&
+                                                        (currentAircraftType.MinRunwayLength < 7000 || a.Tier == 1))
+                                            .Select(a => (Hub: a, Dist: MissionGenerator.CalculateDistance(currentAirport.Latitude, currentAirport.Longitude, a.Latitude, a.Longitude)))
+                                            .OrderBy(x => x.Dist)
+                                            .ToList();
+
+                                        var bestHub = candidateHubs.FirstOrDefault(x => x.Dist <= currentAircraftType.RangeNM).Hub
+                                                      ?? candidateHubs.FirstOrDefault().Hub
+                                                      ?? defaultHub;
+
+                                        if (string.Equals(bestHub.ICAO, currentAirport.ICAO, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            // Se já está no hub e não há missões comerciais hoje, realiza voo local de instrução/treinamento
+                                            double localDuration = Math.Min(1.0, Math.Max(0.5, options.HoursPerDay - dayHoursFlown));
+                                            if (localDuration < 0.25) break;
+
+                                            double fuelUsedLocal = currentAircraftType.FuelConsumptionGPH * localDuration;
+                                            double fuelPriceLocal = FuelPriceService.GetCurrentPrice(currentAircraftType.FuelType ?? "AVGAS", currentAirport.Tier, simulatedDate);
+                                            double fuelCostLocal = Math.Round(fuelUsedLocal * fuelPriceLocal, 2);
+
+                                            double mtowLocal = AircraftWeightSpecs.GetMtow(currentAircraftType.Model, currentAircraftType);
+                                            var feeCtxLocal = new FeeContext(currentAirport.Tier, currentAirport.ICAO, mtowLocal, passengers: 0, hasMission: false, parkedGameHours: 0.0);
+                                            double totalFeesLocal = GroundServiceCalculator.Calculate(feeCtxLocal).Sum(f => f.Total);
+
+                                            double lessonIncome = Math.Round(localDuration * 220.0, 2);
+                                            balance += lessonIncome - fuelCostLocal - totalFeesLocal;
+                                            cumRevenue += lessonIncome;
+                                            cumFuelCost += fuelCostLocal;
+                                            cumFees += totalFeesLocal;
+                                            dayHoursFlown += localDuration;
+                                            totalHours += localDuration;
+                                            totalFlights++;
+                                            clock = CareerClock.AdvanceFlight(clock, localDuration);
+
+                                            airframeHours += localDuration;
+                                            hoursUntil50h -= localDuration;
+                                            hoursUntil100h -= localDuration;
+                                            if (engineClass == EngineClass.Piston) hoursUntil500h -= localDuration;
+                                            tboRemaining -= localDuration;
+
+                                            totalXP += (int)(localDuration * 60);
+
+                                            ApplyFlightWear(parts, _partCatalog, localDuration);
+                                            SyncComponents(components, parts, _partCatalog, mapping);
+
+                                            var localFailures = failureEngine.Evaluate(components, localDuration);
+                                            if (localFailures.Count > 0)
+                                            {
+                                                failureEvents++;
+                                                foreach (var fail in localFailures)
+                                                {
+                                                    ApplyFailureDamage(fail.Kind, fail.Mode.Damage, parts, _partCatalog, mapping);
+                                                }
+                                                SyncComponents(components, parts, _partCatalog, mapping);
+                                            }
+
+                                            continue;
+                                        }
+
+                                        double ferryDist = Math.Max(15.0, MissionGenerator.CalculateDistance(currentAirport.Latitude, currentAirport.Longitude, bestHub.Latitude, bestHub.Longitude));
+                                        double speedFerry = currentAircraftType.CruiseSpeedKts > 0 ? currentAircraftType.CruiseSpeedKts : 110.0;
+                                        double ferryDuration = Math.Max(0.25, (ferryDist / speedFerry) + 0.25);
+
+                                        double fuelUsedFerry = currentAircraftType.FuelConsumptionGPH * ferryDuration;
+                                        double fuelPriceFerry = FuelPriceService.GetCurrentPrice(currentAircraftType.FuelType ?? "AVGAS", bestHub.Tier, simulatedDate);
+                                        double fuelCostFerry = Math.Round(fuelUsedFerry * fuelPriceFerry, 2);
+
+                                        double mtowFerry = AircraftWeightSpecs.GetMtow(currentAircraftType.Model, currentAircraftType);
+                                        var feeCtxFerry = new FeeContext(bestHub.Tier, bestHub.ICAO, mtowFerry, passengers: 0, hasMission: false, parkedGameHours: 0.0);
+                                        double totalFeesFerry = GroundServiceCalculator.Calculate(feeCtxFerry).Sum(f => f.Total);
+
+                                        if (balance < fuelCostFerry && balance < 0)
+                                        {
+                                            isBankrupt = true;
+                                            bankruptcyDay = day;
+                                            break;
+                                        }
+
+                                        balance -= (fuelCostFerry + totalFeesFerry);
+                                        cumFuelCost += fuelCostFerry;
+                                        cumFees += totalFeesFerry;
+                                        dayHoursFlown += ferryDuration;
+                                        totalHours += ferryDuration;
+                                        totalFlights++;
+                                        clock = CareerClock.AdvanceFlight(clock, ferryDuration);
+
+                                        airframeHours += ferryDuration;
+                                        hoursUntil50h -= ferryDuration;
+                                        hoursUntil100h -= ferryDuration;
+                                        if (engineClass == EngineClass.Piston) hoursUntil500h -= ferryDuration;
+                                        tboRemaining -= ferryDuration;
+
+                                        int baseExpFerry = (int)(ferryDuration * 40);
+                                        totalXP += baseExpFerry;
+
+                                        ApplyFlightWear(parts, _partCatalog, ferryDuration);
+                                        SyncComponents(components, parts, _partCatalog, mapping);
+
+                                        var ferryFailures = failureEngine.Evaluate(components, ferryDuration);
+                                        if (ferryFailures.Count > 0)
+                                        {
+                                            failureEvents++;
+                                            foreach (var fail in ferryFailures)
+                                            {
+                                                ApplyFailureDamage(fail.Kind, fail.Mode.Damage, parts, _partCatalog, mapping);
+                                            }
+                                            SyncComponents(components, parts, _partCatalog, mapping);
+                                        }
+
+                                        currentAirport = bestHub;
+                                        continue;
                                     }
 
-                                    // Escolha da melhor missão (maior remuneração/hora)
+                                    // Escolha da melhor missão (diversificada pelo gerador de cada bot)
                                     double speed = currentAircraftType.CruiseSpeedKts > 0 ? currentAircraftType.CruiseSpeedKts : 110.0;
-                                    var chosen = compatible
+                                    var ranked = compatible
                                         .OrderByDescending(m => m.RewardMoney / Math.Max(0.2, (m.DistanceNM / speed) + 0.25))
-                                        .First();
+                                        .ToList();
+
+                                    Mission chosen;
+                                    if (ranked.Count == 1)
+                                    {
+                                        chosen = ranked[0];
+                                    }
+                                    else
+                                    {
+                                        int topN = Math.Min(3, ranked.Count);
+                                        double roll = sysRnd.NextDouble();
+                                        if (roll < 0.60 || topN < 2) chosen = ranked[0];
+                                        else if (roll < 0.85 || topN < 3) chosen = ranked[1];
+                                        else chosen = ranked[2];
+                                    }
 
                                     double flightDuration = Math.Max(0.2, (chosen.DistanceNM / speed) + 0.25);
                                     var destAirport = airportLookup[chosen.DestinationICAO];
@@ -358,7 +499,7 @@ namespace FlightCareer.Application.Simulation
 
                                     // Checagem de falência antes do voo: sem dinheiro para o combustível
                                     if (balance < fuelCost && balance < 0)
-                                     {
+                                    {
                                         isBankrupt = true;
                                         bankruptcyDay = day;
                                         break;
@@ -371,6 +512,7 @@ namespace FlightCareer.Application.Simulation
                                     cumFees += totalFees;
                                     dayHoursFlown += flightDuration;
                                     totalHours += flightDuration;
+                                    totalFlights++;
                                     clock = CareerClock.AdvanceFlight(clock, flightDuration);
 
                                     airframeHours += flightDuration;
@@ -482,6 +624,7 @@ namespace FlightCareer.Application.Simulation
                                         category,
                                         firstPurchaseDay,
                                         totalHours,
+                                        totalFlights,
                                         cumRevenue,
                                         cumFuelCost,
                                         cumFees,
@@ -539,6 +682,7 @@ namespace FlightCareer.Application.Simulation
                                         category,
                                         firstPurchaseDay,
                                         totalHours,
+                                        totalFlights,
                                         cumRevenue,
                                         cumFuelCost,
                                         cumFees,
@@ -606,6 +750,7 @@ namespace FlightCareer.Application.Simulation
                                     category,
                                     firstPurchaseDay,
                                     totalHours,
+                                    totalFlights,
                                     cumRevenue,
                                     cumFuelCost,
                                     cumFees,
@@ -644,7 +789,7 @@ namespace FlightCareer.Application.Simulation
             };
         }
 
-        private (IReadOnlyList<string> Features, int EngineCount, EngineClass EngineClass) ResolveAircraftConfiguration(
+        private static (IReadOnlyList<string> Features, int EngineCount, EngineClass EngineClass) ResolveAircraftConfiguration(
             AircraftType type,
             ComponentCatalog compCatalog,
             AircraftLimitResolver resolver)
@@ -1154,8 +1299,7 @@ namespace FlightCareer.Application.Simulation
                 tboRemaining = MaintenancePricing.TboHoursFor(EngineClassResolver.FromAircraftType(targetType));
 
                 // Reprovisiona peças e componentes para a nova aeronave
-                var config = new CareerProgressionSimulator(null!, componentCatalog, partCatalog, null, limitResolver)
-                    .ResolveAircraftConfiguration(targetType, componentCatalog, limitResolver);
+                var config = ResolveAircraftConfiguration(targetType, componentCatalog, limitResolver);
                 engineClass = config.EngineClass;
                 var currentEngClass = engineClass;
                 failureEngine = new FailureEngine(componentCatalog, currentEngClass, rnd);
@@ -1196,6 +1340,20 @@ namespace FlightCareer.Application.Simulation
             return monthlyInsurance + monthlyFuel + monthlyMaintAndFees;
         }
 
+        public static int DeriveBotSeed(int baseSeed, DifficultyMode difficulty, string policy, int botIndex)
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + baseSeed;
+                hash = hash * 31 + (int)difficulty * 1009;
+                hash = hash * 31 + (policy != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(policy) : 0);
+                hash = hash * 31 + botIndex * 503;
+                int seed = hash & 0x7FFFFFFF;
+                return seed == 0 ? 1 : seed;
+            }
+        }
+
         private static BotMilestoneSnapshot CreateSnapshot(
             string difficulty,
             string policy,
@@ -1209,6 +1367,7 @@ namespace FlightCareer.Application.Simulation
             PilotCategory category,
             int? firstPurchaseDay,
             double totalHours,
+            int totalFlights,
             double cumRevenue,
             double cumFuel,
             double cumFees,
@@ -1253,6 +1412,7 @@ namespace FlightCareer.Application.Simulation
                 PilotCategory = category,
                 FirstPurchaseDay = firstPurchaseDay,
                 TotalHours = Math.Round(totalHours, 1),
+                TotalFlights = totalFlights,
                 RevenuePerHour = Math.Round(revH, 2),
                 FuelCostPerHour = Math.Round(fuelH, 2),
                 FeesPerHour = Math.Round(feesH, 2),
@@ -1349,11 +1509,12 @@ namespace FlightCareer.Application.Simulation
         private static string GenerateCsv(IReadOnlyList<BotMilestoneSnapshot> snapshots)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("dificuldade,politica,bot,dia,falido,dia_falencia,saldo,patrimonio,classe_aviao,categoria_piloto,dia_primeira_compra,horas_voadas,receita_hora,custo_hora,custo_pecas_hora,margem_pct,manutencoes_100h,pecas_trocadas_100h,panes_100h,dias_parados");
+            sb.AppendLine("dificuldade,politica,bot,dia,falido,dia_falencia,saldo,patrimonio,classe_aviao,categoria_piloto,dia_primeira_compra,horas_voadas,total_voos,voos_dia,receita_hora,custo_hora,custo_pecas_hora,margem_pct,manutencoes_100h,pecas_trocadas_100h,panes_100h,dias_parados");
             foreach (var s in snapshots)
             {
+                double flightsPerDay = s.Day > 0 ? (double)s.TotalFlights / s.Day : 0.0;
                 sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                    "{0},{1},{2},{3},{4},{5},{6:F2},{7:F2},{8},{9},{10},{11:F1},{12:F2},{13:F2},{14:F2},{15:F1},{16:F2},{17:F2},{18:F2},{19}",
+                    "{0},{1},{2},{3},{4},{5},{6:F2},{7:F2},{8},{9},{10},{11:F1},{12},{13:F2},{14:F2},{15:F2},{16:F2},{17:F1},{18:F2},{19:F2},{20:F2},{21}",
                     s.Difficulty,
                     s.Policy,
                     s.BotId,
@@ -1366,6 +1527,8 @@ namespace FlightCareer.Application.Simulation
                     (int)s.PilotCategory,
                     s.FirstPurchaseDay?.ToString() ?? "",
                     s.TotalHours,
+                    s.TotalFlights,
+                    flightsPerDay,
                     s.RevenuePerHour,
                     s.TotalCostPerHour,
                     s.PartsCostPerHour,
@@ -1394,7 +1557,7 @@ namespace FlightCareer.Application.Simulation
             // 1. Alertas automáticos
             sb.AppendLine("## 1. Alertas Automáticos de Estabilidade");
             sb.AppendLine();
-            var alerts = EvaluateAlerts(snapshots, milestones);
+            var alerts = EvaluateAlerts(snapshots, milestones, options);
             if (alerts.Count == 0)
             {
                 sb.AppendLine("✅ **Nenhum desbalanceamento crítico detectado:** a economia é estável a curto, médio e longo prazo.");
@@ -1416,8 +1579,8 @@ namespace FlightCareer.Application.Simulation
             {
                 sb.AppendLine($"### Marco: Dia {mDay}");
                 sb.AppendLine();
-                sb.AppendLine("| Dificuldade | Política | Falidos (%) | Dia Falência | Saldo Mediano ($) | Patrimônio Mediano ($) [Mín - Máx] | Classe | Cat. | 1ª Compra (Dia) | Rec/h ($) | Custo/h ($) | Peças/h ($) | Margem (%) | Manut/100h | Peças/100h | Panes/100h | Parado (dias) |");
-                sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
+                sb.AppendLine("| Dificuldade | Política | Falidos (%) | Dia Falência | Saldo Mediano ($) | Patrimônio Mediano ($) [Mín - Máx] | Classe | Cat. | 1ª Compra (Dia) | Horas Voadas | Voos/Dia | Rec/h ($) | Custo/h ($) | Peças/h ($) | Margem (%) | Manut/100h | Peças/100h | Panes/100h | Parado (dias) |");
+                sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
 
                 var daySnaps = snapshots.Where(s => s.Day == mDay).ToList();
                 var groups = daySnaps.GroupBy(s => (s.Difficulty, s.Policy));
@@ -1444,6 +1607,9 @@ namespace FlightCareer.Application.Simulation
                     var purchaseDays = items.Where(i => i.FirstPurchaseDay.HasValue).Select(i => (double)i.FirstPurchaseDay!.Value).ToList();
                     string avgPurchaseDay = purchaseDays.Count > 0 ? $"{purchaseDays.Average():F0}" : "-";
 
+                    double medianHours = Median(items.Select(i => i.TotalHours).ToList());
+                    double avgFlightsPerDay = items.Average(i => i.Day > 0 ? (double)i.TotalFlights / i.Day : 0.0);
+
                     double avgRevH = items.Average(i => i.RevenuePerHour);
                     double avgCostH = items.Average(i => i.TotalCostPerHour);
                     double avgPartsH = items.Average(i => i.PartsCostPerHour);
@@ -1454,7 +1620,7 @@ namespace FlightCareer.Application.Simulation
                     double avgGrounded = items.Average(i => i.DaysGrounded);
 
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture,
-                        "| {0} | {1} | {2:F0}% | {3} | ${4:N0} | ${5:N0} [${6:N0} - ${7:N0}] | {8} | {9} | {10} | ${11:N0} | ${12:N0} | ${13:N0} | {14:F1}% | {15:F1} | {16:F1} | {17:F1} | {18:F1} |",
+                        "| {0} | {1} | {2:F0}% | {3} | ${4:N0} | ${5:N0} [${6:N0} - ${7:N0}] | {8} | {9} | {10} | {11:F1} h | {12:F2} | ${13:N0} | ${14:N0} | ${15:N0} | {16:F1}% | {17:F1} | {18:F1} | {19:F1} | {20:F1} |",
                         g.Key.Difficulty,
                         g.Key.Policy,
                         bankruptPct,
@@ -1466,6 +1632,8 @@ namespace FlightCareer.Application.Simulation
                         topClass,
                         topCat,
                         avgPurchaseDay,
+                        medianHours,
+                        avgFlightsPerDay,
                         avgRevH,
                         avgCostH,
                         avgPartsH,
@@ -1474,6 +1642,37 @@ namespace FlightCareer.Application.Simulation
                         avgParts100h,
                         avgFail100h,
                         avgGrounded));
+                }
+                sb.AppendLine();
+
+                // Detalhamento do status de compra e categoria no marco
+                sb.AppendLine("**Status de Progressão de Aeronave e Categoria:**");
+                foreach (var g in groups.OrderBy(x => x.Key.Difficulty).ThenBy(x => x.Key.Policy))
+                {
+                    var activeBots = g.Where(i => !i.IsBankrupt).ToList();
+                    if (activeBots.Count == 0)
+                    {
+                        sb.AppendLine($"- *{g.Key.Difficulty} / {g.Key.Policy}:* Todos os bots faliram.");
+                        continue;
+                    }
+                    var sampleBot = activeBots.First();
+                    string statusText;
+                    if (sampleBot.FirstPurchaseDay.HasValue)
+                    {
+                        statusText = $"Aeronave adquirida (Classe {sampleBot.AircraftClassKey}, 1ª compra no Dia {sampleBot.FirstPurchaseDay.Value}).";
+                    }
+                    else
+                    {
+                        if (sampleBot.PilotCategory < PilotCategory.Category2_SAE)
+                        {
+                            statusText = $"Bloqueado por Categoria: piloto em Cat 1 ({sampleBot.TotalHours:F1}/40.0 h voadas para homologar Cat 2 e liberar Classe B/C172).";
+                        }
+                        else
+                        {
+                            statusText = $"Aguardando capital: saldo atual ${sampleBot.Balance:N0} com política '{sampleBot.Policy}'.";
+                        }
+                    }
+                    sb.AppendLine($"- *{g.Key.Difficulty} / {g.Key.Policy}:* {statusText}");
                 }
                 sb.AppendLine();
             }
@@ -1557,7 +1756,8 @@ namespace FlightCareer.Application.Simulation
 
         private static List<EconomicAlert> EvaluateAlerts(
             IReadOnlyList<BotMilestoneSnapshot> snapshots,
-            IReadOnlyList<int> milestones)
+            IReadOnlyList<int> milestones,
+            CareerProgressionOptions options)
         {
             var alerts = new List<EconomicAlert>();
 
@@ -1603,6 +1803,20 @@ namespace FlightCareer.Application.Simulation
                 if (d30Margin > 0 && d720Margin < (0.50 * d30Margin))
                 {
                     alerts.Add(new EconomicAlert("Inflação Come a Margem", $"A margem operacional caiu de {d30Margin:F1}% no Dia 30 para {d720Margin:F1}% no Dia 720 (< 50% da margem inicial) devido à inflação de combustível sem correção de contratos."));
+                }
+            }
+
+            // 5. Bot parado: bot sobrevivente voando < 50% das horas/dia configuradas
+            foreach (var mDay in milestones)
+            {
+                var activeBotsAtMilestone = snapshots.Where(s => s.Day == mDay && !s.IsBankrupt).ToList();
+                var stalled = activeBotsAtMilestone.Where(s => (s.TotalHours / s.Day) < (0.5 * options.HoursPerDay)).ToList();
+                if (stalled.Count > 0)
+                {
+                    var sample = stalled[0];
+                    double actualHpd = sample.TotalHours / sample.Day;
+                    alerts.Add(new EconomicAlert("Bot Parado", $"Detectado(s) {stalled.Count} bot(s) ativo(s) com baixa atividade de voo no Dia {mDay} (ex.: '{sample.BotId}' com {sample.TotalHours:F1} h voadas, média {actualHpd:F2} h/dia < {0.5 * options.HoursPerDay:F2} h/dia tolerado)."));
+                    break;
                 }
             }
 

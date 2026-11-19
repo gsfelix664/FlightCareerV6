@@ -222,6 +222,82 @@ namespace FlightCareer.Tests.Economy
             }
         }
 
+        [Fact]
+        public async Task Progression_BotVoaHorasPorDiaAoLongoDoTempo()
+        {
+            var (options, tempDb) = await CreateTestEnvironmentAsync();
+            try
+            {
+                var simOptions = new CareerProgressionOptions
+                {
+                    Days = 60,
+                    BotsPerGroup = 1,
+                    Difficulty = "medium",
+                    Policy = "equilibrado",
+                    Seed = 42,
+                    FastMode = true,
+                    HoursPerDay = 2.0,
+                    OutputDirectory = Path.Combine(Path.GetTempPath(), $"stab_test_hpd_{Guid.NewGuid():N}")
+                };
+
+                var sim = new CareerProgressionSimulator(() => new AppDbContext(options));
+                var res = await sim.RunAsync(simOptions);
+
+                var snap60 = res.Snapshots.FirstOrDefault(s => s.Day == 60);
+                Assert.NotNull(snap60);
+                Assert.False(snap60.IsBankrupt);
+                // Critério da revisão: horas voadas >= 0.8 * 60 * 2 h (96.0 h)
+                Assert.True(snap60.TotalHours >= 0.8 * 60 * 2.0, $"Bot deveria ter voado pelo menos 96h em 60 dias, mas voou {snap60.TotalHours}h.");
+
+                if (Directory.Exists(simOptions.OutputDirectory)) Directory.Delete(simOptions.OutputDirectory, true);
+            }
+            finally
+            {
+                CleanupDb(tempDb);
+            }
+        }
+
+        [Fact]
+        public async Task Progression_BotsComSementesDiferentes()
+        {
+            var (options, tempDb) = await CreateTestEnvironmentAsync();
+            try
+            {
+                var simOptions = new CareerProgressionOptions
+                {
+                    Days = 60,
+                    BotsPerGroup = 2,
+                    Difficulty = "medium",
+                    Policy = "equilibrado",
+                    Seed = 100,
+                    FastMode = true,
+                    OutputDirectory = Path.Combine(Path.GetTempPath(), $"stab_test_diff_seeds_{Guid.NewGuid():N}")
+                };
+
+                var sim = new CareerProgressionSimulator(() => new AppDbContext(options));
+                var res = await sim.RunAsync(simOptions);
+
+                var snapsBot1 = res.Snapshots.Where(s => s.BotId.EndsWith("-1")).ToList();
+                var snapsBot2 = res.Snapshots.Where(s => s.BotId.EndsWith("-2")).ToList();
+
+                var b1End = snapsBot1.Last();
+                var b2End = snapsBot2.Last();
+
+                // Com sementes derivadas por índice do bot, os dois bots devem ter trajetórias com diferenças (saldo, horas ou patrimônio)
+                bool areDifferent = Math.Abs(b1End.TotalHours - b2End.TotalHours) > 0.01 ||
+                                    Math.Abs(b1End.Balance - b2End.Balance) > 1.0 ||
+                                    Math.Abs(b1End.NetWorth - b2End.NetWorth) > 1.0;
+
+                Assert.True(areDifferent, "Bots com índices diferentes devem ter trajetórias econômicas distintas devido às sementes derivadas.");
+
+                if (Directory.Exists(simOptions.OutputDirectory)) Directory.Delete(simOptions.OutputDirectory, true);
+            }
+            finally
+            {
+                CleanupDb(tempDb);
+            }
+        }
+
         private static async Task<(DbContextOptions<AppDbContext> Options, string TempDb)> CreateTestEnvironmentAsync()
         {
             string tempDb = Path.Combine(Path.GetTempPath(), $"career_stab_test_{Guid.NewGuid():N}.db");
