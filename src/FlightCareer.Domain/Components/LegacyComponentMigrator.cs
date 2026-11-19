@@ -39,8 +39,8 @@ namespace FlightCareer.Domain.Components
                     component.CyclesSinceOverhaul = (int)Math.Round(EstimateUsageFromHealth(component.Health, def.NaturalLossPerCycle(engineClass), lifeCycles));
                 }
 
-                // Última inspeção conhecida: a de 50 h (componentes ficam com o valor exato naquele momento)
-                double hoursSinceInspection = Math.Clamp(50.0 - aircraft.HoursUntilNext50hInspection, 0.0, 50.0);
+                // Última inspeção conhecida: a de 12 h (componentes ficam com o valor exato naquele momento)
+                double hoursSinceInspection = Math.Clamp(12.0 - aircraft.HoursUntilNext50hInspection, 0.0, 12.0);
                 component.LastInspectionAirframeHours = Math.Max(0.0, aircraft.CurrentAirframeHours - hoursSinceInspection);
                 component.InspectionPrecision = 0.0;
                 component.InspectionBias = (random.NextDouble() * 2.0 - 1.0) * catalog.Visibility.MaxBias;
@@ -70,8 +70,8 @@ namespace FlightCareer.Domain.Components
         {
             ComponentKind.Engine or ComponentKind.HotSection when lifeHours > 0
                 => Math.Max(0.0, lifeHours - a.EngineTboRemainingHours),
-            ComponentKind.Oil => Math.Clamp(50.0 - a.HoursUntilNext50hInspection, 0.0, 50.0),
-            ComponentKind.Ignition => Math.Clamp(500.0 - a.HoursUntilNext500hInspection, 0.0, 500.0),
+            ComponentKind.Oil => Math.Clamp(12.0 - a.HoursUntilNext50hInspection, 0.0, 12.0),
+            ComponentKind.Ignition => Math.Clamp(125.0 - a.HoursUntilNext500hInspection, 0.0, 125.0),
             ComponentKind.Airframe => Math.Max(0.0, a.CurrentAirframeHours),
             _ => null
         };

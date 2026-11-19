@@ -301,7 +301,7 @@ namespace FlightCareer.UI.ViewModels
                     aircraft.EngineTboRemainingHours = _catalog.Get(ComponentKind.Engine).LifeHoursFor(engineClass);
                     break;
                 case ComponentKind.Ignition:
-                    aircraft.HoursUntilNext500hInspection = 500.0;
+                    aircraft.HoursUntilNext500hInspection = 125.0;
                     break;
             }
             ClearInterdictionIfResolved(aircraft);
@@ -463,15 +463,15 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Inspeção de 50 horas",
+                "Troca de óleo (12 h)",
                 "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a 100% e o motor tem a saúde medida com exatidão.",
                 SelectedAircraft.Cost50hInspection,
-                "INSPEÇÃO 50H",
+                "TROCA DE ÓLEO",
                 (aircraft, components) =>
                 {
                     RepairKind(aircraft, components, ComponentKind.Oil);
                     ComponentMaintenance.Inspect(components.Where(c => c.Kind is ComponentKind.Engine or ComponentKind.Oil), Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    aircraft.HoursUntilNext50hInspection = 12.0;
                     ClearInterdictionIfResolved(aircraft);
 
                     var mapping = PartComponentMapping.CreateDefault();
@@ -483,7 +483,7 @@ namespace FlightCareer.UI.ViewModels
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Inspeção de 50 horas concluída.",
+                successMessage: "Troca de óleo concluída.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection50hDowntimeHours);
         }
@@ -494,16 +494,16 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Inspeção de 100 horas",
-                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de 100 h e 50 h são zerados. Reparos encontrados são orçados à parte.",
+                "Inspeção anual (25 h)",
+                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de inspeção anual (25 h) e troca de óleo (12 h) são zerados. Reparos encontrados são orçados à parte.",
                 SelectedAircraft.Cost100hInspection,
-                "INSPEÇÃO REGULATÓRIA 100H",
+                "INSPEÇÃO ANUAL (25 H)",
                 (aircraft, components) =>
                 {
                     RepairKind(aircraft, components, ComponentKind.Oil);
                     ComponentMaintenance.Inspect(components, Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext100hInspection = 100.0;
-                    aircraft.HoursUntilNext50hInspection = 50.0;
+                    aircraft.HoursUntilNext100hInspection = 25.0;
+                    aircraft.HoursUntilNext50hInspection = 12.0;
                     ClearInterdictionIfResolved(aircraft);
 
                     flagged = PartInspectionFlags.ApplyInspection(
@@ -514,7 +514,7 @@ namespace FlightCareer.UI.ViewModels
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Inspeção de 100 horas concluída. Veja as barras: agora todos os valores são exatos.",
+                successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection100hDowntimeHours);
         }
@@ -525,10 +525,10 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null || !SelectedAircraft.IsPiston) return;
             int flagged = 0;
             await RunPaidServiceAsync(
-                "Revisão de 500 horas",
+                "Revisão de ignição (125 h)",
                 "Revisão dos magnetos, platinados e troca de velas. A ignição volta a 100%.",
                 SelectedAircraft.Cost500hInspection,
-                "REVISÃO 500H / MAGNETOS",
+                "REVISÃO DE IGNIÇÃO",
                 (aircraft, components) =>
                 {
                     RepairKind(aircraft, components, ComponentKind.Ignition);
@@ -543,7 +543,7 @@ namespace FlightCareer.UI.ViewModels
                         Hours(aircraft),
                         aircraft.Pilot?.CareerClockUtc ?? _careerClock);
                 },
-                successMessage: "Revisão de 500 horas concluída.",
+                successMessage: "Revisão de ignição concluída.",
                 getFlaggedCount: () => flagged,
                 downtimeHours: CareerClock.Inspection500hDowntimeHours);
         }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Beechcraft King Air",
   "class": "Turboprop",
   "engineCount": 2,
@@ -36,10 +36,10 @@
   "limits": [
     {
       "key": "vne",
-      "value": 245.0,
+      "value": 263.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vmo 245 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "reference": "usuário 2026-11-19 (AFM; substitui valor anterior)",
       "notes": null
     },
     {

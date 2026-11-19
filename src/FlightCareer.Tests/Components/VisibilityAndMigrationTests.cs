@@ -100,9 +100,9 @@ namespace FlightCareer.Tests.Components
                 TiresCondition = 55.0,
                 AirframeCondition = 91.0,
                 AvionicsCondition = 80.0,
-                EngineTboRemainingHours = 1300.0,
-                HoursUntilNext50hInspection = 20.0,
-                HoursUntilNext500hInspection = 450.0,
+                EngineTboRemainingHours = 350.0,
+                HoursUntilNext50hInspection = 5.0,
+                HoursUntilNext500hInspection = 110.0,
                 CurrentAirframeHours = 2500.0
             };
 
@@ -111,11 +111,11 @@ namespace FlightCareer.Tests.Components
             Assert.Equal(9, comps.Count);
             Assert.All(comps, c => Assert.Equal(aircraft.Id, c.PilotAircraftId));
             Assert.Equal(72.0, comps.Get(ComponentKind.Engine).Health);
-            Assert.Equal(500.0, comps.Get(ComponentKind.Engine).HoursSinceOverhaul, 6);
-            Assert.Equal(30.0, comps.Get(ComponentKind.Oil).HoursSinceOverhaul, 6);
-            Assert.Equal(50.0, comps.Get(ComponentKind.Ignition).HoursSinceOverhaul, 6);
+            Assert.Equal(150.0, comps.Get(ComponentKind.Engine).HoursSinceOverhaul, 6);
+            Assert.Equal(7.0, comps.Get(ComponentKind.Oil).HoursSinceOverhaul, 6);
+            Assert.Equal(15.0, comps.Get(ComponentKind.Ignition).HoursSinceOverhaul, 6);
             Assert.Equal(55.0, comps.Get(ComponentKind.Brakes).Health);
-            Assert.Equal(2470.0, comps.Get(ComponentKind.Tires).LastInspectionAirframeHours, 6);
+            Assert.Equal(2493.0, comps.Get(ComponentKind.Tires).LastInspectionAirframeHours, 6);
             // Pneus a 55%: 45% de desgaste ÷ 0,28% por pouso ≈ 161 ciclos
             Assert.InRange(comps.Get(ComponentKind.Tires).CyclesSinceOverhaul, 160, 162);
         }

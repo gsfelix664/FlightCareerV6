@@ -24,21 +24,21 @@ namespace FlightCareer.Tests.Economy
         [Fact]
         public void MaintenancePricing_MesmosValoresDaUI()
         {
-            // Critério: 850 / 2.500 / 1.450 / 20 % mín. 25.000
-            Assert.Equal(850.0, MaintenancePricing.Cost50hInspection);
-            Assert.Equal(2500.0, MaintenancePricing.Cost100hInspection);
-            Assert.Equal(1450.0, MaintenancePricing.Cost500hInspection);
+            // Critério: 212,50 / 625 / 362,50 / 5 % mín. 6.250 (compressão ÷ 4, CALIBRA-F4)
+            Assert.Equal(212.50, MaintenancePricing.Cost50hInspection);
+            Assert.Equal(625.0, MaintenancePricing.Cost100hInspection);
+            Assert.Equal(362.50, MaintenancePricing.Cost500hInspection);
             Assert.Equal(1200.0, MaintenancePricing.CostToggleConfiguration);
 
-            // Retífica com piso de $25.000
-            Assert.Equal(25000.0, MaintenancePricing.CalculateOverhaulCost(50000.0));
-            Assert.Equal(25000.0, MaintenancePricing.CalculateOverhaulCost(100000.0));
-            Assert.Equal(25000.0, MaintenancePricing.CalculateOverhaulCost(125000.0));
+            // Retífica com piso de $6.250
+            Assert.Equal(6250.0, MaintenancePricing.CalculateOverhaulCost(50000.0));
+            Assert.Equal(6250.0, MaintenancePricing.CalculateOverhaulCost(100000.0));
+            Assert.Equal(6250.0, MaintenancePricing.CalculateOverhaulCost(125000.0));
 
-            // Retífica proporcional acima do piso (20%)
-            Assert.Equal(30000.0, MaintenancePricing.CalculateOverhaulCost(150000.0));
-            Assert.Equal(40000.0, MaintenancePricing.CalculateOverhaulCost(200000.0));
-            Assert.Equal(200000.0, MaintenancePricing.CalculateOverhaulCost(1000000.0));
+            // Retífica proporcional acima do piso (5%)
+            Assert.Equal(7500.0, MaintenancePricing.CalculateOverhaulCost(150000.0));
+            Assert.Equal(10000.0, MaintenancePricing.CalculateOverhaulCost(200000.0));
+            Assert.Equal(50000.0, MaintenancePricing.CalculateOverhaulCost(1000000.0));
         }
 
         [Fact]
@@ -127,15 +127,15 @@ namespace FlightCareer.Tests.Economy
                 var sim = new CareerSimulator(() => new AppDbContext(options));
                 var res = await sim.RunAsync(simOptions);
 
-                var insp100 = res.Maintenance.FirstOrDefault(m => m.Service.Contains("100h"));
+                var insp100 = res.Maintenance.FirstOrDefault(m => m.Service.Contains("100h") || m.Service.Contains("25h") || m.Service.Contains("anual"));
                 Assert.NotNull(insp100);
-                Assert.Equal(2500.0, insp100.Cost);
+                Assert.Equal(625.0, insp100.Cost);
                 Assert.Equal(16.0, insp100.DowntimeHours);
 
-                // Também deve ter feito ao menos uma inspeção de 50h ($850)
-                var insp50 = res.Maintenance.FirstOrDefault(m => m.Service.Contains("50h"));
+                // Também deve ter feito ao menos uma inspeção de 50h / troca de óleo ($212,50)
+                var insp50 = res.Maintenance.FirstOrDefault(m => m.Service.Contains("50h") || m.Service.Contains("12h") || m.Service.Contains("óleo"));
                 Assert.NotNull(insp50);
-                Assert.Equal(850.0, insp50.Cost);
+                Assert.Equal(212.50, insp50.Cost);
 
                 if (Directory.Exists(simOptions.OutputDirectory)) Directory.Delete(simOptions.OutputDirectory, true);
             }

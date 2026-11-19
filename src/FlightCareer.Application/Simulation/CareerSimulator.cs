@@ -210,9 +210,9 @@ namespace FlightCareer.Application.Simulation
 
                     var currentAirport = botStartAirport;
                     double airframeHours = 0.0;
-                    double hoursUntil50h = 50.0;
-                    double hoursUntil100h = 100.0;
-                    double hoursUntil500h = 500.0;
+                    double hoursUntil50h = 12.0;
+                    double hoursUntil100h = 25.0;
+                    double hoursUntil500h = 125.0;
                     double tboRemaining = defaultTbo;
                     int totalLandings = 0;
                     double remainingDowntimeHours = 0.0;
@@ -256,9 +256,9 @@ namespace FlightCareer.Application.Simulation
                         AircraftType = aType,
                         CurrentAirframeHours = 0.0,
                         EngineTboRemainingHours = defaultTbo,
-                        HoursUntilNext50hInspection = 50.0,
-                        HoursUntilNext100hInspection = 100.0,
-                        HoursUntilNext500hInspection = 500.0
+                        HoursUntilNext50hInspection = 12.0,
+                        HoursUntilNext100hInspection = 25.0,
+                        HoursUntilNext500hInspection = 125.0
                     };
 
                     // Sincroniza componentes a partir das peças se houver peças
@@ -576,41 +576,41 @@ namespace FlightCareer.Application.Simulation
                         }
 
                         // 3. Manutenções programadas ao término do dia
-                        // Inspeção 50h
+                        // Inspeção 12h (Troca de óleo)
                         if (hoursUntil50h <= 0)
                         {
                             double cost = MaintenancePricing.Cost50hInspection;
                             balance -= cost;
                             dayMaintCost += cost;
-                            hoursUntil50h = 50.0;
+                            hoursUntil50h = 12.0;
                             var oilComp = components.FirstOrDefault(c => c.Kind == ComponentKind.Oil);
                             if (oilComp != null) oilComp.Health = 100.0;
                             remainingDowntimeHours += 4.0;
-                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Inspeção 50h", cost, 4.0));
+                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Troca de óleo (12h)", cost, 4.0));
                         }
 
-                        // Inspeção 100h
+                        // Inspeção 25h (Inspeção anual)
                         if (hoursUntil100h <= 0)
                         {
                             double cost = MaintenancePricing.Cost100hInspection;
                             balance -= cost;
                             dayMaintCost += cost;
-                            hoursUntil100h = 100.0;
+                            hoursUntil100h = 25.0;
                             remainingDowntimeHours += 16.0;
-                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Inspeção 100h", cost, 16.0));
+                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Inspeção anual (25h)", cost, 16.0));
                         }
 
-                        // Revisão 500h (pistão)
+                        // Revisão 125h (ignição / magnetos)
                         if (isPiston && hoursUntil500h <= 0)
                         {
                             double cost = MaintenancePricing.Cost500hInspection;
                             balance -= cost;
                             dayMaintCost += cost;
-                            hoursUntil500h = 500.0;
+                            hoursUntil500h = 125.0;
                             var ignComp = components.FirstOrDefault(c => c.Kind == ComponentKind.Ignition);
                             if (ignComp != null) ignComp.Health = 100.0;
                             remainingDowntimeHours += 24.0;
-                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Revisão 500h / Magnetos", cost, 24.0));
+                            maintenanceList.Add(new MaintenanceRecord(botName, aType.Model, day, airframeHours, "Revisão de ignição (125h)", cost, 24.0));
                         }
 
                         // Retífica Geral (Overhaul TBO)
@@ -651,7 +651,8 @@ namespace FlightCareer.Application.Simulation
                                     {
                                         var pDef = _partCatalog.Get(cp.PartId);
                                         if (pDef == null) continue;
-                                        double pCost = PartPricing.CalculatePartPrice(pDef, aType.PurchasePrice) + PartPricing.CalculateLaborCost(pDef, 100.0);
+                                        string acClass = AircraftEconomyClass.Resolve(aType.Model, engineClass.ToString(), engineCount, features, aType.PurchasePrice);
+                                        double pCost = PartPricing.CalculatePartPrice(pDef, acClass) + PartPricing.CalculateLaborCost(pDef, 100.0);
                                         double pDown = PartPricing.CalculateDowntimeHours(pDef, rnd);
 
                                         cp.Health = 100.0;

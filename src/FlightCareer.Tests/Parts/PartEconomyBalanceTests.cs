@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Parts;
 using Xunit;
 using Xunit.Abstractions;
@@ -62,45 +63,7 @@ namespace FlightCareer.Tests.Parts
 
         public static string ResolveAircraftClass(string modelName, string engineClass, int engineCount, IReadOnlyCollection<string> features, double price)
         {
-            if (string.Equals(engineClass, "Piston", StringComparison.OrdinalIgnoreCase))
-            {
-                if (engineCount > 1) return "E"; // Bimotor pistão (Baron G58, C404 Titan, DA62)
-                if (features.Contains("diesel")) return "D"; // Diesel FADEC monomotor (DA40 NG)
-                if (features.Contains("turbocharged")) return "C"; // Pistão turbo (SR22T, C400 Corvalis, C207T)
-                if (features.Contains("variablePitchProp") || features.Contains("fuelInjected")) return "B"; // Pistão complexo
-                return "A"; // Pistão leve (C152, J-3 Cub, CAP-4, DR400, Dakota)
-            }
-
-            if (string.Equals(engineClass, "Turboprop", StringComparison.OrdinalIgnoreCase))
-            {
-                if (engineCount == 1) return "F"; // Turboélice mono (TBM, PC-12, C208B)
-                if (price >= 100_000_000.0) return "J"; // Cargueiro militar pesado quadrimotor (A400M)
-                return "G"; // Turboélice bi/multimotor regional (King Air, ATR, DHC-6, SkyCourier, ES30)
-            }
-
-            if (string.Equals(engineClass, "Jet", StringComparison.OrdinalIgnoreCase))
-            {
-                // Jato executivo (CJ4, Longitude, PC-24)
-                bool isBizJet = modelName.Contains("Citation") ||
-                                modelName.Contains("PC-24") ||
-                                (price < 50_000_000.0 && !modelName.Contains("A310"));
-
-                if (isBizJet) return "H";
-
-                // Widebody moderno / transporte pesado (> 200M ou 4 motores ou modelos específicos)
-                bool isWidebody = engineCount >= 4 ||
-                                  price >= 200_000_000.0 ||
-                                  modelName.Contains("747") ||
-                                  modelName.Contains("A330") ||
-                                  modelName.Contains("787");
-
-                if (isWidebody) return "J";
-
-                // Linha aérea narrowbody (A320, A321, 737, A310)
-                return "I";
-            }
-
-            return "A";
+            return AircraftEconomyClass.Resolve(modelName, engineClass, engineCount, features, price);
         }
 
         [Fact]
@@ -135,7 +98,7 @@ namespace FlightCareer.Tests.Parts
                 double maxCost = target.GetProperty("maxCostPerHour").GetDouble();
 
                 var applicableParts = Catalog.PartsFor(features);
-                var simResult = PartEconomySimulator.Simulate(applicableParts, value, engines, 1000.0);
+                var simResult = PartEconomySimulator.Simulate(applicableParts, classKey: classKey, engineCount: engines);
 
                 string status = (simResult.CostPerHour >= minCost && simResult.CostPerHour <= maxCost) ? "OK" : "FORA";
                 _output.WriteLine($"| {classKey} | {example} | ${simResult.CostPerHour:F2}/h | ${minCost:F0} - ${maxCost:F0}/h | {status} |");
@@ -203,7 +166,7 @@ namespace FlightCareer.Tests.Parts
                 double maxCost = target.GetProperty("maxCostPerHour").GetDouble();
 
                 var applicableParts = Catalog.PartsFor(features);
-                var simResult = PartEconomySimulator.Simulate(applicableParts, price, engines, 1000.0);
+                var simResult = PartEconomySimulator.Simulate(applicableParts, classKey: classKey, engineCount: engines);
 
                 string status = (simResult.CostPerHour >= minCost && simResult.CostPerHour <= maxCost) ? "OK" : "FORA";
                 _output.WriteLine($"| {idx++} | {id} | **{classKey}** | {engines}x | ${price:N0} | ${simResult.CostPerHour:F2}/h | ${minCost:F0} - ${maxCost:F0}/h | {status} |");

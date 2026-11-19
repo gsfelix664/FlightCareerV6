@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Diamond DA62",
   "class": "Piston",
   "engineCount": 2,
@@ -122,10 +122,10 @@
     },
     {
       "key": "vle",
-      "value": 201.0,
+      "value": 156.0,
       "unit": "knots",
       "source": "POH",
-      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "reference": "usuário 2026-11-19 (AFM; substitui valor anterior)",
       "notes": null
     },
     {

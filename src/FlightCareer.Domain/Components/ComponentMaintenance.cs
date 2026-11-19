@@ -114,10 +114,10 @@ namespace FlightCareer.Domain.Components
                 return new AircraftStatus(AircraftStatusLevel.Attention, "ATENÇÃO", $"{worst.Def.Name} em {worst.Range}: componente perto do limite.");
 
             var due = new List<string>();
-            if (aircraft.HoursUntilNext50hInspection <= 5) due.Add("inspeção de 50 h");
-            if (aircraft.HoursUntilNext100hInspection <= 10) due.Add("inspeção de 100 h");
-            if (engineClass == EngineClass.Piston && aircraft.HoursUntilNext500hInspection <= 10) due.Add("revisão de 500 h");
-            if (aircraft.EngineTboRemainingHours <= 50) due.Add("TBO do motor");
+            if (aircraft.HoursUntilNext50hInspection <= 1.2) due.Add("troca de óleo");
+            if (aircraft.HoursUntilNext100hInspection <= 2.5) due.Add("inspeção anual");
+            if (engineClass == EngineClass.Piston && aircraft.HoursUntilNext500hInspection <= 12.5) due.Add("revisão de ignição");
+            if (aircraft.EngineTboRemainingHours <= 12.5) due.Add("TBO do motor");
             foreach (var x in shown)
             {
                 var (remaining, life, isCycles) = ComponentMaintenance.RemainingLife(x.Def!, x.Component, engineClass);

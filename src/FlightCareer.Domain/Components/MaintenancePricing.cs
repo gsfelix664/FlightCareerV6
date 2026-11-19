@@ -8,16 +8,16 @@ namespace FlightCareer.Domain.Components
     /// </summary>
     public static class MaintenancePricing
     {
-        public const double Cost50hInspection = 850.0;
-        public const double Cost100hInspection = 2500.0;
-        public const double Cost500hInspection = 1450.0;
-        public const double MinOverhaulCost = 25000.0;
-        public const double OverhaulRate = 0.20;
+        public const double Cost50hInspection = 212.50;
+        public const double Cost100hInspection = 625.0;
+        public const double Cost500hInspection = 362.50;
+        public const double MinOverhaulCost = 6250.0;
+        public const double OverhaulRate = 0.05;
         public const double CostToggleConfiguration = 1200.0;
 
         /// <summary>
         /// Calcula o custo da retífica geral (overhaul de TBO do motor):
-        /// 20% do preço de compra da aeronave, com piso mínimo de $25.000.
+        /// 5% do preço de compra da aeronave, com piso mínimo de $6.250 (compressão ÷ 4, CALIBRA-F4).
         /// </summary>
         public static double CalculateOverhaulCost(double purchasePrice)
         {

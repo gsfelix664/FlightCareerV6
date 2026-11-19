@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FlightCareer.Domain.Economy;
 
 namespace FlightCareer.Domain.Parts
 {
@@ -12,7 +13,7 @@ namespace FlightCareer.Domain.Parts
         IReadOnlyDictionary<string, double> CostByPartGroup);
 
     /// <summary>
-    /// Simulador puro da economia de manutenção e peças (F2.3).
+    /// Simulador puro da economia de manutenção e peças (F2.3 e CALIBRA-F4b).
     /// Simula N horas de operação típica por aeronave/classe e calcula o custo de manutenção por hora.
     /// </summary>
     public static class PartEconomySimulator
@@ -22,11 +23,11 @@ namespace FlightCareer.Domain.Parts
         public const double TypicalStressMultiplier = 1.15; // Reflete transientes operacionais típicos (partidas, subidas, pousos)
 
         /// <summary>
-        /// Simula o ciclo de desgaste e substituição de peças em N horas de operação típica.
+        /// Simula o ciclo de desgaste e substituição de peças em N horas de operação típica usando o multiplicador da classe econômica.
         /// </summary>
         public static EconomySimulationResult Simulate(
             IEnumerable<PartDefinition> applicableParts,
-            double aircraftValue,
+            double classMultiplier = 1.0,
             int engineCount = 1,
             double simulatedHours = DefaultSimulatedHours,
             double replacementThresholdHealth = DefaultReplacementThresholdHealth,
@@ -54,7 +55,7 @@ namespace FlightCareer.Domain.Parts
                 if (hoursPerLife <= 0.1) hoursPerLife = 1.0;
 
                 double replacementsCount = (simulatedHours / hoursPerLife) * instances;
-                double costPerUnit = PartPricing.CalculatePartPrice(def, aircraftValue) +
+                double costPerUnit = PartPricing.CalculatePartPrice(def, classMultiplier) +
                                      PartPricing.CalculateLaborCost(def, laborRatePerHour);
 
                 double partTotalCost = replacementsCount * costPerUnit;
@@ -73,6 +74,23 @@ namespace FlightCareer.Domain.Parts
                 costPerHour,
                 totalReplacements,
                 costByGroup);
+        }
+
+        /// <summary>
+        /// Simula o ciclo de desgaste e substituição de peças resolvendo o multiplicador a partir da chave da classe (A a J).
+        /// </summary>
+        public static EconomySimulationResult Simulate(
+            IEnumerable<PartDefinition> applicableParts,
+            string? classKey,
+            int engineCount = 1,
+            double simulatedHours = DefaultSimulatedHours,
+            double replacementThresholdHealth = DefaultReplacementThresholdHealth,
+            double laborRatePerHour = PartPricing.DefaultLaborRatePerHour)
+        {
+            double mult = !string.IsNullOrWhiteSpace(classKey)
+                ? AircraftEconomyClass.GetPartPriceMultiplier(classKey)
+                : 1.0;
+            return Simulate(applicableParts, mult, engineCount, simulatedHours, replacementThresholdHealth, laborRatePerHour);
         }
     }
 }

@@ -18,8 +18,8 @@ namespace FlightCareer.UI.Models
         public double FuelAmount { get; set; }
 
         public int YearOfManufacture { get; set; } = 1995;
-        public double TsmoHours { get; set; } = 450;
-        public double TboHours { get; set; } = 1800;
+        public double TsmoHours { get; set; } = 0;
+        public double TboHours { get; set; } = 500;
         public string StructuralIncidentHistory { get; set; } = "Sem histórico de incidentes estruturais";
         public string CategoryBadge { get; set; } = "Monomotor Pistão";
 

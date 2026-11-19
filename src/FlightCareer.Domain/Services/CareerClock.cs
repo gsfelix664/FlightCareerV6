@@ -17,19 +17,19 @@ namespace FlightCareer.Domain.Services
         public const double GroundTurnaroundHours = 0.5;
 
         /// <summary>
-        /// Parada estimada para inspeção de 50 horas (~12,5 h na calibração acelerada): 2,0 h.
+        /// Parada estimada para a troca de óleo (a cada 12 h): 2,0 h.
         /// Cobre troca de óleo e filtro, dreno e conferência de limalhas no bujão magnético.
         /// </summary>
         public const double Inspection50hDowntimeHours = 2.0;
 
         /// <summary>
-        /// Parada estimada para inspeção regulatória de 100 horas (~25 h na calibração acelerada): 8,0 h.
+        /// Parada estimada para a inspeção anual (a cada 25 h): 8,0 h.
         /// Cobre inspeção geral de célula, superfícies de comando, cabos, fiações, compressão e filtros.
         /// </summary>
         public const double Inspection100hDowntimeHours = 8.0;
 
         /// <summary>
-        /// Parada estimada para revisão de 500 horas (~125 h na calibração acelerada): 6,0 h.
+        /// Parada estimada para a revisão de ignição (a cada 125 h): 6,0 h.
         /// Cobre revisão completa de magnetos, platinados, condensadores, fiação de alta tensão e velas.
         /// </summary>
         public const double Inspection500hDowntimeHours = 6.0;

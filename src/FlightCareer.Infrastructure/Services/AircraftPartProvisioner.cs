@@ -14,7 +14,7 @@ namespace FlightCareer.Infrastructure.Services
     /// <summary>
     /// Garante que toda aeronave do hangar tenha suas peças individuais instaladas.
     /// Avalia as features técnicas do modelo da aeronave e provisiona as peças aplicáveis a 100% de saúde.
-    /// Idempotente: só cria peças faltantes e nunca remove peças existentes.
+    /// Idempotente: cria peças faltantes e remove peças obsoletas ou que não se aplicam mais à aeronave.
     /// </summary>
     public sealed class AircraftPartProvisioner
     {
@@ -31,7 +31,7 @@ namespace FlightCareer.Infrastructure.Services
         }
 
         /// <summary>
-        /// Provisiona as peças faltantes para todas as aeronaves cadastradas no hangar.
+        /// Provisiona as peças faltantes e remove as que deixaram de se aplicar para todas as aeronaves cadastradas no hangar.
         /// </summary>
         /// <returns>Quantidade total de peças criadas.</returns>
         public async Task<int> EnsurePartsAsync(IAppDbContext db)
@@ -48,6 +48,7 @@ namespace FlightCareer.Infrastructure.Services
                 .ToDictionaryAsync(p => p.AircraftTypeModel, StringComparer.OrdinalIgnoreCase);
 
             int createdCount = 0;
+            int removedCount = 0;
 
             foreach (var a in aircraft)
             {
@@ -65,11 +66,32 @@ namespace FlightCareer.Infrastructure.Services
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para perfil '{model}': {ex.Message}");
-                    features = new List<string>();
+                    // Sem features confiáveis, a limpeza apagaria peças reais: pula esta aeronave.
+                    Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para perfil '{model}': {ex.Message}. Provisionamento e limpeza ignorados.");
+                    continue;
                 }
 
                 var applicableParts = _catalog.PartsFor(features);
+                var applicablePartIds = applicableParts
+                    .Select(p => p.Id)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                // 1. Limpeza de peças que não existem mais no catálogo ou não se aplicam mais às features da aeronave
+                var partsToRemove = a.Parts
+                    .Where(p => _catalog.Find(p.PartId) == null || !applicablePartIds.Contains(p.PartId))
+                    .ToList();
+
+                if (partsToRemove.Count > 0)
+                {
+                    Debug.WriteLine($"[Peças] Aeronave '{model}' (ID {a.Id}): removendo {partsToRemove.Count} peça(s) que deixaram de se aplicar ou saíram do catálogo.");
+                    db.AircraftParts.RemoveRange(partsToRemove);
+                    foreach (var p in partsToRemove)
+                    {
+                        a.Parts.Remove(p);
+                    }
+                    removedCount += partsToRemove.Count;
+                }
+
                 var existingParts = a.Parts
                     .Select(p => (p.PartId.ToLowerInvariant(), p.EngineIndex))
                     .ToHashSet();
@@ -136,7 +158,7 @@ namespace FlightCareer.Infrastructure.Services
                 createdCount += missingParts.Count;
             }
 
-            if (createdCount > 0)
+            if (createdCount > 0 || removedCount > 0)
             {
                 await db.SaveChangesAsync();
             }

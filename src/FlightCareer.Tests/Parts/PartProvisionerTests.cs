@@ -528,5 +528,202 @@ namespace FlightCareer.Tests.Parts
                 Assert.Equal(95.0, savedParts[1].Health);
             }
         }
+
+        [Fact]
+        public async Task Provisioner_RemovePecasQueNaoSeAplicam()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+
+            var pilotId = Guid.NewGuid();
+            var cubAircraftId = Guid.NewGuid();
+            var c152AircraftId = Guid.NewGuid();
+            var cubTypeId = Guid.NewGuid();
+            var c152TypeId = Guid.NewGuid();
+
+            var cubBatteryPartId = Guid.NewGuid();
+            var cubFlapsPartId = Guid.NewGuid();
+            var c152BatteryPartId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                var pilot = new Pilot { Id = pilotId, Name = "Piloto Teste" };
+                db.Pilots.Add(pilot);
+
+                var cubType = new AircraftType { Id = cubTypeId, Model = "Piper J-3 Cub", Type = "Geral", FuelType = "Avgas" };
+                var c152Type = new AircraftType { Id = c152TypeId, Model = "Cessna C152", Type = "Geral", FuelType = "Avgas" };
+                db.AircraftTypes.AddRange(cubType, c152Type);
+
+                var cubAircraft = new PilotAircraft { Id = cubAircraftId, PilotId = pilotId, AircraftTypeId = cubTypeId, Prefix = "PT-CUB" };
+                var c152Aircraft = new PilotAircraft { Id = c152AircraftId, PilotId = pilotId, AircraftTypeId = c152TypeId, Prefix = "PT-152" };
+                db.PilotAircrafts.AddRange(cubAircraft, c152Aircraft);
+
+                var cubProfile = new AircraftLimitProfileEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AircraftTypeModel = "Piper J-3 Cub",
+                    Class = "Piston",
+                    DataVersion = 1,
+                    SimMatchJson = "{}",
+                    FeaturesJson = JsonSerializer.Serialize(new[]
+                    {
+                        AircraftFeatures.Piston,
+                        AircraftFeatures.SingleEngine,
+                        AircraftFeatures.FixedGear,
+                        AircraftFeatures.Tailwheel,
+                        AircraftFeatures.FixedPitchProp,
+                        AircraftFeatures.Carbureted,
+                        AircraftFeatures.NoElectrical,
+                        AircraftFeatures.NoFlaps
+                    })
+                };
+
+                var c152Profile = new AircraftLimitProfileEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AircraftTypeModel = "Cessna C152",
+                    Class = "Piston",
+                    DataVersion = 1,
+                    SimMatchJson = "{}",
+                    FeaturesJson = JsonSerializer.Serialize(new[]
+                    {
+                        AircraftFeatures.Piston,
+                        AircraftFeatures.SingleEngine,
+                        AircraftFeatures.FixedGear,
+                        AircraftFeatures.FixedPitchProp,
+                        AircraftFeatures.Carbureted
+                    })
+                };
+                db.AircraftLimitProfiles.AddRange(cubProfile, c152Profile);
+
+                // Peças do J-3 que NÃO devem se aplicar
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = cubBatteryPartId,
+                    PilotAircraftId = cubAircraftId,
+                    PartId = "electrical.battery",
+                    Health = 90.0
+                });
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = cubFlapsPartId,
+                    PilotAircraftId = cubAircraftId,
+                    PartId = "airframe.flaps",
+                    Health = 85.0
+                });
+
+                // Peça aplicável do C152
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = c152BatteryPartId,
+                    PilotAircraftId = c152AircraftId,
+                    PartId = "electrical.battery",
+                    Health = 77.0
+                });
+
+                await db.SaveChangesAsync();
+            }
+
+            var provisioner = new AircraftPartProvisioner(Catalog);
+
+            await using (var db = new AppDbContext(options))
+            {
+                await provisioner.EnsurePartsAsync(db);
+
+                // J-3: bateria e flaps foram removidas
+                var cubParts = await db.AircraftParts.Where(p => p.PilotAircraftId == cubAircraftId).ToListAsync();
+                Assert.DoesNotContain(cubParts, p => p.PartId == "electrical.battery");
+                Assert.DoesNotContain(cubParts, p => p.PartId == "airframe.flaps");
+                Assert.DoesNotContain(cubParts, p => p.Id == cubBatteryPartId);
+                Assert.DoesNotContain(cubParts, p => p.Id == cubFlapsPartId);
+
+                // C152: bateria preservada com sua saúde original
+                var c152Battery = await db.AircraftParts.SingleOrDefaultAsync(p => p.Id == c152BatteryPartId);
+                Assert.NotNull(c152Battery);
+                Assert.Equal(77.0, c152Battery.Health);
+            }
+        }
+
+        [Fact]
+        public async Task Provisioner_RemovePecaForaDoCatalogo()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+
+            var pilotId = Guid.NewGuid();
+            var aircraftId = Guid.NewGuid();
+            var typeId = Guid.NewGuid();
+            var obsoletePartId1 = Guid.NewGuid();
+            var obsoletePartId2 = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                var pilot = new Pilot { Id = pilotId, Name = "Piloto Teste" };
+                db.Pilots.Add(pilot);
+
+                var c152Type = new AircraftType { Id = typeId, Model = "Cessna C152", Type = "Geral", FuelType = "Avgas" };
+                db.AircraftTypes.Add(c152Type);
+
+                var aircraft = new PilotAircraft { Id = aircraftId, PilotId = pilotId, AircraftTypeId = typeId, Prefix = "PT-152" };
+                db.PilotAircrafts.Add(aircraft);
+
+                var profile = new AircraftLimitProfileEntity
+                {
+                    Id = Guid.NewGuid(),
+                    AircraftTypeModel = "Cessna C152",
+                    Class = "Piston",
+                    DataVersion = 1,
+                    SimMatchJson = "{}",
+                    FeaturesJson = JsonSerializer.Serialize(new[]
+                    {
+                        AircraftFeatures.Piston,
+                        AircraftFeatures.SingleEngine,
+                        AircraftFeatures.FixedGear,
+                        AircraftFeatures.FixedPitchProp,
+                        AircraftFeatures.Carbureted
+                    })
+                };
+                db.AircraftLimitProfiles.Add(profile);
+
+                // electrical.external_lighting (removida do catálogo)
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = obsoletePartId1,
+                    PilotAircraftId = aircraftId,
+                    PartId = "electrical.external_lighting",
+                    Health = 50.0
+                });
+
+                // Peça inexistente arbitrária
+                db.AircraftParts.Add(new AircraftPart
+                {
+                    Id = obsoletePartId2,
+                    PilotAircraftId = aircraftId,
+                    PartId = "custom.non_existent_part",
+                    Health = 50.0
+                });
+
+                await db.SaveChangesAsync();
+            }
+
+            var provisioner = new AircraftPartProvisioner(Catalog);
+
+            await using (var db = new AppDbContext(options))
+            {
+                await provisioner.EnsurePartsAsync(db);
+
+                var parts = await db.AircraftParts.Where(p => p.PilotAircraftId == aircraftId).ToListAsync();
+                Assert.DoesNotContain(parts, p => p.PartId == "electrical.external_lighting");
+                Assert.DoesNotContain(parts, p => p.PartId == "custom.non_existent_part");
+                Assert.DoesNotContain(parts, p => p.Id == obsoletePartId1);
+                Assert.DoesNotContain(parts, p => p.Id == obsoletePartId2);
+            }
+        }
     }
 }
