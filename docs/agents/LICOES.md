@@ -20,3 +20,4 @@ Se a lição virar regra geral do projeto, o revisor move para `AGENTS.md` e apa
 - 2026-11-16 (CATALOGO-PADROES): antes de explicar uma falha no relatório, confira o dado no arquivo (ex.: o valor do limite no JSON); hipótese não conferida não vai como fato.
 - 2026-11-16 (NOTA-PASSAGEIROS): não cite fonte (FAA, IATA, fabricante) em comentário ou relatório sem tê-la conferido; valor herdado ou estimado se descreve como tal.
 - 2026-11-16 (AUTOSTART-CAMINHAO): gravar saldo/combustível num contexto curto exige avisar quem guarda a mesma entidade num contexto longo (MainViewModel): recarregar ou atualizar a instância, senão o próximo SaveChanges regrava o valor velho.
+- 2026-11-19 (CALENDARIO-JOGO): `dotnet test` não compila a UI; o build da solução (`dotnet build src/FlightCareer.slnx`) é obrigatório antes do relatório — um erro de compilação no HangarViewModel passou com 618/618 testes verdes. Se o app estiver aberto, compile com `-p:OutDir=<pasta temporária>`.
