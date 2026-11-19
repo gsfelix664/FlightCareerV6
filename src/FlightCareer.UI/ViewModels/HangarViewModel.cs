@@ -327,7 +327,7 @@ namespace FlightCareer.UI.ViewModels
                     aircraft.EngineTboRemainingHours = _catalog.Get(ComponentKind.Engine).LifeHoursFor(engineClass);
                     break;
                 case ComponentKind.Ignition:
-                    aircraft.HoursUntilNext500hInspection = 125.0;
+                    aircraft.HoursUntilNext500hInspection = MaintenancePricing.IgnitionRevisionIntervalHours;
                     break;
             }
             ClearInterdictionIfResolved(aircraft);
@@ -597,7 +597,7 @@ namespace FlightCareer.UI.ViewModels
                     }
 
                     ComponentMaintenance.Inspect(components.Where(c => c.Kind is ComponentKind.Engine or ComponentKind.Oil), Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext50hInspection = 12.0;
+                    aircraft.HoursUntilNext50hInspection = MaintenancePricing.OilChangeIntervalHours;
                     ClearInterdictionIfResolved(aircraft);
 
                     var mappingInspection = PartComponentMapping.CreateDefault();
@@ -645,8 +645,8 @@ namespace FlightCareer.UI.ViewModels
                     }
 
                     ComponentMaintenance.Inspect(components, Hours(aircraft), _random, _catalog.Visibility);
-                    aircraft.HoursUntilNext100hInspection = 25.0;
-                    aircraft.HoursUntilNext50hInspection = 12.0;
+                    aircraft.HoursUntilNext100hInspection = MaintenancePricing.AnnualInspectionIntervalHours;
+                    aircraft.HoursUntilNext50hInspection = MaintenancePricing.OilChangeIntervalHours;
                     ClearInterdictionIfResolved(aircraft);
 
                     flagged = PartInspectionFlags.ApplyInspection(

@@ -2448,6 +2448,24 @@
   - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.
   - Não testado no MSFS.
 
+## 2026-11-19 - Simulação de estabilidade da carreira (Gemini)
+- **Extração da Inicialização de Carreira (`Domain/Services/CareerStart.cs`)**:
+  - Centralizado o saldo inicial por dificuldade (`Easy` $1.000.000.000, `Medium` $100.000, `Hard` $10.000) e parâmetros iniciais da aeronave (C152 com 5.000 h de célula, meio tanque, TBO 1.800 h, 50 h para próxima inspeção 50h, 100 h para inspeção 100h).
+  - Atualizado `CreatePilotViewModel` para consumir `CareerStart`.
+- **Avaliação Pura de Mercado (`Domain/Economy/AircraftValuation.cs`)**:
+  - Extraído o método estático e puro `CalculateBaseMarketValue`, eliminando dependências de banco e permitindo avaliações rápidas em memória.
+- **Geração de Missões em Memória (`MissionGenerator.GenerateMissionsInMemory`)**:
+  - Suporte completo a geração de contratos em memória com cache por aeroporto/dia, desacoplado de `DbContext` e sem chamadas a `SaveChangesAsync`.
+- **Simulador de Progressão e Estabilidade (`Application/Simulation/CareerProgressionSimulator.cs` e CLI `career-stab`)**:
+  - Modelação de carreira completa com progressão por escada de aeronaves (Classes A→B→E→F→G→H→I→J), respeito às homologações de categoria do piloto (Categorias 1 a 5), políticas cauteloso/equilibrado/agressivo com reservas de caixa operacionais (3 meses, 1 mês ou 0), venda com 8% de taxa de corretagem, quebras e panes via `FailureEngine`, inflação de 10 anos sobre o combustível e detecção estrita de falência.
+  - Relatório `stability.md` com tabela detalhada por marco (Dias 30, 180 e 720), alertas automáticos (falência precoce, enriquecimento rápido, estagnação, inflação come margem) e exportação tabular `stability.csv`.
+- **Comando CLI**:
+  - Adicionado subcomando `career-stab` ao `FlightCareer.Replay`, com salvamento em `%LocalAppData%/FlightCareer/career-sim/`.
+- **Testes e Aceitação**:
+  - 5 novos testes unitários em `src/FlightCareer.Tests/Economy/CareerProgressionTests.cs` (CareerStart, determinismo estrito, reserva de compra, falência e restrição de categorias).
+  - Build 0 erros, `dotnet test` 623/623 aprovados.
+  - Fuzz testing executado em 46 modelos (230 voos) com 100% de aprovação e 0 falhas.
+
 ## 2026-11-19 - Reparo por troca de peça (Gemini)
 - **Planejador de Troca de Peças (`Domain/Parts/PartReplacementPlanner.cs`)**:
   - Nova lógica pura de substituição física de peças inteiras no Hangar a preço integral + mão de obra: na aviação real não se troca 5 % de freio, troca-se a peça física inteira (100 %) pagando preço cheio.
@@ -2468,6 +2486,22 @@
   - `dotnet test src/FlightCareer.Tests`: 639/639 aprovados (100 %).
   - Fuzz testing CLI (`fuzz --aircraft all --runs 5`): 230 voos em 46 modelos aprovados com 100 % e 0 falhas.
   - Não testado na tela do app nem no MSFS.
+
+## 2026-11-19 - ECON-STAB: Desgaste e manutenção de peças na progressão de carreira (Gemini)
+- **Desgaste e Vida de Peças em Carreira (`CareerProgressionSimulator.cs`)**:
+  - Peças instaladas por bot provisionadas pelo catálogo com suporte a `perEngine` e features técnicas do modelo.
+  - A cada voo no modo `--fast`: desgaste natural a `(70 / lifeHours) × horas × 1.15`, acúmulo de horas e ciclos; lâmpadas halógenas condicionadas ao `usageSensor` (nav/strobe/beacon 100%, pouso/táxi 15%, painel 0%).
+  - Barra dos componentes sincronizada com o agregado das peças (`PartComponentBridge.AggregateHealth`) antes do `FailureEngine.Evaluate`.
+  - Danos de panes roteados para as peças físicas do grupo do modo de falha (`DamageGroup`).
+  - Interdição NO-GO por panes ou quebra de peças que bloqueiam voo (`BlocksFlightWhenBroken`), resolvida via substituição de peças.
+- **Manutenção pelas Regras do Hangar (`PartReplacementPlanner`)**:
+  - `cauteloso` e `equilibrado`: plano completo (`PartReplacementPlanner.Plan`) na inspeção anual (25 h / 100 h), substituindo peças < 80% ou com alertas a preço cheio; troca de óleo e filtro a cada 12 h / 50 h pagando peças e taxa de serviço.
+  - `agressivo`: adia manutenções preventivas; ao ficar parado, substitui apenas peças estritamente quebradas ou NO-GO; falência imediata se houver peça NO-GO quebrada com saldo negativo e sem fundos para troca.
+- **Relatórios Consolidados (`stability.md` e `stability.csv`)**:
+  - Adicionadas métricas de custo de troca de peças por hora (`Peças/h ($)` e `custo_pecas_hora`), peças trocadas por 100 h (`Peças/100h` e `pecas_trocadas_100h`) e tabela de detalhamento dos custos operacionais por hora (combustível, taxas, troca de peças, manutenção geral, seguro).
+- **Testes**:
+  - Novo teste `Progression_DesgasteETrocaDePecas_MedidosComSucesso` em `CareerProgressionTests.cs`.
+  - Build 0 erros, `dotnet test` 645/645 aprovados, `fuzz --aircraft all --runs 5` (230 voos em 46 modelos) 100% aprovados.
 
 ## 2026-11-19 - Conversão de cabine (Gemini)
 - **Feature `convertibleCabin` no vocabulário fechado (`AircraftFeatures.cs`, `_schema.json`)**:
@@ -2494,3 +2528,24 @@
   - `dotnet build src/FlightCareer.slnx`: 0 erros.
   - `dotnet test src/FlightCareer.Tests`: 647/647 aprovados (100%).
   - Não testado na tela do app nem no MSFS.
+
+## 2026-11-19 - ECON-STAB: Continuidade de voos, diversificação de bots e validação de carreira (Gemini)
+- **Continuidade de voo dos bots e voo de reposicionamento (Ferry)**:
+  - Eliminação da paralisação de bots em aeródromos sem contratos compatíveis.
+  - Voo de reposicionamento (Ferry, sem receita, pagando combustível e tarifas regulatórias) para o Hub mais próximo (Tier 1 ou 2 com pista compatível com a aeronave) quando não houver missões disponíveis.
+  - Voo de instrução/treinamento local para escolas de aviação (CIAC) quando o bot já estiver no Hub e não houver contratos comerciais no dia (1,0 h a $220/h de receita cobrindo combustível e taxas).
+  - Continuidade do loop diário de voos até o cumprimento da meta configurada (`options.HoursPerDay`), elevando as horas voadas para o ritmo real de operação (~85 h a 116 h em 60 dias).
+- **Sementes individuais e diversificação de rotas**:
+  - Método determinístico `CareerProgressionSimulator.DeriveBotSeed(...)` combinando semente base, dificuldade, política e índice do bot.
+  - Cache de missões por chave de aeroporto e dia `(ICAO, dia)` gerado com semente independente de quem o visita primeiro.
+  - Seleção estocástica ponderada entre as top 3 missões compatíveis, gerando trajetórias e patrimônios distintos para cada bot (faixas [Mín - Máx] reais).
+- **Escada de compra de aeronaves e categorias**:
+  - Resolução de configuração de aeronaves `ResolveAircraftConfiguration` tornada estática.
+  - Promoção de categoria (Cat 1 ➔ Cat 2) atingida aos 40 h de voo e 2.500 XP com pagamento da taxa de homologação ($35.000).
+  - Motivo de bloqueio de compra informado explicitamente nos relatórios quando a categoria ou saldo com reserva impedem a aquisição.
+- **Métricas e sanidade no relatório (`stability.md`, `stability.csv`)**:
+  - Adicionadas colunas `Horas Voadas` e `Voos/Dia` nas tabelas consolidadas.
+  - Alerta automático `Bot Parado` ativado caso algum bot ativo registre média inferior a 50 % da meta diária configurada (0 alertas na amostra).
+- **Testes**:
+  - Novos testes unitários `Progression_BotVoaHorasPorDiaAoLongoDoTempo` e `Progression_BotsComSementesDiferentes` em `CareerProgressionTests.cs`.
+  - Build 0 erros, `dotnet test` 655/655 aprovados (100 %), `fuzz --aircraft all --runs 5` 230/230 voos aprovados (100 %) em 46 aeronaves.

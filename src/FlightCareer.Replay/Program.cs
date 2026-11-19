@@ -50,6 +50,12 @@ namespace FlightCareer.Replay
                 return RunCareer(args.Skip(1).ToArray());
             }
 
+            if (args[0].Equals("career-stab", StringComparison.OrdinalIgnoreCase))
+            {
+                System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+                return RunCareerStab(args.Skip(1).ToArray());
+            }
+
             string? csvPath = null;
             string? aircraftArg = null;
             string? blackboxPath = null;
@@ -202,6 +208,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("Uso: FlightCareer.Replay <csv|csv.gz> [opções]");
             Console.WriteLine("     FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo|all>] [--seed <n>] [--fast]");
             Console.WriteLine("     FlightCareer.Replay career --aircraft <modelos> [--bots <n>] [--days <n>] [--hours-per-day <n>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]");
+            Console.WriteLine("     FlightCareer.Replay career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]");
             Console.WriteLine();
             Console.WriteLine("Opções de Replay:");
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");
@@ -916,6 +923,147 @@ namespace FlightCareer.Replay
                 catch
                 {
                     // Ignora falha de exclusão de arquivo temporário
+                }
+            }
+        }
+
+        private static int RunCareerStab(string[] args)
+        {
+            int days = 720;
+            int bots = 5;
+            int seed = 1;
+            string difficulty = "all";
+            string policy = "all";
+            double hoursPerDay = 2.0;
+            bool fastMode = true;
+            string? outDir = null;
+            string? initialHub = null;
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                string arg = args[i];
+                if (arg.Equals("--days", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int d) && d > 0) days = d;
+                }
+                else if (arg.Equals("--bots", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int b) && b > 0) bots = b;
+                }
+                else if (arg.Equals("--seed", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int s)) seed = s;
+                }
+                else if (arg.Equals("--difficulty", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    difficulty = args[++i];
+                }
+                else if (arg.Equals("--policy", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    policy = args[++i];
+                }
+                else if (arg.Equals("--hours-per-day", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (double.TryParse(args[++i], NumberStyles.Any, CultureInfo.InvariantCulture, out double h) && h > 0) hoursPerDay = h;
+                }
+                else if (arg.Equals("--fast", StringComparison.OrdinalIgnoreCase))
+                {
+                    fastMode = true;
+                }
+                else if (arg.Equals("--out", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    outDir = args[++i];
+                }
+                else if (arg.Equals("--initial-hub", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    initialHub = args[++i];
+                }
+                else if (arg.Equals("-h", StringComparison.OrdinalIgnoreCase) || arg.Equals("--help", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine("Uso: FlightCareer.Replay career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]");
+                    return 0;
+                }
+            }
+
+            string tempDbFile = Path.Combine(Path.GetTempPath(), $"career_stab_{Guid.NewGuid():N}.db");
+            var dbOptions = new DbContextOptionsBuilder<AppDbContext>()
+                .UseSqlite($"Data Source={tempDbFile}")
+                .Options;
+
+            try
+            {
+                Console.WriteLine($"[ECON-STAB] Inicializando banco temporário para metadados em {tempDbFile}...");
+                using (var setupDb = new AppDbContext(dbOptions))
+                {
+                    setupDb.Database.EnsureCreated();
+                    setupDb.EnsureSchemaUpdatedAsync().GetAwaiter().GetResult();
+                    var seeder = new DataSeeder(setupDb);
+                    seeder.SeedAsync((msg, pct) => Console.WriteLine($"  {msg} ({pct * 100:F0}%)")).GetAwaiter().GetResult();
+                }
+
+                Console.WriteLine("[ECON-STAB] Carregando catálogos e inicializando simulador de progressão...");
+                var partsCatalog = PartCatalog.LoadDefault();
+                var wearRuleCatalog = WearRuleCatalog.LoadDefault();
+                var componentCatalog = ComponentCatalog.LoadDefault();
+                var limitLoader = new AircraftLimitCatalogLoader();
+                var resolver = limitLoader.CreateResolver();
+                var hubService = new HubDataService();
+
+                var simulator = new CareerProgressionSimulator(
+                    () => new AppDbContext(dbOptions),
+                    componentCatalog,
+                    partsCatalog,
+                    wearRuleCatalog,
+                    resolver,
+                    hubService);
+
+                var simOptions = new CareerProgressionOptions
+                {
+                    Days = days,
+                    BotsPerGroup = bots,
+                    Seed = seed,
+                    Difficulty = difficulty,
+                    Policy = policy,
+                    HoursPerDay = hoursPerDay,
+                    FastMode = fastMode,
+                    OutputDirectory = outDir,
+                    InitialHub = initialHub,
+                    LogCallback = msg => Console.WriteLine(msg)
+                };
+
+                var result = simulator.RunAsync(simOptions).GetAwaiter().GetResult();
+
+                Console.WriteLine();
+                Console.WriteLine("===============================================================================");
+                Console.WriteLine("                         SIMULAÇÃO ECON-STAB CONCLUÍDA                         ");
+                Console.WriteLine("===============================================================================");
+                Console.WriteLine($"Tempo decorrido: {result.ElapsedTime.TotalSeconds:F1} s");
+                Console.WriteLine($"Total de marcos registrados: {result.Snapshots.Count:N0}");
+                Console.WriteLine($"Diretório de saída: {result.OutputDirectory}");
+                Console.WriteLine("Arquivos gerados: stability.csv, stability.md");
+                Console.WriteLine();
+                Console.WriteLine(result.SummaryMarkdown);
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[ECON-STAB] Erro fatal durante a simulação: {ex.Message}");
+                Console.Error.WriteLine(ex.StackTrace);
+                return 1;
+            }
+            finally
+            {
+                try
+                {
+                    if (File.Exists(tempDbFile))
+                    {
+                        File.Delete(tempDbFile);
+                    }
+                }
+                catch
+                {
+                    // Ignora falha de exclusão
                 }
             }
         }

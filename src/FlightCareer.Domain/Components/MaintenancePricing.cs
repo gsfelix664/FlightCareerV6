@@ -13,6 +13,16 @@ namespace FlightCareer.Domain.Components
         public const double Cost500hInspection = 362.50;
         public const double MinOverhaulCost = 6250.0;
         public const double OverhaulRate = 0.05;
+        /// <summary>Intervalos e TBO comprimidos ÷ 4 (decisão do usuário 2026-11-17/19).</summary>
+        public const double OilChangeIntervalHours = 12.0;
+        public const double AnnualInspectionIntervalHours = 25.0;
+        public const double IgnitionRevisionIntervalHours = 125.0;
+        public const double PistonTboHours = 500.0;
+        public const double TurbineTboHours = 900.0;
+
+        /// <summary>TBO do motor pela classe (pistão 500 h; turboélice e jato 900 h).</summary>
+        public static double TboHoursFor(EngineClass engineClass) => engineClass == EngineClass.Piston ? PistonTboHours : TurbineTboHours;
+
         public const double CostToggleConfiguration = 1200.0;
 
         /// <summary>
