@@ -97,6 +97,53 @@ namespace FlightCareer.Tests.Economy
         }
 
         [Fact]
+        public async Task Agressivo_PulaRevisoes_TemMaisPanesQueCauteloso()
+        {
+            var (options1, tempDb1) = await CreateTestEnvironmentAsync();
+            var (options2, tempDb2) = await CreateTestEnvironmentAsync();
+
+            try
+            {
+                var simOptionsCauteloso = new CareerProgressionOptions
+                {
+                    Days = 120,
+                    BotsPerGroup = 1,
+                    Difficulty = "medium",
+                    Policy = "cauteloso",
+                    Seed = 42,
+                    FastMode = true
+                };
+
+                var simOptionsAgressivo = new CareerProgressionOptions
+                {
+                    Days = 120,
+                    BotsPerGroup = 1,
+                    Difficulty = "medium",
+                    Policy = "agressivo",
+                    Seed = 42,
+                    FastMode = true
+                };
+
+                var simCauteloso = new CareerProgressionSimulator(() => new AppDbContext(options1));
+                var simAgressivo = new CareerProgressionSimulator(() => new AppDbContext(options2));
+
+                var resCauteloso = await simCauteloso.RunAsync(simOptionsCauteloso);
+                var resAgressivo = await simAgressivo.RunAsync(simOptionsAgressivo);
+
+                var snapCauteloso = resCauteloso.Snapshots.Last();
+                var snapAgressivo = resAgressivo.Snapshots.Last();
+
+                Assert.True(snapAgressivo.FailuresPer100h > snapCauteloso.FailuresPer100h,
+                    $"Agressivo ({snapAgressivo.FailuresPer100h:F2} panes/100h) deve ter mais panes/100h que cauteloso ({snapCauteloso.FailuresPer100h:F2} panes/100h)");
+            }
+            finally
+            {
+                CleanupDb(tempDb1);
+                CleanupDb(tempDb2);
+            }
+        }
+
+        [Fact]
         public void Progression_BotCompraQuandoCabeNaReserva()
         {
             var c172 = new AircraftType

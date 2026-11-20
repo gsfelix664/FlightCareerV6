@@ -1,4 +1,18 @@
-# Passagem de sessão (Claude) — 2026-11-19 (PC do escritório)
+# Passagem de sessão (Claude) — 2026-11-20 (PC de casa, com MSFS)
+
+## Atualização 2026-11-20 (vale sobre o que está abaixo)
+- **Manutenção por faixas (decisões do usuário):** `docs/plans/economia-estabilidade.md` › 4.1. Verde 100–40, amarelo 40–20 (desgaste acelerado até 2× e perda de desempenho), vermelho < 20 (pane por peça). Reparo sem limite automático de 80 %; revisões trocam o conjunto delas; walkaround mostra valor exato; só a anual interdita (e só inspeciona); seguro 2,5 %/ano, nega perda total com achado vermelho da anual não trocado.
+- **MANUT-FAIXAS-A mergeada** (Gemini + ajustes do revisor; `docs/reviews/MANUT-FAIXAS-A-revisao.md`): build 0 erros, 673/673. **Nada testado no MSFS.**
+- **Próximo:**
+  1. **ECON-STAB** com as regras novas (`career-stab --days 720 --bots 3 --difficulty all --policy all --fast`, ~45 min): o cauteloso deixou de falir? o agressivo tem mais panes? Calibrar `lowHealthWearMaxMultiplier` e o seguro se preciso. Depois propostas D (curva de progressão) e E (dificuldade) do plano.
+  2. **MANUT-FAIXAS-B** (Hangar): lista de peças por card com `KnownHealth`/`KnownAtAirframeHours` ("visto há X h"), cor da faixa, nota de vida (`PartInspectionFlags.LifeNote`) e botão **Trocar** por peça; "Reparar tudo" = quebradas + vermelhas. Spec ainda não escrita.
+  3. **Bug provável do óleo:** no MSFS 2024 `GENERAL ENG OIL LEAKED PERCENT:1` = **óleo restante** (100 sem pane, cai devagar com o motor ligado, pressão normal; probe `20261120-0822-C172SP_G1000_Passengers`). O `SimFailureActuator` supõe 0 = sem vazamento (sobe até 100; limpeza grava 0 = esvazia). Confirmar e inverter.
+  4. **Perda de desempenho no amarelo:** `docs/plans/perda-desempenho-amarelo.md`. Teste no MSFS incompleto: o Watcher deu `DATA_ERROR` (pedido com *Is String* marcado e índice 0); repetir passos 1–5 com a linha `:1` selecionada, *Is String* desmarcado, e o SimVarProbe gravando (filtro com `(:\d+)?$`, sair com `q`, não usar Ctrl+C). Lista do Watcher: `tools/simvar_probe/watcher/flightcareer-teste-desempenho.simvars`.
+- `REGRAS_tiers.txt` (raiz, do usuário, não commitado): regras de missões Tier 1 — o usuário pediu para não analisar ainda.
+
+---
+
+# Passagem anterior — 2026-11-19 (PC do escritório)
 
 ## Atualização 2026-11-19 (vale sobre o que está abaixo)
 - Base `feat/component-health-system` no GitHub; build 0 erros; `dotnet test` 655/655; **nada testado no MSFS nem visto na tela**.

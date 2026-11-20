@@ -79,5 +79,14 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Horas totais de célula da aeronave no momento da marcação (inspeção ou walkaround).</summary>
         public double? FlaggedAirframeHours { get; set; }
+
+        /// <summary>Último valor de saúde conhecido/visto pelo piloto/mecânico na inspeção/walkaround/troca.</summary>
+        public double? KnownHealth { get; set; }
+
+        /// <summary>Horas de célula da aeronave no momento em que a saúde foi vista/revelada pela última vez.</summary>
+        public double? KnownAtAirframeHours { get; set; }
+
+        /// <summary>Horas de célula se a peça foi encontrada quebrada ou em faixa vermelha na inspeção anual e não corrigida.</summary>
+        public double? FoundRedAtAnnualAirframeHours { get; set; }
     }
 }

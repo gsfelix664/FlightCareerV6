@@ -161,8 +161,10 @@ namespace FlightCareer.Tests.Services
             // Cenário 2: O relógio de carreira avançou 3 meses (~92 dias de tempo de carreira simulado)
             var careerNow3Meses = baseClock.AddDays(92);
             var resultComCarreira = PartInspectionFlags.Evaluate(part, def, careerNow3Meses);
-            Assert.Equal(PartFlag.Suspect, resultComCarreira.Level);
-            Assert.Contains("Calendário", resultComCarreira.Reason);
+            Assert.Equal(PartFlag.None, resultComCarreira.Level); // Vida/calendário não marca mais Suspect
+            var lifeNote = PartInspectionFlags.LifeNote(part, def, careerNow3Meses);
+            Assert.NotNull(lifeNote);
+            Assert.Contains("Calendário", lifeNote);
         }
 
         [Fact]

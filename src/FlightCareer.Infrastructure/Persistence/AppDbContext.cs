@@ -269,6 +269,9 @@ namespace FlightCareer.Infrastructure.Persistence
                     LastShopServiceAirframeHours REAL NULL,
                     LastShopServiceCycles INTEGER NULL,
                     FlaggedAirframeHours REAL NULL,
+                    KnownHealth REAL NULL,
+                    KnownAtAirframeHours REAL NULL,
+                    FoundRedAtAnnualAirframeHours REAL NULL,
                     CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
                 );",
                 "DROP INDEX IF EXISTS IX_AircraftParts_PilotAircraftId_PartId;",
@@ -283,6 +286,9 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;",
                 "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN KnownHealth REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN KnownAtAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN FoundRedAtAnnualAirframeHours REAL NULL;",
 
                 // Compressão de tempo ÷ 4: limites regulatórios de inspeção e TBO para carreiras existentes (CALIBRA-F4)
                 "UPDATE PilotAircrafts SET HoursUntilNext50hInspection = 12.0 WHERE HoursUntilNext50hInspection > 12.0;",

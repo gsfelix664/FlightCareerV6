@@ -32,57 +32,70 @@ namespace FlightCareer.Domain.Parts
     /// </summary>
     public static class PartReplacementPlanner
     {
-        public const double ReplaceBelowHealthPct = 80.0;
+        /// <summary>
+        /// Seleciona as peças recomendadas para substituição (quebradas e em faixa vermelha &lt; 20%).
+        /// Usado pelo botão de reparar/reparar tudo.
+        /// </summary>
+        public static IReadOnlyList<AircraftPart> SelectRecommended(
+            IEnumerable<AircraftPart> parts,
+            PartCatalog catalog,
+            PartBandSettings? bands = null)
+        {
+            if (parts == null) return Array.Empty<AircraftPart>();
+            bands ??= new PartBandSettings();
+
+            var result = new List<AircraftPart>();
+            foreach (var part in parts)
+            {
+                if (part.IsBroken || part.Health < bands.RedBelowPct)
+                {
+                    result.Add(part);
+                }
+            }
+            return result;
+        }
 
         /// <summary>
-        /// Gera o plano de substituição para peças com base no multiplicador econômico de classe da aeronave.
-        /// Peça entra no plano se: IsBroken, Health &lt; 80, ou PartInspectionFlags.Evaluate(...).Level != None.
+        /// Precifica exatamente as peças recebidas com base no multiplicador econômico de classe da aeronave.
         /// </summary>
         public static PartReplacementPlan Plan(
-            IEnumerable<AircraftPart> parts,
+            IEnumerable<AircraftPart> selectedParts,
             PartCatalog catalog,
             double classMultiplier,
             DateTime careerNow,
             double laborRatePerHour = PartPricing.DefaultLaborRatePerHour,
-            IRandomSource? random = null)
+            IRandomSource? random = null,
+            PartBandSettings? bands = null)
         {
-            if (parts == null || catalog == null)
+            if (selectedParts == null || catalog == null)
             {
                 return new PartReplacementPlan(Array.Empty<PartReplacementItem>(), 0.0, 0.0);
             }
 
+            bands ??= new PartBandSettings();
             var items = new List<PartReplacementItem>();
 
-            foreach (var part in parts)
+            foreach (var part in selectedParts)
             {
                 var def = catalog.Get(part.PartId);
                 if (def == null) continue;
 
-                var eval = PartInspectionFlags.Evaluate(part, def, careerNow);
-
-                bool needsReplacement = part.IsBroken
-                    || part.Health < ReplaceBelowHealthPct
-                    || eval.Level != PartFlag.None
-                    || part.Flag != PartFlag.None;
-
-                if (!needsReplacement) continue;
-
                 string reason;
-                if (part.IsBroken || eval.Level == PartFlag.Broken || part.Flag == PartFlag.Broken)
+                if (part.IsBroken)
                 {
                     reason = "Quebrada";
                 }
-                else if (eval.Level != PartFlag.None && eval.Reason != "Desgaste avançado" && !string.IsNullOrWhiteSpace(eval.Reason))
+                else if (part.Health < bands.RedBelowPct)
                 {
-                    reason = eval.Reason;
+                    reason = $"Faixa vermelha: {part.Health:F0} %";
                 }
-                else if (part.Health < ReplaceBelowHealthPct)
+                else if (part.Health < bands.YellowBelowPct)
                 {
-                    reason = $"Saúde {part.Health:F0} %";
+                    reason = $"Faixa amarela: {part.Health:F0} %";
                 }
                 else
                 {
-                    reason = !string.IsNullOrWhiteSpace(eval.Reason) ? eval.Reason : "Atenção recomendada";
+                    reason = $"Saúde {part.Health:F0} %";
                 }
 
                 double partPrice = PartPricing.CalculatePartPrice(def, classMultiplier);
@@ -99,25 +112,26 @@ namespace FlightCareer.Domain.Parts
         }
 
         /// <summary>
-        /// Gera o plano de substituição para peças com base na chave de classe econômica da aeronave (A a J).
+        /// Gera o plano de substituição para as peças recebidas com base na chave de classe econômica da aeronave (A a J).
         /// </summary>
         public static PartReplacementPlan Plan(
-            IEnumerable<AircraftPart> parts,
+            IEnumerable<AircraftPart> selectedParts,
             PartCatalog catalog,
             string? classKey,
             DateTime careerNow,
             double laborRatePerHour = PartPricing.DefaultLaborRatePerHour,
-            IRandomSource? random = null)
+            IRandomSource? random = null,
+            PartBandSettings? bands = null)
         {
             double mult = !string.IsNullOrWhiteSpace(classKey)
                 ? AircraftEconomyClass.GetPartPriceMultiplier(classKey)
                 : 1.0;
-            return Plan(parts, catalog, mult, careerNow, laborRatePerHour, random);
+            return Plan(selectedParts, catalog, mult, careerNow, laborRatePerHour, random, bands);
         }
 
         /// <summary>
         /// Aplica a substituição das peças de um plano: saúde 100 %, IsBroken = false, horas/ciclos zerados,
-        /// LastReplaced* atualizados e marcas de suspeita limpas.
+        /// LastReplaced* atualizados e marcas de suspeita e achados limpos.
         /// </summary>
         public static void Apply(PartReplacementPlan plan, double airframeHours, DateTime careerNow)
         {
@@ -162,6 +176,10 @@ namespace FlightCareer.Domain.Parts
             part.LastShopServiceAtUtc = careerNow;
             part.LastShopServiceAirframeHours = airframeHours;
             part.LastShopServiceCycles = null;
+
+            part.FoundRedAtAnnualAirframeHours = null;
+            part.KnownHealth = 100.0;
+            part.KnownAtAirframeHours = airframeHours;
         }
     }
 }

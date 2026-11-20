@@ -307,12 +307,7 @@ namespace FlightCareer.UI.ViewModels
                 _aircraft.HoursUntilNext50hInspection = Math.Max(0, _aircraft.HoursUntilNext50hInspection - EstimatedHours);
                 _aircraft.HoursUntilNext100hInspection = Math.Max(0, _aircraft.HoursUntilNext100hInspection - EstimatedHours);
 
-                if (_aircraft.EngineTboRemainingHours <= 0)
-                {
-                    _aircraft.IsInterdicted = true;
-                    _aircraft.InterdictionReason = "TBO Vencido durante Translado";
-                }
-                else if (_aircraft.HoursUntilNext100hInspection <= 0)
+                if (_aircraft.HoursUntilNext100hInspection <= 0)
                 {
                     _aircraft.IsInterdicted = true;
                     _aircraft.InterdictionReason = "Inspeção Anual Vencida durante Translado";

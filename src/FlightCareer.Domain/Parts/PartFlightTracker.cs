@@ -39,12 +39,13 @@ namespace FlightCareer.Domain.Parts
             PartCatalog partsCatalog,
             WearRuleCatalog wearRuleCatalog,
             AircraftLimitResolver resolver,
-            IRandomSource? random = null)
+            IRandomSource? random = null,
+            PartBandSettings? bandSettings = null)
         {
             _partsCatalog = partsCatalog ?? throw new ArgumentNullException(nameof(partsCatalog));
             _wearRuleCatalog = wearRuleCatalog ?? throw new ArgumentNullException(nameof(wearRuleCatalog));
             _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
-            _wearEngine = new PartWearEngine(_partsCatalog, _wearRuleCatalog, random);
+            _wearEngine = new PartWearEngine(_partsCatalog, _wearRuleCatalog, random, bandSettings);
         }
 
         public bool IsActive => _parts.Count > 0;

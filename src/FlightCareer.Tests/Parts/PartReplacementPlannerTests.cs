@@ -25,7 +25,8 @@ namespace FlightCareer.Tests.Parts
                 IsBroken = false
             };
 
-            var plan = PartReplacementPlanner.Plan(new[] { brakePad }, _catalog, "A", DateTime.UtcNow);
+            var recommended = PartReplacementPlanner.SelectRecommended(new[] { brakePad }, _catalog);
+            var plan = PartReplacementPlanner.Plan(recommended, _catalog, "A", DateTime.UtcNow);
 
             Assert.Empty(plan.Items);
             Assert.Equal(0.0, plan.TotalCost);
@@ -75,10 +76,14 @@ namespace FlightCareer.Tests.Parts
                 IsBroken = false
             };
 
-            var plan = PartReplacementPlanner.Plan(new[] { oil }, _catalog, "A", DateTime.UtcNow);
+            // Vida vencida não entra em SelectRecommended (apenas quebradas e vermelhas)
+            var recommended = PartReplacementPlanner.SelectRecommended(new[] { oil }, _catalog);
+            Assert.Empty(recommended);
 
+            // Mas pode ser orçada e trocada se o usuário a selecionar diretamente
+            var plan = PartReplacementPlanner.Plan(new[] { oil }, _catalog, "A", DateTime.UtcNow);
             Assert.Single(plan.Items);
-            Assert.Contains("Vida", plan.Items[0].Reason);
+            Assert.Contains("Saúde 95 %", plan.Items[0].Reason);
         }
 
         [Fact]
@@ -219,8 +224,8 @@ namespace FlightCareer.Tests.Parts
             var components = new List<AircraftComponent> { compBrakes };
             aircraft.Components = components;
 
-            // Gera plano de troca para os freios
-            var plan = PartReplacementPlanner.Plan(parts, _catalog, "A", DateTime.UtcNow);
+            // Gera plano de troca para os freios (selecionando as pastilhas)
+            var plan = PartReplacementPlanner.Plan(new[] { pad }, _catalog, "A", DateTime.UtcNow);
             Assert.Single(plan.Items); // apenas pastilhas/discos entram
             Assert.Equal("brakes.pads_discs", plan.Items[0].Part.PartId);
 

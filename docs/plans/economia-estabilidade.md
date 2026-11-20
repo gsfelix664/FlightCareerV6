@@ -46,6 +46,15 @@ Ordem sugerida: A + B + C (regras) → rodar ECON-STAB → F → D + E (pagament
 4. Curva de progressão (D): os marcos do Médio e quanto mais lento é o Difícil.
 5. Dificuldade (E): saldo do Fácil e multiplicadores.
 
+## 4.1 Decisões do usuário (2026-11-20) — manutenção por faixas (substitui A e B)
+- **Faixas de saúde da peça** (walkaround, inspeção e revisão): verde 100–40 %, amarelo 40–20 % (perda de desempenho proporcional, sem pane), vermelho 20–0 % (sorteio de pane crescendo até 0 %; curva atual do `FailureEngine`, λ = 0,02 · 100^((20−h)/20) por hora, λ = 2/h em 0 %).
+- **Desgaste acelerado pela saúde, não pelo vencimento:** abaixo de 40 % o desgaste natural é multiplicado por uma curva suave (ex.: 1 + 1 × ((40 − h)/40)², 2× em 0 %; máximo a calibrar). O 3× por manutenção vencida não volta.
+- **Visibilidade:** walkaround grátis mostra a saúde **exata** das peças visíveis; inspeção paga e revisões mostram a exata das demais do grupo; peça não vista mostra o último valor conhecido e há quantas horas.
+- **Reparo:** sai o limite automático de 80 %. Revisões trocam o conjunto delas como na vida real (óleo: óleo e filtro; ignição: velas e magnetos; TBO: motor) e revelam as demais; pneus e freios não têm revisão. Troca individual a preço cheio, por escolha do piloto.
+- **Vencimentos:** óleo, ignição e TBO vencidos **não interditam** (o risco vem da saúde); inspeção anual vencida continua interditando (só inspeciona, não troca).
+- **Seguro:** pago por mês, ~2–3 %/ano do valor do avião (calibrar na ECON-STAB); cobre revisão vencida; **não cobre** pane de peça que a última inspeção anual achou em vermelho (< 20 %) ou quebrada e que não foi trocada.
+- Perda de desempenho no amarelo depende do que o SDK permite atuar (motor a pistão, pneu, freio): pesquisa e teste no MSFS à parte.
+
 ## 5. Como reproduzir
 ```bash
 dotnet run --project src/FlightCareer.Replay -- career-stab --days 720 --bots 3 --seed 1 --difficulty all --policy all --fast

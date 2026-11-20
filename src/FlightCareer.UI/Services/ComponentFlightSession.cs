@@ -4,6 +4,7 @@ using System.Linq;
 using FlightCareer.Application.Services;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Parts;
 
 namespace FlightCareer.UI.Services
 {
@@ -19,10 +20,12 @@ namespace FlightCareer.UI.Services
     {
         private readonly SimConnectService _sim;
         private readonly ComponentCatalog _catalog;
+        private readonly PartCatalog _partCatalog;
         private readonly IRandomSource _random;
         private readonly SimFailureActuator _actuator;
         private readonly TurbineDegradationActuator _turbineActuator;
         private readonly List<FlightFailureRecord> _history = new();
+        private readonly HashSet<ComponentKind> _failedKindsInFlight = new();
 
         private List<AircraftComponent> _components = new();
         private WearEngine? _wear;
@@ -34,10 +37,11 @@ namespace FlightCareer.UI.Services
 
         public event Action<FlightFailureRecord>? OnFailure;
 
-        public ComponentFlightSession(SimConnectService sim, ComponentCatalog catalog, IRandomSource? random = null)
+        public ComponentFlightSession(SimConnectService sim, ComponentCatalog catalog, IRandomSource? random = null, PartCatalog? partCatalog = null)
         {
             _sim = sim;
             _catalog = catalog;
+            _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
             _random = random ?? new SystemRandomSource();
             _actuator = new SimFailureActuator(sim, _random);
             _actuator.OnRecord += Emit;
@@ -55,6 +59,8 @@ namespace FlightCareer.UI.Services
         public bool CrashApplied => _crashApplied;
         public bool PartsDriven { get; set; }
         public Action<ComponentKind, double>? PartDamageSink { get; set; }
+        public Func<double, Func<ComponentKind, bool>, IReadOnlyCollection<ComponentKind>, IReadOnlyList<PartFailure>>? PartFailureSource { get; set; }
+        public Action<Guid>? PartBreakSink { get; set; }
 
         private void ApplyDamage(ComponentKind kind, double amount)
         {
@@ -75,6 +81,7 @@ namespace FlightCareer.UI.Services
         /// <summary>Prepara a sessão para uma aeronave (componentes já carregados e reconciliados).</summary>
         public void Begin(List<AircraftComponent> components, AircraftType? type)
         {
+            _failedKindsInFlight.Clear();
             _components = components;
             EngineClass = _catalog.ResolveEngineClass(type);
             (_engineLimits, _airframeLimits) = _catalog.ResolveLimits(type?.Model, EngineClass);
@@ -96,6 +103,7 @@ namespace FlightCareer.UI.Services
         public void Reset(bool clearSimState = false)
         {
             _history.Clear();
+            _failedKindsInFlight.Clear();
             _actuator.Reset(clearSimState);
             _turbineActuator.Reset();
             _crashApplied = false;
@@ -161,9 +169,25 @@ namespace FlightCareer.UI.Services
             }
 
             // 3. Panes por desgaste (abaixo de 20%)
-            foreach (var failure in _failures.Evaluate(_components, data, dtHours))
+            if (PartsDriven && PartFailureSource != null)
             {
-                ApplyMode(failure.Kind, failure.Mode, data);
+                var failedKinds = _failedKindsInFlight;
+                var partFailures = PartFailureSource(dtHours, k => ComponentUsage.IsInUse(k, data), failedKinds);
+                foreach (var failure in partFailures)
+                {
+                    PartBreakSink?.Invoke(failure.Part.Id);
+                    string partName = _partCatalog.Get(failure.Part.PartId)?.Name ?? failure.Part.PartId;
+                    string desc = $"{failure.Mode.Description} ({partName} em {failure.HealthAtFailure:F0}%)";
+                    ApplyMode(failure.Kind, failure.Mode, data, desc);
+                    _failedKindsInFlight.Add(failure.Kind);
+                }
+            }
+            else if (_failures != null)
+            {
+                foreach (var failure in _failures.Evaluate(_components, data, dtHours))
+                {
+                    ApplyMode(failure.Kind, failure.Mode, data);
+                }
             }
 
             // 4. Eventos externos (independem da saúde)
@@ -268,7 +292,10 @@ namespace FlightCareer.UI.Services
             }
         }
 
-        private void ApplyMode(ComponentKind kind, FailureModeDefinition mode, SimTelemetry data)
+        private void ApplyMode(ComponentKind kind, FailureModeDefinition mode, SimTelemetry data) =>
+            ApplyMode(kind, mode, data, $"{mode.Description} ({ComponentName(kind)} em {Get(kind)?.Health ?? 0:F0}%)");
+
+        private void ApplyMode(ComponentKind kind, FailureModeDefinition mode, SimTelemetry data, string customDescription)
         {
             if (mode.Damage > 0)
             {
@@ -279,7 +306,7 @@ namespace FlightCareer.UI.Services
             Emit(new FlightFailureRecord
             {
                 Title = $"PANE: {mode.Name.ToUpperInvariant()}",
-                Description = $"{mode.Description} ({ComponentName(kind)} em {Get(kind)?.Health ?? 0:F0}%)",
+                Description = customDescription,
                 IsCritical = mode.Critical,
                 Effect = mode.Effect,
                 Kind = kind,

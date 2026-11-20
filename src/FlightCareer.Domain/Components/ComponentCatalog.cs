@@ -14,6 +14,7 @@ namespace FlightCareer.Domain.Components
     public class ComponentCatalog
     {
         public HazardSettings Hazard { get; set; } = new();
+        public FlightCareer.Domain.Parts.PartBandSettings PartBands { get; set; } = new();
         public VisibilitySettings Visibility { get; set; } = new();
         public LandingSettings Landing { get; set; } = new();
 

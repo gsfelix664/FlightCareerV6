@@ -7,6 +7,7 @@ Arquivos `.simvars` (uma SimVar por linha: `NOME[:índice],unidade`) para carreg
 | `flightcareer-top25.simvars` | Top 25 da pesquisa de variáveis | `docs/plans/sensor-research/variaveis-referencias.md` |
 | `flightcareer-candidatas-desgaste.simvars` | candidatas para desgaste por peça | `docs/plans/validacao-simvars.md` › passo 4 |
 | `flightcareer-candidatas-hud-qualidade.simvars` | candidatas para HUD, qualidade do voo/passageiros, missões, integridade e desgaste (páginas Miscellaneous, Brake/Landing Gear, Control, Electrics, Engine, Flight Model, Fuel, Aircraft Miscellaneous, Radio Navigation e System do SDK) | `variaveis-diversos.md`, `variaveis-freios-trem.md`, `variaveis-comandos.md`, `variaveis-eletrica.md`, `variaveis-motor.md`, `variaveis-modelo-voo.md`, `variaveis-combustivel.md`, `variaveis-aeronave-diversos.md`, `variaveis-radio-navegacao.md`, `variaveis-sistemas.md` |
+| `flightcareer-teste-desempenho.simvars` | as 6 SimVars graváveis do teste de perda de desempenho na faixa amarela | `docs/plans/perda-desempenho-amarelo.md` › 3 |
 | `flightcareer-candidatas-atc.simvars` | candidatas `ATC *` (matrícula, autorizações, pista, gate). **Testar separado e com cuidado:** suspeita (não provada) de que ler `ATC *` derruba o MSFS | `variaveis-radio-navegacao.md` |
 
 Fluxo: Watcher (o nome é aceito e o valor muda?) → SimVarProbe/REC num voo real (matriz) → registro com teste. Cada nova página analisada acrescenta as úteis ao arquivo de candidatas da área.
