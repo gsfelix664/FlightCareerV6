@@ -103,6 +103,7 @@ namespace FlightCareer.UI.Services
         public void Reset(bool clearSimState = false)
         {
             _history.Clear();
+            _failedKindsInFlight.Clear();
             _actuator.Reset(clearSimState);
             _turbineActuator.Reset();
             _crashApplied = false;

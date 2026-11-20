@@ -1222,12 +1222,9 @@ namespace FlightCareer.Application.Simulation
 
                     if (oilParts.Count > 0)
                     {
-                        var oilPlan = PartReplacementPlanner.Plan(oilParts, partCatalog, classKey, simulatedDate, bands: bands);
-                        balance -= oilPlan.TotalCost;
-                        cumPartsCost += oilPlan.TotalCost;
-                        cumMaintCost += oilPlan.TotalCost;
+                        // As peças da troca de óleo estão incluídas no preço do pacote (igual ao Hangar)
                         replacedPartsCount += oilParts.Count;
-                        PartReplacementPlanner.Apply(oilPlan, airframeHours, simulatedDate);
+                        PartReplacementPlanner.ApplyToParts(oilParts, airframeHours, simulatedDate);
                         SyncComponents(components, parts, partCatalog, mapping);
                     }
 
@@ -1280,13 +1277,9 @@ namespace FlightCareer.Application.Simulation
 
                     if (ignParts.Count > 0)
                     {
-                        var ignPlan = PartReplacementPlanner.Plan(ignParts, partCatalog, classKey, simulatedDate, bands: bands);
-                        balance -= ignPlan.TotalCost;
-                        cumPartsCost += ignPlan.TotalCost;
-                        cumMaintCost += ignPlan.TotalCost;
+                        // As peças da revisão de ignição estão incluídas no preço do pacote (igual ao Hangar)
                         replacedPartsCount += ignParts.Count;
-                        remainingDowntimeHours += ignPlan.DowntimeHours;
-                        PartReplacementPlanner.Apply(ignPlan, airframeHours, simulatedDate);
+                        PartReplacementPlanner.ApplyToParts(ignParts, airframeHours, simulatedDate);
                         SyncComponents(components, parts, partCatalog, mapping);
                     }
                 }
@@ -1324,13 +1317,9 @@ namespace FlightCareer.Application.Simulation
 
                 if (overhaulParts.Count > 0)
                 {
-                    var overhaulPlan = PartReplacementPlanner.Plan(overhaulParts, partCatalog, classKey, simulatedDate, bands: bands);
-                    balance -= overhaulPlan.TotalCost;
-                    cumPartsCost += overhaulPlan.TotalCost;
-                    cumMaintCost += overhaulPlan.TotalCost;
+                    // As peças da retífica estão incluídas no preço do pacote (igual ao Hangar)
                     replacedPartsCount += overhaulParts.Count;
-                    remainingDowntimeHours += overhaulPlan.DowntimeHours;
-                    PartReplacementPlanner.Apply(overhaulPlan, airframeHours, simulatedDate);
+                    PartReplacementPlanner.ApplyToParts(overhaulParts, airframeHours, simulatedDate);
                     SyncComponents(components, parts, partCatalog, mapping);
                 }
             }

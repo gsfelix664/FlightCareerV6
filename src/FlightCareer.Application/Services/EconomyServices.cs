@@ -76,24 +76,17 @@ namespace FlightCareer.Application.Services
         /// Verifica se a cobertura do sinistro de perda total foi negada pela seguradora
         /// devido a defeito grave apontado na inspeção anual regulatória e não corrigido.
         /// </summary>
-        public static bool ClaimDenied(PilotAircraft a, out string reason)
+        public static bool ClaimDenied(PilotAircraft a, out string reason) => ClaimDenied(a, null, out reason);
+
+        /// <summary>Igual a <see cref="ClaimDenied(PilotAircraft, out string)"/>; o catálogo, se informado, dá o nome da peça no motivo.</summary>
+        public static bool ClaimDenied(PilotAircraft a, FlightCareer.Domain.Parts.PartCatalog? catalog, out string reason)
         {
             if (a.Parts != null)
             {
                 var defective = a.Parts.FirstOrDefault(p => p.FoundRedAtAnnualAirframeHours.HasValue);
                 if (defective != null)
                 {
-                    string partName = defective.PartId;
-                    try
-                    {
-                        var catalog = FlightCareer.Domain.Parts.PartCatalog.LoadDefault();
-                        partName = catalog.Get(defective.PartId)?.Name ?? defective.PartId;
-                    }
-                    catch
-                    {
-                        // Fallback para PartId
-                    }
-
+                    string partName = catalog?.Get(defective.PartId)?.Name ?? defective.PartId;
                     reason = $"A inspeção anual apontou {partName} e ela não foi trocada";
                     return true;
                 }

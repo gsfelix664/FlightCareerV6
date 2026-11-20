@@ -864,7 +864,7 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            if (FlightCareer.Application.Services.InsuranceService.ClaimDenied(SelectedAircraft.Aircraft, out string denialReason))
+            if (FlightCareer.Application.Services.InsuranceService.ClaimDenied(SelectedAircraft.Aircraft, _partCatalog, out string denialReason))
             {
                 ThemedDialog.Info("Sinistro negado", $"A seguradora negou o pagamento da perda total:\n\n{denialReason}.", DialogKind.Danger);
                 return;

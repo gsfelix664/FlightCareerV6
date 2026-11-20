@@ -2581,3 +2581,7 @@
   - Teste de persistência e schema evolution `Banco_antigo_recebe_novas_colunas_de_aircraft_parts`.
   - Teste de comparação de políticas `Agressivo_PulaRevisoes_TemMaisPanesQueCauteloso` em `CareerProgressionTests.cs`.
   - Build: 0 erros. Suíte completa de testes xUnit: 673/673 aprovados (100%).
+
+## 2026-11-20 - Revisão MANUT-FAIXAS-A e pesquisa de perda de desempenho (Claude)
+- Revisão aprovada com ajustes: o simulador de carreira deixou de cobrar em dobro as peças da troca de óleo, revisão de ignição e retífica (o pacote já inclui as peças, como no Hangar); `InsuranceService.ClaimDenied` recebe o catálogo para o nome da peça (sem `catch` silencioso); `ComponentFlightSession.Reset` limpa as panes do voo.
+- `docs/plans/perda-desempenho-amarelo.md`: o que o SDK permite gravar para a perda de desempenho na faixa amarela e roteiro de teste; primeiro resultado no MSFS (`GENERAL ENG OIL LEAKED PERCENT` parece ser óleo restante — provável bug no vazamento do app). Não testado no MSFS: pane por peça em voo.
