@@ -262,6 +262,8 @@ namespace FlightCareer.UI.Services
                     _parts.Reset();
                     _failures.PartsDriven = false;
                     _failures.PartDamageSink = null;
+                    _failures.PartFailureSource = null;
+                    _failures.PartBreakSink = null;
                     _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
                     return;
                 }
@@ -312,12 +314,16 @@ namespace FlightCareer.UI.Services
                     _failures.Begin(compCopies, dbAircraft.AircraftType);
                     _failures.PartsDriven = _parts.IsActive;
                     _failures.PartDamageSink = _parts.IsActive ? _parts.DamageGroup : null;
+                    _failures.PartFailureSource = _parts.IsActive ? _parts.EvaluateFailures : null;
+                    _failures.PartBreakSink = _parts.IsActive ? _parts.BreakPart : null;
                 }
                 else
                 {
                     _parts.Reset();
                     _failures.PartsDriven = false;
                     _failures.PartDamageSink = null;
+                    _failures.PartFailureSource = null;
+                    _failures.PartBreakSink = null;
 
                     var copies = all.Select(CloneComponent).ToList();
                     LegacyConditionBridge.WriteToLegacy(aircraft, copies);
@@ -330,6 +336,8 @@ namespace FlightCareer.UI.Services
                 _parts.Reset();
                 _failures.PartsDriven = false;
                 _failures.PartDamageSink = null;
+                _failures.PartFailureSource = null;
+                _failures.PartBreakSink = null;
                 _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
             }
         }

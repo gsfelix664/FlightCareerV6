@@ -131,12 +131,7 @@ namespace FlightCareer.Application.Services
                 aircraft.HoursUntilNext100hInspection = Math.Max(0, aircraft.HoursUntilNext100hInspection - hours);
                 aircraft.HoursUntilNext500hInspection = Math.Max(0, aircraft.HoursUntilNext500hInspection - hours);
 
-                if (aircraft.EngineTboRemainingHours <= 0)
-                {
-                    aircraft.IsInterdicted = true;
-                    aircraft.InterdictionReason = "TBO Vencido (Retífica Obrigatória de Motor)";
-                }
-                else if (aircraft.HoursUntilNext100hInspection <= 0)
+                if (aircraft.HoursUntilNext100hInspection <= 0)
                 {
                     aircraft.IsInterdicted = true;
                     aircraft.InterdictionReason = "Inspeção Anual Vencida";

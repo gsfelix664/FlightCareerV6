@@ -2549,3 +2549,35 @@
 - **Testes**:
   - Novos testes unitários `Progression_BotVoaHorasPorDiaAoLongoDoTempo` e `Progression_BotsComSementesDiferentes` em `CareerProgressionTests.cs`.
   - Build 0 erros, `dotnet test` 655/655 aprovados (100 %), `fuzz --aircraft all --runs 5` 230/230 voos aprovados (100 %) em 46 aeronaves.
+
+## 2026-11-20 - MANUT-FAIXAS-A: Manutenção por faixas de saúde, panes por peça e novo seguro (Gemini)
+- **Faixas de saúde por peça (`PartHealthBands.cs`, `component_catalog.json`)**:
+  - Classificação das peças em três faixas de saúde: Verde [100, 40], Amarela [40, 20) e Vermelha [20, 0].
+  - Desgaste acelerado progressivo na faixa amarela (`PartWearEngine`): fator `1 + ((40 - h) / 40)^2` (até 2× em 20%) aplicado ao desgaste natural e lâmpadas acesas antes do multiplicador de estresse.
+  - Taxa base de risco de falhas por peça na faixa vermelha (`HazardPerHour`): zero acima de 20%, subindo para 2,0 falhas/hora em 0% de saúde.
+- **Sorteio e aplicação de panes por peça (`PartFailureEngine.cs`, `ComponentFlightSession.cs`, `FlightMonitor.cs`)**:
+  - Em aeronaves com peças (`PartsDriven = true`), as panes são avaliadas por peça via `PartFailureEngine.Evaluate`, respeitando no máximo uma pane por `ComponentKind` por voo.
+  - Reutilização do sorteio de modo ponderado por peso (`FailureEngine.PickMode`) e roteamento para quebra da peça (`PartBreakSink`), acionando os atuadores do simulador (`ApplyMode`) com identificação nominal da peça e saúde anterior.
+- **Planejador de manutenção e inspeções (`PartReplacementPlanner.cs`, `PartInspectionFlags.cs`, `PartKnowledge.cs`)**:
+  - `PartReplacementPlanner.Plan(selectedParts)` precifica estritamente as peças fornecidas.
+  - `SelectRecommended` seleciona apenas peças quebradas ou na faixa vermelha (< 20%) para o "Reparar tudo" do Hangar.
+  - `PartInspectionFlags.Evaluate` sinaliza exclusivamente pela faixa de saúde (`Suspect` para amarela, `Broken` para vermelha ou quebrada). Vida vencida não sinaliza e vira anotação descritiva informativa (`LifeNote`).
+  - Precisão do walkaround ajustada para `0.0` (exibe valor exato no catálogo e Hangar).
+  - Inspeção anual (25 h) revela todas as peças (`PartKnowledge.Reveal`), registra defeitos não corrigidos em `FoundRedAtAnnualAirframeHours` (`PartKnowledge.MarkAnnualFindings`), zera o contador de 25 h e limpa interdição. **Não troca óleo** nem zera o contador de 12 h.
+- **Fim da interdição por TBO / Óleo / Ignição (`FlightService.cs`, `FerryFlightViewModel.cs`, `HangarViewModel.cs`)**:
+  - Apenas a Inspeção Anual vencida interdita a aeronave no `FlightService` e no `FerryFlightViewModel`. TBO, óleo e ignição vencidos não bloqueiam operações nem translado.
+  - `HangarViewModel.ClearInterdictionIfResolved` exige apenas anual em dia. Aeronaves legadas interditadas por TBO são desinterditadas no carregamento da frota.
+- **Seguro aeronáutico mais barato e condicionado (`EconomyServices.cs`, `HangarViewModel.cs`)**:
+  - Prêmio anual ajustado de 12% para 2,5% ao ano (`MONTHLY_RATE = 0.025 / 12`), piso mínimo reduzido de $250 para $50/mês.
+  - Sinistro de perda total negado (`InsuranceService.ClaimDenied`) caso a aeronave tenha voado com defeito apontado na inspeção anual e não corrigido (`FoundRedAtAnnualAirframeHours != null`).
+- **Simulador de progressão de carreira (`CareerProgressionSimulator.cs`)**:
+  - Desgaste por faixas e avaliação de panes por peça (`PartFailureEngine`) nos voos locais e translados.
+  - Políticas de manutenção adaptadas: `cauteloso` faz walkaround antes de cada voo e troca peças em faixas amarela e vermelha; `equilibrado` troca peças vermelhas e quebradas e respeita inspeções regulatórias; `agressivo` pula revisões preventivas até a interdição por anual e só troca peças quebradas.
+  - Validação estatística: política agressiva registra taxa de panes/100h comprovadamente superior à política cautelosa na mesma semente.
+- **Persistência (`AircraftPart.cs`, `AppDbContext.cs`, `ComponentPersistenceTests.cs`)**:
+  - Adicionadas colunas `KnownHealth`, `KnownAtAirframeHours` e `FoundRedAtAnnualAirframeHours` à tabela `AircraftParts` de forma idempotente em `EnsureSchemaUpdatedAsync`.
+- **Testes e Verificação**:
+  - Nova suíte `PartHealthBandsAndFailuresTests.cs` (16 testes cobrindo faixas, desgaste acelerado, hazard, isolamento de panes, planner, flags, inspeção anual, seguro e interdições de serviço).
+  - Teste de persistência e schema evolution `Banco_antigo_recebe_novas_colunas_de_aircraft_parts`.
+  - Teste de comparação de políticas `Agressivo_PulaRevisoes_TemMaisPanesQueCauteloso` em `CareerProgressionTests.cs`.
+  - Build: 0 erros. Suíte completa de testes xUnit: 673/673 aprovados (100%).

@@ -66,7 +66,7 @@ namespace FlightCareer.Tests.Components
             Assert.True(HealthVisibility.RecordWalkaround(tires, Catalog.Get(ComponentKind.Tires), 100.0, random, Catalog.Visibility));
             Assert.False(HealthVisibility.RecordWalkaround(engine, Catalog.Get(ComponentKind.Engine), 100.0, random, Catalog.Visibility));
 
-            Assert.Equal(10.0, HealthVisibility.HalfWidth(tires, 100.0, Catalog.Visibility), 6);
+            Assert.Equal(Catalog.Visibility.WalkaroundHalfWidth, HealthVisibility.HalfWidth(tires, 100.0, Catalog.Visibility), 6);
             Assert.Equal(25.0, HealthVisibility.HalfWidth(engine, 100.0, Catalog.Visibility), 6);
         }
 

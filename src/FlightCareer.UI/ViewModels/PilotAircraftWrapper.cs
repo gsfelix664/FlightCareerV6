@@ -260,7 +260,7 @@ namespace FlightCareer.UI.ViewModels
                     ? $"{def.Name} (motor {part.EngineIndex})"
                     : def.Name;
 
-                var eval = PartInspectionFlags.Evaluate(part, def, CareerClock);
+                var eval = PartInspectionFlags.Evaluate(part, def, CareerClock, _catalog.PartBands);
                 string reason = !string.IsNullOrEmpty(eval.Reason)
                     ? eval.Reason
                     : (part.Flag == PartFlag.Broken ? "Quebrada" : "Atenção recomendada");
@@ -327,7 +327,8 @@ namespace FlightCareer.UI.ViewModels
             {
                 if (partsByKind.TryGetValue(row.Kind, out var groupParts))
                 {
-                    var plan = PartReplacementPlanner.Plan(groupParts, _partCatalog, _classKey, CareerClock);
+                    var recommended = PartReplacementPlanner.SelectRecommended(groupParts, _partCatalog, _catalog.PartBands);
+                    var plan = PartReplacementPlanner.Plan(recommended, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
                     row.SetReplacementPlan(plan);
                 }
                 else

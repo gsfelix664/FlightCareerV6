@@ -95,6 +95,14 @@ namespace FlightCareer.UI.ViewModels
                 }
                 if (LegacyConditionBridge.ReconcileFromLegacy(aircraft, aircraft.Components, _random, _catalog.Visibility) > 0) changed = true;
                 LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
+
+                if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0 &&
+                    (aircraft.InterdictionReason?.Contains("TBO", StringComparison.OrdinalIgnoreCase) == true))
+                {
+                    aircraft.IsInterdicted = false;
+                    aircraft.InterdictionReason = string.Empty;
+                    changed = true;
+                }
             }
             if (changed || context.ChangeTracker.HasChanges()) await context.SaveChangesAsync();
 
@@ -335,7 +343,7 @@ namespace FlightCareer.UI.ViewModels
 
         private static void ClearInterdictionIfResolved(PilotAircraft aircraft)
         {
-            if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0 && aircraft.EngineTboRemainingHours > 0)
+            if (aircraft.IsInterdicted && aircraft.HoursUntilNext100hInspection > 0)
             {
                 aircraft.IsInterdicted = false;
                 aircraft.InterdictionReason = string.Empty;
@@ -541,13 +549,15 @@ namespace FlightCareer.UI.ViewModels
             if (aircraft == null) return;
 
             int narrowed = ComponentMaintenance.Walkaround(aircraft.Components, _catalog, aircraft.CurrentAirframeHours, _random);
+            PartKnowledge.Reveal(aircraft.Parts, def => def.VisibleOnWalkaround, _partCatalog, aircraft.CurrentAirframeHours);
             int flagged = PartInspectionFlags.ApplyInspection(
                 aircraft.Parts,
                 _partCatalog,
                 def => def.VisibleOnWalkaround,
                 PartFlagSource.Walkaround,
                 aircraft.CurrentAirframeHours,
-                aircraft.Pilot?.CareerClockUtc ?? _careerClock);
+                aircraft.Pilot?.CareerClockUtc ?? _careerClock,
+                _catalog.PartBands);
 
             await context.SaveChangesAsync();
             await LoadFleetAsync(aircraftId);
@@ -601,13 +611,19 @@ namespace FlightCareer.UI.ViewModels
                     ClearInterdictionIfResolved(aircraft);
 
                     var mappingInspection = PartComponentMapping.CreateDefault();
+                    PartKnowledge.Reveal(
+                        aircraft.Parts,
+                        def => mappingInspection.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
+                        _partCatalog,
+                        Hours(aircraft));
                     flagged = PartInspectionFlags.ApplyInspection(
                         aircraft.Parts,
                         _partCatalog,
                         def => mappingInspection.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock,
+                        _catalog.PartBands);
                 },
                 successMessage: "Troca de óleo concluída.",
                 getFlaggedCount: () => flagged,
@@ -621,33 +637,17 @@ namespace FlightCareer.UI.ViewModels
             int flagged = 0;
             await RunPaidServiceAsync(
                 "Inspeção anual (25 h)",
-                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão, o óleo é trocado e os contadores de inspeção anual (25 h) e troca de óleo (12 h) são zerados. Reparos encontrados são orçados à parte.",
+                "Inspeção regulatória completa: todos os componentes têm a saúde medida com exatidão e o contador da inspeção anual (25 h) é zerado. Não troca peças; reparos são orçados à parte.",
                 SelectedAircraft.Cost100hInspection,
                 "INSPEÇÃO ANUAL (25 H)",
                 (aircraft, components) =>
                 {
-                    if (PartComponentBridge.HasParts(aircraft))
-                    {
-                        var mapping = PartComponentMapping.CreateDefault();
-                        var oilParts = aircraft.Parts.Where(p =>
-                        {
-                            var def = _partCatalog.Get(p.PartId);
-                            return def != null && mapping.ResolveComponentKind(def.Group) == ComponentKind.Oil;
-                        }).ToList();
-
-                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
-                        PartReplacementPlanner.ApplyToParts(oilParts, Hours(aircraft), now);
-                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
-                    }
-                    else
-                    {
-                        RepairKind(aircraft, components, ComponentKind.Oil);
-                    }
-
                     ComponentMaintenance.Inspect(components, Hours(aircraft), _random, _catalog.Visibility);
                     aircraft.HoursUntilNext100hInspection = MaintenancePricing.AnnualInspectionIntervalHours;
-                    aircraft.HoursUntilNext50hInspection = MaintenancePricing.OilChangeIntervalHours;
                     ClearInterdictionIfResolved(aircraft);
+
+                    PartKnowledge.Reveal(aircraft.Parts, _ => true, _partCatalog, Hours(aircraft));
+                    PartKnowledge.MarkAnnualFindings(aircraft.Parts, _partCatalog, _catalog.PartBands, Hours(aircraft));
 
                     flagged = PartInspectionFlags.ApplyInspection(
                         aircraft.Parts,
@@ -655,7 +655,8 @@ namespace FlightCareer.UI.ViewModels
                         _ => true,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock,
+                        _catalog.PartBands);
                 },
                 successMessage: "Inspeção anual concluída. Veja as barras: agora todos os valores são exatos.",
                 getFlaggedCount: () => flagged,
@@ -694,13 +695,20 @@ namespace FlightCareer.UI.ViewModels
                         ApplyRegulatoryReset(aircraft, ComponentKind.Ignition);
                     }
 
+                    PartKnowledge.Reveal(
+                        aircraft.Parts,
+                        def => mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition,
+                        _partCatalog,
+                        Hours(aircraft));
+
                     flagged = PartInspectionFlags.ApplyInspection(
                         aircraft.Parts,
                         _partCatalog,
                         def => mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition,
                         PartFlagSource.Inspection,
                         Hours(aircraft),
-                        aircraft.Pilot?.CareerClockUtc ?? _careerClock);
+                        aircraft.Pilot?.CareerClockUtc ?? _careerClock,
+                        _catalog.PartBands);
                 },
                 successMessage: "Revisão de ignição concluída.",
                 getFlaggedCount: () => flagged,
@@ -741,6 +749,13 @@ namespace FlightCareer.UI.ViewModels
                         RepairKind(aircraft, components, ComponentKind.Oil);
                         ApplyRegulatoryReset(aircraft, ComponentKind.Engine);
                     }
+
+                    var mappingOverhaul = PartComponentMapping.CreateDefault();
+                    PartKnowledge.Reveal(
+                        aircraft.Parts,
+                        def => mappingOverhaul.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.HotSection or ComponentKind.Oil,
+                        _partCatalog,
+                        Hours(aircraft));
 
                     PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, new HashSet<ComponentKind>
                     {
@@ -846,6 +861,12 @@ namespace FlightCareer.UI.ViewModels
             if (!SelectedAircraft.IsInsured)
             {
                 ThemedDialog.Info("Sem cobertura", "Esta aeronave não estava segurada no momento do acidente.", DialogKind.Danger);
+                return;
+            }
+
+            if (FlightCareer.Application.Services.InsuranceService.ClaimDenied(SelectedAircraft.Aircraft, out string denialReason))
+            {
+                ThemedDialog.Info("Sinistro negado", $"A seguradora negou o pagamento da perda total:\n\n{denialReason}.", DialogKind.Danger);
                 return;
             }
 

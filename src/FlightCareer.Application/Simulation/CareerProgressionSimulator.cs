@@ -210,6 +210,7 @@ namespace FlightCareer.Application.Simulation
                         var mapping = PartComponentMapping.CreateDefault();
                         (var features, int engineCount, var engineClass) = ResolveAircraftConfiguration(currentAircraftType, _componentCatalog, _limitResolver);
                         var failureEngine = new FailureEngine(_componentCatalog, engineClass, rnd);
+                        var partFailureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, rnd, mapping);
                         var components = _componentCatalog.Components
                             .Where(c => c.AppliesTo.Contains(engineClass))
                             .Select(c => new AircraftComponent
@@ -429,15 +430,19 @@ namespace FlightCareer.Application.Simulation
 
                                             totalXP += (int)(localDuration * 60);
 
-                                            ApplyFlightWear(parts, _partCatalog, localDuration);
+                                            ApplyFlightWear(parts, _partCatalog, localDuration, _componentCatalog.PartBands);
                                             SyncComponents(components, parts, _partCatalog, mapping);
 
-                                            var localFailures = failureEngine.Evaluate(components, localDuration);
+                                            partFailureEngine.Reset();
+                                            var localFailures = partFailureEngine.Evaluate(parts, localDuration, _ => true, Array.Empty<ComponentKind>());
                                             if (localFailures.Count > 0)
                                             {
                                                 failureEvents++;
                                                 foreach (var fail in localFailures)
                                                 {
+                                                    fail.Part.Health = 0.0;
+                                                    fail.Part.IsBroken = true;
+                                                    fail.Part.BrokenAtUtc = simulatedDate;
                                                     ApplyFailureDamage(fail.Kind, fail.Mode.Damage, parts, _partCatalog, mapping);
                                                 }
                                                 SyncComponents(components, parts, _partCatalog, mapping);
@@ -482,15 +487,19 @@ namespace FlightCareer.Application.Simulation
                                         int baseExpFerry = (int)(ferryDuration * 40);
                                         totalXP += baseExpFerry;
 
-                                        ApplyFlightWear(parts, _partCatalog, ferryDuration);
+                                        ApplyFlightWear(parts, _partCatalog, ferryDuration, _componentCatalog.PartBands);
                                         SyncComponents(components, parts, _partCatalog, mapping);
 
-                                        var ferryFailures = failureEngine.Evaluate(components, ferryDuration);
+                                        partFailureEngine.Reset();
+                                        var ferryFailures = partFailureEngine.Evaluate(parts, ferryDuration, _ => true, Array.Empty<ComponentKind>());
                                         if (ferryFailures.Count > 0)
                                         {
                                             failureEvents++;
                                             foreach (var fail in ferryFailures)
                                             {
+                                                fail.Part.Health = 0.0;
+                                                fail.Part.IsBroken = true;
+                                                fail.Part.BrokenAtUtc = simulatedDate;
                                                 ApplyFailureDamage(fail.Kind, fail.Mode.Damage, parts, _partCatalog, mapping);
                                             }
                                             SyncComponents(components, parts, _partCatalog, mapping);
@@ -522,6 +531,35 @@ namespace FlightCareer.Application.Simulation
 
                                     double flightDuration = Math.Max(0.2, (chosen.DistanceNM / speed) + 0.25);
                                     var destAirport = airportLookup[chosen.DestinationICAO];
+
+                                    // Walkaround antes de cada voo (política cautelosa troca visíveis amarelas e vermelhas)
+                                    if (policy.Equals("cauteloso", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        PartKnowledge.Reveal(parts, def => def.VisibleOnWalkaround, _partCatalog, airframeHours);
+                                        var walkaroundBands = _componentCatalog.PartBands;
+                                        var toFix = parts.Where(p =>
+                                        {
+                                            var def = _partCatalog.Get(p.PartId);
+                                            return def != null && def.VisibleOnWalkaround &&
+                                                   (p.IsBroken || (p.KnownHealth.HasValue && p.KnownHealth.Value < walkaroundBands.YellowBelowPct));
+                                        }).ToList();
+
+                                        if (toFix.Count > 0)
+                                        {
+                                            var plan = PartReplacementPlanner.Plan(toFix, _partCatalog, currentClassKey, simulatedDate, bands: walkaroundBands);
+                                            if (plan.Items.Count > 0)
+                                            {
+                                                balance -= plan.TotalCost;
+                                                cumPartsCost += plan.TotalCost;
+                                                cumMaintCost += plan.TotalCost;
+                                                replacedPartsCount += plan.Items.Count;
+                                                maintEvents++;
+                                                remainingDowntimeHours += plan.DowntimeHours;
+                                                PartReplacementPlanner.Apply(plan, airframeHours, simulatedDate);
+                                                SyncComponents(components, parts, _partCatalog, mapping);
+                                            }
+                                        }
+                                    }
 
                                     // Custos operacionais do voo
                                     double fuelUsed = currentAircraftType.FuelConsumptionGPH * flightDuration;
@@ -569,36 +607,40 @@ namespace FlightCareer.Application.Simulation
                                     totalXP += baseXP + tierBonusXP;
 
                                     // 1. Desgaste natural das peças neste voo (--fast)
-                                    ApplyFlightWear(parts, _partCatalog, flightDuration);
+                                    ApplyFlightWear(parts, _partCatalog, flightDuration, _componentCatalog.PartBands);
 
                                     // 2. Barra dos componentes = agregado das peças antes de FailureEngine.Evaluate
                                     SyncComponents(components, parts, _partCatalog, mapping);
 
-                                    // 3. Avaliação de panes via FailureEngine
-                                    var failures = failureEngine.Evaluate(components, flightDuration);
+                                    // 3. Avaliação de panes via PartFailureEngine
+                                    partFailureEngine.Reset();
+                                    var failures = partFailureEngine.Evaluate(parts, flightDuration, _ => true, Array.Empty<ComponentKind>());
                                     bool hadGroundingFailure = false;
                                     if (failures.Count > 0)
                                     {
                                         failureEvents++;
                                         foreach (var fail in failures)
                                         {
+                                            fail.Part.Health = 0.0;
+                                            fail.Part.IsBroken = true;
+                                            fail.Part.BrokenAtUtc = simulatedDate;
+
                                             // Roteia dano do modo de falha para as peças do grupo (DamageGroup)
                                             ApplyFailureDamage(fail.Kind, fail.Mode.Damage, parts, _partCatalog, mapping);
+
+                                            string? defectCode = DefectCatalog.CodeFor(fail.Mode.Effect, fail.Kind, critical: true);
+                                            if (!string.IsNullOrEmpty(defectCode))
+                                            {
+                                                var defectSpec = DefectCatalog.Get(defectCode);
+                                                if (defectSpec.IsGrounding)
+                                                {
+                                                    hadGroundingFailure = true;
+                                                }
+                                            }
                                         }
 
                                         // Sincroniza barras após o dano
                                         SyncComponents(components, parts, _partCatalog, mapping);
-
-                                        var firstFail = failures[0];
-                                        string? defectCode = DefectCatalog.CodeFor(firstFail.Mode.Effect, firstFail.Kind, critical: true);
-                                        if (!string.IsNullOrEmpty(defectCode))
-                                        {
-                                            var defectSpec = DefectCatalog.Get(defectCode);
-                                            if (defectSpec.IsGrounding)
-                                            {
-                                                hadGroundingFailure = true;
-                                            }
-                                        }
                                     }
 
                                     // Checa também se peças NO-GO quebraram
@@ -610,16 +652,10 @@ namespace FlightCareer.Application.Simulation
                                     if (hadGroundingFailure)
                                     {
                                         // Reparo de interdição via substituição de peças NO-GO ou quebradas
-                                        var partsToFix = parts.Where(p => p.IsBroken || (_partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health < 20.0)).ToList();
-                                        if (partsToFix.Count == 0 && failures.Count > 0)
-                                        {
-                                            var firstFail = failures[0];
-                                            partsToFix = parts.Where(p => mapping.ResolveComponentKind(_partCatalog.Get(p.PartId)?.Group ?? "") == firstFail.Kind && p.Health < 50.0).ToList();
-                                        }
-
+                                        var partsToFix = parts.Where(p => p.IsBroken || (_partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health < _componentCatalog.PartBands.RedBelowPct)).ToList();
                                         if (partsToFix.Count > 0)
                                         {
-                                            var fixPlan = PartReplacementPlanner.Plan(partsToFix, _partCatalog, currentClassKey, simulatedDate);
+                                            var fixPlan = PartReplacementPlanner.Plan(partsToFix, _partCatalog, currentClassKey, simulatedDate, bands: _componentCatalog.PartBands);
                                             if (balance < fixPlan.TotalCost && balance < 0)
                                             {
                                                 isBankrupt = true;
@@ -705,7 +741,8 @@ namespace FlightCareer.Application.Simulation
                                 simulatedDate,
                                 day,
                                 ref isBankrupt,
-                                ref bankruptcyDay);
+                                ref bankruptcyDay,
+                                _componentCatalog.PartBands);
 
                             if (isBankrupt)
                             {
@@ -765,6 +802,7 @@ namespace FlightCareer.Application.Simulation
                                 parts,
                                 ref components,
                                 ref failureEngine,
+                                ref partFailureEngine,
                                 ref engineClass,
                                 _partCatalog,
                                 _componentCatalog,
@@ -940,8 +978,10 @@ namespace FlightCareer.Application.Simulation
         private static void ApplyFlightWear(
             IReadOnlyList<AircraftPart> parts,
             PartCatalog catalog,
-            double flightDuration)
+            double flightDuration,
+            PartBandSettings? bands = null)
         {
+            bands ??= new PartBandSettings();
             foreach (var part in parts)
             {
                 if (part.IsBroken) continue;
@@ -972,23 +1012,26 @@ namespace FlightCareer.Application.Simulation
                     }
                 }
 
+                double wearMult = PartHealthBands.LowHealthWearMultiplier(part.Health, bands);
+
                 if (def.LifeHours > 0)
                 {
                     double effectiveHours = flightDuration * usageFraction;
                     part.HoursSinceReplacement += effectiveHours;
-                    double wear = (70.0 / def.LifeHours) * effectiveHours * 1.15;
+                    double wear = (70.0 / def.LifeHours) * effectiveHours * 1.15 * wearMult;
                     part.Health = Math.Clamp(part.Health - wear, 0.0, 100.0);
                 }
                 else if (def.LifeCycles.HasValue && def.LifeCycles.Value > 0)
                 {
                     part.CyclesSinceReplacement += 1;
-                    double wear = 70.0 / def.LifeCycles.Value;
+                    double wear = (70.0 / def.LifeCycles.Value) * wearMult;
                     part.Health = Math.Clamp(part.Health - wear, 0.0, 100.0);
                 }
 
                 if (part.Health <= 0.0)
                 {
                     part.IsBroken = true;
+                    part.Health = 0.0;
                 }
             }
         }
@@ -1040,14 +1083,16 @@ namespace FlightCareer.Application.Simulation
             DateTime simulatedDate,
             int day,
             ref bool isBankrupt,
-            ref int? bankruptcyDay)
+            ref int? bankruptcyDay,
+            PartBandSettings? bands = null)
         {
+            bands ??= new PartBandSettings();
             bool isPiston = engineClass == EngineClass.Piston;
 
             if (policy.Equals("agressivo", StringComparison.OrdinalIgnoreCase))
             {
                 // Política Agressiva:
-                // 1. Se venceu a inspeção anual (25h / 100h regulatória), paga a taxa mandatória da inspeção
+                // 1. Só a inspeção anual (25h / 100h regulatória mandatória): paga taxa e inspeciona
                 if (hoursUntil100h <= 0)
                 {
                     double cost = MaintenancePricing.Cost100hInspection;
@@ -1062,15 +1107,20 @@ namespace FlightCareer.Application.Simulation
                     maintEvents++;
                     hoursUntil100h = MaintenancePricing.AnnualInspectionIntervalHours;
                     remainingDowntimeHours += CareerClock.Inspection100hDowntimeHours;
+
+                    // Anual SÓ inspeciona: revela todas as peças e marca achados vermelhos/quebrados
+                    PartKnowledge.Reveal(parts, _ => true, partCatalog, airframeHours);
+                    PartKnowledge.MarkAnnualFindings(parts, partCatalog, bands, airframeHours);
+                    // Agressivo NÃO troca voluntariamente as peças reveladas nem troca óleo
                 }
 
-                // 2. Quando o avião fica parado, só troca o que está quebrado ou é NO-GO
-                if (remainingDowntimeHours > 0 || parts.Any(p => p.IsBroken || (partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health <= 0.0)))
+                // 2. Quando o avião fica parado por quebra, só troca o que está quebrado ou é NO-GO
+                if (remainingDowntimeHours > 0 || parts.Any(p => p.IsBroken || (partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health < bands.RedBelowPct)))
                 {
-                    var brokenOrNoGo = parts.Where(p => p.IsBroken || (partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health <= 0.0)).ToList();
+                    var brokenOrNoGo = parts.Where(p => p.IsBroken || (partCatalog.Get(p.PartId)?.BlocksFlightWhenBroken == true && p.Health < bands.RedBelowPct)).ToList();
                     if (brokenOrNoGo.Count > 0)
                     {
-                        var plan = PartReplacementPlanner.Plan(brokenOrNoGo, partCatalog, classKey, simulatedDate);
+                        var plan = PartReplacementPlanner.Plan(brokenOrNoGo, partCatalog, classKey, simulatedDate, bands: bands);
                         if (plan.Items.Count > 0)
                         {
                             if (balance < plan.TotalCost && balance < 0)
@@ -1094,7 +1144,9 @@ namespace FlightCareer.Application.Simulation
             }
 
             // Políticas Cauteloso e Equilibrado:
-            // 1. Inspeção anual (100h / 25h): aplica o plano completo (todos os grupos) e zera contadores
+            bool isCauteloso = policy.Equals("cauteloso", StringComparison.OrdinalIgnoreCase);
+
+            // 1. Inspeção anual (100h / 25h): SÓ inspeciona (não troca óleo nem zera contador de 12h)
             if (hoursUntil100h <= 0)
             {
                 double cost = MaintenancePricing.Cost100hInspection;
@@ -1108,30 +1160,45 @@ namespace FlightCareer.Application.Simulation
                 cumMaintCost += cost;
                 maintEvents++;
                 hoursUntil100h = MaintenancePricing.AnnualInspectionIntervalHours;
-                hoursUntil50h = MaintenancePricing.OilChangeIntervalHours;
                 remainingDowntimeHours += CareerClock.Inspection100hDowntimeHours;
 
-                // Plano completo de todas as peças (substitui peças < 80% ou com flags ou quebradas)
-                var fullPlan = PartReplacementPlanner.Plan(parts, partCatalog, classKey, simulatedDate);
-                if (fullPlan.Items.Count > 0)
+                // Revela todas as peças e marca achados da anual
+                PartKnowledge.Reveal(parts, _ => true, partCatalog, airframeHours);
+                PartKnowledge.MarkAnnualFindings(parts, partCatalog, bands, airframeHours);
+
+                // Cauteloso: troca amarelas + vermelhas reveladas. Equilibrado: troca só vermelhas reveladas.
+                var toFix = parts.Where(p =>
                 {
-                    if (balance < fullPlan.TotalCost && balance < 0)
+                    if (p.IsBroken) return true;
+                    if (!p.KnownHealth.HasValue) return false;
+                    return isCauteloso
+                        ? p.KnownHealth.Value < bands.YellowBelowPct
+                        : p.KnownHealth.Value < bands.RedBelowPct;
+                }).ToList();
+
+                if (toFix.Count > 0)
+                {
+                    var plan = PartReplacementPlanner.Plan(toFix, partCatalog, classKey, simulatedDate, bands: bands);
+                    if (plan.Items.Count > 0)
                     {
-                        isBankrupt = true;
-                        bankruptcyDay = day;
-                        return;
+                        if (balance < plan.TotalCost && balance < 0)
+                        {
+                            isBankrupt = true;
+                            bankruptcyDay = day;
+                            return;
+                        }
+                        balance -= plan.TotalCost;
+                        cumPartsCost += plan.TotalCost;
+                        cumMaintCost += plan.TotalCost;
+                        replacedPartsCount += plan.Items.Count;
+                        remainingDowntimeHours += plan.DowntimeHours;
+                        PartReplacementPlanner.Apply(plan, airframeHours, simulatedDate);
+                        SyncComponents(components, parts, partCatalog, mapping);
                     }
-                    balance -= fullPlan.TotalCost;
-                    cumPartsCost += fullPlan.TotalCost;
-                    cumMaintCost += fullPlan.TotalCost;
-                    replacedPartsCount += fullPlan.Items.Count;
-                    remainingDowntimeHours += fullPlan.DowntimeHours;
-                    PartReplacementPlanner.Apply(fullPlan, airframeHours, simulatedDate);
-                    SyncComponents(components, parts, partCatalog, mapping);
                 }
             }
 
-            // 2. Troca de óleo (50h / 12h): troca óleo e filtro, como no Hangar
+            // 2. Troca de óleo (50h / 12h): troca óleo e filtro
             if (hoursUntil50h <= 0)
             {
                 double serviceCost = MaintenancePricing.Cost50hInspection;
@@ -1143,6 +1210,9 @@ namespace FlightCareer.Application.Simulation
                     hoursUntil50h = MaintenancePricing.OilChangeIntervalHours;
                     remainingDowntimeHours += CareerClock.Inspection50hDowntimeHours;
 
+                    // Revela motor e óleo
+                    PartKnowledge.Reveal(parts, def => mapping.ResolveComponentKind(def.Group) is ComponentKind.Engine or ComponentKind.Oil, partCatalog, airframeHours);
+
                     var oilParts = parts.Where(p =>
                     {
                         var def = partCatalog.Get(p.PartId);
@@ -1152,20 +1222,38 @@ namespace FlightCareer.Application.Simulation
 
                     if (oilParts.Count > 0)
                     {
-                        double classMult = AircraftEconomyClass.GetPartPriceMultiplier(classKey);
-                        double partsPriceSum = 0.0;
-                        foreach (var op in oilParts)
-                        {
-                            var def = partCatalog.Get(op.PartId)!;
-                            partsPriceSum += PartPricing.CalculatePartPrice(def, classMult) + PartPricing.CalculateLaborCost(def);
-                        }
-
-                        balance -= partsPriceSum;
-                        cumPartsCost += partsPriceSum;
-                        cumMaintCost += partsPriceSum;
+                        var oilPlan = PartReplacementPlanner.Plan(oilParts, partCatalog, classKey, simulatedDate, bands: bands);
+                        balance -= oilPlan.TotalCost;
+                        cumPartsCost += oilPlan.TotalCost;
+                        cumMaintCost += oilPlan.TotalCost;
                         replacedPartsCount += oilParts.Count;
-                        PartReplacementPlanner.ApplyToParts(oilParts, airframeHours, simulatedDate);
+                        PartReplacementPlanner.Apply(oilPlan, airframeHours, simulatedDate);
                         SyncComponents(components, parts, partCatalog, mapping);
+                    }
+
+                    // Se após a revisão de óleo houver peças reveladas de motor/óleo que precisam de troca:
+                    var oilGroupFix = parts.Where(p =>
+                    {
+                        var def = partCatalog.Get(p.PartId);
+                        if (def == null || mapping.ResolveComponentKind(def.Group) is not (ComponentKind.Engine or ComponentKind.Oil)) return false;
+                        if (p.IsBroken) return true;
+                        if (!p.KnownHealth.HasValue) return false;
+                        return isCauteloso ? p.KnownHealth.Value < bands.YellowBelowPct : p.KnownHealth.Value < bands.RedBelowPct;
+                    }).ToList();
+
+                    if (oilGroupFix.Count > 0)
+                    {
+                        var extraPlan = PartReplacementPlanner.Plan(oilGroupFix, partCatalog, classKey, simulatedDate, bands: bands);
+                        if (extraPlan.Items.Count > 0)
+                        {
+                            balance -= extraPlan.TotalCost;
+                            cumPartsCost += extraPlan.TotalCost;
+                            cumMaintCost += extraPlan.TotalCost;
+                            replacedPartsCount += extraPlan.Items.Count;
+                            remainingDowntimeHours += extraPlan.DowntimeHours;
+                            PartReplacementPlanner.Apply(extraPlan, airframeHours, simulatedDate);
+                            SyncComponents(components, parts, partCatalog, mapping);
+                        }
                     }
                 }
             }
@@ -1182,6 +1270,8 @@ namespace FlightCareer.Application.Simulation
                     hoursUntil500h = MaintenancePricing.IgnitionRevisionIntervalHours;
                     remainingDowntimeHours += CareerClock.Inspection500hDowntimeHours;
 
+                    PartKnowledge.Reveal(parts, def => mapping.ResolveComponentKind(def.Group) == ComponentKind.Ignition, partCatalog, airframeHours);
+
                     var ignParts = parts.Where(p =>
                     {
                         var def = partCatalog.Get(p.PartId);
@@ -1190,8 +1280,13 @@ namespace FlightCareer.Application.Simulation
 
                     if (ignParts.Count > 0)
                     {
-                        PartReplacementPlanner.ApplyToParts(ignParts, airframeHours, simulatedDate);
+                        var ignPlan = PartReplacementPlanner.Plan(ignParts, partCatalog, classKey, simulatedDate, bands: bands);
+                        balance -= ignPlan.TotalCost;
+                        cumPartsCost += ignPlan.TotalCost;
+                        cumMaintCost += ignPlan.TotalCost;
                         replacedPartsCount += ignParts.Count;
+                        remainingDowntimeHours += ignPlan.DowntimeHours;
+                        PartReplacementPlanner.Apply(ignPlan, airframeHours, simulatedDate);
                         SyncComponents(components, parts, partCatalog, mapping);
                     }
                 }
@@ -1213,18 +1308,29 @@ namespace FlightCareer.Application.Simulation
                 tboRemaining = MaintenancePricing.TboHoursFor(EngineClassResolver.FromAircraftType(aircraftType));
                 remainingDowntimeHours += CareerClock.OverhaulDowntimeHours;
 
+                PartKnowledge.Reveal(parts, def =>
+                {
+                    var k = mapping.ResolveComponentKind(def.Group);
+                    return k is ComponentKind.Engine or ComponentKind.HotSection or ComponentKind.Oil;
+                }, partCatalog, airframeHours);
+
                 var overhaulParts = parts.Where(p =>
                 {
                     var def = partCatalog.Get(p.PartId);
                     if (def == null) return false;
                     var kind = mapping.ResolveComponentKind(def.Group);
-                    return kind is ComponentKind.Engine or ComponentKind.Oil or ComponentKind.Ignition or ComponentKind.HotSection;
+                    return kind is ComponentKind.Engine or ComponentKind.HotSection or ComponentKind.Oil;
                 }).ToList();
 
                 if (overhaulParts.Count > 0)
                 {
-                    PartReplacementPlanner.ApplyToParts(overhaulParts, airframeHours, simulatedDate);
+                    var overhaulPlan = PartReplacementPlanner.Plan(overhaulParts, partCatalog, classKey, simulatedDate, bands: bands);
+                    balance -= overhaulPlan.TotalCost;
+                    cumPartsCost += overhaulPlan.TotalCost;
+                    cumMaintCost += overhaulPlan.TotalCost;
                     replacedPartsCount += overhaulParts.Count;
+                    remainingDowntimeHours += overhaulPlan.DowntimeHours;
+                    PartReplacementPlanner.Apply(overhaulPlan, airframeHours, simulatedDate);
                     SyncComponents(components, parts, partCatalog, mapping);
                 }
             }
@@ -1279,6 +1385,7 @@ namespace FlightCareer.Application.Simulation
             List<AircraftPart> parts,
             ref List<AircraftComponent> components,
             ref FailureEngine failureEngine,
+            ref PartFailureEngine partFailureEngine,
             ref EngineClass engineClass,
             PartCatalog partCatalog,
             ComponentCatalog componentCatalog,
@@ -1345,6 +1452,7 @@ namespace FlightCareer.Application.Simulation
                 engineClass = config.EngineClass;
                 var currentEngClass = engineClass;
                 failureEngine = new FailureEngine(componentCatalog, currentEngClass, rnd);
+                partFailureEngine = new PartFailureEngine(componentCatalog, partCatalog, currentEngClass, rnd, mapping);
                 components = componentCatalog.Components
                     .Where(c => c.AppliesTo.Contains(currentEngClass))
                     .Select(c => new AircraftComponent

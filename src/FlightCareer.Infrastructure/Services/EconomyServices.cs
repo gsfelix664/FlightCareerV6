@@ -23,6 +23,12 @@ namespace FlightCareer.Infrastructure.Services
 
         public static System.DateTime CalculateNewExpirationDate(System.DateTime? currentExpiration, System.DateTime careerClock)
             => FlightCareer.Application.Services.InsuranceService.CalculateNewExpirationDate(currentExpiration, careerClock);
+
+        public static bool ClaimDenied(FlightCareer.Domain.Entities.PilotAircraft a, out string reason)
+            => FlightCareer.Application.Services.InsuranceService.ClaimDenied(a, out reason);
+
+        public static bool ClaimDenied(FlightCareer.Domain.Entities.PilotAircraft a)
+            => FlightCareer.Application.Services.InsuranceService.ClaimDenied(a);
     }
 
     public static class FuelService

@@ -42,14 +42,16 @@ namespace FlightCareer.Application.Services
         public static double CalculateMonthlyPremium(double basePrice) => InsuranceService.CalculateMonthlyPremium(basePrice);
         public static double CalculateDeductible(double basePrice) => InsuranceService.CalculateDeductible(basePrice);
         public static double CalculatePayout(double basePrice) => InsuranceService.CalculatePayout(basePrice);
+        public static bool ClaimDenied(PilotAircraft a, out string reason) => InsuranceService.ClaimDenied(a, out reason);
+        public static bool ClaimDenied(PilotAircraft a) => InsuranceService.ClaimDenied(a);
     }
 
     public static class InsuranceService
     {
-        private const double MONTHLY_RATE = 0.01; // 1% do valor da aeronave
+        private const double MONTHLY_RATE = 0.025 / 12.0; // 2,5% ao ano (taxa mensal)
         private const double DEDUCTIBLE_RATE = 0.05; // 5% de franquia
         private const double PAYOUT_RATE = 0.70; // 70% de cobertura
-        private const double MIN_PREMIUM = 250;
+        private const double MIN_PREMIUM = 50.0;
 
         public static double CalculateMonthlyPremium(double basePrice)
         {
@@ -66,6 +68,39 @@ namespace FlightCareer.Application.Services
         public static double CalculatePayout(double basePrice)
         {
             return Math.Round(basePrice * PAYOUT_RATE, 2);
+        }
+
+        public static bool ClaimDenied(PilotAircraft a) => ClaimDenied(a, out _);
+
+        /// <summary>
+        /// Verifica se a cobertura do sinistro de perda total foi negada pela seguradora
+        /// devido a defeito grave apontado na inspeção anual regulatória e não corrigido.
+        /// </summary>
+        public static bool ClaimDenied(PilotAircraft a, out string reason)
+        {
+            if (a.Parts != null)
+            {
+                var defective = a.Parts.FirstOrDefault(p => p.FoundRedAtAnnualAirframeHours.HasValue);
+                if (defective != null)
+                {
+                    string partName = defective.PartId;
+                    try
+                    {
+                        var catalog = FlightCareer.Domain.Parts.PartCatalog.LoadDefault();
+                        partName = catalog.Get(defective.PartId)?.Name ?? defective.PartId;
+                    }
+                    catch
+                    {
+                        // Fallback para PartId
+                    }
+
+                    reason = $"A inspeção anual apontou {partName} e ela não foi trocada";
+                    return true;
+                }
+            }
+
+            reason = string.Empty;
+            return false;
         }
 
         /// <summary>

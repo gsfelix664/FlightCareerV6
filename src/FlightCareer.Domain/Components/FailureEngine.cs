@@ -84,13 +84,16 @@ namespace FlightCareer.Domain.Components
             return failures;
         }
 
-        private FailureModeDefinition? PickMode(ComponentDefinition def)
+        private FailureModeDefinition? PickMode(ComponentDefinition def) =>
+            PickMode(def, _engineClass, _random);
+
+        public static FailureModeDefinition? PickMode(ComponentDefinition def, EngineClass engineClass, IRandomSource random)
         {
-            var modes = def.ModesFor(_engineClass).Where(m => m.Weight > 0).ToList();
+            var modes = def.ModesFor(engineClass).Where(m => m.Weight > 0).ToList();
             if (modes.Count == 0) return null;
 
             double total = modes.Sum(m => m.Weight);
-            double roll = _random.NextDouble() * total;
+            double roll = random.NextDouble() * total;
             foreach (var mode in modes)
             {
                 roll -= mode.Weight;

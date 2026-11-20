@@ -14,10 +14,16 @@
     "lambdaAtThreshold": 0.02,  // Falhas/hora em 20%  (~2% de chance numa hora de voo)
     "lambdaAtZero": 2.0         // Falhas/hora em 0%   (~86% de chance numa hora de voo)
   },
+  "partBands": {
+    // Faixas de saúde por peça: verde [100, 40], amarelo (40, 20] com desgaste acelerado, vermelho < 20 com risco de pane
+    "yellowBelowPct": 40.0,
+    "redBelowPct": 20.0,
+    "lowHealthWearMaxMultiplier": 2.0
+  },
   "visibility": {
     "maxHalfWidth": 25.0,       // Faixa máxima exibida: ±25%
     "growthPerHour": 0.4,       // +2% de incerteza a cada 5 h desde a última inspeção
-    "walkaroundHalfWidth": 10.0,
+    "walkaroundHalfWidth": 0.0,
     "maxBias": 0.6
   },
   "symptomThreshold": 30.0,

@@ -232,5 +232,67 @@ namespace FlightCareer.Tests.Components
                 Assert.True(pilot.CareerClockUtc > DateTime.MinValue);
             }
         }
+
+        [Fact]
+        public async Task Banco_antigo_recebe_novas_colunas_de_aircraft_parts()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+            var partId = Guid.NewGuid();
+            var aircraftId = Guid.NewGuid();
+            var pilotId = Guid.NewGuid();
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.Database.EnsureCreatedAsync();
+
+                var c172 = new AircraftType { Id = Guid.NewGuid(), Model = "C172", Type = "Geral", FuelType = "Avgas", PurchasePrice = 100000 };
+                db.AircraftTypes.Add(c172);
+                db.Pilots.Add(new Pilot { Id = pilotId, Name = "Piloto" });
+                await db.SaveChangesAsync();
+
+                await db.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO PilotAircrafts (Id, PilotId, AircraftTypeId, PurchaseDate, CurrentAirframeHours, Prefix, EngineCondition, TiresCondition, AirframeCondition, AvionicsCondition, LandingsCount, FuelAmount, CurrentLocationICAO, EngineTboRemainingHours, HoursUntilNext50hInspection, HoursUntilNext100hInspection, HoursUntilNext500hInspection, MagnetosCondition, OilCondition, IsInterdicted, InterdictionReason, Configuration) " +
+                    "VALUES ({0}, {1}, {2}, '2026-01-01', 1200, 'PP-AAA', 70, 60, 90, 85, 400, 30, 'SBSP', 1000, 10, 60, 300, 75, 45, 0, '', 'Passageiro')",
+                    aircraftId, pilotId, c172.Id);
+
+                // Simula tabela sem as colunas novas
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AircraftParts DROP COLUMN KnownHealth;");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AircraftParts DROP COLUMN KnownAtAirframeHours;");
+                await db.Database.ExecuteSqlRawAsync("ALTER TABLE AircraftParts DROP COLUMN FoundRedAtAnnualAirframeHours;");
+
+                await db.Database.ExecuteSqlRawAsync(
+                    "INSERT INTO AircraftParts (Id, PilotAircraftId, PartId, EngineIndex, Health, HoursSinceReplacement, CyclesSinceReplacement, LastReplacedAtUtc, LastReplacedAirframeHours, Flag, FlaggedBy, IsBroken) " +
+                    "VALUES ({0}, {1}, 'engine.cylinders', 0, 85.0, 10.0, 5, '2026-01-01', 0.0, 0, 0, 0)",
+                    partId, aircraftId);
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                await db.EnsureSchemaUpdatedAsync();
+                await db.EnsureSchemaUpdatedAsync(); // Idempotente
+
+                var part = await db.AircraftParts.FirstOrDefaultAsync(p => p.Id == partId);
+                Assert.NotNull(part);
+                Assert.Null(part.KnownHealth);
+                Assert.Null(part.KnownAtAirframeHours);
+                Assert.Null(part.FoundRedAtAnnualAirframeHours);
+
+                part.KnownHealth = 85.0;
+                part.KnownAtAirframeHours = 100.0;
+                part.FoundRedAtAnnualAirframeHours = 100.0;
+                await db.SaveChangesAsync();
+            }
+
+            await using (var db = new AppDbContext(options))
+            {
+                var part = await db.AircraftParts.FirstOrDefaultAsync(p => p.Id == partId);
+                Assert.NotNull(part);
+                Assert.Equal(85.0, part.KnownHealth);
+                Assert.Equal(100.0, part.KnownAtAirframeHours);
+                Assert.Equal(100.0, part.FoundRedAtAnnualAirframeHours);
+            }
+        }
     }
 }

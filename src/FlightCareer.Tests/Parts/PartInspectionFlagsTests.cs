@@ -53,9 +53,10 @@ namespace FlightCareer.Tests.Parts
             var def = CreateDef(lifeHours: 100.0);
 
             var result = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
+            Assert.Equal(PartFlag.None, result.Level);
 
-            Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Equal("Vida: 90 / 100 h", result.Reason);
+            var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
+            Assert.Equal("Vida: 90 / 100 h", lifeNote);
         }
 
         [Fact]
@@ -65,9 +66,10 @@ namespace FlightCareer.Tests.Parts
             var def = CreateDef(lifeHours: 250.0);
 
             var result = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
+            Assert.Equal(PartFlag.None, result.Level);
 
-            Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Equal("Vida vencida: 260 / 250 h", result.Reason);
+            var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
+            Assert.Equal("Vida vencida: 260 / 250 h", lifeNote);
         }
 
         [Fact]
@@ -77,9 +79,10 @@ namespace FlightCareer.Tests.Parts
             var def = CreateDef(lifeHours: 0, lifeCycles: 100);
 
             var result = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
+            Assert.Equal(PartFlag.None, result.Level);
 
-            Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Equal("Ciclos: 90 / 100", result.Reason);
+            var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
+            Assert.Equal("Ciclos: 90 / 100", lifeNote);
         }
 
         [Fact]
@@ -91,9 +94,11 @@ namespace FlightCareer.Tests.Parts
             var def = CreateDef(lifeHours: 0, calendarMonths: 12);
 
             var result = PartInspectionFlags.Evaluate(part, def, nowUtc);
+            Assert.Equal(PartFlag.None, result.Level);
 
-            Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Contains("11 / 12 meses", result.Reason);
+            var lifeNote = PartInspectionFlags.LifeNote(part, def, nowUtc);
+            Assert.NotNull(lifeNote);
+            Assert.Contains("11 / 12 meses", lifeNote);
         }
 
         [Fact]
@@ -105,7 +110,7 @@ namespace FlightCareer.Tests.Parts
             var result = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
 
             Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Equal("Desgaste avançado", result.Reason);
+            Assert.Equal("Faixa amarela: 35 %", result.Reason);
         }
 
         [Fact]

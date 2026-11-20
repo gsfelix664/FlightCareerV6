@@ -65,18 +65,22 @@ namespace FlightCareer.Domain.Parts
         private readonly Dictionary<int, bool> _engineWasCombustion = new();
         private readonly Dictionary<int, double> _engineCombustionTimeSeconds = new();
         private readonly Dictionary<string, bool> _previousSensorActive = new(StringComparer.OrdinalIgnoreCase);
+        private readonly PartBandSettings _bandSettings;
 
         /// <summary>
         /// Ponto de teste para testes de mutação / fuzz: desativa a resolução de sensores com sufixo :n (ex.: chave:1).
         /// </summary>
         public bool DisablePerEngineSensorResolution { get; set; }
 
-        public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog, IRandomSource? random = null)
+        public PartWearEngine(PartCatalog partCatalog, WearRuleCatalog wearRuleCatalog, IRandomSource? random = null, PartBandSettings? bandSettings = null)
         {
             _partCatalog = partCatalog ?? throw new ArgumentNullException(nameof(partCatalog));
             _wearRuleCatalog = wearRuleCatalog ?? throw new ArgumentNullException(nameof(wearRuleCatalog));
             _random = random ?? new FlightCareer.Domain.Components.SystemRandomSource();
+            _bandSettings = bandSettings ?? new PartBandSettings();
         }
+
+        public PartBandSettings BandSettings => _bandSettings;
 
         public void ResetExceedanceTracking()
         {
@@ -506,6 +510,7 @@ namespace FlightCareer.Domain.Parts
 
                     // Luz acesa: desgasta por horas de uso
                     double lightRatePerHour = def.LifeHours > 0 ? (70.0 / def.LifeHours) : 0.0;
+                    lightRatePerHour *= PartHealthBands.LowHealthWearMultiplier(part.Health, _bandSettings);
                     part.HoursSinceReplacement += dtSimHours;
 
                     double lightLossPct = lightRatePerHour * dtSimHours;
@@ -528,6 +533,7 @@ namespace FlightCareer.Domain.Parts
                 // Desgaste natural normal (100 -> ~30% ao longo de LifeHours)
                 // Taxa horária normal = 70.0 / LifeHours
                 double normalRatePerHour = def.LifeHours > 0 ? (70.0 / def.LifeHours) : 0.0;
+                normalRatePerHour *= PartHealthBands.LowHealthWearMultiplier(part.Health, _bandSettings);
                 part.HoursSinceReplacement += dtSimHours;
 
                 double maxMultiplier = 1.0;

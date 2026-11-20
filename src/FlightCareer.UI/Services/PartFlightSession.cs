@@ -19,6 +19,10 @@ namespace FlightCareer.UI.Services
     public sealed class PartFlightSession
     {
         private readonly PartFlightTracker _tracker;
+        private readonly PartCatalog _partCatalog;
+        private readonly ComponentCatalog _componentCatalog;
+        private readonly IRandomSource _random;
+        private PartFailureEngine? _failureEngine;
         private readonly object _frameLock = new();
         private SensorFrame? _lastFrame;
 
@@ -26,9 +30,17 @@ namespace FlightCareer.UI.Services
         public event Action<PartWearInspectionEvent>? OnInspection;
         public event Action<string>? OnDiagnostic;
 
-        public PartFlightSession(PartCatalog parts, WearRuleCatalog rules, AircraftLimitResolver resolver)
+        public PartFlightSession(
+            PartCatalog parts,
+            WearRuleCatalog rules,
+            AircraftLimitResolver resolver,
+            ComponentCatalog? componentCatalog = null,
+            IRandomSource? random = null)
         {
-            _tracker = new PartFlightTracker(parts, rules, resolver);
+            _partCatalog = parts;
+            _componentCatalog = componentCatalog ?? ComponentCatalog.LoadDefault();
+            _random = random ?? new SystemRandomSource();
+            _tracker = new PartFlightTracker(parts, rules, resolver, _random, _componentCatalog.PartBands);
         }
 
         public bool IsActive => _tracker.IsActive;
@@ -42,6 +54,14 @@ namespace FlightCareer.UI.Services
                 _lastFrame = null;
             }
             _tracker.Begin(copies, profile, features);
+
+            var engineClass = profile?.Class?.ToLowerInvariant() switch
+            {
+                "turboprop" => EngineClass.Turboprop,
+                "jet" => EngineClass.Jet,
+                _ => EngineClass.Piston
+            };
+            _failureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, _random);
         }
 
         public void Reset()
@@ -51,6 +71,7 @@ namespace FlightCareer.UI.Services
                 _lastFrame = null;
             }
             _tracker.Reset();
+            _failureEngine?.Reset();
         }
 
         public void OnFrame(SensorFrame frame)
@@ -152,5 +173,29 @@ namespace FlightCareer.UI.Services
 
         public Task SaveAsync(AppDbContext context) =>
             PartStateWriter.CopyToDbAsync(context, _tracker.Parts);
+
+        public IReadOnlyList<PartFailure> EvaluateFailures(
+            double dtSimHours,
+            Func<ComponentKind, bool> isInUse,
+            IReadOnlyCollection<ComponentKind> alreadyFailed)
+        {
+            if (_failureEngine == null || !_tracker.IsActive)
+            {
+                return Array.Empty<PartFailure>();
+            }
+
+            return _failureEngine.Evaluate(_tracker.Parts, dtSimHours, isInUse, alreadyFailed);
+        }
+
+        public void BreakPart(Guid partId)
+        {
+            var part = _tracker.Parts.FirstOrDefault(p => p.Id == partId);
+            if (part != null && !part.IsBroken)
+            {
+                part.Health = 0.0;
+                part.IsBroken = true;
+                part.BrokenAtUtc = DateTime.UtcNow;
+            }
+        }
     }
 }

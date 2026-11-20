@@ -9,66 +9,93 @@ namespace FlightCareer.Domain.Parts
 
     /// <summary>
     /// Avaliação e sinalização de peças para exibição de alerta no Hangar após inspeção ou walkaround.
-    /// Exclamação amarela (vida/desgaste avançado) ou vermelha (quebrada), visível até o próximo voo.
+    /// Exclamação amarela (faixa amarela) ou vermelha (faixa vermelha ou quebrada), visível até o próximo voo.
     /// </summary>
     public static class PartInspectionFlags
     {
-        public const double LifeWarningFraction = 0.9;   // ≥ 90 % da vida (h, ciclos ou meses)
-        public const double LowHealthPct = 40.0;          // saúde abaixo disso = amarelo
+        public const double LowHealthPct = 40.0;
+        public const double RedHealthPct = 20.0;
+        public const double LifeWarningFraction = 0.9;
 
-        public static PartFlagResult Evaluate(AircraftPart part, PartDefinition def, DateTime careerNow)
+        /// <summary>
+        /// Avalia a sinalização da peça exclusivamente pela sua faixa de saúde.
+        /// </summary>
+        public static PartFlagResult Evaluate(AircraftPart part, PartDefinition def, DateTime careerNow, PartBandSettings? bands = null)
         {
             if (part == null || def == null)
             {
                 return new PartFlagResult(PartFlag.None, string.Empty);
             }
 
-            // Vermelho: IsBroken -> Broken, "Quebrada"
+            bands ??= new PartBandSettings();
+
             if (part.IsBroken)
             {
                 return new PartFlagResult(PartFlag.Broken, "Quebrada");
             }
 
-            // Amarelo (Suspect), primeiro motivo que bater:
-            // 1. Horas >= 90% de LifeHours
-            if (def.LifeHours > 0 && part.HoursSinceReplacement >= def.LifeHours * LifeWarningFraction)
+            if (part.Health < bands.RedBelowPct)
             {
-                string reason = part.HoursSinceReplacement >= def.LifeHours
-                    ? $"Vida vencida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h"
-                    : $"Vida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h";
-                return new PartFlagResult(PartFlag.Suspect, reason);
+                return new PartFlagResult(PartFlag.Broken, $"Faixa vermelha: {part.Health:F0} %");
             }
 
-            // 2. Ciclos >= 90% de LifeCycles
-            if (def.LifeCycles.HasValue && def.LifeCycles.Value > 0 && part.CyclesSinceReplacement >= def.LifeCycles.Value * LifeWarningFraction)
+            if (part.Health < bands.YellowBelowPct)
             {
-                string reason = part.CyclesSinceReplacement >= def.LifeCycles.Value
-                    ? $"Ciclos vencidos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}"
-                    : $"Ciclos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}";
-                return new PartFlagResult(PartFlag.Suspect, reason);
+                return new PartFlagResult(PartFlag.Suspect, $"Faixa amarela: {part.Health:F0} %");
             }
 
-            // 3. Meses desde LastReplacedAtUtc >= 90% de CalendarLifeMonths (no relógio de carreira)
+            return new PartFlagResult(PartFlag.None, string.Empty);
+        }
+
+        public static PartFlagResult Evaluate(AircraftPart part, PartDefinition def, DateTime careerNow)
+            => Evaluate(part, def, careerNow, new PartBandSettings());
+
+        /// <summary>
+        /// Devolve a nota de vida/ciclos/calendário quando vencidos (como informação descritiva para a UI).
+        /// </summary>
+        public static string? LifeNote(AircraftPart part, PartDefinition def, DateTime careerNow)
+        {
+            if (part == null || def == null) return null;
+
+            if (def.LifeHours > 0)
+            {
+                if (part.HoursSinceReplacement >= def.LifeHours)
+                {
+                    return $"Vida vencida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h";
+                }
+                if (part.HoursSinceReplacement >= def.LifeHours * LifeWarningFraction)
+                {
+                    return $"Vida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h";
+                }
+            }
+
+            if (def.LifeCycles.HasValue && def.LifeCycles.Value > 0)
+            {
+                if (part.CyclesSinceReplacement >= def.LifeCycles.Value)
+                {
+                    return $"Ciclos vencidos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}";
+                }
+                if (part.CyclesSinceReplacement >= def.LifeCycles.Value * LifeWarningFraction)
+                {
+                    return $"Ciclos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}";
+                }
+            }
+
             if (def.CalendarLifeMonths.HasValue && def.CalendarLifeMonths.Value > 0)
             {
                 double elapsedDays = Math.Max(0.0, (careerNow - part.LastReplacedAtUtc).TotalDays);
                 double months = elapsedDays / 30.4375;
+                if (months >= def.CalendarLifeMonths.Value)
+                {
+                    return $"Calendário vencido: {months:F0} / {def.CalendarLifeMonths.Value} meses";
+                }
                 if (months >= def.CalendarLifeMonths.Value * LifeWarningFraction)
                 {
-                    string reason = months >= def.CalendarLifeMonths.Value
-                        ? $"Calendário vencido: {months:F0} / {def.CalendarLifeMonths.Value} meses"
-                        : $"Calendário: {months:F0} / {def.CalendarLifeMonths.Value} meses";
-                    return new PartFlagResult(PartFlag.Suspect, reason);
+                    return $"Calendário: {months:F0} / {def.CalendarLifeMonths.Value} meses";
                 }
             }
 
-            // 4. Saúde abaixo de 40%
-            if (part.Health < LowHealthPct)
-            {
-                return new PartFlagResult(PartFlag.Suspect, "Desgaste avançado");
-            }
-
-            return new PartFlagResult(PartFlag.None, string.Empty);
+            return null;
         }
 
         /// <summary>
@@ -80,7 +107,8 @@ namespace FlightCareer.Domain.Parts
             Func<PartDefinition, bool> inScope,
             PartFlagSource source,
             double airframeHours,
-            DateTime careerNow)
+            DateTime careerNow,
+            PartBandSettings? bands = null)
         {
             if (parts == null || catalog == null || inScope == null) return 0;
 
@@ -90,7 +118,7 @@ namespace FlightCareer.Domain.Parts
                 var def = catalog.Get(part.PartId);
                 if (def == null || !inScope(def)) continue;
 
-                var result = Evaluate(part, def, careerNow);
+                var result = Evaluate(part, def, careerNow, bands);
                 part.Flag = result.Level;
 
                 if (result.Level != PartFlag.None)
