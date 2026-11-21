@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "Diamond DA40NG",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "diesel",
+    "fadec",
+    "fixedGear",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "singleEngine",
+    "turbocharged"
+  ],
+  "simMatch": {
+    "title": [
+      "Diamond DA40NG"
+    ],
+    "atcModel": [
+      "DA-40 NG"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 172.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (172 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 105.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-7 (Coolant max, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 140.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-6 (https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar com POH: padrão da classe pistão; MAX EGT do sim (649,07 °C) é a escala do instrumento",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 58.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 63.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0808-Diamond_DA40NG_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 110.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps T/O 110 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 98.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (Flaps LDG 98 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2300.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (Propeller RPM, Austro Engine E4-A, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 21.8,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-5 (1.5 bar, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-3 (130 KIAS, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (+3.8g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Diamond DA 40 NG AFM Doc. # 6.01.15-E, Sec. 2 p. 2-18 (-1.52g, https://cockpitseeker.com/wp-content/uploads/goodies/ac/DA40/POH_DA40_en.pdf)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Austro AE300",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 112.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Diamond DA40 NG Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

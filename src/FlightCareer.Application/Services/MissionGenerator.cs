@@ -12,13 +12,41 @@ namespace FlightCareer.Application.Services
     {
         private readonly IAppDbContext _context;
         private readonly IHubDataService _hubService;
-        private readonly Random _random = new();
+        private readonly Random _random;
         private bool? _hasSimScenery;
+        private DateTime? _currentReferenceTime;
 
-        public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null)
+        public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null, Random? random = null)
         {
             _context = context;
             _hubService = hubService ?? new HubDataService();
+            _random = random ?? new Random();
+        }
+
+        public MissionGenerator(IAppDbContext context, IHubDataService? hubService, FlightCareer.Domain.Components.IRandomSource randomSource)
+            : this(context, hubService, new RandomAdapter(randomSource))
+        {
+        }
+
+        private sealed class RandomAdapter : Random
+        {
+            private readonly FlightCareer.Domain.Components.IRandomSource _source;
+            public RandomAdapter(FlightCareer.Domain.Components.IRandomSource source) => _source = source ?? throw new ArgumentNullException(nameof(source));
+            public override double NextDouble() => _source.NextDouble();
+            public override int Next() => (int)(_source.NextDouble() * int.MaxValue);
+            public override int Next(int maxValue)
+            {
+                if (maxValue < 0) throw new ArgumentOutOfRangeException(nameof(maxValue));
+                if (maxValue == 0) return 0;
+                return (int)(_source.NextDouble() * maxValue);
+            }
+            public override int Next(int minValue, int maxValue)
+            {
+                if (minValue > maxValue) throw new ArgumentOutOfRangeException(nameof(minValue));
+                if (minValue == maxValue) return minValue;
+                long range = (long)maxValue - minValue;
+                return (int)(minValue + (_source.NextDouble() * range));
+            }
         }
 
         private async Task<bool> HasSimSceneryAsync()
@@ -30,11 +58,14 @@ namespace FlightCareer.Application.Services
             return _hasSimScenery.Value;
         }
 
-        public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport)
+        public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport, DateTime? referenceTime = null)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
+            var now = referenceTime ?? DateTime.Now;
+            _currentReferenceTime = now;
             // 1. Limpar missões expiradas (que não foram aceitas)
             var expired = await _context.Missions
-                .Where(m => !m.IsAccepted && m.ExpirationTime < DateTime.Now)
+                .Where(m => !m.IsAccepted && m.ExpirationTime < now)
                 .ToListAsync();
             
             if (expired.Any())
@@ -47,6 +78,9 @@ namespace FlightCareer.Application.Services
             // Se as missões existentes forem muito antigas, removemos algumas aleatoriamente
             var currentMktMissions = await _context.Missions
                 .Where(m => m.OriginICAO == currentAirport.ICAO && !m.IsAccepted)
+                .OrderBy(m => m.DestinationICAO)
+                .ThenBy(m => m.PayloadLbs)
+                .ThenBy(m => m.RewardMoney)
                 .ToListAsync();
 
             if (currentMktMissions.Any())
@@ -71,6 +105,9 @@ namespace FlightCareer.Application.Services
                     // Atualiza a lista local após a remoção
                     currentMktMissions = await _context.Missions
                         .Where(m => m.OriginICAO == currentAirport.ICAO && !m.IsAccepted)
+                        .OrderBy(m => m.DestinationICAO)
+                        .ThenBy(m => m.PayloadLbs)
+                        .ThenBy(m => m.RewardMoney)
                         .ToListAsync();
                 }
             }
@@ -192,6 +229,7 @@ namespace FlightCareer.Application.Services
                 .Where(a => a.ICAO != origin.ICAO)
                 .Where(a => a.Latitude >= origin.Latitude - maxDeg && a.Latitude <= origin.Latitude + maxDeg)
                 .Where(a => a.Longitude >= origin.Longitude - maxDeg && a.Longitude <= origin.Longitude + maxDeg)
+                .OrderBy(a => a.ICAO)
                 .Take(500)
                 .ToListAsync();
 
@@ -208,89 +246,11 @@ namespace FlightCareer.Application.Services
             
             if (profile != null)
             {
-                var hubs = sub.Id switch
-                {
-                    // --- CATEGORIA 1: AVIAÇÃO COMERCIAL, CARGA E EXECUTIVA PESADA ---
-                    "1.1.1" => profile.Value.DomesticHubs,
-                    "1.1.2" => profile.Value.RegionalIntl,
-                    "1.1.3" => profile.Value.LongHaul,
-
-                    "1.2.1" => profile.Value.CargoHubs,
-                    "1.2.2" => profile.Value.RegionalIntl,
-                    "1.2.3" => profile.Value.LongHaul,
-
-                    "1.3.1" => profile.Value.ExecutiveHubs,
-                    "1.3.2" => profile.Value.DomesticHubs,
-                    "1.3.3" => profile.Value.MaintenanceHubs,
-                    "1.3.4" => profile.Value.DomesticHubs,
-
-                    // --- CATEGORIA 2: AVIAÇÃO REGIONAL, LOGÍSTICA E INVESTIMENTOS ---
-                    "2.1.1" => profile.Value.FeederHubs,
-                    "2.1.2" => profile.Value.RegionalPoints,
-
-                    "2.2.1" => profile.Value.AgroPoints,
-                    "2.2.2" => profile.Value.AgroTechPoints,
-                    "2.2.3" => profile.Value.InvestPoints,
-
-                    "2.3.1" => profile.Value.EcommercePoints,
-                    "2.3.2" => profile.Value.AgroPartsPoints,
-                    "2.3.3" => profile.Value.DomesticHubs,
-
-                    "2.4.1" => profile.Value.MaintenanceHubs,
-                    "2.4.2" => profile.Value.GovPoints,
-
-                    // --- CATEGORIA 3: TURISMO, SAÚDE E SERVIÇOS ---
-                    "3.1.1" => profile.Value.RegionalPoints,
-                    "3.1.2" => profile.Value.LeisurePoints,
-                    "3.1.3" => profile.Value.RegionalPoints,
-
-                    "3.2.1" => profile.Value.AgroPoints,
-                    "3.2.2" => profile.Value.AgroTechPoints,
-                    "3.2.3" => profile.Value.AgroPoints,
-
-                    "3.3.1" => profile.Value.HealthHubs,
-                    "3.3.2" => profile.Value.HealthHubs,
-                    "3.3.3" => profile.Value.HealthHubs,
-
-                    "3.4.1" => profile.Value.InstructionHubs ?? new List<string>(),
-                    "3.4.2" => profile.Value.RegionalPoints,
-                    "3.4.3" => profile.Value.InstructionHubs ?? new List<string>(),
-
-                    // --- CATEGORIA 4: AGRO INTERIOR E OPERAÇÕES REMOTAS ---
-                    "4.1.1" => profile.Value.AgroPoints,
-                    "4.1.2" => profile.Value.RegionalPoints, // Patrão geralmente vem da cidade
-                    "4.1.3" => profile.Value.AgroPoints,
-
-                    "4.2.1" => profile.Value.AgroPoints,
-                    "4.2.2" => profile.Value.AgroPoints,
-                    "4.2.3" => profile.Value.AgroPoints,
-
-                    "4.3.1" => profile.Value.HealthHubs,
-                    "4.3.2" => profile.Value.AgroPoints,
-                    _ => new List<string>()
-                };
-                preferredList.AddRange(hubs);
+                preferredList.AddRange(ResolveG20Hubs(sub.Id, profile.Value));
             }
 
             // 4. Incorporar Hubs dinâmicos via HubDataService (JSON) de acordo com o perfil de AERODROMOS_PRINCIPAIS.txt
-            var dynamicHubs = sub.Id switch
-            {
-                "1.1.1" => _hubService.GetHubs(HubType.CommercialPax, origin.Country),
-                "1.1.2" => _hubService.GetHubs(HubType.CommercialPax, "GLOBAL"),
-                "1.2.1" => _hubService.GetHubs(HubType.Cargo, origin.Country),
-                "1.2.2" => _hubService.GetHubs(HubType.Cargo, "GLOBAL"),
-                "1.3.1" => _hubService.GetHubs(HubType.Executive, origin.Country),
-                "1.3.3" or "2.4.1" => _hubService.GetHubs(HubType.Maintenance, origin.Country),
-                "2.1.1" => _hubService.GetHubs(HubType.Feeder, origin.Country).Concat(_hubService.GetHubs(HubType.CommercialPax, origin.Country)).ToList(),
-                "2.1.2" => _hubService.GetHubs(HubType.Feeder, origin.Country),
-                "2.2.1" or "3.2.1" or "4.1.1" or "4.2.1" or "4.2.2" or "4.2.3" => _hubService.GetHubs(HubType.Agro, origin.Country),
-                "2.3.1" or "2.3.2" => _hubService.GetHubs(HubType.Cargo, origin.Country),
-                "3.1.1" or "3.1.2" => _hubService.GetHubs(HubType.Executive, origin.Country),
-                "3.3.1" or "3.3.2" or "3.3.3" or "4.3.1" => _hubService.GetHubs(HubType.Health, origin.Country),
-                "3.4.1" or "3.4.2" or "3.4.3" => _hubService.GetHubs(HubType.Instruction, origin.Country),
-                _ => (IReadOnlyList<string>)Array.Empty<string>()
-            };
-
+            var dynamicHubs = ResolveDynamicHubs(sub.Id, origin.Country, _hubService);
             if (dynamicHubs.Any())
             {
                 preferredList.AddRange(dynamicHubs);
@@ -302,7 +262,22 @@ namespace FlightCareer.Application.Services
             return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight);
         }
 
-        private async Task<Mission> CreateMissionObject(Airport origin, Airport dest, double dist, SubCategoryConfig sub, int paxCount, double luggageWeightLbs, double cargoWeight)
+        private Task<Mission> CreateMissionObject(Airport origin, Airport dest, double dist, SubCategoryConfig sub, int paxCount, double luggageWeightLbs, double cargoWeight)
+        {
+            var m = CreateMissionObjectSync(origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, _random, _currentReferenceTime ?? DateTime.Now);
+            return Task.FromResult(m);
+        }
+
+        public static Mission CreateMissionObjectSync(
+            Airport origin, 
+            Airport dest, 
+            double dist, 
+            SubCategoryConfig sub, 
+            int paxCount, 
+            double luggageWeightLbs, 
+            double cargoWeight, 
+            Random random, 
+            DateTime referenceTime)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -374,16 +349,229 @@ namespace FlightCareer.Application.Services
                 CargoWeightLbs = Math.Round(cargoWeight, 0),
                 PayloadLbs = Math.Round(totalPayload, 0),
                 Urgency = sub.Urgency,
-                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier),
+                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
-                ExpirationTime = DateTime.Now.AddHours(_random.Next(sub.MinExpHours, sub.MaxExpHours + 1)),
+                ExpirationTime = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)),
                 RequiredCategory = requiredCategory,
                 RequiredTier = (CompanyTier)(int)requiredCategory,
                 MissionCategoryType = categoryType
             };
         }
 
+        public static IReadOnlyList<string> ResolveG20Hubs(string subId, DestinationProfile profile)
+        {
+            return subId switch
+            {
+                "1.1.1" => profile.DomesticHubs ?? new List<string>(),
+                "1.1.2" => profile.RegionalIntl ?? new List<string>(),
+                "1.1.3" => profile.LongHaul ?? new List<string>(),
+
+                "1.2.1" => profile.CargoHubs ?? new List<string>(),
+                "1.2.2" => profile.RegionalIntl ?? new List<string>(),
+                "1.2.3" => profile.LongHaul ?? new List<string>(),
+
+                "1.3.1" => profile.ExecutiveHubs ?? new List<string>(),
+                "1.3.2" => profile.DomesticHubs ?? new List<string>(),
+                "1.3.3" => profile.MaintenanceHubs ?? new List<string>(),
+                "1.3.4" => profile.DomesticHubs ?? new List<string>(),
+
+                "2.1.1" => profile.FeederHubs ?? new List<string>(),
+                "2.1.2" => profile.RegionalPoints ?? new List<string>(),
+
+                "2.2.1" => profile.AgroPoints ?? new List<string>(),
+                "2.2.2" => profile.AgroTechPoints ?? new List<string>(),
+                "2.2.3" => profile.InvestPoints ?? new List<string>(),
+
+                "2.3.1" => profile.EcommercePoints ?? new List<string>(),
+                "2.3.2" => profile.AgroPartsPoints ?? new List<string>(),
+                "2.3.3" => profile.DomesticHubs ?? new List<string>(),
+
+                "2.4.1" => profile.MaintenanceHubs ?? new List<string>(),
+                "2.4.2" => profile.GovPoints ?? new List<string>(),
+
+                "3.1.1" => profile.RegionalPoints ?? new List<string>(),
+                "3.1.2" => profile.LeisurePoints ?? new List<string>(),
+                "3.1.3" => profile.RegionalPoints ?? new List<string>(),
+
+                "3.2.1" => profile.AgroPoints ?? new List<string>(),
+                "3.2.2" => profile.AgroTechPoints ?? new List<string>(),
+                "3.2.3" => profile.AgroPoints ?? new List<string>(),
+
+                "3.3.1" => profile.HealthHubs ?? new List<string>(),
+                "3.3.2" => profile.HealthHubs ?? new List<string>(),
+                "3.3.3" => profile.HealthHubs ?? new List<string>(),
+
+                "3.4.1" => profile.InstructionHubs ?? new List<string>(),
+                "3.4.2" => profile.RegionalPoints ?? new List<string>(),
+                "3.4.3" => profile.InstructionHubs ?? new List<string>(),
+
+                "4.1.1" => profile.AgroPoints ?? new List<string>(),
+                "4.1.2" => profile.RegionalPoints ?? new List<string>(),
+                "4.1.3" => profile.AgroPoints ?? new List<string>(),
+
+                "4.2.1" => profile.AgroPoints ?? new List<string>(),
+                "4.2.2" => profile.AgroPoints ?? new List<string>(),
+                "4.2.3" => profile.AgroPoints ?? new List<string>(),
+
+                "4.3.1" => profile.HealthHubs ?? new List<string>(),
+                "4.3.2" => profile.AgroPoints ?? new List<string>(),
+                _ => Array.Empty<string>()
+            };
+        }
+
+        public static IReadOnlyList<string> ResolveDynamicHubs(string subId, string country, IHubDataService hubService)
+        {
+            if (hubService == null) return Array.Empty<string>();
+            return subId switch
+            {
+                "1.1.1" => hubService.GetHubs(HubType.CommercialPax, country),
+                "1.1.2" => hubService.GetHubs(HubType.CommercialPax, "GLOBAL"),
+                "1.2.1" => hubService.GetHubs(HubType.Cargo, country),
+                "1.2.2" => hubService.GetHubs(HubType.Cargo, "GLOBAL"),
+                "1.3.1" => hubService.GetHubs(HubType.Executive, country),
+                "1.3.3" or "2.4.1" => hubService.GetHubs(HubType.Maintenance, country),
+                "2.1.1" => hubService.GetHubs(HubType.Feeder, country).Concat(hubService.GetHubs(HubType.CommercialPax, country)).ToList(),
+                "2.1.2" => hubService.GetHubs(HubType.Feeder, country),
+                "2.2.1" or "3.2.1" or "4.1.1" or "4.2.1" or "4.2.2" or "4.2.3" => hubService.GetHubs(HubType.Agro, country),
+                "2.3.1" or "2.3.2" => hubService.GetHubs(HubType.Cargo, country),
+                "3.1.1" or "3.1.2" => hubService.GetHubs(HubType.Executive, country),
+                "3.3.1" or "3.3.2" or "3.3.3" or "4.3.1" => hubService.GetHubs(HubType.Health, country),
+                "3.4.1" or "3.4.2" or "3.4.3" => hubService.GetHubs(HubType.Instruction, country),
+                _ => (IReadOnlyList<string>)Array.Empty<string>()
+            };
+        }
+
+        public static List<Mission> GenerateMissionsInMemory(
+            Airport currentAirport,
+            IReadOnlyList<Airport> allAirports,
+            IHubDataService? hubService,
+            Random random,
+            DateTime referenceTime,
+            int? countOverride = null)
+        {
+            if (currentAirport == null) return new List<Mission>();
+            if (!MissionRules.Rules.TryGetValue(currentAirport.Tier, out var tierConfig))
+                return new List<Mission>();
+
+            hubService ??= new HubDataService();
+            int targetCount = countOverride ?? currentAirport.Tier switch
+            {
+                1 => 200,
+                2 => 120,
+                3 => 60,
+                4 => 25,
+                _ => 25
+            };
+
+            var calibratedCategories = GetCalibratedCategories(currentAirport, tierConfig, hubService);
+            var newMissions = new List<Mission>();
+            int maxAttempts = targetCount * 4;
+            int attempts = 0;
+
+            while (newMissions.Count < targetCount && attempts < maxAttempts)
+            {
+                attempts++;
+                var category = PickWeighted(calibratedCategories, random);
+                if (category == null) continue;
+                var subCategory = PickWeighted(category.SubCategories, random);
+                if (subCategory == null) continue;
+
+                var mission = CreateMissionFromSubCategoryInMemory(
+                    currentAirport,
+                    subCategory,
+                    tierConfig.AllowedDestinationTiers,
+                    allAirports,
+                    hubService,
+                    random,
+                    referenceTime);
+
+                if (mission != null)
+                {
+                    newMissions.Add(mission);
+                }
+            }
+
+            return newMissions;
+        }
+
+        private static Mission? CreateMissionFromSubCategoryInMemory(
+            Airport origin,
+            SubCategoryConfig sub,
+            List<int> allowedTiers,
+            IReadOnlyList<Airport> allAirports,
+            IHubDataService hubService,
+            Random random,
+            DateTime referenceTime)
+        {
+            var rangeRule = PickWeighted(sub.RangeRules, random);
+            var paxRule = PickWeighted(sub.PaxRules, random);
+            var lbsRule = sub.LbsRules.Any() ? PickWeighted(sub.LbsRules, random) : null;
+
+            if (rangeRule == null) return null;
+
+            int minRange = rangeRule.Min;
+            int maxRange = rangeRule.Max;
+            int paxCount = paxRule != null ? random.Next(paxRule.Min, paxRule.Max + 1) : 0;
+            double luggageWeightLbs = paxCount > 0 ? paxCount * random.Next(0, 51) : 0;
+            double cargoWeight = lbsRule != null ? random.Next(lbsRule.Min, lbsRule.Max + 1) : 0;
+
+            if (sub.Id == "3.4.1")
+            {
+                return CreateMissionObjectSync(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime);
+            }
+
+            double maxDeg = maxRange / 50.0;
+            var candidates = new List<(Airport Airport, double Dist)>();
+
+            for (int i = 0; i < allAirports.Count; i++)
+            {
+                var a = allAirports[i];
+                if (string.Equals(a.ICAO, origin.ICAO, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!allowedTiers.Contains(a.Tier)) continue;
+                if (sub.RequiresHardSurface && a.Tier > 3) continue;
+                if (sub.MinRunwayDest >= 7000 && a.Tier != 1) continue;
+                else if (sub.MinRunwayDest >= 4500 && a.Tier > 2) continue;
+                else if (sub.MinRunwayDest >= 2500 && a.Tier > 3) continue;
+
+                if (a.Latitude < origin.Latitude - maxDeg || a.Latitude > origin.Latitude + maxDeg) continue;
+                if (a.Longitude < origin.Longitude - maxDeg || a.Longitude > origin.Longitude + maxDeg) continue;
+
+                double dist = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude);
+                if (dist >= minRange && dist <= maxRange)
+                {
+                    candidates.Add((a, dist));
+                    if (candidates.Count >= 200) break;
+                }
+            }
+
+            if (candidates.Count == 0) return null;
+
+            var preferredList = sub.PreferredDestinations.ToList();
+            var profile = G20Destinations.GetProfile(origin.Country);
+            if (profile != null)
+            {
+                preferredList.AddRange(ResolveG20Hubs(sub.Id, profile.Value));
+            }
+            var dynamicHubs = ResolveDynamicHubs(sub.Id, origin.Country, hubService);
+            if (dynamicHubs.Any())
+            {
+                preferredList.AddRange(dynamicHubs);
+            }
+
+            var preferredCandidates = candidates.Where(x => preferredList.Contains(x.Airport.ICAO)).ToList();
+            var selected = preferredCandidates.Count > 0
+                ? preferredCandidates[random.Next(preferredCandidates.Count)]
+                : candidates[random.Next(candidates.Count)];
+
+            return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime);
+        }
+
         private List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig)
+        {
+            return GetCalibratedCategories(airport, tierConfig, _hubService);
+        }
+
+        public static List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig, IHubDataService hubService)
         {
             var categories = tierConfig.Categories.Select(c => new CategoryConfig
             {
@@ -393,7 +581,7 @@ namespace FlightCareer.Application.Services
                 SubCategories = c.SubCategories
             }).ToList();
 
-            var hubTypes = _hubService.GetHubTypesForAirport(airport.ICAO);
+            var hubTypes = hubService?.GetHubTypesForAirport(airport.ICAO) ?? (IReadOnlyList<HubType>)Array.Empty<HubType>();
             if (!hubTypes.Any()) return categories;
 
             // Se for Hub de Instrução e o Tier não possui nativamente a Categoria 3.4 (ex: Tier 1),
@@ -503,10 +691,15 @@ namespace FlightCareer.Application.Services
 
         private T? PickWeighted<T>(IEnumerable<T> items) where T : class
         {
+            return PickWeighted(items, _random);
+        }
+
+        private static T? PickWeighted<T>(IEnumerable<T> items, Random random) where T : class
+        {
             if (items == null || !items.Any()) return null;
             double totalWeight = items.Sum(i => (double)i.GetType().GetProperty("Weight")?.GetValue(i)!);
             if (totalWeight <= 0) return items.FirstOrDefault();
-            double roll = _random.NextDouble() * totalWeight;
+            double roll = (random ?? new Random()).NextDouble() * totalWeight;
             double current = 0;
             foreach (var item in items)
             {
@@ -524,6 +717,19 @@ namespace FlightCareer.Application.Services
             int paxCount = 0, 
             int originTier = 3, 
             int destTier = 3)
+        {
+            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, _random);
+        }
+
+        public static double CalculateReward(
+            double distance, 
+            double payload, 
+            double urgency, 
+            string subId, 
+            int paxCount, 
+            int originTier, 
+            int destTier, 
+            Random random)
         {
             // 1. Taxa Base de Despacho (Fixed Minimum Dispatch Fee) e Tarifas por Tipo de Operação
             double baseFee;
@@ -613,14 +819,14 @@ namespace FlightCareer.Application.Services
             double bushBonus = (destTier == 4) ? 1.25 : 1.00;
 
             // 5. Flutuação de Mercado Orgânica (+/- 14% de variação estocástica realista)
-            double marketSpread = 0.88 + (_random.NextDouble() * 0.26);
+            double marketSpread = 0.88 + ((random ?? new Random()).NextDouble() * 0.26);
 
             double finalReward = grossBase * originFactor * bushBonus * marketSpread;
 
             return Math.Round(finalReward, 2);
         }
 
-        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        public static double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             var d1 = lat1 * (Math.PI / 180.0);
             var num1 = lon1 * (Math.PI / 180.0);

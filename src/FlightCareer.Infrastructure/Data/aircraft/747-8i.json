@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "747-8i",
+  "class": "Jet",
+  "engineCount": 4,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "galley",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "jet",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "747-8i"
+    ],
+    "atcModel": [
+      "B748"
+    ]
+  },
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.92,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 320.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 245.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0818-747-8i-3.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:5",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:6",
+      "value": 285.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 6 (20261115-0818-747-8i.csv)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 365.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 365 KIAS / MMO 0,90 (Boeing 747-8, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE GEnx-2B67",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 160.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE GEnx-2B67",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 1060.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE GEnx-2B67",
+      "notes": null
+    }
+  ]
+}

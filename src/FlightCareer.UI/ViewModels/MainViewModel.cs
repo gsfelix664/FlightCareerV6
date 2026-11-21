@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
@@ -349,14 +350,34 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonColor));
             };
             _flightMonitor.OnAlert += (title, msg, isError) => {
-                // BeginInvoke: o alerta não pode travar o monitor de voo enquanto a janela estiver aberta
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
-                    System.Windows.MessageBox.Show(msg, title, System.Windows.MessageBoxButton.OK, isError ? System.Windows.MessageBoxImage.Error : System.Windows.MessageBoxImage.Information);
-                });
+                // Overlay por cima do simulador (não modal): o alerta não trava o monitor de voo nem tira o foco do MSFS
+                ShowFlightMessage(title, msg, isError ? AlertKind.Error : AlertKind.Info);
             };
             _flightMonitor.OnFlightFinished += OnFlightFinished;
             _flightMonitor.OnTotalLoss += OnTotalLoss;
             _flightMonitor.OnMonitoringCancelled += OnMonitoringCancelled;
+            _flightMonitor.OnFuelTruckCharged += aircraftId =>
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() => RefreshAfterFuelTruckAsync(aircraftId));
+        }
+
+        /// <summary>
+        /// O caminhão de combustível foi cobrado em outro contexto: recarrega saldo e aeronave rastreados por este
+        /// contexto longo, para que um SaveChanges posterior não grave valores antigos (AGENTS.md › 6).
+        /// </summary>
+        private async Task RefreshAfterFuelTruckAsync(Guid aircraftId)
+        {
+            try
+            {
+                await RefreshPilotBalanceAsync();
+                // Em voo monitorado a mesma entidade é a do FlightMonitor (já atualizada em memória): não recarregar
+                if (_flightMonitor.IsMonitoring) return;
+                var tracked = _context.PilotAircrafts.Local.FirstOrDefault(a => a.Id == aircraftId);
+                if (tracked != null) await _context.Entry(tracked).ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainViewModel] Falha ao recarregar após o caminhão de combustível: {ex.Message}");
+            }
         }
 
         private void OnMonitoringCancelled()
@@ -372,6 +393,15 @@ namespace FlightCareer.UI.ViewModels
             });
         }
 
+        /// <summary>Mensagens do voo vão para o overlay por cima do simulador (AlertOverlayService).</summary>
+        private static void ShowFlightMessage(string title, string message, AlertKind kind, bool sticky = false)
+        {
+            var provider = ((App)System.Windows.Application.Current).ServiceProvider;
+            Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<Services.AlertOverlayService>(provider)
+                .Show(title, message, kind, sticky);
+        }
+
         private void OnTotalLoss(PilotAircraft aircraft)
         {
             System.Windows.Application.Current.Dispatcher.Invoke(async () => {
@@ -381,7 +411,7 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonText));
                 OnPropertyChanged(nameof(StartFlightButtonColor));
 
-                System.Windows.MessageBox.Show($"PERDA TOTAL! A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída.\n\nVerifique seu hangar para acionar o seguro.", "Crash - Perda Total", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                ShowFlightMessage("CRASH - PERDA TOTAL", $"A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída. Verifique seu hangar para acionar o seguro.", AlertKind.Error);
                 
                 await InitializeForPilotAsync(PilotName);
             });
@@ -589,6 +619,7 @@ namespace FlightCareer.UI.ViewModels
                 }
 
                 AvailableMissions.Add(mission);
+                await StageMissionStateAsync(mission);
                 await _context.SaveChangesAsync();
 
                 try
@@ -737,6 +768,34 @@ namespace FlightCareer.UI.ViewModels
             if (activeAircraft?.AircraftType != null)
             {
                 var type = activeAircraft.AircraftType;
+                if (type.HasConvertibleCabin)
+                {
+                    var effectiveCap = CabinConversion.GetEffectiveCapacity(type.MaxPax, type.MaxPayloadLbs, activeAircraft.Configuration, hasConvertibleCabin: true);
+
+                    if (CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount > 0))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para CARGA (sem assentos de passageiros).\n\n" +
+                            $"Para aceitar contratos com passageiros, alterne a configuração da cabine para Passageiro no Hangar.",
+                            "Configuração Incompatível",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveCap.MaxCargoLbs))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para PASSAGEIRO.\n\n" +
+                            $"Contratos de carga pura estão limitados à capacidade do bagageiro ({effectiveCap.MaxCargoLbs:N0} LBS).\n" +
+                            $"Para transportar cargas maiores, alterne a configuração da cabine para Carga no Hangar.",
+                            "Configuração Incompatível",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+
                 double totalBatchPayload = itemsToAccept.Sum(m => m.PayloadLbs);
                 int totalBatchPax = itemsToAccept.Sum(m => m.PassengerCount);
 
@@ -774,6 +833,7 @@ namespace FlightCareer.UI.ViewModels
                     _allMissionDisplayItems.Remove(item);
                     mission.IsAccepted = true;
                     mission.PilotId = pilot.Id;
+                    await StageMissionStateAsync(mission);
                 }
             }
 
@@ -785,6 +845,23 @@ namespace FlightCareer.UI.ViewModels
 
             // Redireciona e prepara o Briefing
             ShowBriefingCommand.Execute(null);
+        }
+
+        /// <summary>
+        /// As missões do quadro vêm do contexto do MissionGenerator, não deste. Copia o estado da instância
+        /// exibida para a entidade rastreada aqui; sem isso o SaveChanges deste contexto não gravava
+        /// o aceite/descarregamento (o manifesto sumia ao recarregar).
+        /// </summary>
+        private async Task StageMissionStateAsync(Mission mission)
+        {
+            var db = await _context.Missions.FindAsync(mission.Id);
+            if (db == null || ReferenceEquals(db, mission)) return;
+            db.IsAccepted = mission.IsAccepted;
+            db.PilotId = mission.PilotId;
+            db.OriginICAO = mission.OriginICAO;
+            db.DistanceNM = mission.DistanceNM;
+            db.RewardMoney = mission.RewardMoney;
+            db.ExperienceGain = mission.ExperienceGain;
         }
 
         private async void AcceptMission()
@@ -818,10 +895,20 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            if (ActiveMissions.Any(m => m.PassengerCount > 0) && aircraft.Configuration.Contains("Carga"))
+            if (aircraft.AircraftType?.HasConvertibleCabin == true)
             {
-                System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
-                return;
+                if (ActiveMissions.Any(m => m.PassengerCount > 0) && CabinConversion.IsCargoConfiguration(aircraft.Configuration))
+                {
+                    System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                var effectiveFlightCap = CabinConversion.GetEffectiveCapacity(aircraft.AircraftType.MaxPax, aircraft.AircraftType.MaxPayloadLbs, aircraft.Configuration, hasConvertibleCabin: true);
+                if (!CabinConversion.IsCargoConfiguration(aircraft.Configuration) && ActiveMissions.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveFlightCap.MaxCargoLbs))
+                {
+                    System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está em configuração PASSAGEIRO e possui contrato de carga que excede o bagageiro ({effectiveFlightCap.MaxCargoLbs:N0} LBS).\n\nConverta a cabine para Carga no Hangar para transportar este volume.", "Carga Excede Capacidade de Bagagem", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
             }
 
             var groundingDefects = _flightMonitor.GetGroundingDefects(aircraft.Id);
@@ -842,8 +929,9 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task PromoteCompanyTierAsync()
         {
-            var pilots = await _pilotRepository.GetAllAsync();
-            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            // Carregado deste contexto (antes vinha do repositório e o SaveChanges abaixo não gravava saldo nem categoria)
+            _context.ChangeTracker.Clear();
+            var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Name == PilotName);
             if (pilot == null) return;
 
             if (PilotCategory >= PilotCategory.Category5_MajorAirline)
@@ -956,20 +1044,38 @@ namespace FlightCareer.UI.ViewModels
 
                 if (outcome.Success)
                 {
-                    System.Windows.MessageBox.Show($"Voo concluído com sucesso!\n\nRecompensa: {outcome.Revenue:C2}\nXP: {outcome.XP}\nMissões: {outcome.CompletedMissions}", "Debriefing");
+                    ShowFlightMessage("VOO CONCLUÍDO", $"Recompensa: {outcome.Revenue:C2} · XP: {outcome.XP} · Missões: {outcome.CompletedMissions}", AlertKind.Info, sticky: true);
                     
                     // Recarregar tudo do banco (isso vai atualizar as missões ativas restantes)
                     await InitializeForPilotAsync(PilotName);
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"O voo não foi registrado: {outcome.Message}", "Aviso");
+                    ShowFlightMessage("VOO NÃO REGISTRADO", outcome.Message, AlertKind.Warning, sticky: true);
                 }
             });
         }
 
+        /// <summary>
+        /// Relê o saldo do banco após serviços feitos em outro contexto (Hangar). Recarrega também a entidade
+        /// rastreada por este contexto, para que um SaveChanges posterior não grave um saldo antigo.
+        /// </summary>
+        public async Task RefreshPilotBalanceAsync()
+        {
+            var tracked = _context.Pilots.Local.FirstOrDefault(p => p.Name == PilotName);
+            if (tracked != null)
+            {
+                await _context.Entry(tracked).ReloadAsync();
+                Balance = tracked.Balance;
+                return;
+            }
+            var balance = await _context.Pilots.AsNoTracking().Where(p => p.Name == PilotName).Select(p => (double?)p.Balance).FirstOrDefaultAsync();
+            if (balance.HasValue) Balance = balance.Value;
+        }
+
         public async Task InitializeForPilotAsync(string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             var pilot = await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)

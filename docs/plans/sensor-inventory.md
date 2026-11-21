@@ -1,0 +1,313 @@
+# Inventário de sensores do SimConnect (SDK MSFS 2024)
+
+**Fonte:** documentação oficial do SDK MSFS 2024 (retail), páginas de SimVars de aeronave, consultadas em 2026-11-13:
+- Motor: https://docs.flightsimulator.com/msfs2024/retail/programming-apis/simvars/aircraft-simvars/aircraft-engine-variables/
+- Elétrico: .../aircraft-electrics-variables/
+- Freios e trem: .../aircraft-brake-and-landing-gear-variables/
+- Sistemas (instrumentos, hidráulico, pneumático, pressurização, partial panel): .../aircraft-system-variables/
+- Diversos (posição, alertas, wear and tear, velocidades): .../aircraft-miscellaneous-variables/
+- Combustível: .../aircraft-fuel-variables/
+- Modelo de voo (G, velocidades de projeto): .../aircraft-flight-model-variables/
+- Comandos (flaps, spoilers, trim): .../aircraft-control-variables/
+
+**Status de todos os itens: CANDIDATO.** Nenhum vira regra de desgaste antes de passar no voo de validação
+(plano `pecas-desgaste-falhas.md`, tarefa F1.4). Já confirmados no MSFS 2024 (C152) em sessão anterior estão marcados ✅.
+
+Convenções:
+- `:N` = índice do motor (1 a 16). Ler `NUMBER OF ENGINES` e registrar o índice para cada motor existente.
+- **Unidade:** peça sempre a unidade escrita aqui na `AddToDataDefinition` (o SimConnect converte). Ex.: temperaturas em `celsius`, pressão de óleo em `psi`.
+- **Escrita (W):** só usar escrita onde já foi testada. As demais escritas estão fora do escopo.
+- Coluna "Dica de peça" = qual peça o sensor ajuda a avaliar. **Sensor não é peça.**
+
+---
+
+## 1. Identificação e fase do voo (contexto, não desgasta nada)
+
+| SimVar | Unidade | Uso |
+|---|---|---|
+| `TITLE`, `ATC MODEL`, `ATC TYPE` | string | identificar o avião e escolher limites |
+| `ENGINE TYPE` | enum (0 pistão, 1 jato, 2 nenhum, 3 heli turbina, 4 não suportado, 5 turboélice) | classe do motor |
+| `NUMBER OF ENGINES` | number | quantos índices ler |
+| `IS GEAR RETRACTABLE`, `IS GEAR FLOATS`, `IS GEAR SKIS`, `IS GEAR WHEELS` | bool | quais peças de trem existem |
+| `CARB HEAT AVAILABLE` | bool | carburado × injetado |
+| `RECIP ENG NUM CYLINDERS:N` | number | nº de cilindros |
+| `FLAPS AVAILABLE`, `FLAPS NUM HANDLE POSITIONS` | bool / number | existem flaps |
+| `NEW ELECTRICAL SYSTEM`, `NEW FUEL SYSTEM` | bool | qual família de SimVars elétricas/combustível usar |
+| `SIM ON GROUND`, `PLANE ALT ABOVE GROUND`, `GROUND VELOCITY`, `AIRSPEED INDICATED` | — | fase do voo |
+| `SIMULATION RATE` | number | relógio de desgaste (tempo simulado) |
+| `SURFACE TYPE`, `SURFACE CONDITION`, `ON ANY RUNWAY` | enum / bool | pista de terra/grama, molhada |
+| `AMBIENT TEMPERATURE`, `AMBIENT PRECIP STATE`, `TOTAL AIR TEMPERATURE` | celsius / mask | multiplicadores (frio, chuva) |
+
+## 2. Motor a pistão
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `GENERAL ENG RPM:N` ✅ | rpm | cilindros, virabrequim (over-RPM) |
+| `GENERAL ENG MAX REACHED RPM:N` | rpm | over-RPM registrado pelo sim |
+| `MAX RATED ENGINE RPM:N` | rpm | limite do avião (RPM máxima nominal; SDK 2024, "Aircraft Engine Variables") |
+| `RECIP ENG MANIFOLD PRESSURE:N` | inHg | cilindros (carga), turbo |
+| `RECIP ENG CYLINDER HEAD TEMPERATURE:N` ✅ | celsius | cilindros, válvulas (superaquecimento, shock cooling) |
+| `RECIP MAX CHT` | celsius | limite do próprio avião |
+| `GENERAL ENG EXHAUST GAS TEMPERATURE:N` | celsius | válvulas de escape, escapamento |
+| `MAX EGT` | celsius | limite do avião |
+| `RECIP ENG TURBINE INLET TEMPERATURE:N` | celsius | turbocompressor (TIT) |
+| `RECIP ENG DETONATING:N` | bool | **cilindros/pistões (detonação)** |
+| `RECIP ENG CYLINDER HEALTH:N` | percent over 100 | saúde nativa dos cilindros (comparar com a nossa) |
+| `RECIP ENG NUM CYLINDERS FAILED:N` | number | cilindro perdido (nativo) |
+| `RECIP MIXTURE RATIO:N` | ratio | detonação, mistura pobre |
+| `GENERAL ENG MIXTURE LEVER POSITION:N` | percent | idem |
+| `GENERAL ENG THROTTLE LEVER POSITION:N` | percent | carga, operação brusca |
+| `RECIP ENG BRAKE POWER PCT:N` | percent over 100 | % de potência (carga real) |
+| `RECIP ENG FUEL FLOW:N` | pounds per hour | bomba/injetores |
+| `GENERAL ENG FUEL PRESSURE:N` | psi | bomba de combustível |
+| `RECIP CARBURETOR TEMPERATURE:N` ✅ | celsius | carburador (gelo) |
+| `RECIP ENG ALTERNATE AIR POSITION:N` | position | filtro/admissão |
+| `RECIP ENG WASTEGATE POSITION:N` | percent | turbo / wastegate |
+| `RECIP ENG TURBOCHARGER FAILED:N` | bool | turbocompressor (nativo) |
+| `RECIP ENG COWL FLAP POSITION:N` | percent | refrigeração (cowl flap) |
+| `RECIP ENG PRIMER:N` | bool | primer |
+| `RECIP ENG GLOW PLUG ACTIVE:N` | bool | velas aquecedoras (diesel) |
+| `RECIP ENG RADIATOR TEMPERATURE:N`, `RECIP ENG COOLANT RESERVOIR PERCENT:N` | celsius / percent | arrefecimento líquido (diesel/Rotax) |
+| `RECIP ENG LEFT MAGNETO:N`, `RECIP ENG RIGHT MAGNETO:N` ✅ (W ✅) | bool | magnetos |
+| `RECIP ENG STARTER TORQUE:N` | foot pound | motor de partida |
+| `GENERAL ENG STARTER:N` ✅, `GENERAL ENG STARTER ACTIVE:N` | bool | motor de partida (tempo engatado) |
+| `GENERAL ENG COMBUSTION:N` ✅ | bool | motor funcionando |
+| `PROP RPM:N`, `GENERAL ENG PROPELLER LEVER POSITION:N` | rpm / percent | hélice, governador |
+| `ENG VIBRATION:N` | number | **hélice/motor desbalanceado** |
+
+## 3. Óleo (todas as classes)
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `GENERAL ENG OIL TEMPERATURE:N` ✅ | celsius | óleo, radiador de óleo |
+| `MAX OIL TEMPERATURE` | celsius | limite do avião |
+| `GENERAL ENG OIL PRESSURE:N` ✅ | psi | bomba de óleo, bronzinas |
+| `ENG OIL QUANTITY:N` | percent over 100 | nível de óleo |
+| `GENERAL ENG OIL LEAKED PERCENT:N` ✅ (W ✅) | percent | retentores, juntas |
+| `OIL COOLING FLAPS POSITION:N` | percent over 100 | radiador de óleo |
+| `WARNING OIL PRESSURE` | bool | alerta do painel |
+
+## 4. Turbina (turboélice e jato)
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `TURB ENG N1:N`, `TURB ENG N2:N` | percent | compressor, turbina (sobrevelocidade) |
+| `TURB ENG ITT:N` | celsius | seção quente (palhetas, câmara) |
+| `TURB MAX ITT` | celsius | limite do avião |
+| `TURB ENG MAX TORQUE PERCENT:N` | percent | caixa de redução (turboélice) |
+| `TURB ENG FREE TURBINE TORQUE:N`, `ENG TORQUE:N` | foot pound | idem |
+| `TURB ENG FUEL FLOW PPH:N` | pounds per hour | FCU / bomba |
+| `TURB ENG IS IGNITING:N`, `TURB ENG IGNITION SWITCH EX1:N` | bool / enum | ignitores |
+| `TURB ENG MASTER STARTER SWITCH:N` | bool | starter/gerador |
+| `TURB ENG CONDITION LEVER POSITION:N` | enum | corte de combustível |
+| `TURB ENG INLET TEMPERATURE:N` | celsius | admissão (gelo/FOD) |
+| `TURB ENG VIBRATION:N` | number | **rotor desbalanceado** |
+| `TURB ENG BLEED AIR:N` | psi | sangria |
+| `TURB ENG REVERSE NOZZLE PERCENT:N`, `GENERAL ENG REVERSE THRUST ENGAGED:N` | percent / bool | reversor |
+| `PROP BETA:N`, `PROP FEATHERED:N` | radians / bool | hélice (turboélice) |
+| `APU PCT RPM`, `APU ON FIRE DETECTED` | percent / bool | APU (jatos) |
+
+## 5. Falhas e danos que o simulador já informa
+
+| SimVar | Unidade | Uso |
+|---|---|---|
+| `ENG FAILED:N` ✅ | bool | motor falhado |
+| `ENG ON FIRE:N` ✅ (W ✅), `GENERAL ENG FIRE DETECTED:N` | bool | fogo |
+| `GENERAL ENG DAMAGE PERCENT:N` ✅ | percent | dano nativo do motor |
+| `FLAP DAMAGE BY SPEED` ✅, `FLAP SPEED EXCEEDED` | bool | flaps |
+| `GEAR DAMAGE BY SPEED` ✅, `GEAR SPEED EXCEEDED` | bool | trem |
+| `CRASH FLAG` ✅ | enum | acidente |
+| `PARTIAL PANEL VACUUM` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL PITOT` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ELECTRICAL` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ENGINE` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL AIRSPEED` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ALTIMETER` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL ATTITUDE` | enum | estado de panes do menu do sim |
+| `PARTIAL PANEL HEADING` | enum | estado de panes do menu do sim |
+
+## 6. Elétrico
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `GENERAL ENG MASTER ALTERNATOR:N` ✅ (só leitura) | bool | chave do alternador |
+| `ELECTRICAL GENALT BUS VOLTAGE:N`, `ELECTRICAL GENALT BUS AMPS:N` | volts / amperes | alternador/gerador |
+| `ELECTRICAL GENALT LOAD:N` | percent | **sobrecarga do alternador** |
+| `ELECTRICAL GENERATOR AMPS:N`, `ELECTRICAL GENERATOR VOLTAGE:N`, `ELECTRICAL GENERATOR ACTIVE:N` | amperes / volts / bool | gerador elétrico moderno MSFS 2024 |
+| `ELECTRICAL MAIN BUS VOLTAGE` | volts | regulador de voltagem |
+| `ELECTRICAL BATTERY VOLTAGE`, `ELECTRICAL BATTERY LOAD`, `ELECTRICAL BATTERY LEVEL` | volts / amperes / percent | bateria (descarga profunda) |
+| `ELECTRICAL BATTERY ESTIMATED CAPACITY PCT` | percent over 100 | bateria |
+| `ELECTRICAL MASTER BATTERY` | bool | uso da bateria |
+| `ELECTRICAL TOTAL LOAD AMPS` | amperes | carga elétrica |
+| `EXTERNAL POWER ON` | bool | GPU (poupa bateria/starter) |
+| `WARNING VOLTAGE` | bool | alerta do painel |
+| `CIRCUIT BREAKER PULLED` | bool | disjuntores por nome: fase futura (aviônicos) |
+| `AVIONICS MASTER SWITCH` | bool | chave master de aviônicos |
+| `ELECTRICAL BUS VOLTAGE:1`, `ELECTRICAL BUS VOLTAGE:2`, `ELECTRICAL BUS VOLTAGE:3`, `ELECTRICAL BUS VOLTAGE:4`, `ELECTRICAL BUS VOLTAGE:5` | volts | barramentos v2+ (tensão dos barramentos 1 a 5) |
+| `ELECTRICAL BUS AMPS:1`, `ELECTRICAL BUS AMPS:2`, `ELECTRICAL BUS AMPS:3`, `ELECTRICAL BUS AMPS:4`, `ELECTRICAL BUS AMPS:5` | amperes | barramentos v2+ (corrente dos barramentos 1 a 5) |
+| `CIRCUIT ON:1`, `CIRCUIT ON:2`, `CIRCUIT ON:3`, `CIRCUIT ON:4`, `CIRCUIT ON:5`, `CIRCUIT ON:6`, `CIRCUIT ON:7`, `CIRCUIT ON:8`, `CIRCUIT ON:9`, `CIRCUIT ON:10` | bool | circuitos v2+ (energização dos circuitos 1 a 10) |
+| `ELECTRICAL BATTERY VOLTAGE:1`, `ELECTRICAL BATTERY LOAD:1` | volts / amperes | bateria indexada v2+ (1) |
+| `ELECTRICAL MAIN BUS VOLTAGE:1` | volts | barramento principal legado v1.00 (controle/conferência) |
+| `LIGHT LANDING ON` | bool | iluminação (farol de pouso) |
+| `LIGHT TAXI ON` | bool | iluminação (farol de táxi) |
+| `LIGHT NAV ON` | bool | iluminação (luzes de navegação) |
+| `LIGHT STROBE ON` | bool | iluminação (luzes estroboscópicas) |
+| `LIGHT BEACON ON` | bool | iluminação (beacon) |
+| `LIGHT PANEL ON` | bool | iluminação (painel de instrumentos) |
+
+## 7. Vácuo, pitot, estática e gelo
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `SUCTION PRESSURE` ✅ | inHg | bomba de vácuo |
+| `WARNING VACUUM` | bool | alerta |
+| `PITOT HEAT`, `PITOT HEAT SWITCH`, `PITOT ICE PCT` | bool / enum / percent | sistema pitot |
+| `ALTERNATE STATIC SOURCE OPEN` | bool | sistema estático |
+| `STRUCTURAL ICE PCT`, `STRUCTURAL DEICE SWITCH`, `PROP DEICE SWITCH`, `WINDSHIELD DEICE SWITCH` | percent / bool | gelo na célula/hélice |
+| `ENG ANTI ICE:N` / `GENERAL ENG ANTI ICE POSITION:N` | bool | carb heat / anti-gelo do motor |
+
+## 8. Combustível
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `FUEL TOTAL QUANTITY`, `FUEL TOTAL QUANTITY WEIGHT` | gallons / pounds | — (já usado) |
+| `GENERAL ENG FUEL PUMP SWITCH:N`, `GENERAL ENG FUEL PUMP ON:N` | bool | bomba elétrica (horas de uso) |
+| `FUELSYSTEM PUMP ACTIVE:N`, `FUELSYSTEM ENGINE PRESSURE:N`, `FUELSYSTEM LINE FUEL PRESSURE:N` | bool / kPa | bombas e linhas (só aviões com `NEW FUEL SYSTEM`) |
+| `WARNING FUEL` | bool | alerta |
+| `RECIP ENG FUEL AVAILABLE:N`, `TURB ENG FUEL AVAILABLE:N` | bool | falta de combustível (não é pane de peça) |
+
+## 9. Trem, pneus e freios
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `PLANE TOUCHDOWN NORMAL VELOCITY` | feet per second | amortecedores, estrutura do trem, pneus |
+| `PLANE TOUCHDOWN BANK DEGREES`, `PLANE TOUCHDOWN PITCH DEGREES` | degrees | pouso em uma roda / tail strike |
+| `CONTACT POINT COMPRESSION:0`, `CONTACT POINT COMPRESSION:1`, `CONTACT POINT COMPRESSION:2` | position | **amortecedor por ponto de contato (fim de curso)** |
+| `CONTACT POINT IS SKIDDING:0`, `CONTACT POINT IS SKIDDING:1`, `CONTACT POINT IS SKIDDING:2`, `CONTACT POINT IS ON GROUND:0`, `CONTACT POINT IS ON GROUND:1`, `CONTACT POINT IS ON GROUND:2`, `GEAR IS SKIDDING`, `GEAR SKIDDING FACTOR` | bool / percent | **pneus e pontos de contato (derrapagem, solo)** |
+| `WHEEL RPM`, `LEFT WHEEL RPM`, `RIGHT WHEEL RPM` | rpm | pneus (spin-up no toque) |
+| `GEAR POSITION`, `GEAR HANDLE POSITION`, `GEAR TOTAL PCT EXTENDED` | percent | atuador do trem (ciclos) |
+| `GEAR HYDRAULIC PRESSURE` | psf | hidráulico do trem |
+| `GEAR WARNING` | enum | — |
+| `BRAKE LEFT POSITION`, `BRAKE RIGHT POSITION` | position 32k | pastilhas, discos |
+| `BRAKE LEFT TEMPERATURE`, `BRAKE RIGHT TEMPERATURE` | kelvin | **discos/pastilhas (superaquecimento)** |
+| `BRAKE LEFT WEIGHT REMAINING`, `BRAKE RIGHT WEIGHT REMAINING` | percent over 100 | desgaste nativo das pastilhas |
+| `BRAKE PARKING POSITION` | bool | — |
+| `ANTISKID BRAKES ACTIVE`, `AUTOBRAKES ACTIVE` | bool | jatos |
+| `NOSEWHEEL MAX STEERING ANGLE`, `GEAR STEER ANGLE PCT` | radians / percent | direção da bequilha |
+
+## 10. Célula, comandos e estrutura
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `G FORCE` ✅, `MAX G FORCE`, `MIN G FORCE` | gforce | estrutura (asa, longarina) |
+| `DYNAMIC PRESSURE` | pound-force per square foot | pressão dinâmica / limites estruturais |
+| `SEMIBODY LOADFACTOR Y` | number | estrutura |
+| `WING FLEX PCT` | percent over 100 | estrutura (flexão de asa) |
+| `AIRSPEED INDICATED` ✅, `AIRSPEED TRUE`, `AIRSPEED MACH` | knots / mach | estrutura (Vne/Mmo) |
+| `OVERSPEED WARNING` ✅, `AIRSPEED BARBER POLE` | bool / knots | idem |
+| `REFERENCE SPEED MAX IAS`, `REFERENCE SPEED MAX IAS GEAR DOWN`, `MACH MAX OPERATE` | knots / mach | limites do próprio avião |
+| `DESIGN SPEED VS0`, `DESIGN SPEED VS1`, `DESIGN SPEED VC` | knots | limites do avião |
+| `STALL WARNING` | bool | — |
+| `FLAPS HANDLE INDEX` ✅ (W ✅), `FLAPS HANDLE PERCENT`, `FLAPS CURRENT SPEED LIMITATION` | number / percent / knots | flaps (Vfe por posição) |
+| `TRAILING EDGE FLAPS LEFT PERCENT`, `TRAILING EDGE FLAPS RIGHT PERCENT` | percent over 100 | assimetria de flap |
+| `SPOILERS HANDLE POSITION` | percent | spoilers |
+| `ELEVATOR TRIM POSITION`, `AILERON TRIM PCT`, `RUDDER TRIM PCT` | radians / percent over 100 / percent over 100 | trim (servos) |
+| `ACCELERATION BODY X`, `ACCELERATION BODY Y`, `ACCELERATION BODY Z` | feet per second squared | cargas laterais/turbulência |
+| `PRESSURIZATION CABIN ALTITUDE`, `PRESSURIZATION PRESSURE DIFFERENTIAL` | feet / psf | **estrutura pressurizada (ciclos de pressurização)** |
+| `ELEVATOR POSITION`, `AILERON POSITION`, `RUDDER POSITION` | position | deflexão de comandos de voo (profundor, aileron, leme) |
+| `AUTOPILOT MASTER` | bool | engate do piloto automático |
+
+## 11. Hidráulico e pneumático (aviões que tiverem)
+
+| SimVar | Unidade | Dica de peça |
+|---|---|---|
+| `HYDRAULIC PRESSURE`, `HYDRAULIC PUMP PRESSURE`, `HYDRAULIC RESERVOIR PERCENT` | psf / psi / percent | bomba hidráulica, reservatório |
+| `HYDRAULIC SYSTEM INTEGRITY` | percent over 100 | integridade nativa |
+| `ENG HYDRAULIC PRESSURE:N`, `ENG HYDRAULIC QUANTITY:N` | psf / percent | bomba acionada pelo motor |
+| `PNEUMATICS ENGINE BLEED AIR PRESSURE:N`, `PNEUMATICS DUCT PRESSURE` | psi | sangria, dutos |
+| `PNEUMATICS PACK STATUS` | bool | packs de ar condicionado |
+
+
+## 12. Wear and tear nativo (por componente)
+
+> [!NOTE]
+> **Sintaxe a confirmar no voo F1.4b** (fonte da verdade do desgaste nativo do MSFS 2024, plano › 0.1).
+> Cada variável de componente exige ID numérico (0–49, não existem IDs 15–18 no SDK) e é somente leitura.
+
+| SimVar | Unidade | Dica de peça / Componente |
+|---|---|---|
+| `WEAR AND TEAR LEVEL:0`, `WEAR AND TEAR IS WEAK:0`, `WEAR AND TEAR IS FAILED:0`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:0` | percent over 100 / bool | ID 0: FUEL TANK |
+| `WEAR AND TEAR LEVEL:1`, `WEAR AND TEAR IS WEAK:1`, `WEAR AND TEAR IS FAILED:1`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:1` | percent over 100 / bool | ID 1: FUEL PUMP |
+| `WEAR AND TEAR LEVEL:2`, `WEAR AND TEAR IS WEAK:2`, `WEAR AND TEAR IS FAILED:2`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:2` | percent over 100 / bool | ID 2: FUEL VALVE |
+| `WEAR AND TEAR LEVEL:3`, `WEAR AND TEAR IS WEAK:3`, `WEAR AND TEAR IS FAILED:3`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:3` | percent over 100 / bool | ID 3: FUEL JUNCTION |
+| `WEAR AND TEAR LEVEL:4`, `WEAR AND TEAR IS WEAK:4`, `WEAR AND TEAR IS FAILED:4`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:4` | percent over 100 / bool | ID 4: FUEL LINE |
+| `WEAR AND TEAR LEVEL:5`, `WEAR AND TEAR IS WEAK:5`, `WEAR AND TEAR IS FAILED:5`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:5` | percent over 100 / bool | ID 5: FLAPS LEFT |
+| `WEAR AND TEAR LEVEL:6`, `WEAR AND TEAR IS WEAK:6`, `WEAR AND TEAR IS FAILED:6`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:6` | percent over 100 / bool | ID 6: FLAPS RIGHT |
+| `WEAR AND TEAR LEVEL:7`, `WEAR AND TEAR IS WEAK:7`, `WEAR AND TEAR IS FAILED:7`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:7` | percent over 100 / bool | ID 7: FLAPS LEFT CABLE |
+| `WEAR AND TEAR LEVEL:8`, `WEAR AND TEAR IS WEAK:8`, `WEAR AND TEAR IS FAILED:8`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:8` | percent over 100 / bool | ID 8: FLAPS RIGHT CABLE |
+| `WEAR AND TEAR LEVEL:9`, `WEAR AND TEAR IS WEAK:9`, `WEAR AND TEAR IS FAILED:9`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:9` | percent over 100 / bool | ID 9: AILERONS LEFT |
+| `WEAR AND TEAR LEVEL:10`, `WEAR AND TEAR IS WEAK:10`, `WEAR AND TEAR IS FAILED:10`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:10` | percent over 100 / bool | ID 10: AILERONS RIGHT |
+| `WEAR AND TEAR LEVEL:11`, `WEAR AND TEAR IS WEAK:11`, `WEAR AND TEAR IS FAILED:11`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:11` | percent over 100 / bool | ID 11: AILERONS LEFT CABLE |
+| `WEAR AND TEAR LEVEL:12`, `WEAR AND TEAR IS WEAK:12`, `WEAR AND TEAR IS FAILED:12`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:12` | percent over 100 / bool | ID 12: AILERONS RIGHT CABLE |
+| `WEAR AND TEAR LEVEL:13`, `WEAR AND TEAR IS WEAK:13`, `WEAR AND TEAR IS FAILED:13`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:13` | percent over 100 / bool | ID 13: ELEVATOR |
+| `WEAR AND TEAR LEVEL:14`, `WEAR AND TEAR IS WEAK:14`, `WEAR AND TEAR IS FAILED:14`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:14` | percent over 100 / bool | ID 14: ELEVATOR CABLE |
+| `WEAR AND TEAR LEVEL:19`, `WEAR AND TEAR IS WEAK:19`, `WEAR AND TEAR IS FAILED:19`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:19` | percent over 100 / bool | ID 19: RUDDER |
+| `WEAR AND TEAR LEVEL:20`, `WEAR AND TEAR IS WEAK:20`, `WEAR AND TEAR IS FAILED:20`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:20` | percent over 100 / bool | ID 20: RUDDER CABLE |
+| `WEAR AND TEAR LEVEL:21`, `WEAR AND TEAR IS WEAK:21`, `WEAR AND TEAR IS FAILED:21`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:21` | percent over 100 / bool | ID 21: HYDRAULIC RESERVOIR |
+| `WEAR AND TEAR LEVEL:22`, `WEAR AND TEAR IS WEAK:22`, `WEAR AND TEAR IS FAILED:22`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:22` | percent over 100 / bool | ID 22: HYDRAULIC PUMP |
+| `WEAR AND TEAR LEVEL:23`, `WEAR AND TEAR IS WEAK:23`, `WEAR AND TEAR IS FAILED:23`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:23` | percent over 100 / bool | ID 23: HYDRAULIC VALVE |
+| `WEAR AND TEAR LEVEL:24`, `WEAR AND TEAR IS WEAK:24`, `WEAR AND TEAR IS FAILED:24`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:24` | percent over 100 / bool | ID 24: HYDRAULIC ACTUATOR |
+| `WEAR AND TEAR LEVEL:25`, `WEAR AND TEAR IS WEAK:25`, `WEAR AND TEAR IS FAILED:25`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:25` | percent over 100 / bool | ID 25: HYDRAULIC PTU |
+| `WEAR AND TEAR LEVEL:26`, `WEAR AND TEAR IS WEAK:26`, `WEAR AND TEAR IS FAILED:26`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:26` | percent over 100 / bool | ID 26: HYDRAULIC ACCUMULATOR |
+| `WEAR AND TEAR LEVEL:27`, `WEAR AND TEAR IS WEAK:27`, `WEAR AND TEAR IS FAILED:27`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:27` | percent over 100 / bool | ID 27: HYDRAULIC LINE |
+| `WEAR AND TEAR LEVEL:28`, `WEAR AND TEAR IS WEAK:28`, `WEAR AND TEAR IS FAILED:28`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:28` | percent over 100 / bool | ID 28: ELECTRICAL ALTERNATOR |
+| `WEAR AND TEAR LEVEL:29`, `WEAR AND TEAR IS WEAK:29`, `WEAR AND TEAR IS FAILED:29`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:29` | percent over 100 / bool | ID 29: ELECTRICAL BATTERY |
+| `WEAR AND TEAR LEVEL:30`, `WEAR AND TEAR IS WEAK:30`, `WEAR AND TEAR IS FAILED:30`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:30` | percent over 100 / bool | ID 30: ELECTRICAL IDG |
+| `WEAR AND TEAR LEVEL:31`, `WEAR AND TEAR IS WEAK:31`, `WEAR AND TEAR IS FAILED:31`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:31` | percent over 100 / bool | ID 31: ELECTRICAL RAT |
+| `WEAR AND TEAR LEVEL:32`, `WEAR AND TEAR IS WEAK:32`, `WEAR AND TEAR IS FAILED:32`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:32` | percent over 100 / bool | ID 32: ELECTRICAL BUS |
+| `WEAR AND TEAR LEVEL:33`, `WEAR AND TEAR IS WEAK:33`, `WEAR AND TEAR IS FAILED:33`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:33` | percent over 100 / bool | ID 33: ELECTRICAL CIRCUIT |
+| `WEAR AND TEAR LEVEL:34`, `WEAR AND TEAR IS WEAK:34`, `WEAR AND TEAR IS FAILED:34`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:34` | percent over 100 / bool | ID 34: ELECTRICAL RECTIFIERS |
+| `WEAR AND TEAR LEVEL:35`, `WEAR AND TEAR IS WEAK:35`, `WEAR AND TEAR IS FAILED:35`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:35` | percent over 100 / bool | ID 35: LANDING_GEAR |
+| `WEAR AND TEAR LEVEL:36`, `WEAR AND TEAR IS WEAK:36`, `WEAR AND TEAR IS FAILED:36`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:36` | percent over 100 / bool | ID 36: BRAKE |
+| `WEAR AND TEAR LEVEL:37`, `WEAR AND TEAR IS WEAK:37`, `WEAR AND TEAR IS FAILED:37`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:37` | percent over 100 / bool | ID 37: TIRE |
+| `WEAR AND TEAR LEVEL:38`, `WEAR AND TEAR IS WEAK:38`, `WEAR AND TEAR IS FAILED:38`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:38` | percent over 100 / bool | ID 38: TIRE_PRESSURE |
+| `WEAR AND TEAR LEVEL:39`, `WEAR AND TEAR IS WEAK:39`, `WEAR AND TEAR IS FAILED:39`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:39` | percent over 100 / bool | ID 39: PISTON ENGINE |
+| `WEAR AND TEAR LEVEL:40`, `WEAR AND TEAR IS WEAK:40`, `WEAR AND TEAR IS FAILED:40`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:40` | percent over 100 / bool | ID 40: TURBINE_ENGINE |
+| `WEAR AND TEAR LEVEL:41`, `WEAR AND TEAR IS WEAK:41`, `WEAR AND TEAR IS FAILED:41`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:41` | percent over 100 / bool | ID 41: OIL_TANK_INTEGRITY |
+| `WEAR AND TEAR LEVEL:42`, `WEAR AND TEAR IS WEAK:42`, `WEAR AND TEAR IS FAILED:42`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:42` | percent over 100 / bool | ID 42: OIL_TANK_AMOUNT |
+| `WEAR AND TEAR LEVEL:43`, `WEAR AND TEAR IS WEAK:43`, `WEAR AND TEAR IS FAILED:43`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:43` | percent over 100 / bool | ID 43: AUTOPILOT_BANK |
+| `WEAR AND TEAR LEVEL:44`, `WEAR AND TEAR IS WEAK:44`, `WEAR AND TEAR IS FAILED:44`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:44` | percent over 100 / bool | ID 44: AUTOPILOT_PITCH |
+| `WEAR AND TEAR LEVEL:45`, `WEAR AND TEAR IS WEAK:45`, `WEAR AND TEAR IS FAILED:45`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:45` | percent over 100 / bool | ID 45: AUTOPILOT_YAW |
+| `WEAR AND TEAR LEVEL:46`, `WEAR AND TEAR IS WEAK:46`, `WEAR AND TEAR IS FAILED:46`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:46` | percent over 100 / bool | ID 46: GENERAL |
+| `WEAR AND TEAR LEVEL:47`, `WEAR AND TEAR IS WEAK:47`, `WEAR AND TEAR IS FAILED:47`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:47` | percent over 100 / bool | ID 47: TAILWHEEL LANDING GEAR |
+| `WEAR AND TEAR LEVEL:48`, `WEAR AND TEAR IS WEAK:48`, `WEAR AND TEAR IS FAILED:48`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:48` | percent over 100 / bool | ID 48: TAILWHEEL TIRE |
+| `WEAR AND TEAR LEVEL:49`, `WEAR AND TEAR IS WEAK:49`, `WEAR AND TEAR IS FAILED:49`, `WEAR AND TEAR OVERSTRESS DAMAGE RATE:49` | percent over 100 / bool | ID 49: TAILWHEEL TIRE PRESSURE |
+| `WEAR AND TEAR EXPOSED PARTS LEVEL`, `WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL` | percent over 100 | Nível geral de peças expostas (sem ID) |
+
+## 13. Só calibração (varredura)
+
+SimVars temporárias para rotina guiada de calibração (`CalibrationMode = true`, excluídas do voo normal).
+
+| SimVar | Unidade | Descrição / uso |
+|---|---|---|
+| `CIRCUIT ON:11`, `CIRCUIT ON:12`, `CIRCUIT ON:13`, `CIRCUIT ON:14`, `CIRCUIT ON:15`, `CIRCUIT ON:16`, `CIRCUIT ON:17`, `CIRCUIT ON:18`, `CIRCUIT ON:19`, `CIRCUIT ON:20` | bool | varredura de circuitos para identificação da chave de aviônicos |
+| `ELECTRICAL BUS VOLTAGE:6`, `ELECTRICAL BUS VOLTAGE:7`, `ELECTRICAL BUS VOLTAGE:8`, `ELECTRICAL BUS VOLTAGE:9`, `ELECTRICAL BUS VOLTAGE:10` | volts | varredura de tensão de barramentos |
+| `ELECTRICAL BUS AMPS:6`, `ELECTRICAL BUS AMPS:7`, `ELECTRICAL BUS AMPS:8`, `ELECTRICAL BUS AMPS:9`, `ELECTRICAL BUS AMPS:10` | amperes | varredura de amperagem de barramentos |
+
+### Spike de sintaxe alternativa (motor pistão, ID 39)
+
+| SimVar | Unidade | Dica de peça / Componente |
+|---|---|---|
+| `WEAR AND TEAR LEVEL:39:1` | percent over 100 | Spike: ID com índice de motor (:1) |
+| `WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n` | percent over 100 | Spike: componente pelo nome (formato `:'NOME'_n` do SDK) |
+| `WEAR AND TEAR WEAK VALUE:39` | percent over 100 | Spike: weak value float para ID 39 |
+| `WEAR AND TEAR OVERSTRESS FACTOR:39` | percent over 100 | Spike: overstress factor para ID 39 |
+
+---
+
+## Regras de leitura (para o executor)
+
+1. Ler em **duas definições separadas**: a de contexto (seção 1, uma vez por voo e no `AircraftLoaded`) e a de sensores (seções 2 a 12, ~1–2 Hz).
+2. Se `AddToDataDefinition` de uma SimVar gerar `SIMCONNECT_EXCEPTION.NAME_UNRECOGNIZED`, registrar no log com o nome e **seguir sem ela** (o `dwIndex` da exceção diz qual foi). Não derrubar a conexão.
+3. Variável que fica **constante em 0** durante todo o roteiro de validação = "não suportada nesta aeronave".
+4. Itens ✅ já foram vistos funcionando no C152; mesmo assim entram no voo de validação para os outros aviões.

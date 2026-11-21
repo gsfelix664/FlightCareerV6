@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "Diamond DA62",
+  "class": "Piston",
+  "engineCount": 2,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "deIceBoots",
+    "diesel",
+    "fadec",
+    "fuelInjected",
+    "glassCockpit",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "propDeIce",
+    "retractableGear",
+    "turbocharged",
+    "weatherRadar"
+  ],
+  "simMatch": {
+    "title": [
+      "DA62"
+    ],
+    "atcModel": [
+      "DA62"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 201.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (201 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 121.29,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 64.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 70.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0809-DA62_Scientific_Research.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 135.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Approach 135 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 118.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (Landing 118 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2300.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.5 p. 6 (Austro Engine E4P 2300 rpm, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 160.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.10 p. 7 (160 KEAS, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 156.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "usuário 2026-11-19 (AFM; substitui valor anterior)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (+3.8g, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.629 Issue 8, Sec. A.III.6 p. 6 (-1.52g, https://www.easa.europa.eu/en/downloads/44256/en)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 2 × 70 A (DA62, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Austro AE330",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 136.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Diamond DA62 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

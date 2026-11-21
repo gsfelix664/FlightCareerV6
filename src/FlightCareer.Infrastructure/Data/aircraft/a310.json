@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "A310",
+  "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "galley",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "jet",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "ptu",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "A310"
+    ],
+    "atcModel": [
+      "A310"
+    ]
+  },
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.84,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0820-A310.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 270.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLE 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 245.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 0 245 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 210.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 15 210 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 195.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 15 Flaps 20 195 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Maximum Slats/Flaps Speeds p. 10 (Slats 20 Flaps 40 180 KTS, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 270.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "iniBuilds A310 MSFS Manual, Gear Operating Speeds p. 10 (VLO 270 KT, https://flightsimulator.azureedge.net/wp-content/uploads/2022/11/iniBuilds_A310_MSFS_Manual.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 360.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 360 KIAS / MMO 0,84 (Airbus A310, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE CF6-80C2",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 160.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE CF6-80C2",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 960.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: GE CF6-80C2",
+      "notes": null
+    }
+  ]
+}

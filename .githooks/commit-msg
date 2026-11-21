@@ -1,0 +1,13 @@
+#!/bin/sh
+# Padrão: tipo(escopo): descrição   (ver AGENTS.md › 4)
+first=$(head -n1 "$1")
+case "$first" in
+  Merge*|Revert*|fixup!*|squash!*) exit 0 ;;
+esac
+if ! printf '%s' "$first" | grep -qE '^(feat|fix|refactor|docs|test|chore|perf|style|build|ci)(\([a-z0-9._/-]+\))?: .+'; then
+  echo "BLOQUEADO: mensagem fora do padrão 'tipo(escopo): descrição'." >&2
+  echo "Exemplo: feat(parts): F1.1 registro de sensores" >&2
+  echo "Recebido: $first" >&2
+  exit 1
+fi
+exit 0

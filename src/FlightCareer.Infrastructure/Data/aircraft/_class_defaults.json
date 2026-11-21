@@ -1,0 +1,184 @@
+{
+  "Piston": [
+    {
+      "key": "rpmRedline",
+      "value": 2700,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe pistão (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe pistão (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 118,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe pistão (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 20,
+      "unit": "psi",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe pistão (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 23 Categoria Normal (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 23 Categoria Normal (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "chtCoolingRateMax",
+      "value": 28,
+      "unit": "celsius_per_minute",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: orientação comum do setor de ~50 °F/min (27,8 °C/min) de resfriamento da CHT; documento do fabricante não confirmado (a Lycoming SI 1094 trata de empobrecimento da mistura)",
+      "notes": "Taxa máxima recomendada de choque térmico para motores a pistão refrigerados a ar"
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: MAX EGT informado pelo MSFS no C152 (≈1640 °F)",
+      "notes": null
+    }
+  ],
+  "Turboprop": [
+    {
+      "key": "oilTempMax",
+      "value": 110,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe turboélice (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 60,
+      "unit": "psi",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe turboélice (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 805,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe turboélice (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100,
+      "unit": "percent",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe turboélice (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 101.5,
+      "unit": "percent",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe turboélice (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 23 Categoria Normal (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 23 Categoria Normal (component_catalog.json)",
+      "notes": null
+    }
+  ],
+  "Jet": [
+    {
+      "key": "oilTempMax",
+      "value": 140,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe jato (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 25,
+      "unit": "psi",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe jato (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 900,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe jato (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100,
+      "unit": "percent",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe jato (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 101.5,
+      "unit": "percent",
+      "source": "ClassDefault",
+      "reference": "Padrão da classe jato (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 25 Categoria Transporte (component_catalog.json)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "ClassDefault",
+      "reference": "FAR 25 Categoria Transporte (component_catalog.json)",
+      "notes": null
+    }
+  ]
+}

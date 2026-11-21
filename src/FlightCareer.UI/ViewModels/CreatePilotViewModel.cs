@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
+using FlightCareer.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -55,13 +56,7 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            double initialBalance = SelectedDifficulty switch
-            {
-                DifficultyMode.Easy => 1000000000,
-                DifficultyMode.Medium => 100000,
-                DifficultyMode.Hard => 10000,
-                _ => 100000
-            };
+            double initialBalance = CareerStart.GetInitialBalance(SelectedDifficulty);
 
             var pilot = new Pilot
             {
@@ -91,16 +86,17 @@ namespace FlightCareer.UI.ViewModels
                     PilotId = pilot.Id,
                     AircraftTypeId = c152.Id,
                     PurchaseDate = DateTime.Now,
-                    CurrentAirframeHours = 5000, // C152 padrão começa com horas
+                    CurrentAirframeHours = CareerStart.DefaultStartingAirframeHours, // C152 padrão começa com horas
                     Prefix = generatedPrefix,
                     EngineCondition = 100,
                     TiresCondition = 100,
                     AirframeCondition = 100,
-                    FuelAmount = c152.FuelTankGallons / 2, // Começa com meio tanque
+                    FuelAmount = c152.FuelTankGallons * CareerStart.DefaultStartingFuelFraction, // Começa com meio tanque
                     CurrentLocationICAO = pilot.InitialBaseICAO,
-                    EngineTboRemainingHours = 1800,
-                    HoursUntilNext50hInspection = 50,
-                    HoursUntilNext100hInspection = 100,
+                    EngineTboRemainingHours = CareerStart.DefaultStartingTboRemainingHours,
+                    HoursUntilNext50hInspection = CareerStart.DefaultStarting50hHours,
+                    HoursUntilNext100hInspection = CareerStart.DefaultStarting100hHours,
+                    HoursUntilNext500hInspection = CareerStart.DefaultStarting500hHours,
                     IsInterdicted = false,
                     InterdictionReason = string.Empty,
                     Configuration = "Passageiro"

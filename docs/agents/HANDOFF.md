@@ -1,0 +1,81 @@
+# Passagem de sessão (Claude) — 2026-11-21 (PC de casa, com MSFS)
+
+## Atualização 2026-11-21 (vale sobre o que está abaixo)
+- **Mergeados e no GitHub:** correção do óleo (`SimFailureActuator.Reset` só desfaz vazamento criado pelo app; não esvazia mais o motor no início do voo) e **MANUT-FAIXAS-B** (lista "Peças (n)" por card com saúde conhecida, "visto há X h", nota de vida e **Trocar**; "Reparar tudo" só pelo conhecido; troca avulsa não devolve TBO/125 h; cores 40/20). Build 0 erros, 684/684. **Nada visto na tela nem testado no MSFS.**
+- **ECON-STAB com as faixas:** 0 falências; cauteloso ≈ agressivo; manutenção quase não pesa porque a margem é ~90 %. Detalhes em `docs/plans/economia-estabilidade.md` › 4.2. Itens 1 e 2 abaixo concluídos.
+- **Plano futuro (usuário adiou em 2026-11-21): matrícula do Hangar no sim.** Não implementado (nem leitura). `ATC ID` é gravável pelo SDK (STRING32), assim como `ATC AIRLINE`/`ATC FLIGHT NUMBER`/`ATC HEAVY` (`docs/plans/sensor-research/variaveis-aeronave-diversos.md:81`). Passos: teste de console no MSFS (ler, gravar `PS-BYN`, ler, restaurar); gravar ao iniciar o monitoramento e no `AircraftLoaded`, guardando o original; conferir ATC e pintura dinâmica.
+- **Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do plano de economia → recalibrar `MissionGenerator.CalculateReward` por classe; voo de teste no MSFS (conferir óleo no início do voo, Hangar novo); itens 3 (inversão do óleo no vazamento ativo) e 4 abaixo continuam.
+
+---
+
+# Passagem anterior — 2026-11-20 (PC de casa, com MSFS)
+
+## Atualização 2026-11-20 (vale sobre o que está abaixo)
+- **Manutenção por faixas (decisões do usuário):** `docs/plans/economia-estabilidade.md` › 4.1. Verde 100–40, amarelo 40–20 (desgaste acelerado até 2× e perda de desempenho), vermelho < 20 (pane por peça). Reparo sem limite automático de 80 %; revisões trocam o conjunto delas; walkaround mostra valor exato; só a anual interdita (e só inspeciona); seguro 2,5 %/ano, nega perda total com achado vermelho da anual não trocado.
+- **MANUT-FAIXAS-A mergeada** (Gemini + ajustes do revisor; `docs/reviews/MANUT-FAIXAS-A-revisao.md`): build 0 erros, 673/673. **Nada testado no MSFS.**
+- **Próximo:**
+  1. **ECON-STAB** com as regras novas (`career-stab --days 720 --bots 3 --difficulty all --policy all --fast`, ~45 min): o cauteloso deixou de falir? o agressivo tem mais panes? Calibrar `lowHealthWearMaxMultiplier` e o seguro se preciso. Depois propostas D (curva de progressão) e E (dificuldade) do plano.
+  2. **MANUT-FAIXAS-B** (Hangar): lista de peças por card com `KnownHealth`/`KnownAtAirframeHours` ("visto há X h"), cor da faixa, nota de vida (`PartInspectionFlags.LifeNote`) e botão **Trocar** por peça; "Reparar tudo" = quebradas + vermelhas. Spec ainda não escrita.
+  3. **Bug provável do óleo:** no MSFS 2024 `GENERAL ENG OIL LEAKED PERCENT:1` = **óleo restante** (100 sem pane, cai devagar com o motor ligado, pressão normal; probe `20261120-0822-C172SP_G1000_Passengers`). O `SimFailureActuator` supõe 0 = sem vazamento (sobe até 100; limpeza grava 0 = esvazia). Confirmar e inverter.
+  4. **Perda de desempenho no amarelo:** `docs/plans/perda-desempenho-amarelo.md`. Teste no MSFS incompleto: o Watcher deu `DATA_ERROR` (pedido com *Is String* marcado e índice 0); repetir passos 1–5 com a linha `:1` selecionada, *Is String* desmarcado, e o SimVarProbe gravando (filtro com `(:\d+)?$`, sair com `q`, não usar Ctrl+C). Lista do Watcher: `tools/simvar_probe/watcher/flightcareer-teste-desempenho.simvars`.
+- `REGRAS_tiers.txt` (raiz, do usuário, não commitado): regras de missões Tier 1 — o usuário pediu para não analisar ainda.
+
+---
+
+# Passagem anterior — 2026-11-19 (PC do escritório)
+
+## Atualização 2026-11-19 (vale sobre o que está abaixo)
+- Base `feat/component-health-system` no GitHub; build 0 erros; `dotnet test` 655/655; **nada testado no MSFS nem visto na tela**.
+- Mergeados hoje (todos aprovados): correção do **R$ → $** (cultura en-US no construtor do `App`; antes caía no `async OnStartup`), **CALIBRA-F4b** (as 153 peças com a calibração do usuário `docs/agents/specs/calibracao-pecas-usuario-2026-11-19.json`; preço = base × multiplicador da classe A 0,75…J 5,5; TBO 500/900 h; inspeções 12/25/125 h; DA62 Vle 156, King Air 350 Vne 263), junto com **CATALOGO-MOTOR** e **CALIBRA-F4**; **CALENDARIO-JOGO** (`CareerClock`: só avança com voo + 0,5 h e oficina; seguro e vida em meses usam ele); **REPARO-PECAS** (troca a preço cheio só peças gastas); **CABINE** (conversão só em `convertibleCabin`, custo/parada por porte, efeito nas missões); **ECON-STAB** (`FlightCareer.Replay career-stab`, carreira completa com compra/venda, 3 dificuldades × 3 estilos). Decisões do arquivo do usuário (`docs/tarefas_sem_IA.md`) registradas nos § 3 dos planos de eventos/combustível/API/iluminação.
+- **Análise da economia:** `docs/plans/economia-estabilidade.md` — quem faz manutenção certa vai à falência e quem adia enriquece (limite de troca 80 % alto demais; pane só abaixo de 20 %; seguro 12 %/ano); margens 60–95 %; dificuldade só muda o saldo. Propostas A–F e **5 decisões do usuário** pendentes antes do rebalanceamento.
+- Pendentes conhecidos: multiplicadores por classe duplicados (código e `economy_targets.json`) — ler do JSON; `FlightService.ProcessFlightCancellationAsync` não está ligado (cancelamento não avança o relógio); queda de utilização após o upgrade na simulação (investigar, plano › F); teste do tempo acelerado no MSFS (`ROTEIRO.md` › 8).
+- Lição nova: `dotnet test` não compila a UI — sempre `dotnet build src/FlightCareer.slnx` (com o app aberto, `-p:OutDir=<pasta temporária>`).
+
+---
+
+(Histórico de 2026-11-17)
+
+Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `docs/agents/LICOES.md` (lição nova: não relaxar metas/oráculos) e os vereditos em `docs/reviews/`. As specs desta sessão estão em `docs/agents/specs/` (as próximas também devem ser copiadas para lá ao delegar).
+
+## Máquina e regras
+- **PC do escritório: sem MSFS e sem SDK.** Build, testes, fuzz e simulador de carreira rodam; nada que precise do simulador.
+- Divisão: código e dados → Gemini com spec (`tools/agents/gemini-task.sh <ID> <branch> <spec>` em segundo plano; worktrees `../FlightCareerV6-gemini` e `../FlightCareerV6-gemini2`, um por tarefa em paralelo via `FC_GEMINI_WORKTREE`; `FC_BASE=<branch>` para partir de outra branch). Claude escreve a spec, revisa, roda build/testes/fuzz, escreve `docs/reviews/<ID>-revisao.md`, faz merge e push com `FC_ALLOW_PROTECTED=1` (memória: push ao fim de cada trabalho aprovado).
+- **Limite de 1h30 do executor:** tarefas grandes (calibração com otimização, simulação longa) estouram e terminam **sem commit**. Divida a tarefa ou peça para o Gemini não rodar a simulação completa (o revisor roda).
+- Quota do Claude e do Gemini no fim: usuário volta no **sábado**.
+
+## Estado da base (`feat/component-health-system`, enviada ao GitHub)
+- Build 0 erros; `dotnet test` 612/612.
+- Mergeados hoje (todos aprovados; **nada testado no MSFS**):
+  1. **LIMITES-V4** — 130 limites do `tools/aircraft_limits/sources/aircraft_limits-v4.json` (fonte do usuário, não conferida) em 17 perfis; nenhum POH alterado.
+  2. **LUZES-F2** — grupo Iluminação (6 lâmpadas halógenas, desgaste só acesa, queima por taxa, `minorPart`, `LightingMel` só avisa); sem atuação no sim.
+  3. **HANGAR-ICONES** — Hangar não lista peças; após inspeção/walkaround, chips com exclamação amarela (vida ≥ 90 %, vencida ou saúde < 40 %) ou vermelha (quebrada) até o próximo voo. **Não visto na tela.**
+  4. **Ícones dos grupos no Hangar** (Claude) — a barra de saúde virou ícone vetorial por grupo, verde/amarelo/vermelho pelas mesmas faixas; **não visto na tela** (confira no sábado).
+  5. **ECON-SIM** — `FlightCareer.Replay career` (bots × missões reais × custos do jogo → `summary.md`). Funciona (C152, 3 dias, 23 s), mas a rodada grande (8 aviões × 5 bots × 90 dias) **não terminou em ~1 h**: rodar por avião ou otimizar antes.
+- Lista de peças para o usuário: `docs/plans/lista-pecas-hangar.md` (ainda com os valores antigos; será regenerada pela CALIBRA-F4).
+
+## Branches pendentes (no GitHub, **não mergeadas**)
+1. **`feat/catalogo-motor`** (revisada, ajustes do revisor feitos): remove `electrical.external_lighting`; J-3/CAP-4 sem peças elétricas/aviônicas/flap; calibração do grupo Motor do usuário (preço, mão de obra, parada); provisionador remove peças que não se aplicam (pula a aeronave se as features não puderem ser lidas). `economy_targets.json` **restaurado** de propósito → `PartEconomyBalanceTests` (2) falha até a CALIBRA-F4. Só entra junto com ela.
+2. **`feat/calibra-f4`** (parte da anterior; **parcial, não aprovada**): fator ÷ 4 (spec `docs/agents/specs/spec-CALIBRA-F4.md`). Ainda falham `PartEconomyBalanceTests` (2) e `Catalogo_Motor_CalibracaoDoUsuario`. O Gemini estourou o tempo tentando otimizar os percentuais com scripts (apagados). **Próximo passo:** revisar o diff; terminar a calibração de `repairCostPctOfAircraft` por grupo (o Claude define a regra — ex.: pct ÷ 4 e ajuste fino por grupo pela tabela do `PartEconomySimulator` — e o Gemini aplica em tarefa curta, sem simulação longa); depois merge das duas branches juntas.
+
+## Decisões do usuário (2026-11-17)
+- Iluminação = peças dentro do Elétrico; tudo halógena; MEL noturna só avisa. `electrical.external_lighting` removido.
+- Colunas da tabela do usuário "Pode reparar?" e "Crítico em voo?" = NO-GO e walkaround (sem mudança). "× n" na mão de obra = n horas; "×" junto do preço = preço escala com o avião (mantido).
+- **Fator de compressão ÷ 4** em toda vida de peça (horas e ciclos; base = catálogo de `83db087`), TBO (pistão 450 h, turbina 900 h) e inspeções: **12 h "Troca de óleo"**, **25 h "Inspeção anual"** (interdita), **125 h "Revisão de ignição"**; preços de inspeção/retífica ÷ 4. Calendário (meses) **não** comprimido; óleo pistão/turbina 3 meses. Calibração do óleo do usuário: `docs/agents/specs/calibracao-oleo-usuario.json`.
+- Ícones das peças: após inspeção, até o próximo voo.
+- Vida por calendário usa a data real (conta com o app fechado); calendário de jogo é ideia em aberto.
+
+## Achados para o rebalanceamento das missões (próxima tarefa depois da CALIBRA-F4)
+- Missões pagam muito acima do custo: no simulador o C152 fatura ~$1.988/h, margem 89 %, avião pago em ~34 h; 737 ~$37.600 por voo de 1 h. A taxa base fixa por missão ($220–5.500) e a tarifa por milha não dependem do avião → aviões leves rendem demais; progressão invertida (C152 se paga em dezenas de horas, 737 em milhares).
+- Não há salário; seguro é mensal; estacionamento ainda não é cobrado.
+- Plano: rodar `career` por avião na base com a CALIBRA-F4, o usuário define a margem-alvo por classe, depois recalibrar `MissionGenerator.CalculateReward` (taxa base e tarifa por milha por classe de avião) com um teste de margem por classe.
+
+## O que o usuário faz até sábado (sem IA)
+1. Tabelas de calibração dos demais grupos (formato da tabela do motor, vida real — o Claude aplica o ÷ 4).
+2. Margem-alvo por classe (ou "horas para pagar o avião" desejadas) e referências reais de custo/receita por hora.
+3. Conferir no POH: DA62 Vle (201 × 156 kt), King Air 350 Vne (245 × 263); variantes CTSL × CT, CAP 10 × CAP-4, DR400/100 × DR400.
+4. Decisões: Vlo (extensão × menor entre extensão e recolhimento); auto-leme com −10 % XP?; calendário de jogo?; § 3 de `eventos-diversos.md`, `eventos-comandos.md`, `eventos-combustivel.md`, `simconnect-api.md`.
+5. Abrir o app e conferir os chips do Hangar após uma inspeção.
+6. Em casa (MSFS): Ctrl+E e caminhão chegam ao SimConnect; sinal do `PLANE PITCH DEGREES`; pausa pelo menu na nota; mapa elétrico (Developer Mode › Electrical System Debug) de C152, C172, Baron e TBM para o plano de iluminação F1. **Tempo acelerado:** voo a 4× e 16× para confirmar que horas, desgaste, inspeções, TBO e relógio de carreira contam o tempo simulado (`docs/plans/sensor-validation/ROTEIRO.md` › 8).
+
+## Pendências antigas que precisam do simulador
+- SimvarWatcher com as listas novas; SimVarProbe com `--filter "^(?!ATC |AI )"`; escrita de turbina, combustível, slew; teste de panes (`BREAKER_*_SET`, `PARTIAL PANEL *`, `FUELSYSTEM_*`, `HYDRAULIC_ACTUATOR_ACTIVE_SET`, trim disabled); `FlightSave`/`FlightLoad`; Flow API; índices elétricos reais por avião; voos em outros aviões; F4.2e, crash declarado, pista de terra.

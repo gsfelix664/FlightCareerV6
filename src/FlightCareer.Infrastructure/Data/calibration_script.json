@@ -1,0 +1,86 @@
+{
+  "steps": [
+    {
+      "id": "cold-dark",
+      "text": "Tudo desligado (cold & dark): master da bateria OFF, alternador OFF, aviônicos OFF e motor desligado",
+      "minSeconds": 10.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "battery-on",
+      "text": "Ligue somente a chave da bateria (master BAT ON; alternador e aviônicos permanecem OFF)",
+      "minSeconds": 30.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "avionics-on",
+      "text": "Ligue a chave de aviônicos (avionics master ON com a bateria ligada)",
+      "minSeconds": 30.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "avionics-off",
+      "text": "Desligue a chave de aviônicos (avionics master OFF)",
+      "minSeconds": 20.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "avionics-on-2",
+      "text": "Ligue a chave de aviônicos novamente (segundo pulso de confirmação)",
+      "minSeconds": 10.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "engine-start",
+      "text": "Dê a partida no motor e aguarde os parâmetros estabilizarem",
+      "minSeconds": 30.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "alternator-off",
+      "text": "Desligue o alternador/gerador (chave ALT/GEN OFF)",
+      "minSeconds": 60.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "alternator-on",
+      "text": "Ligue o alternador/gerador (chave ALT/GEN ON)",
+      "minSeconds": 30.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "flaps-each-detent",
+      "text": "Estenda cada dente de flap pausadamente até a deflexão máxima e em seguida recolha totalmente",
+      "minSeconds": 20.0,
+      "appliesTo": {
+        "none": [
+          "noFlaps"
+        ]
+      }
+    },
+    {
+      "id": "elevator-full",
+      "text": "Mova o manche/profundor de batente a batente (todo para trás e todo para frente)",
+      "minSeconds": 5.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "aileron-full",
+      "text": "Mova os ailerons de batente a batente (todo para esquerda e todo para a direita)",
+      "minSeconds": 5.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "rudder-full",
+      "text": "Mova os pedais do leme de batente a batente (todo para esquerda e todo para a direita)",
+      "minSeconds": 5.0,
+      "appliesTo": {}
+    },
+    {
+      "id": "end",
+      "text": "Calibração concluída! O gravador foi encerrado.",
+      "minSeconds": 0.0,
+      "appliesTo": {}
+    }
+  ]
+}

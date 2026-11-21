@@ -1,0 +1,3090 @@
+{
+  "sensors": [
+    {
+      "key": "eng-rpm",
+      "simVar": "GENERAL ENG RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-reached-rpm",
+      "simVar": "GENERAL ENG MAX REACHED RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-rated-rpm",
+      "simVar": "MAX RATED ENGINE RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-manifold-pressure",
+      "simVar": "RECIP ENG MANIFOLD PRESSURE",
+      "unit": "inhg",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cht",
+      "simVar": "RECIP ENG CYLINDER HEAD TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-cht",
+      "simVar": "RECIP MAX CHT",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": false
+    },
+    {
+      "key": "eng-egt",
+      "simVar": "GENERAL ENG EXHAUST GAS TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-max-egt",
+      "simVar": "MAX EGT",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": false
+    },
+    {
+      "key": "eng-tit",
+      "simVar": "RECIP ENG TURBINE INLET TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-detonating",
+      "simVar": "RECIP ENG DETONATING",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cylinder-health",
+      "simVar": "RECIP ENG CYLINDER HEALTH",
+      "unit": "percent over 100",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-num-cylinders-failed",
+      "simVar": "RECIP ENG NUM CYLINDERS FAILED",
+      "unit": "number",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-mixture-ratio",
+      "simVar": "RECIP MIXTURE RATIO",
+      "unit": "ratio",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-mixture-lever-position",
+      "simVar": "GENERAL ENG MIXTURE LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-throttle-lever-position",
+      "simVar": "GENERAL ENG THROTTLE LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-brake-power-pct",
+      "simVar": "RECIP ENG BRAKE POWER PCT",
+      "unit": "percent over 100",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-fuel-flow",
+      "simVar": "RECIP ENG FUEL FLOW",
+      "unit": "pounds per hour",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-fuel-pressure",
+      "simVar": "GENERAL ENG FUEL PRESSURE",
+      "unit": "psi",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-carb-temperature",
+      "simVar": "RECIP CARBURETOR TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-alternate-air-position",
+      "simVar": "RECIP ENG ALTERNATE AIR POSITION",
+      "unit": "position",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-wastegate-position",
+      "simVar": "RECIP ENG WASTEGATE POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-turbocharger-failed",
+      "simVar": "RECIP ENG TURBOCHARGER FAILED",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-cowl-flap-position",
+      "simVar": "RECIP ENG COWL FLAP POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-primer",
+      "simVar": "RECIP ENG PRIMER",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-glow-plug-active",
+      "simVar": "RECIP ENG GLOW PLUG ACTIVE",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-radiator-temperature",
+      "simVar": "RECIP ENG RADIATOR TEMPERATURE",
+      "unit": "celsius",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-coolant-reservoir-percent",
+      "simVar": "RECIP ENG COOLANT RESERVOIR PERCENT",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-left-magneto",
+      "simVar": "RECIP ENG LEFT MAGNETO",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-right-magneto",
+      "simVar": "RECIP ENG RIGHT MAGNETO",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter-torque",
+      "simVar": "RECIP ENG STARTER TORQUE",
+      "unit": "foot pound",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter",
+      "simVar": "GENERAL ENG STARTER",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-starter-active",
+      "simVar": "GENERAL ENG STARTER ACTIVE",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-combustion",
+      "simVar": "GENERAL ENG COMBUSTION",
+      "unit": "bool",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-prop-rpm",
+      "simVar": "PROP RPM",
+      "unit": "rpm",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-propeller-lever-position",
+      "simVar": "GENERAL ENG PROPELLER LEVER POSITION",
+      "unit": "percent",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "eng-vibration",
+      "simVar": "ENG VIBRATION",
+      "unit": "number",
+      "group": "piston",
+      "perEngine": true
+    },
+    {
+      "key": "oil-temperature",
+      "simVar": "GENERAL ENG OIL TEMPERATURE",
+      "unit": "celsius",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-max-temperature",
+      "simVar": "MAX OIL TEMPERATURE",
+      "unit": "celsius",
+      "group": "oil",
+      "perEngine": false
+    },
+    {
+      "key": "oil-pressure",
+      "simVar": "GENERAL ENG OIL PRESSURE",
+      "unit": "psi",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-quantity",
+      "simVar": "ENG OIL QUANTITY",
+      "unit": "percent over 100",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-leaked-percent",
+      "simVar": "GENERAL ENG OIL LEAKED PERCENT",
+      "unit": "percent",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-cooling-flaps-position",
+      "simVar": "OIL COOLING FLAPS POSITION",
+      "unit": "percent over 100",
+      "group": "oil",
+      "perEngine": true
+    },
+    {
+      "key": "oil-warning-pressure",
+      "simVar": "WARNING OIL PRESSURE",
+      "unit": "bool",
+      "group": "oil",
+      "perEngine": false
+    },
+    {
+      "key": "turb-n1",
+      "simVar": "TURB ENG N1",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-n2",
+      "simVar": "TURB ENG N2",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-itt",
+      "simVar": "TURB ENG ITT",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-max-itt",
+      "simVar": "TURB MAX ITT",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "turb-max-torque-percent",
+      "simVar": "TURB ENG MAX TORQUE PERCENT",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-free-turbine-torque",
+      "simVar": "TURB ENG FREE TURBINE TORQUE",
+      "unit": "foot pound",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-eng-torque",
+      "simVar": "ENG TORQUE",
+      "unit": "foot pound",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-fuel-flow-pph",
+      "simVar": "TURB ENG FUEL FLOW PPH",
+      "unit": "pounds per hour",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-is-igniting",
+      "simVar": "TURB ENG IS IGNITING",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-ignition-switch-ex1",
+      "simVar": "TURB ENG IGNITION SWITCH EX1",
+      "unit": "enum",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-master-starter-switch",
+      "simVar": "TURB ENG MASTER STARTER SWITCH",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-condition-lever-position",
+      "simVar": "TURB ENG CONDITION LEVER POSITION",
+      "unit": "enum",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-inlet-temperature",
+      "simVar": "TURB ENG INLET TEMPERATURE",
+      "unit": "celsius",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-vibration",
+      "simVar": "TURB ENG VIBRATION",
+      "unit": "number",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-bleed-air",
+      "simVar": "TURB ENG BLEED AIR",
+      "unit": "psi",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-reverse-nozzle-percent",
+      "simVar": "TURB ENG REVERSE NOZZLE PERCENT",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-reverse-thrust-engaged",
+      "simVar": "GENERAL ENG REVERSE THRUST ENGAGED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-prop-beta",
+      "simVar": "PROP BETA",
+      "unit": "radians",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-prop-feathered",
+      "simVar": "PROP FEATHERED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": true
+    },
+    {
+      "key": "turb-apu-pct-rpm",
+      "simVar": "APU PCT RPM",
+      "unit": "percent",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "turb-apu-on-fire-detected",
+      "simVar": "APU ON FIRE DETECTED",
+      "unit": "bool",
+      "group": "turbine",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-eng-failed",
+      "simVar": "ENG FAILED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-eng-on-fire",
+      "simVar": "ENG ON FIRE",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-eng-fire-detected",
+      "simVar": "GENERAL ENG FIRE DETECTED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-general-eng-damage-percent",
+      "simVar": "GENERAL ENG DAMAGE PERCENT",
+      "unit": "percent",
+      "group": "native-damage",
+      "perEngine": true
+    },
+    {
+      "key": "dmg-flap-damage-by-speed",
+      "simVar": "FLAP DAMAGE BY SPEED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-flap-speed-exceeded",
+      "simVar": "FLAP SPEED EXCEEDED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-gear-damage-by-speed",
+      "simVar": "GEAR DAMAGE BY SPEED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-gear-speed-exceeded",
+      "simVar": "GEAR SPEED EXCEEDED",
+      "unit": "bool",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-crash-flag",
+      "simVar": "CRASH FLAG",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-vacuum",
+      "simVar": "PARTIAL PANEL VACUUM",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-pitot",
+      "simVar": "PARTIAL PANEL PITOT",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-electrical",
+      "simVar": "PARTIAL PANEL ELECTRICAL",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-engine",
+      "simVar": "PARTIAL PANEL ENGINE",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-airspeed",
+      "simVar": "PARTIAL PANEL AIRSPEED",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-altimeter",
+      "simVar": "PARTIAL PANEL ALTIMETER",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-attitude",
+      "simVar": "PARTIAL PANEL ATTITUDE",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "dmg-partial-panel-heading",
+      "simVar": "PARTIAL PANEL HEADING",
+      "unit": "enum",
+      "group": "native-damage",
+      "perEngine": false
+    },
+    {
+      "key": "elec-master-alternator",
+      "simVar": "GENERAL ENG MASTER ALTERNATOR",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-bus-voltage",
+      "simVar": "ELECTRICAL GENALT BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-bus-amps",
+      "simVar": "ELECTRICAL GENALT BUS AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-genalt-load",
+      "simVar": "ELECTRICAL GENALT LOAD",
+      "unit": "percent",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-generator-amps",
+      "simVar": "ELECTRICAL GENERATOR AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-generator-voltage",
+      "simVar": "ELECTRICAL GENERATOR VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-generator-active",
+      "simVar": "ELECTRICAL GENERATOR ACTIVE",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": true
+    },
+    {
+      "key": "elec-main-bus-voltage",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-voltage",
+      "simVar": "ELECTRICAL BATTERY VOLTAGE",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-load",
+      "simVar": "ELECTRICAL BATTERY LOAD",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-level",
+      "simVar": "ELECTRICAL BATTERY LEVEL",
+      "unit": "percent",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-estimated-capacity-pct",
+      "simVar": "ELECTRICAL BATTERY ESTIMATED CAPACITY PCT",
+      "unit": "percent over 100",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-master-battery",
+      "simVar": "ELECTRICAL MASTER BATTERY",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-total-load-amps",
+      "simVar": "ELECTRICAL TOTAL LOAD AMPS",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-external-power-on",
+      "simVar": "EXTERNAL POWER ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-warning-voltage",
+      "simVar": "WARNING VOLTAGE",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-breaker-pulled",
+      "simVar": "CIRCUIT BREAKER PULLED",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-avionics-master-switch",
+      "simVar": "AVIONICS MASTER SWITCH",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-1",
+      "simVar": "ELECTRICAL BUS VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-2",
+      "simVar": "ELECTRICAL BUS VOLTAGE:2",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-3",
+      "simVar": "ELECTRICAL BUS VOLTAGE:3",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-4",
+      "simVar": "ELECTRICAL BUS VOLTAGE:4",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-voltage-5",
+      "simVar": "ELECTRICAL BUS VOLTAGE:5",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-1",
+      "simVar": "ELECTRICAL BUS AMPS:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-2",
+      "simVar": "ELECTRICAL BUS AMPS:2",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-3",
+      "simVar": "ELECTRICAL BUS AMPS:3",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-4",
+      "simVar": "ELECTRICAL BUS AMPS:4",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-bus-amps-5",
+      "simVar": "ELECTRICAL BUS AMPS:5",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-1",
+      "simVar": "CIRCUIT ON:1",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-2",
+      "simVar": "CIRCUIT ON:2",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-3",
+      "simVar": "CIRCUIT ON:3",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-4",
+      "simVar": "CIRCUIT ON:4",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-5",
+      "simVar": "CIRCUIT ON:5",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-6",
+      "simVar": "CIRCUIT ON:6",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-7",
+      "simVar": "CIRCUIT ON:7",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-8",
+      "simVar": "CIRCUIT ON:8",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-9",
+      "simVar": "CIRCUIT ON:9",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-10",
+      "simVar": "CIRCUIT ON:10",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-circuit-on-11",
+      "simVar": "CIRCUIT ON:11",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-12",
+      "simVar": "CIRCUIT ON:12",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-13",
+      "simVar": "CIRCUIT ON:13",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-14",
+      "simVar": "CIRCUIT ON:14",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-15",
+      "simVar": "CIRCUIT ON:15",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-16",
+      "simVar": "CIRCUIT ON:16",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-17",
+      "simVar": "CIRCUIT ON:17",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-18",
+      "simVar": "CIRCUIT ON:18",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-19",
+      "simVar": "CIRCUIT ON:19",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-circuit-on-20",
+      "simVar": "CIRCUIT ON:20",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-6",
+      "simVar": "ELECTRICAL BUS VOLTAGE:6",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-7",
+      "simVar": "ELECTRICAL BUS VOLTAGE:7",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-8",
+      "simVar": "ELECTRICAL BUS VOLTAGE:8",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-9",
+      "simVar": "ELECTRICAL BUS VOLTAGE:9",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-voltage-10",
+      "simVar": "ELECTRICAL BUS VOLTAGE:10",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-6",
+      "simVar": "ELECTRICAL BUS AMPS:6",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-7",
+      "simVar": "ELECTRICAL BUS AMPS:7",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-8",
+      "simVar": "ELECTRICAL BUS AMPS:8",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-9",
+      "simVar": "ELECTRICAL BUS AMPS:9",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-bus-amps-10",
+      "simVar": "ELECTRICAL BUS AMPS:10",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false,
+      "calibrationOnly": true
+    },
+    {
+      "key": "elec-battery-voltage-1",
+      "simVar": "ELECTRICAL BATTERY VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-battery-load-1",
+      "simVar": "ELECTRICAL BATTERY LOAD:1",
+      "unit": "amperes",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "elec-main-bus-voltage-1",
+      "simVar": "ELECTRICAL MAIN BUS VOLTAGE:1",
+      "unit": "volts",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "vac-suction-pressure",
+      "simVar": "SUCTION PRESSURE",
+      "unit": "inhg",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "vac-warning-vacuum",
+      "simVar": "WARNING VACUUM",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-heat",
+      "simVar": "PITOT HEAT",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-heat-switch",
+      "simVar": "PITOT HEAT SWITCH",
+      "unit": "enum",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-pitot-ice-pct",
+      "simVar": "PITOT ICE PCT",
+      "unit": "percent",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-alternate-static-source-open",
+      "simVar": "ALTERNATE STATIC SOURCE OPEN",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-structural-ice-pct",
+      "simVar": "STRUCTURAL ICE PCT",
+      "unit": "percent",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-structural-deice-switch",
+      "simVar": "STRUCTURAL DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-prop-deice-switch",
+      "simVar": "PROP DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-windshield-deice-switch",
+      "simVar": "WINDSHIELD DEICE SWITCH",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": false
+    },
+    {
+      "key": "inst-eng-anti-ice",
+      "simVar": "ENG ANTI ICE",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": true
+    },
+    {
+      "key": "inst-general-eng-anti-ice-position",
+      "simVar": "GENERAL ENG ANTI ICE POSITION",
+      "unit": "bool",
+      "group": "instruments",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-total-quantity",
+      "simVar": "FUEL TOTAL QUANTITY",
+      "unit": "gallons",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-total-quantity-weight",
+      "simVar": "FUEL TOTAL QUANTITY WEIGHT",
+      "unit": "pounds",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-pump-switch",
+      "simVar": "GENERAL ENG FUEL PUMP SWITCH",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-pump-on",
+      "simVar": "GENERAL ENG FUEL PUMP ON",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-pump-active",
+      "simVar": "FUELSYSTEM PUMP ACTIVE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-engine-pressure",
+      "simVar": "FUELSYSTEM ENGINE PRESSURE",
+      "unit": "kpa",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-system-line-fuel-pressure",
+      "simVar": "FUELSYSTEM LINE FUEL PRESSURE",
+      "unit": "kpa",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-warning",
+      "simVar": "WARNING FUEL",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": false
+    },
+    {
+      "key": "fuel-recip-eng-available",
+      "simVar": "RECIP ENG FUEL AVAILABLE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "fuel-turb-eng-available",
+      "simVar": "TURB ENG FUEL AVAILABLE",
+      "unit": "bool",
+      "group": "fuel",
+      "perEngine": true
+    },
+    {
+      "key": "gear-plane-touchdown-normal-velocity",
+      "simVar": "PLANE TOUCHDOWN NORMAL VELOCITY",
+      "unit": "feet per second",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-plane-touchdown-bank-degrees",
+      "simVar": "PLANE TOUCHDOWN BANK DEGREES",
+      "unit": "degrees",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-plane-touchdown-pitch-degrees",
+      "simVar": "PLANE TOUCHDOWN PITCH DEGREES",
+      "unit": "degrees",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-compression-0",
+      "simVar": "CONTACT POINT COMPRESSION:0",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-compression-1",
+      "simVar": "CONTACT POINT COMPRESSION:1",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-compression-2",
+      "simVar": "CONTACT POINT COMPRESSION:2",
+      "unit": "position",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-0",
+      "simVar": "CONTACT POINT IS SKIDDING:0",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-1",
+      "simVar": "CONTACT POINT IS SKIDDING:1",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-is-skidding-2",
+      "simVar": "CONTACT POINT IS SKIDDING:2",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-0",
+      "simVar": "CONTACT POINT IS ON GROUND:0",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-1",
+      "simVar": "CONTACT POINT IS ON GROUND:1",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-contact-point-on-ground-2",
+      "simVar": "CONTACT POINT IS ON GROUND:2",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-is-skidding",
+      "simVar": "GEAR IS SKIDDING",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-skidding-factor",
+      "simVar": "GEAR SKIDDING FACTOR",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-wheel-rpm",
+      "simVar": "WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-left-wheel-rpm",
+      "simVar": "LEFT WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "tire-right-wheel-rpm",
+      "simVar": "RIGHT WHEEL RPM",
+      "unit": "rpm",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-position",
+      "simVar": "GEAR POSITION",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-handle-position",
+      "simVar": "GEAR HANDLE POSITION",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-total-pct-extended",
+      "simVar": "GEAR TOTAL PCT EXTENDED",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-hydraulic-pressure",
+      "simVar": "GEAR HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-warning",
+      "simVar": "GEAR WARNING",
+      "unit": "enum",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-position",
+      "simVar": "BRAKE LEFT POSITION",
+      "unit": "position 32k",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-position",
+      "simVar": "BRAKE RIGHT POSITION",
+      "unit": "position 32k",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-temperature",
+      "simVar": "BRAKE LEFT TEMPERATURE",
+      "unit": "kelvin",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-temperature",
+      "simVar": "BRAKE RIGHT TEMPERATURE",
+      "unit": "kelvin",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-left-weight-remaining",
+      "simVar": "BRAKE LEFT WEIGHT REMAINING",
+      "unit": "percent over 100",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-right-weight-remaining",
+      "simVar": "BRAKE RIGHT WEIGHT REMAINING",
+      "unit": "percent over 100",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-parking-position",
+      "simVar": "BRAKE PARKING POSITION",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-antiskid-active",
+      "simVar": "ANTISKID BRAKES ACTIVE",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "brake-autobrakes-active",
+      "simVar": "AUTOBRAKES ACTIVE",
+      "unit": "bool",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-nosewheel-max-steering-angle",
+      "simVar": "NOSEWHEEL MAX STEERING ANGLE",
+      "unit": "radians",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "gear-steer-angle-pct",
+      "simVar": "GEAR STEER ANGLE PCT",
+      "unit": "percent",
+      "group": "gear",
+      "perEngine": false
+    },
+    {
+      "key": "af-g-force",
+      "simVar": "G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-max-g-force",
+      "simVar": "MAX G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-min-g-force",
+      "simVar": "MIN G FORCE",
+      "unit": "gforce",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-dynamic-pressure",
+      "simVar": "DYNAMIC PRESSURE",
+      "unit": "pound-force per square foot",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-semibody-loadfactor-y",
+      "simVar": "SEMIBODY LOADFACTOR Y",
+      "unit": "number",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-wing-flex-pct",
+      "simVar": "WING FLEX PCT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-indicated",
+      "simVar": "AIRSPEED INDICATED",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-true",
+      "simVar": "AIRSPEED TRUE",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-mach",
+      "simVar": "AIRSPEED MACH",
+      "unit": "mach",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-overspeed-warning",
+      "simVar": "OVERSPEED WARNING",
+      "unit": "bool",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-airspeed-barber-pole",
+      "simVar": "AIRSPEED BARBER POLE",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-ref-speed-max-ias",
+      "simVar": "REFERENCE SPEED MAX IAS",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-ref-speed-max-ias-gear-down",
+      "simVar": "REFERENCE SPEED MAX IAS GEAR DOWN",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-mach-max-operate",
+      "simVar": "MACH MAX OPERATE",
+      "unit": "mach",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vs0",
+      "simVar": "DESIGN SPEED VS0",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vs1",
+      "simVar": "DESIGN SPEED VS1",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-design-speed-vc",
+      "simVar": "DESIGN SPEED VC",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-stall-warning",
+      "simVar": "STALL WARNING",
+      "unit": "bool",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-handle-index",
+      "simVar": "FLAPS HANDLE INDEX",
+      "unit": "number",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-handle-percent",
+      "simVar": "FLAPS HANDLE PERCENT",
+      "unit": "percent",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-flaps-current-speed-limitation",
+      "simVar": "FLAPS CURRENT SPEED LIMITATION",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-trailing-edge-flaps-left-percent",
+      "simVar": "TRAILING EDGE FLAPS LEFT PERCENT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-trailing-edge-flaps-right-percent",
+      "simVar": "TRAILING EDGE FLAPS RIGHT PERCENT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-spoilers-handle-position",
+      "simVar": "SPOILERS HANDLE POSITION",
+      "unit": "percent",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-elevator-trim-position",
+      "simVar": "ELEVATOR TRIM POSITION",
+      "unit": "radians",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-aileron-trim-pct",
+      "simVar": "AILERON TRIM PCT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-rudder-trim-pct",
+      "simVar": "RUDDER TRIM PCT",
+      "unit": "percent over 100",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-x",
+      "simVar": "ACCELERATION BODY X",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-y",
+      "simVar": "ACCELERATION BODY Y",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-acceleration-body-z",
+      "simVar": "ACCELERATION BODY Z",
+      "unit": "feet per second squared",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-pressurization-cabin-altitude",
+      "simVar": "PRESSURIZATION CABIN ALTITUDE",
+      "unit": "feet",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-pressurization-pressure-differential",
+      "simVar": "PRESSURIZATION PRESSURE DIFFERENTIAL",
+      "unit": "psf",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-elevator-position",
+      "simVar": "ELEVATOR POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-aileron-position",
+      "simVar": "AILERON POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-rudder-position",
+      "simVar": "RUDDER POSITION",
+      "unit": "position",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "af-autopilot-master",
+      "simVar": "AUTOPILOT MASTER",
+      "unit": "bool",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-pressure",
+      "simVar": "HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-pump-pressure",
+      "simVar": "HYDRAULIC PUMP PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-reservoir-percent",
+      "simVar": "HYDRAULIC RESERVOIR PERCENT",
+      "unit": "percent",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-system-integrity",
+      "simVar": "HYDRAULIC SYSTEM INTEGRITY",
+      "unit": "percent over 100",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "hyd-eng-pressure",
+      "simVar": "ENG HYDRAULIC PRESSURE",
+      "unit": "psf",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "hyd-eng-quantity",
+      "simVar": "ENG HYDRAULIC QUANTITY",
+      "unit": "percent",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "pneu-engine-bleed-air-pressure",
+      "simVar": "PNEUMATICS ENGINE BLEED AIR PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": true
+    },
+    {
+      "key": "pneu-duct-pressure",
+      "simVar": "PNEUMATICS DUCT PRESSURE",
+      "unit": "psi",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "pneu-pack-status",
+      "simVar": "PNEUMATICS PACK STATUS",
+      "unit": "bool",
+      "group": "hydraulic",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-0",
+      "simVar": "WEAR AND TEAR LEVEL:0",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-0",
+      "simVar": "WEAR AND TEAR IS WEAK:0",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-0",
+      "simVar": "WEAR AND TEAR IS FAILED:0",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-0",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:0",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-1",
+      "simVar": "WEAR AND TEAR LEVEL:1",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-1",
+      "simVar": "WEAR AND TEAR IS WEAK:1",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-1",
+      "simVar": "WEAR AND TEAR IS FAILED:1",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-1",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:1",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-2",
+      "simVar": "WEAR AND TEAR LEVEL:2",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-2",
+      "simVar": "WEAR AND TEAR IS WEAK:2",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-2",
+      "simVar": "WEAR AND TEAR IS FAILED:2",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-2",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:2",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-3",
+      "simVar": "WEAR AND TEAR LEVEL:3",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-3",
+      "simVar": "WEAR AND TEAR IS WEAK:3",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-3",
+      "simVar": "WEAR AND TEAR IS FAILED:3",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-3",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:3",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-4",
+      "simVar": "WEAR AND TEAR LEVEL:4",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-4",
+      "simVar": "WEAR AND TEAR IS WEAK:4",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-4",
+      "simVar": "WEAR AND TEAR IS FAILED:4",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-4",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:4",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-5",
+      "simVar": "WEAR AND TEAR LEVEL:5",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-5",
+      "simVar": "WEAR AND TEAR IS WEAK:5",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-5",
+      "simVar": "WEAR AND TEAR IS FAILED:5",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-5",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:5",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-6",
+      "simVar": "WEAR AND TEAR LEVEL:6",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-6",
+      "simVar": "WEAR AND TEAR IS WEAK:6",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-6",
+      "simVar": "WEAR AND TEAR IS FAILED:6",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-6",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:6",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-7",
+      "simVar": "WEAR AND TEAR LEVEL:7",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-7",
+      "simVar": "WEAR AND TEAR IS WEAK:7",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-7",
+      "simVar": "WEAR AND TEAR IS FAILED:7",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-7",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:7",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-8",
+      "simVar": "WEAR AND TEAR LEVEL:8",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-8",
+      "simVar": "WEAR AND TEAR IS WEAK:8",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-8",
+      "simVar": "WEAR AND TEAR IS FAILED:8",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-8",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:8",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-9",
+      "simVar": "WEAR AND TEAR LEVEL:9",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-9",
+      "simVar": "WEAR AND TEAR IS WEAK:9",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-9",
+      "simVar": "WEAR AND TEAR IS FAILED:9",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-9",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:9",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-10",
+      "simVar": "WEAR AND TEAR LEVEL:10",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-10",
+      "simVar": "WEAR AND TEAR IS WEAK:10",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-10",
+      "simVar": "WEAR AND TEAR IS FAILED:10",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-10",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:10",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-11",
+      "simVar": "WEAR AND TEAR LEVEL:11",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-11",
+      "simVar": "WEAR AND TEAR IS WEAK:11",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-11",
+      "simVar": "WEAR AND TEAR IS FAILED:11",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-11",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:11",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-12",
+      "simVar": "WEAR AND TEAR LEVEL:12",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-12",
+      "simVar": "WEAR AND TEAR IS WEAK:12",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-12",
+      "simVar": "WEAR AND TEAR IS FAILED:12",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-12",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:12",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-13",
+      "simVar": "WEAR AND TEAR LEVEL:13",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-13",
+      "simVar": "WEAR AND TEAR IS WEAK:13",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-13",
+      "simVar": "WEAR AND TEAR IS FAILED:13",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-13",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:13",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-14",
+      "simVar": "WEAR AND TEAR LEVEL:14",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-14",
+      "simVar": "WEAR AND TEAR IS WEAK:14",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-14",
+      "simVar": "WEAR AND TEAR IS FAILED:14",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-14",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:14",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-19",
+      "simVar": "WEAR AND TEAR LEVEL:19",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-19",
+      "simVar": "WEAR AND TEAR IS WEAK:19",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-19",
+      "simVar": "WEAR AND TEAR IS FAILED:19",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-19",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:19",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-20",
+      "simVar": "WEAR AND TEAR LEVEL:20",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-20",
+      "simVar": "WEAR AND TEAR IS WEAK:20",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-20",
+      "simVar": "WEAR AND TEAR IS FAILED:20",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-20",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:20",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-21",
+      "simVar": "WEAR AND TEAR LEVEL:21",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-21",
+      "simVar": "WEAR AND TEAR IS WEAK:21",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-21",
+      "simVar": "WEAR AND TEAR IS FAILED:21",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-21",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:21",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-22",
+      "simVar": "WEAR AND TEAR LEVEL:22",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-22",
+      "simVar": "WEAR AND TEAR IS WEAK:22",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-22",
+      "simVar": "WEAR AND TEAR IS FAILED:22",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-22",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:22",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-23",
+      "simVar": "WEAR AND TEAR LEVEL:23",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-23",
+      "simVar": "WEAR AND TEAR IS WEAK:23",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-23",
+      "simVar": "WEAR AND TEAR IS FAILED:23",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-23",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:23",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-24",
+      "simVar": "WEAR AND TEAR LEVEL:24",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-24",
+      "simVar": "WEAR AND TEAR IS WEAK:24",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-24",
+      "simVar": "WEAR AND TEAR IS FAILED:24",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-24",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:24",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-25",
+      "simVar": "WEAR AND TEAR LEVEL:25",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-25",
+      "simVar": "WEAR AND TEAR IS WEAK:25",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-25",
+      "simVar": "WEAR AND TEAR IS FAILED:25",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-25",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:25",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-26",
+      "simVar": "WEAR AND TEAR LEVEL:26",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-26",
+      "simVar": "WEAR AND TEAR IS WEAK:26",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-26",
+      "simVar": "WEAR AND TEAR IS FAILED:26",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-26",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:26",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-27",
+      "simVar": "WEAR AND TEAR LEVEL:27",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-27",
+      "simVar": "WEAR AND TEAR IS WEAK:27",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-27",
+      "simVar": "WEAR AND TEAR IS FAILED:27",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-27",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:27",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-28",
+      "simVar": "WEAR AND TEAR LEVEL:28",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-28",
+      "simVar": "WEAR AND TEAR IS WEAK:28",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-28",
+      "simVar": "WEAR AND TEAR IS FAILED:28",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-28",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:28",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-29",
+      "simVar": "WEAR AND TEAR LEVEL:29",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-29",
+      "simVar": "WEAR AND TEAR IS WEAK:29",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-29",
+      "simVar": "WEAR AND TEAR IS FAILED:29",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-29",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:29",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-30",
+      "simVar": "WEAR AND TEAR LEVEL:30",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-30",
+      "simVar": "WEAR AND TEAR IS WEAK:30",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-30",
+      "simVar": "WEAR AND TEAR IS FAILED:30",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-30",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:30",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-31",
+      "simVar": "WEAR AND TEAR LEVEL:31",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-31",
+      "simVar": "WEAR AND TEAR IS WEAK:31",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-31",
+      "simVar": "WEAR AND TEAR IS FAILED:31",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-31",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:31",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-32",
+      "simVar": "WEAR AND TEAR LEVEL:32",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-32",
+      "simVar": "WEAR AND TEAR IS WEAK:32",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-32",
+      "simVar": "WEAR AND TEAR IS FAILED:32",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-32",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:32",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-33",
+      "simVar": "WEAR AND TEAR LEVEL:33",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-33",
+      "simVar": "WEAR AND TEAR IS WEAK:33",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-33",
+      "simVar": "WEAR AND TEAR IS FAILED:33",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-33",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:33",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-34",
+      "simVar": "WEAR AND TEAR LEVEL:34",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-34",
+      "simVar": "WEAR AND TEAR IS WEAK:34",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-34",
+      "simVar": "WEAR AND TEAR IS FAILED:34",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-34",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:34",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-35",
+      "simVar": "WEAR AND TEAR LEVEL:35",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-35",
+      "simVar": "WEAR AND TEAR IS WEAK:35",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-35",
+      "simVar": "WEAR AND TEAR IS FAILED:35",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-35",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:35",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-36",
+      "simVar": "WEAR AND TEAR LEVEL:36",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-36",
+      "simVar": "WEAR AND TEAR IS WEAK:36",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-36",
+      "simVar": "WEAR AND TEAR IS FAILED:36",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-36",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:36",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-37",
+      "simVar": "WEAR AND TEAR LEVEL:37",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-37",
+      "simVar": "WEAR AND TEAR IS WEAK:37",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-37",
+      "simVar": "WEAR AND TEAR IS FAILED:37",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-37",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:37",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-38",
+      "simVar": "WEAR AND TEAR LEVEL:38",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-38",
+      "simVar": "WEAR AND TEAR IS WEAK:38",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-38",
+      "simVar": "WEAR AND TEAR IS FAILED:38",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-38",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:38",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-39",
+      "simVar": "WEAR AND TEAR LEVEL:39",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-39",
+      "simVar": "WEAR AND TEAR IS WEAK:39",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-39",
+      "simVar": "WEAR AND TEAR IS FAILED:39",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-39",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:39",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-40",
+      "simVar": "WEAR AND TEAR LEVEL:40",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-40",
+      "simVar": "WEAR AND TEAR IS WEAK:40",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-40",
+      "simVar": "WEAR AND TEAR IS FAILED:40",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-40",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:40",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-41",
+      "simVar": "WEAR AND TEAR LEVEL:41",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-41",
+      "simVar": "WEAR AND TEAR IS WEAK:41",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-41",
+      "simVar": "WEAR AND TEAR IS FAILED:41",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-41",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:41",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-42",
+      "simVar": "WEAR AND TEAR LEVEL:42",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-42",
+      "simVar": "WEAR AND TEAR IS WEAK:42",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-42",
+      "simVar": "WEAR AND TEAR IS FAILED:42",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-42",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:42",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-43",
+      "simVar": "WEAR AND TEAR LEVEL:43",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-43",
+      "simVar": "WEAR AND TEAR IS WEAK:43",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-43",
+      "simVar": "WEAR AND TEAR IS FAILED:43",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-43",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:43",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-44",
+      "simVar": "WEAR AND TEAR LEVEL:44",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-44",
+      "simVar": "WEAR AND TEAR IS WEAK:44",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-44",
+      "simVar": "WEAR AND TEAR IS FAILED:44",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-44",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:44",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-45",
+      "simVar": "WEAR AND TEAR LEVEL:45",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-45",
+      "simVar": "WEAR AND TEAR IS WEAK:45",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-45",
+      "simVar": "WEAR AND TEAR IS FAILED:45",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-45",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:45",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-46",
+      "simVar": "WEAR AND TEAR LEVEL:46",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-46",
+      "simVar": "WEAR AND TEAR IS WEAK:46",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-46",
+      "simVar": "WEAR AND TEAR IS FAILED:46",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-46",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:46",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-47",
+      "simVar": "WEAR AND TEAR LEVEL:47",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-47",
+      "simVar": "WEAR AND TEAR IS WEAK:47",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-47",
+      "simVar": "WEAR AND TEAR IS FAILED:47",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-47",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:47",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-48",
+      "simVar": "WEAR AND TEAR LEVEL:48",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-48",
+      "simVar": "WEAR AND TEAR IS WEAK:48",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-48",
+      "simVar": "WEAR AND TEAR IS FAILED:48",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-48",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:48",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-level-49",
+      "simVar": "WEAR AND TEAR LEVEL:49",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-weak-49",
+      "simVar": "WEAR AND TEAR IS WEAK:49",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-is-failed-49",
+      "simVar": "WEAR AND TEAR IS FAILED:49",
+      "unit": "bool",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-overstress-rate-49",
+      "simVar": "WEAR AND TEAR OVERSTRESS DAMAGE RATE:49",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-exposed-level",
+      "simVar": "WEAR AND TEAR EXPOSED PARTS LEVEL",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nw-exposed-lowest-level",
+      "simVar": "WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL",
+      "unit": "percent over 100",
+      "group": "native-wear",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-level-39-idx1",
+      "simVar": "WEAR AND TEAR LEVEL:39:1",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-level-name",
+      "simVar": "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-weak-value-39",
+      "simVar": "WEAR AND TEAR WEAK VALUE:39",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "nwspike-overstress-factor-39",
+      "simVar": "WEAR AND TEAR OVERSTRESS FACTOR:39",
+      "unit": "percent over 100",
+      "group": "native-wear-spike",
+      "perEngine": false
+    },
+    {
+      "key": "light-landing-on",
+      "simVar": "LIGHT LANDING ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-taxi-on",
+      "simVar": "LIGHT TAXI ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-nav-on",
+      "simVar": "LIGHT NAV ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-strobe-on",
+      "simVar": "LIGHT STROBE ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-beacon-on",
+      "simVar": "LIGHT BEACON ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    },
+    {
+      "key": "light-panel-on",
+      "simVar": "LIGHT PANEL ON",
+      "unit": "bool",
+      "group": "electrical",
+      "perEngine": false
+    }
+  ]
+}

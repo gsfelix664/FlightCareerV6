@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "C400 Corvalis",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "fixedGear",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "singleEngine",
+    "spoilers",
+    "turbocharged"
+  ],
+  "simMatch": {
+    "title": [
+      "C400 Corvalis"
+    ],
+    "atcModel": [
+      "C400TT"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 220.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 226.85,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 782.41,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 59.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 72.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 117.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0800-C400_Corvalis.csv)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 100.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 100 A (Corvalis, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-550-C",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2600.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental TSIO-550-C",
+      "notes": null
+    }
+  ]
+}

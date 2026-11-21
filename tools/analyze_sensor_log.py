@@ -1,0 +1,1344 @@
+#!/usr/bin/env python3
+"""Script de análise de logs de telemetria e validação de sensores do FlightCareer.
+
+Transforma arquivos CSV gerados pelo SensorRecorder e metadados de context.json
+em um relatório de validação por sensor (Validado / Não suportado / Revisar).
+"""
+
+import argparse
+import csv
+import json
+import math
+import os
+import statistics
+import sys
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+
+# Raiz padrão do repositório e caminhos de catálogo resolvidos a partir da pasta deste script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_REPO_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+DEFAULT_REGISTRY = os.path.join(
+    DEFAULT_REPO_ROOT, "src", "FlightCareer.Infrastructure", "Data", "sensor_registry.json"
+)
+DEFAULT_EXPECTATIONS = os.path.join(SCRIPT_DIR, "sensor_validation_expectations.json")
+
+NATIVE_COMPONENTS: Dict[int, str] = {
+    0: "FUEL TANK",
+    1: "FUEL PUMP",
+    2: "FUEL VALVE",
+    3: "FUEL JUNCTION",
+    4: "FUEL LINE",
+    5: "FLAPS LEFT",
+    6: "FLAPS RIGHT",
+    7: "FLAPS LEFT CABLE",
+    8: "FLAPS RIGHT CABLE",
+    9: "AILERONS LEFT",
+    10: "AILERONS RIGHT",
+    11: "AILERONS LEFT CABLE",
+    12: "AILERONS RIGHT CABLE",
+    13: "ELEVATOR",
+    14: "ELEVATOR CABLE",
+    19: "RUDDER",
+    20: "RUDDER CABLE",
+    21: "HYDRAULIC RESERVOIR",
+    22: "HYDRAULIC PUMP",
+    23: "HYDRAULIC VALVE",
+    24: "HYDRAULIC ACTUATOR",
+    25: "HYDRAULIC PTU",
+    26: "HYDRAULIC ACCUMULATOR",
+    27: "HYDRAULIC LINE",
+    28: "ELECTRICAL ALTERNATOR",
+    29: "ELECTRICAL BATTERY",
+    30: "ELECTRICAL IDG",
+    31: "ELECTRICAL RAT",
+    32: "ELECTRICAL BUS",
+    33: "ELECTRICAL CIRCUIT",
+    34: "ELECTRICAL RECTIFIERS",
+    35: "LANDING_GEAR",
+    36: "BRAKE",
+    37: "TIRE",
+    38: "TIRE_PRESSURE",
+    39: "PISTON ENGINE",
+    40: "TURBINE_ENGINE",
+    41: "OIL_TANK_INTEGRITY",
+    42: "OIL_TANK_AMOUNT",
+    43: "AUTOPILOT_BANK",
+    44: "AUTOPILOT_PITCH",
+    45: "AUTOPILOT_YAW",
+    46: "GENERAL",
+    47: "TAILWHEEL LANDING GEAR",
+    48: "TAILWHEEL TIRE",
+    49: "TAILWHEEL TIRE PRESSURE",
+}
+
+
+# Subida de nível acima disto conta como reinício/reparo (abaixo é ruído de ponto flutuante)
+RESTART_JUMP = 0.005
+
+CAL_PREFIXES = ("cal-normal-", "cal-abuso-", "cal-longo-")
+# Marcadores do voo longo que só anotam o momento (fraca/pane): não abrem trecho novo
+CAL_ANNOTATIONS = ("cal-longo-weak", "cal-longo-pane")
+DEFAULT_MIN_THRESHOLD = 0.0001
+NOISE_MULTIPLIER = 3.0
+UNIT_STABLE_MAX_SPREAD = 1.5   # max(razão)/min(razão) entre trechos de abuso
+
+
+def native_wear_summary(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Dict[str, Any]:
+    """Calcula o resumo do desgaste nativo (wear and tear) por componente.
+
+    Para cada ID de componente presente no log:
+    - Nível inicial, final e mínimo
+    - Delta do voo (acumula estritamente quedas; subida conta como reinício e move a base sem creditar)
+    - Primeiro UTC e nível quando nw-is-weak vira 1
+    - Primeiro UTC e nível quando nw-is-failed vira 1
+    - Taxa máxima de overstress damage rate
+    """
+    if not rows:
+        return {"has_data": False, "components": {}}
+
+    all_keys: Set[str] = set()
+    for r in rows:
+        all_keys.update(r.keys())
+
+    present_ids = [cid for cid in sorted(NATIVE_COMPONENTS.keys()) if f"nw-level-{cid}" in all_keys]
+
+    if not present_ids:
+        return {"has_data": False, "components": {}}
+
+    components_summary: Dict[int, Dict[str, Any]] = {}
+
+    for cid in present_ids:
+        lvl_key = f"nw-level-{cid}"
+        weak_key = f"nw-is-weak-{cid}"
+        failed_key = f"nw-is-failed-{cid}"
+        ov_key = f"nw-overstress-rate-{cid}"
+
+        valid_levels: List[float] = []
+        initial_lvl: Optional[float] = None
+        final_lvl: Optional[float] = None
+        min_lvl: Optional[float] = None
+        prev_lvl: Optional[float] = None
+        total_drop: float = 0.0
+        restarts: int = 0
+
+        first_weak_utc: Optional[str] = None
+        first_weak_level: Optional[float] = None
+        first_failed_utc: Optional[str] = None
+        first_failed_level: Optional[float] = None
+        max_overstress: float = 0.0
+
+        for r in rows:
+            raw_lvl = r.get(lvl_key, "")
+            current_lvl: Optional[float] = None
+            if raw_lvl is not None and raw_lvl != "":
+                try:
+                    lvl_val = float(raw_lvl)
+                    if not (math.isnan(lvl_val) or math.isinf(lvl_val)):
+                        current_lvl = lvl_val
+                        valid_levels.append(lvl_val)
+                        if initial_lvl is None:
+                            initial_lvl = lvl_val
+                            min_lvl = lvl_val
+                            prev_lvl = lvl_val
+                        else:
+                            min_lvl = min(min_lvl, lvl_val)
+                            diff = lvl_val - prev_lvl
+                            if diff < 0.0:
+                                # Toda queda conta: o desgaste nativo lento é da ordem de 1e-6 por amostra
+                                total_drop += (-diff)
+                            elif diff > RESTART_JUMP:
+                                # Subida grande = voo reiniciado ou reparo no sim: move a base sem creditar
+                                restarts += 1
+                            # Subida pequena (ruído) só move a base
+                            prev_lvl = lvl_val
+                        final_lvl = lvl_val
+                except ValueError:
+                    pass
+
+            # Checa is_weak
+            raw_weak = r.get(weak_key, "")
+            if raw_weak is not None and raw_weak != "":
+                try:
+                    weak_val = float(raw_weak)
+                    is_w = weak_val >= 0.5
+                except ValueError:
+                    is_w = raw_weak.strip().lower() in ("true", "1")
+
+                if is_w and first_weak_utc is None:
+                    first_weak_utc = r.get("utc", "")
+                    first_weak_level = current_lvl if current_lvl is not None else prev_lvl
+
+            # Checa is_failed
+            raw_failed = r.get(failed_key, "")
+            if raw_failed is not None and raw_failed != "":
+                try:
+                    failed_val = float(raw_failed)
+                    is_f = failed_val >= 0.5
+                except ValueError:
+                    is_f = raw_failed.strip().lower() in ("true", "1")
+
+                if is_f and first_failed_utc is None:
+                    first_failed_utc = r.get("utc", "")
+                    first_failed_level = current_lvl if current_lvl is not None else prev_lvl
+
+            # Checa overstress rate
+            raw_ov = r.get(ov_key, "")
+            if raw_ov is not None and raw_ov != "":
+                try:
+                    ov_val = float(raw_ov)
+                    if not (math.isnan(ov_val) or math.isinf(ov_val)):
+                        max_overstress = max(max_overstress, ov_val)
+                except ValueError:
+                    pass
+
+        if not valid_levels:
+            continue
+
+        total_drop = round(total_drop, 6)
+        responded = (total_drop > 1e-5) or (restarts > 0) or (first_weak_utc is not None) or (first_failed_utc is not None) or (max_overstress > 1e-5)
+
+        components_summary[cid] = {
+            "id": cid,
+            "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+            "initial": initial_lvl,
+            "final": final_lvl,
+            "min": min_lvl,
+            "delta": total_drop,
+            "restarts": restarts,
+            "weak_utc": first_weak_utc,
+            "weak_level": first_weak_level,
+            "failed_utc": first_failed_utc,
+            "failed_level": first_failed_level,
+            "max_overstress": max_overstress,
+            "responded": responded,
+            "is_idle": not responded,
+        }
+
+    return {
+        "has_data": len(components_summary) > 0,
+        "components": components_summary,
+    }
+
+
+def parse_iso_utc(utc_str: str) -> Optional[datetime]:
+
+    """Converte string ISO 8601 UTC em objeto datetime com fuso UTC."""
+    if not utc_str:
+        return None
+    try:
+        dt = datetime.fromisoformat(utc_str.strip())
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception:
+        return None
+
+
+def load_context(csv_paths: List[str]) -> Dict[str, Any]:
+    """Carrega arquivos de contexto JSON associados aos arquivos CSV informados."""
+    context: Dict[str, Any] = {
+        "Title": "",
+        "EngineCount": 1,
+        "SlotCount": 0,
+        "RejectedSimVars": [],
+        "Strings": {},
+        "Numbers": {},
+    }
+
+    for csv_path in csv_paths:
+        base, _ = os.path.splitext(csv_path)
+        context_path = f"{base}-context.json"
+        if os.path.isfile(context_path):
+            try:
+                with open(context_path, "r", encoding="utf-8-sig") as f:
+                    data = json.load(f)
+                    if data.get("Title"):
+                        context["Title"] = data["Title"]
+                    if data.get("EngineCount"):
+                        context["EngineCount"] = data["EngineCount"]
+                    if data.get("SlotCount"):
+                        context["SlotCount"] = data["SlotCount"]
+                    if data.get("RejectedSimVars"):
+                        for rej in data["RejectedSimVars"]:
+                            if rej not in context["RejectedSimVars"]:
+                                context["RejectedSimVars"].append(rej)
+                    if data.get("Strings"):
+                        context["Strings"].update(data["Strings"])
+                    if data.get("Numbers"):
+                        context["Numbers"].update(data["Numbers"])
+            except Exception as ex:
+                sys.stderr.write(f"Aviso: falha ao ler context.json '{context_path}': {ex}\n")
+    return context
+
+
+def load_rows(csv_paths: List[str]) -> Tuple[List[Dict[str, str]], List[str]]:
+    """Lê os arquivos CSV informados, ignora linhas com UTC inválido e concatena em ordem cronológica."""
+    raw_rows: List[Tuple[datetime, Dict[str, str]]] = []
+    columns_seen: List[str] = []
+
+    for path in csv_paths:
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"Arquivo CSV não encontrado: {path}")
+
+        with open(path, "r", newline="", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f)
+            if reader.fieldnames:
+                for col in reader.fieldnames:
+                    if col and col not in columns_seen:
+                        columns_seen.append(col)
+
+            for line_no, row in enumerate(reader, start=2):
+                utc_raw = row.get("utc")
+                if not utc_raw:
+                    sys.stderr.write(f"Aviso: linha {line_no} ignorada por 'utc' ausente em '{path}'\n")
+                    continue
+
+                dt = parse_iso_utc(utc_raw)
+                if dt is None:
+                    sys.stderr.write(f"Aviso: linha {line_no} ignorada por 'utc' inválido '{utc_raw}' em '{path}'\n")
+                    continue
+
+                raw_rows.append((dt, row))
+
+    # Concatena em ordem de utc
+    raw_rows.sort(key=lambda item: item[0])
+    ordered_rows = [item[1] for item in raw_rows]
+    return ordered_rows, columns_seen
+
+
+def extract_sensor_columns(all_columns: List[str]) -> List[str]:
+    """Filtra colunas do CSV para manter apenas as de sensores (exclui utc, sim_rate, marker e pad-*)."""
+    sensor_cols: List[str] = []
+    for col in all_columns:
+        if col in ("utc", "sim_rate", "marker"):
+            continue
+        if col.startswith("pad-"):
+            continue
+        sensor_cols.append(col)
+    return sensor_cols
+
+
+def column_stats(
+    rows: List[Dict[str, str]],
+    sensor_columns: List[str],
+    max_gap: float = 5.0,
+) -> Dict[str, Dict[str, Any]]:
+    """Calcula estatísticas básicas e porcentagem constante ponderada por tempo para cada coluna."""
+    stats: Dict[str, Dict[str, Any]] = {}
+    n_rows = len(rows)
+
+    # Pré-calcula timestamps e intervalos dt entre amostras consecutivas
+    parsed_timestamps: List[float] = []
+    for r in rows:
+        dt = parse_iso_utc(r.get("utc", ""))
+        parsed_timestamps.append(dt.timestamp() if dt else 0.0)
+
+    dts: List[float] = [0.0] * n_rows
+    for i in range(n_rows - 1):
+        delta = parsed_timestamps[i + 1] - parsed_timestamps[i]
+        if delta > max_gap:
+            dts[i] = 0.0
+        else:
+            dts[i] = max(0.0, delta)
+
+    for col in sensor_columns:
+        valid_vals: List[float] = []
+        time_by_val: Dict[float, float] = {}
+        distinct_vals: Set[float] = set()
+
+        for idx, r in enumerate(rows):
+            raw_v = r.get(col, "")
+            if raw_v is None or raw_v == "":
+                continue
+            try:
+                v = float(raw_v)
+                if math.isnan(v) or math.isinf(v):
+                    continue
+                valid_vals.append(v)
+                # Arredonda levemente para 7 casas decimais para agrupar ruído de precisão float
+                v_key = round(v, 7)
+                distinct_vals.add(v_key)
+                time_by_val[v_key] = time_by_val.get(v_key, 0.0) + dts[idx]
+            except ValueError:
+                continue
+
+        samples = len(valid_vals)
+        if samples == 0:
+            stats[col] = {
+                "samples": 0,
+                "min": None,
+                "max": None,
+                "mean": None,
+                "pct_const": 0.0,
+                "distinct": 0,
+                "span": 0.0,
+            }
+            continue
+
+        min_val = min(valid_vals)
+        max_val = max(valid_vals)
+        mean_val = sum(valid_vals) / samples
+        span = max_val - min_val
+
+        total_time = sum(time_by_val.values())
+        if total_time > 0.0:
+            max_time = max(time_by_val.values())
+            pct_const = (max_time / total_time) * 100.0
+        else:
+            pct_const = 100.0
+
+        stats[col] = {
+            "samples": samples,
+            "min": min_val,
+            "max": max_val,
+            "mean": mean_val,
+            "pct_const": pct_const,
+            "distinct": len(distinct_vals),
+            "span": span,
+        }
+
+    return stats
+
+
+def compute_durations_and_gaps(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Tuple[float, float, int]:
+    """Calcula duração real coberta, duração simulada e número de quebras (dt > max_gap)."""
+    if not rows:
+        return 0.0, 0.0, 0
+
+    real_duration = 0.0
+    sim_duration = 0.0
+    gap_count = 0
+
+    for i in range(len(rows) - 1):
+        dt_curr = parse_iso_utc(rows[i].get("utc", ""))
+        dt_next = parse_iso_utc(rows[i + 1].get("utc", ""))
+        if dt_curr and dt_next:
+            delta = dt_next.timestamp() - dt_curr.timestamp()
+            if delta > max_gap:
+                gap_count += 1
+            elif delta > 0.0:
+                real_duration += delta
+                try:
+                    sim_rate = float(rows[i].get("sim_rate", "1"))
+                except ValueError:
+                    sim_rate = 1.0
+                sim_duration += delta * sim_rate
+
+    return real_duration, sim_duration, gap_count
+
+
+
+def extract_markers(rows: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    """Extrai todas as linhas que contêm texto na coluna marker."""
+    markers: List[Dict[str, Any]] = []
+    for idx, r in enumerate(rows):
+        marker_text = (r.get("marker") or "").strip()
+        if marker_text:
+            dt = parse_iso_utc(r.get("utc", ""))
+            markers.append({
+                "index": idx,
+                "text": marker_text,
+                "utc": r.get("utc", ""),
+                "timestamp": dt.timestamp() if dt else 0.0,
+            })
+    return markers
+
+
+def match_marker_prefix(marker_text: str, expectations: Dict[str, List[str]]) -> Optional[str]:
+    """Associa o texto do marcador ao prefixo de expectativas correspondente pelo prefixo exato do roteiro."""
+    norm = marker_text.strip().lower()
+    for prefix in expectations:
+        if norm.startswith(prefix.lower()):
+            return prefix
+    return None
+
+
+def marker_reactions(
+    rows: List[Dict[str, str]],
+    sensor_columns: List[str],
+    markers: List[Dict[str, Any]],
+    window_seconds: float,
+    col_stats: Dict[str, Dict[str, Any]],
+) -> Dict[str, List[str]]:
+    """Verifica se cada sensor reagiu na janela antes x depois de cada marcador."""
+    reactions_by_col: Dict[str, List[str]] = {col: [] for col in sensor_columns}
+
+    if not markers:
+        return reactions_by_col
+
+    # Pré-extrai timestamps e valores válidos por coluna
+    timestamps: List[float] = []
+    for r in rows:
+        dt = parse_iso_utc(r.get("utc", ""))
+        timestamps.append(dt.timestamp() if dt else 0.0)
+
+    # Dicionário de (timestamp, valor) por coluna
+    col_series: Dict[str, List[Tuple[float, float]]] = {}
+    for col in sensor_columns:
+        series: List[Tuple[float, float]] = []
+        for i, r in enumerate(rows):
+            raw = r.get(col, "")
+            if raw is not None and raw != "":
+                try:
+                    val = float(raw)
+                    if not (math.isnan(val) or math.isinf(val)):
+                        series.append((timestamps[i], val))
+                except ValueError:
+                    pass
+        col_series[col] = series
+
+    for m in markers:
+        t_m = m["timestamp"]
+        m_text = m["text"]
+
+        for col in sensor_columns:
+            span = col_stats.get(col, {}).get("span", 0.0)
+            threshold = max(1e-6, 0.01 * span)
+
+            series = col_series[col]
+            vals_before = [val for t, val in series if (t_m - window_seconds) <= t < t_m]
+            vals_after = [val for t, val in series if t_m <= t <= (t_m + window_seconds)]
+
+            if vals_before and vals_after:
+                min_before, max_before = min(vals_before), max(vals_before)
+                min_after, max_after = min(vals_after), max(vals_after)
+
+                diff_min = abs(min_after - min_before)
+                diff_max = abs(max_after - max_before)
+
+                if diff_min > threshold or diff_max > threshold:
+                    reactions_by_col[col].append(m_text)
+
+    return reactions_by_col
+
+
+def classify(
+    column: str,
+    stats: Dict[str, Any],
+    reactions: List[str],
+    markers: List[Dict[str, Any]],
+    expectations: Dict[str, List[str]],
+) -> str:
+    """Classifica a coluna em 'Não suportado', 'Validado' ou 'Revisar' conforme as regras de negócio."""
+    if stats["samples"] == 0 or stats["distinct"] <= 1:
+        return "Não suportado"
+
+    if stats["pct_const"] >= 99.0:
+        return "Revisar"
+
+    base_key = column.split(":")[0]
+
+    # Identifica marcadores presentes no log que tinham essa chave base nas suas expectativas
+    expected_markers_in_log: List[str] = []
+    for m in markers:
+        prefix = match_marker_prefix(m["text"], expectations)
+        if prefix and base_key in expectations.get(prefix, []):
+            expected_markers_in_log.append(m["text"])
+
+    if expected_markers_in_log:
+        # Deve ter reagido em pelo menos um marcador esperado presente no log
+        reacted = any(m_text in reactions for m_text in expected_markers_in_log)
+        if reacted:
+            return "Validado"
+        return "Revisar"
+
+    # Se varia e não estava nas expectativas de nenhum marcador presente no log
+    return "Validado"
+
+
+def load_registry(registry_path: str) -> Tuple[Dict[str, str], Set[str]]:
+    """Carrega o sensor_registry.json e retorna mapeamento de key -> group e conjunto de chaves.
+
+    Se o arquivo não existir ou o JSON for inválido, emite mensagem no stderr e encerra com código 2.
+    """
+    if not os.path.isfile(registry_path):
+        sys.stderr.write(f"Erro: arquivo de registro de sensores não encontrado: '{registry_path}'\n")
+        sys.exit(2)
+
+    key_to_group: Dict[str, str] = {}
+    try:
+        with open(registry_path, "r", encoding="utf-8-sig") as f:
+            data = json.load(f)
+            sensors = data.get("sensors", [])
+            for s in sensors:
+                key_to_group[s["key"]] = s.get("group", "outro")
+    except Exception as ex:
+        sys.stderr.write(f"Erro: falha ao carregar JSON do registro de sensores '{registry_path}': {ex}\n")
+        sys.exit(2)
+
+    return key_to_group, set(key_to_group.keys())
+
+
+def load_expectations(expectations_path: str) -> Dict[str, List[str]]:
+    """Carrega o sensor_validation_expectations.json.
+
+    Se o arquivo não existir ou o JSON for inválido, emite mensagem no stderr e encerra com código 2.
+    """
+    if not os.path.isfile(expectations_path):
+        sys.stderr.write(f"Erro: arquivo de expectativas não encontrado: '{expectations_path}'\n")
+        sys.exit(2)
+
+    try:
+        with open(expectations_path, "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+    except Exception as ex:
+        sys.stderr.write(f"Erro: falha ao carregar JSON de expectativas '{expectations_path}': {ex}\n")
+        sys.exit(2)
+
+
+def format_num(val: Optional[float]) -> str:
+    """Formata valor numérico para relatório em Markdown."""
+    if val is None:
+        return "-"
+    if abs(val) < 1e-5 and val != 0.0:
+        return f"{val:.4e}"
+    if abs(val) >= 10000:
+        return f"{val:.1f}"
+    if abs(val) < 0.01 and val != 0.0:
+        return f"{val:.4f}"
+    return f"{val:.2f}"
+
+
+def render_report(
+    ac_type: str,
+    ac_model: str,
+    csv_paths: List[str],
+    context: Dict[str, Any],
+    sensor_columns: List[str],
+    stats: Dict[str, Dict[str, Any]],
+    reactions: Dict[str, List[str]],
+    classifications: Dict[str, str],
+    markers: List[Dict[str, Any]],
+    expectations: Dict[str, List[str]],
+    key_to_group: Dict[str, str],
+    unmapped_columns: List[str],
+    real_duration_sec: float,
+    sim_duration_sec: float,
+    gap_count: int = 0,
+    max_gap_sec: float = 5.0,
+    nw_summary: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Gera o relatório completo em formato Markdown."""
+    counts = {"Validado": 0, "Revisar": 0, "Não suportado": 0}
+    for c in classifications.values():
+        counts[c] = counts.get(c, 0) + 1
+
+    total_cols = len(sensor_columns)
+
+    # Formatação de durações
+    real_m, real_s = divmod(int(real_duration_sec), 60)
+    real_h, real_m = divmod(real_m, 60)
+    real_dur_str = f"{real_h:02d}:{real_m:02d}:{real_s:02d} ({real_duration_sec:.1f} s)"
+
+    sim_m, sim_s = divmod(int(sim_duration_sec), 60)
+    sim_h, sim_m = divmod(sim_m, 60)
+    sim_dur_str = f"{sim_h:02d}:{sim_m:02d}:{sim_s:02d} ({sim_duration_sec:.1f} s)"
+
+    strings = context.get("Strings", {})
+    ctx_title = strings.get("ctx-title") or context.get("Title") or "-"
+    ctx_atc_model = strings.get("ctx-atc-model") or "-"
+    ctx_atc_type = strings.get("ctx-atc-type") or "-"
+    engine_count = context.get("EngineCount", 1)
+
+    rejected_simvars = context.get("RejectedSimVars", [])
+    files_list = ", ".join(f"`{os.path.basename(p)}`" for p in csv_paths)
+
+    lines: List[str] = []
+    lines.append(f"# Relatório de Validação de Sensores — Tipo {ac_type} ({ac_model})")
+    lines.append("")
+    lines.append("> [!NOTE]")
+    lines.append("> As classificações deste relatório são **sugestões automáticas** geradas pelo script de análise com base em regras heurísticas.")
+    lines.append("> A decisão final sobre a validação de cada sensor cabe ao **revisor humano**.")
+    lines.append("")
+    lines.append("## Metadados do Voo")
+    lines.append("")
+    lines.append(f"- **Tipo de Aeronave (Matriz):** {ac_type}")
+    lines.append(f"- **Modelo:** {ac_model}")
+    lines.append(f"- **Título (Contexto):** {ctx_title}")
+    lines.append(f"- **ATC Model / Type:** {ctx_atc_model} / {ctx_atc_type}")
+    lines.append(f"- **Número de Motores:** {engine_count}")
+    lines.append(f"- **Arquivos Analisados:** {files_list}")
+    lines.append(f"- **Duração Coberta:** {real_dur_str}")
+    lines.append(f"- **Duração Simulada (Σ dt × sim_rate):** {sim_dur_str}")
+    lines.append(f"- **Quebras de Gravação (intervalo > {max_gap_sec:.1f}s):** {gap_count}")
+    if rejected_simvars:
+        lines.append(f"- **SimVars Rejeitadas no SimConnect:** {', '.join(f'`{r}`' for r in rejected_simvars)}")
+    else:
+        lines.append("- **SimVars Rejeitadas no SimConnect:** Nenhuma")
+    lines.append("")
+
+    lines.append("## Resumo das Sugestões")
+    lines.append("")
+    lines.append(f"- **Total de Sensores Analisados:** {total_cols}")
+    lines.append(f"- **Validado:** {counts.get('Validado', 0)} ({counts.get('Validado', 0) / max(1, total_cols) * 100:.1f}%)")
+    lines.append(f"- **Revisar:** {counts.get('Revisar', 0)} ({counts.get('Revisar', 0) / max(1, total_cols) * 100:.1f}%)")
+    lines.append(f"- **Não suportado:** {counts.get('Não suportado', 0)} ({counts.get('Não suportado', 0) / max(1, total_cols) * 100:.1f}%)")
+    lines.append("")
+
+    lines.append("## Wear and tear nativo")
+    lines.append("")
+    if nw_summary is None or not nw_summary.get("has_data", False):
+        lines.append("sem dados de wear and tear por componente neste log")
+        lines.append("")
+    else:
+        components = nw_summary.get("components", {})
+        active_comps = [c for c in components.values() if c["responded"]]
+        idle_comps = [c for c in components.values() if c["is_idle"]]
+
+        lines.append("### Componentes que responderam")
+        lines.append("")
+        if active_comps:
+            lines.append("| ID | Componente | Inicial | Final | Mín | Delta do voo | Reinícios | Weak em (nível) | Failed em (nível) | Overstress máx |")
+            lines.append("|---|---|---|---|---|---|---|---|---|---|")
+            for c in sorted(active_comps, key=lambda x: x["id"]):
+                cid = c["id"]
+                name = c["name"]
+                init_s = format_num(c["initial"])
+                fin_s = format_num(c["final"])
+                min_s = format_num(c["min"])
+                delta_s = format_num(c["delta"])
+                restarts_s = str(c["restarts"])
+
+                if c["weak_level"] is not None:
+                    weak_s = f"{format_num(c['weak_level'])} ({c['weak_utc']})"
+                else:
+                    weak_s = "-"
+
+                if c["failed_level"] is not None:
+                    failed_s = f"{format_num(c['failed_level'])} ({c['failed_utc']})"
+                else:
+                    failed_s = "-"
+
+                ov_s = format_num(c["max_overstress"])
+
+                lines.append(f"| `{cid}` | {name} | {init_s} | {fin_s} | {min_s} | {delta_s} | {restarts_s} | {weak_s} | {failed_s} | {ov_s} |")
+            lines.append("")
+        else:
+            lines.append("*Nenhum componente variou ou atingiu falha durante o voo.*")
+            lines.append("")
+
+        lines.append("### Componentes sem variação (parados em 1.00)")
+        lines.append("")
+        if idle_comps:
+            idle_desc = [f"{c['id']} ({c['name']})" for c in sorted(idle_comps, key=lambda x: x["id"])]
+            lines.append("- " + ", ".join(idle_desc))
+            lines.append("")
+        else:
+            lines.append("*Todos os componentes monitorados registraram variação.*")
+            lines.append("")
+
+        lines.append("### Sintaxe aceita")
+        lines.append("")
+        spike_keys = [
+            ("nwspike-level-39-idx1", "WEAR AND TEAR LEVEL:39:1"),
+            ("nwspike-level-name", "WEAR AND TEAR LEVEL:'PISTON_ENGINE'_n"),
+            ("nwspike-weak-value-39", "WEAR AND TEAR WEAK VALUE:39"),
+            ("nwspike-overstress-factor-39", "WEAR AND TEAR OVERSTRESS FACTOR:39"),
+        ]
+        rejected_set = set(rejected_simvars)
+        lines.append("#### Variantes de Spike (ID 39 — Piston Engine)")
+        lines.append("")
+        for k, simvar in spike_keys:
+            status = "❌ Rejeitada (NAME_UNRECOGNIZED)" if simvar in rejected_set else "✅ Aceita pelo SimConnect"
+            lines.append(f"- `{k}` (`{simvar}`): {status}")
+        lines.append("")
+
+        rejected_nw = [r for r in rejected_simvars if r.startswith("WEAR AND TEAR") and not any(r == sv for _, sv in spike_keys)]
+        if rejected_nw:
+            lines.append("#### SimVars de Wear and Tear Padrão Rejeitadas")
+            lines.append("")
+            for r in rejected_nw:
+                lines.append(f"- ❌ `{r}`")
+            lines.append("")
+        else:
+            lines.append("#### SimVars de Wear and Tear Padrão")
+            lines.append("")
+            lines.append("- Todas as SimVars `WEAR AND TEAR <VAR>:<id>` padrão foram aceitas pelo SimConnect (nenhuma rejeitada).")
+            lines.append("")
+
+    lines.append("## Marcadores Registrados")
+    lines.append("")
+    if markers:
+        lines.append("| Marcador | UTC | Esperados que reagiram / esperados |")
+        lines.append("|---|---|---|")
+        for m in markers:
+            m_text = m["text"]
+            m_utc = m["utc"]
+            prefix = match_marker_prefix(m_text, expectations)
+            if prefix and prefix in expectations:
+                expected_keys = expectations[prefix]
+                reacted_cnt = 0
+                for ek in expected_keys:
+                    # Chave esperada reagiu se qualquer coluna com essa chave base reagiu
+                    if any(
+                        col.split(":")[0] == ek and m_text in reactions.get(col, [])
+                        for col in sensor_columns
+                    ):
+                        reacted_cnt += 1
+                ratio_str = f"{reacted_cnt} / {len(expected_keys)}"
+            else:
+                ratio_str = "fora do roteiro (sem expectativa)"
+            lines.append(f"| `{m_text}` | `{m_utc}` | {ratio_str} |")
+    else:
+        lines.append("*Nenhum marcador registrado no log.*")
+    lines.append("")
+
+    # Agrupamento das colunas por grupo
+    group_order = [
+        "piston",
+        "turbine",
+        "oil",
+        "electrical",
+        "fuel",
+        "gear",
+        "hydraulic",
+        "instruments",
+        "airframe",
+        "native-damage",
+        "native-wear",
+        "native-wear-spike",
+        "outro",
+    ]
+
+    cols_by_group: Dict[str, List[str]] = {}
+    for col in sensor_columns:
+        base_k = col.split(":")[0]
+        grp = key_to_group.get(base_k, "outro")
+        cols_by_group.setdefault(grp, []).append(col)
+
+    lines.append("## Tabela de Sensores por Grupo")
+    lines.append("")
+
+    for grp in group_order:
+        cols_in_grp = cols_by_group.get(grp, [])
+        if not cols_in_grp:
+            continue
+
+        lines.append(f"### Grupo: {grp}")
+        lines.append("")
+        lines.append("| Chave | Grupo | Amostras | Mín | Máx | Média | % const. | Reagiu em | Sugestão |")
+        lines.append("|---|---|---|---|---|---|---|---|---|")
+
+        for col in sorted(cols_in_grp):
+            st = stats[col]
+            sug = classifications[col]
+            react_list = reactions.get(col, [])
+            react_str = ", ".join(f"`{r}`" for r in react_list) if react_list else "-"
+
+            min_s = format_num(st["min"])
+            max_s = format_num(st["max"])
+            mean_s = format_num(st["mean"])
+            pct_s = f"{st['pct_const']:.1f}%"
+            samples_s = str(st["samples"])
+
+            lines.append(f"| `{col}` | {grp} | {samples_s} | {min_s} | {max_s} | {mean_s} | {pct_s} | {react_str} | **{sug}** |")
+        lines.append("")
+
+    if unmapped_columns:
+        lines.append("## Colunas do CSV Fora do Registro")
+        lines.append("")
+        for uc in sorted(unmapped_columns):
+            lines.append(f"- `{uc}`")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def calibration_summary(
+    rows: List[Dict[str, str]],
+    max_gap: float = 5.0,
+) -> Dict[str, Any]:
+    """Calcula o resumo de calibração addon x nativo a partir de trechos delimitados por marcadores cal-*.
+
+    Trechos: cada marcador cujo texto começa com um de CAL_PREFIXES abre um trecho que vai até o
+    próximo marcador cal-* (exclusive) ou até o fim do log. Marcadores que não são cal-* são ignorados.
+    Nome do trecho = texto do marcador; tipo = 'normal' | 'abuso' | 'longo' pelo prefixo.
+    Para cada trecho e cada <id> com coluna nw-overstress-rate-<id> ou nw-level-<id> no log:
+      - samples, duration_s (soma dos dt entre linhas consecutivas, ignorando dt > max_gap)
+      - rate_max, rate_mean (média ponderada pelo tempo)
+      - rate_integral = soma(taxa_i * dt_i) com dt_i = tempo até a próxima linha (ignorando dt > max_gap)
+      - level_drop = soma só das quedas do nível dentro do trecho (subida = reinício, não credita)
+      - unit_ratio = rate_integral / level_drop  (None se level_drop < 1e-6)
+      - first_weak_s / first_failed_s = segundos desde o início do trecho até nw-is-weak/failed virar 1 (None se não ligou)
+    Por componente (sobre todos os trechos):
+      - noise = maior rate_max entre trechos 'normal' (None se não houver trecho normal)
+      - suggested_threshold = max(noise * NOISE_MULTIPLIER, DEFAULT_MIN_THRESHOLD) (DEFAULT_MIN_THRESHOLD se noise None)
+      - noisy = noise is not None and noise > 0.001   (taxa relevante em operação normal: manter em Observar)
+      - abuse_ratios = unit_ratio dos trechos 'abuso' e 'longo' com valor
+      - unit_status = 'confirmada' se len(abuse_ratios) >= 2 e max/min <= UNIT_STABLE_MAX_SPREAD;
+                      'inconclusiva' se len(abuse_ratios) < 2; 'divergente' caso contrário
+      - unit_ratio_median (mediana de abuse_ratios ou None)
+    Retorno: {"has_data": bool, "segments": [ {name, kind, start_utc, components: {id: {...}}} ],
+              "components": {id: {...}}}
+    """
+    if not rows:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    cal_markers: List[Tuple[int, str, str]] = []
+    for idx, r in enumerate(rows):
+        txt = (r.get("marker") or "").strip()
+        if not txt:
+            continue
+        kind: Optional[str] = None
+        if txt.startswith(CAL_ANNOTATIONS):
+            continue
+        for pfx in CAL_PREFIXES:
+            if txt.startswith(pfx):
+                kind = pfx.split("-")[1]
+                break
+        if kind is not None:
+            cal_markers.append((idx, txt, kind))
+
+    if not cal_markers:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    all_keys: Set[str] = set()
+    for r in rows:
+        all_keys.update(r.keys())
+
+    cids_set: Set[int] = set()
+    for k in all_keys:
+        if k.startswith("nw-overstress-rate-"):
+            try:
+                cids_set.add(int(k.split("-")[-1]))
+            except ValueError:
+                pass
+        elif k.startswith("nw-level-"):
+            try:
+                cids_set.add(int(k.split("-")[-1]))
+            except ValueError:
+                pass
+
+    present_ids = sorted(cids_set)
+    if not present_ids:
+        return {"has_data": False, "segments": [], "components": {}}
+
+    segments: List[Dict[str, Any]] = []
+
+    for m_idx, (start_row_idx, m_name, m_kind) in enumerate(cal_markers):
+        end_row_idx = cal_markers[m_idx + 1][0] if (m_idx + 1 < len(cal_markers)) else len(rows)
+        sub_rows = rows[start_row_idx:end_row_idx]
+        if not sub_rows:
+            continue
+
+        start_utc = sub_rows[0].get("utc", "")
+        start_dt = parse_iso_utc(start_utc)
+        start_ts = start_dt.timestamp() if start_dt else 0.0
+
+        n_sub = len(sub_rows)
+        dts: List[float] = [0.0] * n_sub
+        row_timestamps: List[float] = []
+        for r in sub_rows:
+            dt_obj = parse_iso_utc(r.get("utc", ""))
+            row_timestamps.append(dt_obj.timestamp() if dt_obj else 0.0)
+
+        for i in range(n_sub - 1):
+            delta = row_timestamps[i + 1] - row_timestamps[i]
+            if 0.0 < delta <= max_gap:
+                dts[i] = delta
+            else:
+                dts[i] = 0.0
+
+        duration_s = sum(dts)
+
+        seg_components: Dict[int, Dict[str, Any]] = {}
+        for cid in present_ids:
+            rate_key = f"nw-overstress-rate-{cid}"
+            level_key = f"nw-level-{cid}"
+            weak_key = f"nw-is-weak-{cid}"
+            failed_key = f"nw-is-failed-{cid}"
+
+            samples = 0
+            rate_max = 0.0
+            rate_integral = 0.0
+            level_drop = 0.0
+            prev_lvl: Optional[float] = None
+            first_weak_s: Optional[float] = None
+            first_failed_s: Optional[float] = None
+
+            for i, r in enumerate(sub_rows):
+                raw_rate = r.get(rate_key, "")
+                raw_lvl = r.get(level_key, "")
+
+                has_rate_sample = False
+                val_rate: Optional[float] = None
+                if raw_rate not in (None, ""):
+                    try:
+                        vr = float(raw_rate)
+                        if not (math.isnan(vr) or math.isinf(vr)):
+                            val_rate = vr
+                            has_rate_sample = True
+                    except ValueError:
+                        pass
+
+                has_lvl_sample = False
+                val_lvl: Optional[float] = None
+                if raw_lvl not in (None, ""):
+                    try:
+                        vl = float(raw_lvl)
+                        if not (math.isnan(vl) or math.isinf(vl)):
+                            val_lvl = vl
+                            has_lvl_sample = True
+                    except ValueError:
+                        pass
+
+                if has_rate_sample or has_lvl_sample:
+                    samples += 1
+
+                if val_rate is not None:
+                    rate_max = max(rate_max, val_rate)
+                    rate_integral += val_rate * dts[i]
+
+                if val_lvl is not None:
+                    if prev_lvl is None:
+                        prev_lvl = val_lvl
+                    else:
+                        diff = val_lvl - prev_lvl
+                        if diff < 0.0:
+                            level_drop += (-diff)
+                        prev_lvl = val_lvl
+
+                raw_weak = r.get(weak_key, "")
+                if raw_weak not in (None, "") and first_weak_s is None:
+                    is_w = False
+                    try:
+                        is_w = float(raw_weak) >= 0.5
+                    except ValueError:
+                        is_w = str(raw_weak).strip().lower() in ("true", "1")
+                    if is_w:
+                        t_curr = row_timestamps[i]
+                        first_weak_s = round(t_curr - start_ts, 3)
+
+                raw_failed = r.get(failed_key, "")
+                if raw_failed not in (None, "") and first_failed_s is None:
+                    is_f = False
+                    try:
+                        is_f = float(raw_failed) >= 0.5
+                    except ValueError:
+                        is_f = str(raw_failed).strip().lower() in ("true", "1")
+                    if is_f:
+                        t_curr = row_timestamps[i]
+                        first_failed_s = round(t_curr - start_ts, 3)
+
+            level_drop = round(level_drop, 6)
+            rate_integral = round(rate_integral, 6)
+            rate_mean = (rate_integral / duration_s) if duration_s > 0.0 else 0.0
+            unit_ratio = (rate_integral / level_drop) if level_drop >= 1e-6 else None
+
+            seg_components[cid] = {
+                "id": cid,
+                "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+                "samples": samples,
+                "duration_s": duration_s,
+                "rate_max": rate_max,
+                "rate_mean": rate_mean,
+                "rate_integral": rate_integral,
+                "level_drop": level_drop,
+                "unit_ratio": unit_ratio,
+                "first_weak_s": first_weak_s,
+                "first_failed_s": first_failed_s,
+            }
+
+        segments.append({
+            "name": m_name,
+            "kind": m_kind,
+            "start_utc": start_utc,
+            "components": seg_components,
+        })
+
+    components_summary: Dict[int, Dict[str, Any]] = {}
+    for cid in present_ids:
+        normal_rates: List[float] = []
+        for seg in segments:
+            if seg["kind"] == "normal":
+                normal_rates.append(seg["components"][cid]["rate_max"])
+
+        noise: Optional[float] = max(normal_rates) if normal_rates else None
+        if noise is not None:
+            suggested_threshold = max(noise * NOISE_MULTIPLIER, DEFAULT_MIN_THRESHOLD)
+        else:
+            suggested_threshold = DEFAULT_MIN_THRESHOLD
+
+        noisy = (noise is not None and noise > 0.001)
+
+        abuse_ratios: List[float] = []
+        for seg in segments:
+            if seg["kind"] in ("abuso", "longo"):
+                ur = seg["components"][cid]["unit_ratio"]
+                if ur is not None:
+                    abuse_ratios.append(ur)
+
+        if len(abuse_ratios) >= 2:
+            min_r = min(abuse_ratios)
+            max_r = max(abuse_ratios)
+            if min_r > 0 and (max_r / min_r) <= UNIT_STABLE_MAX_SPREAD:
+                unit_status = "confirmada"
+            else:
+                unit_status = "divergente"
+        else:
+            unit_status = "inconclusiva"
+
+        unit_ratio_median: Optional[float] = (
+            statistics.median(abuse_ratios) if abuse_ratios else None
+        )
+
+        has_response = any(
+            (seg["components"][cid]["rate_max"] > 0.0 or seg["components"][cid]["level_drop"] > 0.0)
+            for seg in segments
+        )
+
+        components_summary[cid] = {
+            "id": cid,
+            "name": NATIVE_COMPONENTS.get(cid, f"COMPONENTE_{cid}"),
+            "noise": noise,
+            "suggested_threshold": suggested_threshold,
+            "noisy": noisy,
+            "abuse_ratios": abuse_ratios,
+            "unit_status": unit_status,
+            "unit_ratio_median": unit_ratio_median,
+            "has_response": has_response,
+        }
+
+    return {
+        "has_data": len(segments) > 0,
+        "segments": segments,
+        "components": components_summary,
+    }
+
+
+def render_calibration_report(summary: Dict[str, Any], model: str) -> str:
+    """Renderiza relatório de calibração addon x nativo em Markdown em português."""
+    lines: List[str] = [
+        f"# Relatório de Calibração Addon × Nativo — {model}",
+        "",
+    ]
+
+    if not summary.get("has_data") or not summary.get("segments"):
+        lines.append("Sem trechos de calibração (marcadores cal-*) neste log.")
+        lines.append("")
+        return "\n".join(lines)
+
+    lines.append("> [!NOTE]")
+    lines.append("> Hipótese: taxa = fração do nível por segundo. Razão ≈ 1 confirma; a perda do addon é comparada pelo revisor.")
+    lines.append("")
+
+    components = summary.get("components", {})
+    segments = summary.get("segments", [])
+
+    lines.append("## 1. Resumo por Componente (Limiares e Unidade)")
+    lines.append("")
+    lines.append("| ID | Componente | Ruído Normal | Limiar Sugerido | Ruidoso (noisy) | Status Unidade | Razão Mediana |")
+    lines.append("|---|---|---|---|---|---|---|")
+
+    active_comps = []
+    idle_comps = []
+
+    for cid in sorted(components.keys()):
+        comp = components[cid]
+        if not comp.get("has_response", False):
+            idle_comps.append(f"{comp['name']} ({cid})")
+            continue
+
+        active_comps.append(comp)
+        c_name = comp["name"]
+        noise_str = f"{comp['noise']:.6f}" if comp["noise"] is not None else "-"
+        thresh_str = f"{comp['suggested_threshold']:.6f}"
+        noisy_str = "Sim" if comp["noisy"] else "Não"
+        status_str = comp["unit_status"]
+        median_str = f"{comp['unit_ratio_median']:.4f}" if comp["unit_ratio_median"] is not None else "-"
+
+        lines.append(
+            f"| {cid} | {c_name} | {noise_str} | {thresh_str} | {noisy_str} | {status_str} | {median_str} |"
+        )
+    lines.append("")
+
+    if idle_comps:
+        lines.append(f"**Componentes sem resposta (taxa 0 e sem queda de nível):** {', '.join(idle_comps)}")
+        lines.append("")
+
+    lines.append("## 2. Detalhamento por Trecho Marcado")
+    lines.append("")
+    lines.append("| Trecho | Tipo | ID | Componente | Duração (s) | Taxa Máx | Taxa Média | Integral Taxa | Queda Nível | Razão | 1º Weak (s) | 1º Failed (s) |")
+    lines.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
+
+    for seg in segments:
+        s_name = seg["name"]
+        s_kind = seg["kind"]
+        seg_comps = seg.get("components", {})
+        for cid in sorted(seg_comps.keys()):
+            sc = seg_comps[cid]
+            if sc["rate_max"] == 0.0 and sc["level_drop"] == 0.0:
+                continue
+
+            c_name = sc["name"]
+            dur_str = f"{sc['duration_s']:.1f}"
+            rmax_str = f"{sc['rate_max']:.6f}"
+            rmean_str = f"{sc['rate_mean']:.6f}"
+            rint_str = f"{sc['rate_integral']:.6f}"
+            ldrop_str = f"{sc['level_drop']:.6f}"
+            ratio_str = f"{sc['unit_ratio']:.4f}" if sc["unit_ratio"] is not None else "-"
+            weak_str = f"{sc['first_weak_s']:.1f}" if sc["first_weak_s"] is not None else "-"
+            failed_str = f"{sc['first_failed_s']:.1f}" if sc["first_failed_s"] is not None else "-"
+
+            lines.append(
+                f"| `{s_name}` | {s_kind} | {cid} | {c_name} | {dur_str} | {rmax_str} | {rmean_str} | {rint_str} | {ldrop_str} | {ratio_str} | {weak_str} | {failed_str} |"
+            )
+
+    lines.append("")
+    return "\n".join(lines)
+
+
+def main() -> None:
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8")
+    except Exception as ex:
+        sys.stderr.write(f"Aviso: falha ao reconfigurar encoding para UTF-8: {ex}\n")
+
+    parser = argparse.ArgumentParser(
+        description="Analisa logs CSV do SensorRecorder e gera relatório de validação por sensor."
+    )
+    parser.add_argument("--type", required=True, help="Tipo de aeronave na matriz A–I (ex.: A)")
+    parser.add_argument("--model", required=True, help="Modelo da aeronave (ex.: C152)")
+    parser.add_argument("csv_files", nargs="+", help="Um ou mais arquivos CSV de log de sensores")
+    parser.add_argument(
+        "--out",
+        help="Caminho do arquivo Markdown de saída (padrão: docs/plans/sensor-validation/<type>-<model>.md)",
+    )
+    parser.add_argument(
+        "--window",
+        type=float,
+        default=30.0,
+        help="Janela em segundos antes x depois dos marcadores para detecção de reação (padrão: 30)",
+    )
+    parser.add_argument(
+        "--max-gap",
+        type=float,
+        default=5.0,
+        help="Intervalo máximo em segundos entre amostras consecutivas antes de considerar quebra na gravação (padrão: 5.0)",
+    )
+    parser.add_argument(
+        "--registry",
+        default=DEFAULT_REGISTRY,
+        help="Caminho do sensor_registry.json",
+    )
+    parser.add_argument(
+        "--expectations",
+        default=DEFAULT_EXPECTATIONS,
+        help="Caminho do sensor_validation_expectations.json",
+    )
+    parser.add_argument(
+        "--calibration",
+        action="store_true",
+        help="Gera relatório de calibração addon x nativo a partir dos marcadores cal-*",
+    )
+    parser.add_argument(
+        "--calibration-out",
+        help="Caminho do arquivo Markdown de saída de calibração (padrão: docs/plans/sensor-validation/calibration-<model>.md)",
+    )
+
+    args = parser.parse_args()
+
+    # Valida caminhos dos arquivos
+    for p in args.csv_files:
+        if not os.path.isfile(p):
+            sys.stderr.write(f"Erro: arquivo CSV não encontrado: {p}\n")
+            sys.exit(1)
+
+    out_path = args.out
+    if not out_path:
+        out_path = os.path.join("docs", "plans", "sensor-validation", f"{args.type}-{args.model}.md")
+
+    # Carrega dados
+    try:
+        rows, all_columns = load_rows(args.csv_files)
+    except Exception as ex:
+        sys.stderr.write(f"Erro ao processar arquivos CSV: {ex}\n")
+        sys.exit(1)
+
+    if not rows:
+        sys.stderr.write("Erro: nenhum registro válido encontrado nos arquivos CSV informados.\n")
+        sys.exit(1)
+
+    context = load_context(args.csv_files)
+    key_to_group, reg_keys = load_registry(args.registry)
+    expectations = load_expectations(args.expectations)
+
+    sensor_cols = extract_sensor_columns(all_columns)
+    unmapped_cols = [c for c in sensor_cols if c.split(":")[0] not in reg_keys]
+
+    # Cálculos
+    stats = column_stats(rows, sensor_cols, max_gap=args.max_gap)
+    markers = extract_markers(rows)
+    reactions = marker_reactions(rows, sensor_cols, markers, args.window, stats)
+
+    classifications: Dict[str, str] = {}
+    for col in sensor_cols:
+        classifications[col] = classify(
+            col, stats[col], reactions.get(col, []), markers, expectations
+        )
+
+    # Duração coberta (real) e simulada considerando quebras (dt > max-gap)
+    real_duration, sim_duration, gap_count = compute_durations_and_gaps(rows, args.max_gap)
+
+    # Resumo do desgaste nativo por componente
+    nw_summary = native_wear_summary(rows, args.max_gap)
+
+    report_content = render_report(
+        ac_type=args.type,
+        ac_model=args.model,
+        csv_paths=args.csv_files,
+        context=context,
+        sensor_columns=sensor_cols,
+        stats=stats,
+        reactions=reactions,
+        classifications=classifications,
+        markers=markers,
+        expectations=expectations,
+        key_to_group=key_to_group,
+        unmapped_columns=unmapped_cols,
+        real_duration_sec=real_duration,
+        sim_duration_sec=sim_duration,
+        gap_count=gap_count,
+        max_gap_sec=args.max_gap,
+        nw_summary=nw_summary,
+    )
+
+    # Grava relatório
+    out_dir = os.path.dirname(out_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        f.write(report_content)
+
+    print(f"Relatório gerado com sucesso em: {out_path}")
+
+    if args.calibration:
+        cal_summary = calibration_summary(rows, max_gap=args.max_gap)
+        cal_report = render_calibration_report(cal_summary, model=args.model)
+        cal_out_path = args.calibration_out
+        if not cal_out_path:
+            cal_out_path = os.path.join(
+                "docs", "plans", "sensor-validation", f"calibration-{args.model}.md"
+            )
+        cal_out_dir = os.path.dirname(cal_out_path)
+        if cal_out_dir:
+            os.makedirs(cal_out_dir, exist_ok=True)
+        with open(cal_out_path, "w", encoding="utf-8") as f:
+            f.write(cal_report)
+        print(f"Relatório de calibração gerado com sucesso em: {cal_out_path}")
+
+
+if __name__ == "__main__":
+    main()

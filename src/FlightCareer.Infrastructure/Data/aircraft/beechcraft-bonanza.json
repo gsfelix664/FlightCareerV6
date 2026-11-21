@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "Beechcraft Bonanza",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "fuelInjected",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "retractableGear",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 205.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Vne ≈ 205 KIAS (Bonanza G36, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Aproximação 12°: 152 KIAS (G36)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 124.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Total 30°: 124 KIAS (G36)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B (G36)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B (G36)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 238.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B (G36)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 116.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B (G36)",
+      "notes": null
+    }
+  ]
+}

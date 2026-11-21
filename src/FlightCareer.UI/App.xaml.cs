@@ -20,9 +20,11 @@ namespace FlightCareer.UI
     {
         public IServiceProvider ServiceProvider { get; private set; } = null!;
 
-        protected override async void OnStartup(StartupEventArgs e)
+        public App()
         {
-            // Forçar cultura en-US para garantir que valores monetários apareçam como $ (USD) mundialmente
+            // Forçar cultura en-US (moeda genérica $) ANTES de qualquer código assíncrono.
+            // Definida dentro do async OnStartup, a cultura ficava presa ao contexto assíncrono do método
+            // e o thread da UI voltava à cultura do Windows (pt-BR → "R$ 1.200") depois do primeiro await.
             var culture = new System.Globalization.CultureInfo("en-US");
             System.Threading.Thread.CurrentThread.CurrentCulture = culture;
             System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
@@ -30,6 +32,10 @@ namespace FlightCareer.UI
             System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
             FrameworkElement.LanguageProperty.OverrideMetadata(typeof(FrameworkElement), new FrameworkPropertyMetadata(
                 System.Windows.Markup.XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+        }
+
+        protected override async void OnStartup(StartupEventArgs e)
+        {
 
             // Tratamento global de erros para capturar o 0xc000041d
             DispatcherUnhandledException += (s, args) =>
@@ -51,6 +57,7 @@ namespace FlightCareer.UI
             ConfigureServices(serviceCollection);
 
             ServiceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider.GetRequiredService<SensorFrameReader>();
 
             // 1. Mostrar Splash
             var splash = new SplashWindow();
@@ -62,8 +69,54 @@ namespace FlightCareer.UI
                 using (var scope = ServiceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    await dbContext.Database.EnsureCreatedAsync();
+                    await dbContext.Database.EnsureCreatedAsync();
+
                     await dbContext.EnsureSchemaUpdatedAsync();
+
+                    // Catálogo fixo de limites por aeronave (F2.0): roda em toda inicialização, para bancos
+                    // existentes receberem os perfis e para dataVersion maior atualizar os limites.
+                    try
+                    {
+                        var applied = await new FlightCareer.Infrastructure.Services.AircraftLimitSeeder(dbContext).SeedLimitsAsync();
+                        System.Diagnostics.Debug.WriteLine($"[Limites] Perfis de limites aplicados: {applied}");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Limites] Falha ao semear o catálogo de limites: {ex.Message}");
+                    }
+
+                    // Barras de saúde por componente: cria/migra os componentes das aeronaves do hangar
+                    try
+                    {
+                        var provisioner = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>();
+                        await provisioner.EnsureComponentsAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Componentes] Falha ao provisionar componentes: {ex.Message}");
+                    }
+
+                    // Peças individuais com saúde oculta (F2.1): cria as peças faltantes para as aeronaves do hangar
+                    try
+                    {
+                        var partsProvisioner = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.AircraftPartProvisioner>();
+                        await partsProvisioner.EnsurePartsAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao provisionar peças: {ex.Message}");
+                    }
+
+                    // Migração de peças para aeronaves existentes do hangar (F2.3)
+                    try
+                    {
+                        var migrationService = scope.ServiceProvider.GetRequiredService<FlightCareer.Infrastructure.Services.PartMigrationService>();
+                        await migrationService.MigrateAllPendingAsync(dbContext);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao migrar peças de aeronaves: {ex.Message}");
+                    }
 
                     var seeder = scope.ServiceProvider.GetRequiredService<IDataSeeder>();
                     if (!seeder.IsSeeded())
@@ -131,13 +184,31 @@ namespace FlightCareer.UI
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
             services.AddSingleton<IMarketSimulationService, MarketSimulationService>();
             services.AddSingleton<FlightService>();
+            services.AddSingleton(_ => FlightCareer.Domain.Components.ComponentCatalog.LoadDefault());
+            services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftComponentProvisioner>(sp =>
+                new FlightCareer.Infrastructure.Services.AircraftComponentProvisioner(sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>()));
+            services.AddSingleton(_ => FlightCareer.Domain.Parts.PartCatalog.LoadDefault());
+            services.AddSingleton(_ => FlightCareer.Domain.Parts.WearRuleCatalog.LoadDefault());
+            services.AddSingleton(_ => new FlightCareer.Infrastructure.Services.AircraftLimitCatalogLoader().CreateResolver());
+            services.AddSingleton<FlightCareer.Infrastructure.Services.PartMigrationService>(sp =>
+                new FlightCareer.Infrastructure.Services.PartMigrationService(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
+            services.AddSingleton<FlightCareer.Infrastructure.Services.AircraftPartProvisioner>(sp =>
+                new FlightCareer.Infrastructure.Services.AircraftPartProvisioner(sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>()));
 
             services.AddSingleton<SimConnectService>();
+            services.AddSingleton<SensorFrameReader>();
+            services.AddSingleton<ContextSnapshotReader>();
+            services.AddSingleton<SensorRecorder>();
             services.AddSingleton<ISimConnectService>(sp => sp.GetRequiredService<SimConnectService>());
             services.AddSingleton<Services.FlightMonitor>(sp => new Services.FlightMonitor(
                 sp.GetRequiredService<SimConnectService>(),
                 sp.GetRequiredService<FlightService>(),
-                sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
+                sp.GetRequiredService<IDbContextFactory<AppDbContext>>(),
+                sp.GetRequiredService<FlightCareer.Domain.Components.ComponentCatalog>(),
+                sp.GetRequiredService<SensorFrameReader>(),
+                sp.GetRequiredService<FlightCareer.Domain.Parts.PartCatalog>(),
+                sp.GetRequiredService<FlightCareer.Domain.Parts.WearRuleCatalog>(),
+                sp.GetRequiredService<FlightCareer.Domain.Limits.AircraftLimitResolver>()));
             services.AddSingleton<MetarService>(sp => new MetarService(
                 sp.GetRequiredService<IDbContextFactory<AppDbContext>>()));
 
@@ -171,6 +242,7 @@ namespace FlightCareer.UI
                 DataContext = s.GetRequiredService<DebugViewModel>()
             });
 
+            services.AddSingleton<Services.AlertOverlayService>();
             services.AddSingleton<DebugOverlayViewModel>();
             services.AddTransient<DebugOverlayWindow>(s => new DebugOverlayWindow
             {

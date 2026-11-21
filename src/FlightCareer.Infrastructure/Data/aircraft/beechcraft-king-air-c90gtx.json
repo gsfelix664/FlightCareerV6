@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "Beechcraft King Air C90GTx",
+  "class": "Turboprop",
+  "engineCount": 2,
+  "features": [
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "convertibleCabin",
+    "deIceBoots",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 226.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 184.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 148.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-135A",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 105.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 805.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 169.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 78.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 88.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.46,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.72,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.49,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1900.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft King Air C90GTx POH / AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

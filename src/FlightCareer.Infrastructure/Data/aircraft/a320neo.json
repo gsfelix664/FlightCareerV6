@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "A320neo",
+  "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "galley",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "jet",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "ptu",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "A320neo"
+    ],
+    "atcModel": [
+      "A20N"
+    ]
+  },
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.82,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD (MMO M 0.82; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 280.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD (VLE 280 kt / M 0.67; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 230.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD, A320 MSN 01767-09045 (CONF 1 230 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD, A320 MSN 01767-09045 (CONF 2 200 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 177.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD, A320 MSN 01767-09045 (CONF FULL 177 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 350.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD (VMO 350 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 185.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD, A320 MSN 01767-09045 (CONF 3 185 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Airbus A318/A319/A320/A321 FCOM (IGO fleet, rev. 21 JAN 19), LIM-AG-SPD (VLO extension 250 kt / M 0.60; retraction 220 kt; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Airbus FCOM DSC-27-20-10-20 P 5/16, load factor protection (+2.5 g clean; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Airbus FCOM DSC-27-20-10-20 P 5/16, load factor protection (-1 g clean; arquivo local do usuario: A320 Neo FCOM_1.pdf (archive.org/details/a-320-neo-fcom-1))",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: CFM LEAP-1A",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 140.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 1060.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 112.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 145.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A320neo FCOM / AFM (CFM LEAP-1A26); não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

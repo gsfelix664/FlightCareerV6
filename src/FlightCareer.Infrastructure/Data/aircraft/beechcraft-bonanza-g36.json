@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "Beechcraft Bonanza G36",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "retractableGear",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [
+      "Beechcraft Bonanza"
+    ],
+    "atcModel": [
+      "BE36"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 203.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Never exceed 203 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar com POH: padrão da classe pistão; MAX EGT do sim (649,07 °C) é a escala do instrumento",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 61.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 68.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0807-Beechcraft_Bonanza_Private_Charter.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps 12° 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 122.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Flaps normal 122 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.5 p. 4 (Continental IO-550-B 2700 rpm, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 165.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (165 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "EASA TCDS EASA.IM.A.279 Issue 03, Sec. III.9 p. 5 (Landing gear extended normal 152 KCAS, https://www.easa.europa.eu/en/downloads/7204/en)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 141.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Bonanza G36 POH, Sec. 2 (141 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-B",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 154.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Bonanza G36 POH / AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

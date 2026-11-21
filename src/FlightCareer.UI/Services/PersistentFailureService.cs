@@ -1,4 +1,6 @@
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Sensors;
 using FlightCareer.Domain.Services;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +13,10 @@ using System.Threading.Tasks;
 namespace FlightCareer.UI.Services
 {
     /// <summary>
-    /// Panes persistentes. Pane nativa: o sim gera, o addon detecta e grava. Pane do addon: sorteada pelo
-    /// WearAndFailureService e gravada aqui. As duas vão para a mesma tabela (AircraftDefects) e só saem pela oficina.
+    /// Panes persistentes (discrepâncias entre voos). Pane nativa: o sim gera, o addon detecta e grava. Pane do addon:
+    /// sorteada pelo sistema de componentes (ComponentFlightSession) e gravada aqui pelo FlightMonitor.
+    /// As duas vão para a mesma tabela (AircraftDefects) e só saem pela oficina.
+    /// No voo, o SimFailureActuator aplica o efeito; este serviço mantém o efeito entre voos e recarregamentos.
     ///
     /// Enquanto houver pane aberta e o voo estiver sendo monitorado, este serviço:
     ///  1. reaplica a pane ao carregar a aeronave (o simulador zera as falhas ao recarregar);
@@ -22,23 +26,10 @@ namespace FlightCareer.UI.Services
     /// </summary>
     public class PersistentFailureService
     {
-        // Comandos de flap bloqueados enquanto os flaps estiverem travados. A correção usa a SimVar
-        // FLAPS HANDLE INDEX (gravável), então nenhum destes eventos é transmitido pelo addon.
-        private static readonly string[] FlapPilotEvents =
-        {
-            "FLAPS_INCR", "FLAPS_DECR", "FLAPS_UP", "FLAPS_DOWN", "FLAPS_1", "FLAPS_2", "FLAPS_3", "FLAPS_4",
-            "FLAPS_SET", "AXIS_FLAPS_SET", "FLAPS_CONTINUOUS_INCR", "FLAPS_CONTINUOUS_DECR"
-        };
-
-        // Comandos de ligar o alternador bloqueados. A correção transmite ALTERNATOR_OFF (fora desta lista).
-        private static readonly string[] AlternatorPilotEvents =
-        {
-            "ALTERNATOR_ON", "ALTERNATOR_SET", "TOGGLE_ALTERNATOR1", "TOGGLE_MASTER_ALTERNATOR"
-        };
-
-        // Magnetos: sem bloqueio de eventos. Bloquear congelaria a chave (inclusive a partida em START).
-        // A vigilância força o magneto morto para 0, o que reproduz a tabela da pane:
-        // BOTH -> só o bom | L (morto) -> OFF, motor apaga | R -> R | OFF -> OFF.
+        // Chaves e comandos do piloto permanecem livres:
+        // - Alternador: desconectado do barramento (ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE); chave física fica em ON.
+        // - Flaps: superfície travada continuamente (WriteFlapSurfacePercent); alavanca física se move livremente.
+        // - Magnetos: chave acompanha a ignição (limitação do modelo 3D).
 
         private const double EngineDamageThresholdPercent = 10.0;
         private const double BrakesWornThresholdPercent = 15.0;
@@ -50,12 +41,18 @@ namespace FlightCareer.UI.Services
 
         private readonly SimConnectService _simConnect;
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        // Pane do wear and tear nativo (F4.2c): WEAR AND TEAR IS FAILED:<id> vem do leitor genérico de sensores
+        private readonly SensorFrameReader? _sensorFrames;
+        private readonly NativeWearFailureDetector _nativeWear = new();
 
         private readonly List<AircraftDefect> _openDefects = new();
         private readonly HashSet<string> _togglesApplied = new();
         private readonly Dictionary<string, DateTime> _lastCorrection = new();
         // Panes registradas cuja gravação assíncrona ainda não terminou: não podem parecer "reparadas" numa releitura.
         private readonly HashSet<Guid> _unsaved = new();
+
+        private readonly Dictionary<int, bool> _nativeFlapFailedById = new();
+        private bool _nativeFlapFailed;
 
         private PilotAircraft? _aircraft;
         private Func<string> _phaseProvider = () => string.Empty;
@@ -79,10 +76,12 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<AircraftDefect> OpenDefects => _openDefects;
         public bool IsActive => _active;
 
-        public PersistentFailureService(SimConnectService simConnect, IDbContextFactory<AppDbContext> contextFactory)
+        public PersistentFailureService(SimConnectService simConnect, IDbContextFactory<AppDbContext> contextFactory,
+            SensorFrameReader? sensorFrames = null)
         {
             _simConnect = simConnect;
             _contextFactory = contextFactory;
+            _sensorFrames = sensorFrames;
 
             // O registro de TOGGLE_* enviados vale para a aeronave carregada no simulador, não para o voo do app:
             // só é limpo quando o sim recarrega a aeronave ou a conexão cai.
@@ -122,6 +121,8 @@ namespace FlightCareer.UI.Services
             _lastDbSync = DateTime.Now;
             ReleaseResolved(previousOpen);
             _lastCorrection.Clear();
+            _nativeFlapFailedById.Clear();
+            _nativeFlapFailed = false;
             _previous = null;
             _suctionSeenHealthy = false;
             _suctionLowSince = null;
@@ -130,6 +131,11 @@ namespace FlightCareer.UI.Services
 
             _simConnect.OnFailureStateReceived += OnFailureState;
             _simConnect.OnMaskedEvent += OnMaskedEvent;
+            if (_sensorFrames != null)
+            {
+                if (_detectNative) _nativeWear.Reset();
+                _sensorFrames.OnFrame += OnSensorFrame;
+            }
             _active = true;
 
             ApplyAll();
@@ -140,7 +146,9 @@ namespace FlightCareer.UI.Services
             if (!_active) return;
             _simConnect.OnFailureStateReceived -= OnFailureState;
             _simConnect.OnMaskedEvent -= OnMaskedEvent;
+            if (_sensorFrames != null) _sensorFrames.OnFrame -= OnSensorFrame;
             _simConnect.SetMaskedEvents(Array.Empty<string>());
+            _simConnect.SetPersistentToggles(Array.Empty<string>());
             _active = false;
         }
 
@@ -230,25 +238,24 @@ namespace FlightCareer.UI.Services
         {
             if (!_active) return;
 
-            var masked = new List<string>();
-            foreach (var defect in _openDefects)
-            {
-                switch (defect.Code)
-                {
-                    case DefectCatalog.FlapLock:
-                    case DefectCatalog.FlapDamage:
-                        masked.AddRange(FlapPilotEvents);
-                        break;
-                    case DefectCatalog.Alternator:
-                        masked.AddRange(AlternatorPilotEvents);
-                        break;
-                }
-            }
-            _simConnect.SetMaskedEvents(masked);
+            // Chaves e comandos livres no simulador (sem mascaramento)
+            _simConnect.SetMaskedEvents(Array.Empty<string>());
 
-            // Panes reaplicadas por evento nativo TOGGLE_*.
+            // Toggles das panes abertas não são desfeitos pelo início de voo (ClearSimFailures)
+            _simConnect.SetPersistentToggles(_openDefects
+                .Select(d => DefectCatalog.Get(d.Code))
+                .Where(s => s.Enforcement == DefectEnforcement.NativeToggle && s.ToggleEvent != null)
+                .Select(s => s.ToggleEvent!));
+
+            // Panes reaplicadas por evento nativo TOGGLE_* (ou desconexão de alternador via SetAlternatorConnected)
             foreach (var defect in _openDefects)
             {
+                if (defect.Code == DefectCatalog.Alternator)
+                {
+                    _simConnect.SetAlternatorConnected(1, false);
+                    continue;
+                }
+
                 var spec = DefectCatalog.Get(defect.Code);
                 if (spec.Enforcement != DefectEnforcement.NativeToggle || spec.ToggleEvent == null) continue;
                 if (_togglesApplied.Contains(defect.Code)) continue;
@@ -271,18 +278,14 @@ namespace FlightCareer.UI.Services
             _previous = null;
             _suctionSeenHealthy = false;
             _suctionLowSince = null;
+            _nativeFlapFailedById.Clear();
+            _nativeFlapFailed = false;
             if (_active) _reapplyAfter = DateTime.Now + ReapplyDelayAfterLoad;
         }
 
         private void OnMaskedEvent(string simEvent, uint data)
         {
-            // O comando já foi bloqueado pelo SimConnect. Só registrar para o piloto entender.
-            var defect = _openDefects.FirstOrDefault(d =>
-                (simEvent.StartsWith("FLAPS", StringComparison.OrdinalIgnoreCase) || simEvent.StartsWith("AXIS_FLAPS", StringComparison.OrdinalIgnoreCase))
-                    ? d.Code is DefectCatalog.FlapLock or DefectCatalog.FlapDamage
-                    : d.Code == DefectCatalog.Alternator);
-            if (defect != null && ShouldCorrect("masked:" + defect.Code, TimeSpan.FromSeconds(3)))
-                OnEnforcementAction?.Invoke($"Comando bloqueado ({simEvent}): {defect.Title}");
+            // Comandos de alternador e flap não são mais mascarados (comandos do piloto permanecem livres)
         }
 
         // ------------------------------------------------------------------ vigilância contínua
@@ -336,17 +339,26 @@ namespace FlightCareer.UI.Services
             foreach (var old in previous)
             {
                 if (_openDefects.Any(d => d.Code == old.Code)) continue;
+
+                if (old.Code == DefectCatalog.Alternator)
+                {
+                    _simConnect.SetAlternatorConnected(1, true);
+                    OnEnforcementAction?.Invoke($"Pane reparada, removida do simulador: {old.Title}");
+                    continue;
+                }
+
                 var spec = DefectCatalog.Get(old.Code);
                 if (spec.Enforcement != DefectEnforcement.NativeToggle || spec.ToggleEvent == null) continue;
 
                 if (old.Code == DefectCatalog.EngineFailure)
                 {
                     if (_simConnect.CurrentFailureState is { } st && st.EngineFailed > 0.5)
-                        _simConnect.SetFailure(spec.ToggleEvent);
+                        _simConnect.SendEvent(spec.ToggleEvent);
                 }
                 else if (_togglesApplied.Contains(old.Code))
                 {
-                    _simConnect.SetFailure(spec.ToggleEvent);
+                    // Enviado por este serviço neste carregamento da aeronave: o toggle desfaz
+                    _simConnect.SendEvent(spec.ToggleEvent);
                 }
                 _togglesApplied.Remove(old.Code);
                 OnEnforcementAction?.Invoke($"Pane reparada, removida do simulador: {old.Title}");
@@ -369,12 +381,8 @@ namespace FlightCareer.UI.Services
 
                     case DefectCatalog.FlapLock:
                     case DefectCatalog.FlapDamage:
-                        if (Math.Abs(state.FlapsHandleIndex - defect.Parameter) > 0.1 && ShouldCorrect(defect.Code))
-                            _simConnect.WriteFlapsHandleIndex(defect.Parameter);
-                        break;
-
-                    case DefectCatalog.Alternator when state.AlternatorSwitch > 0.5:
-                        if (ShouldCorrect(defect.Code)) _simConnect.TransmitEvent("ALTERNATOR_OFF");
+                        double target = FlapSurfaceLock.TargetFraction(defect.Parameter, state.FlapsNumHandlePositions);
+                        _simConnect.WriteFlapSurfacePercent(target);
                         break;
 
                     // Motor inoperante: o sim zera a falha ao reiniciar o voo/recarregar a aeronave.
@@ -382,7 +390,8 @@ namespace FlightCareer.UI.Services
                     case DefectCatalog.EngineFailure when state.EngineFailed < 0.5:
                         if (ShouldCorrect(defect.Code, EngineReapplyThrottle))
                         {
-                            _simConnect.SetFailure(DefectCatalog.Get(defect.Code).ToggleEvent!);
+                            // Leitura rápida confirma que não está falhado: o toggle não repara nada
+                            _simConnect.SendEvent(DefectCatalog.Get(defect.Code).ToggleEvent!);
                             _togglesApplied.Add(defect.Code);
                             OnEnforcementAction?.Invoke($"Pane reaplicada no simulador: {defect.Title}");
                         }
@@ -450,6 +459,48 @@ namespace FlightCareer.UI.Services
                 OnNativeCrash?.Invoke(DescribeCrashFlag(s.CrashFlag));
 
             DetectVacuumByEffect(s);
+        }
+
+        /// <summary>
+        /// Pane do wear and tear nativo (plano › 0.1, regra 5; F4.2c): a borda 0 → 1 de WEAR AND TEAR IS FAILED:&lt;id&gt;
+        /// vira discrepância. Não passa por ENG FAILED nem GENERAL ENG DAMAGE PERCENT (F1.4c), por isso a leitura própria.
+        /// Só em voo monitorado; o modo vigia não detecta panes novas.
+        /// </summary>
+        private void OnSensorFrame(SensorFrame frame)
+        {
+            if (frame.Values != null)
+            {
+                bool updated = false;
+                for (int id = 5; id <= 8; id++)
+                {
+                    string key = $"{NativeWearFailureMap.SensorKeyPrefix}{id}";
+                    if (frame.Values.TryGetValue(key, out double val) && !double.IsNaN(val))
+                    {
+                        _nativeFlapFailedById[id] = val >= 0.5;
+                        updated = true;
+                    }
+                }
+                if (updated)
+                {
+                    _nativeFlapFailed = _nativeFlapFailedById.Values.Any(f => f);
+                }
+            }
+
+            if (!_active || !_detectNative || _aircraft == null || frame.Values == null) return;
+
+            foreach (var e in _nativeWear.Update(frame.Values))
+            {
+                if (e.DefectCode == null)
+                {
+                    OnEnforcementAction?.Invoke($"Wear and tear do simulador: {e.NativeName} (ID {e.ComponentId}) quebrado, só registro");
+                    continue;
+                }
+
+                var defect = Record(e.DefectCode, DefectOrigin.Native, NativeWearFailureMap.CauseFor(e.ComponentId, e.NativeName),
+                    description: "O desgaste do próprio simulador (wear and tear) quebrou esta peça.");
+                if (defect == null)
+                    OnEnforcementAction?.Invoke($"Wear and tear do simulador: {e.NativeName} (ID {e.ComponentId}) quebrado; pane {e.DefectCode} já aberta");
+            }
         }
 
         /// <summary>

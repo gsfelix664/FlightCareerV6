@@ -13,13 +13,15 @@ namespace FlightCareer.Infrastructure.Services
     public class MarketSimulationService : IMarketSimulationService
     {
         private readonly AppDbContext _context;
+        private readonly PartMigrationService? _partMigrationService;
         private static DateTime _lastTickUtc = DateTime.UtcNow.AddHours(-1);
         private static readonly SemaphoreSlim _simulationLock = new(1, 1);
         private readonly Random _random = new();
 
-        public MarketSimulationService(AppDbContext context)
+        public MarketSimulationService(AppDbContext context, PartMigrationService? partMigrationService = null)
         {
             _context = context;
+            _partMigrationService = partMigrationService;
         }
 
         public double CalculateBaseMarketValue(
@@ -31,36 +33,19 @@ namespace FlightCareer.Infrastructure.Services
             int year,
             double airframeHours)
         {
-            if (type == null) return 0.0;
-
-            double cMotor = Math.Clamp(engineCond, 0.0, 100.0) / 100.0;
-            double cAvionics = Math.Clamp(avionicsCond, 0.0, 100.0) / 100.0;
-            double cEstrutura = ((Math.Clamp(airframeCond, 0.0, 100.0) + Math.Clamp(tiresCond, 0.0, 100.0)) / 2.0) / 100.0;
-
-            int currentYear = DateTime.UtcNow.Year;
-            int safeYear = year > 1900 ? year : 1995;
-            double fAno = Math.Clamp(1.0 - ((currentYear - safeYear) * 0.005), 0.70, 1.05);
-
-            double weightedCondition = (0.45 * cMotor) + (0.30 * cAvionics) + (0.25 * cEstrutura);
-            double baseValue = type.PurchasePrice * fAno * weightedCondition;
-
-            // Bônus Overhaul Zero Hora
-            if (engineCond >= 95.0)
-            {
-                baseValue *= 1.12; // +12%
-            }
-
-            // Penalidade AOG / Sucata
-            if (engineCond < 25.0 || tiresCond < 25.0 || airframeCond < 25.0 || avionicsCond < 25.0)
-            {
-                baseValue *= 0.75; // -25%
-            }
-
-            return Math.Round(Math.Max(5000.0, baseValue), 2);
+            return FlightCareer.Domain.Economy.AircraftValuation.CalculateBaseMarketValue(
+                type,
+                engineCond,
+                tiresCond,
+                airframeCond,
+                avionicsCond,
+                year,
+                airframeHours);
         }
 
         public async Task EnsureMarketInitializedAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -98,6 +83,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task ProcessSimulationTicksAsync()
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -299,6 +285,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message, PilotAircraft? Aircraft)> BuyMarketListingAsync(Guid marketListingId, string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -353,8 +340,37 @@ namespace FlightCareer.Infrastructure.Services
                     CurrentAirframeHours = listing.AirframeHours,
                     FuelAmount = listing.FuelAmount,
                     CurrentLocationICAO = pilot.CurrentAirportICAO,
-                    EngineTboRemainingHours = Math.Max(100.0, listing.TboHours - listing.TsmoHours)
+                    EngineTboRemainingHours = Math.Max(25.0, listing.TboHours - listing.TsmoHours)
                 };
+
+                // Provisiona peças coerentes com o estado da aeronave comprada (F2.3 - Decisão 3)
+                if (_partMigrationService != null && listing.AircraftType != null)
+                {
+                    var profile = await _context.AircraftLimitProfiles
+                        .FirstOrDefaultAsync(p => p.AircraftTypeModel.ToLower() == listing.AircraftType.Model.ToLower());
+                    var features = new List<string>();
+                    int engineCount = 1;
+                    if (profile != null)
+                    {
+                        try
+                        {
+                            features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(profile.FeaturesJson) ?? new();
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"[Mercado] Falha ao deserializar FeaturesJson para perfil {profile.AircraftTypeModel}: {ex.Message}");
+                        }
+                        engineCount = profile.EngineCount;
+                    }
+                    _partMigrationService.ProvisionPurchasedAircraft(
+                        newAircraft,
+                        features,
+                        engineCount,
+                        listing.EngineCondition,
+                        listing.TiresCondition,
+                        listing.AirframeCondition,
+                        listing.AvionicsCondition);
+                }
 
                 _context.PilotAircrafts.Add(newAircraft);
 
@@ -426,6 +442,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message, MarketListing? Listing)> ListPlayerAircraftAsync(Guid playerAircraftId, string pilotName, double askingPrice)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -481,8 +498,9 @@ namespace FlightCareer.Infrastructure.Services
                     AirframeHours = aircraft.CurrentAirframeHours,
                     YearOfManufacture = year,
                     TboHours = (aircraft.AircraftType.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
-                                aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 3600.0 : 1800.0,
-                    TsmoHours = Math.Max(0, 1800.0 - aircraft.EngineTboRemainingHours),
+                                aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 500.0,
+                    TsmoHours = Math.Max(0, ((aircraft.AircraftType.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
+                                              aircraft.AircraftType.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 500.0) - aircraft.EngineTboRemainingHours),
                     StructuralIncidentHistory = "Aeronave operada pela frota da companhia",
                     FuelAmount = aircraft.FuelAmount,
                     BaseMarketValue = baseVal,
@@ -510,6 +528,7 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task<(bool Success, string Message)> CancelPlayerListingAsync(Guid marketListingId, string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             await _simulationLock.WaitAsync();
             try
             {
@@ -557,7 +576,7 @@ namespace FlightCareer.Infrastructure.Services
             double hours = _random.Next(120, 9500);
 
             double tbo = (type.FuelType?.Contains("JET", StringComparison.OrdinalIgnoreCase) == true ||
-                          type.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 3600.0 : 1800.0;
+                          type.Type?.Contains("Turboprop", StringComparison.OrdinalIgnoreCase) == true) ? 900.0 : 500.0;
             double tsmo = Math.Round(_random.NextDouble() * Math.Min(tbo, hours % tbo == 0 ? tbo : hours % tbo), 1);
 
             double fuel = Math.Round(_random.NextDouble() * type.FuelTankGallons, 1);

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "Flight Design CT",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "fixedGear",
+    "fixedPitchProp",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [
+      "Flight Design CT"
+    ],
+    "atcModel": [
+      "FDCT"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 145.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (145 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 120.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Coolant/head max 120°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 140.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (140°C, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0803-Flight_Design_CT.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 44.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0803-Flight_Design_CT.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 52.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0803-Flight_Design_CT.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 100.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 0° 100 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 80.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 15° 80 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 62.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 30° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 62.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.1 p. 2-1 (Flaps 35° 62 kts CAS, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 5800.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (Rotax 912 ULS 5800 rpm max 5 min, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 11.6,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.5 p. 2-3 (0.8 bar / 11.6 psi, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 4.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (+4g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -2.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Flight Design CTLS AOI AF 04300005 Rev 8, Sec. 2.2 p. 2-2 (-2g, http://flightdesignusa.com/wp-content/uploads/2022/11/AF04300005_08.pdf)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 20.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: ≈20 A (Rotax 912, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 14.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Rotax 912",
+      "notes": null
+    }
+  ]
+}

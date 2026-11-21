@@ -1,4 +1,9 @@
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Integrity;
+using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
 using FlightCareer.Application.DTOs;
@@ -8,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,19 +25,34 @@ namespace FlightCareer.UI.Services
         private readonly SimConnectService _simConnect;
         private readonly FlightService _flightService;
         private readonly IDbContextFactory<Infrastructure.Persistence.AppDbContext> _contextFactory;
-        private readonly WearAndFailureService _wearService;
+        private readonly ComponentFlightSession _failures;
+        private readonly ComponentCatalog _catalog;
+        private readonly IRandomSource _random = new SystemRandomSource();
         private readonly FlightQualityService _qualityService = new();
         private readonly FlightTelemetryLogger _telemetryLogger = new();
+        private readonly PartCatalog _partCatalog;
+        private readonly WearRuleCatalog _wearRules;
+        private readonly AircraftLimitResolver _limitResolver;
+        private readonly PartFlightSession _parts;
+        private readonly FuelUsageAccumulator _fuelAccumulator = new();
+        private readonly FuelTruckDelivery _fuelTruck = new();
+        private readonly ExceedanceLogAggregator _exceedanceLog = new();
+        private bool _autoStartUsed;
+        private FuelIntegrityMonitor? _fuelIntegrity;
+        private SlewMonitor _slewMonitor = new();
+        private bool _flightInvalidated;
+        private string? _flightInvalidationReason;
+        private TouchdownEvent? _lastTouchdownEvent;
         private string _currentStatus = "PREPARAÇÃO";
 
         public bool IsMonitoring { get; private set; }
         public bool IsFlightActive { get; private set; }
         public string CurrentStatus => _currentStatus;
         public PilotAircraft? CurrentAircraft => _aircraft;
+        public Guid? WatchedAircraftId => _aircraft?.Id ?? _watchedAircraft?.Id;
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
         private bool _hasTouchedDown;
-
         private double _simulatedFlightTimeSeconds = 0;
         private DateTime _lastTick = DateTime.MinValue;
         private DateTime? _startConditionTime;
@@ -47,115 +69,78 @@ namespace FlightCareer.UI.Services
         private string _originIcao = string.Empty;
         private DateTime _lastDatabaseUpdate = DateTime.MinValue;
         private DateTime _lastWearUpdate = DateTime.MinValue;
+        private DateTime _lastPreflightTick = DateTime.MinValue;
         private DateTime? _groundAbortTime;
         private SimTelemetry? _lastData;
+
+        // Leitura rápida (a cada 2 frames): toque e crash medidos pelo addon, independem do aviso de crash do sim
+        private readonly TouchdownDetector _touchdown;
+        private readonly Stopwatch _fastClock = Stopwatch.StartNew();
+        private DateTime _lastFastSample = DateTime.MinValue;
+        private bool _impactCrashHandled;
+        // Perda total em andamento: crash do sim, crash do addon e componentes a 0% podem chegar juntos
+        private bool _totalLossInProgress;
+        private static readonly TimeSpan FastStreamTimeout = TimeSpan.FromSeconds(3);
+        /// <summary>Leitura rápida chegando: o toque é medido nela; senão, cai no cálculo antigo pela telemetria de 1 s.</summary>
+        private bool FastStreamAlive => DateTime.Now - _lastFastSample < FastStreamTimeout;
 
         public event Action<string, string, bool>? OnAlert;
         public event Action<string>? OnStatusChanged;
         public event Action<FlightOutcome>? OnFlightFinished;
         public event Action<PilotAircraft>? OnTotalLoss;
         public event Action? OnMonitoringCancelled;
+        /// <summary>Caminhão de combustível cobrado em outro contexto: quem guarda piloto/aeronave em contexto longo deve recarregar (id da aeronave).</summary>
+        public event Action<Guid>? OnFuelTruckCharged;
 
-        public WearAndFailureService WearService => _wearService;
+        /// <summary>Desgaste e panes por componente do voo atual.</summary>
+        public ComponentFlightSession Failures => _failures;
+
+        /// <summary>Panes persistentes (discrepâncias entre voos), addon e nativas.</summary>
         public PersistentFailureService PersistentFailures => _persistentFailures;
-
         private readonly PersistentFailureService _persistentFailures;
+        private PilotAircraft? _watchedAircraft;
 
         [ActivatorUtilitiesConstructor]
         public FlightMonitor(
             SimConnectService simConnect,
             FlightService flightService,
-            IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory)
+            IDbContextFactory<Infrastructure.Persistence.AppDbContext> contextFactory,
+            ComponentCatalog catalog,
+            SensorFrameReader sensorFrames,
+            PartCatalog partCatalog,
+            WearRuleCatalog wearRules,
+            AircraftLimitResolver limitResolver)
         {
             _simConnect = simConnect;
             _flightService = flightService;
             _contextFactory = contextFactory;
-            _wearService = new WearAndFailureService(simConnect);
-            _wearService.OnFailureTriggered += OnAircraftFailureTriggered;
+            _catalog = catalog;
+            _failures = new ComponentFlightSession(simConnect, catalog, _random);
+            _failures.OnFailure += OnAircraftFailureTriggered;
+            _touchdown = new TouchdownDetector(catalog.Landing);
 
-            _persistentFailures = new PersistentFailureService(simConnect, contextFactory);
-            _persistentFailures.OnDefectRecorded += OnDefectRecorded;
-            _persistentFailures.OnNativeCrash += cause =>
+            _partCatalog = partCatalog;
+            _wearRules = wearRules;
+            _limitResolver = limitResolver;
+            _parts = new PartFlightSession(partCatalog, wearRules, limitResolver);
+            sensorFrames.OnFrame += _parts.OnFrame;
+            // Uma linha no início e outra no fim de cada faixa (antes: uma por peça a cada tick)
+            _parts.OnExceedanceTick += tick =>
             {
-                _telemetryLogger.LogEvent("CRASH_FLAG_MSFS", cause);
-                OnAlert?.Invoke("ACIDENTE REPORTADO PELO SIMULADOR", cause, true);
+                foreach (var line in _exceedanceLog.Update(tick, _simulatedFlightTimeSeconds))
+                    _telemetryLogger.LogEvent("EXCEDENCIA_PECA", line);
             };
+            _parts.OnInspection += insp => _telemetryLogger.LogEvent("INSPECAO_PECA", $"{insp.DefectCode} - {insp.TargetPartId} - {insp.Description}");
+            _parts.OnDiagnostic += diag => _telemetryLogger.LogEvent("PECAS_DIAG", diag);
+
+            _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
+            _persistentFailures.OnDefectRecorded += OnDefectRecorded;
+            _persistentFailures.OnNativeCrash += HandleSimulatorCrash;
             _persistentFailures.OnEnforcementAction += msg => _telemetryLogger.LogEvent("PANE_PERSISTENTE", msg);
+
+            _simConnect.OnObservedEvent += OnObservedEventReceived;
+            _simConnect.OnDataReceived += OnTelemetryForFuelTruck;
         }
-
-        private Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
-        {
-            return _contextFactory.CreateDbContextAsync();
-        }
-
-        /// <summary>Pane do addon -> código do catálogo. Null = efeito transitório que não vira defeito.</summary>
-        private static string? DefectCodeFor(FailureRecord failure) => failure.Type switch
-        {
-            FailureType.EngineIFSD => DefectCatalog.EngineFailure,
-            FailureType.AlternatorFailure => DefectCatalog.Alternator,
-            FailureType.VacuumFailure => DefectCatalog.Vacuum,
-            FailureType.PitotBlockage => DefectCatalog.Pitot,
-            FailureType.StaticPortBlockage => DefectCatalog.StaticPort,
-            FailureType.TireBlowout => DefectCatalog.TireBlowout,
-            FailureType.FlapLock => DefectCatalog.FlapLock,
-            FailureType.GearCollapse => DefectCatalog.GearCollapse,
-            FailureType.CabinDepressurization => DefectCatalog.Pressurization,
-            FailureType.MagnetoFailure => failure.DefectCode,
-            FailureType.EngineFire => DefectCatalog.EngineFire,
-            FailureType.OilLeak => DefectCatalog.OilLeak,
-            _ => null // CarbIcing, SparkPlugFouling: transitórios
-        };
-
-        private static FailureType? FailureTypeFor(string code) => code switch
-        {
-            DefectCatalog.EngineFailure => FailureType.EngineIFSD,
-            DefectCatalog.Alternator => FailureType.AlternatorFailure,
-            DefectCatalog.Vacuum => FailureType.VacuumFailure,
-            DefectCatalog.Pitot => FailureType.PitotBlockage,
-            DefectCatalog.StaticPort => FailureType.StaticPortBlockage,
-            DefectCatalog.TireBlowout => FailureType.TireBlowout,
-            DefectCatalog.FlapLock or DefectCatalog.FlapDamage => FailureType.FlapLock,
-            DefectCatalog.GearCollapse => FailureType.GearCollapse,
-            DefectCatalog.Pressurization => FailureType.CabinDepressurization,
-            DefectCatalog.MagnetoLeft or DefectCatalog.MagnetoRight => FailureType.MagnetoFailure,
-            DefectCatalog.EngineFire => FailureType.EngineFire,
-            DefectCatalog.OilLeak => FailureType.OilLeak,
-            _ => null
-        };
-
-        /// <summary>Panes já abertas não são sorteadas de novo (nem reenviadas por TOGGLE, o que as desligaria).</summary>
-        private void SeedWearServiceWithOpenDefects()
-        {
-            foreach (var defect in _persistentFailures.OpenDefects)
-            {
-                if (FailureTypeFor(defect.Code) is { } type) _wearService.MarkAlreadyActive(type);
-            }
-        }
-
-        private void OnAircraftFailureTriggered(FailureRecord failure)
-        {
-            // Sem salto para um valor fixo (antes: EngineCondition = 10%). A saúde é mantida no instante da pane;
-            // se o motor seguir girando com a pane, o WearAndFailureService acelera o desgaste.
-            // Gravar e registrar ANTES do alerta: o alerta pode abrir uma janela, e nada aqui pode depender dela.
-            _telemetryLogger.LogEvent("PANE_EM_VOO", $"{failure.Title} - {failure.Description}");
-
-            var code = DefectCodeFor(failure);
-            if (code == null)
-            {
-                // O addon derrubou o motor por efeito transitório: a borda de ENG FAILED não é pane nativa nova
-                if (failure.SimEventName == "TOGGLE_ENGINE1_FAILURE") _persistentFailures.ExpectEngineFailureFromAddon();
-            }
-            else
-            {
-                _persistentFailures.Record(code, DefectOrigin.Addon, failure.Description,
-                    title: failure.Title, description: failure.Description,
-                    alreadyInjected: !string.IsNullOrEmpty(failure.SimEventName));
-            }
-
-            OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
-        }
-
-        private PilotAircraft? _watchedAircraft;
 
         /// <summary>
         /// Aeronave ativa do piloto: mesmo fora de um voo monitorado (ex.: NO-GO, voo reiniciado no sim),
@@ -169,33 +154,77 @@ namespace FlightCareer.UI.Services
             else _persistentFailures.Start(aircraft, () => "SOLO (FORA DE VOO)", detectNative: false);
         }
 
+        /// <summary>Panes abertas que impedem o voo (NO-GO).</summary>
+        public List<AircraftDefect> GetGroundingDefects(Guid aircraftId) =>
+            _persistentFailures.LoadOpenDefects(aircraftId).Where(d => d.IsGrounding).ToList();
+
+        /// <summary>Pane nativa detectada no simulador: reflete o dano nos componentes.</summary>
         private void OnDefectRecorded(AircraftDefect defect)
         {
-            if (defect.Origin != DefectOrigin.Native) return; // panes do addon já foram anunciadas acima
+            if (defect.Origin != DefectOrigin.Native) return; // panes do addon já foram anunciadas pelo alerta da sessão
 
-            if (_aircraft != null)
+            if (_aircraft != null && IsMonitoring && NativeWearFailureMap.ComponentIdFromCause(defect.Cause) is int wearId)
             {
-                switch (defect.Code)
+                // Pane do wear and tear nativo: a peça quebrou no sim e vai a 0% (plano › 0.1, regra 5; decisão 2026-11-14)
+                if (_parts.IsActive)
                 {
-                    case DefectCatalog.EngineFailure:
-                        // Mesma regra da pane do addon: mantém a saúde e acelera o desgaste se o motor seguir girando
-                        _wearService.MarkAlreadyActive(FailureType.EngineIFSD);
-                        break;
-                    case DefectCatalog.EngineFire:
-                        _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 5.0);
-                        _aircraft.AirframeCondition = Math.Max(0, _aircraft.AirframeCondition - 20.0);
-                        break;
-                    case DefectCatalog.EngineDamage:
-                        // Dano parcial vira perda proporcional
-                        _aircraft.EngineCondition = Math.Min(_aircraft.EngineCondition, 100.0 - defect.Parameter);
-                        break;
-                    case DefectCatalog.GearDamage:
-                        _aircraft.AirframeCondition = Math.Max(0, _aircraft.AirframeCondition - 10.0);
-                        break;
-                    case DefectCatalog.BrakesWorn:
-                        _aircraft.TiresCondition = Math.Min(_aircraft.TiresCondition, 30.0);
-                        break;
+                    _parts.ApplyNativeFailed(wearId, NativeWearFailureMap.Get(wearId)?.Kind);
+                    _parts.SyncComponents(_aircraft, _failures.Components);
                 }
+                else
+                {
+                    if (NativeWearFailureMap.Get(wearId)?.Kind is ComponentKind wearKind) _failures.ClampHealth(wearKind, 0.0);
+                }
+                SyncLegacyConditions();
+            }
+            else if (_aircraft != null && IsMonitoring)
+            {
+                if (_parts.IsActive)
+                {
+                    switch (defect.Code)
+                    {
+                        case DefectCatalog.EngineFailure:
+                            _parts.ClampGroup(ComponentKind.Engine, 15.0);
+                            break;
+                        case DefectCatalog.EngineFire:
+                            _parts.ClampGroup(ComponentKind.Engine, 5.0);
+                            _parts.DamageGroup(ComponentKind.Airframe, 20.0);
+                            break;
+                        case DefectCatalog.EngineDamage:
+                            _parts.ClampGroup(ComponentKind.Engine, 100.0 - defect.Parameter);
+                            break;
+                        case DefectCatalog.GearDamage:
+                            _parts.DamageGroup(ComponentKind.LandingGear, 20.0);
+                            break;
+                        case DefectCatalog.BrakesWorn:
+                            _parts.ClampGroup(ComponentKind.Brakes, 30.0);
+                            break;
+                    }
+                    _parts.SyncComponents(_aircraft, _failures.Components);
+                }
+                else
+                {
+                    switch (defect.Code)
+                    {
+                        case DefectCatalog.EngineFailure:
+                            _failures.ClampHealth(ComponentKind.Engine, 15.0);
+                            break;
+                        case DefectCatalog.EngineFire:
+                            _failures.ClampHealth(ComponentKind.Engine, 5.0);
+                            Damage(ComponentKind.Airframe, 20.0);
+                            break;
+                        case DefectCatalog.EngineDamage:
+                            _failures.ClampHealth(ComponentKind.Engine, 100.0 - defect.Parameter);
+                            break;
+                        case DefectCatalog.GearDamage:
+                            Damage(ComponentKind.LandingGear, 20.0);
+                            break;
+                        case DefectCatalog.BrakesWorn:
+                            _failures.ClampHealth(ComponentKind.Brakes, 30.0);
+                            break;
+                    }
+                }
+                SyncLegacyConditions();
             }
 
             OnAlert?.Invoke($"PANE DO SIMULADOR: {defect.Title.ToUpper()}",
@@ -203,13 +232,330 @@ namespace FlightCareer.UI.Services
             _telemetryLogger.LogEvent("PANE_NATIVA_MSFS", $"{defect.Code} - {defect.Cause}");
         }
 
-        /// <summary>Panes abertas que impedem o voo (NO-GO).</summary>
-        public List<AircraftDefect> GetGroundingDefects(Guid aircraftId) =>
-            _persistentFailures.LoadOpenDefects(aircraftId).Where(d => d.IsGrounding).ToList();
+        private void Damage(ComponentKind kind, double amount)
+        {
+            if (_parts.IsActive)
+            {
+                _parts.DamageGroup(kind, amount);
+                if (_aircraft != null) _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+            else
+            {
+                var c = _failures.Get(kind);
+                if (c != null) c.Health = Math.Max(0.0, c.Health - amount);
+            }
+        }
+
+        /// <summary>
+        /// Carrega (ou cria) os componentes da aeronave, aplica reparos/danos feitos fora do voo nas colunas
+        /// antigas (Hangar, crash no pouso) e entrega cópias desanexadas para a sessão de voo.
+        /// Se a aeronave possui peças individuais, inicializa o PartFlightSession e sincroniza as barras.
+        /// </summary>
+        private void LoadFlightComponents(PilotAircraft aircraft)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var dbAircraft = context.PilotAircrafts
+                    .Include(a => a.AircraftType)
+                    .Include(a => a.Components)
+                    .Include(a => a.Parts)
+                    .FirstOrDefault(a => a.Id == aircraft.Id);
+
+                if (dbAircraft == null)
+                {
+                    _parts.Reset();
+                    _failures.PartsDriven = false;
+                    _failures.PartDamageSink = null;
+                    _failures.PartFailureSource = null;
+                    _failures.PartBreakSink = null;
+                    _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
+                    return;
+                }
+
+                var engineClass = _catalog.ResolveEngineClass(dbAircraft.AircraftType);
+                var existingKinds = dbAircraft.Components.Select(c => c.Kind).ToHashSet();
+                var missing = LegacyComponentMigrator.CreateComponents(dbAircraft, engineClass, _catalog, _random)
+                    .Where(c => !existingKinds.Contains(c.Kind))
+                    .ToList();
+                if (missing.Count > 0) context.AircraftComponents.AddRange(missing);
+
+                var all = dbAircraft.Components.Concat(missing).Distinct().ToList();
+                LegacyConditionBridge.ReconcileFromLegacy(dbAircraft, all, _random, _catalog.Visibility);
+                LegacyConditionBridge.WriteToLegacy(dbAircraft, all);
+                context.SaveChanges();
+
+                if (PartComponentBridge.HasParts(dbAircraft))
+                {
+                    string? model = dbAircraft.AircraftType?.Model;
+                    List<string> features = new();
+                    if (!string.IsNullOrWhiteSpace(model))
+                    {
+                        var limitProfileEntity = context.AircraftLimitProfiles.FirstOrDefault(p => p.AircraftTypeModel == model);
+                        if (limitProfileEntity != null && !string.IsNullOrWhiteSpace(limitProfileEntity.FeaturesJson))
+                        {
+                            try
+                            {
+                                features = System.Text.Json.JsonSerializer.Deserialize<List<string>>(limitProfileEntity.FeaturesJson) ?? new();
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"[Peças] Erro ao desserializar FeaturesJson para {model}: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    var domainProfile = _limitResolver.FindById(model);
+
+                    PartComponentBridge.ReconcilePartsFromComponents(all, dbAircraft.Parts, _partCatalog);
+                    PartComponentBridge.SyncComponentsFromParts(dbAircraft, all, dbAircraft.Parts, _partCatalog);
+                    context.SaveChanges();
+
+                    var partCopies = dbAircraft.Parts.Select(ClonePart).ToList();
+                    var compCopies = all.Select(CloneComponent).ToList();
+                    LegacyConditionBridge.WriteToLegacy(aircraft, compCopies);
+
+                    _parts.Begin(partCopies, domainProfile, features);
+                    _failures.Begin(compCopies, dbAircraft.AircraftType);
+                    _failures.PartsDriven = _parts.IsActive;
+                    _failures.PartDamageSink = _parts.IsActive ? _parts.DamageGroup : null;
+                    _failures.PartFailureSource = _parts.IsActive ? _parts.EvaluateFailures : null;
+                    _failures.PartBreakSink = _parts.IsActive ? _parts.BreakPart : null;
+                }
+                else
+                {
+                    _parts.Reset();
+                    _failures.PartsDriven = false;
+                    _failures.PartDamageSink = null;
+                    _failures.PartFailureSource = null;
+                    _failures.PartBreakSink = null;
+
+                    var copies = all.Select(CloneComponent).ToList();
+                    LegacyConditionBridge.WriteToLegacy(aircraft, copies);
+                    _failures.Begin(copies, dbAircraft.AircraftType);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Componentes] Falha ao carregar componentes da aeronave: {ex.Message}");
+                _parts.Reset();
+                _failures.PartsDriven = false;
+                _failures.PartDamageSink = null;
+                _failures.PartFailureSource = null;
+                _failures.PartBreakSink = null;
+                _failures.Begin(new List<AircraftComponent>(), aircraft.AircraftType);
+            }
+        }
+
+        private static AircraftPart ClonePart(AircraftPart p) => new()
+        {
+            Id = p.Id,
+            PilotAircraftId = p.PilotAircraftId,
+            PartId = p.PartId,
+            EngineIndex = p.EngineIndex,
+            Health = p.Health,
+            HoursSinceReplacement = p.HoursSinceReplacement,
+            CyclesSinceReplacement = p.CyclesSinceReplacement,
+            LastReplacedAtUtc = p.LastReplacedAtUtc,
+            LastReplacedAirframeHours = p.LastReplacedAirframeHours,
+            Flag = p.Flag,
+            FlaggedBy = p.FlaggedBy,
+            FlaggedAtUtc = p.FlaggedAtUtc,
+            IsBroken = p.IsBroken,
+            BrokenAtUtc = p.BrokenAtUtc
+        };
+
+        private static AircraftComponent CloneComponent(AircraftComponent c) => new()
+        {
+            Id = c.Id,
+            PilotAircraftId = c.PilotAircraftId,
+            Kind = c.Kind,
+            Health = c.Health,
+            HoursSinceOverhaul = c.HoursSinceOverhaul,
+            CyclesSinceOverhaul = c.CyclesSinceOverhaul,
+            LastInspectionAirframeHours = c.LastInspectionAirframeHours,
+            InspectionPrecision = c.InspectionPrecision,
+            InspectionBias = c.InspectionBias
+        };
+
+        /// <summary>Copia o estado dos componentes da sessão para as linhas do banco (no contexto informado).</summary>
+        private async Task SaveComponentsAsync(Infrastructure.Persistence.AppDbContext context)
+        {
+            if (_aircraft == null || _failures.Components.Count == 0) return;
+            var aircraftId = _aircraft.Id;
+            var dbComponents = await context.AircraftComponents.Where(c => c.PilotAircraftId == aircraftId).ToListAsync();
+            foreach (var c in _failures.Components)
+            {
+                var d = dbComponents.FirstOrDefault(x => x.Id == c.Id);
+                if (d == null) continue;
+                d.Health = c.Health;
+                d.HoursSinceOverhaul = c.HoursSinceOverhaul;
+                d.CyclesSinceOverhaul = c.CyclesSinceOverhaul;
+                d.LastInspectionAirframeHours = c.LastInspectionAirframeHours;
+                d.InspectionPrecision = c.InspectionPrecision;
+                d.InspectionBias = c.InspectionBias;
+            }
+
+            if (_parts.IsActive)
+            {
+                await _parts.SaveAsync(context);
+            }
+        }
+
+        private void SyncLegacyConditions()
+        {
+            if (_aircraft != null) LegacyConditionBridge.WriteToLegacy(_aircraft, _failures.Components);
+        }
+
+        private Task<Infrastructure.Persistence.AppDbContext> CreateDbContextAsync()
+        {
+            return _contextFactory.CreateDbContextAsync();
+        }
+
+        private void OnAircraftFailureTriggered(FlightFailureRecord failure)
+        {
+            // Gravar e registrar ANTES do alerta: nada aqui pode depender da janela do alerta
+            string tag = failure.Source == "Excedência" ? "EXCEDENCIA" : "PANE_EM_VOO";
+            _telemetryLogger.LogEvent(tag, $"[{failure.Source}] {failure.Title} - {failure.Description}");
+
+            if (failure.Source != "Excedência")
+            {
+                if (!failure.Persistent)
+                {
+                    // Efeito transitório (gelo no carburador): a borda de ENG FAILED que vem a seguir não é pane nativa nova
+                    if (failure.Effect == FailureEffect.EngineFailure) _persistentFailures.ExpectEngineFailureFromAddon();
+                }
+                else if (DefectCatalog.CodeFor(failure.Effect, failure.Kind, failure.IsCritical) is { } code)
+                {
+                    // Discrepância persistente: segue no avião até o reparo na oficina
+                    _persistentFailures.Record(code, DefectOrigin.Addon, $"[{failure.Source}] {failure.Title}",
+                        title: failure.Title, description: failure.Description,
+                        alreadyInjected: failure.Effect != FailureEffect.None);
+                }
+
+                // Excedências vão só para o blackbox: uma caixa modal a cada limite excedido atrapalharia o voo
+                OnAlert?.Invoke(failure.Title, failure.Description, failure.IsCritical);
+            }
+        }
+
+        private void OnObservedEventReceived(string name, uint data)
+        {
+            if (string.Equals(name, "ENGINE_AUTO_START", StringComparison.OrdinalIgnoreCase))
+            {
+                if (IsMonitoring && !_autoStartUsed)
+                {
+                    _autoStartUsed = true;
+                    _telemetryLogger.LogEvent("AUTO_START", "Partida automática usada");
+                }
+            }
+            else if (string.Equals(name, "REQUEST_FUEL_KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!IsMonitoring && WatchedAircraftId.HasValue && _simConnect.CurrentData.IsOnGround)
+                {
+                    double simFuel = _simConnect.CurrentData.FuelTotalGallons;
+                    _fuelTruck.Arm(simFuel, DateTime.UtcNow);
+                    _telemetryLogger.LogEvent("CAMINHAO_SOLICITADO", $"Caminhão solicitado no solo com {simFuel:F1} gal");
+                }
+            }
+        }
+
+        private void OnTelemetryForFuelTruck(object? sender, SimTelemetry data)
+        {
+            if (IsMonitoring) return;
+            if (_fuelTruck.Status != FuelTruckDeliveryStatus.Armed) return;
+
+            _fuelTruck.Update(data.FuelTotalGallons, data.IsOnGround, DateTime.UtcNow);
+            if (_fuelTruck.Status == FuelTruckDeliveryStatus.Completed)
+            {
+                var aircraftId = WatchedAircraftId;
+                if (aircraftId.HasValue)
+                {
+                    ProcessFuelTruckDelivery(aircraftId.Value, _fuelTruck.MaxGallons + data.UnusableFuelGallons);
+                }
+            }
+        }
+
+        /// <returns>Novo combustível da aeronave gravado no banco, ou null se nada foi cobrado.</returns>
+        /// <param name="simFinalGallons">Combustível no sim depois do caminhão: vira o valor do app ("cobra e aceita").</param>
+        private double? ProcessFuelTruckDelivery(Guid aircraftId, double simFinalGallons)
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var aircraft = context.PilotAircrafts
+                    .Include(a => a.AircraftType)
+                    .FirstOrDefault(a => a.Id == aircraftId);
+                if (aircraft == null) return null;
+
+                // Cobra o que o app ainda não tinha pago (sim final − combustível do app), não a subida medida no sim:
+                // se o sim não estava sincronizado, a subida medida daria combustível de graça ou cobraria a mais
+                double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? simFinalGallons;
+                double newFuel = Math.Min(fuelCapacity, simFinalGallons);
+                double deliveredGallons = Math.Round(newFuel - aircraft.FuelAmount, 2);
+                if (deliveredGallons <= 0) return null;
+
+                var pilot = context.Pilots.FirstOrDefault(p => p.Id == aircraft.PilotId);
+                if (pilot == null) return null;
+
+                int airportTier = 3;
+                if (!string.IsNullOrEmpty(pilot.CurrentAirportICAO))
+                {
+                    var airport = context.Airports.FirstOrDefault(a => a.ICAO == pilot.CurrentAirportICAO);
+                    if (airport != null && airport.Tier > 0)
+                    {
+                        airportTier = airport.Tier;
+                    }
+                }
+
+                string fuelType = aircraft.AircraftType?.FuelType ?? "AVGAS";
+                double pricePerGallon = FlightCareer.Application.Services.FuelPriceService.GetCurrentPrice(fuelType, airportTier);
+                double cost = Math.Round(deliveredGallons * pricePerGallon, 2);
+
+                aircraft.FuelAmount = newFuel;
+
+                pilot.Balance -= cost;
+                context.FinancialTransactions.Add(new FinancialTransaction
+                {
+                    Id = Guid.NewGuid(),
+                    PilotId = pilot.Id,
+                    Date = DateTime.Now,
+                    Category = "Combustível",
+                    Description = $"Combustível (caminhão do sim) {deliveredGallons:F1} gal",
+                    Amount = cost,
+                    Type = TransactionType.Expense
+                });
+                context.SaveChanges();
+
+                if (_watchedAircraft != null && _watchedAircraft.Id == aircraftId)
+                {
+                    _watchedAircraft.FuelAmount = aircraft.FuelAmount;
+                }
+                if (_aircraft != null && _aircraft.Id == aircraftId)
+                {
+                    _aircraft.FuelAmount = aircraft.FuelAmount;
+                }
+                if (_pilot != null && _pilot.Id == pilot.Id)
+                {
+                    _pilot.Balance = pilot.Balance;
+                }
+
+                _telemetryLogger.LogEvent("COMBUSTIVEL_CAMINHAO", $"{deliveredGallons:F1} gal cobrados ({cost:C2}) a {pricePerGallon:C2}/gal");
+                OnAlert?.Invoke("ABASTECIMENTO", $"Caminhão: {deliveredGallons:F1} gal cobrados ({cost:C2})", false);
+                OnFuelTruckCharged?.Invoke(aircraftId);
+                return aircraft.FuelAmount;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[FlightMonitor] Erro ao processar cobrança do caminhão de combustível: {ex.Message}");
+                return null;
+            }
+        }
 
         public bool StartMonitoring(Pilot pilot, PilotAircraft aircraft, List<Mission> missions)
         {
             if (IsMonitoring) return false;
+
+            _autoStartUsed = false;
 
             if (!_simConnect.IsConnected)
             {
@@ -237,25 +583,76 @@ namespace FlightCareer.UI.Services
                 return false;
             }
 
+            if (_simConnect.CurrentFuelState.UnlimitedFuel > 0.5)
+            {
+                OnAlert?.Invoke("COMBUSTÍVEL ILIMITADO", "Desligue o combustível ilimitado nas opções do simulador para voar na carreira.", true);
+                return false;
+            }
+
+            if (_fuelTruck.Status == FuelTruckDeliveryStatus.Armed)
+            {
+                double currentSimFuel = _simConnect.CurrentData.FuelTotalGallons;
+                _fuelTruck.ForceComplete(currentSimFuel);
+                if (_fuelTruck.Status == FuelTruckDeliveryStatus.Completed)
+                {
+                    // A aeronave recebida aqui é a do contexto longo do MainViewModel: atualizar em memória evita que a
+                    // sincronização devolva o valor antigo e que um SaveChanges posterior regrave o combustível velho
+                    if (ProcessFuelTruckDelivery(aircraft.Id, _fuelTruck.MaxGallons + _simConnect.CurrentData.UnusableFuelGallons) is double newFuel)
+                    {
+                        aircraft.FuelAmount = newFuel;
+                    }
+                }
+            }
+
+            // Abastecimento manual (decisão do usuário, 2026-11-21): o piloto compra no Hangar e coloca a mesma quantidade
+            // no simulador (menu ou EFB). O app não grava nos tanques: só confere, como o briefing, e bloqueia se divergir.
+            var startData = _simConnect.CurrentData;
+            if (!startData.IsOnGround)
+            {
+                OnAlert?.Invoke("FORA DO SOLO", "Inicie o monitoramento com a aeronave no solo.", true);
+                return false;
+            }
+            double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? startData.FuelTotalCapacity;
+            double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
+            double simOnBoard = Math.Round(startData.FuelTotalGallons + startData.UnusableFuelGallons, 1);
+            double startTolerance = Math.Max(1.0, aircraft.FuelAmount * 0.02); // mesma tolerância do briefing
+            if (Math.Abs(simOnBoard - aircraft.FuelAmount) > startTolerance)
+            {
+                OnAlert?.Invoke("COMBUSTÍVEL DIVERGENTE",
+                    $"A bordo no simulador: {simOnBoard:F1} gal. Abastecido no Hangar: {aircraft.FuelAmount:F1} gal. Ajuste o combustível no simulador (menu ou EFB) ou abasteça no Hangar.", true);
+                return false;
+            }
+
             _pilot = pilot;
             _aircraft = aircraft;
             _activeMissions = missions;
             _originIcao = pilot.CurrentAirportICAO;
 
+            // Panes persistentes primeiro: registram os toggles que o início do voo não pode desfazer
+            _persistentFailures.Start(aircraft, () => _currentStatus);
+
             _simConnect.ResetCrashState();
-            _wearService.Reset();
+            LoadFlightComponents(aircraft);
+            _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
+            _fuelAccumulator.Reset();
+            _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
+            _slewMonitor = new SlewMonitor();
+            _flightInvalidated = false;
+            _flightInvalidationReason = null;
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
             _hasTouchedDown = false;
             _simulatedFlightTimeSeconds = 0;
             _lastTick = DateTime.MinValue;
+            _lastPreflightTick = DateTime.MinValue;
 
-            // Reaplicar panes diferidas abertas, iniciar bloqueio e vigilância
-            _persistentFailures.Start(aircraft, () => _currentStatus);
-            SeedWearServiceWithOpenDefects();
-
+            _touchdown.Reset();
+            _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _simConnect.OnDataReceived += OnSimDataReceived;
+            _simConnect.OnFastFlightReceived += OnFastFlight;
+            _simConnect.OnCrashEvent += OnSimConnectCrash;
             IsMonitoring = true;
 
             OnAlert?.Invoke("SISTEMA INICIALIZADO", "O monitoramento começará automaticamente 10 segundos após você ligar os motores e soltar o freio de estacionamento.", false);
@@ -273,6 +670,8 @@ namespace FlightCareer.UI.Services
         {
             if (!IsMonitoring) return;
             _simConnect.OnDataReceived -= OnSimDataReceived;
+            _simConnect.OnFastFlightReceived -= OnFastFlight;
+            _simConnect.OnCrashEvent -= OnSimConnectCrash;
             _persistentFailures.Stop();
             // Volta ao modo vigia: as panes (inclusive as que surgiram neste voo) seguem aplicadas após o pouso
             var keepWatching = _aircraft ?? _watchedAircraft;
@@ -282,7 +681,11 @@ namespace FlightCareer.UI.Services
                 _persistentFailures.Start(keepWatching, () => "SOLO (FORA DE VOO)", detectNative: false);
             }
             _simConnect.ResetCrashState();
-            _wearService.Reset();
+            // As peças NÃO são zeradas aqui: FinalizeFlightAsync chama StopMonitoring antes de salvar
+            // (SaveComponentsAsync). O próximo LoadFlightComponents faz Begin/Reset da sessão de peças.
+            _failures.PartsDriven = false;
+            _failures.PartDamageSink = null;
+            _failures.Reset();
             IsMonitoring = false;
             IsFlightActive = false;
             _startConditionTime = null;
@@ -296,6 +699,7 @@ namespace FlightCareer.UI.Services
             // Se o voo já estava ativo (motores ligados/PB solto), salvamos o estado atual
             if (IsFlightActive && lastData != null && _pilot != null && _aircraft != null)
             {
+                FlushExceedanceLog();
                 _telemetryLogger.StopFlightLog("CANCELADO_PELO_PILOTO", 0, _qualityService.GetQualityScore());
                 OnStatusChanged?.Invoke("CANCELANDO E SALVANDO ESTADO...");
                 
@@ -311,8 +715,11 @@ namespace FlightCareer.UI.Services
                         dbAircraft.AirframeCondition = _aircraft.AirframeCondition;
                         dbAircraft.TiresCondition = _aircraft.TiresCondition;
                         dbAircraft.AvionicsCondition = _aircraft.AvionicsCondition;
+                        dbAircraft.MagnetosCondition = _aircraft.MagnetosCondition;
+                        dbAircraft.OilCondition = _aircraft.OilCondition;
                         dbAircraft.LandingsCount = _aircraft.LandingsCount;
-                        
+                        await SaveComponentsAsync(context);
+
                         // 2. Tentar localizar aeroporto mais próximo para salvar nova posição caso tenha se movido
                         string currentIcao = await GetNearestAirportICAO(lastData.Value.Latitude, lastData.Value.Longitude);
                         if (!string.IsNullOrEmpty(currentIcao))
@@ -351,18 +758,82 @@ namespace FlightCareer.UI.Services
                     System.Diagnostics.Debug.WriteLine($"Error saving state: {ex.Message}");
                 }
             }
+            else if (!IsFlightActive && _parts.HasPreflightChanges && _aircraft != null)
+            {
+                try
+                {
+                    await using var context = await CreateDbContextAsync();
+                    await SaveComponentsAsync(context);
+                    await context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error saving preflight parts state on cancel: {ex.Message}");
+                }
+            }
 
             StopMonitoring();
             OnStatusChanged?.Invoke("MONITORAMENTO CANCELADO");
             OnMonitoringCancelled?.Invoke();
         }
 
+        private void OnSimConnectCrash(object? sender, EventArgs e) =>
+            HandleSimulatorCrash("Acidente reportado pelo simulador");
+
+        private void HandleSimulatorCrash(string cause)
+        {
+            var decision = CrashPolicy.Decide(IsMonitoring, IsFlightActive, _impactCrashHandled);
+            switch (decision)
+            {
+                case CrashDecision.TotalLoss:
+                    _impactCrashHandled = true;
+                    bool alreadyApplied = _failures.CrashApplied;
+                    _failures.MarkCrashApplied();
+                    if (!alreadyApplied)
+                    {
+                        _telemetryLogger.LogEvent("CRASH_MSFS", cause);
+                        _currentStatus = "ACIDENTE";
+                        OnStatusChanged?.Invoke(_currentStatus);
+                        OnAlert?.Invoke("ACIDENTE", $"O simulador reportou acidente: {cause}. A aeronave foi perdida.", true);
+                    }
+                    _ = HandleTotalLossAsync();
+                    break;
+
+                case CrashDecision.AlertOnly:
+                    _telemetryLogger.LogEvent("CRASH_FLAG_MSFS", cause);
+                    OnAlert?.Invoke("ACIDENTE REPORTADO PELO SIMULADOR", cause, true);
+                    break;
+
+                case CrashDecision.Ignore:
+                    break;
+            }
+        }
+
         private async Task HandleTotalLossAsync()
         {
-            if (_aircraft == null) return;
+            if (_aircraft == null || _totalLossInProgress) return;
+            _totalLossInProgress = true;
             
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
+            FlushExceedanceLog();
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
+            _failures.ZeroAll();
+            if (_parts.IsActive)
+            {
+                _parts.ZeroAll();
+                _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+            SyncLegacyConditions();
+            try
+            {
+                await using var componentContext = await CreateDbContextAsync();
+                await SaveComponentsAsync(componentContext);
+                await componentContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving components on total loss: {ex.Message}");
+            }
             StopMonitoring();
             
             // Salvar estado de 0% no banco para garantir que a aeronave está "morta"
@@ -413,6 +884,57 @@ namespace FlightCareer.UI.Services
             if (!IsMonitoring) return;
             _lastData = data;
 
+            // --- MONITORAMENTO DE INTEGRIDADE: SLEW E CONGELAMENTOS ---
+            var integrityState = _simConnect.CurrentIntegrityState;
+            bool slewActive = integrityState.IsSlewActive > 0.5;
+            bool altFreeze = integrityState.IsAltitudeFreezeOn > 0.5;
+            bool attFreeze = integrityState.IsAttitudeFreezeOn > 0.5;
+            bool latLonFreeze = integrityState.IsLatitudeLongitudeFreezeOn > 0.5;
+
+            var slewVerdict = _slewMonitor.Update(
+                slewActive: slewActive,
+                onGround: data.IsOnGround,
+                hasTakenOff: _isAirborne,
+                latDeg: data.Latitude,
+                lonDeg: data.Longitude
+            );
+
+            if (slewVerdict.Invalidated)
+            {
+                InvalidateFlight(slewVerdict.Reason ?? "slew");
+            }
+            else if (slewVerdict.UsageCompleted)
+            {
+                _telemetryLogger.LogEvent("SLEW", $"slew no solo: {Math.Round(slewVerdict.UsageMeters)} m");
+            }
+
+            var freezeVerdict = _slewMonitor.CheckFreeze(
+                altitudeFreeze: altFreeze,
+                attitudeFreeze: attFreeze,
+                latLonFreeze: latLonFreeze,
+                onGround: data.IsOnGround,
+                hasTakenOff: _isAirborne
+            );
+
+            if (freezeVerdict.Invalidated)
+            {
+                InvalidateFlight(freezeVerdict.Reason ?? "congelamento");
+            }
+
+            var fuelState = _simConnect.CurrentFuelState;
+            _fuelAccumulator.Update(new[]
+            {
+                fuelState.FuelUsedSinceStart1,
+                fuelState.FuelUsedSinceStart2,
+                fuelState.FuelUsedSinceStart3,
+                fuelState.FuelUsedSinceStart4
+            });
+
+            foreach (var diag in _fuelAccumulator.DrainDiagnostics())
+            {
+                _telemetryLogger.LogEvent("FUEL_ACCUMULATOR", diag);
+            }
+
             // Lógica de Início de Gravação: Quando ligar motores E soltar PB por 10 segundos
             if (!IsFlightActive)
             {
@@ -439,6 +961,31 @@ namespace FlightCareer.UI.Services
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
                 }
+
+                // Combustível colocado depois de iniciar o monitoramento (antes de ativar o voo) não foi pago no Hangar
+                if (_aircraft != null && !_flightInvalidated)
+                {
+                    double onBoard = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+                    if (onBoard > _aircraft.FuelAmount + Math.Max(1.0, _aircraft.FuelAmount * 0.02))
+                    {
+                        InvalidateFlight($"combustível abastecido depois de iniciar o monitoramento ({onBoard:F1} gal a bordo, {_aircraft.FuelAmount:F1} gal pagos)");
+                    }
+                }
+
+                if (!IsFlightActive && _parts.IsActive && _aircraft != null)
+                {
+                    DateTime nowPreflight = DateTime.Now;
+                    double wallSec = _lastPreflightTick == DateTime.MinValue ? 0.0 : (nowPreflight - _lastPreflightTick).TotalSeconds;
+                    _lastPreflightTick = nowPreflight;
+                    double dtHours = SimTimeStep.ToSimHours(wallSec, data.SimulationRate);
+                    if (dtHours > 0)
+                    {
+                        _parts.ObservePreflight(dtHours);
+                        _parts.SyncComponents(_aircraft, _failures.Components);
+                        SyncLegacyConditions();
+                    }
+                }
+
                 return;
             }
 
@@ -447,18 +994,34 @@ namespace FlightCareer.UI.Services
             double dt = _lastTick == DateTime.MinValue ? 0 : (now - _lastTick).TotalSeconds;
             _lastTick = now;
 
-            if (dt < 0) dt = 0;
-            if (dt > 1.0) dt = 1.0;
-
             bool isPaused = data.IsEngineRunning && data.GroundSpeed == 0 && data.EngineRPM == 0;
-            if (!isPaused && dt > 0)
+            if (!isPaused)
             {
-                double simRate = data.SimulationRate > 0 ? data.SimulationRate : 1.0;
-                _simulatedFlightTimeSeconds += dt * simRate;
+                // Salto (pausa/travamento) limitado no tempo real, antes do sim rate (antes cortava em 1 s por pacote)
+                _simulatedFlightTimeSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
             }
 
-            // Panes nativas (ENG FAILED, fogo, dano, flap/trem, freios, crash, vácuo) são detectadas pelo
-            // PersistentFailureService na leitura rápida de panes, gravadas e tratadas em OnDefectRecorded.
+            // --- MONITORAMENTO DE INTEGRIDADE DE COMBUSTÍVEL EM VOO ---
+            if (_fuelIntegrity != null)
+            {
+                var integrityEvents = _fuelIntegrity.Update(
+                    simFuelTotalGal: data.FuelTotalGallons,
+                    unlimitedFuel: fuelState.UnlimitedFuel > 0.5,
+                    simOnGround: data.IsOnGround,
+                    simulatedTimeSeconds: _simulatedFlightTimeSeconds
+                );
+
+                foreach (var evt in integrityEvents)
+                {
+                    if (evt.Type == FuelIntegrityEventType.UnlimitedFuelActive || evt.Type == FuelIntegrityEventType.InFlightRefueling)
+                    {
+                        InvalidateFlight(evt.Message);
+                    }
+                }
+            }
+
+            // Panes nativas do MSFS (ENG FAILED, fogo, dano de motor/flap/trem, freios, vácuo) são detectadas pelo
+            // PersistentFailureService na leitura rápida de panes e tratadas em OnDefectRecorded.
 
             // --- DETECÇÃO DE PLANEIO / MOTOR CORTADO EM VOO (TREINAMENTO OU VOLUNTÁRIO) ---
             if (_isAirborne && !data.IsOnGround && !data.IsEngineRunning)
@@ -478,7 +1041,8 @@ namespace FlightCareer.UI.Services
 
             // --- MONITORAMENTO DE QUALIDADE ---
             bool hasPax = _activeMissions.Any(m => m.PassengerCount > 0);
-            _qualityService.ProcessFrame(data, hasPax);
+            double qualitySimSeconds = isPaused ? 0.0 : SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
+            _qualityService.ProcessSample(FlightQualitySample.FromTelemetry(data), hasPax, qualitySimSeconds);
 
             // Durante o Voo: Atualizar combustível, localização e estado no Hangar a cada 60 segundos (1 min)
             if ((DateTime.Now - _lastDatabaseUpdate).TotalSeconds >= 60)
@@ -487,11 +1051,28 @@ namespace FlightCareer.UI.Services
                 _lastDatabaseUpdate = DateTime.Now;
             }
 
-            // Processar Desgaste e Falhas a cada 1 segundo
+            // Processar Desgaste e Falhas a cada pacote de telemetria
             if (_aircraft != null)
             {
-                double deltaHours = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalHours;
-                _wearService.ProcessWear(_aircraft, data, deltaHours);
+                double wallSeconds = (DateTime.Now - (_lastWearUpdate == DateTime.MinValue ? DateTime.Now : _lastWearUpdate)).TotalSeconds;
+                // Desgaste no mesmo relógio do TBO/inspeções: tempo simulado (sim rate), com o salto limitado no tempo real
+                double deltaHours = SimTimeStep.ToSimHours(wallSeconds, data.SimulationRate);
+                _failures.ProcessTick(data, deltaHours);
+
+                if (_parts.IsActive)
+                {
+                    if (_failures.CrashApplied)
+                    {
+                        _parts.ZeroAll();
+                    }
+                    else
+                    {
+                        _parts.ProcessTick(deltaHours);
+                    }
+                    _parts.SyncComponents(_aircraft, _failures.Components);
+                }
+
+                SyncLegacyConditions();
 
                 // Checar Perda Total
                 if (IsFlightActive && _aircraft.EngineCondition <= 0 && _aircraft.TiresCondition <= 0 && _aircraft.AirframeCondition <= 0)
@@ -523,11 +1104,13 @@ namespace FlightCareer.UI.Services
                 double fpmVs = Math.Abs(data.VerticalSpeed);
                 double touchdownRate = fpmBody > 10 ? fpmBody : fpmVs;
 
-                if (!_hasTouchedDown)
+                // Com a leitura rápida ativa, o toque e o bounce são registrados em OnFastFlight (medidos no contato)
+                if (!_hasTouchedDown && !FastStreamAlive)
                 {
                     _hasTouchedDown = true;
                     _qualityService.RecordTouchdownFpm(touchdownRate);
-                    if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+                    _lastTouchdownEvent = null;
+                    RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
 
                     _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
                     OnStatusChanged?.Invoke(_currentStatus);
@@ -535,10 +1118,11 @@ namespace FlightCareer.UI.Services
                 else
                 {
                     // Bounce detection: se o impacto subsequente for mais forte (durante a desaceleração de pouso > 35 kts)
-                    if (data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
+                    if (!FastStreamAlive && data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
-                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, touchdownRate, data.VelocityBodyX);
+                        _lastTouchdownEvent = null;
+                        RegisterLanding(touchdownRate, data, isBounce: true);
                         _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
@@ -571,7 +1155,7 @@ namespace FlightCareer.UI.Services
                     {
                         double fpm = Math.Abs(data.VelocityBodyY * 60.0);
                         _qualityService.RecordTouchdownFpm(fpm > 10 ? fpm : Math.Abs(data.VerticalSpeed));
-                        if (_aircraft != null) _wearService.ProcessLanding(_aircraft, _qualityService.TouchdownFPM, data.VelocityBodyX);
+                        RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
                     }
                     _ = FinalizeFlightAsync(data);
                 }
@@ -606,6 +1190,81 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        /// <summary>Leitura rápida: alimenta o detector de toque; o evento sai 0,5 s depois do contato.</summary>
+        private void OnFastFlight(SimFastFlightState s)
+        {
+            if (!IsMonitoring) return;
+            _lastFastSample = DateTime.Now;
+            if (!IsFlightActive || _impactCrashHandled) return;
+
+            var ev = _touchdown.Update(new FastFlightSample(
+                _fastClock.Elapsed.TotalSeconds, s.OnGround >= 0.5, s.VerticalSpeed, s.BodyVertical, s.GForce,
+                -s.Pitch, s.Bank, s.Airspeed, s.GroundSpeed));
+            if (ev != null) HandleTouchdown(ev);
+        }
+
+        private void HandleTouchdown(TouchdownEvent ev)
+        {
+            var inv = CultureInfo.InvariantCulture;
+            string summary = string.Format(inv, "{0} fpm, pico {1:F2} G, nariz {2:F1}°, inclinação {3:F1}°, GS {4:F0} kt",
+                ev.TouchdownFpm, ev.PeakG, ev.NoseUpDeg, ev.BankDeg, ev.GroundSpeedKnots);
+            string trace = string.Join(" | ", ev.Trace.Select(x => string.Format(inv, "{0:F2}s {1}{2:F0}fpm {3:F2}G {4:F0}/{5:F0}°",
+                x.TimeSec - ev.ContactTimeSec, x.OnGround ? "S " : "A ", x.VerticalSpeedFpm, x.GForce, x.NoseUpDeg, x.BankDeg)));
+
+            if (ev.Kind == TouchdownKind.Crash)
+            {
+                _impactCrashHandled = true;
+                _failures.MarkCrashApplied();
+                _telemetryLogger.LogEvent("CRASH_ADDON", $"{ev.Reason} ({summary})");
+                _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+                _currentStatus = "ACIDENTE";
+                OnStatusChanged?.Invoke(_currentStatus);
+                OnAlert?.Invoke("ACIDENTE", $"Impacto com o solo: {ev.Reason}. A aeronave foi perdida.", true);
+                _ = HandleTotalLossAsync();
+                return;
+            }
+
+            _telemetryLogger.LogEvent("TOQUE", summary);
+            _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+            if (!_isAirborne) return; // contato antes de decolar de fato (ex.: salto na corrida): só registro
+
+            if (!_hasTouchedDown)
+            {
+                _hasTouchedDown = true;
+                _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                _lastTouchdownEvent = ev;
+                if (_lastData is { } data) RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
+                _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
+                OnStatusChanged?.Invoke(_currentStatus);
+            }
+            else if (ev.GroundSpeedKnots > 35 && ev.TouchdownFpm > _qualityService.TouchdownFPM)
+            {
+                _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
+                _lastTouchdownEvent = ev;
+                if (_lastData is { } data) RegisterLanding(ev.TouchdownFpm, data, isBounce: true);
+                _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
+                OnStatusChanged?.Invoke(_currentStatus);
+            }
+        }
+
+        /// <summary>Toque na pista: ciclo de trem/pneus/freios e dano por impacto. Bounce não conta como novo pouso.</summary>
+        private void RegisterLanding(double touchdownFpm, SimTelemetry data, bool isBounce)
+        {
+            if (_aircraft == null) return;
+            if (!isBounce) _aircraft.LandingsCount++;
+            _failures.ProcessLanding(touchdownFpm, data.VelocityBodyX, data.IsWetOrContaminatedSurface);
+
+            if (_parts.IsActive)
+            {
+                double? pitch = _lastTouchdownEvent?.NoseUpDeg;
+                double? bank = _lastTouchdownEvent?.BankDeg;
+                _parts.ProcessTouchdown(touchdownFpm, pitch, bank, data.VelocityBodyX, isBounce);
+                _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+
+            SyncLegacyConditions();
+        }
+
         private async Task UpdateHangarStateAsync(SimTelemetry data)
         {
             if (_aircraft == null || _pilot == null) return;
@@ -631,6 +1290,7 @@ namespace FlightCareer.UI.Services
                     dbAircraft.HoursUntilNext500hInspection = _aircraft.HoursUntilNext500hInspection;
                     dbAircraft.EngineTboRemainingHours = _aircraft.EngineTboRemainingHours;
                     dbAircraft.LandingsCount = _aircraft.LandingsCount;
+                    await SaveComponentsAsync(context);
 
                     // Atualizar também o objeto local para garantir sincronia
                     _aircraft.FuelAmount = dbAircraft.FuelAmount;
@@ -685,9 +1345,11 @@ namespace FlightCareer.UI.Services
             _isAirborne = false;
             _hasTouchedDown = false;
             _simConnect.ResetCrashState();
-            _wearService.Reset();
-            SeedWearServiceWithOpenDefects();
+            _failures.Reset(clearSimState: true);
             _qualityService.Reset();
+            _touchdown.Reset();
+            _impactCrashHandled = false;
+            _totalLossInProgress = false;
             _startTime = DateTime.Now;
             _lastTick = DateTime.Now;
             _simulatedFlightTimeSeconds = 0;
@@ -701,12 +1363,14 @@ namespace FlightCareer.UI.Services
             OnStatusChanged?.Invoke(_currentStatus);
 
             // Iniciar Gravação Blackbox
+            _exceedanceLog.Reset();
             string destIcao = _activeMissions.FirstOrDefault()?.DestinationICAO ?? "DEST";
             _telemetryLogger.StartFlightLog(_originIcao, destIcao, _aircraft);
         }
 
         private async Task FinalizeFlightAsync(SimTelemetry data)
         {
+            FlushExceedanceLog();
             _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
             StopMonitoring();
 
@@ -767,6 +1431,20 @@ namespace FlightCareer.UI.Services
 
             double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
             double finalFuel = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+            double realFuelUsed = _fuelAccumulator.TotalGallons(data.FuelWeightPerGallon);
+
+            // Componentes primeiro: o FlightService grava as colunas antigas (já sincronizadas) e as horas
+            try
+            {
+                SyncLegacyConditions();
+                await using var componentContext = await CreateDbContextAsync();
+                await SaveComponentsAsync(componentContext);
+                await componentContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error saving components at flight end: {ex.Message}");
+            }
 
             var outcome = await _flightService.ProcessFlightFinishAsync(
                 _pilot.Id,
@@ -788,10 +1466,31 @@ namespace FlightCareer.UI.Services
                 nearestDistance,
                 flightDurationMinutes,
                 _aircraft.MagnetosCondition,
-                _aircraft.OilCondition
+                _aircraft.OilCondition,
+                realFuelUsed: realFuelUsed,
+                isFlightInvalidated: _flightInvalidated,
+                invalidationReason: _flightInvalidationReason,
+                autoStartUsed: _autoStartUsed
             );
 
             OnFlightFinished?.Invoke(outcome);
+        }
+
+        private void FlushExceedanceLog()
+        {
+            foreach (var line in _exceedanceLog.Flush(_simulatedFlightTimeSeconds))
+                _telemetryLogger.LogEvent("EXCEDENCIA_PECA", line);
+        }
+
+        private void InvalidateFlight(string reason)
+        {
+            if (_flightInvalidated) return;
+            _flightInvalidated = true;
+            _flightInvalidationReason = reason.StartsWith("Voo invalidado", StringComparison.OrdinalIgnoreCase)
+                ? reason
+                : $"Voo invalidado: {reason}";
+            _telemetryLogger.LogEvent("INTEGRIDADE", _flightInvalidationReason);
+            OnAlert?.Invoke("VOO INVALIDADO", _flightInvalidationReason, true);
         }
     }
 }

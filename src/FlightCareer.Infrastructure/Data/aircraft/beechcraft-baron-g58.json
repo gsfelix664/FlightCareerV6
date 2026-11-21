@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "Beechcraft Baron G58",
+  "class": "Piston",
+  "engineCount": 2,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "deIceBoots",
+    "fuelInjected",
+    "glassCockpit",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "propDeIce",
+    "retractableGear",
+    "weatherRadar"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "va",
+      "value": 156.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Beechcraft Baron G58 POH, Sec. 2 (156 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 223.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 122.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 100.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: 2 × 100 A (Baron G58, típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-550-C",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 238.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 116.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 195.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 75.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 84.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 152.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Baron G58 POH / AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

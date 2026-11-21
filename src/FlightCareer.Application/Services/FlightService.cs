@@ -1,4 +1,5 @@
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
 using FlightCareer.Domain.Utils;
@@ -45,11 +46,30 @@ namespace FlightCareer.Application.Services
             double nearestDistance = 0.0,
             double flightDurationMinutes = 0.0,
             double? magnetosCondition = null,
-            double? oilCondition = null)
+            double? oilCondition = null,
+            double? realFuelUsed = null,
+            bool isFlightInvalidated = false,
+            string? invalidationReason = null,
+            bool autoStartUsed = false)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
                 : Math.Max(1, (int)(DateTime.Now - startTime).TotalMinutes);
+
+            double fuelDifference = Math.Max(0, initialFuel - finalFuel);
+            double resolvedFuelUsed = (realFuelUsed.HasValue && realFuelUsed.Value >= 0)
+                ? realFuelUsed.Value
+                : fuelDifference;
+
+            // Conferência: diferença > 10% entre consumo real e (inicial - final)
+            if (realFuelUsed.HasValue && resolvedFuelUsed > 0.05)
+            {
+                double discrepancy = Math.Abs(resolvedFuelUsed - fuelDifference);
+                if (discrepancy / resolvedFuelUsed > 0.10)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[Combustível Blackbox] Divergência > 10% entre consumo real ({resolvedFuelUsed:F2} gal) e inicial-final ({fuelDifference:F2} gal).");
+                }
+            }
 
             var outcome = new FlightOutcome
             {
@@ -57,7 +77,7 @@ namespace FlightCareer.Application.Services
                 Destination = destinationIcao,
                 DistanceNM = distanceNM,
                 FlightTimeMinutes = durationMinutes,
-                FuelUsed = Math.Max(0, initialFuel - finalFuel)
+                FuelUsed = Math.Round(resolvedFuelUsed, 2)
             };
 
             if (distanceNM < 0.01) 
@@ -69,8 +89,11 @@ namespace FlightCareer.Application.Services
 
             try
             {
+                // Serviço singleton com contexto de longa duração: sem isto, o piloto e a aeronave viriam do
+                // cache do voo anterior e sobrescreveriam reparos, inspeções, abastecimentos e gastos feitos depois.
+                _context.ChangeTracker.Clear();
                 var pilot = await _context.Pilots
-                    .Include(p => p.Hangar)
+                    .Include(p => p.Hangar).ThenInclude(a => a.AircraftType)
                     .FirstOrDefaultAsync(p => p.Id == pilotId);
                 
                 if (pilot == null) throw new Exception("Piloto não encontrado.");
@@ -108,15 +131,10 @@ namespace FlightCareer.Application.Services
                 aircraft.HoursUntilNext100hInspection = Math.Max(0, aircraft.HoursUntilNext100hInspection - hours);
                 aircraft.HoursUntilNext500hInspection = Math.Max(0, aircraft.HoursUntilNext500hInspection - hours);
 
-                if (aircraft.EngineTboRemainingHours <= 0)
+                if (aircraft.HoursUntilNext100hInspection <= 0)
                 {
                     aircraft.IsInterdicted = true;
-                    aircraft.InterdictionReason = "TBO Vencido (Retífica Obrigatória de Motor)";
-                }
-                else if (aircraft.HoursUntilNext100hInspection <= 0)
-                {
-                    aircraft.IsInterdicted = true;
-                    aircraft.InterdictionReason = "Inspeção Regulatória de 100 Horas Vencida";
+                    aircraft.InterdictionReason = "Inspeção Anual Vencida";
                 }
                 
                 // 2. Atualizar Piloto
@@ -147,6 +165,9 @@ namespace FlightCareer.Application.Services
                             if (dbMission != null) _context.Missions.Remove(dbMission);
                         }
                     }
+
+                    // Avança relógio de carreira (duração voada + solo)
+                    pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
                     await _context.SaveChangesAsync();
                     
                     outcome.Success = false;
@@ -238,18 +259,21 @@ namespace FlightCareer.Application.Services
                 int baseXP = outcome.FlightTimeMinutes + (int)(distanceNM * 0.5);
                 int tierBonusXP = (int)(baseXP * (airportTier * 0.2)); 
                 int totalXP = (int)((baseXP + tierBonusXP) * qualityMultiplier);
+                totalXP = ProcedurePenalties.ApplyAutoStartPenalty(totalXP, autoStartUsed);
 
                 int missionsDone = 0;
                 int missionsRemaining = 0;
+                int passengersCompleted = 0;
 
                 foreach (var mission in activeMissions)
                 {
-                    if (mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
+                    if (!isFlightInvalidated && mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
                     {
                         // PAGAMENTO INTEGRAL (Independente da qualidade, exceto se crashar)
                         double missionReward = mission.RewardMoney;
                         totalRevenue += missionReward;
                         missionsDone++;
+                        passengersCompleted += mission.PassengerCount;
                         
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null) _context.Missions.Remove(dbMission);
@@ -307,28 +331,64 @@ namespace FlightCareer.Application.Services
                     });
                 }
 
-                // Cálculo da Taxa de Pouso baseada no MTOW e classificação do aeroporto
+                // Cálculo das taxas aeroportuárias (Pouso, Embarque, Handling, Navegação/Terminal) via catálogo
                 double mtowLbs = AircraftWeightSpecs.GetMtow(aircraft.AircraftType?.Model, aircraft.AircraftType);
+                int feeTier = destAirport?.Tier ?? 4;
 
-                double landingFee = CalculateLandingFee(destAirport, mtowLbs);
-                if (landingFee > 0)
+                var feeContext = new FeeContext(
+                    feeTier,
+                    destinationIcao,
+                    mtowLbs,
+                    passengersCompleted,
+                    missionsDone > 0,
+                    parkedGameHours: 0.0
+                );
+
+                var fees = GroundServiceCalculator.Calculate(feeContext);
+                double totalFees = 0;
+                double landingOnlyFee = 0;
+
+                foreach (var fee in fees)
                 {
-                    pilot.Balance -= landingFee;
+                    if (fee.Total <= 0) continue;
+
+                    totalFees += fee.Total;
+                    if (fee.Code == "LANDING")
+                    {
+                        landingOnlyFee += fee.Total;
+                    }
+
+                    string category = fee.Code switch
+                    {
+                        "LANDING" => "Taxa de Pouso",
+                        "PAX_FEE" => "Taxa de Embarque",
+                        "HANDLING" => "Handling",
+                        "NAV_TERMINAL" => "Navegação/Terminal",
+                        "PARKING" => "Estacionamento",
+                        _ => fee.Description
+                    };
+
+                    pilot.Balance -= fee.Total;
                     _context.FinancialTransactions.Add(new FinancialTransaction
                     {
                         Id = Guid.NewGuid(),
                         PilotId = pilot.Id,
                         Date = DateTime.Now,
                         Type = TransactionType.Expense,
-                        Category = "Taxa de Pouso",
-                        Amount = landingFee,
-                        Description = $"Taxa de Pouso em {destinationIcao} (Tier {airportTier}, MTOW: {mtowLbs:N0} lbs)"
+                        Category = category,
+                        Amount = fee.Total,
+                        Description = fee.Description
                     });
                 }
+
+                // outcome.LandingFee mantém o nome para compatibilidade com DTO, HUD e persistência,
+                // mas passa a representar a soma consolidada de todas as taxas aeroportuárias do voo.
+                outcome.LandingFee = totalFees;
 
                 pilot.Balance += totalRevenue;
                 pilot.ExperiencePoints += totalXP;
                 pilot.TotalHours += hours;
+                pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
 
                 // 4. Registrar Voo no Logbook
                 var flight = new Flight
@@ -347,14 +407,35 @@ namespace FlightCareer.Application.Services
 
                 await _context.SaveChangesAsync();
 
+                if (isFlightInvalidated)
+                {
+                    outcome.Success = false;
+                    outcome.Revenue = 0;
+                    outcome.FuelCost = fuelCost;
+                    outcome.LandingFee = totalFees;
+                    outcome.XP = 0;
+                    outcome.CompletedMissions = 0;
+                    outcome.RemainingMissions = activeMissions.Count;
+                    outcome.Message = invalidationReason ?? "Voo invalidado: combustível alterado em voo.";
+                    return outcome;
+                }
+
                 outcome.Success = true;
                 outcome.Revenue = totalRevenue;
                 outcome.FuelCost = fuelCost;
-                outcome.LandingFee = landingFee;
+                outcome.LandingFee = totalFees;
                 outcome.XP = totalXP;
                 outcome.CompletedMissions = missionsDone;
                 outcome.RemainingMissions = missionsRemaining;
                 outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2}";
+                if (totalFees > landingOnlyFee)
+                {
+                    outcome.Message += $" | Taxas: {totalFees:C2}";
+                }
+                if (autoStartUsed)
+                {
+                    outcome.Message += " | Partida automática usada (−10% XP)";
+                }
                 return outcome;
             }
             catch (Exception ex)
@@ -372,19 +453,32 @@ namespace FlightCareer.Application.Services
                 return 0.0;
             }
 
-            return airport.Tier switch
+            var context = new FeeContext(airport.Tier, airport.ICAO ?? string.Empty, mtowLbs, 0, false);
+            var fees = GroundServiceCalculator.Calculate(context);
+            var landing = fees.FirstOrDefault(f => f.Code == "LANDING");
+            return landing?.Total ?? 0.0;
+        }
+
+        /// <summary>
+        /// Processa o cancelamento de um voo monitorado após ter ficado ativo:
+        /// avança o relógio de carreira pela duração simulada voada mais 0,5 h de solo/turnaround.
+        /// </summary>
+        public async Task ProcessFlightCancellationAsync(Guid pilotId, double flightDurationHours)
+        {
+            try
             {
-                // Tier 1: Grandes Hubs Internacionais (taxas elevadas proporcionais ao porte)
-                1 => Math.Round(250.0 + (mtowLbs * 0.035), 2),
-
-                // Tier 2: Regionais Médios / Capitais Estaduais
-                2 => Math.Round(80.0 + (mtowLbs * 0.015), 2),
-
-                // Tier 3: Aeródromos Municipais / Interior Pavimentado
-                3 => Math.Round(25.0 + (mtowLbs * 0.005), 2),
-
-                _ => 0.0
-            };
+                _context.ChangeTracker.Clear();
+                var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Id == pilotId);
+                if (pilot != null)
+                {
+                    pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, flightDurationHours);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[FlightService] Erro ao avançar relógio de carreira no cancelamento: {ex.Message}");
+            }
         }
     }
 }

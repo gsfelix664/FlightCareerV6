@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "A330-BelugaXL",
+  "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "jet",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "pressurized",
+    "ptu",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "A330-BelugaXL"
+    ],
+    "atcModel": [
+      "Beluga XL"
+    ]
+  },
+  "limits": [
+    {
+      "key": "mmo",
+      "value": 0.69,
+      "unit": "mach",
+      "source": "SimVar",
+      "reference": "MACH MAX OPERATE (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 240.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 186.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:4",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 4 (20261115-0825-A330-BelugaXL.csv)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 330.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: RR Trent 700 (TGT)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 160.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 900.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 114.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 148.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 196.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Airbus A330-743L BelugaXL FCOM / AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "Robin DR400",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "carbureted",
+    "fixedGear",
+    "fixedPitchProp",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [
+      "Robin DR400"
+    ],
+    "atcModel": [
+      "DR40"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 166.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 115.74,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX OIL TEMPERATURE (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar com POH: padrão da classe pistão; MAX EGT do sim (649,07 °C) é a escala do instrumento",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 46.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 51.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 120.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 92.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0804-Robin_DR400.csv)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: ≈60 A (aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 14.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Lycoming O-360",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Lycoming O-360",
+      "notes": null
+    }
+  ]
+}

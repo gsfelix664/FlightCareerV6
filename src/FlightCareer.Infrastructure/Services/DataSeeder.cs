@@ -1,6 +1,8 @@
 using CsvHelper;
 using CsvHelper.Configuration;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Application.Interfaces;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -411,14 +413,21 @@ namespace FlightCareer.Infrastructure.Services
             using var reader = new StreamReader(filePath);
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
             
+            var profiles = new AircraftLimitCatalogLoader().LoadProfiles();
+            var resolver = new AircraftLimitResolver(profiles, new Dictionary<string, IReadOnlyList<AircraftLimit>>());
+
             var records = csv.GetRecords<dynamic>();
             foreach (var record in records)
             {
                 var dict = (IDictionary<string, object>)record;
+                var model = dict["Modelo"].ToString()!;
+                var matched = resolver.FindById(model) ?? resolver.FindProfile(model, model);
+                bool hasConvertible = matched != null && matched.Features.Contains(AircraftFeatures.ConvertibleCabin, StringComparer.OrdinalIgnoreCase);
+
                 var aircraft = new AircraftType
                 {
                     Id = Guid.NewGuid(),
-                    Model = dict["Modelo"].ToString()!,
+                    Model = model,
                     Type = dict["Tipo"].ToString()!,
                     PurchasePrice = double.Parse(dict["PrecoNovo(dolar)"].ToString()!, CultureInfo.InvariantCulture),
                     FuelTankGallons = double.Parse(dict["Tanque(gal)"].ToString()!, CultureInfo.InvariantCulture),
@@ -428,7 +437,8 @@ namespace FlightCareer.Infrastructure.Services
                     MaxPax = int.Parse(dict["PaxMax"].ToString()!, CultureInfo.InvariantCulture),
                     FuelConsumptionGPH = double.Parse(dict["ConsumoHora(GPH)"].ToString()!, CultureInfo.InvariantCulture),
                     MinRunwayLength = int.Parse(dict["PistaMin"].ToString()!, CultureInfo.InvariantCulture),
-                    FuelType = dict["Combustivel"].ToString()!
+                    FuelType = dict["Combustivel"].ToString()!,
+                    HasConvertibleCabin = hasConvertible
                 };
                 _context.AircraftTypes.Add(aircraft);
             }

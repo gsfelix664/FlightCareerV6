@@ -1,0 +1,1712 @@
+{
+  "schemaVersion": "2.0",
+  "totalAircraft": 30,
+  "dataPolicy": "Certified manufacturer POH/AFM/FCOM and FAA/EASA TCDS values only. Heuristic telemetry thresholds removed.",
+  "aircraft": [
+    {
+      "icao": "A20N",
+      "name": "Airbus A320neo",
+      "variant": "WV050 / CFM LEAP-1A26",
+      "category": "Airliner / Narrowbody",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.064 / FAA TCDS A28NM (WV050)",
+        "operational_manual": "Airbus A320neo FCOM / AFM (CFM LEAP-1A26)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 112,
+        "vs1_stall_clean": 145,
+        "vfe_flaps": {
+          "CONF_1": 230,
+          "CONF_1_PLUS_F": 215,
+          "CONF_2": 200,
+          "CONF_3": 185,
+          "CONF_FULL": 177
+        },
+        "vlo_gear_extend": 250,
+        "vlo_gear_retract": 220,
+        "vle_gear_extended": 280,
+        "vmo_max_operating": 350,
+        "mmo_max_mach": 0.82,
+        "max_tire_ground_speed_kt": 195
+      },
+      "weights_kg": {
+        "empty_operating_min": 40600,
+        "max_taxi_mtw": 79400,
+        "max_takeoff_mtow": 79000,
+        "max_landing_mlw": 67400,
+        "max_zero_fuel_mzfw": 64300
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 39800,
+        "max_altitude_flaps_extended_ft": 20000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -2000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 35,
+        "max_crosswind_landing_kt": 38,
+        "max_crosswind_autoland_kt": 20,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 30
+      },
+      "engine_and_systems": {
+        "max_egt_toga_c": 1060,
+        "max_egt_mct_c": 1025,
+        "max_egt_start_ground_c": 750,
+        "max_oil_temp_continuous_c": 140,
+        "max_oil_temp_transient_c": 155,
+        "max_reverse_min_speed_kt": 70,
+        "autopilot_min_agl_ft": {
+          "takeoff": 100,
+          "ils_cat1": 160,
+          "non_precision": 250,
+          "circling": 500,
+          "enroute": 500
+        }
+      }
+    },
+    {
+      "icao": "C152",
+      "name": "Cessna 152",
+      "variant": "Standard / Lycoming O-235-L2C (110 HP)",
+      "category": "Single-Engine Piston / Trainer",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS 3A19",
+        "operational_manual": "Cessna Model 152 Pilot's Operating Handbook (POH)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 35,
+        "vs1_stall_clean": 40,
+        "vx_best_angle_climb": 55,
+        "vy_best_rate_climb": 67,
+        "va_maneuvering_at_mtow": 104,
+        "vfe_flaps": {
+          "FLAPS_10": 85,
+          "FLAPS_20": 85,
+          "FLAPS_30": 85
+        },
+        "vno_max_structural_cruising": 111,
+        "vne_never_exceed": 149
+      },
+      "weights_kg": {
+        "empty_operating_min": 504,
+        "max_ramp_wt": 757,
+        "max_takeoff_mtow": 757,
+        "max_landing_mlw": 757,
+        "max_baggage_kg": 54
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14700,
+        "g_load_clean_normal": {
+          "min": -1.76,
+          "max": 4.4
+        },
+        "g_load_flaps_normal": {
+          "min": 0.0,
+          "max": 3.5
+        },
+        "g_load_clean_utility": {
+          "min": -1.76,
+          "max": 4.4
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 12,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2550,
+        "max_oil_temp_c": 118,
+        "min_oil_temp_c": 38,
+        "oil_pressure_psi": {
+          "min": 25,
+          "normal_min": 60,
+          "normal_max": 90,
+          "max": 100
+        },
+        "fuel_capacity_usable_l": 92.7
+      }
+    },
+    {
+      "icao": "C172",
+      "name": "Cessna 172S Skyhawk G1000",
+      "variant": "172S / Lycoming IO-360-L2A (180 HP) / Garmin G1000 NXi",
+      "category": "Single-Engine Piston / Utility",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS 3A12",
+        "operational_manual": "Cessna Model 172S Nav III (G1000) POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 40,
+        "vs1_stall_clean": 48,
+        "vx_best_angle_climb": 62,
+        "vy_best_rate_climb": 74,
+        "va_maneuvering_at_mtow": 105,
+        "vfe_flaps": {
+          "FLAPS_10": 110,
+          "FLAPS_20": 85,
+          "FLAPS_30": 85
+        },
+        "vno_max_structural_cruising": 129,
+        "vne_never_exceed": 163
+      },
+      "weights_kg": {
+        "empty_operating_min": 767,
+        "max_ramp_wt": 1160,
+        "max_takeoff_mtow": 1157,
+        "max_landing_mlw": 1157,
+        "max_baggage_kg": 54
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14000,
+        "g_load_clean_normal": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps_normal": {
+          "min": 0.0,
+          "max": 3.0
+        },
+        "g_load_clean_utility": {
+          "min": -1.76,
+          "max": 4.4
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 118,
+        "min_oil_temp_c": 38,
+        "oil_pressure_psi": {
+          "min": 20,
+          "normal_min": 50,
+          "normal_max": 90,
+          "max": 115
+        },
+        "max_cht_c": 260,
+        "fuel_capacity_usable_l": 200.6
+      }
+    },
+    {
+      "icao": "A339",
+      "name": "Airbus A330-900neo",
+      "variant": "A330-941 / Rolls-Royce Trent 7000-72",
+      "category": "Airliner / Widebody",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.004 / FAA TCDS A46NM",
+        "operational_manual": "Airbus A330-900 FCOM / AFM (Rolls-Royce Trent 7000)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 115,
+        "vs1_stall_clean": 150,
+        "vfe_flaps": {
+          "CONF_1": 240,
+          "CONF_1_PLUS_F": 215,
+          "CONF_2": 196,
+          "CONF_3": 186,
+          "CONF_FULL": 180
+        },
+        "vlo_gear_extend": 250,
+        "vlo_gear_retract": 220,
+        "vle_gear_extended": 250,
+        "vmo_max_operating": 330,
+        "mmo_max_mach": 0.86,
+        "max_tire_ground_speed_kt": 204
+      },
+      "weights_kg": {
+        "empty_operating_min": 132000,
+        "max_taxi_mtw": 251900,
+        "max_takeoff_mtow": 251000,
+        "max_landing_mlw": 191000,
+        "max_zero_fuel_mzfw": 181000
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 41450,
+        "max_altitude_flaps_extended_ft": 20000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -2000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 35,
+        "max_crosswind_landing_kt": 38,
+        "max_crosswind_autoland_kt": 25,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 45
+      },
+      "engine_and_systems": {
+        "max_egt_toga_c": 900,
+        "max_egt_mct_c": 850,
+        "max_egt_start_ground_c": 700,
+        "max_oil_temp_continuous_c": 175,
+        "max_oil_temp_transient_c": 190,
+        "max_reverse_min_speed_kt": 70,
+        "autopilot_min_agl_ft": {
+          "takeoff": 100,
+          "ils_cat1": 160,
+          "non_precision": 250,
+          "circling": 500,
+          "enroute": 500
+        }
+      }
+    },
+    {
+      "icao": "B38M",
+      "name": "Boeing 737 MAX 8",
+      "variant": "737-8 / CFM LEAP-1B27",
+      "category": "Airliner / Narrowbody",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A16WE / EASA TCDS IM.A.120",
+        "operational_manual": "Boeing 737-8 MAX FCOM / AFM (CFM LEAP-1B)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 115,
+        "vs1_stall_clean": 148,
+        "vfe_flaps": {
+          "FLAPS_1": 250,
+          "FLAPS_2": 250,
+          "FLAPS_5": 250,
+          "FLAPS_10": 215,
+          "FLAPS_15": 205,
+          "FLAPS_25": 190,
+          "FLAPS_30": 175,
+          "FLAPS_40": 162
+        },
+        "vlo_gear_extend": 270,
+        "vlo_gear_retract": 235,
+        "vle_gear_extended": 320,
+        "vmo_max_operating": 340,
+        "mmo_max_mach": 0.82,
+        "max_tire_ground_speed_kt": 195
+      },
+      "weights_kg": {
+        "empty_operating_min": 45070,
+        "max_taxi_mtw": 82645,
+        "max_takeoff_mtow": 82191,
+        "max_landing_mlw": 69309,
+        "max_zero_fuel_mzfw": 65952
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 41000,
+        "max_altitude_flaps_extended_ft": 20000,
+        "max_runway_altitude_ft": 9500,
+        "min_runway_altitude_ft": -1000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 33,
+        "max_crosswind_landing_kt": 36,
+        "max_crosswind_autoland_kt": 25,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 30
+      },
+      "engine_and_systems": {
+        "max_egt_toga_c": 1060,
+        "max_egt_mct_c": 1025,
+        "max_egt_start_ground_c": 750,
+        "max_oil_temp_continuous_c": 140,
+        "max_oil_temp_transient_c": 155,
+        "max_reverse_min_speed_kt": 60,
+        "autopilot_min_agl_ft": {
+          "takeoff": 400,
+          "ils_cat1": 158,
+          "non_precision": 200,
+          "circling": 500,
+          "enroute": 1000
+        }
+      }
+    },
+    {
+      "icao": "AT46",
+      "name": "ATR 42-600",
+      "variant": "ATR 42-500/600 / P&WC PW127M",
+      "category": "Regional Turboprop",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.084 / FAA TCDS A53EU",
+        "operational_manual": "ATR 42-600 FCOM / AFM (P&WC PW127M)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 81,
+        "vs1_stall_clean": 104,
+        "vfe_flaps": {
+          "FLAPS_15": 170,
+          "FLAPS_30": 150
+        },
+        "vlo_gear_extend": 170,
+        "vlo_gear_retract": 160,
+        "vle_gear_extended": 170,
+        "vmo_max_operating": 250,
+        "mmo_max_mach": 0.55,
+        "max_tire_ground_speed_kt": 165
+      },
+      "weights_kg": {
+        "empty_operating_min": 11700,
+        "max_taxi_mtw": 18770,
+        "max_takeoff_mtow": 18600,
+        "max_landing_mlw": 18300,
+        "max_zero_fuel_mzfw": 17000
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 25000,
+        "max_altitude_flaps_extended_ft": 15000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -1000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 35,
+        "max_crosswind_landing_kt": 35,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 23
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 800,
+        "max_itt_mct_c": 765,
+        "max_itt_start_c": 840,
+        "max_oil_temp_continuous_c": 125,
+        "max_prop_rpm_pct": 100.8,
+        "autopilot_min_agl_ft": {
+          "takeoff": 100,
+          "ils_cat1": 160,
+          "non_precision": 200,
+          "enroute": 500
+        }
+      }
+    },
+    {
+      "icao": "AT76",
+      "name": "ATR 72-600",
+      "variant": "ATR 72-212A (600) / P&WC PW127M",
+      "category": "Regional Turboprop",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.084 / FAA TCDS A53EU",
+        "operational_manual": "ATR 72-600 FCOM / AFM (P&WC PW127M)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 85,
+        "vs1_stall_clean": 113,
+        "vfe_flaps": {
+          "FLAPS_15": 185,
+          "FLAPS_30": 150
+        },
+        "vlo_gear_extend": 170,
+        "vlo_gear_retract": 160,
+        "vle_gear_extended": 170,
+        "vmo_max_operating": 250,
+        "mmo_max_mach": 0.55,
+        "max_tire_ground_speed_kt": 165
+      },
+      "weights_kg": {
+        "empty_operating_min": 13500,
+        "max_taxi_mtw": 23170,
+        "max_takeoff_mtow": 23000,
+        "max_landing_mlw": 22350,
+        "max_zero_fuel_mzfw": 21000
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 25000,
+        "max_altitude_flaps_extended_ft": 15000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -1000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 35,
+        "max_crosswind_landing_kt": 35,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 23
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 800,
+        "max_itt_mct_c": 765,
+        "max_itt_start_c": 840,
+        "max_oil_temp_continuous_c": 125,
+        "max_prop_rpm_pct": 100.8,
+        "autopilot_min_agl_ft": {
+          "takeoff": 100,
+          "ils_cat1": 160,
+          "non_precision": 200,
+          "enroute": 500
+        }
+      }
+    },
+    {
+      "icao": "BLCF",
+      "name": "Boeing 747-400LCF Dreamlifter",
+      "variant": "747-409LCF / PW4062",
+      "category": "Outsize Heavy Cargo",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A20WE (STC ST01702SE)",
+        "operational_manual": "Boeing 747-400LCF Dreamlifter AFM Supplement"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 122,
+        "vs1_stall_clean": 160,
+        "vfe_flaps": {
+          "FLAPS_1": 280,
+          "FLAPS_5": 260,
+          "FLAPS_10": 240,
+          "FLAPS_20": 230,
+          "FLAPS_25": 205,
+          "FLAPS_30": 180
+        },
+        "vlo_gear_extend": 270,
+        "vlo_gear_retract": 250,
+        "vle_gear_extended": 320,
+        "vmo_max_operating": 365,
+        "mmo_max_mach": 0.85,
+        "max_tire_ground_speed_kt": 204
+      },
+      "weights_kg": {
+        "empty_operating_min": 180530,
+        "max_taxi_mtw": 365595,
+        "max_takeoff_mtow": 364235,
+        "max_landing_mlw": 274423,
+        "max_zero_fuel_mzfw": 263083
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 43000,
+        "max_altitude_flaps_extended_ft": 20000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -1000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 25,
+        "max_crosswind_landing_kt": 25,
+        "max_tailwind_kt": 10,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 45
+      },
+      "engine_and_systems": {
+        "max_egt_toga_c": 650,
+        "max_egt_mct_c": 610,
+        "max_egt_start_c": 535,
+        "max_oil_temp_continuous_c": 163,
+        "max_reverse_min_speed_kt": 60,
+        "autopilot_min_agl_ft": {
+          "takeoff": 250,
+          "ils_cat1": 150,
+          "non_precision": 250,
+          "enroute": 1000
+        }
+      }
+    },
+    {
+      "icao": "A337",
+      "name": "Airbus A330-743L BelugaXL",
+      "variant": "A330-743L / Rolls-Royce Trent 772B-60",
+      "category": "Outsize Heavy Cargo",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.004 (A330-743L)",
+        "operational_manual": "Airbus A330-743L BelugaXL FCOM / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 114,
+        "vs1_stall_clean": 148,
+        "vfe_flaps": {
+          "CONF_1": 240,
+          "CONF_1_PLUS_F": 215,
+          "CONF_2": 196,
+          "CONF_3": 186,
+          "CONF_FULL": 180
+        },
+        "vlo_gear_extend": 250,
+        "vlo_gear_retract": 220,
+        "vle_gear_extended": 250,
+        "vmo_max_operating": 330,
+        "mmo_max_mach": 0.82,
+        "max_tire_ground_speed_kt": 204
+      },
+      "weights_kg": {
+        "empty_operating_min": 127500,
+        "max_taxi_mtw": 227900,
+        "max_takeoff_mtow": 227000,
+        "max_landing_mlw": 187000,
+        "max_zero_fuel_mzfw": 178000
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 35000,
+        "max_altitude_flaps_extended_ft": 20000,
+        "max_runway_altitude_ft": 9200,
+        "min_runway_altitude_ft": -2000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.5
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_crosswind_takeoff_kt": 28,
+        "max_crosswind_landing_kt": 28,
+        "max_tailwind_kt": 15,
+        "max_runway_slope_pct": 2.0,
+        "min_runway_width_m": 45
+      },
+      "engine_and_systems": {
+        "max_egt_toga_c": 900,
+        "max_egt_mct_c": 850,
+        "max_egt_start_ground_c": 700,
+        "max_oil_temp_continuous_c": 160,
+        "max_reverse_min_speed_kt": 70,
+        "autopilot_min_agl_ft": {
+          "takeoff": 100,
+          "ils_cat1": 160,
+          "non_precision": 250,
+          "circling": 500,
+          "enroute": 500
+        }
+      }
+    },
+    {
+      "icao": "PC24",
+      "name": "Pilatus PC-24",
+      "variant": "Super Versatile Jet / Williams FJ44-4A-QPM",
+      "category": "Business Jet / Utility",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.594 / FAA TCDS A00064CE",
+        "operational_manual": "Pilatus PC-24 Airplane Flight Manual (AFM)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 81,
+        "vs1_stall_clean": 105,
+        "vfe_flaps": {
+          "FLAPS_8": 200,
+          "FLAPS_15": 200,
+          "FLAPS_33": 140
+        },
+        "vlo_gear_extend": 200,
+        "vlo_gear_retract": 180,
+        "vle_gear_extended": 200,
+        "vmo_max_operating": 290,
+        "mmo_max_mach": 0.74
+      },
+      "weights_kg": {
+        "empty_operating_min": 4965,
+        "max_ramp_wt": 8345,
+        "max_takeoff_mtow": 8300,
+        "max_landing_mlw": 7665,
+        "max_zero_fuel_mzfw": 6450
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 45000,
+        "max_altitude_flaps_extended_ft": 15000,
+        "g_load_clean": {
+          "min": -1.0,
+          "max": 2.68
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 25,
+        "max_tailwind_kt": 15,
+        "unpaved_runway_certified": true
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 855,
+        "max_itt_mct_c": 835,
+        "max_oil_temp_c": 135
+      }
+    },
+    {
+      "icao": "C9GT",
+      "name": "Beechcraft King Air C90 GTX",
+      "variant": "C90GTx / P&WC PT6A-135A (550 SHP x2)",
+      "category": "Twin-Engine Turboprop",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS 3A20",
+        "operational_manual": "Beechcraft King Air C90GTx POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 78,
+        "vs1_stall_clean": 88,
+        "vx_best_angle_climb": 100,
+        "vy_best_rate_climb": 112,
+        "va_maneuvering_at_mtow": 169,
+        "vfe_flaps": {
+          "APPROACH": 184,
+          "FULL_DOWN": 148
+        },
+        "vlo_gear_extend": 182,
+        "vlo_gear_retract": 163,
+        "vle_gear_extended": 182,
+        "vmo_max_operating": 226,
+        "mmo_max_mach": 0.46
+      },
+      "weights_kg": {
+        "empty_operating_min": 3150,
+        "max_ramp_wt": 4785,
+        "max_takeoff_mtow": 4756,
+        "max_landing_mlw": 4354,
+        "max_zero_fuel_mzfw": 4050
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 30000,
+        "g_load_clean": {
+          "min": -1.49,
+          "max": 3.72
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 20,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 805,
+        "max_itt_mct_c": 805,
+        "max_prop_rpm": 1900,
+        "max_oil_temp_c": 105
+      }
+    },
+    {
+      "icao": "BE36",
+      "name": "Beechcraft Bonanza G36",
+      "variant": "G36 / Continental IO-550-B (300 HP)",
+      "category": "Single-Engine Piston / High Performance",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS 3A15",
+        "operational_manual": "Beechcraft Bonanza G36 POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 51,
+        "vs1_stall_clean": 61,
+        "vx_best_angle_climb": 84,
+        "vy_best_rate_climb": 100,
+        "va_maneuvering_at_mtow": 141,
+        "vfe_flaps": {
+          "APPROACH": 154,
+          "FULL_30": 124
+        },
+        "vlo_gear_extend": 154,
+        "vlo_gear_retract": 154,
+        "vle_gear_extended": 154,
+        "vno_max_structural_cruising": 167,
+        "vne_never_exceed": 205
+      },
+      "weights_kg": {
+        "empty_operating_min": 1142,
+        "max_ramp_wt": 1662,
+        "max_takeoff_mtow": 1656,
+        "max_landing_mlw": 1656,
+        "max_baggage_kg": 181
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 18500,
+        "g_load_clean_utility": {
+          "min": -1.76,
+          "max": 4.4
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 17,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 116,
+        "max_cht_c": 238,
+        "fuel_capacity_usable_l": 280.1
+      }
+    },
+    {
+      "icao": "B350",
+      "name": "Beechcraft King Air 350i",
+      "variant": "B300 / P&WC PT6A-60A (1050 SHP x2)",
+      "category": "Twin-Engine Turboprop",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A24CE",
+        "operational_manual": "Beechcraft Super King Air B300 (350i) POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 81,
+        "vs1_stall_clean": 94,
+        "vx_best_angle_climb": 112,
+        "vy_best_rate_climb": 125,
+        "va_maneuvering_at_mtow": 184,
+        "vfe_flaps": {
+          "APPROACH": 202,
+          "FULL_DOWN": 158
+        },
+        "vlo_gear_extend": 184,
+        "vlo_gear_retract": 166,
+        "vle_gear_extended": 184,
+        "vmo_max_operating": 263,
+        "mmo_max_mach": 0.58
+      },
+      "weights_kg": {
+        "empty_operating_min": 4491,
+        "max_ramp_wt": 6849,
+        "max_takeoff_mtow": 6804,
+        "max_landing_mlw": 6804,
+        "max_zero_fuel_mzfw": 5670
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 35000,
+        "g_load_clean": {
+          "min": -1.27,
+          "max": 3.17
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 25,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 820,
+        "max_itt_mct_c": 785,
+        "max_prop_rpm": 1700,
+        "max_oil_temp_c": 110
+      }
+    },
+    {
+      "icao": "C208",
+      "name": "Cessna 208B Grand Caravan EX",
+      "variant": "208B EX / P&WC PT6A-140 (867 SHP)",
+      "category": "Single-Engine Turboprop / Utility",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A37CE",
+        "operational_manual": "Cessna Model 208B (675 / EX) POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 61,
+        "vs1_stall_clean": 78,
+        "vx_best_angle_climb": 83,
+        "vy_best_rate_climb": 104,
+        "va_maneuvering_at_mtow": 148,
+        "vfe_flaps": {
+          "FLAPS_10": 175,
+          "FLAPS_20": 150,
+          "FLAPS_30": 125
+        },
+        "vmo_max_operating": 175
+      },
+      "weights_kg": {
+        "empty_operating_min": 2331,
+        "max_ramp_wt": 4008,
+        "max_takeoff_mtow": 3995,
+        "max_landing_mlw": 3856
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 25000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.4
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 20,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 850,
+        "max_itt_mct_c": 825,
+        "max_prop_rpm": 1900,
+        "max_oil_temp_c": 105,
+        "fuel_capacity_usable_l": 1256.7
+      }
+    },
+    {
+      "icao": "C25C",
+      "name": "Cessna Citation CJ4",
+      "variant": "525C / Williams FJ44-4A (3621 lbf x2)",
+      "category": "Light Business Jet",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A1WI",
+        "operational_manual": "Cessna Model 525C (Citation CJ4) AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 85,
+        "vs1_stall_clean": 109,
+        "vfe_flaps": {
+          "FLAPS_15": 200,
+          "FLAPS_35": 160
+        },
+        "vlo_gear_extend": 200,
+        "vlo_gear_retract": 200,
+        "vle_gear_extended": 200,
+        "vmo_max_operating": 305,
+        "mmo_max_mach": 0.77
+      },
+      "weights_kg": {
+        "empty_operating_min": 4663,
+        "max_ramp_wt": 7815,
+        "max_takeoff_mtow": 7761,
+        "max_landing_mlw": 7103,
+        "max_zero_fuel_mzfw": 5670
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 45000,
+        "max_altitude_flaps_extended_ft": 18000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 24,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 855,
+        "max_itt_mct_c": 835,
+        "max_oil_temp_c": 135
+      }
+    },
+    {
+      "icao": "SF50",
+      "name": "Cirrus Vision Jet G2",
+      "variant": "SF50 G2 / Williams FJ33-5A (1846 lbf)",
+      "category": "Personal Light Jet",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A00018CH",
+        "operational_manual": "Cirrus Vision SF50 G2 Airplane Flight Manual (AFM)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 67,
+        "vs1_stall_clean": 81,
+        "vfe_flaps": {
+          "FLAPS_50": 190,
+          "FLAPS_100": 150
+        },
+        "vlo_gear_extend": 190,
+        "vlo_gear_retract": 190,
+        "vle_gear_extended": 190,
+        "vmo_max_operating": 250,
+        "mmo_max_mach": 0.53
+      },
+      "weights_kg": {
+        "empty_operating_min": 1610,
+        "max_ramp_wt": 2740,
+        "max_takeoff_mtow": 2722,
+        "max_landing_mlw": 2517,
+        "max_zero_fuel_mzfw": 2223
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 31000,
+        "max_altitude_flaps_extended_ft": 18000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 20,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 880,
+        "max_itt_mct_c": 850,
+        "max_oil_temp_c": 135
+      }
+    },
+    {
+      "icao": "CC19",
+      "name": "CubCrafters NXCub",
+      "variant": "CC19-180 Nosewheel / Lycoming CC363i (180 HP)",
+      "category": "Single-Engine Piston / STOL Bush",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A00053SE",
+        "operational_manual": "CubCrafters CC19-180 (NXCub) POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 34,
+        "vs1_stall_clean": 39,
+        "vx_best_angle_climb": 48,
+        "vy_best_rate_climb": 62,
+        "va_maneuvering_at_mtow": 93,
+        "vfe_flaps": {
+          "FLAPS_1": 74,
+          "FLAPS_2": 74,
+          "FLAPS_3": 74
+        },
+        "vno_max_structural_cruising": 108,
+        "vne_never_exceed": 141
+      },
+      "weights_kg": {
+        "empty_operating_min": 565,
+        "max_ramp_wt": 1043,
+        "max_takeoff_mtow": 1043,
+        "max_landing_mlw": 1043
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 118,
+        "max_cht_c": 246
+      }
+    },
+    {
+      "icao": "CC19_TW",
+      "name": "CubCrafters XCub",
+      "variant": "CC19-180 Tailwheel / Lycoming O-360-C1G (180 HP)",
+      "category": "Single-Engine Piston / STOL Bush",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS A00053SE",
+        "operational_manual": "CubCrafters CC19-180 (XCub Tailwheel) POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 34,
+        "vs1_stall_clean": 39,
+        "vx_best_angle_climb": 48,
+        "vy_best_rate_climb": 62,
+        "va_maneuvering_at_mtow": 93,
+        "vfe_flaps": {
+          "FLAPS_1": 74,
+          "FLAPS_2": 74,
+          "FLAPS_3": 74
+        },
+        "vno_max_structural_cruising": 108,
+        "vne_never_exceed": 141
+      },
+      "weights_kg": {
+        "empty_operating_min": 552,
+        "max_ramp_wt": 1043,
+        "max_takeoff_mtow": 1043,
+        "max_landing_mlw": 1043
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 118,
+        "max_cht_c": 246
+      }
+    },
+    {
+      "icao": "TBM9",
+      "name": "Daher TBM 930",
+      "variant": "TBM 930 / P&WC PT6A-66D (850 SHP)",
+      "category": "Single-Engine Turboprop / High Speed",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.010 / FAA TCDS A60EU",
+        "operational_manual": "Daher TBM 930 Pilot's Operating Handbook (POH)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 65,
+        "vs1_stall_clean": 81,
+        "vx_best_angle_climb": 95,
+        "vy_best_rate_climb": 124,
+        "va_maneuvering_at_mtow": 158,
+        "vfe_flaps": {
+          "TAKEOFF": 178,
+          "LANDING": 122
+        },
+        "vlo_gear_extend": 178,
+        "vlo_gear_retract": 178,
+        "vle_gear_extended": 178,
+        "vmo_max_operating": 266,
+        "mmo_max_mach": 0.65
+      },
+      "weights_kg": {
+        "empty_operating_min": 2097,
+        "max_ramp_wt": 3369,
+        "max_takeoff_mtow": 3354,
+        "max_landing_mlw": 3186,
+        "max_zero_fuel_mzfw": 2736
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 31000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 20,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 840,
+        "max_itt_mct_c": 840,
+        "max_prop_rpm": 2000,
+        "max_oil_temp_c": 105,
+        "fuel_capacity_usable_l": 1101.5
+      }
+    },
+    {
+      "icao": "DA40",
+      "name": "Diamond DA40 NG",
+      "variant": "DA40 NG / Austro Engine AE300 Jet-A1 (168 HP)",
+      "category": "Single-Engine Piston (Diesel/Jet-A1)",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.022 / FAA TCDS A47CE",
+        "operational_manual": "Diamond DA40 NG Airplane Flight Manual (AFM)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 52,
+        "vs1_stall_clean": 58,
+        "vx_best_angle_climb": 68,
+        "vy_best_rate_climb": 77,
+        "va_maneuvering_at_mtow": 112,
+        "vfe_flaps": {
+          "TAKEOFF": 110,
+          "LANDING": 98
+        },
+        "vno_max_structural_cruising": 135,
+        "vne_never_exceed": 172
+      },
+      "weights_kg": {
+        "empty_operating_min": 900,
+        "max_ramp_wt": 1310,
+        "max_takeoff_mtow": 1310,
+        "max_landing_mlw": 1280
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 16400,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 25,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2300,
+        "max_oil_temp_c": 135,
+        "max_coolant_temp_c": 105,
+        "fuel_capacity_usable_l": 147.6
+      }
+    },
+    {
+      "icao": "DA62",
+      "name": "Diamond DA62",
+      "variant": "DA62 / Austro Engine AE330 Jet-A1 (180 HP x2)",
+      "category": "Twin-Engine Piston (Diesel/Jet-A1)",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.629 / FAA TCDS A00063CE",
+        "operational_manual": "Diamond DA62 Airplane Flight Manual (AFM)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 58,
+        "vs1_stall_clean": 67,
+        "vx_best_angle_climb": 82,
+        "vy_best_rate_climb": 89,
+        "va_maneuvering_at_mtow": 136,
+        "vfe_flaps": {
+          "TAKEOFF": 136,
+          "LANDING": 119
+        },
+        "vlo_gear_extend": 156,
+        "vlo_gear_retract": 156,
+        "vle_gear_extended": 156,
+        "vno_max_structural_cruising": 166,
+        "vne_never_exceed": 205
+      },
+      "weights_kg": {
+        "empty_operating_min": 1570,
+        "max_ramp_wt": 2300,
+        "max_takeoff_mtow": 2300,
+        "max_landing_mlw": 2300,
+        "max_zero_fuel_mzfw": 2120
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 20000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 22,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2300,
+        "max_oil_temp_c": 135,
+        "max_coolant_temp_c": 105,
+        "fuel_capacity_usable_l": 326.0
+      }
+    },
+    {
+      "icao": "CTSL",
+      "name": "Flight Design CTSL",
+      "variant": "CTSL / Rotax 912 ULS (100 HP)",
+      "category": "Light Sport Aircraft (LSA)",
+      "reference_sources": {
+        "regulatory_tcds": "ASTM F2245 LSA Consensus Standard / EASA LSA.A.052",
+        "operational_manual": "Flight Design CTSL Pilot Operating Handbook (POH)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 39,
+        "vs1_stall_clean": 44,
+        "vx_best_angle_climb": 58,
+        "vy_best_rate_climb": 68,
+        "va_maneuvering_at_mtow": 101,
+        "vfe_flaps": {
+          "FLAPS_15": 80,
+          "FLAPS_30": 62,
+          "FLAPS_35": 62
+        },
+        "vno_max_structural_cruising": 120,
+        "vne_never_exceed": 145
+      },
+      "weights_kg": {
+        "empty_operating_min": 340,
+        "max_ramp_wt": 600,
+        "max_takeoff_mtow": 600,
+        "max_landing_mlw": 600
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14000,
+        "g_load_clean": {
+          "min": -2.0,
+          "max": 4.0
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 8
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 5500,
+        "max_oil_temp_c": 130,
+        "max_cht_c": 135,
+        "fuel_capacity_usable_l": 126.0
+      }
+    },
+    {
+      "icao": "ICON",
+      "name": "ICON A5",
+      "variant": "A5 / Rotax 912 iS Sport (100 HP)",
+      "category": "Amphibious Light Sport Aircraft (LSA)",
+      "reference_sources": {
+        "regulatory_tcds": "FAA Special LSA (ASTM F2245) / Exemption 10829",
+        "operational_manual": "ICON A5 Pilot's Operating Handbook (POH)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 39,
+        "vs1_stall_clean": 45,
+        "vx_best_angle_climb": 53,
+        "vy_best_rate_climb": 62,
+        "va_maneuvering_at_mtow": 87,
+        "vfe_flaps": {
+          "FLAPS_15": 75,
+          "FLAPS_30": 65
+        },
+        "vlo_gear_extend": 75,
+        "vlo_gear_retract": 75,
+        "vle_gear_extended": 109,
+        "vno_max_structural_cruising": 95,
+        "vne_never_exceed": 109
+      },
+      "weights_kg": {
+        "empty_operating_min": 490,
+        "max_ramp_wt": 686,
+        "max_takeoff_mtow": 686,
+        "max_landing_mlw": 686
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 15000,
+        "g_load_clean": {
+          "min": -2.0,
+          "max": 4.0
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 12,
+        "max_tailwind_kt": 8,
+        "water_operations_certified": true
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 5500,
+        "max_oil_temp_c": 130,
+        "max_coolant_temp_c": 120,
+        "fuel_capacity_usable_l": 75.7
+      }
+    },
+    {
+      "icao": "VL3",
+      "name": "JMB Aircraft VL-3",
+      "variant": "VL-3 Evolution / Rotax 915 iS (141 HP)",
+      "category": "High-Performance Ultralight / Sport",
+      "reference_sources": {
+        "regulatory_tcds": "EASA CS-LSA / LTF-UL Ultralight Certification",
+        "operational_manual": "JMB Aircraft VL-3 Evolution Flight Manual"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 34,
+        "vs1_stall_clean": 44,
+        "vx_best_angle_climb": 62,
+        "vy_best_rate_climb": 78,
+        "va_maneuvering_at_mtow": 115,
+        "vfe_flaps": {
+          "FLAPS_15": 95,
+          "FLAPS_37": 76,
+          "FLAPS_55": 70
+        },
+        "vlo_gear_extend": 95,
+        "vlo_gear_retract": 95,
+        "vle_gear_extended": 95,
+        "vno_max_structural_cruising": 162,
+        "vne_never_exceed": 200
+      },
+      "weights_kg": {
+        "empty_operating_min": 325,
+        "max_ramp_wt": 600,
+        "max_takeoff_mtow": 600,
+        "max_landing_mlw": 600
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 18000,
+        "g_load_clean": {
+          "min": -2.0,
+          "max": 4.0
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 16,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 5500,
+        "max_oil_temp_c": 130,
+        "max_coolant_temp_c": 120,
+        "fuel_capacity_usable_l": 120.0
+      }
+    },
+    {
+      "icao": "PC6T",
+      "name": "Pilatus PC-6 Porter",
+      "variant": "PC-6/B2-H4 Turbo Porter / P&WC PT6A-27 (550 SHP)",
+      "category": "Single-Engine Turboprop / STOL Utility",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.093 / FAA TCDS 7A12",
+        "operational_manual": "Pilatus PC-6/B2-H4 Turbo Porter AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 52,
+        "vs1_stall_clean": 58,
+        "vx_best_angle_climb": 65,
+        "vy_best_rate_climb": 74,
+        "va_maneuvering_at_mtow": 114,
+        "vfe_flaps": {
+          "TAKEOFF": 96,
+          "LANDING": 96
+        },
+        "vmo_max_operating": 151
+      },
+      "weights_kg": {
+        "empty_operating_min": 1270,
+        "max_ramp_wt": 2800,
+        "max_takeoff_mtow": 2800,
+        "max_landing_mlw": 2660
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 25000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10,
+        "unpaved_runway_certified": true
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 725,
+        "max_itt_mct_c": 725,
+        "max_prop_rpm": 2200,
+        "max_oil_temp_c": 99,
+        "fuel_capacity_usable_l": 644.0
+      }
+    },
+    {
+      "icao": "PC12",
+      "name": "Pilatus PC-12 NGX",
+      "variant": "PC-12/47E / P&WC PT6E-67XP (1200 SHP)",
+      "category": "Single-Engine Turboprop / Executive & Cargo",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.089 / FAA TCDS A78EU",
+        "operational_manual": "Pilatus PC-12/47E (PC-12 NGX) AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 67,
+        "vs1_stall_clean": 92,
+        "vx_best_angle_climb": 100,
+        "vy_best_rate_climb": 130,
+        "va_maneuvering_at_mtow": 163,
+        "vfe_flaps": {
+          "FLAPS_15": 165,
+          "FLAPS_30": 130,
+          "FLAPS_40": 130
+        },
+        "vlo_gear_extend": 180,
+        "vlo_gear_retract": 180,
+        "vle_gear_extended": 240,
+        "vmo_max_operating": 240,
+        "mmo_max_mach": 0.48
+      },
+      "weights_kg": {
+        "empty_operating_min": 3100,
+        "max_ramp_wt": 4760,
+        "max_takeoff_mtow": 4740,
+        "max_landing_mlw": 4500,
+        "max_zero_fuel_mzfw": 4100
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 30000,
+        "g_load_clean": {
+          "min": -1.36,
+          "max": 3.4
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 20,
+        "max_tailwind_kt": 15,
+        "unpaved_runway_certified": true
+      },
+      "engine_and_systems": {
+        "max_itt_takeoff_c": 850,
+        "max_itt_mct_c": 820,
+        "max_prop_rpm": 1700,
+        "max_oil_temp_c": 105,
+        "fuel_capacity_usable_l": 1521.7
+      }
+    },
+    {
+      "icao": "CP10",
+      "name": "Robin CAP 10",
+      "variant": "CAP 10C / Lycoming AEIO-360-B2F (180 HP)",
+      "category": "Single-Engine Piston / Aerobatic Trainer",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.362 / FAA TCDS A36EU",
+        "operational_manual": "Robin CAP 10C Airplane Flight Manual (AFM)"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 43,
+        "vs1_stall_clean": 46,
+        "vx_best_angle_climb": 65,
+        "vy_best_rate_climb": 76,
+        "va_maneuvering_at_mtow": 135,
+        "vfe_flaps": {
+          "ALL_STAGES": 86
+        },
+        "vno_max_structural_cruising": 145,
+        "vne_never_exceed": 183
+      },
+      "weights_kg": {
+        "empty_operating_min": 550,
+        "max_ramp_wt": 830,
+        "max_takeoff_mtow": 830,
+        "max_landing_mlw": 830
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 16400,
+        "g_load_clean_aerobatic": {
+          "min": -4.5,
+          "max": 6.0
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 118,
+        "max_cht_c": 260,
+        "fuel_capacity_usable_l": 150.0
+      }
+    },
+    {
+      "icao": "DR40",
+      "name": "Robin DR400/100 Cadet",
+      "variant": "DR400/100 / Lycoming O-235-L2A (112 HP)",
+      "category": "Single-Engine Piston / Trainer",
+      "reference_sources": {
+        "regulatory_tcds": "EASA TCDS A.367",
+        "operational_manual": "Robin DR400/100 Cadet Flight Manual"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 43,
+        "vs1_stall_clean": 49,
+        "vx_best_angle_climb": 62,
+        "vy_best_rate_climb": 73,
+        "va_maneuvering_at_mtow": 116,
+        "vfe_flaps": {
+          "TAKEOFF_15": 92,
+          "LANDING_60": 81
+        },
+        "vno_max_structural_cruising": 140,
+        "vne_never_exceed": 166
+      },
+      "weights_kg": {
+        "empty_operating_min": 535,
+        "max_ramp_wt": 900,
+        "max_takeoff_mtow": 900,
+        "max_landing_mlw": 900
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 13000,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 15,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2600,
+        "max_oil_temp_c": 118,
+        "max_cht_c": 260,
+        "fuel_capacity_usable_l": 110.0
+      }
+    },
+    {
+      "icao": "SAVG",
+      "name": "Zlin Aviation Savage Cub",
+      "variant": "Savage Cub / Rotax 912 ULS (100 HP)",
+      "category": "Light Sport Aircraft / Bush Taildragger",
+      "reference_sources": {
+        "regulatory_tcds": "ASTM F2245 LSA / LTF-UL Certification",
+        "operational_manual": "Zlin Aviation Savage Cub Flight Manual"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 32,
+        "vs1_stall_clean": 37,
+        "vx_best_angle_climb": 45,
+        "vy_best_rate_climb": 55,
+        "va_maneuvering_at_mtow": 82,
+        "vfe_flaps": {
+          "ALL_STAGES": 65
+        },
+        "vno_max_structural_cruising": 92,
+        "vne_never_exceed": 111
+      },
+      "weights_kg": {
+        "empty_operating_min": 295,
+        "max_ramp_wt": 560,
+        "max_takeoff_mtow": 560,
+        "max_landing_mlw": 560
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 14000,
+        "g_load_clean": {
+          "min": -2.0,
+          "max": 4.0
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 12,
+        "max_tailwind_kt": 8
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 5500,
+        "max_oil_temp_c": 130,
+        "max_cht_c": 135,
+        "fuel_capacity_usable_l": 64.0
+      }
+    },
+    {
+      "icao": "BE58",
+      "name": "Beechcraft Baron G58",
+      "variant": "G58 / Continental IO-550-C (300 HP x2)",
+      "category": "Twin-Engine Piston",
+      "reference_sources": {
+        "regulatory_tcds": "FAA TCDS 3A16",
+        "operational_manual": "Beechcraft Baron G58 POH / AFM"
+      },
+      "speeds_kt": {
+        "vso_stall_landing_config": 75,
+        "vs1_stall_clean": 84,
+        "vx_best_angle_climb": 92,
+        "vy_best_rate_climb": 105,
+        "va_maneuvering_at_mtow": 156,
+        "vfe_flaps": {
+          "APPROACH_15": 152,
+          "FULL_30": 122
+        },
+        "vlo_gear_extend": 152,
+        "vlo_gear_retract": 152,
+        "vle_gear_extended": 152,
+        "vno_max_structural_cruising": 195,
+        "vne_never_exceed": 223
+      },
+      "weights_kg": {
+        "empty_operating_min": 1764,
+        "max_ramp_wt": 2506,
+        "max_takeoff_mtow": 2495,
+        "max_landing_mlw": 2449,
+        "max_baggage_kg": 136
+      },
+      "envelope_and_altitude": {
+        "service_ceiling_ft": 20688,
+        "g_load_clean": {
+          "min": -1.52,
+          "max": 3.8
+        },
+        "g_load_flaps": {
+          "min": 0.0,
+          "max": 2.0
+        }
+      },
+      "wind_and_runway": {
+        "max_demonstrated_crosswind_kt": 22,
+        "max_tailwind_kt": 10
+      },
+      "engine_and_systems": {
+        "max_rpm_continuous": 2700,
+        "max_oil_temp_c": 116,
+        "max_cht_c": 238,
+        "fuel_capacity_usable_l": 734.4
+      }
+    }
+  ]
+}

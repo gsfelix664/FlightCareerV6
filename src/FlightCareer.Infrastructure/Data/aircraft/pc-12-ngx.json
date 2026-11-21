@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "PC-12 NGX",
+  "class": "Turboprop",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "convertibleCabin",
+    "deIceBoots",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "lavatory",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "singleEngine",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "PC-12 NGX"
+    ],
+    "atcModel": [
+      "PC12"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 240.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 64.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 91.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 165.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 2 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0812-PC-12_NGX_Air_Ambulance.csv)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 300.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: starter-gerador 300 A (PC-12, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6E-67XP (ref. PT6A-67P)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 105.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 850.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 163.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.48,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.4,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.36,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-12/47E (PC-12 NGX) AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

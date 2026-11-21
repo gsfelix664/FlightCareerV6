@@ -6,6 +6,6 @@ namespace FlightCareer.Application.Interfaces
 {
     public interface IMissionGenerator
     {
-        Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport);
+        Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport, System.DateTime? referenceTime = null);
     }
 }
