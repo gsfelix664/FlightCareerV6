@@ -73,6 +73,11 @@ Mesmo comando (`--days 720 --bots 3 --seed 1 --difficulty all --policy all --fas
 
 **Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do § 4 → recalibrar `MissionGenerator.CalculateReward` por classe → ECON-STAB de novo.
 
+## 4.3 Decisões do usuário (2026-11-21) — pagamento e dificuldade
+- **D aprovada como proposta:** Médio — 1º upgrade em ~60–90 dias de jogo, turboélice (classe F) em ~1 ano, jato/linha (H, I, J) só no 3º ano; patrimônio do agressivo ≤ 20× o inicial no 1º ano. Difícil ~1,5× mais lento.
+- **E aprovada como proposta:** Fácil $1 mi, pagamento ×1,25, custos ×0,8; Médio ×1; Difícil pagamento ×0,85, custos ×1,15, panes ×1,25.
+- Execução: ECON-DIFF (Gemini) cria os botões sem mudar o Médio (`mission_pay.json` com `scale` por família de missão + `DifficultyEconomy`); depois o revisor calibra as `scale` com a ECON-STAB até a curva de D.
+
 ## 5. Como reproduzir
 ```bash
 dotnet run --project src/FlightCareer.Replay -- career-stab --days 720 --bots 3 --seed 1 --difficulty all --policy all --fast
