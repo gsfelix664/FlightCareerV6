@@ -24,6 +24,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly ComponentCatalog _catalog;
         private readonly PartCatalog _partCatalog;
         private readonly string? _classKey;
+        private readonly IRelayCommand<PartRowViewModel>? _replacePartCommand;
 
         public PilotAircraft Aircraft { get; }
         public EngineClass EngineClass { get; }
@@ -56,13 +57,15 @@ namespace FlightCareer.UI.ViewModels
             DateTime? careerClock = null,
             PartCatalog? partCatalog = null,
             string? classKey = null,
-            bool hasConvertibleCabin = false)
+            bool hasConvertibleCabin = false,
+            IRelayCommand<PartRowViewModel>? replacePartCommand = null)
         {
             Aircraft = aircraft;
             _catalog = catalog;
             _careerClock = careerClock;
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
             _classKey = classKey;
+            _replacePartCommand = replacePartCommand;
             HasConvertibleCabin = (aircraft.AircraftType?.HasConvertibleCabin == true) || hasConvertibleCabin;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
 
@@ -256,9 +259,7 @@ namespace FlightCareer.UI.ViewModels
                 var kind = mapping.ResolveComponentKind(def.Group);
                 if (!kind.HasValue) continue;
 
-                string name = (def.PerEngine && maxEngineCount > 1 && part.EngineIndex > 0)
-                    ? $"{def.Name} (motor {part.EngineIndex})"
-                    : def.Name;
+                string name = PartHangarView.DisplayName(part, def, maxEngineCount);
 
                 var eval = PartInspectionFlags.Evaluate(part, def, CareerClock, _catalog.PartBands);
                 string reason = !string.IsNullOrEmpty(eval.Reason)
@@ -301,6 +302,7 @@ namespace FlightCareer.UI.ViewModels
                 foreach (var row in Components)
                 {
                     row.SetReplacementPlan(null);
+                    row.SetParts(Array.Empty<PartRowViewModel>());
                 }
                 return;
             }
@@ -323,17 +325,30 @@ namespace FlightCareer.UI.ViewModels
                 }
             }
 
+            int engineCount = Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+
             foreach (var row in Components)
             {
                 if (partsByKind.TryGetValue(row.Kind, out var groupParts))
                 {
-                    var recommended = PartReplacementPlanner.SelectRecommended(groupParts, _partCatalog, _catalog.PartBands);
+                    var recommended = PartReplacementPlanner.SelectRecommendedKnown(groupParts, _catalog.PartBands);
                     var plan = PartReplacementPlanner.Plan(recommended, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
                     row.SetReplacementPlan(plan);
+
+                    var hangarRows = PartHangarView.BuildList(groupParts, _partCatalog, engineCount, Aircraft.CurrentAirframeHours, CareerClock, _catalog.PartBands);
+                    var partRowViewModels = new List<PartRowViewModel>();
+                    foreach (var hRow in hangarRows)
+                    {
+                        var singlePlan = PartReplacementPlanner.Plan(new[] { hRow.Part }, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
+                        string replaceText = $"Trocar · {singlePlan.TotalCost:C0}";
+                        partRowViewModels.Add(new PartRowViewModel(hRow, replaceText, _replacePartCommand));
+                    }
+                    row.SetParts(partRowViewModels);
                 }
                 else
                 {
                     row.SetReplacementPlan(new PartReplacementPlan(Array.Empty<PartReplacementItem>(), 0.0, 0.0));
+                    row.SetParts(Array.Empty<PartRowViewModel>());
                 }
             }
 

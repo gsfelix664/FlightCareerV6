@@ -218,8 +218,8 @@ namespace FlightCareer.Tests.Parts
         [Fact]
         public void Planner_Plan_PrecificaSoAsSelecionadas()
         {
-            var p35 = new AircraftPart { Id = Guid.NewGuid(), PartId = "brakes.pads_discs", Health = 35.0 };
-            var p15 = new AircraftPart { Id = Guid.NewGuid(), PartId = "brakes.pads_discs", Health = 15.0 };
+            var p35 = new AircraftPart { Id = Guid.NewGuid(), PartId = "brakes.pads_discs", Health = 35.0, KnownHealth = 35.0 };
+            var p15 = new AircraftPart { Id = Guid.NewGuid(), PartId = "brakes.pads_discs", Health = 15.0, KnownHealth = 15.0 };
 
             var plan = PartReplacementPlanner.Plan(new[] { p35, p15 }, PartsCatalog, "A", DateTime.UtcNow);
 
