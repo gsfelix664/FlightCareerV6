@@ -36,6 +36,7 @@ namespace FlightCareer.UI.Services
         private readonly PartFlightSession _parts;
         private readonly FuelUsageAccumulator _fuelAccumulator = new();
         private readonly FuelTruckDelivery _fuelTruck = new();
+        private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
         private SlewMonitor _slewMonitor = new();
@@ -123,7 +124,12 @@ namespace FlightCareer.UI.Services
             _limitResolver = limitResolver;
             _parts = new PartFlightSession(partCatalog, wearRules, limitResolver);
             sensorFrames.OnFrame += _parts.OnFrame;
-            _parts.OnExceedance += ex => _telemetryLogger.LogEvent("EXCEDENCIA_PECA", $"{ex.RuleId} - {ex.TargetId} - {ex.PeakValue:F1} (limite {ex.LimitValue:F1}) - dano {ex.TotalDamagePct:F2}%");
+            // Uma linha no início e outra no fim de cada faixa (antes: uma por peça a cada tick)
+            _parts.OnExceedanceTick += tick =>
+            {
+                foreach (var line in _exceedanceLog.Update(tick, _simulatedFlightTimeSeconds))
+                    _telemetryLogger.LogEvent("EXCEDENCIA_PECA", line);
+            };
             _parts.OnInspection += insp => _telemetryLogger.LogEvent("INSPECAO_PECA", $"{insp.DefectCode} - {insp.TargetPartId} - {insp.Description}");
             _parts.OnDiagnostic += diag => _telemetryLogger.LogEvent("PECAS_DIAG", diag);
 
@@ -693,6 +699,7 @@ namespace FlightCareer.UI.Services
             // Se o voo já estava ativo (motores ligados/PB solto), salvamos o estado atual
             if (IsFlightActive && lastData != null && _pilot != null && _aircraft != null)
             {
+                FlushExceedanceLog();
                 _telemetryLogger.StopFlightLog("CANCELADO_PELO_PILOTO", 0, _qualityService.GetQualityScore());
                 OnStatusChanged?.Invoke("CANCELANDO E SALVANDO ESTADO...");
                 
@@ -808,6 +815,7 @@ namespace FlightCareer.UI.Services
             _totalLossInProgress = true;
             
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
+            FlushExceedanceLog();
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
             _failures.ZeroAll();
             if (_parts.IsActive)
@@ -1355,12 +1363,14 @@ namespace FlightCareer.UI.Services
             OnStatusChanged?.Invoke(_currentStatus);
 
             // Iniciar Gravação Blackbox
+            _exceedanceLog.Reset();
             string destIcao = _activeMissions.FirstOrDefault()?.DestinationICAO ?? "DEST";
             _telemetryLogger.StartFlightLog(_originIcao, destIcao, _aircraft);
         }
 
         private async Task FinalizeFlightAsync(SimTelemetry data)
         {
+            FlushExceedanceLog();
             _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
             StopMonitoring();
 
@@ -1464,6 +1474,12 @@ namespace FlightCareer.UI.Services
             );
 
             OnFlightFinished?.Invoke(outcome);
+        }
+
+        private void FlushExceedanceLog()
+        {
+            foreach (var line in _exceedanceLog.Flush(_simulatedFlightTimeSeconds))
+                _telemetryLogger.LogEvent("EXCEDENCIA_PECA", line);
         }
 
         private void InvalidateFlight(string reason)
