@@ -2635,3 +2635,6 @@
 
 ## 2026-11-21 - RPM do pistão: sem penalidade no arco verde (Claude)
 - Decisão do usuário: subir a pleno dentro do arco verde é operação normal do POH (C152 até 2.550 RPM). `piston_rpm_overspeed` em `wear_rules.json`: faixa `caution` passa de 97 % para 100 % da linha vermelha e `warning` de 100 % para 104 %. Antes, a subida a pleno do C152 (2.475–2.570 RPM) acelerava 1,5–2,5× o desgaste de 12 peças e encurtava ~10–13 % a vida delas na carreira. Teste: `WearRuleCatalogTests.PistonRpm_SubidaAPlenoNoArcoVerde_SemPenalidade`. Não testado no MSFS.
+
+## 2026-11-21 - Pneus, freios e rodas envelhecem por pouso (Claude)
+- Achado no voo de SNEJ: no jogo, as peças de vida em ciclos (pneus 75, freios 150, rodas 350) só se gastavam por eventos (pouso duro, frenagem, deriva, táxi) e `CyclesSinceReplacement` só subia nas peças da regra `landing_cycle_structural_stress`; o simulador de carreira já gastava 70 %/vida por pouso. Novo `PartWearEngine.ApplyLandingCycle` (chamado pelo `PartFlightTracker.ProcessTouchdown` em todo toque que não é bounce): aplica as regras de ciclo, conta +1 ciclo em toda peça com vida em ciclos (sem contar duas vezes) e aplica o desgaste natural 70/vida × faixa amarela nas que não têm vida em horas. Testes: `LandingCycleWearTests` (5); suíte 697/697 com replay e fuzz. Não testado no MSFS.

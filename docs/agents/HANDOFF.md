@@ -1,10 +1,36 @@
-# Passagem de sessão (Claude) — 2026-11-21 (PC de casa, com MSFS)
+# Passagem de sessão (Claude) — 2026-11-21, fim do dia (PC de casa, com MSFS)
 
-## Atualização 2026-11-21 (vale sobre o que está abaixo)
-- **Mergeados e no GitHub:** correção do óleo (`SimFailureActuator.Reset` só desfaz vazamento criado pelo app; não esvazia mais o motor no início do voo) e **MANUT-FAIXAS-B** (lista "Peças (n)" por card com saúde conhecida, "visto há X h", nota de vida e **Trocar**; "Reparar tudo" só pelo conhecido; troca avulsa não devolve TBO/125 h; cores 40/20). Build 0 erros, 684/684. **Nada visto na tela nem testado no MSFS.**
-- **ECON-STAB com as faixas:** 0 falências; cauteloso ≈ agressivo; manutenção quase não pesa porque a margem é ~90 %. Detalhes em `docs/plans/economia-estabilidade.md` › 4.2. Itens 1 e 2 abaixo concluídos.
-- **Plano futuro (usuário adiou em 2026-11-21): matrícula do Hangar no sim.** Não implementado (nem leitura). `ATC ID` é gravável pelo SDK (STRING32), assim como `ATC AIRLINE`/`ATC FLIGHT NUMBER`/`ATC HEAVY` (`docs/plans/sensor-research/variaveis-aeronave-diversos.md:81`). Passos: teste de console no MSFS (ler, gravar `PS-BYN`, ler, restaurar); gravar ao iniciar o monitoramento e no `AircraftLoaded`, guardando o original; conferir ATC e pintura dinâmica.
-- **Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do plano de economia → recalibrar `MissionGenerator.CalculateReward` por classe; voo de teste no MSFS (conferir óleo no início do voo, Hangar novo); itens 3 (inversão do óleo no vazamento ativo) e 4 abaixo continuam.
+Base `feat/component-health-system` no GitHub. Build 0 erros; `dotnet test` 697/697. Primeiros voos reais no MSFS 2024 com o app (C152 em SNEJ). Leia junto: `AGENTS.md` (§ 6 e § 7 atualizados hoje), `docs/CHANGELOG.md` (entradas de 2026-11-21).
+
+## Feito hoje (mergeado e no GitHub)
+1. **Óleo:** `SimFailureActuator.Reset` só desfaz vazamento criado pelo app (antes gravava 0 = esvaziava o óleo a cada voo, pois no MSFS 2024 a SimVar parece valer 100 sem pane). A inversão no vazamento ativo continua pendente.
+2. **MANUT-FAIXAS-B** (Gemini, aprovada): lista "Peças (n)" no Hangar com saúde conhecida e **Trocar**; "Reparar tudo" só pelo conhecido; troca avulsa não devolve TBO/125 h; cores 40/20. **Não vista na tela.**
+3. **Combustível:** escrita de `FUELSYSTEM TANK QUANTITY:n` define o total e a leitura devolve o utilizável → `FuelTank.ToSimWriteValue` soma o não utilizável (testado no C152); legado lê e grava o total (testado no TBM 930); 747-8i tem 8 tanques (testado). Depois o usuário decidiu **abastecimento manual**: compra no Hangar, coloca no sim (menu/EFB); o app **não grava** mais nos tanques; briefing e `StartMonitoring` conferem e bloqueiam se divergir; abastecer após iniciar invalida o voo. Gravação fica para panes futuras.
+4. **Overlay de mensagens:** `AlertOverlayService` mostra os alertas do voo, a perda total e o resultado por cima do sim (sem roubar foco). **Não visto na tela.**
+5. **Blackbox:** excedências agrupadas (`ExceedanceLogAggregator`: uma linha INICIO e uma FIM por faixa).
+6. **RPM do pistão:** `piston_rpm_overspeed` só penaliza a partir da linha vermelha (atenção 100 %, alerta 104 %), decisão do usuário (subida a pleno no arco verde é normal).
+7. **Peças de vida em ciclos** (pneus, freios, rodas) envelhecem a cada pouso no jogo (`PartWearEngine.ApplyLandingCycle`), como o simulador de carreira.
+8. **ECON-STAB com as faixas:** 0 falências, cauteloso ≈ agressivo; margem ~90 % ainda deixa todos ricos (`economia-estabilidade.md` › 4.2). Decisões D (curva) e E (dificuldade) **aprovadas** (› 4.3).
+9. **Plano de XP aprovado:** `docs/plans/xp-proficiencia.md` › 5.1 (minutos no ar, qualidade, bônus de dificuldade). **Implementação pendente.**
+
+## Pendente (em ordem)
+1. **ECON-DIFF** (branch `feat/econ-diff`, **não mergeada**): tabela de pagamento em `mission_pay.json` + `DifficultyEconomy` (Fácil $1 mi, ×1,25/×0,8; Difícil ×0,85/×1,15/panes ×1,25). Revisão feita com ajustes do revisor commitados na branch (`687933e`: sementes estáveis no simulador — `string.GetHashCode` aleatório tornava a ECON-STAB não reprodutível — e tabela em cache). Falta: rodar `career-stab --days 30 --bots 1 --difficulty medium --policy equilibrado` **duas vezes** na branch e na base com o hash estável (resultados iguais entre execuções e o Médio igual à base), escrever `docs/reviews/ECON-DIFF-revisao.md`, merge (conflito provável só no CHANGELOG/AGENTS) e push. Não rodar simulação longa enquanto o usuário voa (derruba o FPS).
+2. **Calibração do pagamento** (D + E): ajustar `scale` por família em `mission_pay.json` com a ECON-STAB até a curva do Médio (1ª troca dia 60–90, turboélice ~1 ano, jato no 3º ano, agressivo ≤ 20× no 1º ano); Difícil 1,5× mais lento.
+3. **XP** (spec para o Gemini a partir de `xp-proficiencia.md`), com os achados 2 e 3 do plano: avião usado do mercado com TBO acima do limite (PP-UZJ: 1.791 h com TBO 500) e peças com ~50 % e 0 h/0 ciclos; bônus de pista difícil no pagamento por `Runways.Surface`/comprimento em vez do tier. Taxa base e exigências calibradas na ECON-STAB.
+4. **Óleo:** inverter a semântica de `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo (`ProcessOilLeak`/`TransmitOilLeak`) após confirmar no MSFS.
+5. **Perda de desempenho no amarelo:** `docs/plans/perda-desempenho-amarelo.md` (teste no MSFS incompleto).
+6. **Plano futuro (adiado pelo usuário): matrícula do Hangar no sim** (`ATC ID` gravável, STRING32; `variaveis-aeronave-diversos.md:81`). Teste de console, gravar ao iniciar e no `AircraftLoaded`, guardar o original.
+
+## Voos reais de hoje (C152, SNEJ, 5.130 ft, pista de terra)
+- **PS-BYN:** estol em subida com queda de asa (IAS 58 → 32 kt com nariz subindo, mistura toda rica, alta densidade) → crash detectado pelo addon → **perda total**. Nenhuma interferência do app. Não conferido se o seguro foi acionado.
+- **PP-UZJ** (comprado usado): voo de instrução local de 17,7 min (7,4 min no ar), toque 645 fpm, nota 64 %, $344,60, 23 XP, combustível 0,6 gal conferido com o fluxo; desgaste por eventos coerente (pneus −8 %, montantes −3,5 %). O voo rodou com a versão anterior às correções 5–7.
+- Para conferir no próximo voo: overlay (aparece, não rouba foco), conferência de combustível manual no briefing e no início, óleo normal no início, lista de peças no Hangar, blackbox com INICIO/FIM.
+
+## Notas de trabalho
+- Com o app aberto, `dotnet build` falha ao copiar: use `-p:OutDir=<pasta do scratchpad>`.
+- Testes de SimConnect sem o app: programa de console no scratchpad referenciando `FlightCareer.Domain` e a DLL do SimConnect da UI (usado hoje no combustível); sempre restaurar o estado do sim no fim.
+- Logs: blackbox em `src/FlightCareer.UI/bin/Debug/net10.0-windows/logs/flights/`; REC em `%LocalAppData%\FlightCareer\sensor-logs\` (o fim fica congelado após crash: o MSFS 2024 reposiciona o avião).
+- `REGRAS_tiers.txt` na raiz (do usuário, não commitado): não analisar ainda.
 
 ---
 

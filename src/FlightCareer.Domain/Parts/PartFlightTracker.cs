@@ -334,7 +334,7 @@ namespace FlightCareer.Domain.Parts
             // landingCycles conta somente se não for bounce
             if (!isBounce)
             {
-                Aggregate(_wearEngine.ApplyEvent(_parts, WearRuleMetrics.LandingCycles, 1.0, _features));
+                Aggregate(_wearEngine.ApplyLandingCycle(_parts, _features));
             }
 
             return new PartWearEventResult(inspections, damaged.Distinct().ToList(), totalDamage);

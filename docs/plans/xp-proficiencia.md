@@ -1,6 +1,6 @@
 # Plano — XP por proficiência e dificuldade
 
-Criado em 2026-11-21 (Claude), depois do voo de SNEJ (C152, pista de terra a 5.130 ft entre montanhas, 17,7 min, 23 XP). Status: **proposta, aguardando decisões do usuário (§ 5)**.
+Criado em 2026-11-21 (Claude), depois do voo de SNEJ (C152, pista de terra a 5.130 ft entre montanhas, 17,7 min, 23 XP). Status: **aprovado pelo usuário em 2026-11-21 (§ 5.1); implementação pendente**.
 
 ## 1. Como é hoje (`FlightService.ProcessFlightFinishAsync`, ~linha 258)
 ```
@@ -50,3 +50,8 @@ Um voo normal e bem feito rende ~60 XP/h; um voo difícil e bem feito, 90–120 
 2. Aprova a tabela de bônus e penalidades (valores e teto de +100 %)?
 3. Taxa base (1,0 ou 1,5 XP por minuto no ar) e exigências de XP por categoria (2.500 / 12.000 / 45.000 / 150.000): manter ou ajustar?
 4. Os achados 1–3 entram antes do XP?
+
+## 5.1 Decisões do usuário (2026-11-21)
+- Plano aprovado como proposto: XP por minuto no ar (sem táxi), fator de qualidade 0,5–1,2, bônus de dificuldade e penalidades da § 3, teto de +100 %, e o quadro de missões com a mesma estimativa.
+- Taxa base (1,0 ou 1,5 XP/min) e exigências por categoria: o revisor calibra na ECON-STAB para que os bots de política cautelosa/equilibrada sigam a curva de progressão de economia-estabilidade.md › 4.3 (D), mantendo 2.500 / 12.000 / 45.000 / 150.000 se a curva fechar.
+- Achados § 4: o 1 (ciclos de pouso) foi corrigido em 2026-11-21 (`PartWearEngine.ApplyLandingCycle`); 2 (avião usado incoerente) e 3 (bônus de pista difícil no pagamento) entram antes ou junto da implementação do XP.
