@@ -35,7 +35,6 @@ namespace FlightCareer.UI.Services
         private readonly AircraftLimitResolver _limitResolver;
         private readonly PartFlightSession _parts;
         private readonly FuelUsageAccumulator _fuelAccumulator = new();
-        private readonly FuelSyncCoordinator _fuelSync = new();
         private readonly FuelTruckDelivery _fuelTruck = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -433,16 +432,6 @@ namespace FlightCareer.UI.Services
             }
         }
 
-        private bool DispatchFuelWrite(double targetFuel)
-        {
-            var activeTanks = _simConnect.GetActiveFuelTanks();
-            if (activeTanks.Count == 0) return false;
-            var plan = FuelTankWritePlan.Distribute(targetFuel, activeTanks);
-            if (plan.Allocations.Count == 0) return false;
-            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
-            return true;
-        }
-
         private void OnObservedEventReceived(string name, uint data)
         {
             if (string.Equals(name, "ENGINE_AUTO_START", StringComparison.OrdinalIgnoreCase))
@@ -475,7 +464,7 @@ namespace FlightCareer.UI.Services
                 var aircraftId = WatchedAircraftId;
                 if (aircraftId.HasValue)
                 {
-                    ProcessFuelTruckDelivery(aircraftId.Value, _fuelTruck.MaxGallons);
+                    ProcessFuelTruckDelivery(aircraftId.Value, _fuelTruck.MaxGallons + data.UnusableFuelGallons);
                 }
             }
         }
@@ -602,37 +591,30 @@ namespace FlightCareer.UI.Services
                 {
                     // A aeronave recebida aqui é a do contexto longo do MainViewModel: atualizar em memória evita que a
                     // sincronização devolva o valor antigo e que um SaveChanges posterior regrave o combustível velho
-                    if (ProcessFuelTruckDelivery(aircraft.Id, _fuelTruck.MaxGallons) is double newFuel)
+                    if (ProcessFuelTruckDelivery(aircraft.Id, _fuelTruck.MaxGallons + _simConnect.CurrentData.UnusableFuelGallons) is double newFuel)
                     {
                         aircraft.FuelAmount = newFuel;
                     }
                 }
             }
 
-            double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? _simConnect.CurrentData.FuelTotalCapacity;
-            double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
-            double simFuel = _simConnect.CurrentData.FuelTotalGallons;
-            double targetFuel = aircraft.FuelAmount;
-            bool isOnGround = _simConnect.CurrentData.IsOnGround;
-
-            _fuelSync.Reset();
-            _fuelSync.Start(targetFuel, simFuel, fuelTolerance, isOnGround);
-
-            if (_fuelSync.Status == FuelSyncStatus.Failed)
+            // Abastecimento manual (decisão do usuário, 2026-11-21): o piloto compra no Hangar e coloca a mesma quantidade
+            // no simulador (menu ou EFB). O app não grava nos tanques: só confere, como o briefing, e bloqueia se divergir.
+            var startData = _simConnect.CurrentData;
+            if (!startData.IsOnGround)
             {
-                OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível fora do solo.", true);
+                OnAlert?.Invoke("FORA DO SOLO", "Inicie o monitoramento com a aeronave no solo.", true);
                 return false;
             }
-
-            if (_fuelSync.NeedsSimWrite)
+            double fuelCapacity = aircraft.AircraftType?.FuelTankGallons ?? startData.FuelTotalCapacity;
+            double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
+            double simOnBoard = Math.Round(startData.FuelTotalGallons + startData.UnusableFuelGallons, 1);
+            double startTolerance = Math.Max(1.0, aircraft.FuelAmount * 0.02); // mesma tolerância do briefing
+            if (Math.Abs(simOnBoard - aircraft.FuelAmount) > startTolerance)
             {
-                bool wrote = DispatchFuelWrite(targetFuel);
-                if (!wrote)
-                {
-                    OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível com os tanques do simulador.", true);
-                    return false;
-                }
-                _fuelSync.NotifyWriteDispatched();
+                OnAlert?.Invoke("COMBUSTÍVEL DIVERGENTE",
+                    $"A bordo no simulador: {simOnBoard:F1} gal. Abastecido no Hangar: {aircraft.FuelAmount:F1} gal. Ajuste o combustível no simulador (menu ou EFB) ou abasteça no Hangar.", true);
+                return false;
             }
 
             _pilot = pilot;
@@ -647,9 +629,7 @@ namespace FlightCareer.UI.Services
             LoadFlightComponents(aircraft);
             _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
             _fuelAccumulator.Reset();
-            _fuelIntegrity = _fuelSync.Status == FuelSyncStatus.Confirmed
-                ? new FuelIntegrityMonitor(fuelCapacity, fuelTolerance)
-                : null;
+            _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
             _slewMonitor = new SlewMonitor();
             _flightInvalidated = false;
             _flightInvalidationReason = null;
@@ -947,36 +927,6 @@ namespace FlightCareer.UI.Services
                 _telemetryLogger.LogEvent("FUEL_ACCUMULATOR", diag);
             }
 
-            if (_fuelSync.Status == FuelSyncStatus.Pending)
-            {
-                _fuelSync.Update(data.FuelTotalGallons, data.IsOnGround);
-
-                if (_fuelSync.NeedsSimWrite)
-                {
-                    DispatchFuelWrite(_fuelSync.TargetGallons);
-                    _fuelSync.NotifyWriteDispatched();
-                }
-
-                if (_fuelSync.Status == FuelSyncStatus.Confirmed)
-                {
-                    _telemetryLogger.LogEvent("COMBUSTIVEL", $"combustível sincronizado: sim {data.FuelTotalGallons:F1} gal → app {_fuelSync.TargetGallons:F1} gal");
-                    double fuelCapacity = _aircraft?.AircraftType?.FuelTankGallons ?? _simConnect.CurrentData.FuelTotalCapacity;
-                    double fuelTolerance = Math.Max(0.5, fuelCapacity * 0.01);
-                    _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
-                }
-                else if (_fuelSync.Status == FuelSyncStatus.Failed)
-                {
-                    OnAlert?.Invoke("ERRO DE SINCRONIZAÇÃO", "Não foi possível sincronizar o combustível com os tanques do simulador.", true);
-                    StopMonitoring();
-                    return;
-                }
-                else
-                {
-                    _startConditionTime = null;
-                    return;
-                }
-            }
-
             // Lógica de Início de Gravação: Quando ligar motores E soltar PB por 10 segundos
             if (!IsFlightActive)
             {
@@ -1001,6 +951,16 @@ namespace FlightCareer.UI.Services
                         _startConditionTime = null;
                         _currentStatus = "PREPARAÇÃO";
                         OnStatusChanged?.Invoke(_currentStatus);
+                    }
+                }
+
+                // Combustível colocado depois de iniciar o monitoramento (antes de ativar o voo) não foi pago no Hangar
+                if (_aircraft != null && !_flightInvalidated)
+                {
+                    double onBoard = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
+                    if (onBoard > _aircraft.FuelAmount + Math.Max(1.0, _aircraft.FuelAmount * 0.02))
+                    {
+                        InvalidateFlight($"combustível abastecido depois de iniciar o monitoramento ({onBoard:F1} gal a bordo, {_aircraft.FuelAmount:F1} gal pagos)");
                     }
                 }
 

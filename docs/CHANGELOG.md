@@ -2618,3 +2618,8 @@
 ## 2026-11-21 - Gravação de combustível testada no 747-8i (Claude)
 - **Testado no MSFS 2024 (747-8i, sistema moderno):** 8 tanques nos índices 1–8 (o app lê até o 8), capacidade total = utilizável; alvo +500 gal → diferença de 1,2 gal (tolerância 629 gal); restaurado tanque a tanque ao estado original.
 - Achado: a distribuição proporcional à capacidade enche também o tanque central e os de reserva/estabilizador com carga parcial (no teste: central 0 → 8.635 gal, principais externos 4.233 → 2.702). Funciona para a sincronização, mas foge da ordem real de abastecimento e mexe no CG. Registrado como pendente no `AGENTS.md` › 6.
+
+## 2026-11-21 - Abastecimento manual no simulador (Claude)
+- Decisão do usuário: o piloto compra no Hangar e coloca o combustível no simulador ele mesmo (imersão e CG). O app deixou de gravar nos tanques: saiu a sincronização automática do `FlightMonitor.StartMonitoring` (`FuelSyncCoordinator`/`DispatchFuelWrite`) e a gravação após o abastecimento no Hangar e na janela de abastecimento.
+- O briefing continua liberando o voo só com combustível, carga e passageiros batendo. O `StartMonitoring` repete a conferência (a bordo + não utilizável × pago, mesma tolerância do briefing) e bloqueia com "COMBUSTÍVEL DIVERGENTE"; combustível colocado entre o início do monitoramento e a ativação invalida o voo (em voo já invalidava). O caminhão do sim continua cobrando a entrega, agora na mesma convenção do app (a bordo + não utilizável).
+- Não testado no MSFS.
