@@ -350,10 +350,8 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonColor));
             };
             _flightMonitor.OnAlert += (title, msg, isError) => {
-                // BeginInvoke: o alerta não pode travar o monitor de voo enquanto a janela estiver aberta
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
-                    System.Windows.MessageBox.Show(msg, title, System.Windows.MessageBoxButton.OK, isError ? System.Windows.MessageBoxImage.Error : System.Windows.MessageBoxImage.Information);
-                });
+                // Overlay por cima do simulador (não modal): o alerta não trava o monitor de voo nem tira o foco do MSFS
+                ShowFlightMessage(title, msg, isError ? AlertKind.Error : AlertKind.Info);
             };
             _flightMonitor.OnFlightFinished += OnFlightFinished;
             _flightMonitor.OnTotalLoss += OnTotalLoss;
@@ -395,6 +393,15 @@ namespace FlightCareer.UI.ViewModels
             });
         }
 
+        /// <summary>Mensagens do voo vão para o overlay por cima do simulador (AlertOverlayService).</summary>
+        private static void ShowFlightMessage(string title, string message, AlertKind kind, bool sticky = false)
+        {
+            var provider = ((App)System.Windows.Application.Current).ServiceProvider;
+            Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<Services.AlertOverlayService>(provider)
+                .Show(title, message, kind, sticky);
+        }
+
         private void OnTotalLoss(PilotAircraft aircraft)
         {
             System.Windows.Application.Current.Dispatcher.Invoke(async () => {
@@ -404,7 +411,7 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonText));
                 OnPropertyChanged(nameof(StartFlightButtonColor));
 
-                System.Windows.MessageBox.Show($"PERDA TOTAL! A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída.\n\nVerifique seu hangar para acionar o seguro.", "Crash - Perda Total", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                ShowFlightMessage("CRASH - PERDA TOTAL", $"A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída. Verifique seu hangar para acionar o seguro.", AlertKind.Error);
                 
                 await InitializeForPilotAsync(PilotName);
             });
@@ -1037,14 +1044,14 @@ namespace FlightCareer.UI.ViewModels
 
                 if (outcome.Success)
                 {
-                    System.Windows.MessageBox.Show($"Voo concluído com sucesso!\n\nRecompensa: {outcome.Revenue:C2}\nXP: {outcome.XP}\nMissões: {outcome.CompletedMissions}", "Debriefing");
+                    ShowFlightMessage("VOO CONCLUÍDO", $"Recompensa: {outcome.Revenue:C2} · XP: {outcome.XP} · Missões: {outcome.CompletedMissions}", AlertKind.Info, sticky: true);
                     
                     // Recarregar tudo do banco (isso vai atualizar as missões ativas restantes)
                     await InitializeForPilotAsync(PilotName);
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"O voo não foi registrado: {outcome.Message}", "Aviso");
+                    ShowFlightMessage("VOO NÃO REGISTRADO", outcome.Message, AlertKind.Warning, sticky: true);
                 }
             });
         }

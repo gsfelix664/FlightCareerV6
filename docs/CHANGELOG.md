@@ -2623,3 +2623,8 @@
 - Decisão do usuário: o piloto compra no Hangar e coloca o combustível no simulador ele mesmo (imersão e CG). O app deixou de gravar nos tanques: saiu a sincronização automática do `FlightMonitor.StartMonitoring` (`FuelSyncCoordinator`/`DispatchFuelWrite`) e a gravação após o abastecimento no Hangar e na janela de abastecimento.
 - O briefing continua liberando o voo só com combustível, carga e passageiros batendo. O `StartMonitoring` repete a conferência (a bordo + não utilizável × pago, mesma tolerância do briefing) e bloqueia com "COMBUSTÍVEL DIVERGENTE"; combustível colocado entre o início do monitoramento e a ativação invalida o voo (em voo já invalidava). O caminhão do sim continua cobrando a entrega, agora na mesma convenção do app (a bordo + não utilizável).
 - Não testado no MSFS.
+
+## 2026-11-21 - Mensagens do voo em overlay por cima do simulador (Claude)
+- Novo `AlertOverlayService` + `AlertOverlayWindow`/`AlertOverlayViewModel` (UI): janela sempre no topo, transparente, fora da barra de tarefas e sem roubar o foco do MSFS (`WS_EX_NOACTIVATE`), centralizada no alto da tela e arrastável. Até 5 mensagens empilhadas; avisos somem em 10 s, atenção em 20 s, erros e o resultado do voo ficam até o piloto fechar (✕).
+- Passam a ir para o overlay: todos os alertas do `FlightMonitor.OnAlert` (antes `MessageBox` modal), a perda total e o resultado do voo (concluído / não registrado). As perguntas Sim/Não do planejamento continuam na janela do app. Se o overlay falhar, a mensagem volta para a caixa do app.
+- Funciona com o MSFS em janela ou tela cheia sem borda (como o HUD). Não visto na tela nem testado no MSFS.
