@@ -26,7 +26,8 @@ namespace FlightCareer.UI.Services
         private readonly object _frameLock = new();
         private SensorFrame? _lastFrame;
 
-        public event Action<PartWearExceedance>? OnExceedance;
+        /// <summary>Excedências de cada tick (lista vazia = nenhuma faixa ativa), para o agrupador do blackbox.</summary>
+        public event Action<IReadOnlyList<PartWearExceedance>>? OnExceedanceTick;
         public event Action<PartWearInspectionEvent>? OnInspection;
         public event Action<string>? OnDiagnostic;
 
@@ -92,13 +93,7 @@ namespace FlightCareer.UI.Services
 
             var result = _tracker.ProcessTick(frame, dtSimHours, DateTime.UtcNow);
 
-            if (result.Exceedances != null)
-            {
-                foreach (var ex in result.Exceedances)
-                {
-                    OnExceedance?.Invoke(ex);
-                }
-            }
+            OnExceedanceTick?.Invoke(result.Exceedances ?? Array.Empty<PartWearExceedance>());
 
             if (result.Inspections != null)
             {
