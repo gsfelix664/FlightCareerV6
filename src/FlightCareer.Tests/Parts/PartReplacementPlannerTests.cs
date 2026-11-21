@@ -41,6 +41,7 @@ namespace FlightCareer.Tests.Parts
                 Id = Guid.NewGuid(),
                 PartId = "brakes.pads_discs",
                 Health = 75.0, // < 80%
+                KnownHealth = 75.0,
                 HoursSinceReplacement = 50.0,
                 IsBroken = false
             };
@@ -72,6 +73,7 @@ namespace FlightCareer.Tests.Parts
                 Id = Guid.NewGuid(),
                 PartId = "oil.lubricant",
                 Health = 95.0, // saúde alta, mas horas no limite de vida
+                KnownHealth = 95.0,
                 HoursSinceReplacement = def.LifeHours,
                 IsBroken = false
             };

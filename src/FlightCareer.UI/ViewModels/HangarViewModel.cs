@@ -107,9 +107,10 @@ namespace FlightCareer.UI.ViewModels
             if (changed || context.ChangeTracker.HasChanges()) await context.SaveChangesAsync();
 
             var repair = RepairComponentCommand;
+            var replace = ReplacePartCommand;
             var wrapped = pilot.Hangar
                 .OrderBy(a => a.Prefix)
-                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a), HasConvertibleCabin(a)) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a), HasConvertibleCabin(a), replace) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
             // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
@@ -353,6 +354,39 @@ namespace FlightCareer.UI.ViewModels
         // ------------------------------------------------------------------ Componentes
 
         [RelayCommand]
+        private async Task ReplacePart(PartRowViewModel? row)
+        {
+            if (row == null || !CanOperate() || SelectedAircraft == null) return;
+
+            var part = row.Part;
+            var plan = PartReplacementPlanner.Plan(new[] { part }, _partCatalog, ResolveClassKey(SelectedAircraft.Aircraft), _careerClock, bands: _catalog.PartBands);
+            if (plan.Items.Count == 0) return;
+
+            var item = plan.Items[0];
+            string name = row.DisplayName;
+            double cost = plan.TotalCost;
+
+            await RunPaidServiceAsync(
+                "Trocar peça",
+                $"Trocar {name} em {SelectedAircraft.Prefix}:\n• {item.Reason} ({cost:C0})",
+                cost,
+                $"TROCA DE PEÇA: {name}",
+                (aircraft, components) =>
+                {
+                    var p = aircraft.Parts.FirstOrDefault(x => x.Id == part.Id);
+                    if (p != null)
+                    {
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(new[] { p }, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                    }
+                },
+                kind: DialogKind.Info,
+                successMessage: $"{name}: substituída a 100%.",
+                downtimeHours: plan.DowntimeHours);
+        }
+
+        [RelayCommand]
         private async Task RepairComponent(ComponentRowViewModel? row)
         {
             if (row == null || !CanOperate() || !row.CanRepair || SelectedAircraft == null) return;
@@ -369,15 +403,13 @@ namespace FlightCareer.UI.ViewModels
                 int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
                 string list = string.Join("\n", plan.Items.Select(i =>
                 {
-                    string name = (i.Def.PerEngine && engineCount > 1 && i.Part.EngineIndex > 0)
-                        ? $"{i.Def.Name} (motor {i.Part.EngineIndex})"
-                        : i.Def.Name;
+                    string name = PartHangarView.DisplayName(i.Part, i.Def, engineCount);
                     return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
                 }));
 
                 await RunPaidServiceAsync(
                     row.ServiceName,
-                    $"{row.ServiceName} em {SelectedAircraft.Prefix}:\n{list}{extra}",
+                    $"{row.ServiceName} em {SelectedAircraft.Prefix}:\n{list}",
                     plan.TotalCost,
                     row.ServiceName.ToUpperInvariant(),
                     (aircraft, components) =>
@@ -387,12 +419,8 @@ namespace FlightCareer.UI.ViewModels
                         var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
                         PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
                         PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
-                        if (kind == ComponentKind.Engine)
-                        {
-                            ApplyRegulatoryReset(aircraft, kind);
-                        }
                     },
-                    kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
+                    kind: DialogKind.Info,
                     successMessage: $"{row.Name}: {plan.Items.Count} peça(s) substituída(s) a 100%.",
                     downtimeHours: plan.DowntimeHours);
             }
@@ -481,9 +509,7 @@ namespace FlightCareer.UI.ViewModels
                 int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
                 string list = string.Join("\n", allItems.Select(i =>
                 {
-                    string name = (i.Def.PerEngine && engineCount > 1 && i.Part.EngineIndex > 0)
-                        ? $"{i.Def.Name} (motor {i.Part.EngineIndex})"
-                        : i.Def.Name;
+                    string name = PartHangarView.DisplayName(i.Part, i.Def, engineCount);
                     return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
                 }));
 
@@ -499,11 +525,6 @@ namespace FlightCareer.UI.ViewModels
                         var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
                         PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
                         PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
-
-                        foreach (var r in rows)
-                        {
-                            ApplyRegulatoryReset(aircraft, r.Kind);
-                        }
                     },
                     successMessage: $"{allItems.Count} peça(s) substituída(s) a 100%.",
                     downtimeHours: maxDowntime);

@@ -22,9 +22,9 @@ namespace FlightCareer.UI.ViewModels
         public static readonly SolidColorBrush Muted = Freeze(0x52, 0x63, 0x75);
         public static readonly SolidColorBrush Secondary = Freeze(0x8B, 0x9B, 0xAE);
 
-        /// <summary>Cor por saúde: verde ≥ 60, âmbar 30–60, laranja 20–30 (sintomas), vermelho &lt; 20 (risco de pane).</summary>
+        /// <summary>Cor por saúde: vermelho &lt; 20, âmbar &lt; 40, senão verde.</summary>
         public static SolidColorBrush ForHealth(double value) =>
-            value < 20 ? Red : value < 30 ? Orange : value < 60 ? Amber : Green;
+            value < 20 ? Red : value < 40 ? Amber : Green;
 
         public static SolidColorBrush ForStatus(AircraftStatusLevel level) => level switch
         {
@@ -165,10 +165,55 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(HasFlaggedParts));
         }
 
+        public ObservableCollection<PartRowViewModel> Parts { get; } = new();
+        public bool HasParts => Parts.Count > 0;
+        public string PartsHeader => $"Peças ({Parts.Count})";
+
+        public void SetParts(IEnumerable<PartRowViewModel> parts)
+        {
+            Parts.Clear();
+            if (parts != null)
+            {
+                foreach (var p in parts) Parts.Add(p);
+            }
+            OnPropertyChanged(nameof(HasParts));
+            OnPropertyChanged(nameof(PartsHeader));
+        }
+
         public void Refresh(double airframeHours)
         {
             _airframeHours = airframeHours;
             OnPropertyChanged(string.Empty);
+        }
+    }
+
+    /// <summary>Linha de peça no Hangar com saúde conhecida e troca individual.</summary>
+    public sealed class PartRowViewModel
+    {
+        public PartHangarRow Row { get; }
+        public AircraftPart Part => Row.Part;
+        public PartDefinition Def => Row.Def;
+        public string DisplayName => Row.DisplayName;
+        public string HealthText => Row.HealthText;
+        public string SeenText => Row.SeenText;
+        public string? LifeNote => Row.LifeNote;
+        public bool HasLifeNote => !string.IsNullOrEmpty(LifeNote);
+        public SolidColorBrush Brush => Row.Band switch
+        {
+            PartKnownBand.Broken => HangarPalette.Red,
+            PartKnownBand.Red => HangarPalette.Red,
+            PartKnownBand.Yellow => HangarPalette.Amber,
+            PartKnownBand.Green => HangarPalette.Green,
+            _ => HangarPalette.Muted
+        };
+        public string ReplaceText { get; }
+        public IRelayCommand<PartRowViewModel>? ReplaceCommand { get; }
+
+        public PartRowViewModel(PartHangarRow row, string replaceText, IRelayCommand<PartRowViewModel>? replaceCommand = null)
+        {
+            Row = row ?? throw new ArgumentNullException(nameof(row));
+            ReplaceText = replaceText;
+            ReplaceCommand = replaceCommand;
         }
     }
 

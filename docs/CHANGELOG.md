@@ -2589,3 +2589,19 @@
 ## 2026-11-21 - Limpeza do vazamento de óleo não esvazia mais o motor (Claude)
 - `SimFailureActuator.Reset(clearSimState: true)` (chamado em todo início de monitoramento e ativação do voo) só grava `GENERAL ENG OIL LEAKED PERCENT:1 = 0` quando o próprio app criou o vazamento. Antes gravava 0 sempre que o sim informava valor > 0; no MSFS 2024 a SimVar parece valer 100 sem pane (probe `20261120-0822-C172SP_G1000_Passengers`), o que esvaziaria o óleo a cada voo.
 - Correção mínima e segura para o teste de voo. A semântica da SimVar no vazamento ativo (`ProcessOilLeak`, `TransmitOilLeak`) continua a confirmar e inverter (HANDOFF › item 3). Não testado no MSFS.
+
+## 2026-11-21 - Lista de peças no Hangar e troca individual (Gemini)
+- **Visualização de peças por componente (`PartHangarView.cs`, `ComponentRowViewModel.cs`, `HangarView.xaml`)**:
+  - Implementado `PartHangarView` com `PartKnownBand` (Broken, Red, Yellow, Unknown, Green), gerando linhas de visualização (`PartHangarRow`) baseadas exclusivamente na saúde conhecida (`KnownHealth`), tempo desde a última inspeção (`KnownAtAirframeHours`), nota de vida útil (`PartInspectionFlags.LifeNote`) e formatação nominal por motor.
+  - Cards de componente no Hangar agora contêm um `Expander` "Peças (n)" fechado por padrão com listagem detalhada de cada peça, indicador de faixa colorido, nota de vida e botão para troca individual a preço integral.
+  - Paleta de cores do Hangar ajustada para as faixas de saúde 40/20 (`< 20` Red, `< 40` Amber, senão Green).
+- **Troca individual de peças (`HangarViewModel.cs`, `PilotAircraftWrapper.cs`)**:
+  - Novo comando `ReplacePart` no Hangar que orça e substitui uma peça individual a preço de tabela + mão de obra, zerando horas/ciclos, restaurando a saúde para 100% e sincronizando com as barras agregadas sem conceder reset de TBO.
+- **Proteção de integridade regulatória (correção de reset de TBO / 125 h)**:
+  - Removido `ApplyRegulatoryReset` dos caminhos com peças de `RepairComponent` e `RepairAll`. A troca de componentes avulsos do motor ou ignição (arranque, velas, coletores) não restaura mais indevidamente o TBO ou a revisão de 125 h, preservando a exclusividade dos serviços dedicados de overhaul e revisão.
+- **Recomendação e motivos baseados no conhecimento do piloto (`PartReplacementPlanner.cs`)**:
+  - Novo método `SelectRecommendedKnown` selecionando apenas peças quebradas ou com `KnownHealth < 20%`.
+  - Motivo de substituição no `Plan` atualizado para reportar a saúde conhecida ou escolha do piloto, eliminando qualquer vazamento de saúde real antes da inspeção.
+- **Testes**:
+  - Nova suíte `PartHangarViewTests.cs` com 11 testes cobrindo todas as regras de visualização, ordenação por gravidade, faixas e motivos conhecidos.
+  - Build 0 erros, suíte xUnit 684/684 testes aprovados (100%).

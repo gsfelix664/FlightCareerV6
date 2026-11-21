@@ -56,6 +56,27 @@ namespace FlightCareer.Domain.Parts
         }
 
         /// <summary>
+        /// Quebradas (pane é visível ao piloto) ou KnownHealth &lt; RedBelowPct. Nunca lê part.Health.
+        /// </summary>
+        public static IReadOnlyList<AircraftPart> SelectRecommendedKnown(
+            IEnumerable<AircraftPart> parts,
+            PartBandSettings? bands = null)
+        {
+            if (parts == null) return Array.Empty<AircraftPart>();
+            bands ??= new PartBandSettings();
+
+            var result = new List<AircraftPart>();
+            foreach (var part in parts)
+            {
+                if (part.IsBroken || (part.KnownHealth.HasValue && part.KnownHealth.Value < bands.RedBelowPct))
+                {
+                    result.Add(part);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Precifica exatamente as peças recebidas com base no multiplicador econômico de classe da aeronave.
         /// </summary>
         public static PartReplacementPlan Plan(
@@ -85,17 +106,24 @@ namespace FlightCareer.Domain.Parts
                 {
                     reason = "Quebrada";
                 }
-                else if (part.Health < bands.RedBelowPct)
+                else if (part.KnownHealth.HasValue)
                 {
-                    reason = $"Faixa vermelha: {part.Health:F0} %";
-                }
-                else if (part.Health < bands.YellowBelowPct)
-                {
-                    reason = $"Faixa amarela: {part.Health:F0} %";
+                    if (part.KnownHealth.Value < bands.RedBelowPct)
+                    {
+                        reason = $"Faixa vermelha: {part.KnownHealth.Value:F0} %";
+                    }
+                    else if (part.KnownHealth.Value < bands.YellowBelowPct)
+                    {
+                        reason = $"Faixa amarela: {part.KnownHealth.Value:F0} %";
+                    }
+                    else
+                    {
+                        reason = $"Saúde {part.KnownHealth.Value:F0} %";
+                    }
                 }
                 else
                 {
-                    reason = $"Saúde {part.Health:F0} %";
+                    reason = "Troca por escolha do piloto";
                 }
 
                 double partPrice = PartPricing.CalculatePartPrice(def, classMultiplier);
