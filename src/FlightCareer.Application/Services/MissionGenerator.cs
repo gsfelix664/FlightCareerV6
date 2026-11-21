@@ -1,4 +1,5 @@
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,6 +16,9 @@ namespace FlightCareer.Application.Services
         private readonly Random _random;
         private bool? _hasSimScenery;
         private DateTime? _currentReferenceTime;
+
+        public double PayMultiplier { get; set; } = 1.0;
+        public MissionPayTable PayTable { get; set; } = MissionPayTable.LoadDefault();
 
         public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null, Random? random = null)
         {
@@ -264,7 +268,7 @@ namespace FlightCareer.Application.Services
 
         private Task<Mission> CreateMissionObject(Airport origin, Airport dest, double dist, SubCategoryConfig sub, int paxCount, double luggageWeightLbs, double cargoWeight)
         {
-            var m = CreateMissionObjectSync(origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, _random, _currentReferenceTime ?? DateTime.Now);
+            var m = CreateMissionObjectSync(origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable);
             return Task.FromResult(m);
         }
 
@@ -277,7 +281,9 @@ namespace FlightCareer.Application.Services
             double luggageWeightLbs, 
             double cargoWeight, 
             Random random, 
-            DateTime referenceTime)
+            DateTime referenceTime,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -349,7 +355,7 @@ namespace FlightCareer.Application.Services
                 CargoWeightLbs = Math.Round(cargoWeight, 0),
                 PayloadLbs = Math.Round(totalPayload, 0),
                 Urgency = sub.Urgency,
-                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random),
+                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random, payMultiplier, payTable),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
                 ExpirationTime = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)),
                 RequiredCategory = requiredCategory,
@@ -447,7 +453,9 @@ namespace FlightCareer.Application.Services
             IHubDataService? hubService,
             Random random,
             DateTime referenceTime,
-            int? countOverride = null)
+            int? countOverride = null,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
         {
             if (currentAirport == null) return new List<Mission>();
             if (!MissionRules.Rules.TryGetValue(currentAirport.Tier, out var tierConfig))
@@ -483,7 +491,9 @@ namespace FlightCareer.Application.Services
                     allAirports,
                     hubService,
                     random,
-                    referenceTime);
+                    referenceTime,
+                    payMultiplier,
+                    payTable);
 
                 if (mission != null)
                 {
@@ -501,7 +511,9 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<Airport> allAirports,
             IHubDataService hubService,
             Random random,
-            DateTime referenceTime)
+            DateTime referenceTime,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
         {
             var rangeRule = PickWeighted(sub.RangeRules, random);
             var paxRule = PickWeighted(sub.PaxRules, random);
@@ -517,7 +529,7 @@ namespace FlightCareer.Application.Services
 
             if (sub.Id == "3.4.1")
             {
-                return CreateMissionObjectSync(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime);
+                return CreateMissionObjectSync(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable);
             }
 
             double maxDeg = maxRange / 50.0;
@@ -563,7 +575,7 @@ namespace FlightCareer.Application.Services
                 ? preferredCandidates[random.Next(preferredCandidates.Count)]
                 : candidates[random.Next(candidates.Count)];
 
-            return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime);
+            return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable);
         }
 
         private List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig)
@@ -718,7 +730,7 @@ namespace FlightCareer.Application.Services
             int originTier = 3, 
             int destTier = 3)
         {
-            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, _random);
+            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, _random, PayMultiplier, PayTable);
         }
 
         public static double CalculateReward(
@@ -729,77 +741,17 @@ namespace FlightCareer.Application.Services
             int paxCount, 
             int originTier, 
             int destTier, 
-            Random random)
+            Random? random = null,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
         {
-            // 1. Taxa Base de Despacho (Fixed Minimum Dispatch Fee) e Tarifas por Tipo de Operação
-            double baseFee;
-            double ratePerMile;
-            double ratePerPayloadLb;
+            payTable ??= MissionPayTable.LoadDefault();
+            var family = payTable.Resolve(subId);
 
-            if (subId.StartsWith("3.4")) // Instrução / Treinamento de Pilotos
-            {
-                // Cobre a hora/aula do instrutor de voo (INVA) e custos mínimos de pátio do aeroclube
-                baseFee = subId == "3.4.1" ? 220.0 : 350.0;
-                ratePerMile = 6.5;
-                ratePerPayloadLb = 0.10;
-            }
-            else if (subId.StartsWith("3.3") || subId == "4.3.1") // Remoção Médica / Medevac / Órgãos
-            {
-                // Serviço crítico de UTI aérea com equipe médica e equipamentos a bordo
-                baseFee = 2400.0;
-                ratePerMile = 14.0;
-                ratePerPayloadLb = 0.25;
-            }
-            else if (subId == "4.3.2" || subId == "3.2.1") // AOG Máquinas / Peças Críticas Urgentes
-            {
-                // Urgência industrial/agrícola: maquinário parado na colheita pagando prêmio de socorro
-                baseFee = 950.0;
-                ratePerMile = 8.0;
-                ratePerPayloadLb = 0.35;
-            }
-            else if (subId.StartsWith("4.")) // Agro Interior / Logística de Sede / Bush
-            {
-                baseFee = 380.0;
-                ratePerMile = 4.5;
-                ratePerPayloadLb = 0.18;
-            }
-            else if (subId.StartsWith("3.2")) // Agro Suporte Municipal
-            {
-                baseFee = 450.0;
-                ratePerMile = 5.0;
-                ratePerPayloadLb = 0.15;
-            }
-            else if (subId.StartsWith("3.1") || subId.StartsWith("2.2") || subId.StartsWith("1.3")) // Táxi Aéreo / Charter Executivo
-            {
-                // Fretamento executivo: taxa de acionamento de perna mínima + adicional por assento ocupado
-                baseFee = 950.0;
-                ratePerMile = 7.5 + (Math.Max(1, paxCount) * 1.5);
-                ratePerPayloadLb = 0.12;
-            }
-            else if (subId.StartsWith("2.3")) // Carga Expressa / E-Commerce
-            {
-                baseFee = 500.0;
-                ratePerMile = 4.0;
-                ratePerPayloadLb = 0.22;
-            }
-            else if (subId.StartsWith("2.1")) // Linha Aérea Regional (Feeder)
-            {
-                baseFee = 1800.0;
-                ratePerMile = 6.0 + (paxCount * 0.45);
-                ratePerPayloadLb = 0.08;
-            }
-            else if (subId.StartsWith("1.1") || subId.StartsWith("1.2")) // Linha Regular Comercial & Carga Heavy
-            {
-                baseFee = 5500.0;
-                ratePerMile = 8.0 + (paxCount * 0.30);
-                ratePerPayloadLb = 0.05;
-            }
-            else // Fallback Geral
-            {
-                baseFee = 400.0;
-                ratePerMile = 5.5;
-                ratePerPayloadLb = 0.10;
-            }
+            double effectivePax = family.PaxAtLeastOne ? Math.Max(1, paxCount) : paxCount;
+            double ratePerMile = family.RatePerMile + (effectivePax * family.RatePerPaxMile);
+            double baseFee = family.BaseFee;
+            double ratePerPayloadLb = family.RatePerPayloadLb;
 
             // 2. Base Bruta multiplicada pela Urgência da Missão
             double urgencyMultiplier = Math.Max(1.0, urgency);
@@ -821,7 +773,7 @@ namespace FlightCareer.Application.Services
             // 5. Flutuação de Mercado Orgânica (+/- 14% de variação estocástica realista)
             double marketSpread = 0.88 + ((random ?? new Random()).NextDouble() * 0.26);
 
-            double finalReward = grossBase * originFactor * bushBonus * marketSpread;
+            double finalReward = grossBase * originFactor * bushBonus * marketSpread * family.Scale * payMultiplier;
 
             return Math.Round(finalReward, 2);
         }

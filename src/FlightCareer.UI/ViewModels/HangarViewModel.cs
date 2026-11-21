@@ -34,6 +34,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly Services.FlightMonitor? _flightMonitor;
         private readonly IRandomSource _random = new SystemRandomSource();
         private Guid _pilotId;
+        private DifficultyMode _pilotDifficulty = DifficultyMode.Medium;
 
         [ObservableProperty] private ObservableCollection<PilotAircraftWrapper> _fleet = new();
         [ObservableProperty] private PilotAircraftWrapper? _selectedAircraft;
@@ -75,6 +76,7 @@ namespace FlightCareer.UI.ViewModels
                 .FirstOrDefaultAsync(p => p.Id == _pilotId);
             if (pilot == null) return;
 
+            _pilotDifficulty = pilot.Difficulty;
             _careerClock = pilot.CareerClockUtc;
             CareerDateText = $"Dia da carreira: {_careerClock:dd/MM/yyyy}";
 
@@ -202,6 +204,14 @@ namespace FlightCareer.UI.ViewModels
         {
             if (SelectedAircraft == null) return false;
             var aircraftId = SelectedAircraft.Aircraft.Id;
+
+            var diffEcon = DifficultyEconomy.For(_pilotDifficulty);
+            if (diffEcon.CostMultiplier != 1.0)
+            {
+                cost = Math.Round(cost * diffEcon.CostMultiplier, 2);
+                string diffLabel = DifficultyEconomy.Label(_pilotDifficulty);
+                message = $"{message}\n\nDificuldade {diffLabel}: custos ×{diffEcon.CostMultiplier:0.00}";
+            }
 
             if (!ThemedDialog.Confirm(title, $"{message}\n\nCusto: {cost:C2}", "Autorizar", kind)) return false;
 

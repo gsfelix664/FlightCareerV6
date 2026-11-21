@@ -204,10 +204,11 @@ namespace FlightCareer.Application.Services
                     }
 
                     // Custos de Combustível Consumido
+                    double costMultiplierOff = DifficultyEconomy.For(pilot.Difficulty).CostMultiplier;
                     double fuelUsedOff = outcome.FuelUsed;
                     string fuelTypeOff = aircraft.AircraftType?.FuelType ?? "AVGAS";
                     double fuelPriceOff = FuelPriceService.GetCurrentPrice(fuelTypeOff);
-                    double fuelCostOff = Math.Round(fuelUsedOff * fuelPriceOff, 2);
+                    double fuelCostOff = Math.Round(fuelUsedOff * fuelPriceOff * costMultiplierOff, 2);
 
                     if (fuelCostOff > 0)
                     {
@@ -311,10 +312,11 @@ namespace FlightCareer.Application.Services
                 }
 
                 // 3. Custos Operacionais: Combustível Consumido (SimConnect) e Taxa de Pouso (MTOW & Classificação)
+                double costMultiplier = DifficultyEconomy.For(pilot.Difficulty).CostMultiplier;
                 double fuelUsed = outcome.FuelUsed;
                 string fuelType = aircraft.AircraftType?.FuelType ?? "AVGAS";
                 double fuelPrice = FuelPriceService.GetCurrentPrice(fuelType);
-                double fuelCost = Math.Round(fuelUsed * fuelPrice, 2);
+                double fuelCost = Math.Round(fuelUsed * fuelPrice * costMultiplier, 2);
 
                 if (fuelCost > 0)
                 {
@@ -352,10 +354,11 @@ namespace FlightCareer.Application.Services
                 {
                     if (fee.Total <= 0) continue;
 
-                    totalFees += fee.Total;
+                    double feeTotal = Math.Round(fee.Total * costMultiplier, 2);
+                    totalFees += feeTotal;
                     if (fee.Code == "LANDING")
                     {
-                        landingOnlyFee += fee.Total;
+                        landingOnlyFee += feeTotal;
                     }
 
                     string category = fee.Code switch
@@ -368,7 +371,7 @@ namespace FlightCareer.Application.Services
                         _ => fee.Description
                     };
 
-                    pilot.Balance -= fee.Total;
+                    pilot.Balance -= feeTotal;
                     _context.FinancialTransactions.Add(new FinancialTransaction
                     {
                         Id = Guid.NewGuid(),
@@ -376,7 +379,7 @@ namespace FlightCareer.Application.Services
                         Date = DateTime.Now,
                         Type = TransactionType.Expense,
                         Category = category,
-                        Amount = fee.Total,
+                        Amount = feeTotal,
                         Description = fee.Description
                     });
                 }

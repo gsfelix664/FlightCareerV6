@@ -2605,3 +2605,31 @@
 - **Testes**:
   - Nova suíte `PartHangarViewTests.cs` com 11 testes cobrindo todas as regras de visualização, ordenação por gravidade, faixas e motivos conhecidos.
   - Build 0 erros, suíte xUnit 684/684 testes aprovados (100%).
+
+## 2026-11-21 - ECON-DIFF: Calibração de pagamento em JSON e economia por dificuldade (Gemini)
+- **Tabela de remuneração de missões desacoplada (`MissionPayTable.cs`, `mission_pay.json`)**:
+  - Parâmetros tarifários das missões movidos do código para `src/FlightCareer.Infrastructure/Data/mission_pay.json` com 11 famílias ordenadas (`instrucao_basica`, `instrucao`, `medevac`, `aog`, `agro_bush`, `agro_municipal`, `taxi_aereo`, `carga_expressa`, `regional`, `linha`, `fallback`), cada uma com fator `scale` (padrão 1.0).
+  - Resolução determinística por ordem de precedência (`Resolve`) casando IDs exatos (ex.: `4.3.1`, `3.2.1`, `3.4.1`) e prefixos (ex.: `4.`, `3.2`, `1.1`), com fallback automático idêntico aos valores originais em caso de arquivo ausente ou corrompido.
+  - `MissionGenerator.CalculateReward` e `GenerateMissionsInMemory` agora recebem e aplicam `family.Scale * payMultiplier`.
+- **Configurações e multiplicadores por dificuldade (`DifficultyEconomy.cs`, `CareerStart.cs`)**:
+  - Saldo inicial da dificuldade Fácil ajustado de $1 bi para $1.000.000 (Médio permanece em $100.000 e Difícil em $10.000).
+  - Multiplicadores aprovados:
+    - **Fácil**: `PayMultiplier = 1.25`, `CostMultiplier = 0.80`, `FailureMultiplier = 1.00`.
+    - **Médio**: `PayMultiplier = 1.00`, `CostMultiplier = 1.00`, `FailureMultiplier = 1.00` (zero desvio em relação ao comportamento nominal).
+    - **Difícil**: `PayMultiplier = 0.85`, `CostMultiplier = 1.15`, `FailureMultiplier = 1.25`.
+- **Aplicação no jogo e Hangar**:
+  - No `MainViewModel`, `MissionGenerator.PayMultiplier` é configurado a partir da dificuldade do piloto ativo antes da geração e no recálculo de rotas.
+  - No `FlightService`, custos de combustível e taxas aeroportuárias são multiplicados por `CostMultiplier`.
+  - No `HangarViewModel.RunPaidServiceAsync`, custos de manutenção/reparos recebem o multiplicador e o diálogo de autorização informa `Dificuldade {nome}: custos ×{m:0.00}` quando o fator difere de 1,0.
+  - No `FlightMonitor`, entregas por caminhão de combustível aplicam `CostMultiplier`.
+- **Multiplicador de panes (`FailureEngine.cs`, `PartFailureEngine.cs`, `ComponentFlightSession.cs`, `PartFlightSession.cs`)**:
+  - Adicionada propriedade `HazardMultiplier` que escala a taxa de risco $\lambda$ antes do cálculo da probabilidade de falha exponencial.
+  - `FlightMonitor.StartMonitoring` injeta `FailureMultiplier` da dificuldade do piloto nas sessões de voo.
+- **Simulador de progressão (`CareerProgressionSimulator.cs`)**:
+  - Isolamento do cache de missões por chave de aeroporto, dia e dificuldade.
+  - Aplicação de `PayMultiplier` em todas as missões geradas e de `CostMultiplier` em combustível, taxas, peças, revisões de manutenção, seguro e retífica.
+  - Injeção de `HazardMultiplier` nos motores de pane do bot.
+- **Testes e Validação**:
+  - Nova suíte `DifficultyEconomyTests.cs` com 8 testes validando os valores da dificuldade, saldo de $1M, equivalência matemática exata com a fórmula antiga, proporcionalidade de multiplicador e escala por família, integridade do JSON e taxa de risco dobrada.
+  - Simulação `career-stab` (30 dias, 1 bot, equilibrado, all): Dia 30 do Médio com saldo $150.162 e patrimônio $196.962 (idêntico à referência nominal).
+  - `dotnet build`: 0 erros. Suíte xUnit: 692/692 testes aprovados (100%).

@@ -182,6 +182,17 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Relógio de carreira (`Pilot.CareerClockUtc` / `CareerClock`):** avança exclusivamente com tempo voado (duração simulada do voo + 0,5 h de solo/turnaround via `CareerClock.AdvanceFlight`) e tempo de parada de oficina no Hangar (inspeções e serviços: 50h/12,5h → 2 h, 100h/25h → 8 h, 500h/125h → 6 h, retífica → 72 h; reparos com base em `downtimeHours` das peças ou 2 h padrão via `CareerClock.Advance`). Nunca avança com o simulador fechado ou pelo relógio do Windows, evitando penalizar jogadores inativos.
 - **Vida em meses de peças e Seguro aeronáutico:** a vida por calendário das peças (`PartDefinition.CalendarLifeMonths`) avaliada em `PartInspectionFlags.Evaluate` e a contratação/expiração de seguro de 30 dias (`InsuranceService.IsInsured`, `CalculateNewExpirationDate`, `PilotAircraftWrapper.IsInsured`) comparam suas validades contra o relógio de carreira (`CareerClockUtc`). A data de carreira é exibida no painel da frota no Hangar (`Dia da carreira: dd/MM/yyyy`).
 
+### Economia e Dificuldade (ECON-DIFF)
+- **Tabela de pagamento em JSON (`Infrastructure/Data/mission_pay.json` e `Domain/Economy/MissionPayTable`):** parâmetros de tarifa das missões (taxa base, taxa por milha, taxa por pax·milha e taxa por peso) desacoplados do código em 11 famílias ordenadas (`instrucao_basica`, `instrucao`, `medevac`, `aog`, `agro_bush`, `agro_municipal`, `taxi_aereo`, `carga_expressa`, `regional`, `linha`, `fallback`), cada uma com botão de escala multiplicadora (`scale`, padrão 1,0). Fallback embutido com tolerância a falhas idêntico aos valores originais.
+- **Economia por dificuldade (`Domain/Economy/DifficultyEconomy`):** a dificuldade do piloto afeta receitas, custos operacionais e taxa de panes sem alterar o modo Médio:
+  - **Fácil:** saldo inicial $1.000.000 (reduzido de $1 bi), pagamento ×1,25, custos ×0,80, panes ×1,00.
+  - **Médio:** saldo inicial $100.000, pagamento ×1,00, custos ×1,00, panes ×1,00 (referência inalterada).
+  - **Difícil:** saldo inicial $10.000, pagamento ×0,85, custos ×1,15, panes ×1,25.
+- **Atuação dos multiplicadores:**
+  - `PayMultiplier`: aplicado no cálculo de recompensa das missões geradas (`MissionGenerator.CalculateReward` / `GenerateMissionsInMemory`).
+  - `CostMultiplier`: aplicado a combustível e taxas de aeroporto no fim do voo (`FlightService`), em todos os serviços pagos do Hangar com aviso explicativo (`HangarViewModel.RunPaidServiceAsync`), no abastecimento por caminhão (`FlightMonitor.ProcessFuelTruckDelivery`) e em todos os custos operacionais/manutenção do simulador de progressão (`CareerProgressionSimulator`).
+  - `FailureMultiplier` / `HazardMultiplier`: multiplica a taxa de risco $\lambda$ antes do sorteio de pane exponencial em `FailureEngine` e `PartFailureEngine`. Configurado no início do voo pelo `FlightMonitor` nas sessões ativa (`ComponentFlightSession`) e de peças (`PartFlightSession`).
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

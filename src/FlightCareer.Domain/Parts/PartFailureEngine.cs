@@ -35,9 +35,27 @@ namespace FlightCareer.Domain.Parts
             _mapping = mapping ?? PartComponentMapping.CreateDefault();
         }
 
+        public double HazardMultiplier { get; set; } = 1.0;
+
         public IReadOnlyCollection<ComponentKind> FailedThisFlight => _failedThisFlight;
 
         public void Reset() => _failedThisFlight.Clear();
+
+        public double CalculateProbability(AircraftPart part, double dtHours)
+        {
+            if (part == null || part.IsBroken || dtHours <= 0) return 0.0;
+            var def = _parts.Get(part.PartId);
+            if (def == null || def.MinorPart) return 0.0;
+
+            var kind = _mapping.ResolveComponentKind(def.Group);
+            if (!kind.HasValue) return 0.0;
+
+            var compDef = _catalog.Components.FirstOrDefault(c => c.Kind == kind.Value);
+            if (compDef == null || !compDef.AppliesTo.Contains(_engineClass)) return 0.0;
+
+            double lambda = FailureEngine.HazardPerHour(part.Health, _catalog.Hazard, compDef.HazardScale) * HazardMultiplier;
+            return lambda <= 0.0 ? 0.0 : 1.0 - Math.Exp(-lambda * dtHours);
+        }
 
         public IReadOnlyList<PartFailure> Evaluate(
             IEnumerable<AircraftPart> parts,
@@ -65,7 +83,7 @@ namespace FlightCareer.Domain.Parts
                 var compDef = _catalog.Components.FirstOrDefault(c => c.Kind == kind.Value);
                 if (compDef == null || !compDef.AppliesTo.Contains(_engineClass)) continue;
 
-                double lambda = FailureEngine.HazardPerHour(part.Health, _catalog.Hazard, compDef.HazardScale);
+                double lambda = FailureEngine.HazardPerHour(part.Health, _catalog.Hazard, compDef.HazardScale) * HazardMultiplier;
                 double p = lambda <= 0.0 ? 0.0 : 1.0 - Math.Exp(-lambda * dtHours);
 
                 if (p <= 0.0 || _random.NextDouble() >= p) continue;

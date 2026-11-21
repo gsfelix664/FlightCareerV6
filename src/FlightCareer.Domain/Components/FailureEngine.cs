@@ -30,6 +30,8 @@ namespace FlightCareer.Domain.Components
             _random = random;
         }
 
+        public double HazardMultiplier { get; set; } = 1.0;
+
         public IReadOnlyCollection<ComponentKind> FailedThisFlight => _failedThisFlight;
 
         public void Reset() => _failedThisFlight.Clear();
@@ -45,9 +47,9 @@ namespace FlightCareer.Domain.Components
         }
 
         /// <summary>Probabilidade de pane num intervalo de uso de dtHours.</summary>
-        public static double FailureProbability(double health, double dtHours, HazardSettings settings, double scale = 1.0)
+        public static double FailureProbability(double health, double dtHours, HazardSettings settings, double scale = 1.0, double hazardMultiplier = 1.0)
         {
-            double lambda = HazardPerHour(health, settings, scale);
+            double lambda = HazardPerHour(health, settings, scale) * hazardMultiplier;
             return lambda <= 0 || dtHours <= 0 ? 0.0 : 1.0 - Math.Exp(-lambda * dtHours);
         }
 
@@ -71,7 +73,7 @@ namespace FlightCareer.Domain.Components
                 var def = _catalog.Components.FirstOrDefault(d => d.Kind == component.Kind);
                 if (def == null || !def.AppliesTo.Contains(_engineClass)) continue;
 
-                double p = FailureProbability(component.Health, dtHours, _catalog.Hazard, def.HazardScale);
+                double p = FailureProbability(component.Health, dtHours, _catalog.Hazard, def.HazardScale, HazardMultiplier);
                 if (p <= 0 || _random.NextDouble() >= p) continue;
 
                 var mode = PickMode(def);

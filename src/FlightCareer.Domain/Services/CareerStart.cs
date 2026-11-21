@@ -8,7 +8,7 @@ namespace FlightCareer.Domain.Services
     /// </summary>
     public static class CareerStart
     {
-        public const double EasyInitialBalance = 1_000_000_000.0;
+        public const double EasyInitialBalance = 1_000_000.0;
         public const double MediumInitialBalance = 100_000.0;
         public const double HardInitialBalance = 10_000.0;
 

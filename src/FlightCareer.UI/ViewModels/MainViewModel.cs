@@ -1141,6 +1141,11 @@ namespace FlightCareer.UI.ViewModels
                     OriginLon = airport.Longitude;
                 }
                 
+                if (_missionGenerator is MissionGenerator mg)
+                {
+                    mg.PayMultiplier = DifficultyEconomy.For(pilot.Difficulty).PayMultiplier;
+                }
+
                 var missions = await _missionGenerator.GenerateMissionsAsync(airport);
                 var missionList = missions.ToList();
 

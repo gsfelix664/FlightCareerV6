@@ -23,8 +23,8 @@ namespace FlightCareer.Tests.Economy
         [Fact]
         public void CareerStart_SaldosIguaisAoJogo()
         {
-            // Critério: Fácil $1.000.000.000, Médio $100.000, Difícil $10.000, C152 5.000h de célula e meio tanque
-            Assert.Equal(1_000_000_000.0, CareerStart.GetInitialBalance(DifficultyMode.Easy));
+            // Critério: Fácil $1.000.000, Médio $100.000, Difícil $10.000, C152 5.000h de célula e meio tanque
+            Assert.Equal(1_000_000.0, CareerStart.GetInitialBalance(DifficultyMode.Easy));
             Assert.Equal(100_000.0, CareerStart.GetInitialBalance(DifficultyMode.Medium));
             Assert.Equal(10_000.0, CareerStart.GetInitialBalance(DifficultyMode.Hard));
 
