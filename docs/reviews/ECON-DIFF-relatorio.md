@@ -1,6 +1,6 @@
 # ECON-DIFF — Botões de calibração do pagamento e economia por dificuldade
 
-**Branch:** feat/econ-diff · **Commit:** pendente · **Data:** 2026-11-21
+**Branch:** feat/econ-diff · **Commit:** 28d79ed · **Data:** 2026-11-21
 
 ## Plano (antes de codar)
 - Criar `DifficultyEconomy.cs` no domínio com multiplicadores (Easy: 1.25/0.80/1.00; Medium: 1.0/1.0/1.0; Hard: 0.85/1.15/1.25) e labels.
