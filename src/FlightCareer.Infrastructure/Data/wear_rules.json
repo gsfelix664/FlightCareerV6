@@ -22,7 +22,7 @@
       "bands": [
         {
           "name": "caution",
-          "threshold": 0.97,
+          "threshold": 1.0,
           "parts": [
             {
               "partId": "engine.cylinders",
@@ -88,7 +88,7 @@
         },
         {
           "name": "warning",
-          "threshold": 1.0,
+          "threshold": 1.04,
           "parts": [
             {
               "partId": "engine.cylinders",

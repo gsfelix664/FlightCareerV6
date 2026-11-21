@@ -2632,3 +2632,6 @@
 ## 2026-11-21 - Excedências agrupadas no blackbox (Claude)
 - Achado no voo de SNEJ (C152): a caixa-preta tinha 1.221 linhas "EXCEDENCIA_PECA" em 3 min, uma por peça por segundo. Não era registro abaixo do limite: a regra `piston_rpm_overspeed` tem faixa `caution` a partir de 97 % da linha vermelha (2.474 RPM no C152, desgaste natural × 1,5–2,5 em 12 peças), e o log mostra a linha vermelha como "limite".
 - Novo `Domain/Parts/ExceedanceLogAggregator`: uma linha `INICIO` e uma `FIM` por ocorrência (regra + faixa/motor), com duração em tempo simulado, pico, dano somado e peças. `PartFlightSession.OnExceedanceTick` substitui o evento por peça; o `FlightMonitor` encerra as ocorrências abertas antes de fechar o blackbox (fim, cancelamento, perda total). Testes: `ExceedanceLogAggregatorTests` (4). Não testado no MSFS.
+
+## 2026-11-21 - RPM do pistão: sem penalidade no arco verde (Claude)
+- Decisão do usuário: subir a pleno dentro do arco verde é operação normal do POH (C152 até 2.550 RPM). `piston_rpm_overspeed` em `wear_rules.json`: faixa `caution` passa de 97 % para 100 % da linha vermelha e `warning` de 100 % para 104 %. Antes, a subida a pleno do C152 (2.475–2.570 RPM) acelerava 1,5–2,5× o desgaste de 12 peças e encurtava ~10–13 % a vida delas na carreira. Teste: `WearRuleCatalogTests.PistonRpm_SubidaAPlenoNoArcoVerde_SemPenalidade`. Não testado no MSFS.

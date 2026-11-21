@@ -318,5 +318,16 @@ namespace FlightCareer.Tests.Parts
                     $"Regra de evento '{rule.Id}' possui métrica '{rule.Metric}' fora do vocabulário fechado WearRuleMetrics.All.");
             }
         }
+
+        [Fact]
+        public void PistonRpm_SubidaAPlenoNoArcoVerde_SemPenalidade()
+        {
+            // Decisão do usuário (2026-11-21): até a linha vermelha (arco verde do POH) não há desgaste acelerado;
+            // atenção a partir da vermelha e alerta a +4 %
+            var rule = Catalog.Find("piston_rpm_overspeed");
+            Assert.NotNull(rule);
+            Assert.Equal(1.00, rule!.Bands[0].Threshold, 6);
+            Assert.Equal(1.04, rule.Bands[1].Threshold, 6);
+        }
     }
 }
