@@ -1,6 +1,6 @@
 # Plano — Estabilidade da economia da carreira (análise da ECON-STAB)
 
-Criado em 2026-11-19 (Claude). Status: **análise feita, aguardando decisões do usuário (§ 4)**.
+Criado em 2026-11-19 (Claude). Status: **regras de manutenção aplicadas (§ 4.1) e medidas (§ 4.2); aguardando decisões 4 e 5 (pagamento e dificuldade)**.
 Fonte: `FlightCareer.Replay career-stab --days 720 --bots 3 --difficulty all --policy all --fast` (27 carreiras, 45 min), com a calibração do usuário (real ÷ 4), preço por classe, reparo por troca de peça, calendário de carreira e cabine já na base. Bots começam como o jogador (saldo da dificuldade + C152), voam ~2,5 h/dia, compram o próximo avião da escada A→J e vendem o anterior.
 
 ## 1. Resultado (mediana de 3 bots por grupo)
@@ -54,6 +54,24 @@ Ordem sugerida: A + B + C (regras) → rodar ECON-STAB → F → D + E (pagament
 - **Vencimentos:** óleo, ignição e TBO vencidos **não interditam** (o risco vem da saúde); inspeção anual vencida continua interditando (só inspeciona, não troca).
 - **Seguro:** pago por mês, ~2–3 %/ano do valor do avião (calibrar na ECON-STAB); cobre revisão vencida; **não cobre** pane de peça que a última inspeção anual achou em vermelho (< 20 %) ou quebrada e que não foi trocada.
 - Perda de desempenho no amarelo depende do que o SDK permite atuar (motor a pistão, pneu, freio): pesquisa e teste no MSFS à parte.
+
+## 4.2 Rodada com as regras de faixas (2026-11-21, após MANUT-FAIXAS-A)
+Mesmo comando (`--days 720 --bots 3 --seed 1 --difficulty all --policy all --fast`, 22 min). Relatório completo: `docs/plans/econ-stab/2026-11-21-faixas.md`.
+
+| Médio, mediana | Dia 180 | Dia 720 | Panes/100 h | Peças/100 h |
+|---|---|---|---|---|
+| Agressivo | $3,0 mi, classe F | **$19,8 mi**, classe H | 1,0 | 9 |
+| Cauteloso | $2,6 mi, classe F | **$19,0 mi**, classe H | 0,0 | 49 |
+| Equilibrado | $2,9 mi, classe F | **$19,1 mi**, classe H | 2,3 | 47 |
+
+1. **Fim da falência:** 0 falidos em todas as 27 carreiras (antes: cauteloso e equilibrado 3/3 falidos no Médio e no Difícil). O seguro caiu para ~$160/h de ~$1.300/h de custo.
+2. **Manutenção certa deixou de ser punida**, mas também quase não pesa: troca de peças + manutenção = ~$200–500/h contra receita ~$13.000/h. O cauteloso tem 0 panes e o agressivo 1–2 por 100 h; a diferença de patrimônio é de ~4 %.
+3. **A utilização não cai mais depois do upgrade** (~2,6 h/dia nos 2 anos): a queda da rodada anterior vinha das carreiras quebradas pelo custo fixo; o item F fica sem objeto.
+4. **O problema que sobra é o pagamento:** margem ~90 % no Médio/Difícil; patrimônio ~15× no dia 180 e ~100× em 2 anos. Médio e Difícil continuam iguais depois de ~3 meses.
+5. **Calibrar `lowHealthWearMaxMultiplier` agora não vale a pena:** com margem de 90 % nenhum custo de manutenção muda o resultado. Rever depois de D + E. O simulador também não modela perda total (o risco real do agressivo).
+6. Fácil (J no 2º ano) é modo livre; o cauteloso lá gasta ~$5.000/h em manutenção geral nos jatos (conferir o preço de revisão/retífica da classe J junto com D).
+
+**Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do § 4 → recalibrar `MissionGenerator.CalculateReward` por classe → ECON-STAB de novo.
 
 ## 5. Como reproduzir
 ```bash
