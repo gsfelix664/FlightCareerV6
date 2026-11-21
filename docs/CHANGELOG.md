@@ -2610,3 +2610,7 @@
 - Causa do erro "Não foi possível sincronizar o combustível com os tanques do simulador" no primeiro voo real (C152): no MSFS 2024 a escrita de `FUELSYSTEM TANK QUANTITY:n` define a quantidade **total** do tanque, mas a leitura devolve a **utilizável**. O app gravava 6,3 gal por tanque, o sim ficava com 5,55 (0,75 gal não utilizável por tanque) e as 3 tentativas falhavam.
 - `SimFuelState` e a definição de leitura ganham `FUELSYSTEM TANK CAPACITY:1..8` no fim; `FuelTank` ganha `UnusableGallons` e `ToSimWriteValue`; `SetFuelTanks` soma a parte não utilizável de cada tanque. Corrigido também o nome do tanque de ponta esquerdo legado (`FUEL TANK LEFT TIP QUANTITY`) e o `catch {}` silencioso do `WndProc`.
 - **Testado no MSFS 2024 (C152)** com um teste de console que usa o mesmo struct e a mesma distribuição do app: alvo 12,60 gal → sim 12,60 gal. Escrita dos tanques legados não testada.
+
+## 2026-11-21 - Gravação de combustível no sistema legado testada (Claude)
+- **Testado no MSFS 2024 (TBM 930, sistema legado):** gravar `FUEL TANK LEFT/RIGHT MAIN QUANTITY` com a distribuição do app levou o total de 150,5 a 160,5 gal (diferença 0) e voltou a 150,5. No legado a leitura e a escrita são do total com o não utilizável (9 gal no TBM), então a correção do sistema moderno não se aplica e não é necessária.
+- Levantamento do sistema de combustível dos 25 aviões com log de calibração registrado no `AGENTS.md` › 6 (8 legados, 17 modernos). Não testado: aviões com mais de 8 tanques no sistema moderno (747-8i).
