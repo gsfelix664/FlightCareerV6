@@ -642,6 +642,45 @@ namespace FlightCareer.Domain.Parts
         }
 
         /// <summary>
+        /// Ciclo de pouso (toque que não é bounce): aplica as regras de <see cref="WearRuleMetrics.LandingCycles"/> e,
+        /// em toda peça com vida em ciclos (pneus, freios, rodas…), conta +1 ciclo e aplica o desgaste natural por ciclo
+        /// (100 → ~30 % ao longo de LifeCycles, × multiplicador da faixa amarela), como o simulador de carreira.
+        /// Peças que também têm vida em horas já envelhecem por hora: aqui só contam o ciclo.
+        /// Antes só as peças citadas nas regras contavam ciclo e nenhuma tinha desgaste natural por pouso.
+        /// </summary>
+        public PartWearEventResult ApplyLandingCycle(IReadOnlyList<AircraftPart> parts, IReadOnlyList<string> features)
+        {
+            if (parts == null || parts.Count == 0)
+            {
+                return new PartWearEventResult(Array.Empty<PartWearInspectionEvent>(), Array.Empty<string>(), 0.0);
+            }
+
+            var cyclesBefore = parts.ToDictionary(p => p, p => p.CyclesSinceReplacement, ReferenceEqualityComparer.Instance);
+            var ruleResult = ApplyEvent(parts, WearRuleMetrics.LandingCycles, 1.0, features);
+
+            var damaged = new List<string>(ruleResult.DamagedPartIds);
+            double totalDamage = ruleResult.TotalDamageApplied;
+
+            foreach (var part in parts)
+            {
+                if (part.IsBroken) continue;
+                var def = _partCatalog.Get(part.PartId);
+                if (def == null || !def.LifeCycles.HasValue || def.LifeCycles.Value <= 0) continue;
+
+                if (part.CyclesSinceReplacement == cyclesBefore[part]) part.CyclesSinceReplacement++;
+
+                if (def.LifeHours > 0) continue;
+                double wear = (70.0 / def.LifeCycles.Value) * PartHealthBands.LowHealthWearMultiplier(part.Health, _bandSettings);
+                if (wear <= 0) continue;
+                part.Health = Math.Clamp(part.Health - wear, 0.0, 100.0);
+                damaged.Add(part.PartId);
+                totalDamage += wear;
+            }
+
+            return new PartWearEventResult(ruleResult.Inspections, damaged.Distinct().ToList(), totalDamage);
+        }
+
+        /// <summary>
         /// Aplica evento de quebra completa originada pelo simulador nativo (WEAR AND TEAR IS FAILED:id 0->1).
         /// Leva a saúde da peça a 0%, marca IsBroken = true e registra BrokenAtUtc.
         /// Idempotente: um evento por peça por voo (se já quebrada, ignora).
