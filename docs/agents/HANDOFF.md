@@ -3,6 +3,7 @@
 ## Atualização 2026-11-21 (vale sobre o que está abaixo)
 - **Mergeados e no GitHub:** correção do óleo (`SimFailureActuator.Reset` só desfaz vazamento criado pelo app; não esvazia mais o motor no início do voo) e **MANUT-FAIXAS-B** (lista "Peças (n)" por card com saúde conhecida, "visto há X h", nota de vida e **Trocar**; "Reparar tudo" só pelo conhecido; troca avulsa não devolve TBO/125 h; cores 40/20). Build 0 erros, 684/684. **Nada visto na tela nem testado no MSFS.**
 - **ECON-STAB com as faixas:** 0 falências; cauteloso ≈ agressivo; manutenção quase não pesa porque a margem é ~90 %. Detalhes em `docs/plans/economia-estabilidade.md` › 4.2. Itens 1 e 2 abaixo concluídos.
+- **Plano futuro (usuário adiou em 2026-11-21): matrícula do Hangar no sim.** Não implementado (nem leitura). `ATC ID` é gravável pelo SDK (STRING32), assim como `ATC AIRLINE`/`ATC FLIGHT NUMBER`/`ATC HEAVY` (`docs/plans/sensor-research/variaveis-aeronave-diversos.md:81`). Passos: teste de console no MSFS (ler, gravar `PS-BYN`, ler, restaurar); gravar ao iniciar o monitoramento e no `AircraftLoaded`, guardando o original; conferir ATC e pintura dinâmica.
 - **Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do plano de economia → recalibrar `MissionGenerator.CalculateReward` por classe; voo de teste no MSFS (conferir óleo no início do voo, Hangar novo); itens 3 (inversão do óleo no vazamento ativo) e 4 abaixo continuam.
 
 ---
