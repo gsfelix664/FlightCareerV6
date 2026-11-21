@@ -2614,3 +2614,7 @@
 ## 2026-11-21 - Gravação de combustível no sistema legado testada (Claude)
 - **Testado no MSFS 2024 (TBM 930, sistema legado):** gravar `FUEL TANK LEFT/RIGHT MAIN QUANTITY` com a distribuição do app levou o total de 150,5 a 160,5 gal (diferença 0) e voltou a 150,5. No legado a leitura e a escrita são do total com o não utilizável (9 gal no TBM), então a correção do sistema moderno não se aplica e não é necessária.
 - Levantamento do sistema de combustível dos 25 aviões com log de calibração registrado no `AGENTS.md` › 6 (8 legados, 17 modernos). Não testado: aviões com mais de 8 tanques no sistema moderno (747-8i).
+
+## 2026-11-21 - Gravação de combustível testada no 747-8i (Claude)
+- **Testado no MSFS 2024 (747-8i, sistema moderno):** 8 tanques nos índices 1–8 (o app lê até o 8), capacidade total = utilizável; alvo +500 gal → diferença de 1,2 gal (tolerância 629 gal); restaurado tanque a tanque ao estado original.
+- Achado: a distribuição proporcional à capacidade enche também o tanque central e os de reserva/estabilizador com carga parcial (no teste: central 0 → 8.635 gal, principais externos 4.233 → 2.702). Funciona para a sincronização, mas foge da ordem real de abastecimento e mexe no CG. Registrado como pendente no `AGENTS.md` › 6.
