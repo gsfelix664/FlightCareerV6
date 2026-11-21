@@ -242,6 +242,7 @@ namespace FlightCareer.UI
                 DataContext = s.GetRequiredService<DebugViewModel>()
             });
 
+            services.AddSingleton<Services.AlertOverlayService>();
             services.AddSingleton<DebugOverlayViewModel>();
             services.AddTransient<DebugOverlayWindow>(s => new DebugOverlayWindow
             {
