@@ -383,5 +383,29 @@ namespace FlightCareer.Tests.Fuel
 
             Assert.Equal(FuelSyncStatus.Failed, coord.Status);
         }
+
+        [Fact]
+        public void FuelTank_ToSimWriteValue_SomaParteNaoUtilizavel_C152()
+        {
+            // Medido no MSFS 2024 (C152, 2026-11-21): capacidade total 13,00, utilizável 12,25; gravar 6,30 → lido 5,55
+            var tank = new FuelTank("FUELSYSTEM TANK QUANTITY:1", 12.25, 5.55, UnusableGallons: 0.75);
+            Assert.Equal(6.30, tank.ToSimWriteValue(5.55), 6);
+        }
+
+        [Fact]
+        public void FuelTank_ToSimWriteValue_SemNaoUtilizavel_GravaOValor()
+        {
+            var tank = new FuelTank("FUEL TANK LEFT MAIN QUANTITY", 13.0, 5.0);
+            Assert.Equal(5.0, tank.ToSimWriteValue(5.0), 6);
+            Assert.Equal(0.0, tank.ToSimWriteValue(-1.0), 6);
+        }
+
+        [Fact]
+        public void SimFuelState_TemUmCampoPorDatum()
+        {
+            // UNLIMITED + 4 consumo + NEW FUEL SYSTEM + 8×(utilizável, quantidade) + 9×(capacidade, quantidade) legados + 8 capacidades totais
+            int datums = 1 + 4 + 1 + 16 + 18 + 8;
+            Assert.Equal(datums * sizeof(double), System.Runtime.InteropServices.Marshal.SizeOf<SimFuelState>());
+        }
     }
 }

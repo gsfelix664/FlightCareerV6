@@ -2605,3 +2605,8 @@
 - **Testes**:
   - Nova suíte `PartHangarViewTests.cs` com 11 testes cobrindo todas as regras de visualização, ordenação por gravidade, faixas e motivos conhecidos.
   - Build 0 erros, suíte xUnit 684/684 testes aprovados (100%).
+
+## 2026-11-21 - Sincronização do combustível com o sim corrigida (Claude)
+- Causa do erro "Não foi possível sincronizar o combustível com os tanques do simulador" no primeiro voo real (C152): no MSFS 2024 a escrita de `FUELSYSTEM TANK QUANTITY:n` define a quantidade **total** do tanque, mas a leitura devolve a **utilizável**. O app gravava 6,3 gal por tanque, o sim ficava com 5,55 (0,75 gal não utilizável por tanque) e as 3 tentativas falhavam.
+- `SimFuelState` e a definição de leitura ganham `FUELSYSTEM TANK CAPACITY:1..8` no fim; `FuelTank` ganha `UnusableGallons` e `ToSimWriteValue`; `SetFuelTanks` soma a parte não utilizável de cada tanque. Corrigido também o nome do tanque de ponta esquerdo legado (`FUEL TANK LEFT TIP QUANTITY`) e o `catch {}` silencioso do `WndProc`.
+- **Testado no MSFS 2024 (C152)** com um teste de console que usa o mesmo struct e a mesma distribuição do app: alvo 12,60 gal → sim 12,60 gal. Escrita dos tanques legados não testada.
