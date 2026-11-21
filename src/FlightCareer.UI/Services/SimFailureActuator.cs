@@ -65,7 +65,9 @@ namespace FlightCareer.UI.Services
             {
                 _sim.ClearSimFailures();
                 if (_fireActive || _sim.CurrentData.IsEngineOnFire) _sim.SetEngineFire(false);
-                if (_oilLeakedPercent > 0 || _sim.CurrentData.OilLeakedPercent > 0) _sim.SetOilLeakedPercent(0.0);
+                // Só desfaz o vazamento que o próprio app criou. No MSFS 2024 a SimVar parece valer 100 sem pane
+                // (probe 20261120-0822-C172SP): ler o valor do sim e gravar 0 esvaziaria o óleo a cada início de voo.
+                if (_oilLeakedPercent > 0) _sim.SetOilLeakedPercent(0.0);
                 if (_active.Contains(FailureEffect.AlternatorOff)) _sim.SetAlternatorConnected(1, true);
             }
 
