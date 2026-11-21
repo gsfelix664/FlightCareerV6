@@ -401,6 +401,12 @@ namespace FlightCareer.UI.Services
                 AddFuelDef("FUEL TANK CENTER3 CAPACITY", "Gallons");
                 AddFuelDef("FUEL TANK CENTER3 QUANTITY", "Gallons");
 
+                // Capacidade total dos tanques do sistema moderno (no fim, mesma ordem do SimFuelState)
+                for (int i = 1; i <= 8; i++)
+                {
+                    AddFuelDef($"FUELSYSTEM TANK CAPACITY:{i}", "Gallons");
+                }
+
                 _simConnect.RegisterDataDefineStruct<SimFuelState>(DEFINITIONS.FuelStateRead);
 
                 // Leitura do estado de integridade (slew e congelamentos)
@@ -875,7 +881,10 @@ namespace FlightCareer.UI.Services
                     _simConnect.ReceiveMessage();
                     handled = true;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] ReceiveMessage falhou: {ex.GetType().Name}: {ex.Message}");
+                }
             }
             return IntPtr.Zero;
         }
@@ -987,14 +996,14 @@ namespace FlightCareer.UI.Services
 
             if (fuel.NewFuelSystem > 0.5)
             {
-                if (fuel.FuelSystemTankUsableCapacity1 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:1", fuel.FuelSystemTankUsableCapacity1, fuel.FuelSystemTankQuantity1));
-                if (fuel.FuelSystemTankUsableCapacity2 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:2", fuel.FuelSystemTankUsableCapacity2, fuel.FuelSystemTankQuantity2));
-                if (fuel.FuelSystemTankUsableCapacity3 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:3", fuel.FuelSystemTankUsableCapacity3, fuel.FuelSystemTankQuantity3));
-                if (fuel.FuelSystemTankUsableCapacity4 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:4", fuel.FuelSystemTankUsableCapacity4, fuel.FuelSystemTankQuantity4));
-                if (fuel.FuelSystemTankUsableCapacity5 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:5", fuel.FuelSystemTankUsableCapacity5, fuel.FuelSystemTankQuantity5));
-                if (fuel.FuelSystemTankUsableCapacity6 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:6", fuel.FuelSystemTankUsableCapacity6, fuel.FuelSystemTankQuantity6));
-                if (fuel.FuelSystemTankUsableCapacity7 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:7", fuel.FuelSystemTankUsableCapacity7, fuel.FuelSystemTankQuantity7));
-                if (fuel.FuelSystemTankUsableCapacity8 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:8", fuel.FuelSystemTankUsableCapacity8, fuel.FuelSystemTankQuantity8));
+                if (fuel.FuelSystemTankUsableCapacity1 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:1", fuel.FuelSystemTankUsableCapacity1, fuel.FuelSystemTankQuantity1, Unusable(fuel.FuelSystemTankCapacity1, fuel.FuelSystemTankUsableCapacity1)));
+                if (fuel.FuelSystemTankUsableCapacity2 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:2", fuel.FuelSystemTankUsableCapacity2, fuel.FuelSystemTankQuantity2, Unusable(fuel.FuelSystemTankCapacity2, fuel.FuelSystemTankUsableCapacity2)));
+                if (fuel.FuelSystemTankUsableCapacity3 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:3", fuel.FuelSystemTankUsableCapacity3, fuel.FuelSystemTankQuantity3, Unusable(fuel.FuelSystemTankCapacity3, fuel.FuelSystemTankUsableCapacity3)));
+                if (fuel.FuelSystemTankUsableCapacity4 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:4", fuel.FuelSystemTankUsableCapacity4, fuel.FuelSystemTankQuantity4, Unusable(fuel.FuelSystemTankCapacity4, fuel.FuelSystemTankUsableCapacity4)));
+                if (fuel.FuelSystemTankUsableCapacity5 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:5", fuel.FuelSystemTankUsableCapacity5, fuel.FuelSystemTankQuantity5, Unusable(fuel.FuelSystemTankCapacity5, fuel.FuelSystemTankUsableCapacity5)));
+                if (fuel.FuelSystemTankUsableCapacity6 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:6", fuel.FuelSystemTankUsableCapacity6, fuel.FuelSystemTankQuantity6, Unusable(fuel.FuelSystemTankCapacity6, fuel.FuelSystemTankUsableCapacity6)));
+                if (fuel.FuelSystemTankUsableCapacity7 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:7", fuel.FuelSystemTankUsableCapacity7, fuel.FuelSystemTankQuantity7, Unusable(fuel.FuelSystemTankCapacity7, fuel.FuelSystemTankUsableCapacity7)));
+                if (fuel.FuelSystemTankUsableCapacity8 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:8", fuel.FuelSystemTankUsableCapacity8, fuel.FuelSystemTankQuantity8, Unusable(fuel.FuelSystemTankCapacity8, fuel.FuelSystemTankUsableCapacity8)));
             }
             else
             {
@@ -1002,7 +1011,7 @@ namespace FlightCareer.UI.Services
                 if (fuel.TankRightMainCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT MAIN QUANTITY", fuel.TankRightMainCapacity, fuel.TankRightMainQuantity));
                 if (fuel.TankLeftAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT AUX QUANTITY", fuel.TankLeftAuxCapacity, fuel.TankLeftAuxQuantity));
                 if (fuel.TankRightAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT AUX QUANTITY", fuel.TankRightAuxCapacity, fuel.TankRightAuxQuantity));
-                if (fuel.TankLeftTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT TIP CAPACITY", fuel.TankLeftTipCapacity, fuel.TankLeftTipQuantity));
+                if (fuel.TankLeftTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT TIP QUANTITY", fuel.TankLeftTipCapacity, fuel.TankLeftTipQuantity));
                 if (fuel.TankRightTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT TIP QUANTITY", fuel.TankRightTipCapacity, fuel.TankRightTipQuantity));
                 if (fuel.TankCenterCapacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER QUANTITY", fuel.TankCenterCapacity, fuel.TankCenterQuantity));
                 if (fuel.TankCenter2Capacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER2 QUANTITY", fuel.TankCenter2Capacity, fuel.TankCenter2Quantity));
@@ -1012,9 +1021,17 @@ namespace FlightCareer.UI.Services
             return tanks;
         }
 
+        // Parte não utilizável = capacidade total − utilizável (0 se a total não for lida)
+        private static double Unusable(double totalCapacity, double usableCapacity) =>
+            totalCapacity > usableCapacity ? totalCapacity - usableCapacity : 0.0;
+
         public void SetFuelTanks(IReadOnlyList<(string simVar, double gallons)> tanks)
         {
             if (_simConnect == null || tanks == null || tanks.Count == 0) return;
+
+            // Os valores recebidos são utilizáveis; a escrita do sistema moderno define o total (com o não utilizável)
+            var known = new Dictionary<string, FuelTank>(StringComparer.OrdinalIgnoreCase);
+            foreach (var t in GetActiveFuelTanks()) known[t.SimVar] = t;
 
             foreach (var (simVar, gallons) in tanks)
             {
@@ -1024,7 +1041,8 @@ namespace FlightCareer.UI.Services
                 {
                     try
                     {
-                        var val = new SimDoubleValue { Value = Math.Max(0.0, gallons) };
+                        double write = known.TryGetValue(simVar.Trim(), out var tank) ? tank.ToSimWriteValue(gallons) : Math.Max(0.0, gallons);
+                        var val = new SimDoubleValue { Value = write };
                         _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
                     }
                     catch (Exception ex)

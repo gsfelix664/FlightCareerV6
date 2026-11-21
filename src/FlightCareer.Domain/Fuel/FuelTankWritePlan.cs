@@ -3,7 +3,16 @@ using System.Collections.Generic;
 
 namespace FlightCareer.Domain.Fuel
 {
-    public record FuelTank(string SimVar, double UsableCapacityGallons, double CurrentGallons = 0.0);
+    /// <param name="UnusableGallons">
+    /// Parte não utilizável do tanque (capacidade total − capacidade utilizável). No MSFS 2024 (sistema novo),
+    /// a leitura de FUELSYSTEM TANK QUANTITY devolve o utilizável, mas a escrita define o total: testado no C152
+    /// (gravar 6,05 → lido 5,30; não utilizável 0,75 por tanque).
+    /// </param>
+    public record FuelTank(string SimVar, double UsableCapacityGallons, double CurrentGallons = 0.0, double UnusableGallons = 0.0)
+    {
+        /// <summary>Valor a gravar na SimVar para o tanque ficar com <paramref name="usableGallons"/> utilizáveis.</summary>
+        public double ToSimWriteValue(double usableGallons) => Math.Max(0.0, usableGallons) + Math.Max(0.0, UnusableGallons);
+    }
 
     public record FuelTankAllocation(string SimVar, double Gallons);
 

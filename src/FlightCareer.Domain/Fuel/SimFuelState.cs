@@ -55,5 +55,15 @@ namespace FlightCareer.Domain.Fuel
         public double TankCenter2Quantity;                  // FUEL TANK CENTER2 QUANTITY (Gallons)
         public double TankCenter3Capacity;                  // FUEL TANK CENTER3 CAPACITY (Gallons)
         public double TankCenter3Quantity;                  // FUEL TANK CENTER3 QUANTITY (Gallons)
+
+        // Capacidade total (com a parte não utilizável) do sistema moderno (1..8): acrescentada no fim
+        public double FuelSystemTankCapacity1;              // FUELSYSTEM TANK CAPACITY:1 (Gallons)
+        public double FuelSystemTankCapacity2;              // FUELSYSTEM TANK CAPACITY:2 (Gallons)
+        public double FuelSystemTankCapacity3;              // FUELSYSTEM TANK CAPACITY:3 (Gallons)
+        public double FuelSystemTankCapacity4;              // FUELSYSTEM TANK CAPACITY:4 (Gallons)
+        public double FuelSystemTankCapacity5;              // FUELSYSTEM TANK CAPACITY:5 (Gallons)
+        public double FuelSystemTankCapacity6;              // FUELSYSTEM TANK CAPACITY:6 (Gallons)
+        public double FuelSystemTankCapacity7;              // FUELSYSTEM TANK CAPACITY:7 (Gallons)
+        public double FuelSystemTankCapacity8;              // FUELSYSTEM TANK CAPACITY:8 (Gallons)
     }
 }
