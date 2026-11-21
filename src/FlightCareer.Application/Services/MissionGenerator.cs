@@ -18,7 +18,7 @@ namespace FlightCareer.Application.Services
         private DateTime? _currentReferenceTime;
 
         public double PayMultiplier { get; set; } = 1.0;
-        public MissionPayTable PayTable { get; set; } = MissionPayTable.LoadDefault();
+        public MissionPayTable PayTable { get; set; } = MissionPayTable.Shared;
 
         public MissionGenerator(IAppDbContext context, IHubDataService? hubService = null, Random? random = null)
         {
@@ -745,7 +745,7 @@ namespace FlightCareer.Application.Services
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null)
         {
-            payTable ??= MissionPayTable.LoadDefault();
+            payTable ??= MissionPayTable.Shared;
             var family = payTable.Resolve(subId);
 
             double effectivePax = family.PaxAtLeastOne ? Math.Max(1, paxCount) : paxCount;

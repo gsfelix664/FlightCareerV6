@@ -272,5 +272,30 @@ namespace FlightCareer.Tests.Economy
 
             return Math.Round(finalReward, 2);
         }
+
+        [Fact]
+        public void StableHash_ValorFixoEntreExecucoes()
+        {
+            // FNV-1a 32 bits de "SBSP" (valor fixo: string.GetHashCode muda a cada processo)
+            uint expected = 2166136261;
+            foreach (char c in "SBSP") { expected ^= c; expected *= 16777619; }
+            Assert.Equal(unchecked((int)expected), FlightCareer.Application.Simulation.CareerProgressionSimulator.StableHash("SBSP"));
+            Assert.NotEqual(FlightCareer.Application.Simulation.CareerProgressionSimulator.StableHash("SBSP"),
+                FlightCareer.Application.Simulation.CareerProgressionSimulator.StableHash("SBGR"));
+        }
+
+        [Fact]
+        public void DeriveBotSeed_NaoDependeDaCaixaDaPolitica()
+        {
+            int a = FlightCareer.Application.Simulation.CareerProgressionSimulator.DeriveBotSeed(1, DifficultyMode.Medium, "Cauteloso", 2);
+            int b = FlightCareer.Application.Simulation.CareerProgressionSimulator.DeriveBotSeed(1, DifficultyMode.Medium, "cauteloso", 2);
+            Assert.Equal(a, b);
+        }
+
+        [Fact]
+        public void MissionPayTable_Shared_MesmaInstancia()
+        {
+            Assert.Same(MissionPayTable.Shared, MissionPayTable.Shared);
+        }
     }
 }

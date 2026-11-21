@@ -72,6 +72,11 @@ namespace FlightCareer.Domain.Economy
             return new MissionPayTable(families);
         }
 
+        private static readonly Lazy<MissionPayTable> _shared = new(() => LoadDefault());
+
+        /// <summary>Tabela padrão lida uma única vez (o gerador calcula milhares de missões).</summary>
+        public static MissionPayTable Shared => _shared.Value;
+
         public static MissionPayTable LoadDefault(string? directory = null)
         {
             string[] candidates =

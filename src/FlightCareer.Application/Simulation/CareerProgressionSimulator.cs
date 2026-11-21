@@ -302,7 +302,7 @@ namespace FlightCareer.Application.Simulation
                                     var cacheKey = (currentAirport.ICAO, day, difficulty);
                                     if (!missionCache.TryGetValue(cacheKey, out var availableMissions))
                                     {
-                                        int apSeed = unchecked((currentAirport.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                        int apSeed = unchecked((StableHash(currentAirport.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
                                         var apRnd = new Random(apSeed & 0x7FFFFFFF);
                                         availableMissions = MissionGenerator.GenerateMissionsInMemory(
                                             currentAirport,
@@ -335,7 +335,7 @@ namespace FlightCareer.Application.Simulation
                                         var key = (ap.ICAO, day, difficulty);
                                         if (!missionCache.TryGetValue(key, out var list))
                                         {
-                                            int seedAp = unchecked((ap.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                            int seedAp = unchecked((StableHash(ap.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
                                             list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier);
                                             missionCache[key] = list;
                                         }
@@ -1490,6 +1490,24 @@ namespace FlightCareer.Application.Simulation
             return monthlyInsurance + monthlyFuel + monthlyMaintAndFees;
         }
 
+        /// <summary>
+        /// Hash FNV-1a estável entre execuções. string.GetHashCode() é aleatório por processo no .NET,
+        /// o que tornava a ECON-STAB não reprodutível com a mesma semente.
+        /// </summary>
+        public static int StableHash(string? text)
+        {
+            unchecked
+            {
+                uint hash = 2166136261;
+                foreach (char c in text ?? string.Empty)
+                {
+                    hash ^= c;
+                    hash *= 16777619;
+                }
+                return (int)hash;
+            }
+        }
+
         public static int DeriveBotSeed(int baseSeed, DifficultyMode difficulty, string policy, int botIndex)
         {
             unchecked
@@ -1497,7 +1515,7 @@ namespace FlightCareer.Application.Simulation
                 int hash = 17;
                 hash = hash * 31 + baseSeed;
                 hash = hash * 31 + (int)difficulty * 1009;
-                hash = hash * 31 + (policy != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(policy) : 0);
+                hash = hash * 31 + (policy != null ? StableHash(policy.ToLowerInvariant()) : 0);
                 hash = hash * 31 + botIndex * 503;
                 int seed = hash & 0x7FFFFFFF;
                 return seed == 0 ? 1 : seed;
