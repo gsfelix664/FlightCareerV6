@@ -1,4 +1,13 @@
-# Passagem de sessão (Claude) — 2026-11-20 (PC de casa, com MSFS)
+# Passagem de sessão (Claude) — 2026-11-21 (PC de casa, com MSFS)
+
+## Atualização 2026-11-21 (vale sobre o que está abaixo)
+- **Mergeados e no GitHub:** correção do óleo (`SimFailureActuator.Reset` só desfaz vazamento criado pelo app; não esvazia mais o motor no início do voo) e **MANUT-FAIXAS-B** (lista "Peças (n)" por card com saúde conhecida, "visto há X h", nota de vida e **Trocar**; "Reparar tudo" só pelo conhecido; troca avulsa não devolve TBO/125 h; cores 40/20). Build 0 erros, 684/684. **Nada visto na tela nem testado no MSFS.**
+- **ECON-STAB com as faixas:** 0 falências; cauteloso ≈ agressivo; manutenção quase não pesa porque a margem é ~90 %. Detalhes em `docs/plans/economia-estabilidade.md` › 4.2. Itens 1 e 2 abaixo concluídos.
+- **Próximo:** decisões 4 (curva D) e 5 (dificuldade E) do plano de economia → recalibrar `MissionGenerator.CalculateReward` por classe; voo de teste no MSFS (conferir óleo no início do voo, Hangar novo); itens 3 (inversão do óleo no vazamento ativo) e 4 abaixo continuam.
+
+---
+
+# Passagem anterior — 2026-11-20 (PC de casa, com MSFS)
 
 ## Atualização 2026-11-20 (vale sobre o que está abaixo)
 - **Manutenção por faixas (decisões do usuário):** `docs/plans/economia-estabilidade.md` › 4.1. Verde 100–40, amarelo 40–20 (desgaste acelerado até 2× e perda de desempenho), vermelho < 20 (pane por peça). Reparo sem limite automático de 80 %; revisões trocam o conjunto delas; walkaround mostra valor exato; só a anual interdita (e só inspeciona); seguro 2,5 %/ano, nega perda total com achado vermelho da anual não trocado.
