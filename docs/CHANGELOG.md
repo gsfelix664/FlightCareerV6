@@ -2585,3 +2585,7 @@
 ## 2026-11-20 - Revisão MANUT-FAIXAS-A e pesquisa de perda de desempenho (Claude)
 - Revisão aprovada com ajustes: o simulador de carreira deixou de cobrar em dobro as peças da troca de óleo, revisão de ignição e retífica (o pacote já inclui as peças, como no Hangar); `InsuranceService.ClaimDenied` recebe o catálogo para o nome da peça (sem `catch` silencioso); `ComponentFlightSession.Reset` limpa as panes do voo.
 - `docs/plans/perda-desempenho-amarelo.md`: o que o SDK permite gravar para a perda de desempenho na faixa amarela e roteiro de teste; primeiro resultado no MSFS (`GENERAL ENG OIL LEAKED PERCENT` parece ser óleo restante — provável bug no vazamento do app). Não testado no MSFS: pane por peça em voo.
+
+## 2026-11-21 - Limpeza do vazamento de óleo não esvazia mais o motor (Claude)
+- `SimFailureActuator.Reset(clearSimState: true)` (chamado em todo início de monitoramento e ativação do voo) só grava `GENERAL ENG OIL LEAKED PERCENT:1 = 0` quando o próprio app criou o vazamento. Antes gravava 0 sempre que o sim informava valor > 0; no MSFS 2024 a SimVar parece valer 100 sem pane (probe `20261120-0822-C172SP_G1000_Passengers`), o que esvaziaria o óleo a cada voo.
+- Correção mínima e segura para o teste de voo. A semântica da SimVar no vazamento ativo (`ProcessOilLeak`, `TransmitOilLeak`) continua a confirmar e inverter (HANDOFF › item 3). Não testado no MSFS.
