@@ -829,32 +829,7 @@ namespace FlightCareer.UI.ViewModels
                 $"ABASTECIMENTO ({gallons:F1} GAL)",
                 (aircraft, _) => aircraft.FuelAmount = target,
                 category: "Combustível",
-                successMessage: $"Tanques com {target:F1} gal.");
-
-            TryWriteFuelToSimulator(SelectedAircraft.Aircraft);
-        }
-
-        private void TryWriteFuelToSimulator(PilotAircraft aircraft)
-        {
-            if (_simConnect == null || !_simConnect.IsConnected) return;
-            if (_flightMonitor == null || _flightMonitor.WatchedAircraftId != aircraft.Id) return;
-
-            var simData = _simConnect.CurrentData;
-            bool onGround = simData.IsOnGround;
-            bool engineRunning = simData.IsEngineRunning;
-
-            if (onGround && !engineRunning)
-            {
-                var activeTanks = _simConnect.GetActiveFuelTanks();
-                if (activeTanks.Count > 0)
-                {
-                    var plan = FuelTankWritePlan.Distribute(aircraft.FuelAmount, activeTanks);
-                    if (plan.Allocations.Count > 0)
-                    {
-                        _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
-                    }
-                }
-            }
+                successMessage: $"Tanques com {target:F1} gal no app. Coloque {target:F1} gal no simulador (menu ou EFB): o briefing confere antes do voo.");
         }
 
         [RelayCommand]

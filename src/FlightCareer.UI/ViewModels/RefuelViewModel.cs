@@ -88,25 +88,6 @@ namespace FlightCareer.UI.ViewModels
             _context.FinancialTransactions.Add(transaction);
             await _context.SaveChangesAsync();
 
-            // Gravar combustível no simulador se a aeronave for a ativa/vigiada conectada no solo e com motores desligados
-            if (_simConnect != null && _simConnect.IsConnected &&
-                _flightMonitor != null && _flightMonitor.WatchedAircraftId == _aircraftWrapper.Aircraft.Id)
-            {
-                var simData = _simConnect.CurrentData;
-                if (simData.IsOnGround && !simData.IsEngineRunning)
-                {
-                    var activeTanks = _simConnect.GetActiveFuelTanks();
-                    if (activeTanks.Count > 0)
-                    {
-                        var plan = FuelTankWritePlan.Distribute(_aircraftWrapper.Aircraft.FuelAmount, activeTanks);
-                        if (plan.Allocations.Count > 0)
-                        {
-                            _simConnect.SetFuelTanks(plan.Allocations.Select(a => (a.SimVar, a.Gallons)).ToList());
-                        }
-                    }
-                }
-            }
-
             MessageBox.Show($"Abastecimento concluído! Total: {TotalCost:C2}");
             window.DialogResult = true;
             window.Close();
