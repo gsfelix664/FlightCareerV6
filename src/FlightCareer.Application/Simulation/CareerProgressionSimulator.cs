@@ -1584,6 +1584,7 @@ namespace FlightCareer.Application.Simulation
         /// Hash FNV-1a estável entre execuções. string.GetHashCode() é aleatório por processo no .NET,
         /// o que tornava a ECON-STAB não reprodutível com a mesma semente.
         /// </summary>
+
         public static int StableHash(string? text)
         {
             unchecked
@@ -1755,7 +1756,7 @@ namespace FlightCareer.Application.Simulation
 
         private static List<int> DetermineMilestones(int totalDays)
         {
-            var standard = new[] { 30, 180, 720 };
+            var standard = new[] { 30, 60, 90, 180, 365, 540, 730, 1095 };
             var list = standard.Where(m => m <= totalDays).ToList();
             if (!list.Contains(totalDays) && totalDays > 0)
             {
