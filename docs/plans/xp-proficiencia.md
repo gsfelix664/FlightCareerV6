@@ -55,3 +55,16 @@ Um voo normal e bem feito rende ~60 XP/h; um voo difícil e bem feito, 90–120 
 - Plano aprovado como proposto: XP por minuto no ar (sem táxi), fator de qualidade 0,5–1,2, bônus de dificuldade e penalidades da § 3, teto de +100 %, e o quadro de missões com a mesma estimativa.
 - Taxa base (1,0 ou 1,5 XP/min) e exigências por categoria: o revisor calibra na ECON-STAB para que os bots de política cautelosa/equilibrada sigam a curva de progressão de economia-estabilidade.md › 4.3 (D), mantendo 2.500 / 12.000 / 45.000 / 150.000 se a curva fechar.
 - Achados § 4: o 1 (ciclos de pouso) foi corrigido em 2026-11-21 (`PartWearEngine.ApplyLandingCycle`); 2 (avião usado incoerente) e 3 (bônus de pista difícil no pagamento) entram antes ou junto da implementação do XP.
+
+## 5.2 Pedido do usuário (2026-11-22) — critérios da nota por tipo de missão (implementação futura)
+A nota de qualidade (que vira o fator 0,5–1,2 do XP) passa a avaliar **o que importa em cada tipo de voo**, em vez de uma regra única. Ponto de partida no código: `Domain/Services/FlightQualityService` já separa carga × passageiro (na carga só contam G e solavanco) e tem as regras injetáveis em `FlightQualityRules`; a ideia é ter um conjunto de regras e pesos **por família de missão**, usando as mesmas famílias/prefixos de `mission_pay.json` (`instrucao_basica`, `instrucao`, `taxi_aereo`, `regional`, `linha`, `carga_expressa`, `aog`, `medevac`, `agro_bush`, `agro_municipal`).
+
+| Tipo de voo | O que mais pesa na nota | O que pesa pouco ou nada |
+|---|---|---|
+| Instrução (3.4, 3.4.1) | pousos (razão de descida no toque, quiques), **toque-e-arremetida (TGL)**, força G, ângulos (bank/pitch) e velocidades dentro do permitido (Vfe, Vno, Vne, excedências de motor) | tempo de chegada |
+| Passageiros / táxi aéreo / regional / linha | conforto: força G, solavanco, ângulo e razão de subida/descida, bank, pouso suave | — |
+| Carga / carga expressa / AOG | força G e solavanco (carga solta), limites estruturais; pontualidade na expressa e no AOG | bank e pitch (já ignorados hoje) |
+| Médico (medevac) | **velocidade/tempo de chegada** (pontualidade contra o tempo estimado), sem exceder limites, conforto moderado (paciente a bordo) | — |
+| Agro / bush | precisão em pista curta/terra, controle no toque, limites | conforto |
+
+O que ainda não é medido e precisa de sensor/regra nova: contagem de TGL (toque sem parada seguido de decolagem), aproximação estabilizada, tempo de chegada contra o estimado da missão (o prazo `ExpirationTime` existe, o tempo estimado de voo não). Calibrar os pesos com voos gravados (replay) antes de ligar. Decisões pendentes do usuário: pesos de cada tipo e se a pontualidade do medevac também afeta o pagamento ou só o XP.
