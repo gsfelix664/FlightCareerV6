@@ -2908,3 +2908,27 @@
 - **Calibração em dados:** `career_phases.json` (3.6.x na fase 2), `mission_pay.json` (famílias `aerofoto` e `paraquedismo`) e `xp_rules.json` (M_Tipo 1,15).
 - Suíte de testes: `Phase2ContractTests.cs` (13 novos testes) cobrindo rastreadores, completion, gerador, migração de banco e isenção de taxas. Total de 886/886 testes xUnit aprovados (100%), fuzz testing (10 corridas) com 100% de aprovação e 0 falhas.
 - Não testado no MSFS / não visto na tela.
+
+## 2026-11-22 - Contratos das fases 3 a 7 (FASES-2C) (Gemini)
+- **Subtipos de Contratos das Fases 3 a 7 (`MissionRules.cs`):** adicionadas categorias dedicadas nos Tiers 1, 2 e 3 (`1.7.1`–`1.7.8`, `2.7.1`–`2.7.4`, `3.7.1`–`3.7.2`):
+  - **Fase 3:**
+    - Fretamento executivo (`1.7.1`, `2.7.1`, `3.7.1`): origem tier 1–3 → destino tier 3–4 do mesmo país; 2–6 pax; 100–400 NM; família `taxi_aereo` (M_Tipo 1,25).
+    - Carga frágil / expressa (`1.7.2`, `2.7.2`, `3.7.2`): 100–800 lb; 80–400 NM; Urgency 1,3; expiração curta (1–3 h); família nova `carga_fragil` (escala 0.7 da `aog`, M_Tipo 1,35).
+  - **Fase 4:**
+    - MEDEVAC dinâmico (`1.7.3`, `2.7.3`): destino com maior pista $\le 4.000$ ft ou não pavimentada; 1–2 pax + 300–600 lb; Urgency 1,5; expiração 1–2 h; família `medevac` (M_Tipo 1,50).
+    - VIP internacional curto (`1.7.4`, `2.7.4`): destino em país vizinho/diferente (`Country` diferente); 300–900 NM; 2–8 pax; família `taxi_aereo` (M_Tipo 1,25).
+  - **Fase 6:**
+    - Ponte aérea / troncal (`1.7.5`): hub ↔ hub do mesmo país (tier 1 ↔ tier 1); 150–220 pax; 150–700 NM; família `linha` (M_Tipo 1,25).
+    - Cargueiro noturno (`1.7.6`): hubs tier 1; 20.000–60.000 lb; 300–1.500 NM; texto "voo noturno"; família `linha` com M_Tipo 1,00 para carga.
+  - **Fase 7:**
+    - Long-haul internacional (`1.7.7`): > 2.500 NM entre hubs de países diferentes; 200–400 pax; família `linha` (M_Tipo 1,25).
+    - Fretamento global / carga de alto valor (`1.7.8`): > 2.000 NM; carga 30.000–100.000 lb; Urgency 1,2; família nova `carga_global` (escala 0.28 da `linha`, M_Tipo 1,35).
+- **Gerador de Missões (`MissionGenerator.cs`):**
+  - Implementada filtragem operacional de destinos para os 8 contratos em `CreateMissionFromSubCategory` e `CreateMissionFromSubCategoryInMemory`, garantindo destino em mesmo país / país diferente, hubs tier 1, aeródromos com restrição de pista ($\le 4.000$ ft ou não pavimentada) e faixas de distância/pax/carga.
+- **Calibração e Economia:**
+  - `career_phases.json` e `CareerPhaseCatalog.cs`: mapeamento completo de todos os 14 subtipos novos para suas fases regulatórias (3, 4, 6 e 7), com fallback seguro embutido.
+  - `mission_pay.json` e `MissionPayTable.cs`: adicionadas famílias `carga_fragil` (escala 0.7) e `carga_global` (escala 0.28) com paridade e ordenação 1:1.
+  - `xp_rules.json`, `XpRules.cs` e `XpCalculator.cs`: configurados `carga_fragil: 1.35`, `carga_global: 1.35` e `1.7.6: 1.00`.
+- **Suíte de Testes:**
+  - `Phase3To7ContractsTests.cs`: 12 testes cobrindo integridade do catálogo, oráculos do gerador com sementes fixas para os 8 contratos, regras geográficas/pistas de destino, escalas de pagamento e persistência no banco. Total de 898/898 testes aprovados (100%).
+- Não testado no MSFS / não visto na tela.

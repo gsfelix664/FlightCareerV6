@@ -227,6 +227,38 @@ namespace FlightCareer.Application.Services
                 query = query.Where(a => a.Tier <= 3);
             }
 
+            // Filtros específicos por contrato das Fases 3 a 7
+            if (sub.Id == "1.7.1" || sub.Id == "2.7.1")
+            {
+                // Fretamento Executivo: capital/hub ou regional -> interior (tier 3 ou 4) do mesmo país
+                query = query.Where(a => a.Country == origin.Country && (a.Tier == 3 || a.Tier == 4));
+            }
+            else if (sub.Id == "1.7.4" || sub.Id == "2.7.4")
+            {
+                // VIP Internacional Curto: país vizinho / diferente
+                query = query.Where(a => a.Country != origin.Country && a.Country != "");
+            }
+            else if (sub.Id == "1.7.5")
+            {
+                // Ponte Aérea / Troncal: hub ↔ hub do mesmo país
+                query = query.Where(a => a.Tier == 1 && a.Country == origin.Country);
+            }
+            else if (sub.Id == "1.7.6")
+            {
+                // Cargueiro Noturno: entre hubs
+                query = query.Where(a => a.Tier == 1);
+            }
+            else if (sub.Id == "1.7.7")
+            {
+                // Long-Haul Internacional: entre hubs de países diferentes
+                query = query.Where(a => a.Tier == 1 && a.Country != origin.Country && a.Country != "");
+            }
+            else if (sub.Id == "1.7.8")
+            {
+                // Fretamento Global / Carga de Alto Valor: aeroportos de grande porte
+                query = query.Where(a => a.Tier <= 2);
+            }
+
             if (sub.Id == "3.4.1") 
             {
                 var originRwy = await GetDestinationRunwayAsync(origin.ICAO);
@@ -322,6 +354,26 @@ namespace FlightCareer.Application.Services
                 .Where(x => x.Dist >= minRange && x.Dist <= maxRange)
                 .ToList();
 
+            if (sub.Id == "1.7.3" || sub.Id == "2.7.3" || sub.Id == "3.7.2")
+            {
+                // MEDEVAC Dinâmico: destino com maior pista <= 4.000 ft ou não pavimentada
+                var candIcaos = validDestinations.Select(x => x.Airport.ICAO).ToList();
+                var rwys = await _context.Runways
+                    .Where(r => candIcaos.Contains(r.AirportIdent))
+                    .ToListAsync();
+                var rwyByIcao = rwys.GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                validDestinations = validDestinations.Where(x =>
+                {
+                    if (rwyByIcao.TryGetValue(x.Airport.ICAO, out var destRwys) && destRwys.Count > 0)
+                    {
+                        return destRwys.Max(r => r.LengthFt) <= 4000 || destRwys.Any(r => RunwaySurface.IsUnpaved(r.Surface));
+                    }
+                    return x.Airport.Tier >= 3;
+                }).ToList();
+            }
+
             if (!validDestinations.Any()) return null;
 
             // 3. Priorizar ICAOs (Geral ou via Perfis G20)
@@ -343,8 +395,18 @@ namespace FlightCareer.Application.Services
             var preferredCandidates = validDestinations.Where(x => preferredList.Contains(x.Airport.ICAO)).ToList();
             var selected = preferredCandidates.Any() ? preferredCandidates[_random.Next(preferredCandidates.Count)] : validDestinations[_random.Next(validDestinations.Count)];
 
-            string? titleOverride = sub.Id == "3.5.3" ? $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}" : null;
-            string? descOverride = sub.Id == "3.5.3" ? $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial." : null;
+            string? titleOverride = sub.Id switch
+            {
+                "3.5.3" => $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}",
+                "1.7.6" => $"Cargueiro Noturno: {origin.ICAO} ➔ {selected.Airport.ICAO}",
+                _ => null
+            };
+            string? descOverride = sub.Id switch
+            {
+                "3.5.3" => $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial.",
+                "1.7.6" => $"Operação logística de carga pesada em voo noturno conectando grandes hubs ({origin.ICAO} ➔ {selected.Airport.ICAO}).",
+                _ => null
+            };
             var destRunway = await GetDestinationRunwayAsync(selected.Airport.ICAO);
 
             return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight,
@@ -617,7 +679,8 @@ namespace FlightCareer.Application.Services
             DateTime referenceTime,
             int? countOverride = null,
             double payMultiplier = 1.0,
-            MissionPayTable? payTable = null)
+            MissionPayTable? payTable = null,
+            IReadOnlyList<Runway>? allRunways = null)
         {
             if (currentAirport == null) return new List<Mission>();
             if (!MissionRules.Rules.TryGetValue(currentAirport.Tier, out var tierConfig))
@@ -655,7 +718,8 @@ namespace FlightCareer.Application.Services
                     random,
                     referenceTime,
                     payMultiplier,
-                    payTable);
+                    payTable,
+                    allRunways);
 
                 if (mission != null)
                 {
@@ -675,7 +739,8 @@ namespace FlightCareer.Application.Services
             Random random,
             DateTime referenceTime,
             double payMultiplier = 1.0,
-            MissionPayTable? payTable = null)
+            MissionPayTable? payTable = null,
+            IReadOnlyList<Runway>? allRunways = null)
         {
             var rangeRule = PickWeighted(sub.RangeRules, random);
             var paxRule = PickWeighted(sub.PaxRules, random);
@@ -790,6 +855,46 @@ namespace FlightCareer.Application.Services
                 else if (sub.MinRunwayDest >= 4500 && a.Tier > 2) continue;
                 else if (sub.MinRunwayDest >= 2500 && a.Tier > 3) continue;
 
+                // Filtros específicos por contrato das Fases 3 a 7
+                if (sub.Id == "1.7.1" || sub.Id == "2.7.1")
+                {
+                    if (!string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase) || (a.Tier != 3 && a.Tier != 4)) continue;
+                }
+                else if (sub.Id == "1.7.4" || sub.Id == "2.7.4")
+                {
+                    if (string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                }
+                else if (sub.Id == "1.7.5")
+                {
+                    if (a.Tier != 1 || !string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                }
+                else if (sub.Id == "1.7.6")
+                {
+                    if (a.Tier != 1) continue;
+                }
+                else if (sub.Id == "1.7.7")
+                {
+                    if (a.Tier != 1 || string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                }
+                else if (sub.Id == "1.7.8")
+                {
+                    if (a.Tier > 2) continue;
+                }
+                else if (sub.Id == "1.7.3" || sub.Id == "2.7.3" || sub.Id == "3.7.2")
+                {
+                    if (allRunways != null)
+                    {
+                        var destRwys = allRunways.Where(r => string.Equals(r.AirportIdent, a.ICAO, StringComparison.OrdinalIgnoreCase)).ToList();
+                        if (destRwys.Count > 0)
+                        {
+                            bool ok = destRwys.Max(r => r.LengthFt) <= 4000 || destRwys.Any(r => RunwaySurface.IsUnpaved(r.Surface));
+                            if (!ok) continue;
+                        }
+                        else if (a.Tier != 3 && a.Tier != 4) continue;
+                    }
+                    else if (a.Tier != 3 && a.Tier != 4) continue;
+                }
+
                 if (a.Latitude < origin.Latitude - maxDeg || a.Latitude > origin.Latitude + maxDeg) continue;
                 if (a.Longitude < origin.Longitude - maxDeg || a.Longitude > origin.Longitude + maxDeg) continue;
 
@@ -820,8 +925,18 @@ namespace FlightCareer.Application.Services
                 ? preferredCandidates[random.Next(preferredCandidates.Count)]
                 : candidates[random.Next(candidates.Count)];
 
-            string? titleOverride = sub.Id == "3.5.3" ? $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}" : null;
-            string? descOverride = sub.Id == "3.5.3" ? $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial." : null;
+            string? titleOverride = sub.Id switch
+            {
+                "3.5.3" => $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}",
+                "1.7.6" => $"Cargueiro Noturno: {origin.ICAO} ➔ {selected.Airport.ICAO}",
+                _ => null
+            };
+            string? descOverride = sub.Id switch
+            {
+                "3.5.3" => $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial.",
+                "1.7.6" => $"Operação logística de carga pesada em voo noturno conectando grandes hubs ({origin.ICAO} ➔ {selected.Airport.ICAO}).",
+                _ => null
+            };
 
             return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable,
                 requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride);

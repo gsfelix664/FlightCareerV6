@@ -248,6 +248,19 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Persistência de Dados e Integração:** coluna `ContractData` (TEXT DEFAULT NULL) adicionada em `Mission` e migrada em `EnsureSchemaUpdatedAsync`. `FlightMonitor` atualiza trackers e repassa métricas para `FlightService.ProcessFlightFinishAsync`.
 - **Calibração em dados:** subtipos 3.6.x mapeados para fase 2 em `career_phases.json`, famílias `aerofoto` e `paraquedismo` adicionadas em `mission_pay.json` e `xp_rules.json`. Não testado no MSFS / tela do app.
 
+### Contratos das Fases 3 a 7 (FASES-2C)
+- **Subtipos das Fases 3 a 7 (`MissionRules.cs`):** categorias adicionadas nos Tiers 1, 2 e 3 (`1.7.1`–`1.7.8`, `2.7.1`–`2.7.4`, `3.7.1`–`3.7.2`):
+  - **Fase 3:** Fretamento executivo (`1.7.1`, `2.7.1`, `3.7.1`, mesmo país, tiers 3–4, 2–6 pax, 100–400 NM, família `taxi_aereo`, M_Tipo 1,25) e Carga frágil / expressa (`1.7.2`, `2.7.2`, `3.7.2`, 100–800 lb, 80–400 NM, Urgency 1,3, expiração 1–3 h, família nova `carga_fragil` com escala 0.7 da `aog`, M_Tipo 1,35).
+  - **Fase 4:** MEDEVAC dinâmico (`1.7.3`, `2.7.3`, destino com pista $\le 4.000$ ft ou não pavimentada, 1–2 pax + 300–600 lb, Urgency 1,5, expiração 1–2 h, família `medevac`, M_Tipo 1,50) e VIP internacional curto (`1.7.4`, `2.7.4`, destino com `Country` diferente, 300–900 NM, 2–8 pax, família `taxi_aereo`, M_Tipo 1,25).
+  - **Fase 6:** Ponte aérea / troncal (`1.7.5`, hub ↔ hub tier 1 do mesmo país, 150–220 pax, 150–700 NM, família `linha`, M_Tipo 1,25) e Cargueiro noturno (`1.7.6`, hubs tier 1, 20.000–60.000 lb, 300–1.500 NM, família `linha`, M_Tipo 1,00 para carga).
+  - **Fase 7:** Long-haul internacional (`1.7.7`, > 2.500 NM entre hubs tier 1 de países diferentes, 200–400 pax, família `linha`, M_Tipo 1,25) e Fretamento global / carga de alto valor (`1.7.8`, > 2.000 NM, carga 30.000–100.000 lb, Urgency 1,2, família nova `carga_global` com escala 0.28 da `linha`, M_Tipo 1,35).
+- **Filtros Operacionais no Gerador (`MissionGenerator.cs`):** filtragem de aeródromos de destino em `CreateMissionFromSubCategory` e `CreateMissionFromSubCategoryInMemory` respeitando país de destino (mesmo país ou diferente), tier do aeroporto e pista curta/não pavimentada (`RunwaySurface.IsUnpaved`).
+- **Calibração em dados:**
+  - `career_phases.json` e `CareerPhaseCatalog.cs`: subtipos mapeados para fases 3, 4, 6 e 7 com fallback seguro.
+  - `mission_pay.json` e `MissionPayTable.cs`: adicionadas famílias `carga_fragil` (escala 0.7) e `carga_global` (escala 0.28).
+  - `xp_rules.json`, `XpRules.cs` e `XpCalculator.cs`: configurados multiplicadores `carga_fragil` (1.35), `carga_global` (1.35) e `1.7.6` (1.00).
+- Não testado no MSFS / não visto na tela.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

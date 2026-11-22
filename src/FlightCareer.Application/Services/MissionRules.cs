@@ -146,6 +146,7 @@ namespace FlightCareer.Application.Services
                 PaxRules = { new(30, 15, 40), new(50, 5, 15), new(20, 0, 0) }
             });
             t1.Categories.Add(c1_3);
+            t1.Categories.Add(CreateTier1CareerCategory());
             Rules.Add(1, t1);
 
             // TIER 2
@@ -274,6 +275,7 @@ namespace FlightCareer.Application.Services
             t2.Categories.Add(c2_5);
             t2.Categories.Add(CreateAeroclubeCategory());
             t2.Categories.Add(CreateSaeCategory());
+            t2.Categories.Add(CreateTier2CareerCategory());
             Rules.Add(2, t2);
 
             // TIER 3
@@ -390,6 +392,7 @@ namespace FlightCareer.Application.Services
             t3.Categories.Add(c3_4);
             t3.Categories.Add(CreateAeroclubeCategory());
             t3.Categories.Add(CreateSaeCategory());
+            t3.Categories.Add(CreateTier3CareerCategory());
             Rules.Add(3, t3);
 
             // TIER 4
@@ -554,6 +557,144 @@ namespace FlightCareer.Application.Services
                 PaxRules = { new(100, 0, 0) },
                 LbsRules = { new(100, 10, 50) },
                 RangeRules = { new(100, 10, 80) }
+            });
+            return cat;
+        }
+
+        private static CategoryConfig CreateTier1CareerCategory()
+        {
+            var cat = new CategoryConfig { Id = "1.7", Name = "Contratos de Carreira (Fases 3 a 7)", Weight = 15 };
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.1", Name = "Fretamento Executivo",
+                Description = "Fretamento executivo conectando grandes centros e capitais ao interior. Transporte de passageiros corporativos para aeródromos sem linha aérea regular.",
+                Weight = 15, MinExpHours = 6, MaxExpHours = 24, RequiresHardSurface = false, MinRunwayDest = 1800, LuggageWeightKg = 18,
+                RangeRules = { new(100, 100, 400) },
+                PaxRules = { new(100, 2, 6) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.2", Name = "Carga Frágil / Expressa",
+                Description = "Transporte de carga expressa e frágil com tolerância zero a impactos e janela de expiração extremamente curta.",
+                Weight = 15, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1500, Urgency = 1.3,
+                RangeRules = { new(100, 80, 400) },
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 100, 800) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.3", Name = "MEDEVAC Dinâmico",
+                Description = "Remoção médica aeromédica de emergência (UTI aérea) com destino crítico em pista curta ou não pavimentada. A bordo paciente, acompanhante e equipamentos de suporte à vida.",
+                Weight = 40, MinExpHours = 1, MaxExpHours = 2, RequiresHardSurface = false, MinRunwayDest = 1000, Urgency = 1.5,
+                RangeRules = { new(100, 50, 350) },
+                PaxRules = { new(100, 1, 2) },
+                LbsRules = { new(100, 300, 600) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.4", Name = "VIP Internacional Curto",
+                Description = "Transporte executivo VIP para países vizinhos com controle alfandegário e exigências de alto padrão de atendimento.",
+                Weight = 15, MinExpHours = 12, MaxExpHours = 36, RequiresHardSurface = true, MinRunwayDest = 3000, LuggageWeightKg = 25, Urgency = 1.2,
+                RangeRules = { new(100, 300, 900) },
+                PaxRules = { new(100, 2, 8) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.5", Name = "Ponte Aérea / Troncal",
+                Description = "Ponte aérea de altíssima densidade conectando grandes hubs metropolitanos do mesmo país. Exige máxima pontualidade e precisão de despacho.",
+                Weight = 20, MinExpHours = 12, MaxExpHours = 24, RequiresHardSurface = true, MinRunwayDest = 4000, LuggageWeightKg = 20, Urgency = 1.1,
+                RangeRules = { new(100, 150, 700) },
+                PaxRules = { new(100, 150, 220) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.6", Name = "Cargueiro Noturno",
+                Description = "Operação logística de carga pesada em voo noturno conectando hubs de distribuição primária da rede.",
+                Weight = 15, MinExpHours = 12, MaxExpHours = 36, RequiresHardSurface = true, MinRunwayDest = 5000, Urgency = 1.0,
+                RangeRules = { new(100, 300, 1500) },
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 20000, 60000) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.7", Name = "Long-Haul Internacional",
+                Description = "Travessia intercontinental regular conectando grandes hubs globais em países distintos com distâncias superiores a 2.500 NM.",
+                Weight = 15, MinExpHours = 36, MaxExpHours = 72, RequiresHardSurface = true, MinRunwayDest = 7000, LuggageWeightKg = 40, Urgency = 1.0,
+                RangeRules = { new(100, 2501, 6000) },
+                PaxRules = { new(100, 200, 400) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "1.7.8", Name = "Fretamento Global / Carga de Alto Valor",
+                Description = "Fretamento intercontinental especializado para transporte de carga pesada e de altíssimo valor agregado em rotas superiores a 2.000 NM.",
+                Weight = 15, MinExpHours = 24, MaxExpHours = 48, RequiresHardSurface = true, MinRunwayDest = 6000, Urgency = 1.2,
+                RangeRules = { new(100, 2001, 5500) },
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 30000, 100000) }
+            });
+            return cat;
+        }
+
+        private static CategoryConfig CreateTier2CareerCategory()
+        {
+            var cat = new CategoryConfig { Id = "2.7", Name = "Contratos de Carreira (Fases 3 e 4)", Weight = 15 };
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "2.7.1", Name = "Fretamento Executivo",
+                Description = "Fretamento executivo conectando polos regionais ao interior. Transporte corporativo para aeródromos sem linha aérea regular.",
+                Weight = 25, MinExpHours = 6, MaxExpHours = 24, RequiresHardSurface = false, MinRunwayDest = 1800, LuggageWeightKg = 18,
+                RangeRules = { new(100, 100, 400) },
+                PaxRules = { new(100, 2, 6) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "2.7.2", Name = "Carga Frágil / Expressa",
+                Description = "Transporte de carga expressa e frágil com tolerância zero a impactos e janela de expiração extremamente curta.",
+                Weight = 20, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1500, Urgency = 1.3,
+                RangeRules = { new(100, 80, 400) },
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 100, 800) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "2.7.3", Name = "MEDEVAC Dinâmico",
+                Description = "Remoção médica aeromédica de emergência (UTI aérea) com destino crítico em pista curta ou não pavimentada. A bordo paciente, acompanhante e equipamentos de suporte à vida.",
+                Weight = 40, MinExpHours = 1, MaxExpHours = 2, RequiresHardSurface = false, MinRunwayDest = 1000, Urgency = 1.5,
+                RangeRules = { new(100, 50, 350) },
+                PaxRules = { new(100, 1, 2) },
+                LbsRules = { new(100, 300, 600) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "2.7.4", Name = "VIP Internacional Curto",
+                Description = "Transporte executivo VIP a partir de polo regional para países vizinhos.",
+                Weight = 15, MinExpHours = 12, MaxExpHours = 36, RequiresHardSurface = true, MinRunwayDest = 3000, LuggageWeightKg = 25, Urgency = 1.2,
+                RangeRules = { new(100, 300, 900) },
+                PaxRules = { new(100, 2, 8) }
+            });
+            return cat;
+        }
+
+        private static CategoryConfig CreateTier3CareerCategory()
+        {
+            var cat = new CategoryConfig { Id = "3.7", Name = "Contratos de Carreira (Fases 3 e 4)", Weight = 15 };
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.7.1", Name = "Carga Frágil / Expressa",
+                Description = "Transporte de carga expressa e frágil a partir de aeródromo municipal com janela de expiração extremamente curta.",
+                Weight = 30, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1500, Urgency = 1.3,
+                RangeRules = { new(100, 80, 400) },
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 100, 800) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.7.2", Name = "MEDEVAC Dinâmico",
+                Description = "Remoção médica de urgência com base em polo municipal atendendo destinos com pista curta ou não pavimentada.",
+                Weight = 50, MinExpHours = 1, MaxExpHours = 2, RequiresHardSurface = false, MinRunwayDest = 1000, Urgency = 1.5,
+                RangeRules = { new(100, 50, 350) },
+                PaxRules = { new(100, 1, 2) },
+                LbsRules = { new(100, 300, 600) }
             });
             return cat;
         }
