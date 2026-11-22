@@ -43,6 +43,20 @@ Os ids são os subtipos atuais (o primeiro dígito é o tier do aeroporto de ori
 ## 5. Pendências do usuário
 1. Revisar o mapeamento da § 3.
 2. Missões de fases **anteriores** continuam liberadas para quem subiu (sugestão: sim)?
-3. Promoção de fase: só nível de XP, ou também custo de homologação e mínimo de horas?
+3. ~~Promoção de fase~~ **Decidido (2026-11-22)** — ver § 6.
 4. Ordem de implementação dos contratos novos (sugestão: fase 1 — panorâmico, TGL e translado básico — primeiro, porque o jogador começa nela).
-5. `REGRAS_tiers.txt` (arquivo do usuário, ainda não analisado) — confirmar se é a fonte destas regras.
+5. ~~`REGRAS_tiers.txt`~~ **Não tem relação com as fases** (é outro assunto do usuário); continua sem ler até ele pedir.
+
+## 6. Nível × fase (decisão do usuário, 2026-11-22)
+- **Subir de nível depende só de XP.** Os níveis continuam subindo livremente (ex.: 1 → 5 → 9) mesmo que o piloto não tenha mudado de fase.
+- **Mudar de fase exige três coisas:** (1) ter o **nível de entrada** da fase seguinte (ex.: nível 6 para a fase 2); (2) **pagar a homologação**; (3) ter o **mínimo de horas**. Enquanto não pagar ou não tiver as horas, o piloto fica na fase atual (com o nível acima), e as missões da fase seguinte ficam bloqueadas.
+- Hoje existem 4 promoções (horas 40 / 150 / 500 / 1.500 h; homologação $35 mil / $120 mil / $500 mil / $2 mi). Proposta para as 6 promoções das 7 fases (calibrar na ECON-STAB junto com o pagamento):
+
+| Para a fase | Nível de entrada | Horas mínimas | Homologação |
+|---|---|---|---|
+| 2 SAE | 6 | 40 h | $35.000 |
+| 3 Táxi aéreo | 13 | 150 h | $120.000 |
+| 4 Executiva/MEDEVAC | 21 | 300 h | $300.000 |
+| 5 Regional | 29 | 500 h | $500.000 |
+| 6 Doméstica | 37 | 1.000 h | $1.200.000 |
+| 7 Internacional | 45 | 1.500 h | $2.000.000 |
