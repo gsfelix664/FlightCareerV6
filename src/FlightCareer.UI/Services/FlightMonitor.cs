@@ -41,6 +41,8 @@ namespace FlightCareer.UI.Services
         private readonly FuelTruckDelivery _fuelTruck = new();
         private readonly TouchAndGoCounter _touchAndGoCounter = new();
         private readonly OverflyTracker _overflyTracker = new();
+        private readonly SurveyLegTracker _surveyTracker = new();
+        private readonly SkydiveDropTracker _skydiveTracker = new();
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -665,6 +667,29 @@ namespace FlightCareer.UI.Services
             _fuelAccumulator.Reset();
             _touchAndGoCounter.Reset(_simConnect.CurrentData.IsOnGround);
             _overflyTracker.Reset();
+            _surveyTracker.Reset();
+            _skydiveTracker.Reset();
+            foreach (var m in missions)
+            {
+                if (m.SubId == "3.6.1" && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var survey = System.Text.Json.JsonSerializer.Deserialize<SurveyContractData>(m.ContractData);
+                        if (survey != null) _surveyTracker.Configure(survey);
+                    }
+                    catch { }
+                }
+                else if (m.SubId == "3.6.2" && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var skydive = System.Text.Json.JsonSerializer.Deserialize<SkydiveContractData>(m.ContractData);
+                        if (skydive != null) _skydiveTracker.Configure(skydive);
+                    }
+                    catch { }
+                }
+            }
             if (missions.Any(m => !string.IsNullOrWhiteSpace(m.OverflyWaypoints)))
             {
                 using var wpContext = _contextFactory.CreateDbContext();
@@ -1118,10 +1143,22 @@ namespace FlightCareer.UI.Services
             _lastTick = now;
 
             bool isPaused = data.IsEngineRunning && data.GroundSpeed == 0 && data.EngineRPM == 0;
+            double simDt = 0.0;
             if (!isPaused)
             {
+                simDt = SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
                 // Salto (pausa/travamento) limitado no tempo real, antes do sim rate (antes cortava em 1 s por pacote)
-                _simulatedFlightTimeSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
+                _simulatedFlightTimeSeconds += simDt;
+            }
+
+            if (_surveyTracker.HasActiveContract)
+            {
+                _surveyTracker.Update(data.Latitude, data.Longitude, data.Altitude, data.Airspeed, data.PlaneHeading);
+            }
+            if (_skydiveTracker.HasActiveContract)
+            {
+                double chtCooling = _parts.LatestChtCoolingRate;
+                _skydiveTracker.Update(data.Latitude, data.Longitude, data.Altitude, data.Airspeed, chtCooling, simDt);
             }
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
@@ -1766,7 +1803,11 @@ namespace FlightCareer.UI.Services
                 autoStartUsed: _autoStartUsed,
                 xpInputs: xpInputs,
                 visitedWaypoints: _overflyTracker.VisitedWaypoints,
-                touchAndGoCount: _touchAndGoCounter.Count
+                touchAndGoCount: _touchAndGoCounter.Count,
+                surveyLegsCompleted: _surveyTracker.CompletedLegs,
+                skydiveDropCompleted: _skydiveTracker.DropCompleted,
+                skydiveThermalShock: _skydiveTracker.ThermalShockDetected,
+                skydiveMaxCoolingRate: _skydiveTracker.MaxCoolingRateObserved
             );
 
             OnFlightFinished?.Invoke(outcome);

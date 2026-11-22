@@ -55,5 +55,8 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Identificadores de pontos/aeródromos de sobrevoo obrigatório (ex.: "SBXX;SDYY;SNZZ"). Nulo/vazio = não se aplica.</summary>
         public string? OverflyWaypoints { get; set; }
+
+        /// <summary>Parâmetros específicos do contrato serializados em JSON (geometria de pernas de levantamento ou zona/altitude de salto). Nulo em missões padrão.</summary>
+        public string? ContractData { get; set; }
     }
 }

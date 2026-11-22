@@ -273,6 +273,7 @@ namespace FlightCareer.Application.Services
             });
             t2.Categories.Add(c2_5);
             t2.Categories.Add(CreateAeroclubeCategory());
+            t2.Categories.Add(CreateSaeCategory());
             Rules.Add(2, t2);
 
             // TIER 3
@@ -388,6 +389,7 @@ namespace FlightCareer.Application.Services
             });
             t3.Categories.Add(c3_4);
             t3.Categories.Add(CreateAeroclubeCategory());
+            t3.Categories.Add(CreateSaeCategory());
             Rules.Add(3, t3);
 
             // TIER 4
@@ -497,7 +499,32 @@ namespace FlightCareer.Application.Services
             });
             t4.Categories.Add(c4_4);
             t4.Categories.Add(CreateAeroclubeCategory());
+            t4.Categories.Add(CreateSaeCategory());
             Rules.Add(4, t4);
+        }
+
+        private static CategoryConfig CreateSaeCategory()
+        {
+            var cat = new CategoryConfig { Id = "3.6", Name = "Serviços Aéreos Especializados (SAE)", Weight = 5 };
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.6.1", Name = "Levantamento / Fotografia Aérea",
+                Description = "Levantamento fotográfico aéreo executando pernas paralelas em altitude e velocidade constantes sobre área demarcada.",
+                Weight = 50, MinExpHours = 2, MaxExpHours = 6, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 50, 100) },
+                RangeRules = { new(100, 15, 60) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.6.2", Name = "Lançamento de Paraquedistas",
+                Description = "Subida para lançamento de paraquedistas na vertical do aeródromo, estabilização na altitude de salto e descida sem choque térmico.",
+                Weight = 50, MinExpHours = 2, MaxExpHours = 6, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(50, 4, 6), new(50, 7, 10) },
+                LbsRules = { new(100, 80, 200) },
+                RangeRules = { new(100, 15, 35) }
+            });
+            return cat;
         }
 
         private static CategoryConfig CreateAeroclubeCategory()

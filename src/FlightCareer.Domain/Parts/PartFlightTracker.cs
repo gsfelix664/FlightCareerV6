@@ -65,6 +65,7 @@ namespace FlightCareer.Domain.Parts
 
         public bool IsActive => _parts.Count > 0;
         public bool HasPreflightChanges { get; private set; }
+        public double LatestChtCoolingRate { get; private set; }
         public IReadOnlyList<AircraftPart> Parts => _parts;
 
         /// <summary>
@@ -92,6 +93,7 @@ namespace FlightCareer.Domain.Parts
             _reportedDiagnostics.Clear();
             _accumulatedSimSeconds = 0.0;
             _chtHistoryByEngine.Clear();
+            LatestChtCoolingRate = 0.0;
             HasPreflightChanges = false;
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
@@ -150,6 +152,7 @@ namespace FlightCareer.Domain.Parts
             _reportedDiagnostics.Clear();
             _accumulatedSimSeconds = 0.0;
             _chtHistoryByEngine.Clear();
+            LatestChtCoolingRate = 0.0;
             HasPreflightChanges = false;
             LastDerivedEvents = Array.Empty<DerivedPartEvent>();
         }
@@ -526,6 +529,7 @@ namespace FlightCareer.Domain.Parts
                 if (eng == 1)
                 {
                     dict["eng-cht-cooling-rate"] = coolingRate;
+                    LatestChtCoolingRate = coolingRate;
                 }
             }
 

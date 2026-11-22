@@ -122,6 +122,28 @@
       "scale": 0.28
     },
     {
+      "id": "aerofoto",
+      "prefixes": [ "3.6.1" ],
+      "baseFee": 600.0,
+      "baseFeePerPax": 0.0,
+      "ratePerMile": 6.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.10,
+      "scale": 1.0
+    },
+    {
+      "id": "paraquedismo",
+      "prefixes": [ "3.6.2" ],
+      "baseFee": 0.0,
+      "baseFeePerPax": 120.0,
+      "ratePerMile": 4.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": true,
+      "ratePerPayloadLb": 0.10,
+      "scale": 1.0
+    },
+    {
       "id": "fallback",
       "prefixes": [],
       "baseFee": 400.0,

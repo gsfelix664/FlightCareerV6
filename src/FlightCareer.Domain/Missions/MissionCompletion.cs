@@ -1,22 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using FlightCareer.Domain.Entities;
 
 namespace FlightCareer.Domain.Missions
 {
-    public sealed record MissionCompletionResult(bool IsCompleted, string? Reason);
+    public sealed record MissionCompletionResult(bool IsCompleted, string? Reason, string? Warning = null);
 
     /// <summary>
-    /// Avalia a conclusão operacional de missões normais, circuitos de TGL e voos panorâmicos com sobrevoos.
+    /// Avalia a conclusão operacional de missões normais, circuitos de TGL, voos panorâmicos com sobrevoos,
+    /// levantamento fotográfico aéreo (3.6.1) e lançamento de paraquedistas (3.6.2).
     /// </summary>
     public static class MissionCompletion
     {
         public static MissionCompletionResult Evaluate(
             Mission mission,
             string landedIcao,
-            IReadOnlySet<string>? visitedWaypoints,
-            int touchAndGoCount)
+            IReadOnlySet<string>? visitedWaypoints = null,
+            int touchAndGoCount = 0,
+            int surveyLegsCompleted = 0,
+            bool skydiveDropCompleted = false,
+            bool skydiveThermalShock = false,
+            double skydiveMaxCoolingRate = 0.0)
         {
             if (mission == null)
             {
@@ -57,6 +63,50 @@ namespace FlightCareer.Domain.Missions
                         false,
                         $"Sobrevoo incompleto: ponto(s) não visitado(s): {string.Join(", ", missing)}.");
                 }
+            }
+
+            // Levantamento / Fotografia Aérea (3.6.1)
+            if (mission.SubId == "3.6.1")
+            {
+                int requiredLegs = 3;
+                if (!string.IsNullOrWhiteSpace(mission.ContractData))
+                {
+                    try
+                    {
+                        var survey = JsonSerializer.Deserialize<SurveyContractData>(mission.ContractData);
+                        if (survey != null && survey.RequiredLegs > 0)
+                        {
+                            requiredLegs = survey.RequiredLegs;
+                        }
+                    }
+                    catch { }
+                }
+
+                if (surveyLegsCompleted < requiredLegs)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        $"Levantamento incompleto: {surveyLegsCompleted} de {requiredLegs} pernas concluídas.");
+                }
+            }
+
+            // Lançamento de Paraquedistas (3.6.2)
+            if (mission.SubId == "3.6.2")
+            {
+                if (!skydiveDropCompleted)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        "Lançamento incompleto: não estabilizou na altitude de salto sobre a zona.");
+                }
+
+                string? warning = null;
+                if (skydiveThermalShock)
+                {
+                    warning = $"Choque térmico na descida: taxa máxima de resfriamento {skydiveMaxCoolingRate:F1} °C/min (limite: 28 °C/min).";
+                }
+
+                return new MissionCompletionResult(true, null, warning);
             }
 
             return new MissionCompletionResult(true, null);

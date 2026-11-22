@@ -82,6 +82,8 @@ namespace FlightCareer.Domain.Xp
             ["carga_expressa"] = 1.00,
             ["instrucao_basica"] = 1.10,
             ["instrucao"] = 1.10,
+            ["aerofoto"] = 1.15,
+            ["paraquedismo"] = 1.15,
             ["agro_municipal"] = 1.15,
             ["agro_bush"] = 1.15,
             ["taxi_aereo"] = 1.25,
