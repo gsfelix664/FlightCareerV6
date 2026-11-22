@@ -2771,3 +2771,7 @@
   - `FlightFinishXpPersistenceTests.cs`: teste de integração em SQLite em memória conferindo persistência exata de XP, avanço de nível do piloto e zeramento em voo invalidado.
 - Build 0 erros, `dotnet test` 809/809 testes aprovados (100%), Fuzz Testing em todas as 46 aeronaves (920 voos) 100% aprovado sem nenhuma violação.
 - Não testado no MSFS. Bônus noturno desligado (não confirmada SimVar direta no SDK); infrações de estol e luzes/velocidade não monitoradas atualmente pelo monitor entram como 0.
+
+## 2026-11-22 - Calibração do pagamento pela curva de progressão (Claude)
+- `mission_pay.json`: instrução 1,5; carga/agro/AOG/aeromédico/fallback 0,7; táxi aéreo/regional/linha 0,28. Medido na ECON-STAB (3 anos, 3 bots por estilo): Médio — 1ª troca no dia 79–96, turboélice no dia 365, jato no início do 3º ano; Difícil ~1,4–1,5× mais lento, sem jato em 3 anos. Antes: classe G no 1º ano e $8,3 mi de patrimônio. Detalhes e o conflito com a meta de patrimônio (≤ 20×) em `economia-estabilidade.md` › 4.4.
+- `CareerProgressionSimulator`: marcos 30/60/90/180/365/540/730/1095 dias. Testes da ECON-DIFF ajustados: a equivalência com o código antigo usa a tabela embutida (escala 1,0); o JSON calibrado só precisa de escala positiva. Suíte 821/821. Revalidar depois da FASES-1.

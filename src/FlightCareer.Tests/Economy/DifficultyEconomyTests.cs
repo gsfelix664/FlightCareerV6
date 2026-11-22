@@ -64,7 +64,8 @@ namespace FlightCareer.Tests.Economy
                 foreach (int pax in new[] { 0, 6 })
                 {
                     double oldVal = CalculateRewardOld(120, 500, 1.3, subId, pax, 1, 4, new Random(42));
-                    double newVal = MissionGenerator.CalculateReward(120, 500, 1.3, subId, pax, 1, 4, new Random(42));
+                    // Tabela embutida (escala 1,0): a calibração de 2026-11-22 muda só as escalas do JSON
+                    double newVal = MissionGenerator.CalculateReward(120, 500, 1.3, subId, pax, 1, 4, new Random(42), 1.0, MissionPayTable.Defaults);
                     Assert.Equal(oldVal, newVal);
                 }
             }
@@ -122,7 +123,8 @@ namespace FlightCareer.Tests.Economy
                 Assert.Equal(def.RatePerPaxMile, load.RatePerPaxMile);
                 Assert.Equal(def.PaxAtLeastOne, load.PaxAtLeastOne);
                 Assert.Equal(def.RatePerPayloadLb, load.RatePerPayloadLb);
-                Assert.Equal(def.Scale, load.Scale);
+                // Escala calibrada no JSON (economia-estabilidade.md › 4.4): só precisa ser positiva
+                Assert.True(load.Scale > 0);
             }
         }
 

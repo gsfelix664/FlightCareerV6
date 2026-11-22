@@ -9,7 +9,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.10,
-      "scale": 1.0
+      "scale": 1.5
     },
     {
       "id": "instrucao",
@@ -19,7 +19,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.10,
-      "scale": 1.0
+      "scale": 1.5
     },
     {
       "id": "medevac",
@@ -29,7 +29,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.25,
-      "scale": 1.0
+      "scale": 0.7
     },
     {
       "id": "aog",
@@ -39,7 +39,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.35,
-      "scale": 1.0
+      "scale": 0.7
     },
     {
       "id": "agro_bush",
@@ -49,7 +49,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.18,
-      "scale": 1.0
+      "scale": 0.7
     },
     {
       "id": "agro_municipal",
@@ -59,7 +59,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.15,
-      "scale": 1.0
+      "scale": 0.7
     },
     {
       "id": "taxi_aereo",
@@ -69,7 +69,7 @@
       "ratePerPaxMile": 1.5,
       "paxAtLeastOne": true,
       "ratePerPayloadLb": 0.12,
-      "scale": 1.0
+      "scale": 0.28
     },
     {
       "id": "carga_expressa",
@@ -79,7 +79,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.22,
-      "scale": 1.0
+      "scale": 0.7
     },
     {
       "id": "regional",
@@ -89,7 +89,7 @@
       "ratePerPaxMile": 0.45,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.08,
-      "scale": 1.0
+      "scale": 0.28
     },
     {
       "id": "linha",
@@ -99,7 +99,7 @@
       "ratePerPaxMile": 0.30,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.05,
-      "scale": 1.0
+      "scale": 0.28
     },
     {
       "id": "fallback",
@@ -109,7 +109,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.10,
-      "scale": 1.0
+      "scale": 0.7
     }
   ]
 }

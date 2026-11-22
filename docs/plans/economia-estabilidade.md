@@ -83,3 +83,19 @@ Mesmo comando (`--days 720 --bots 3 --seed 1 --difficulty all --policy all --fas
 dotnet run --project src/FlightCareer.Replay -- career-stab --days 720 --bots 3 --seed 1 --difficulty all --policy all --fast
 ```
 (~45 min; relatório em `%LocalAppData%/FlightCareer/career-sim/`.)
+
+## 4.4 Calibração do pagamento (2026-11-22, revisor) — `mission_pay.json`
+Medição por classe × tipo de missão (1 ano, Médio, escalas 1,0): o C152 fatura $1.019/h em instrução, $2.226/h em carga especializada e $3.882/h em táxi aéreo (~40 % da receita dele); da classe B em diante quase tudo é **táxi aéreo/charter (passageiros)**, $8–15 mil/h — é isso que acelerava a carreira depois da 1ª troca.
+
+Escalas finais: `instrucao_basica`/`instrucao` **1,5**; `medevac`, `aog`, `agro_bush`, `agro_municipal`, `carga_expressa`, `fallback` **0,7**; `taxi_aereo`, `regional`, `linha` **0,28**.
+
+| Rodada (3 anos, 3 bots/estilo) | 1ª troca (Médio) | Dia 365 (Médio) | Dia 730 (Médio) | Difícil |
+|---|---|---|---|---|
+| Escalas 1,0 (antes) | 71–88 | classe G, $8,3 mi agressivo | G | 1ª troca 95–151, G no 1º ano |
+| **Final** | **79–96** | **F** (turboélice), $4,5–4,8 mi | **H** (jato, início do 3º ano) | 1ª troca 105–137, F em 1 ano, G no 3º, sem jato em 3 anos |
+
+- Meta D cumprida nos marcos de avião (1ª troca no limite de 90 dias para o cauteloso).
+- **Conflito na meta D:** "patrimônio do agressivo ≤ 20× no 1º ano" ($2 mi) é incompatível com "turboélice em ~1 ano": o próprio C208 vale mais de $2 mi. Priorizados os marcos de avião; o patrimônio fica ~45× no dia 365. **Decisão do usuário pendente.**
+- Margem ainda ~88–93 % no 1º ano (custo pequeno perto da receita); um bot agressivo faliu no 2º ano nas rodadas finais (risco real de quem compra no limite).
+- Simulador: marcos 30/60/90/180/365/540/730/1095.
+- **Revalidar** depois da FASES-1 (a promoção passa a ser por nível/horas/homologação e o XP mudou — XP-NOVO —, o que pode mudar quando os bots trocam de avião).
