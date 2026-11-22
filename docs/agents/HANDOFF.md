@@ -1,3 +1,12 @@
+# Atualização 2026-11-22 (Claude, PC de casa)
+- Mergeados hoje: ECON-DIFF (revisão `docs/reviews/ECON-DIFF-revisao.md`), faixa "~51%", **HANGAR-ICONES-PECAS** (estado das peças por ícone, 5 estados: nova ≥ 80, gasta mas boa 80–40, atenção 40–20, quebrada < 20, "?" incerta; sem % no Hangar; horas de TBO/óleo/ignição corretas por grupo) e o combustível do briefing (lia o avião em cache). Suíte 737/737. Nada visto na tela.
+- **Calibração do pagamento em andamento** na branch `feat/calibra-pagamento` (não commitada): marcos 30/60/90/180/365/540/730/1095 no simulador e um contador temporário `DBG-CAL` (receita por classe × tipo de missão) — **remover o `DBG-CAL` antes do commit**. Referência (escalas 1,0): 1ª troca dia 71–88 (na meta), classe F no dia 180 (meta 365), agressivo $8,3 mi no 1º ano (meta ≤ $2 mi), H no dia 1095. Escala 0,35 fora da instrução: 1ª troca no dia 124–165 (tarde demais), classe E no dia 365. Próximo: medir a receita por família (rodada `DBG-CAL` interrompida para o voo do usuário) e cortar só o que as classes B–G voam. Cada rodada de 1 ano (Médio + Difícil, 3 bots) leva ~11 min; 3 anos, ~38 min.
+- **Correções futuras pedidas pelo usuário (HUD, `DebugOverlayWindow.xaml` / `DebugOverlayViewModel.cs`):**
+  1. Mapinha do HUD (`Utils/FlightMapControl`): pôr um ponto na **partida**, igual ao ponto verde da chegada.
+  2. HUD ainda mostra **%** de saúde (`AirframeCondition`/`EngineCondition`/`TiresCondition`, linhas ~96–101 e ~189–191). Deve mostrar só os ícones do Hangar (`PartHangarView.DisplayState`/`Summarize`, `HangarIcons`). Atenção: hoje são as colunas antigas = **saúde real**, ou seja, o HUD vaza a saúde oculta; usar a saúde conhecida como no Hangar.
+
+---
+
 # Passagem de sessão (Claude) — 2026-11-21, fim do dia (PC de casa, com MSFS)
 
 Base `feat/component-health-system` no GitHub. Build 0 erros; `dotnet test` 697/697. Primeiros voos reais no MSFS 2024 com o app (C152 em SNEJ). Leia junto: `AGENTS.md` (§ 6 e § 7 atualizados hoje), `docs/CHANGELOG.md` (entradas de 2026-11-21).
