@@ -16,5 +16,6 @@ namespace FlightCareer.Application.DTOs
         public int XP { get; set; }
         public int CompletedMissions { get; set; }
         public int RemainingMissions { get; set; }
+        public System.Collections.Generic.IReadOnlyList<string>? XpBreakdownLines { get; set; }
     }
 }

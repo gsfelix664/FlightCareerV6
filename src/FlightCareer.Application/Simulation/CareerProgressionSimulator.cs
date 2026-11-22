@@ -13,6 +13,7 @@ using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Services;
+using FlightCareer.Domain.Xp;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightCareer.Application.Simulation
@@ -430,7 +431,36 @@ namespace FlightCareer.Application.Simulation
                                             if (engineClass == EngineClass.Piston) hoursUntil500h -= localDuration;
                                             tboRemaining -= localDuration;
 
-                                            totalXP += (int)(localDuration * 60);
+                                            double localFlightMin = localDuration * 60.0;
+                                            RunwayFacts? localRwyFacts = currentAirport != null
+                                                ? new RunwayFacts(3000.0, 2000.0, currentAirport.Tier >= 4, currentAirport.ElevationFt)
+                                                : null;
+                                            var localXpInputs = new XpFlightInputs(
+                                                AirborneMinutes: localFlightMin,
+                                                DistanceNm: 15.0,
+                                                LegsCompleted: 1,
+                                                MissionFamilyId: "instrucao",
+                                                IsFerryOrNoMission: false,
+                                                UsedTimeAcceleration: false,
+                                                CrashDetectionOn: true,
+                                                AutoCoordinationOn: false,
+                                                RealismPct: 100.0,
+                                                AutoStartUsed: false,
+                                                WorstTouchdownFpm: 150.0,
+                                                WorstTouchdownG: 1.2,
+                                                TouchdownCount: 1,
+                                                VneOrStallInfractions: 0,
+                                                GExcessInfractionsWithPax: 0,
+                                                LightsOrSpeedInfractions: 0,
+                                                OffRunwayOrExcursion: false,
+                                                Origin: localRwyFacts,
+                                                Destination: localRwyFacts,
+                                                Landing: null,
+                                                BlockMinutes: localFlightMin,
+                                                EteMinutes: localFlightMin,
+                                                IsUrgentMission: false
+                                            );
+                                            totalXP += XpCalculator.Compute(localXpInputs).Total;
 
                                             ApplyFlightWear(parts, _partCatalog, localDuration, _componentCatalog.PartBands);
                                             SyncComponents(components, parts, _partCatalog, mapping);
@@ -486,8 +516,37 @@ namespace FlightCareer.Application.Simulation
                                         if (engineClass == EngineClass.Piston) hoursUntil500h -= ferryDuration;
                                         tboRemaining -= ferryDuration;
 
-                                        int baseExpFerry = (int)(ferryDuration * 40);
-                                        totalXP += baseExpFerry;
+                                        double ferryFlightMin = ferryDuration * 60.0;
+                                        double ferryCruise = Math.Max(1.0, currentAircraftType?.CruiseSpeedKts ?? 100.0);
+                                        double ferryEte = (ferryDist / ferryCruise) * 60.0 + 15.0;
+                                        RunwayFacts? ferryOrigRwy = currentAirport != null ? new RunwayFacts(3000.0, 2000.0, currentAirport.Tier >= 4, currentAirport.ElevationFt) : null;
+                                        RunwayFacts? ferryDestRwy = bestHub != null ? new RunwayFacts(3000.0, 2000.0, bestHub.Tier >= 4, bestHub.ElevationFt) : null;
+                                        var ferryXpInputs = new XpFlightInputs(
+                                            AirborneMinutes: ferryFlightMin,
+                                            DistanceNm: ferryDist,
+                                            LegsCompleted: 1,
+                                            MissionFamilyId: null,
+                                            IsFerryOrNoMission: true,
+                                            UsedTimeAcceleration: false,
+                                            CrashDetectionOn: true,
+                                            AutoCoordinationOn: false,
+                                            RealismPct: 100.0,
+                                            AutoStartUsed: false,
+                                            WorstTouchdownFpm: 150.0,
+                                            WorstTouchdownG: 1.2,
+                                            TouchdownCount: 1,
+                                            VneOrStallInfractions: 0,
+                                            GExcessInfractionsWithPax: 0,
+                                            LightsOrSpeedInfractions: 0,
+                                            OffRunwayOrExcursion: false,
+                                            Origin: ferryOrigRwy,
+                                            Destination: ferryDestRwy,
+                                            Landing: null,
+                                            BlockMinutes: ferryFlightMin,
+                                            EteMinutes: ferryEte,
+                                            IsUrgentMission: false
+                                        );
+                                        totalXP += XpCalculator.Compute(ferryXpInputs).Total;
 
                                         ApplyFlightWear(parts, _partCatalog, ferryDuration, _componentCatalog.PartBands);
                                         SyncComponents(components, parts, _partCatalog, mapping);
@@ -604,10 +663,41 @@ namespace FlightCareer.Application.Simulation
                                     if (engineClass == EngineClass.Piston) hoursUntil500h -= flightDuration;
                                     tboRemaining -= flightDuration;
 
-                                    // XP do voo
-                                    int baseXP = (int)(flightDuration * 60) + (int)(chosen.DistanceNM * 0.5);
-                                    int tierBonusXP = (int)(baseXP * (destAirport.Tier * 0.2));
-                                    totalXP += baseXP + tierBonusXP;
+                                    // XP do voo (XP-NOVO)
+                                    double botFlightMin = flightDuration * 60.0;
+                                    double botCruise = Math.Max(1.0, currentAircraftType?.CruiseSpeedKts ?? 100.0);
+                                    double botEte = (chosen.DistanceNM / botCruise) * 60.0 + 15.0;
+                                    double botMinReqFt = currentAircraftType?.MinRunwayLength ?? 2000.0;
+                                    RunwayFacts? botOrigRwy = currentAirport != null ? new RunwayFacts(Math.Max(botMinReqFt * 1.1, 3000.0), botMinReqFt, currentAirport.Tier >= 4, currentAirport.ElevationFt) : null;
+                                    RunwayFacts? botDestRwy = destAirport != null ? new RunwayFacts(Math.Max(botMinReqFt * 1.1, 3000.0), botMinReqFt, destAirport.Tier >= 4, destAirport.ElevationFt) : null;
+                                    string? botFamilyId = MissionPayTable.Shared.Resolve(chosen.SubId)?.Id;
+                                    bool botIsUrgent = chosen.Urgency > 1.0 || (chosen.SubId != null && (chosen.SubId.StartsWith("3.3") || chosen.SubId.StartsWith("4.3.1")));
+                                    var botXpInputs = new XpFlightInputs(
+                                        AirborneMinutes: botFlightMin,
+                                        DistanceNm: chosen.DistanceNM,
+                                        LegsCompleted: 1,
+                                        MissionFamilyId: botFamilyId,
+                                        IsFerryOrNoMission: false,
+                                        UsedTimeAcceleration: false,
+                                        CrashDetectionOn: true,
+                                        AutoCoordinationOn: false,
+                                        RealismPct: 100.0,
+                                        AutoStartUsed: false,
+                                        WorstTouchdownFpm: 150.0,
+                                        WorstTouchdownG: 1.2,
+                                        TouchdownCount: 1,
+                                        VneOrStallInfractions: 0,
+                                        GExcessInfractionsWithPax: 0,
+                                        LightsOrSpeedInfractions: 0,
+                                        OffRunwayOrExcursion: false,
+                                        Origin: botOrigRwy,
+                                        Destination: botDestRwy,
+                                        Landing: null,
+                                        BlockMinutes: botFlightMin,
+                                        EteMinutes: botEte,
+                                        IsUrgentMission: botIsUrgent
+                                    );
+                                    totalXP += XpCalculator.Compute(botXpInputs).Total;
 
                                     // 1. Desgaste natural das peças neste voo (--fast)
                                     ApplyFlightWear(parts, _partCatalog, flightDuration, _componentCatalog.PartBands);

@@ -3,6 +3,7 @@ using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
 using FlightCareer.Domain.Utils;
+using FlightCareer.Domain.Xp;
 using FlightCareer.Application.DTOs;
 using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +51,8 @@ namespace FlightCareer.Application.Services
             double? realFuelUsed = null,
             bool isFlightInvalidated = false,
             string? invalidationReason = null,
-            bool autoStartUsed = false)
+            bool autoStartUsed = false,
+            XpFlightInputs? xpInputs = null)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -206,6 +208,22 @@ namespace FlightCareer.Application.Services
                     // Decisão 2026-11-21 (AGENTS.md › 6): combustível é pago na compra no Hangar. O consumo só é descontado dos tanques.
                     pilot.TotalHours += hours;
 
+                    int offFieldXP = 0;
+                    if (xpInputs != null)
+                    {
+                        var breakdown = XpCalculator.Compute(xpInputs);
+                        offFieldXP = isFlightInvalidated ? 0 : breakdown.Total;
+                        outcome.XpBreakdownLines = breakdown.Lines;
+                    }
+                    else
+                    {
+                        double baseScore = (flightDurationMinutes > 0 ? flightDurationMinutes * 2.0 : outcome.FlightTimeMinutes * 2.0) + (distanceNM * 0.5) + 50.0;
+                        double mQuality = Math.Clamp(qualityMultiplier - 0.40, 0.5, 1.15);
+                        double mRealism = autoStartUsed ? 0.90 : 1.00;
+                        offFieldXP = isFlightInvalidated ? 0 : (int)Math.Round(baseScore * 1.0 * mRealism * mQuality);
+                    }
+                    pilot.ExperiencePoints += offFieldXP;
+
                     // Registrar Voo no Logbook
                     var flightOff = new Flight
                     {
@@ -217,7 +235,7 @@ namespace FlightCareer.Application.Services
                         DistanceNM = distanceNM,
                         Date = DateTime.Now,
                         Revenue = 0,
-                        XP = 0,
+                        XP = offFieldXP,
                         AircraftModel = aircraft.AircraftType?.Model ?? ""
                     };
                     _context.Flights.Add(flightOff);
@@ -228,7 +246,7 @@ namespace FlightCareer.Application.Services
                     outcome.Revenue = 0;
                     outcome.FuelCost = 0;
                     outcome.LandingFee = 0;
-                    outcome.XP = 0;
+                    outcome.XP = offFieldXP;
                     outcome.CompletedMissions = 0;
                     outcome.RemainingMissions = missionsRemainingOff;
                     outcome.Message = $"POUSO FORÇADO FORA DE PISTA! Aeronave pousou a {nearestDistance:F1} NM de {destinationIcao}. Carga e passageiros aguardam resgate.";
@@ -236,13 +254,37 @@ namespace FlightCareer.Application.Services
                 }
 
                 double totalRevenue = 0;
-                // XP Baseado em Tempo + Distância + Tier (Afetado pela Qualidade)
-                int baseXP = outcome.FlightTimeMinutes + (int)(distanceNM * 0.5);
-                int tierBonusXP = (int)(baseXP * (airportTier * 0.2)); 
-                int totalXP = (int)((baseXP + tierBonusXP) * qualityMultiplier);
-                totalXP = ProcedurePenalties.ApplyAutoStartPenalty(totalXP, autoStartUsed);
-                // Voo invalidado (slew, congelamento, combustível): sem XP. Antes o resultado mostrava 0, mas o XP era somado ao piloto.
-                if (isFlightInvalidated) totalXP = 0;
+                // XP por Esforço × Habilidade + Bônus (XP-NOVO)
+                int totalXP = 0;
+                XpBreakdown? xpBreakdown = null;
+
+                if (xpInputs != null)
+                {
+                    xpBreakdown = XpCalculator.Compute(xpInputs);
+                    totalXP = isFlightInvalidated ? 0 : xpBreakdown.Total;
+                    outcome.XpBreakdownLines = xpBreakdown.Lines;
+                }
+                else
+                {
+                    string? firstFamily = null;
+                    if (activeMissions.Count > 0)
+                    {
+                        var firstMission = activeMissions[0];
+                        firstFamily = MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id;
+                    }
+                    double mType = 1.0;
+                    if (activeMissions.Count == 0) mType = 0.80;
+                    else if (!string.IsNullOrEmpty(firstFamily))
+                    {
+                        XpRules.Default.TypeMultipliers.TryGetValue(firstFamily, out mType);
+                        if (mType <= 0) mType = 1.0;
+                    }
+
+                    double baseScore = (flightDurationMinutes > 0 ? flightDurationMinutes * 2.0 : outcome.FlightTimeMinutes * 2.0) + (distanceNM * 0.5) + 50.0;
+                    double mQuality = Math.Clamp(qualityMultiplier, 0.5, 1.15);
+                    double mRealism = autoStartUsed ? 0.90 : 1.00;
+                    totalXP = isFlightInvalidated ? 0 : (int)Math.Round(baseScore * mType * mRealism * mQuality);
+                }
 
                 int missionsDone = 0;
                 int missionsRemaining = 0;
@@ -395,14 +437,21 @@ namespace FlightCareer.Application.Services
                 outcome.XP = totalXP;
                 outcome.CompletedMissions = missionsDone;
                 outcome.RemainingMissions = missionsRemaining;
-                outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2}";
-                if (totalFees > landingOnlyFee)
+                outcome.Message = $"Rating: {qualityService.GetRating()} ({qualityScore:F0}%) | Lucro Líquido: {outcome.NetProfit:C2} | XP: +{totalXP}";
+                if (xpBreakdown != null && xpBreakdown.Lines.Count > 0)
                 {
-                    outcome.Message += $" | Taxas: {totalFees:C2}";
+                    outcome.Message += $" ({string.Join(" · ", xpBreakdown.Lines)})";
                 }
-                if (autoStartUsed)
+                else
                 {
-                    outcome.Message += " | Partida automática usada (−10% XP)";
+                    if (totalFees > landingOnlyFee)
+                    {
+                        outcome.Message += $" | Taxas: {totalFees:C2}";
+                    }
+                    if (autoStartUsed)
+                    {
+                        outcome.Message += " | Partida automática usada (−10% XP)";
+                    }
                 }
                 return outcome;
             }
