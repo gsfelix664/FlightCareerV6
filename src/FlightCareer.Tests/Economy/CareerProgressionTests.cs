@@ -218,21 +218,21 @@ namespace FlightCareer.Tests.Economy
             var m2 = MissionGenerator.CreateMissionObjectSync(origin, dest, 50.0, subCat2, 0, 0, 500, rnd, date);
             var m5 = MissionGenerator.CreateMissionObjectSync(origin, dest, 300.0, subCat5, 150, 4500, 2000, rnd, date);
 
-            Assert.Equal(PilotCategory.Category1_FlightSchool, m1.RequiredCategory);
-            Assert.Equal(PilotCategory.Category2_SAE, m2.RequiredCategory);
-            Assert.Equal(PilotCategory.Category5_MajorAirline, m5.RequiredCategory);
+            Assert.Equal(CareerPhase.Phase1_FlightSchool, m1.RequiredPhase);
+            Assert.Equal(CareerPhase.Phase3_AirTaxi, m2.RequiredPhase);
+            Assert.Equal(CareerPhase.Phase6_DomesticAirline, m5.RequiredPhase);
 
-            // Piloto em Categoria 1 só pode aceitar m1
-            var pilotCat = PilotCategory.Category1_FlightSchool;
-            Assert.True(m1.RequiredCategory <= pilotCat);
-            Assert.False(m2.RequiredCategory <= pilotCat);
-            Assert.False(m5.RequiredCategory <= pilotCat);
+            // Piloto em Fase 1 só pode aceitar m1
+            var pilotPhase = CareerPhase.Phase1_FlightSchool;
+            Assert.True(m1.RequiredPhase <= pilotPhase);
+            Assert.False(m2.RequiredPhase <= pilotPhase);
+            Assert.False(m5.RequiredPhase <= pilotPhase);
 
-            // Ao promover para Categoria 2, m2 é liberada, mas m5 continua bloqueada
-            pilotCat = PilotCategory.Category2_SAE;
-            Assert.True(m1.RequiredCategory <= pilotCat);
-            Assert.True(m2.RequiredCategory <= pilotCat);
-            Assert.False(m5.RequiredCategory <= pilotCat);
+            // Ao promover para Fase 3, m2 é liberada, mas m5 continua bloqueada
+            pilotPhase = CareerPhase.Phase3_AirTaxi;
+            Assert.True(m1.RequiredPhase <= pilotPhase);
+            Assert.True(m2.RequiredPhase <= pilotPhase);
+            Assert.False(m5.RequiredPhase <= pilotPhase);
         }
 
         [Fact]

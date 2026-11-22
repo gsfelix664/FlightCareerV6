@@ -45,7 +45,9 @@ namespace FlightCareer.Application.Simulation
         public double NetWorth { get; init; } // Saldo + valor de mercado
         public string AircraftModel { get; init; } = "";
         public string AircraftClassKey { get; init; } = "";
-        public PilotCategory PilotCategory { get; init; }
+        public CareerPhase CareerPhase { get; init; }
+        [Obsolete("Utilize CareerPhase")]
+        public PilotCategory PilotCategory => (PilotCategory)(int)CareerPhase;
         public int? FirstPurchaseDay { get; init; }
         public double TotalHours { get; init; }
         public int TotalFlights { get; init; }
@@ -97,7 +99,7 @@ namespace FlightCareer.Application.Simulation
             _hubDataService = hubDataService ?? new HubDataService();
         }
 
-        public sealed record LadderStep(string ClassKey, string ModelSubstring, PilotCategory RequiredCategory, AircraftType Type);
+        public sealed record LadderStep(string ClassKey, string ModelSubstring, CareerPhase RequiredPhase, AircraftType Type);
 
         public async Task<CareerProgressionResult> RunAsync(CareerProgressionOptions options)
         {
@@ -177,7 +179,7 @@ namespace FlightCareer.Application.Simulation
                         string botId = $"Bot-{difficulty}-{policy}-{botNum}";
                         var diffEcon = DifficultyEconomy.For(difficulty);
                         double balance = CareerStart.GetInitialBalance(difficulty);
-                        var category = PilotCategory.Category1_FlightSchool;
+                        var phase = CareerPhase.Phase1_FlightSchool;
                         double totalHours = 0.0;
                         int totalFlights = 0;
                         int totalXP = 0;
@@ -252,7 +254,7 @@ namespace FlightCareer.Application.Simulation
                                         balance,
                                         currentAircraftType,
                                         currentClassKey,
-                                        category,
+                                        phase,
                                         firstPurchaseDay,
                                         totalHours,
                                         totalFlights,
@@ -320,7 +322,7 @@ namespace FlightCareer.Application.Simulation
                                     // Mesmo filtro de compatibilidade usado para escolher o destino do reposicionamento
                                     bool IsCompatibleMission(Mission mm)
                                     {
-                                        if (mm.RequiredCategory > category) return false;
+                                        if (mm.RequiredPhase > phase) return false;
                                         if (mm.PayloadLbs > currentAircraftType.MaxPayloadLbs) return false;
                                         if (mm.PassengerCount > currentAircraftType.MaxPax) return false;
                                         if (mm.DistanceNM > currentAircraftType.RangeNM) return false;
@@ -346,7 +348,7 @@ namespace FlightCareer.Application.Simulation
                                     var compatible = new List<Mission>();
                                     foreach (var m in availableMissions)
                                     {
-                                        if (m.RequiredCategory > category) continue;
+                                        if (m.RequiredPhase > phase) continue;
                                         if (m.PayloadLbs > currentAircraftType.MaxPayloadLbs) continue;
                                         if (m.PassengerCount > currentAircraftType.MaxPax) continue;
                                         if (m.DistanceNM > currentAircraftType.RangeNM) continue;
@@ -793,7 +795,7 @@ namespace FlightCareer.Application.Simulation
                                         balance,
                                         currentAircraftType,
                                         currentClassKey,
-                                        category,
+                                        phase,
                                         firstPurchaseDay,
                                         totalHours,
                                         totalFlights,
@@ -853,7 +855,7 @@ namespace FlightCareer.Application.Simulation
                                         balance,
                                         currentAircraftType,
                                         currentClassKey,
-                                        category,
+                                        phase,
                                         firstPurchaseDay,
                                         totalHours,
                                         totalFlights,
@@ -871,9 +873,9 @@ namespace FlightCareer.Application.Simulation
                                 continue;
                             }
 
-                            // 5. Promoção de categoria regulatória (se cumpriu horas + XP + saldo com reserva)
-                            CheckCategoryPromotion(
-                                ref category,
+                            // 5. Promoção de fase de carreira (se cumpriu nível + horas + saldo com reserva)
+                            CheckPhasePromotion(
+                                ref phase,
                                 ref balance,
                                 totalHours,
                                 totalXP,
@@ -905,7 +907,7 @@ namespace FlightCareer.Application.Simulation
                                 mapping,
                                 rnd,
                                 policy,
-                                category,
+                                phase,
                                 simulatedDate,
                                 day,
                                 failureMultiplier: diffEcon.FailureMultiplier);
@@ -923,7 +925,7 @@ namespace FlightCareer.Application.Simulation
                                     balance,
                                     currentAircraftType,
                                     currentClassKey,
-                                    category,
+                                    phase,
                                     firstPurchaseDay,
                                     totalHours,
                                     totalFlights,
@@ -1425,8 +1427,8 @@ namespace FlightCareer.Application.Simulation
             }
         }
 
-        private static void CheckCategoryPromotion(
-            ref PilotCategory currentCat,
+        private static void CheckPhasePromotion(
+            ref CareerPhase currentPhase,
             ref double balance,
             double totalHours,
             int totalXP,
@@ -1434,14 +1436,15 @@ namespace FlightCareer.Application.Simulation
             AircraftType currentType,
             string currentClassKey)
         {
-            if (currentCat >= PilotCategory.Category5_MajorAirline) return;
+            if (currentPhase >= CareerPhase.Phase7_InternationalAirline) return;
 
-            var nextCat = (PilotCategory)((int)currentCat + 1);
-            double promoCost = currentCat.GetPromotionCost();
-            double reqHours = currentCat.GetRequiredHours();
-            int reqXP = currentCat.GetRequiredXP();
+            var nextPhase = (CareerPhase)((int)currentPhase + 1);
+            int reqLevel = nextPhase.GetEntryLevel();
+            double promoCost = nextPhase.GetPromotionCost();
+            double reqHours = nextPhase.GetMinHours();
+            int currentLevel = PilotLevel.ForXp(totalXP);
 
-            if (totalHours >= reqHours && totalXP >= reqXP)
+            if (currentLevel >= reqLevel && totalHours >= reqHours)
             {
                 double monthlyCost = CalculateEstimatedMonthlyOperatingCost(currentType, currentClassKey);
                 double reserveNeeded = policy.ToLowerInvariant() switch
@@ -1454,7 +1457,7 @@ namespace FlightCareer.Application.Simulation
                 if (balance >= promoCost + reserveNeeded)
                 {
                     balance -= promoCost;
-                    currentCat = nextCat;
+                    currentPhase = nextPhase;
                 }
             }
         }
@@ -1482,7 +1485,7 @@ namespace FlightCareer.Application.Simulation
             PartComponentMapping mapping,
             IRandomSource rnd,
             string policy,
-            PilotCategory pilotCategory,
+            CareerPhase pilotPhase,
             DateTime simulatedDate,
             int day,
             double failureMultiplier = 1.0)
@@ -1490,9 +1493,9 @@ namespace FlightCareer.Application.Simulation
             if (currentLadderIdx + 1 >= ladder.Count) return;
 
             var nextStep = ladder[currentLadderIdx + 1];
-            if (pilotCategory < nextStep.RequiredCategory)
+            if (pilotPhase < nextStep.RequiredPhase)
             {
-                // Categoria regulatória do piloto não autoriza o próximo avião
+                // Fase regulatória do piloto não autoriza o próximo avião
                 return;
             }
 
@@ -1623,7 +1626,7 @@ namespace FlightCareer.Application.Simulation
             double balance,
             AircraftType currentType,
             string classKey,
-            PilotCategory category,
+            CareerPhase phase,
             int? firstPurchaseDay,
             double totalHours,
             int totalFlights,
@@ -1668,7 +1671,7 @@ namespace FlightCareer.Application.Simulation
                 NetWorth = Math.Round(netWorth, 2),
                 AircraftModel = currentType.Model,
                 AircraftClassKey = classKey,
-                PilotCategory = category,
+                CareerPhase = phase,
                 FirstPurchaseDay = firstPurchaseDay,
                 TotalHours = Math.Round(totalHours, 1),
                 TotalFlights = totalFlights,
@@ -1691,41 +1694,41 @@ namespace FlightCareer.Application.Simulation
         {
             var list = new List<LadderStep>();
 
-            // Escada A -> B -> E -> F -> G -> H -> I -> J
+            // Escada A -> B -> E -> F -> G -> H -> I -> J mapeada para CareerPhase
             var c152 = allTypes.FirstOrDefault(t => t.Model.Contains("152"))
                 ?? throw new InvalidOperationException("C152 não encontrado.");
-            list.Add(new LadderStep("A", "Cessna C152", PilotCategory.Category1_FlightSchool, c152));
+            list.Add(new LadderStep("A", "Cessna C152", CareerPhase.Phase1_FlightSchool, c152));
 
             var c172 = allTypes.FirstOrDefault(t => t.Model.Contains("172"))
                 ?? c152;
-            list.Add(new LadderStep("B", "C172SP G1000", PilotCategory.Category2_SAE, c172));
+            list.Add(new LadderStep("B", "C172SP G1000", CareerPhase.Phase1_FlightSchool, c172));
 
             var baron = allTypes.FirstOrDefault(t => t.Model.Contains("Baron"))
                 ?? allTypes.FirstOrDefault(t => t.Model.Contains("DA62"))
                 ?? c172;
-            list.Add(new LadderStep("E", "Beechcraft Baron G58", PilotCategory.Category3_AirTaxi, baron));
+            list.Add(new LadderStep("E", "Beechcraft Baron G58", CareerPhase.Phase3_AirTaxi, baron));
 
             var c208 = allTypes.FirstOrDefault(t => t.Model.Contains("208"))
                 ?? allTypes.FirstOrDefault(t => t.Model.Contains("TBM"))
                 ?? baron;
-            list.Add(new LadderStep("F", "C208B", PilotCategory.Category3_AirTaxi, c208));
+            list.Add(new LadderStep("F", "C208B", CareerPhase.Phase3_AirTaxi, c208));
 
             var kingAir = allTypes.FirstOrDefault(t => t.Model.Contains("King Air 250") || t.Model.Contains("King Air"))
                 ?? allTypes.FirstOrDefault(t => t.Model.Contains("ATR 42"))
                 ?? c208;
-            list.Add(new LadderStep("G", "Beechcraft King Air 250", PilotCategory.Category4_Regional, kingAir));
+            list.Add(new LadderStep("G", "Beechcraft King Air 250", CareerPhase.Phase4_HighPerformanceAndMedevac, kingAir));
 
             var cj4 = allTypes.FirstOrDefault(t => t.Model.Contains("CJ4") || t.Model.Contains("Citation"))
                 ?? kingAir;
-            list.Add(new LadderStep("H", "Cessna Citation CJ4", PilotCategory.Category4_Regional, cj4));
+            list.Add(new LadderStep("H", "Cessna Citation CJ4", CareerPhase.Phase4_HighPerformanceAndMedevac, cj4));
 
             var a320 = allTypes.FirstOrDefault(t => t.Model.Contains("320") || t.Model.Contains("737"))
                 ?? cj4;
-            list.Add(new LadderStep("I", "A320neo", PilotCategory.Category5_MajorAirline, a320));
+            list.Add(new LadderStep("I", "A320neo", CareerPhase.Phase6_DomesticAirline, a320));
 
             var a330 = allTypes.FirstOrDefault(t => t.Model.Contains("330") || t.Model.Contains("747") || t.Model.Contains("787"))
                 ?? a320;
-            list.Add(new LadderStep("J", "A330-200", PilotCategory.Category5_MajorAirline, a330));
+            list.Add(new LadderStep("J", "A330-200", CareerPhase.Phase7_InternationalAirline, a330));
 
             return list;
         }
@@ -1783,7 +1786,7 @@ namespace FlightCareer.Application.Simulation
                     s.Balance,
                     s.NetWorth,
                     s.AircraftClassKey,
-                    (int)s.PilotCategory,
+                    (int)s.CareerPhase,
                     s.FirstPurchaseDay?.ToString() ?? "",
                     s.TotalHours,
                     s.TotalFlights,
@@ -1838,7 +1841,7 @@ namespace FlightCareer.Application.Simulation
             {
                 sb.AppendLine($"### Marco: Dia {mDay}");
                 sb.AppendLine();
-                sb.AppendLine("| Dificuldade | Política | Falidos (%) | Dia Falência | Saldo Mediano ($) | Patrimônio Mediano ($) [Mín - Máx] | Classe | Cat. | 1ª Compra (Dia) | Horas Voadas | Voos/Dia | Rec/h ($) | Custo/h ($) | Peças/h ($) | Margem (%) | Manut/100h | Peças/100h | Panes/100h | Parado (dias) |");
+                sb.AppendLine("| Dificuldade | Política | Falidos (%) | Dia Falência | Saldo Mediano ($) | Patrimônio Mediano ($) [Mín - Máx] | Classe | Fase | 1ª Compra (Dia) | Horas Voadas | Voos/Dia | Rec/h ($) | Custo/h ($) | Peças/h ($) | Margem (%) | Manut/100h | Peças/100h | Panes/100h | Parado (dias) |");
                 sb.AppendLine("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|");
 
                 var daySnaps = snapshots.Where(s => s.Day == mDay).ToList();
@@ -1861,7 +1864,7 @@ namespace FlightCareer.Application.Simulation
                     // Maior classe atingida entre os sobreviventes
                     var active = items.Where(i => !i.IsBankrupt).ToList();
                     string topClass = active.Count > 0 ? active.OrderByDescending(a => a.AircraftClassKey).First().AircraftClassKey : "-";
-                    string topCat = active.Count > 0 ? active.Max(a => (int)a.PilotCategory).ToString() : "-";
+                    string topPhase = active.Count > 0 ? active.Max(a => (int)a.CareerPhase).ToString() : "-";
 
                     var purchaseDays = items.Where(i => i.FirstPurchaseDay.HasValue).Select(i => (double)i.FirstPurchaseDay!.Value).ToList();
                     string avgPurchaseDay = purchaseDays.Count > 0 ? $"{purchaseDays.Average():F0}" : "-";
@@ -1889,7 +1892,7 @@ namespace FlightCareer.Application.Simulation
                         minNetWorth,
                         maxNetWorth,
                         topClass,
-                        topCat,
+                        topPhase,
                         avgPurchaseDay,
                         medianHours,
                         avgFlightsPerDay,
@@ -1922,9 +1925,9 @@ namespace FlightCareer.Application.Simulation
                     }
                     else
                     {
-                        if (sampleBot.PilotCategory < PilotCategory.Category2_SAE)
+                        if (sampleBot.CareerPhase < CareerPhase.Phase2_SAE)
                         {
-                            statusText = $"Bloqueado por Categoria: piloto em Cat 1 ({sampleBot.TotalHours:F1}/40.0 h voadas para homologar Cat 2 e liberar Classe B/C172).";
+                            statusText = $"Bloqueado por Fase: piloto em Fase 1 ({sampleBot.TotalHours:F1}/40.0 h voadas para homologar Fase 2 e liberar novas operações).";
                         }
                         else
                         {

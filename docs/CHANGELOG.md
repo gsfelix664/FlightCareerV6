@@ -2784,3 +2784,27 @@
 - `Infrastructure/Services/RuleCoverageService.cs`: regras elétricas reconhecidas como ativas via detecção em voo com anotação `(detecção em voo)`; comparativo Antes / Depois no topo do relatório `cobertura-regras-por-aviao.md` demonstrando aumento de regras ativas médias de 30,3 para 32,6 e redução de inativas de 4,5 para 2,2.
 - Testes unitários e de integração: novos testes em `ElectricalRuleDeriverTests.cs` (detecção de barramento com bateria ligada/desligada, detecção de 14 V, disparo de descarga e sobrecarga sem índices no catálogo) e `CatalogTests.cs` (fórmula de Va e integridade do POH); suíte xUnit aprovada com 789 testes (100%) e fuzz testing com 920 voos procedurais (46 modelos × 20 corridas) aprovado com 100%.
 - Não testado no MSFS.
+## 2026-11-22 - 7 fases por nível no lugar das categorias (FASES-1) (Gemini)
+- `Domain/Entities/CareerPhase.cs` e `Domain/Career/CareerPhaseCatalog.cs`: novo enum `CareerPhase` (1 a 7) e catálogo desacoplado em `Infrastructure/Data/career_phases.json` com fallback embutido idêntico:
+  - Fases 1 a 7: Escola de aviação / aeroclube (1), Serviços aéreos especializados - SAE (2), Táxi aéreo e carga leve (3), Executiva de alta performance e MEDEVAC (4), Regional commuter (5), Linha aérea doméstica narrowbody (6), Companhia internacional widebody (7).
+  - Tríade de promoção: nível $\ge$ nível de entrada (L6, L13, L21, L29, L37, L45), horas mínimas (40, 150, 300, 500, 1.000, 1.500 h) e homologação regulatória paga ($35 mil, $120 mil, $300 mil, $500 mil, $1,2 mi, $2 mi).
+  - Progressão de nível: contínua via ganho de XP (curva quadrática $300 \times (L - 1)^2$, sem nível máximo); após a fase 7 os níveis continuam subindo sem novas fases.
+  - Mapeamento de subtipos: 26 subtipos de missão mapeados para as 7 fases conforme § 3 de `fases-carreira.md`. Missões de fases anteriores permanecem liberadas para pilotos de fase superior.
+- `Pilot.cs` e `Mission.cs`: novas propriedades mapeadas `CareerPhase` e `RequiredPhase`. Antigas `PilotCategory`, `CompanyTier`, `RequiredCategory` e `RequiredTier` preservadas com `[Obsolete]` como adaptadores para compatibilidade.
+- `AppDbContext.cs`:
+  - Migração de schema idempotente em `EnsureSchemaUpdatedAsync` adicionando as colunas `CareerPhase` e `RequiredPhase` e convertendo dados legados pela regra 5 (1→1, 2→2, 3→3, 4→5, 5→6).
+  - `HasDefaultValue(CareerPhase.Phase1_FlightSchool)` configurado no modelBuilder para suportar criação e inserts legados.
+- `MissionGenerator.cs`: resolução de `RequiredPhase` e `MissionCategoryType` a partir de `sub.Id` via `CareerPhaseCatalog`.
+- `MainViewModel.cs`:
+  - Checagens de aceite e início de voo verificam `m.RequiredPhase > pilot.CareerPhase`.
+  - Promoção `PromoteCompanyTierAsync` atualizada para as 7 fases com conferência da tríade (nível, horas, taxa) e mensagem descritiva do que falta ("Nível X — ok · Horas Y/Z · Homologação $W").
+  - Identificação de fase e status no cabeçalho exibindo "Fase N — nome · Nível L · licença".
+- `FlightMonitor.cs`: validação de início de voo bloqueia com alerta de fase insuficiente quando `m.RequiredPhase > pilot.CareerPhase`.
+- `MissionDisplayItem.cs`: elegibilidade checada por `RequiredPhase`, tooltip com o nome da fase exigida.
+- `CreatePilotViewModel.cs` e `FerryFlightViewModel.cs`: inicialização e contratos de traslado configurados em `CareerPhase.Phase1_FlightSchool`.
+- `CareerProgressionSimulator.cs`: bots promovem pelas novas regras da tríade (`CheckPhasePromotion`) com escada de compra de aeronaves mapeada para as fases operacionais (A, B → 1; E, F → 3; G, H → 4; I → 6; J → 7).
+- Suíte de testes:
+  - `CareerPhaseTests.cs`: 5 novos testes xUnit cobrindo progressão por XP puro, bloqueios da tríade de promoção (horas, homologação, sucesso), mapa dos 26 subtipos para as 7 fases, liberação de missões anteriores e bloqueio de superiores, níveis após fase 7 (L60), e migração de banco legado idempotente com conversão 4→5 e 5→6.
+  - Atualização dos testes existentes `CareerProgressionTests.cs` e `PartFlightIntegrationTests.cs`.
+- `dotnet build` 0 erros, `dotnet test` 827/827 testes aprovados (100%), simulação `career-stab --days 90 --bots 1 --difficulty medium --policy equilibrado` executada com sucesso absoluto.
+- Não testado no MSFS / não visto na tela.

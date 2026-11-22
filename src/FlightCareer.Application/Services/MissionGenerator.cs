@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Economy;
+using FlightCareer.Domain.Career;
 using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -287,58 +288,9 @@ namespace FlightCareer.Application.Services
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
-            // Determinar a Categoria Regulatória e Tipo da Missão
-            PilotCategory requiredCategory;
-            string categoryType;
-
-            if (sub.Id.StartsWith("3.4"))
-            {
-                requiredCategory = PilotCategory.Category1_FlightSchool;
-                categoryType = "Instrução / Treinamento";
-            }
-            else if (sub.Id.StartsWith("3.2") || sub.Id.StartsWith("4.") || sub.Id.StartsWith("2.3"))
-            {
-                requiredCategory = PilotCategory.Category2_SAE;
-                categoryType = "SAE / Carga Especializada";
-            }
-            else if (sub.Id.StartsWith("3.1") || sub.Id.StartsWith("3.3") || sub.Id.StartsWith("1.3") || sub.Id.StartsWith("2.2"))
-            {
-                requiredCategory = PilotCategory.Category3_AirTaxi;
-                categoryType = "Táxi Aéreo / Charter";
-            }
-            else if (sub.Id.StartsWith("2.1"))
-            {
-                requiredCategory = PilotCategory.Category4_Regional;
-                categoryType = "Linha Regional";
-            }
-            else if (sub.Id.StartsWith("1.1") || sub.Id.StartsWith("1.2"))
-            {
-                requiredCategory = PilotCategory.Category5_MajorAirline;
-                categoryType = "Linha Regular / Heavy";
-            }
-            else
-            {
-                if (paxCount > 19 || totalPayload > 10000)
-                {
-                    requiredCategory = PilotCategory.Category5_MajorAirline;
-                    categoryType = "Linha Regular";
-                }
-                else if (paxCount > 9 || totalPayload > 3000)
-                {
-                    requiredCategory = PilotCategory.Category4_Regional;
-                    categoryType = "Linha Regional";
-                }
-                else if (paxCount > 0 || totalPayload > 1000)
-                {
-                    requiredCategory = PilotCategory.Category3_AirTaxi;
-                    categoryType = "Táxi Aéreo";
-                }
-                else
-                {
-                    requiredCategory = PilotCategory.Category2_SAE;
-                    categoryType = "SAE / Carga Leve";
-                }
-            }
+            // Determinar a Fase Regulatória Requerida da Missão (Fases 1 a 7 conforme catálogo e subtipo)
+            var requiredPhase = CareerPhaseCatalog.Instance.ResolvePhase(sub.Id, fallback: CareerPhase.Phase1_FlightSchool);
+            string categoryType = requiredPhase.GetDisplayName();
 
             return new Mission
             {
@@ -359,8 +311,9 @@ namespace FlightCareer.Application.Services
                 RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random, payMultiplier, payTable),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
                 ExpirationTime = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)),
-                RequiredCategory = requiredCategory,
-                RequiredTier = (CompanyTier)(int)requiredCategory,
+                RequiredPhase = requiredPhase,
+                RequiredCategory = (PilotCategory)(int)requiredPhase,
+                RequiredTier = (CompanyTier)(int)requiredPhase,
                 MissionCategoryType = categoryType
             };
         }

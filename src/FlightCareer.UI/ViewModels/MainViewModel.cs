@@ -51,7 +51,12 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _destLon;
         [ObservableProperty] private string _currentView = "Missions";
         [ObservableProperty] private Guid? _activeAircraftId;
-        [ObservableProperty] private PilotCategory _pilotCategory = PilotCategory.Category1_FlightSchool;
+        [ObservableProperty] private CareerPhase _careerPhase = CareerPhase.Phase1_FlightSchool;
+        public PilotCategory PilotCategory
+        {
+            get => (PilotCategory)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
+        }
 
         // Filtros e Busca da Tabela de Missões
         [ObservableProperty] private string _selectedCategoryFilter = "TODOS";
@@ -126,18 +131,23 @@ namespace FlightCareer.UI.ViewModels
 
         public CompanyTier CompanyTier
         {
-            get => (CompanyTier)(int)PilotCategory;
-            set => PilotCategory = (PilotCategory)(int)value;
+            get => (CompanyTier)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
         }
 
-        public string PilotCategoryDisplay => PilotCategory.GetDisplayName();
-        public string PilotCategoryBadge => PilotCategory.GetShortName();
-        public string PilotCategoryColor => PilotCategory.GetBadgeColor();
+        public string CareerPhaseStatusDisplay => CareerPhase.FormatPhaseStatus(PilotLevel);
+        public string CareerPhaseDisplay => CareerPhase.GetDisplayName();
+        public string CareerPhaseBadge => CareerPhase.GetShortName();
+        public string CareerPhaseColor => CareerPhase.GetBadgeColor();
 
         // Aliases para compatibilidade XAML
-        public string CompanyTierDisplay => PilotCategoryDisplay;
-        public string CompanyTierBadge => PilotCategoryBadge;
-        public string CompanyTierColor => PilotCategoryColor;
+        public string PilotCategoryDisplay => CareerPhaseStatusDisplay;
+        public string PilotCategoryBadge => CareerPhaseBadge;
+        public string PilotCategoryColor => CareerPhaseColor;
+
+        public string CompanyTierDisplay => CareerPhaseStatusDisplay;
+        public string CompanyTierBadge => CareerPhaseBadge;
+        public string CompanyTierColor => CareerPhaseColor;
         
         partial void OnSelectedMissionChanged(Mission? value)
         {
@@ -625,10 +635,10 @@ namespace FlightCareer.UI.ViewModels
                     var pilots = await _pilotRepository.GetAllAsync();
                     var p = pilots.FirstOrDefault(x => x.Name == PilotName);
                     var activeAircraft = p?.Hangar.FirstOrDefault(a => a.Id == p.ActiveAircraftId);
-                    var pCat = p?.PilotCategory ?? PilotCategory.Category1_FlightSchool;
+                    var pPhase = p?.CareerPhase ?? CareerPhase.Phase1_FlightSchool;
                     var originAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.OriginICAO);
                     var destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
-                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pCat, originAirport);
+                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pPhase, originAirport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     _allMissionDisplayItems.Add(item);
                     ApplyMissionFilters();
@@ -748,13 +758,13 @@ namespace FlightCareer.UI.ViewModels
 
             if (itemsToAccept.Count == 0) return;
 
-            // Checagem de Homologação
-            var blocked = itemsToAccept.Where(i => i.Mission.RequiredCategory > pilot.PilotCategory).ToList();
+            // Checagem de Homologação pela Fase
+            var blocked = itemsToAccept.Where(i => i.Mission.RequiredPhase > pilot.CareerPhase).ToList();
             if (blocked.Count > 0)
             {
                 var firstBlocked = blocked.First();
                 System.Windows.MessageBox.Show(
-                    $"Sua empresa ({pilot.PilotCategory.GetDisplayName()}) ainda não possui homologação para realizar contratos do tipo '{firstBlocked.Mission.RequiredCategory.GetDisplayName()}'.\n\nEvolua a categoria da sua empresa para desbloquear esta operação.",
+                    $"Sua empresa ({pilot.CareerPhase.GetDisplayName()}) ainda não possui homologação para realizar contratos da '{firstBlocked.Mission.RequiredPhase.GetDisplayName()}'.\n\nEvolua a fase da sua empresa para desbloquear esta operação.",
                     "Contrato Bloqueado por Homologação",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Warning);
@@ -906,10 +916,10 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
+            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredPhase > pilot.CareerPhase);
             if (prohibitedMission != null)
             {
-                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa opera em {pilot.PilotCategory.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige a {prohibitedMission.RequiredPhase.GetDisplayName()}, mas sua empresa opera na {pilot.CareerPhase.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
@@ -952,57 +962,59 @@ namespace FlightCareer.UI.ViewModels
             var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Name == PilotName);
             if (pilot == null) return;
 
-            if (PilotCategory >= PilotCategory.Category5_MajorAirline)
+            if (pilot.CareerPhase >= CareerPhase.Phase7_InternationalAirline)
             {
-                System.Windows.MessageBox.Show("Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Categoria 5 (Linha Aérea Regular)!", "Nível Máximo Atingido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(
+                    "Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Fase 7 (Companhia internacional / widebody)!\n\n" +
+                    "Não há mais fases a desbloquear. Seus níveis continuam progredindo livremente pelo ganho de experiência (XP).", 
+                    "Fase Máxima Atingida", 
+                    System.Windows.MessageBoxButton.OK, 
+                    System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            var nextCategory = (PilotCategory)((int)PilotCategory + 1);
-            double cost = PilotCategory.GetPromotionCost();
-            double reqHours = PilotCategory.GetRequiredHours();
-            int reqXP = PilotCategory.GetRequiredXP();
+            var nextPhase = (CareerPhase)((int)pilot.CareerPhase + 1);
+            int reqLevel = nextPhase.GetEntryLevel();
+            double reqHours = nextPhase.GetMinHours();
+            double cost = nextPhase.GetPromotionCost();
 
-            string reqDesc = nextCategory switch
-            {
-                PilotCategory.Category2_SAE => "- Carteira de Piloto Privado (40+ Horas de Voo)\n- Manual de Serviços Especializados e Inspeção ANAC/FAA",
-                PilotCategory.Category3_AirTaxi => "- Licença de Piloto Comercial (PC) + IFR (150+ Horas)\n- Homologação de Táxi Aéreo, Gestor SGSO e Mecânico Responsável (DTS)",
-                PilotCategory.Category4_Regional => "- Habilitação Multimotor (MLTE) + IFR (500+ Horas)\n- Infraestrutura de Rampa/Ground Handling e Sistema DOV",
-                PilotCategory.Category5_MajorAirline => "- Licença de Piloto de Linha Aérea (PLA) (1500+ Horas)\n- Slots em Hubs Principais, Auditoria IOSA e Homologação Regular",
-                _ => ""
-            };
-
+            bool levelOk = pilot.Level >= reqLevel;
             bool hoursOk = TotalHours >= reqHours;
-            bool xpOk = pilot.ExperiencePoints >= reqXP;
             bool balanceOk = Balance >= cost;
-            bool canPromote = hoursOk && xpOk && balanceOk;
+            bool canPromote = levelOk && hoursOk && balanceOk;
+
+            string levelStatus = levelOk ? $"Nível {reqLevel} — ok" : $"Nível {pilot.Level}/{reqLevel}";
+            string hoursStatus = hoursOk ? $"Horas {reqHours:F0} — ok" : $"Horas {TotalHours:F1}/{reqHours:F0}";
+            string balanceStatus = balanceOk ? $"Homologação {cost:C0} — ok" : $"Homologação {cost:C0} (Saldo: {Balance:C0})";
+            string summaryLine = $"{levelStatus} · {hoursStatus} · {balanceStatus}";
 
             string statusMsg = $"=== CERTIFICAÇÃO REGULATÓRIA DA EMPRESA ===\n\n" +
-                               $"Homologação Atual: {PilotCategory.GetDisplayName()}\n" +
-                               $"Próxima Categoria: {nextCategory.GetDisplayName()}\n\n" +
-                               $"REQUISITOS OPERACIONAIS:\n{reqDesc}\n\n" +
+                               $"Fase Atual: {pilot.CareerPhase.FormatPhaseStatus(pilot.Level)}\n" +
+                               $"Próxima Fase: {nextPhase.FormatPhaseStatus(reqLevel)}\n\n" +
+                               $"REQUISITOS OPERACIONAIS:\n{nextPhase.GetOperationalDescription()}\n\n" +
                                $"TRÍADE DE PROGRESSÃO:\n" +
+                               $"• Nível do Piloto: {pilot.Level} / {reqLevel} {(levelOk ? "[OK]" : "[PENDENTE]")}\n" +
                                $"• Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h {(hoursOk ? "[OK]" : "[PENDENTE]")}\n" +
-                               $"• Experiência (XP): {pilot.ExperiencePoints:N0} / {reqXP:N0} XP {(xpOk ? "[OK]" : "[PENDENTE]")}\n" +
-                               $"• Taxa de Homologação: {cost:C2} (Saldo: {Balance:C2}) {(balanceOk ? "[OK]" : "[PENDENTE]")}\n\n";
+                               $"• Taxa de Homologação: {cost:C2} (Saldo: {Balance:C2}) {(balanceOk ? "[OK]" : "[PENDENTE]")}\n\n" +
+                               $"Status: {summaryLine}\n\n";
 
             if (!canPromote)
             {
                 statusMsg += "SUA EMPRESA AINDA NÃO CUMPRE TODOS OS REQUISITOS:\n";
+                if (!levelOk) statusMsg += $"- Nível insuficiente. Alcance o nível {reqLevel} por meio de XP (atualmente nível {pilot.Level}).\n";
                 if (!hoursOk) statusMsg += $"- Faltam {(reqHours - TotalHours):F1} horas de voo registradas no manche.\n";
-                if (!xpOk) statusMsg += $"- Faltam {(reqXP - pilot.ExperiencePoints):N0} pontos de XP. Realize voos com pousos suaves e sem infrações para elevar sua pontuação de proficiência.\n";
                 if (!balanceOk) statusMsg += $"- Capital insuficiente. Faltam {(cost - Balance):C2} em caixa para pagar a homologação regulatória.\n";
 
                 System.Windows.MessageBox.Show(statusMsg, "Progresso de Certificação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            statusMsg += "Todos os requisitos regulatórios, horas e pontuação de XP foram atingidos!\n\nDeseja pagar a taxa e homologar sua empresa para a nova Categoria agora?";
-            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Categoria Operacional", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            statusMsg += $"Todos os requisitos ({summaryLine}) foram atingidos!\n\nDeseja pagar a taxa de {cost:C2} e homologar sua empresa para a {nextPhase.GetDisplayName()} agora?";
+            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Fase da Carreira", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             if (result != System.Windows.MessageBoxResult.Yes) return;
 
             pilot.Balance -= cost;
-            pilot.PilotCategory = nextCategory;
+            pilot.CareerPhase = nextPhase;
 
             _context.FinancialTransactions.Add(new FinancialTransaction
             {
@@ -1010,7 +1022,7 @@ namespace FlightCareer.UI.ViewModels
                 PilotId = pilot.Id,
                 Date = DateTime.Now,
                 Category = "Certificação",
-                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextCategory.GetDisplayName()}",
+                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextPhase.GetDisplayName()}",
                 Amount = cost,
                 Type = TransactionType.Expense
             });
@@ -1018,7 +1030,7 @@ namespace FlightCareer.UI.ViewModels
             await _context.SaveChangesAsync();
             await InitializeForPilotAsync(pilot.Name);
 
-            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob: {nextCategory.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob a: {nextPhase.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         private async Task CancelFlightAsync()
@@ -1108,7 +1120,7 @@ namespace FlightCareer.UI.ViewModels
             Balance = pilot.Balance;
             ExperiencePoints = pilot.ExperiencePoints;
             ActiveAircraftId = pilot.ActiveAircraftId;
-            PilotCategory = pilot.PilotCategory;
+            CareerPhase = pilot.CareerPhase;
 
             // REGRA: A localização do piloto é ONDE ESTÁ O AVIÃO ATIVO
             var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
@@ -1132,6 +1144,10 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(CashDisplay));
             OnPropertyChanged(nameof(RankDisplay));
             OnPropertyChanged(nameof(XpProgress));
+            OnPropertyChanged(nameof(CareerPhaseStatusDisplay));
+            OnPropertyChanged(nameof(CareerPhaseDisplay));
+            OnPropertyChanged(nameof(CareerPhaseBadge));
+            OnPropertyChanged(nameof(CareerPhaseColor));
             OnPropertyChanged(nameof(PilotCategoryDisplay));
             OnPropertyChanged(nameof(PilotCategoryBadge));
             OnPropertyChanged(nameof(PilotCategoryColor));
@@ -1175,7 +1191,7 @@ namespace FlightCareer.UI.ViewModels
                 var missionList = missions.ToList();
 
                 activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
-                var pilotCategory = pilot.PilotCategory;
+                var pilotPhase = pilot.CareerPhase;
 
                 var destIcaos = missionList.Select(m => m.DestinationICAO).Distinct().ToList();
                 var destAirports = await _context.Airports
@@ -1186,7 +1202,7 @@ namespace FlightCareer.UI.ViewModels
                 foreach (var m in missionList)
                 {
                     destAirports.TryGetValue(m.DestinationICAO, out var dest);
-                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotCategory, airport);
+                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotPhase, airport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     displayItems.Add(item);
                 }
