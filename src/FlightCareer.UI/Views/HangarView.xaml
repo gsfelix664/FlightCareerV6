@@ -238,6 +238,15 @@
                         <TextBlock Text="{Binding StatusDetail}" Foreground="{StaticResource HgText2}" FontSize="12.5" Margin="14,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
+
+                <!-- Faixa de Oficina (PARADA-REAL) -->
+                <Border Background="#122330" BorderBrush="{StaticResource HgCyan}" BorderThickness="1" CornerRadius="6" Padding="14,10" Margin="0,8,0,0"
+                        Visibility="{Binding IsInWorkshop, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⏱" Foreground="{StaticResource HgCyan}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding WorkshopBannerText}" Foreground="{StaticResource HgCyan}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
 
             <!-- Conteúdo -->
@@ -513,8 +522,8 @@
 
                                 <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="Troca de óleo (12 h)" Style="{StaticResource HgLabel}"/>
-                                        <TextBlock Text="{Binding HoursUntilNext50hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush50h}"/>
+                                        <TextBlock Text="{Binding OilChangeLabel}" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext50hInspection, StringFormat={}{0:F1} h de voo restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush50h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text50h}" IsEnabled="{Binding CanService}"
                                             Command="{Binding DataContext.Perform50hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -523,8 +532,8 @@
 
                                 <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="Inspeção anual (25 h, obrigatória)" Style="{StaticResource HgLabel}"/>
-                                        <TextBlock Text="{Binding HoursUntilNext100hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush100h}"/>
+                                        <TextBlock Text="{Binding AnnualInspectionLabel}" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext100hInspection, StringFormat={}{0:F1} h de voo restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush100h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text100h}" IsEnabled="{Binding CanService}"
                                             Command="{Binding DataContext.Perform100hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -533,22 +542,25 @@
 
                                 <Grid Margin="0,0,0,12" Visibility="{Binding IsPiston, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <StackPanel>
-                                        <TextBlock Text="Revisão de ignição (125 h, magnetos e velas)" Style="{StaticResource HgLabel}"/>
-                                        <TextBlock Text="{Binding HoursUntilNext500hInspection, StringFormat={}{0:F1} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush500h}"/>
+                                        <TextBlock Text="{Binding IgnitionRevisionLabel}" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding HoursUntilNext500hInspection, StringFormat={}{0:F1} h de voo restantes}" Style="{StaticResource HgValue}" Foreground="{Binding Brush500h}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding Text500h}" IsEnabled="{Binding CanService}"
                                             Command="{Binding DataContext.Perform500hInspectionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 </Grid>
 
-                                <Grid>
+                                <Grid Margin="0,0,0,12">
                                     <StackPanel>
-                                        <TextBlock Text="TBO do motor" Style="{StaticResource HgLabel}"/>
-                                        <TextBlock Text="{Binding EngineTboRemainingHours, StringFormat={}{0:F0} h restantes}" Style="{StaticResource HgValue}" Foreground="{Binding BrushTbo}"/>
+                                        <TextBlock Text="{Binding TboLabel}" Style="{StaticResource HgLabel}"/>
+                                        <TextBlock Text="{Binding EngineTboRemainingHours, StringFormat={}{0:F0} h de voo restantes}" Style="{StaticResource HgValue}" Foreground="{Binding BrushTbo}"/>
                                     </StackPanel>
                                     <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{Binding TextOverhaul}" IsEnabled="{Binding CanService}"
                                             Command="{Binding DataContext.PerformOverhaulCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             ToolTip="{Binding OverhaulTooltip}"/>
                                 </Grid>
+
+                                <TextBlock Text="Os prazos de manutenção são os da vida real; o jogo conta as horas em ritmo acelerado (×4) para caber na carreira."
+                                           Foreground="{StaticResource HgText2}" FontSize="11" FontFamily="{StaticResource HgSans}" TextWrapping="Wrap" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
 

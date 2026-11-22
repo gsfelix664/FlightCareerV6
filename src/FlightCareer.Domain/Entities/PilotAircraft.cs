@@ -40,5 +40,11 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Data UTC em que as peças individuais desta aeronave foram migradas das barras/colunas legadas.</summary>
         public DateTime? PartsMigratedAtUtc { get; set; }
+
+        /// <summary>Prazo em relógio real (UTC) até o qual a aeronave fica indisponível na oficina (PARADA-REAL).</summary>
+        public DateTime? WorkshopUntilUtc { get; set; }
+
+        /// <summary>Descrição do serviço em andamento na oficina (ex: Troca de óleo, Retífica).</summary>
+        public string? WorkshopDescription { get; set; }
     }
 }

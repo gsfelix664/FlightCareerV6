@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Enums;
 using FlightCareer.UI.Services;
@@ -54,6 +55,11 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _hangarAircraftFuel;
         [ObservableProperty] private double _hangarAircraftMtow = 2500;
         [ObservableProperty] private double _hangarAircraftCruiseSpeed = 110;
+        [ObservableProperty] private DateTime? _workshopUntilUtc;
+        [ObservableProperty] private string? _workshopDescription;
+
+        partial void OnWorkshopUntilUtcChanged(DateTime? value) => ValidatePreFlightConditions();
+        partial void OnWorkshopDescriptionChanged(string? value) => ValidatePreFlightConditions();
 
         partial void OnHangarAircraftLocationChanged(string value)
         {
@@ -631,8 +637,13 @@ namespace FlightCareer.UI.ViewModels
 
             // CASO 2: DESPACHO PRÉ-VOO (RAMPA / SOLO)
             bool connectionOk = _simConnect.IsConnected;
+            bool isInWorkshop = WorkshopDowntime.IsInWorkshop(WorkshopUntilUtc, DateTime.UtcNow);
+            var workshopRemaining = WorkshopDowntime.Remaining(WorkshopUntilUtc, DateTime.UtcNow);
+            string workshopMmSs = $"{(int)workshopRemaining.TotalMinutes:D2}:{workshopRemaining.Seconds:D2}";
+            string workshopDesc = string.IsNullOrWhiteSpace(WorkshopDescription) ? "manutenção" : WorkshopDescription;
+
             string modelOnly = (HangarAircraftModel ?? "").Split('(')[0].Trim();
-            bool aircraftOk = connectionOk && IsAircraftMatching(AircraftTitle, HangarAircraftModel);
+            bool aircraftOk = connectionOk && !isInWorkshop && IsAircraftMatching(AircraftTitle, HangarAircraftModel);
 
             string simLocation = (_nearestAirportICAO ?? "").Trim().ToUpper();
             string simMsfsIdent = (_nearestAirportMsfsIdent ?? "").Trim().ToUpper();
@@ -660,6 +671,11 @@ namespace FlightCareer.UI.ViewModels
                 acftSim = "Aguardando conexão com o simulador...";
                 acftExplanation = "Inicie o Microsoft Flight Simulator ou ative o painel Debug para sincronizar.";
             }
+            else if (isInWorkshop)
+            {
+                acftSim = $"✕ Na oficina — libera em {workshopMmSs}";
+                acftExplanation = $"A aeronave está na oficina ({workshopDesc}). Aguarde a liberação em {workshopMmSs} para iniciar o voo.";
+            }
             else if (aircraftOk)
             {
                 acftSim = $"✓ Sincronizada no MSFS: {AircraftTitle}";
@@ -670,8 +686,8 @@ namespace FlightCareer.UI.ViewModels
                 acftSim = $"✕ Detectada no MSFS: {(string.IsNullOrWhiteSpace(AircraftTitle) ? "Não identificada" : AircraftTitle)}";
                 acftExplanation = $"⚠️ Selecione o modelo '{modelOnly}' no menu de aeronaves do MSFS antes de decolar.";
             }
-            string acftTolerance = !connectionOk ? "AGUARDANDO" : (aircraftOk ? "✓ CORRESPONDENTE" : "✕ DIVERGENTE");
-            UpdateChecklistItem(0, "✈", "MODELO DA AERONAVE", acftSoftware, acftSim, aircraftOk, acftExplanation, aircraftOk ? "OK" : "DIVERGENTE",
+            string acftTolerance = !connectionOk ? "AGUARDANDO" : (isInWorkshop ? "NA OFICINA" : (aircraftOk ? "✓ CORRESPONDENTE" : "✕ DIVERGENTE"));
+            UpdateChecklistItem(0, "✈", "MODELO DA AERONAVE", acftSoftware, acftSim, aircraftOk, acftExplanation, isInWorkshop ? "NA OFICINA" : (aircraftOk ? "OK" : "DIVERGENTE"),
                 cleanPlanned: modelOnly,
                 cleanSim: string.IsNullOrWhiteSpace(AircraftTitle) ? "N/A" : AircraftTitle,
                 toleranceBadge: acftTolerance);
@@ -813,6 +829,12 @@ namespace FlightCareer.UI.ViewModels
                 WeightStatusText = _simConnect.DebugMode ? "MODO DEBUG ATIVO" : "SIMULADOR DESCONECTADO";
                 WeightStatusColor = "#EF4444";
                 GatekeeperBlockedReason = "Voo bloqueado: O simulador MSFS não está conectado.";
+            }
+            else if (isInWorkshop)
+            {
+                WeightStatusText = $"NA OFICINA (Libera em {workshopMmSs})";
+                WeightStatusColor = "#EF4444";
+                GatekeeperBlockedReason = $"Voo bloqueado: A aeronave {HangarAircraftPrefix} está na oficina ({workshopDesc}). Libera em {workshopMmSs}.";
             }
             else if (!aircraftOk)
             {

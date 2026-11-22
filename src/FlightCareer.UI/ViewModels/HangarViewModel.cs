@@ -128,6 +128,60 @@ namespace FlightCareer.UI.ViewModels
             var selectId = keepSelection ?? SelectedAircraft?.Aircraft.Id ?? pilot.ActiveAircraftId;
             SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == selectId) ?? Fleet.FirstOrDefault();
             await LoadFlaggedPartsForSelectedAircraftAsync();
+            UpdateWorkshopTimer();
+        }
+
+        private System.Windows.Threading.DispatcherTimer? _workshopTimer;
+
+        private void UpdateWorkshopTimer()
+        {
+            bool anyInWorkshop = Fleet != null && Fleet.Any(a => a.IsInWorkshop);
+            if (anyInWorkshop)
+            {
+                if (_workshopTimer == null)
+                {
+                    _workshopTimer = new System.Windows.Threading.DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromSeconds(1)
+                    };
+                    _workshopTimer.Tick += OnWorkshopTimerTick;
+                }
+                if (!_workshopTimer.IsEnabled)
+                {
+                    _workshopTimer.Start();
+                }
+            }
+            else
+            {
+                if (_workshopTimer != null && _workshopTimer.IsEnabled)
+                {
+                    _workshopTimer.Stop();
+                }
+            }
+        }
+
+        private void OnWorkshopTimerTick(object? sender, EventArgs e)
+        {
+            if (Fleet == null || Fleet.Count == 0)
+            {
+                _workshopTimer?.Stop();
+                return;
+            }
+
+            bool anyRemaining = false;
+            foreach (var a in Fleet)
+            {
+                if (a.IsInWorkshop)
+                {
+                    anyRemaining = true;
+                }
+                a.RefreshWorkshop();
+            }
+
+            if (!anyRemaining)
+            {
+                _workshopTimer?.Stop();
+            }
         }
 
         partial void OnSelectedAircraftChanged(PilotAircraftWrapper? value)
@@ -197,10 +251,11 @@ namespace FlightCareer.UI.ViewModels
         /// <summary>
         /// Executa um serviço pago: confirma, confere saldo, aplica sobre a aeronave e componentes de um contexto novo,
         /// registra a transação, sincroniza as colunas antigas, salva e recarrega a frota.
+        /// Suporta parada em tempo real e serviço expresso (PARADA-REAL).
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
             Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
-            Func<AppDbContext, Task>? applyInContext = null, Func<int>? getFlaggedCount = null, double downtimeHours = 0.0)
+            Func<AppDbContext, Task>? applyInContext = null, Func<int>? getFlaggedCount = null, double downtimeHours = 0.0, bool? express = null)
         {
             if (SelectedAircraft == null) return false;
             var aircraftId = SelectedAircraft.Aircraft.Id;
@@ -213,7 +268,67 @@ namespace FlightCareer.UI.ViewModels
                 message = $"{message}\n\nDificuldade {diffLabel}: custos ×{diffEcon.CostMultiplier:0.00}";
             }
 
-            if (!ThemedDialog.Confirm(title, $"{message}\n\nCusto: {cost:C2}", "Autorizar", kind)) return false;
+            bool isExpress = false;
+            double effectiveCost = cost;
+            double effectiveDowntimeHours = downtimeHours;
+            int realMinutes = 0;
+
+            if (downtimeHours > 0.0)
+            {
+                var normal = WorkshopDowntime.Apply(downtimeHours, express: false);
+                var expressCalc = WorkshopDowntime.Apply(downtimeHours, express: true);
+                double normalCost = cost;
+                double expressCost = Math.Round(cost * WorkshopDowntime.ExpressCostMultiplier, 2);
+
+                if (express.HasValue)
+                {
+                    isExpress = express.Value;
+                    if (isExpress)
+                    {
+                        effectiveCost = expressCost;
+                        effectiveDowntimeHours = expressCalc.gameHours;
+                        realMinutes = expressCalc.realMinutes;
+                    }
+                    else
+                    {
+                        effectiveCost = normalCost;
+                        effectiveDowntimeHours = normal.gameHours;
+                        realMinutes = normal.realMinutes;
+                    }
+                }
+                else
+                {
+                    string serviceMsg = $"{message}\n\nEscolha o atendimento na oficina:\n• Normal: libera em {normal.realMinutes} min ({normal.gameHours:F0} h de carreira)\n• Expresso (+50%): libera em {expressCalc.realMinutes} min ({expressCalc.gameHours:F0} h de carreira)";
+                    var choice = ThemedDialog.ConfirmService(
+                        title,
+                        serviceMsg,
+                        normalCost,
+                        normal.realMinutes,
+                        expressCost,
+                        expressCalc.realMinutes,
+                        kind);
+
+                    if (choice == ServiceOption.Cancel) return false;
+
+                    if (choice == ServiceOption.Express)
+                    {
+                        isExpress = true;
+                        effectiveCost = expressCost;
+                        effectiveDowntimeHours = expressCalc.gameHours;
+                        realMinutes = expressCalc.realMinutes;
+                    }
+                    else
+                    {
+                        effectiveCost = normalCost;
+                        effectiveDowntimeHours = normal.gameHours;
+                        realMinutes = normal.realMinutes;
+                    }
+                }
+            }
+            else
+            {
+                if (!ThemedDialog.Confirm(title, $"{message}\n\nCusto: {cost:C2}", "Autorizar", kind)) return false;
+            }
 
             await using var context = await _contextFactory.CreateDbContextAsync();
             var pilot = await context.Pilots.FindAsync(_pilotId);
@@ -224,27 +339,35 @@ namespace FlightCareer.UI.ViewModels
                 .FirstOrDefaultAsync(a => a.Id == aircraftId);
             if (pilot == null || aircraft == null) return false;
 
-            if (pilot.Balance < cost)
+            if (pilot.Balance < effectiveCost)
             {
-                ThemedDialog.Info("Saldo insuficiente", $"Este serviço custa {cost:C2} e o saldo atual é {pilot.Balance:C2}.", DialogKind.Danger);
+                ThemedDialog.Info("Saldo insuficiente", $"Este serviço custa {effectiveCost:C2} e o saldo atual é {pilot.Balance:C2}.", DialogKind.Danger);
                 return false;
             }
 
-            pilot.Balance -= cost;
+            pilot.Balance -= effectiveCost;
             aircraft.Pilot = pilot;
 
-            if (downtimeHours > 0.0)
+            if (effectiveDowntimeHours > 0.0)
             {
-                pilot.CareerClockUtc = CareerClock.Advance(pilot.CareerClockUtc, downtimeHours);
+                pilot.CareerClockUtc = CareerClock.Advance(pilot.CareerClockUtc, effectiveDowntimeHours);
                 _careerClock = pilot.CareerClockUtc;
                 CareerDateText = $"Dia da carreira: {_careerClock:dd/MM/yyyy}";
+            }
+
+            if (realMinutes > 0)
+            {
+                var nowUtc = DateTime.UtcNow;
+                aircraft.WorkshopUntilUtc = WorkshopDowntime.CalculateNewUntilUtc(aircraft.WorkshopUntilUtc, nowUtc, realMinutes);
+                string desc = isExpress ? $"{transactionDescription} (EXPRESSO)" : transactionDescription;
+                aircraft.WorkshopDescription = desc;
             }
 
             apply(aircraft, aircraft.Components);
             if (applyInContext != null) await applyInContext(context);
             LegacyConditionBridge.WriteToLegacy(aircraft, aircraft.Components);
 
-            if (cost > 0)
+            if (effectiveCost > 0)
             {
                 context.FinancialTransactions.Add(new FinancialTransaction
                 {
@@ -252,8 +375,8 @@ namespace FlightCareer.UI.ViewModels
                     PilotId = pilot.Id,
                     Date = DateTime.Now,
                     Category = category,
-                    Description = $"{transactionDescription}: {aircraft.Prefix}",
-                    Amount = cost,
+                    Description = isExpress ? $"{transactionDescription} (EXPRESSO): {aircraft.Prefix}" : $"{transactionDescription}: {aircraft.Prefix}",
+                    Amount = effectiveCost,
                     Type = TransactionType.Expense
                 });
             }
@@ -261,6 +384,7 @@ namespace FlightCareer.UI.ViewModels
             await context.SaveChangesAsync();
             await LoadFleetAsync(aircraftId);
             await RefreshMainBalanceAsync();
+            UpdateWorkshopTimer();
 
             if (successMessage != null)
             {
@@ -271,6 +395,10 @@ namespace FlightCareer.UI.ViewModels
                     {
                         successMessage = $"{successMessage.TrimEnd('.')} — {n} peça(s) com atenção.";
                     }
+                }
+                if (realMinutes > 0)
+                {
+                    successMessage = $"{successMessage}\n\n⏱ Aeronave na oficina: liberação em {realMinutes} min.";
                 }
                 ThemedDialog.Info(title, successMessage, DialogKind.Success);
             }

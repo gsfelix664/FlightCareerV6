@@ -229,6 +229,11 @@ namespace FlightCareer.UI.ViewModels
                 if (grounding.Count > 0)
                     return new AircraftStatus(AircraftStatusLevel.Interdicted, "GROUNDED (PANE)",
                         "Item inoperante: " + string.Join(", ", grounding.Select(d => d.Title)) + ". Repare a pane na oficina.");
+
+                if (IsInWorkshop)
+                    return new AircraftStatus(AircraftStatusLevel.Attention, "OFICINA",
+                        $"Em manutenção ({Aircraft.WorkshopDescription ?? "serviço"}). Libera em {WorkshopRemainingFormatted}.");
+
                 if (OpenDefects.Count > 0 && status.Level is AircraftStatusLevel.Ready or AircraftStatusLevel.MaintenanceDue)
                     return new AircraftStatus(AircraftStatusLevel.Attention, "PANE DIFERIDA",
                         "Voo permitido com: " + string.Join(", ", OpenDefects.Select(d => d.Title)) + ".");
@@ -267,6 +272,37 @@ namespace FlightCareer.UI.ViewModels
         public double TotalRepairCost => Components.Sum(c => c.RepairCost);
         public bool HasRepairs => TotalRepairCost > 0;
         public string RepairAllText => HasRepairs ? $"Reparar tudo · {TotalRepairCost:C0}" : "Nada a reparar";
+
+        // --- Oficina em tempo real (PARADA-REAL) ---
+        public bool IsInWorkshop => WorkshopDowntime.IsInWorkshop(Aircraft.WorkshopUntilUtc, DateTime.UtcNow);
+        public TimeSpan WorkshopRemaining => WorkshopDowntime.Remaining(Aircraft.WorkshopUntilUtc, DateTime.UtcNow);
+        public string WorkshopRemainingFormatted
+        {
+            get
+            {
+                var rem = WorkshopRemaining;
+                return $"{(int)rem.TotalMinutes:D2}:{rem.Seconds:D2}";
+            }
+        }
+        public string WorkshopBannerText => $"Na oficina — libera em {WorkshopRemainingFormatted} ({Aircraft.WorkshopDescription ?? "serviço"})";
+
+        public void RefreshWorkshop()
+        {
+            OnPropertyChanged(nameof(IsInWorkshop));
+            OnPropertyChanged(nameof(WorkshopRemaining));
+            OnPropertyChanged(nameof(WorkshopRemainingFormatted));
+            OnPropertyChanged(nameof(WorkshopBannerText));
+            OnPropertyChanged(nameof(StatusLevel));
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(StatusDetail));
+            OnPropertyChanged(nameof(StatusBrush));
+        }
+
+        // --- Prazos reais (× 4) ---
+        public string OilChangeLabel => $"Troca de óleo — a cada {MaintenancePricing.RealHours(MaintenancePricing.OilChangeIntervalHours):F0} h na vida real";
+        public string AnnualInspectionLabel => $"Inspeção anual — a cada {MaintenancePricing.RealHours(MaintenancePricing.AnnualInspectionIntervalHours):F0} h na vida real (obrigatória)";
+        public string IgnitionRevisionLabel => $"Revisão de ignição — a cada {MaintenancePricing.RealHours(MaintenancePricing.IgnitionRevisionIntervalHours):F0} h na vida real (magnetos e velas)";
+        public string TboLabel => $"TBO {MaintenancePricing.RealHours(MaintenancePricing.TboHoursFor(EngineClass)):N0} h (vida real)";
 
         // --- Inspeções e TBO ---
         public double EngineTboRemainingHours => Math.Round(Aircraft.EngineTboRemainingHours, 1);

@@ -173,36 +173,36 @@ namespace FlightCareer.Domain.Parts
                 case ComponentKind.Engine:
                 {
                     double remaining = Math.Round(aircraft.EngineTboRemainingHours, 1);
-                    double total = MaintenancePricing.TboHoursFor(engineClass);
+                    double totalReal = MaintenancePricing.RealHours(MaintenancePricing.TboHoursFor(engineClass));
                     if (remaining <= 0)
                     {
                         double overdue = Math.Abs(remaining);
-                        return ($"TBO vencido há {overdue:F0} h", true);
+                        return ($"TBO vencido há {overdue:F0} h de voo", true);
                     }
-                    return ($"TBO: {remaining:F0} h restantes (de {total:F0})", false);
+                    return ($"TBO {totalReal:N0} h (vida real) · faltam {remaining:F0} h de voo", false);
                 }
                 case ComponentKind.Oil:
                 {
                     double remaining = Math.Round(aircraft.HoursUntilNext50hInspection, 1);
-                    double total = MaintenancePricing.OilChangeIntervalHours;
+                    double totalReal = MaintenancePricing.RealHours(MaintenancePricing.OilChangeIntervalHours);
                     if (remaining <= 0)
                     {
                         double overdue = Math.Abs(remaining);
-                        return ($"Troca de óleo vencida há {overdue:F0} h", true);
+                        return ($"Troca de óleo vencida há {overdue:F0} h de voo", true);
                     }
-                    return ($"Troca de óleo em {remaining:F0} h (de {total:F0})", false);
+                    return ($"Troca de óleo a cada {totalReal:F0} h (vida real) · faltam {remaining:F0} h de voo", false);
                 }
                 case ComponentKind.Ignition:
                 {
                     if (engineClass != EngineClass.Piston) return (string.Empty, false);
                     double remaining = Math.Round(aircraft.HoursUntilNext500hInspection, 1);
-                    double total = MaintenancePricing.IgnitionRevisionIntervalHours;
+                    double totalReal = MaintenancePricing.RealHours(MaintenancePricing.IgnitionRevisionIntervalHours);
                     if (remaining <= 0)
                     {
                         double overdue = Math.Abs(remaining);
-                        return ($"Revisão de ignição vencida há {overdue:F0} h", true);
+                        return ($"Revisão de ignição vencida há {overdue:F0} h de voo", true);
                     }
-                    return ($"Revisão de ignição em {remaining:F0} h (de {total:F0})", false);
+                    return ($"Revisão de ignição a cada {totalReal:F0} h (vida real) · faltam {remaining:F0} h de voo", false);
                 }
                 default:
                     return (string.Empty, false);

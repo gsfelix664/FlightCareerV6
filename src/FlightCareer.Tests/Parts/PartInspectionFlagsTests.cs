@@ -56,7 +56,7 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(PartFlag.None, result.Level);
 
             var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
-            Assert.Equal("Vida: 90 / 100 h", lifeNote);
+            Assert.Equal("Vida 400 h (vida real) · faltam 10 h de voo", lifeNote);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(PartFlag.None, result.Level);
 
             var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
-            Assert.Equal("Vida vencida: 260 / 250 h", lifeNote);
+            Assert.Equal("Vida 1000 h (vida real) · vencida há 10 h de voo", lifeNote);
         }
 
         [Fact]
@@ -82,7 +82,7 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(PartFlag.None, result.Level);
 
             var lifeNote = PartInspectionFlags.LifeNote(part, def, DateTime.UtcNow);
-            Assert.Equal("Ciclos: 90 / 100", lifeNote);
+            Assert.Equal("Ciclos 400 (vida real) · faltam 10 ciclos de voo", lifeNote);
         }
 
         [Fact]

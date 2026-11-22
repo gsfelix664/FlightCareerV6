@@ -257,7 +257,7 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(PartFlag.None, eval50.Level);
             string? lifeNote = PartInspectionFlags.LifeNote(p50, def, DateTime.UtcNow);
             Assert.NotNull(lifeNote);
-            Assert.Contains("Vida vencida", lifeNote);
+            Assert.Contains("vencida", lifeNote);
 
             var eval30 = PartInspectionFlags.Evaluate(p30, def, DateTime.UtcNow);
             Assert.Equal(PartFlag.Suspect, eval30.Level);

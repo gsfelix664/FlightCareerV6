@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
@@ -546,6 +547,8 @@ namespace FlightCareer.UI.ViewModels
                     _briefingViewModel.HangarAircraftLocation = active.CurrentLocationICAO;
                     _briefingViewModel.HangarAircraftMtow = AircraftWeightSpecs.GetMtow(active.AircraftType?.Model, active.AircraftType);
                     _briefingViewModel.HangarAircraftCruiseSpeed = active.AircraftType?.CruiseSpeedKts ?? 110.0;
+                    _briefingViewModel.WorkshopUntilUtc = active.WorkshopUntilUtc;
+                    _briefingViewModel.WorkshopDescription = active.WorkshopDescription;
                 }
             }
             else
@@ -556,6 +559,8 @@ namespace FlightCareer.UI.ViewModels
                 _briefingViewModel.HangarAircraftLocation = "---";
                 _briefingViewModel.HangarAircraftMtow = 2500.0;
                 _briefingViewModel.HangarAircraftCruiseSpeed = 110.0;
+                _briefingViewModel.WorkshopUntilUtc = null;
+                _briefingViewModel.WorkshopDescription = null;
             }
             
             await _briefingViewModel.RebuildItineraryAndValidateAsync();
@@ -873,6 +878,26 @@ namespace FlightCareer.UI.ViewModels
 
             var aircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
             if (aircraft == null) return;
+
+            // Releitura fresca da aeronave para conferir oficina sem cache (PARADA-REAL)
+            var freshAircraft = await _context.PilotAircrafts
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == aircraft.Id);
+
+            var workshopUntil = freshAircraft?.WorkshopUntilUtc ?? aircraft.WorkshopUntilUtc;
+            var workshopDesc = freshAircraft?.WorkshopDescription ?? aircraft.WorkshopDescription ?? "manutenção";
+
+            if (WorkshopDowntime.IsInWorkshop(workshopUntil, DateTime.UtcNow))
+            {
+                var remaining = WorkshopDowntime.Remaining(workshopUntil, DateTime.UtcNow);
+                string mmss = $"{(int)remaining.TotalMinutes:D2}:{remaining.Seconds:D2}";
+                System.Windows.MessageBox.Show(
+                    $"A aeronave {aircraft.Prefix} está na oficina ({workshopDesc}). Libera em {mmss}.",
+                    "Aeronave na Oficina",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
 
             if (aircraft.IsInterdicted)
             {
