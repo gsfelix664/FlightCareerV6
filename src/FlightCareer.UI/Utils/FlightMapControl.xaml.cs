@@ -19,6 +19,7 @@ namespace FlightCareer.UI.Utils
     {
         private readonly List<PointLatLng> _waypoints = new List<PointLatLng>();
         private GMapMarker? _aircraftMarker;
+        private GMapMarker? _originMarker;
         private GMapMarker? _destinationMarker;
         private GMapRoute? _destinationRoute;
         private GMapRoute? _waypointRoute;
@@ -35,6 +36,8 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty RouteLegsProperty = DependencyProperty.Register("RouteLegs", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRouteLegsChanged));
         public static readonly DependencyProperty AircraftLatProperty = DependencyProperty.Register("AircraftLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty AircraftLonProperty = DependencyProperty.Register("AircraftLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
+        public static readonly DependencyProperty OriginLatProperty = DependencyProperty.Register("OriginLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnOriginChanged));
+        public static readonly DependencyProperty OriginLonProperty = DependencyProperty.Register("OriginLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnOriginChanged));
         public static readonly DependencyProperty DestLatProperty = DependencyProperty.Register("DestLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnDestinationChanged));
         public static readonly DependencyProperty DestLonProperty = DependencyProperty.Register("DestLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnDestinationChanged));
         public static readonly DependencyProperty OriginIcaoProperty = DependencyProperty.Register("OriginIcao", typeof(string), typeof(FlightMapControl), new PropertyMetadata(string.Empty, OnIcaoChanged));
@@ -65,6 +68,8 @@ namespace FlightCareer.UI.Utils
         public System.Collections.IEnumerable? RouteLegs { get => (System.Collections.IEnumerable?)GetValue(RouteLegsProperty); set => SetValue(RouteLegsProperty, value); }
         public double AircraftLat { get => (double)GetValue(AircraftLatProperty); set => SetValue(AircraftLatProperty, value); }
         public double AircraftLon { get => (double)GetValue(AircraftLonProperty); set => SetValue(AircraftLonProperty, value); }
+        public double OriginLat { get => (double)GetValue(OriginLatProperty); set => SetValue(OriginLatProperty, value); }
+        public double OriginLon { get => (double)GetValue(OriginLonProperty); set => SetValue(OriginLonProperty, value); }
         public double DestLat { get => (double)GetValue(DestLatProperty); set => SetValue(DestLatProperty, value); }
         public double DestLon { get => (double)GetValue(DestLonProperty); set => SetValue(DestLonProperty, value); }
         public string OriginIcao { get => (string)GetValue(OriginIcaoProperty); set => SetValue(OriginIcaoProperty, value); }
@@ -150,6 +155,14 @@ namespace FlightCareer.UI.Utils
             if (d is FlightMapControl map)
             {
                 map.UpdateAircraftPosition();
+                map.UpdateDestinationRoute();
+            }
+        }
+
+        private static void OnOriginChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
                 map.UpdateDestinationRoute();
             }
         }
@@ -330,15 +343,38 @@ namespace FlightCareer.UI.Utils
         /// </summary>
         private void UpdateDestinationRoute()
         {
+            if (_originMarker != null) MainMap.Markers.Remove(_originMarker);
             if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
             if (_destinationRoute != null) MainMap.Markers.Remove(_destinationRoute);
+
+            // 1. Marcador circular sutil no ponto de partida (mesmo estilo do destino, ciano neon com tooltip ICAO)
+            if (OriginLat != 0 && OriginLon != 0)
+            {
+                var pOrigin = new PointLatLng(OriginLat, OriginLon);
+                var originCircle = new Ellipse
+                {
+                    Width = 9,
+                    Height = 9,
+                    Fill = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
+                    Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
+                    StrokeThickness = 1.5,
+                    ToolTip = !string.IsNullOrWhiteSpace(OriginIcao) ? $"ORIGEM: {OriginIcao}" : "ORIGEM"
+                };
+
+                _originMarker = new GMapMarker(pOrigin)
+                {
+                    ZIndex = 110,
+                    Shape = originCircle
+                };
+                MainMap.Markers.Add(_originMarker);
+            }
 
             if (DestLat == 0 || DestLon == 0) return;
 
             var pStart = new PointLatLng(AircraftLat, AircraftLon);
             var pEnd = new PointLatLng(DestLat, DestLon);
 
-            // 1. Gerar arco geodésico curvo (Great-Circle) com 20 pontos intermediários
+            // 2. Gerar arco geodésico curvo (Great-Circle) com 20 pontos intermediários
             var points = GenerateGreatCircleArc(pStart, pEnd, 20);
             _destinationRoute = new GMapRoute(points)
             {
@@ -352,7 +388,7 @@ namespace FlightCareer.UI.Utils
             };
             MainMap.Markers.Add(_destinationRoute);
 
-            // 2. Marcador circular sutil no destino
+            // 3. Marcador circular sutil no destino
             var destCircle = new Ellipse
             {
                 Width = 9,
@@ -370,13 +406,19 @@ namespace FlightCareer.UI.Utils
             };
             MainMap.Markers.Add(_destinationMarker);
 
-            // 3. Transição e enquadramento suave (fly-to / pan-zoom)
+            // 4. Transição e enquadramento suave (fly-to / pan-zoom)
             if (AircraftLat != 0 && AircraftLon != 0 && DestLat != 0 && DestLon != 0)
             {
-                double minLat = points.Min(p => p.Lat);
-                double maxLat = points.Max(p => p.Lat);
-                double minLon = points.Min(p => p.Lng);
-                double maxLon = points.Max(p => p.Lng);
+                var allPoints = new List<PointLatLng>(points);
+                if (OriginLat != 0 && OriginLon != 0)
+                {
+                    allPoints.Add(new PointLatLng(OriginLat, OriginLon));
+                }
+
+                double minLat = allPoints.Min(p => p.Lat);
+                double maxLat = allPoints.Max(p => p.Lat);
+                double minLon = allPoints.Min(p => p.Lng);
+                double maxLon = allPoints.Max(p => p.Lng);
 
                 double latSpan = Math.Max(0.08, maxLat - minLat);
                 double lonSpan = Math.Max(0.08, maxLon - minLon);
@@ -439,6 +481,7 @@ namespace FlightCareer.UI.Utils
             // Ocultar rota simples de destino único se estiver em modo multi-pernas
             if (_destinationRoute != null) MainMap.Markers.Remove(_destinationRoute);
             if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
+            if (_originMarker != null) MainMap.Markers.Remove(_originMarker);
 
             var allRoutePoints = new List<PointLatLng>();
             if (AircraftLat != 0 && AircraftLon != 0)
