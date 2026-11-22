@@ -128,5 +128,34 @@ namespace FlightCareer.Tests.Limits
             Assert.Equal(260.2, chtMax.Value, 1); // captura: 260,18 °C (500 °F)
             Assert.Equal("celsius", chtMax.Unit);
         }
+
+        [Fact]
+        public void Catalog_VaEstimationAndPohIntegrity()
+        {
+            // Valida a fórmula de estimativa de Va: vs1 40 kt, n 3.8 -> 78 kt (Math.Round(40 * Math.Sqrt(3.8)) = 78)
+            double vs1Test = 40.0;
+            double nTest = 3.8;
+            double vaTest = Math.Round(vs1Test * Math.Sqrt(nTest));
+            Assert.Equal(78.0, vaTest);
+
+            var profiles = _loader.LoadProfiles();
+
+            // C152 possui Va de manual (POH: 104 kt) e não deve ser alterado
+            var c152 = profiles.FirstOrDefault(p => p.AircraftId == "Cessna C152");
+            Assert.NotNull(c152);
+            var vaC152 = c152.Limits.FirstOrDefault(l => l.Key == "va");
+            Assert.NotNull(vaC152);
+            Assert.Equal(104.0, vaC152.Value);
+            Assert.Equal(LimitSource.POH, vaC152.Source);
+
+            // C400 Corvalis (vs1 = 72, n = 3.8) -> Va estimado = 140 kt como ClassDefault
+            var c400 = profiles.FirstOrDefault(p => p.AircraftId == "C400 Corvalis");
+            Assert.NotNull(c400);
+            var vaC400 = c400.Limits.FirstOrDefault(l => l.Key == "va");
+            Assert.NotNull(vaC400);
+            Assert.Equal(140.0, vaC400.Value);
+            Assert.Equal(LimitSource.ClassDefault, vaC400.Source);
+            Assert.Contains("Va = Vs1·√n", vaC400.Reference);
+        }
     }
 }

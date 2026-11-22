@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 9,
   "id": "CAP-4",
   "class": "Piston",
   "engineCount": 1,
@@ -93,6 +93,14 @@
       "unit": "rpm",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: Franklin 65 hp (Paulistinha)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 91.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=6, categoria acrobática); atualizar pelo POH",
       "notes": null
     }
   ]

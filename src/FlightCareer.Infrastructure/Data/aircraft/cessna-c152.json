@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 8,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
@@ -8,6 +8,7 @@
     "carbureted",
     "fixedGear",
     "fixedPitchProp",
+    "noAvionicsMaster",
     "noseWheelSteering",
     "piston",
     "singleEngine"

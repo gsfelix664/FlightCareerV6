@@ -3167,7 +3167,12 @@
         "elec-circuit-on-3"
       ],
       "nativeOverstress": null,
-      "appliesTo": {},
+      "appliesTo": {
+        "none": [
+          "noElectrical",
+          "noAvionicsMaster"
+        ]
+      },
       "source": "teste elétrico de solo C172SP G1000 (teste-eletrico-C172.md, log 20261115-1636-C172SP_G1000_Passengers.csv); POH Starter & Avionics Master Procedures / FAA AC 43.13-1B",
       "bands": [
         {

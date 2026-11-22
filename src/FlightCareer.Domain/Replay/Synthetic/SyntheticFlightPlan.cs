@@ -41,6 +41,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
             bool isRetractable = featSet.Contains("retractableGear") || featSet.Contains("hydraulicGear");
             bool hasFlaps = !featSet.Contains(AircraftFeatures.NoFlaps);
             bool hasElectrical = !featSet.Contains(AircraftFeatures.NoElectrical);
+            bool hasAvionicsMaster = !featSet.Contains(AircraftFeatures.NoAvionicsMaster);
             int engineCount = Math.Max(1, profile.EngineCount);
 
             // Sim rate: 80% dos voos 1x fixo; 20% com trecho acelerado durante cruzeiro
@@ -87,6 +88,11 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 {
                     candidateTypes.Remove(SyntheticAbuseType.BatteryDischarging);
                     candidateTypes.Remove(SyntheticAbuseType.ElectricalOverload);
+                    candidateTypes.Remove(SyntheticAbuseType.AvionicsMasterOnStart);
+                }
+
+                if (!hasAvionicsMaster)
+                {
                     candidateTypes.Remove(SyntheticAbuseType.AvionicsMasterOnStart);
                 }
 

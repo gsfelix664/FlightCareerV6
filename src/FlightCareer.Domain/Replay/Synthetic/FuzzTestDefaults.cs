@@ -43,8 +43,10 @@ namespace FlightCareer.Domain.Replay.Synthetic
             bool hasMainBus = existingLimits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase));
             bool hasAvionicsCircuit = existingLimits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase));
             bool hasAvionicsBusAmps = existingLimits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsBusAmpsIndex, StringComparison.OrdinalIgnoreCase));
+            bool hasNoAvionicsMaster = profile.Features != null &&
+                profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoAvionicsMaster, StringComparison.OrdinalIgnoreCase));
 
-            if (hasMainBus && hasAvionicsCircuit && hasAvionicsBusAmps)
+            if (hasMainBus && (hasAvionicsCircuit || hasNoAvionicsMaster) && hasAvionicsBusAmps)
             {
                 return profile;
             }
@@ -63,7 +65,7 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 ));
             }
 
-            if (!hasAvionicsCircuit)
+            if (!hasAvionicsCircuit && !hasNoAvionicsMaster)
             {
                 newLimits.Add(new AircraftLimit(
                     Key: LimitKeys.ElecAvionicsCircuitIndex,

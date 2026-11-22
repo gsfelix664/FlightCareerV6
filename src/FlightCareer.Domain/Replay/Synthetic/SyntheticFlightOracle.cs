@@ -158,10 +158,17 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 return violations;
             }
 
-            // Se o abuso for elétrico em aeronave sem sistema elétrico (noElectrical), abuso é inaplicável: gabarito ignorado sem violação
+            // Se o abuso for elétrico em aeronave sem sistema elétrico (noElectrical), ou partida com aviônicos em aeronave sem chave (noAvionicsMaster), abuso é inaplicável: gabarito ignorado sem violação
+            if (abuse.Type == SyntheticAbuseType.AvionicsMasterOnStart &&
+                profile?.Features != null &&
+                (profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)) ||
+                 profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoAvionicsMaster, StringComparison.OrdinalIgnoreCase))))
+            {
+                return violations;
+            }
+
             if ((abuse.Type == SyntheticAbuseType.BatteryDischarging ||
-                 abuse.Type == SyntheticAbuseType.ElectricalOverload ||
-                 abuse.Type == SyntheticAbuseType.AvionicsMasterOnStart) &&
+                 abuse.Type == SyntheticAbuseType.ElectricalOverload) &&
                 profile?.Features != null &&
                 profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
             {
@@ -325,21 +332,19 @@ namespace FlightCareer.Domain.Replay.Synthetic
                 case SyntheticAbuseType.BatteryDischarging:
                     if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
                         return null;
-                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
-                        return LimitKeys.ElecMainBusIndex;
+                    // Barramento principal e tensão são detectados dinamicamente em voo quando ausentes (LIMITES-FALTANTES)
                     break;
 
                 case SyntheticAbuseType.ElectricalOverload:
                     if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
                         return null;
-                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.AlternatorRatedAmps, StringComparison.OrdinalIgnoreCase)))
-                        return LimitKeys.AlternatorRatedAmps;
-                    if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecMainBusIndex, StringComparison.OrdinalIgnoreCase)))
-                        return LimitKeys.ElecMainBusIndex;
+                    // Barramento e tensão são detectados dinamicamente em voo; alternatorRatedAmps possui padrão de classe (LIMITES-FALTANTES)
                     break;
 
                 case SyntheticAbuseType.AvionicsMasterOnStart:
-                    if (profile.Features != null && profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)))
+                    if (profile.Features != null &&
+                        (profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoElectrical, StringComparison.OrdinalIgnoreCase)) ||
+                         profile.Features.Any(f => string.Equals(f, AircraftFeatures.NoAvionicsMaster, StringComparison.OrdinalIgnoreCase))))
                         return null;
                     if (!profile.Limits.Any(l => string.Equals(l.Key, LimitKeys.ElecAvionicsCircuitIndex, StringComparison.OrdinalIgnoreCase)))
                         return LimitKeys.ElecAvionicsCircuitIndex;

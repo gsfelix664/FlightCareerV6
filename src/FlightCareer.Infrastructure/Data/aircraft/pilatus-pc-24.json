@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Pilatus PC-24",
   "class": "Jet",
   "engineCount": 2,
@@ -153,6 +153,14 @@
       "unit": "g",
       "source": "POH",
       "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Pilatus PC-24 Airplane Flight Manual (AFM); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 166.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=2.5); atualizar pelo POH",
       "notes": null
     }
   ]
