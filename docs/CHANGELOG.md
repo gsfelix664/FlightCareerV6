@@ -2669,3 +2669,7 @@
 
 ## 2026-11-22 - Revisão e merge da ECON-DIFF (Claude)
 - `feat/econ-diff` aprovada (`docs/reviews/ECON-DIFF-revisao.md`) e mergeada. `career-stab --days 30 --bots 1 --difficulty medium --policy equilibrado` rodado duas vezes na branch e duas na base com o hash estável: resultados idênticos (saldo $133.933, patrimônio $180.733 no dia 30), então a simulação é reprodutível e o Médio não mudou. Não testado no MSFS.
+
+## 2026-11-22 - Hangar: faixa de saúde sem "51–51%" e legenda atualizada (Claude)
+- `HealthRange.ToString` mostra um valor só quando os dois lados da faixa arredondam para o mesmo inteiro (logo após inspeção a faixa abre ±0,4 %/h e aparecia "51–51%"). Teste `Texto_da_faixa_nao_repete_o_mesmo_numero`.
+- Legenda do Hangar atualizada para as faixas atuais (verde > 40 %, amarelo 40–20 %, vermelho < 20 %); citava marcas de 20/30 % das barras antigas. Não visto na tela.
