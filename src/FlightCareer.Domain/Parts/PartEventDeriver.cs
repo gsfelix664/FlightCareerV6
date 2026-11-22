@@ -18,6 +18,38 @@ namespace FlightCareer.Domain.Parts
     /// </summary>
     public sealed class PartEventDeriver
     {
+        /// <summary>
+        /// Vocabulário completo de métricas operacionais derivadas e produzidas pelo deriver.
+        /// </summary>
+        public static readonly IReadOnlySet<string> ProducedMetrics = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            WearRuleMetrics.EngineStartCycle,
+            WearRuleMetrics.TurbineStartCycle,
+            WearRuleMetrics.StarterSeconds,
+            WearRuleMetrics.AvionicsMasterStartSpikes,
+            WearRuleMetrics.StartLightsOnCount,
+            WearRuleMetrics.BatteryDeepDischargeMinutes,
+            WearRuleMetrics.ElectricalOverloadMinutes,
+            WearRuleMetrics.GearCycles,
+            WearRuleMetrics.FlightCycles,
+            WearRuleMetrics.BrakeEnergyPctRef,
+            WearRuleMetrics.TaxiTurnSpeedKnots,
+            WearRuleMetrics.SkidSeconds,
+            WearRuleMetrics.HighPowerColdOilMinutes,
+            WearRuleMetrics.TrimCycles,
+            WearRuleMetrics.TurbulenceGExceedanceCycles,
+            WearRuleMetrics.RapidPowerTransientCycles,
+            // METRICAS-B
+            WearRuleMetrics.IcingExposureMinutes,
+            WearRuleMetrics.DeiceCycles,
+            WearRuleMetrics.PropDeiceCycles,
+            WearRuleMetrics.GlowPlugCycles,
+            WearRuleMetrics.DryRunPumpMinutes,
+            WearRuleMetrics.LowHydraulicPressureMinutes,
+            WearRuleMetrics.PressurizationCycles,
+            WearRuleMetrics.RapidDecompressionDeltaPsf
+        };
+
         private readonly Dictionary<int, bool> _wasCombustion = new();
         private readonly Dictionary<int, bool> _wasStarter = new();
         private readonly Dictionary<int, double> _starterAccumulated = new();
@@ -77,6 +109,49 @@ namespace FlightCareer.Domain.Parts
         private readonly Dictionary<int, int> _transientCycleCountByEngine = new();
         private readonly Dictionary<int, HashSet<double>> _transientThresholdsByEngine = new();
         private readonly Dictionary<int, double> _transientCooldownByEngine = new();
+
+        // METRICAS-B:
+        // 1. Gelo estrutural e pitot (icingExposureMinutes)
+        private double _icingExposureSec;
+        private double _icingExposureOffSec;
+        private readonly HashSet<double> _icingThresholdsEmitted = new();
+
+        // 2. Ciclos de botas pneumáticas de degelo (deiceCycles)
+        private bool _prevDeiceSwitch;
+        private int _deiceCycleCount;
+        private readonly HashSet<double> _deiceThresholdsEmitted = new();
+
+        // 3. Ciclos de degelo elétrico de hélice (propDeiceCycles)
+        private bool _prevPropDeiceSwitch;
+        private int _propDeiceCycleCount;
+        private readonly HashSet<double> _propDeiceThresholdsEmitted = new();
+
+        // 4. Ciclos de aquecimento de velas aquecedoras em motor diesel (glowPlugCycles)
+        private int _glowPlugCycleCount;
+        private readonly HashSet<double> _glowPlugThresholdsEmitted = new();
+
+        // 5. Operação de bomba de combustível a seco ou no solo sem motor (dryRunPumpMinutes)
+        private double _dryRunPumpSec;
+        private double _dryRunPumpOffSec;
+        private readonly HashSet<double> _dryRunPumpThresholdsEmitted = new();
+
+        // 6. Baixa pressão hidráulica com motor funcionando (lowHydraulicPressureMinutes)
+        private bool _hydraulicArmed;
+        private double _maxHydraulicPressureSeen;
+        private double _lowHydPressSec;
+        private readonly HashSet<double> _lowHydPressThresholdsEmitted = new();
+
+        // 7. Ciclos de pressurização de cabine (pressurizationCycles)
+        private bool _pressurizationHighReached;
+        private int _pressurizationCycleCount;
+        private readonly HashSet<double> _pressurizationThresholdsEmitted = new();
+
+        // 8. Descompressão rápida de cabine (rapidDecompressionDeltaPsf)
+        private bool _decompressionActive;
+        private double _decompressionPeakPsf;
+        private double _decompressionLowSec;
+        private double _decompressionSimTimeSec;
+        private readonly Queue<(double TimeSec, double DiffPsi)> _decompressionHistory = new();
 
         private readonly List<string> _diagnosticMessages = new();
         private readonly HashSet<string> _diagnosticKeysReported = new(StringComparer.Ordinal);
@@ -155,6 +230,40 @@ namespace FlightCareer.Domain.Parts
             _transientThresholdsByEngine.Clear();
             _transientCooldownByEngine.Clear();
 
+            _icingExposureSec = 0.0;
+            _icingExposureOffSec = 0.0;
+            _icingThresholdsEmitted.Clear();
+
+            _prevDeiceSwitch = false;
+            _deiceCycleCount = 0;
+            _deiceThresholdsEmitted.Clear();
+
+            _prevPropDeiceSwitch = false;
+            _propDeiceCycleCount = 0;
+            _propDeiceThresholdsEmitted.Clear();
+
+            _glowPlugCycleCount = 0;
+            _glowPlugThresholdsEmitted.Clear();
+
+            _dryRunPumpSec = 0.0;
+            _dryRunPumpOffSec = 0.0;
+            _dryRunPumpThresholdsEmitted.Clear();
+
+            _hydraulicArmed = false;
+            _maxHydraulicPressureSeen = 0.0;
+            _lowHydPressSec = 0.0;
+            _lowHydPressThresholdsEmitted.Clear();
+
+            _pressurizationHighReached = false;
+            _pressurizationCycleCount = 0;
+            _pressurizationThresholdsEmitted.Clear();
+
+            _decompressionActive = false;
+            _decompressionPeakPsf = 0.0;
+            _decompressionLowSec = 0.0;
+            _decompressionSimTimeSec = 0.0;
+            _decompressionHistory.Clear();
+
             _diagnosticMessages.Clear();
             _diagnosticKeysReported.Clear();
         }
@@ -203,6 +312,12 @@ namespace FlightCareer.Domain.Parts
                     if (!featSet.Contains(AircraftFeatures.NoElectrical) && !featSet.Contains("noElectrical"))
                     {
                         CheckStartLightsOnLoad(frame, eng, events);
+                    }
+
+                    // Regra diesel_glow_plug_cycle (métrica glowPlugCycles)
+                    if (featSet.Contains(AircraftFeatures.Diesel) || featSet.Contains("diesel"))
+                    {
+                        CheckGlowPlugCycle(eng, events);
                     }
                 }
 
@@ -272,6 +387,15 @@ namespace FlightCareer.Domain.Parts
             CheckTrimCycles(frame, onGround, events);
             CheckTurbulenceGExceedance(frame, onGround, events);
             CheckRapidPowerTransient(frame, dtSimSeconds, featSet, events);
+
+            // 6. Novas métricas e regras de sistemas da spec METRICAS-B
+            CheckStructuralIcing(frame, dtSimSeconds, onGround, events);
+            CheckDeiceBootCycles(frame, featSet, events);
+            CheckPropDeiceCycles(frame, events);
+            CheckDryRunFuelPump(frame, dtSimSeconds, onGround, events);
+            CheckLowHydraulicPressure(frame, dtSimSeconds, events);
+            CheckPressurizationCycles(frame, featSet, events);
+            CheckRapidDecompression(frame, dtSimSeconds, featSet, events);
 
             return events;
         }
@@ -1107,6 +1231,337 @@ namespace FlightCareer.Domain.Parts
 
             onGround = true;
             return false;
+        }
+
+        private void CheckGlowPlugCycle(int eng, List<DerivedPartEvent> events)
+        {
+            _glowPlugCycleCount++;
+            double[] thresholds = { 1.0, 3.0, 5.0 };
+            foreach (var th in thresholds)
+            {
+                if (_glowPlugCycleCount >= th && !_glowPlugThresholdsEmitted.Contains(th))
+                {
+                    _glowPlugThresholdsEmitted.Add(th);
+                    events.Add(new DerivedPartEvent(WearRuleMetrics.GlowPlugCycles, th, eng));
+                }
+            }
+        }
+
+        private void CheckStructuralIcing(SensorFrame frame, double dtSimSeconds, bool onGround, List<DerivedPartEvent> events)
+        {
+            bool hasSIce = frame.Values.TryGetValue("inst-structural-ice-pct", out double sIce);
+            bool hasPIce = frame.Values.TryGetValue("inst-pitot-ice-pct", out double pIce);
+
+            if (!hasSIce && !hasPIce)
+            {
+                ReportDiagnosticOnce("icing-missing-sensor",
+                    "Regra 'structural_icing_exposure' desativada: 'inst-structural-ice-pct' e 'inst-pitot-ice-pct' ausentes no frame de sensores.");
+                return;
+            }
+
+            // No ar, gelo estrutural >= 5% ou gelo no pitot >= 10%
+            bool inIcing = !onGround && ((hasSIce && sIce >= 5.0) || (hasPIce && pIce >= 10.0));
+
+            if (inIcing)
+            {
+                _icingExposureSec += Math.Max(0.0, dtSimSeconds);
+                _icingExposureOffSec = 0.0;
+                double minutes = _icingExposureSec / 60.0;
+
+                double[] thresholds = { 5.0, 15.0, 30.0 };
+                foreach (var th in thresholds)
+                {
+                    if (minutes >= th && !_icingThresholdsEmitted.Contains(th))
+                    {
+                        _icingThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.IcingExposureMinutes, th, null));
+                    }
+                }
+            }
+            else
+            {
+                _icingExposureOffSec += Math.Max(0.0, dtSimSeconds);
+                if (_icingExposureOffSec >= 600.0) // reinício após 10 min sem gelo
+                {
+                    _icingExposureSec = 0.0;
+                    _icingThresholdsEmitted.Clear();
+                    _icingExposureOffSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckDeiceBootCycles(SensorFrame frame, HashSet<string> features, List<DerivedPartEvent> events)
+        {
+            if (!features.Contains("deIceBoots") && !features.Contains(AircraftFeatures.DeIceBoots))
+            {
+                return;
+            }
+
+            if (!frame.Values.TryGetValue("inst-structural-deice-switch", out double deiceSwitch))
+            {
+                ReportDiagnosticOnce("deice-switch-missing",
+                    "Regra 'structural_deice_boot_cycles' desativada: SimVar 'inst-structural-deice-switch' ausente no frame de sensores.");
+                return;
+            }
+
+            bool curDeice = deiceSwitch >= 0.5;
+            if (!_prevDeiceSwitch && curDeice)
+            {
+                _deiceCycleCount++;
+                double[] thresholds = { 2.0, 6.0, 12.0 };
+                foreach (var th in thresholds)
+                {
+                    if (_deiceCycleCount >= th && !_deiceThresholdsEmitted.Contains(th))
+                    {
+                        _deiceThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.DeiceCycles, th, null));
+                    }
+                }
+            }
+            _prevDeiceSwitch = curDeice;
+        }
+
+        private void CheckPropDeiceCycles(SensorFrame frame, List<DerivedPartEvent> events)
+        {
+            if (!frame.Values.TryGetValue("inst-prop-deice-switch", out double propDeiceSwitch))
+            {
+                ReportDiagnosticOnce("prop-deice-missing",
+                    "Regra 'propeller_deice_boot_cycles' desativada: SimVar 'inst-prop-deice-switch' ausente no frame de sensores.");
+                return;
+            }
+
+            bool curPropDeice = propDeiceSwitch >= 0.5;
+            if (!_prevPropDeiceSwitch && curPropDeice)
+            {
+                _propDeiceCycleCount++;
+                double[] thresholds = { 2.0, 6.0, 12.0 };
+                foreach (var th in thresholds)
+                {
+                    if (_propDeiceCycleCount >= th && !_propDeiceThresholdsEmitted.Contains(th))
+                    {
+                        _propDeiceThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.PropDeiceCycles, th, null));
+                    }
+                }
+            }
+            _prevPropDeiceSwitch = curPropDeice;
+        }
+
+        private void CheckDryRunFuelPump(SensorFrame frame, double dtSimSeconds, bool onGround, List<DerivedPartEvent> events)
+        {
+            bool hasPumpSensor = false;
+            bool pumpActive = false;
+
+            foreach (var kvp in frame.Values)
+            {
+                if (kvp.Key.StartsWith("fuel-pump-on", StringComparison.OrdinalIgnoreCase) ||
+                    kvp.Key.StartsWith("fuel-pump-switch", StringComparison.OrdinalIgnoreCase))
+                {
+                    hasPumpSensor = true;
+                    if (kvp.Value >= 0.5) pumpActive = true;
+                }
+            }
+
+            if (!hasPumpSensor)
+            {
+                ReportDiagnosticOnce("fuel-pump-missing-sensor",
+                    "Regra 'fuel_pump_dry_run_empty_tank' desativada: sensores de bomba de combustível ausentes no frame de sensores.");
+                return;
+            }
+
+            frame.Values.TryGetValue("fuel-total-quantity", out double fuelQty);
+
+            bool anyCombustion = false;
+            for (int eng = 1; eng <= 4; eng++)
+            {
+                if (TryGetEngineValues(frame, eng, out double cVal, out _) && cVal > 0.5)
+                {
+                    anyCombustion = true;
+                }
+            }
+
+            bool isDryRun = pumpActive && (fuelQty < 0.5 || (onGround && !anyCombustion));
+
+            if (isDryRun)
+            {
+                _dryRunPumpSec += Math.Max(0.0, dtSimSeconds);
+                _dryRunPumpOffSec = 0.0;
+                double minutes = _dryRunPumpSec / 60.0;
+
+                double[] thresholds = { 2.0, 5.0, 10.0 };
+                foreach (var th in thresholds)
+                {
+                    if (minutes >= th && !_dryRunPumpThresholdsEmitted.Contains(th))
+                    {
+                        _dryRunPumpThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.DryRunPumpMinutes, th, null));
+                    }
+                }
+            }
+            else
+            {
+                _dryRunPumpOffSec += Math.Max(0.0, dtSimSeconds);
+                if (_dryRunPumpOffSec >= 60.0) // reinício após 1 min fora
+                {
+                    _dryRunPumpSec = 0.0;
+                    _dryRunPumpThresholdsEmitted.Clear();
+                    _dryRunPumpOffSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckLowHydraulicPressure(SensorFrame frame, double dtSimSeconds, List<DerivedPartEvent> events)
+        {
+            double hydPress = 0.0;
+            bool hasHyd = false;
+
+            if (frame.Values.TryGetValue("hyd-pressure", out hydPress)) hasHyd = true;
+            if (frame.Values.TryGetValue("hyd-pump-pressure", out double pPress))
+            {
+                if (pPress > hydPress || !hasHyd)
+                {
+                    hydPress = pPress;
+                    hasHyd = true;
+                }
+            }
+
+            if (!hasHyd) return;
+
+            if (hydPress >= 500.0)
+            {
+                _hydraulicArmed = true;
+            }
+
+            if (_hydraulicArmed)
+            {
+                if (hydPress > _maxHydraulicPressureSeen)
+                {
+                    _maxHydraulicPressureSeen = hydPress;
+                }
+
+                bool anyCombustion = false;
+                for (int eng = 1; eng <= 4; eng++)
+                {
+                    if (TryGetEngineValues(frame, eng, out double cVal, out _) && cVal > 0.5)
+                    {
+                        anyCombustion = true;
+                    }
+                }
+
+                bool isLowPressure = anyCombustion && _maxHydraulicPressureSeen > 0 && (hydPress < (0.50 * _maxHydraulicPressureSeen));
+
+                if (isLowPressure)
+                {
+                    _lowHydPressSec += Math.Max(0.0, dtSimSeconds);
+                    double minutes = _lowHydPressSec / 60.0;
+
+                    double[] thresholds = { 3.0, 8.0, 15.0 };
+                    foreach (var th in thresholds)
+                    {
+                        if (minutes >= th && !_lowHydPressThresholdsEmitted.Contains(th))
+                        {
+                            _lowHydPressThresholdsEmitted.Add(th);
+                            events.Add(new DerivedPartEvent(WearRuleMetrics.LowHydraulicPressureMinutes, th, null));
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CheckPressurizationCycles(SensorFrame frame, HashSet<string> features, List<DerivedPartEvent> events)
+        {
+            if (!features.Contains("pressurized") && !features.Contains(AircraftFeatures.Pressurized))
+            {
+                return;
+            }
+
+            if (!frame.Values.TryGetValue("af-pressurization-pressure-differential", out double diffPsi))
+            {
+                ReportDiagnosticOnce("press-diff-missing",
+                    "Regra 'pressurization_cycle_stress' desativada: SimVar 'af-pressurization-pressure-differential' ausente no frame de sensores.");
+                return;
+            }
+
+            if (diffPsi >= 2.0)
+            {
+                _pressurizationHighReached = true;
+            }
+            else if (_pressurizationHighReached && diffPsi < 0.5)
+            {
+                _pressurizationHighReached = false;
+                _pressurizationCycleCount++;
+
+                double[] thresholds = { 1.0, 2.0, 4.0 };
+                foreach (var th in thresholds)
+                {
+                    if (_pressurizationCycleCount >= th && !_pressurizationThresholdsEmitted.Contains(th))
+                    {
+                        _pressurizationThresholdsEmitted.Add(th);
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.PressurizationCycles, th, null));
+                    }
+                }
+            }
+        }
+
+        private void CheckRapidDecompression(SensorFrame frame, double dtSimSeconds, HashSet<string> features, List<DerivedPartEvent> events)
+        {
+            if (!features.Contains("pressurized") && !features.Contains(AircraftFeatures.Pressurized))
+            {
+                return;
+            }
+
+            if (!frame.Values.TryGetValue("af-pressurization-pressure-differential", out double diffPsi))
+            {
+                return;
+            }
+
+            _decompressionSimTimeSec += Math.Max(0.0, dtSimSeconds);
+            _decompressionHistory.Enqueue((TimeSec: _decompressionSimTimeSec, DiffPsi: diffPsi));
+
+            double oldestTime = _decompressionHistory.Peek().TimeSec;
+            double oldestPsi = _decompressionHistory.Peek().DiffPsi;
+            double dt = _decompressionSimTimeSec - oldestTime;
+            double dropRatePsfPerSec = dt >= 0.05 ? (((oldestPsi - diffPsi) * 144.0) / dt) : 0.0;
+
+            while (_decompressionHistory.Count > 1 && (_decompressionSimTimeSec - _decompressionHistory.Peek().TimeSec) > 1.0)
+            {
+                _decompressionHistory.Dequeue();
+            }
+
+            if (dropRatePsfPerSec >= 150.0)
+            {
+                _decompressionActive = true;
+                _decompressionLowSec = 0.0;
+                if (dropRatePsfPerSec > _decompressionPeakPsf)
+                {
+                    _decompressionPeakPsf = dropRatePsfPerSec;
+                }
+            }
+
+            if (_decompressionActive)
+            {
+                if (dropRatePsfPerSec > _decompressionPeakPsf)
+                {
+                    _decompressionPeakPsf = dropRatePsfPerSec;
+                }
+
+                if (dropRatePsfPerSec < 20.0)
+                {
+                    _decompressionLowSec += Math.Max(0.0, dtSimSeconds);
+                }
+                else
+                {
+                    _decompressionLowSec = 0.0;
+                }
+
+                if (_decompressionLowSec >= 5.0)
+                {
+                    events.Add(new DerivedPartEvent(WearRuleMetrics.RapidDecompressionDeltaPsf, _decompressionPeakPsf, null));
+                    _decompressionActive = false;
+                    _decompressionPeakPsf = 0.0;
+                    _decompressionLowSec = 0.0;
+                }
+            }
         }
     }
 }

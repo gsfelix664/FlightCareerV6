@@ -2103,7 +2103,7 @@
       "id": "turbine_start_cycle",
       "description": "Ciclo de partida de turbina (igniters e motor-gerador de partida)",
       "kind": "Event",
-      "metric": "engineStartCycle",
+      "metric": "turbineStartCycle",
       "appliesTo": {
         "any": [
           "turboprop",

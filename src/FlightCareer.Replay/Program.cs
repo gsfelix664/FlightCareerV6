@@ -56,6 +56,11 @@ namespace FlightCareer.Replay
                 return RunCareerStab(args.Skip(1).ToArray());
             }
 
+            if (args[0].Equals("coverage", StringComparison.OrdinalIgnoreCase))
+            {
+                return RunCoverage(args.Skip(1).ToArray());
+            }
+
             string? csvPath = null;
             string? aircraftArg = null;
             string? blackboxPath = null;
@@ -209,6 +214,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("     FlightCareer.Replay fuzz [--runs <n>] [--aircraft <modelo|all>] [--seed <n>] [--fast]");
             Console.WriteLine("     FlightCareer.Replay career --aircraft <modelos> [--bots <n>] [--days <n>] [--hours-per-day <n>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]");
             Console.WriteLine("     FlightCareer.Replay career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]");
+            Console.WriteLine("     FlightCareer.Replay coverage [--out <caminho>]");
             Console.WriteLine();
             Console.WriteLine("Opções de Replay:");
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");
@@ -1066,6 +1072,24 @@ namespace FlightCareer.Replay
                     // Ignora falha de exclusão
                 }
             }
+        }
+
+        private static int RunCoverage(string[] args)
+        {
+            string outPath = Path.Combine("docs", "plans", "cobertura-regras-por-aviao.md");
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Equals("--out", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    outPath = args[++i];
+                }
+            }
+
+            Console.WriteLine("[COVERAGE] Avaliando cobertura das 47 regras de desgaste para os 46 modelos...");
+            var service = new RuleCoverageService();
+            service.SaveReport(outPath);
+            Console.WriteLine($"[COVERAGE] Relatório gerado com sucesso em: {Path.GetFullPath(outPath)}");
+            return 0;
         }
     }
 }
