@@ -99,3 +99,16 @@ Escalas finais: `instrucao_basica`/`instrucao` **1,5**; `medevac`, `aog`, `agro_
 - Margem ainda ~88–93 % no 1º ano (custo pequeno perto da receita); um bot agressivo faliu no 2º ano nas rodadas finais (risco real de quem compra no limite).
 - Simulador: marcos 30/60/90/180/365/540/730/1095.
 - **Revalidar** depois da FASES-1 (a promoção passa a ser por nível/horas/homologação e o XP mudou — XP-NOVO —, o que pode mudar quando os bots trocam de avião).
+
+## 4.5 Calibração com XP, fases e contratos das fases 3–7 (2026-11-22, revisor)
+Depois de XP-NOVO, FASES-1/2A/2B/2C a progressão ficou lenta (t5/t6: 1ª compra no dia 112–206, nenhum jato em 3 anos). Escalas finais em `mission_pay.json`: `instrucao_basica`/`instrucao` **2,0**; `taxi_aereo`/`regional`/`linha`/`carga_global` **0,35**; demais como na § 4.4 (famílias das fases 1–2 a 1,0; agro/medevac/aog/carga 0,7).
+
+Rodada t8 (`career-stab`, 3 anos, 3 bots por política, `--fast`):
+
+| Dificuldade | 1ª compra (dia) | Dia 365 | Dia 730 | Dia 1095 | Falências |
+|---|---|---|---|---|---|
+| Médio (3 políticas) | 55–113 | classe F, ~$3,5–3,8 mi | G, ~$8,1–8,7 mi | G, ~$16,3–16,5 mi | 0 |
+| Difícil (3 políticas) | 128–214 | E, ~$1,8–2,2 mi | F, ~$4,3–4,4 mi | H, ~$9,9–10,3 mi | 0 |
+
+- A quebra dos agressivos da t7 (2 de 3 no Médio) não se repetiu na t8.
+- **Pendências para o usuário:** (1) patrimônio no 3º ano ≈ 16 mi no Médio, acima da meta ≤ 20× do valor da frota prevista quando a meta foi escrita; reduzir exige baixar as escalas de linha/regional, o que atrasa o turboélice de ~1 ano. (2) No Médio os bots ficam na classe G do dia 540 ao 1095 (o Difícil chega a H no dia 1095): provável trava de fase 6 (nível/horas/homologação) nas políticas dos bots — investigar no simulador antes de mexer em escala.

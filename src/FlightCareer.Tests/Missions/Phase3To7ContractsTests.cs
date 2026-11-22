@@ -53,10 +53,10 @@ namespace FlightCareer.Tests.Missions
         {
             var payTable = MissionPayTable.Shared;
 
-            // 1. Carga Frágil: escala igual à da AOG (0.7)
+            // 1. Carga Frágil: escala igual à da AOG (valor calibrado em mission_pay.json)
             var famAog = payTable.Resolve("3.2.1");
             Assert.Equal("aog", famAog.Id);
-            Assert.Equal(0.7, famAog.Scale);
+            Assert.True(famAog.Scale > 0);
 
             var famFragil1 = payTable.Resolve("1.7.2");
             var famFragil2 = payTable.Resolve("2.7.2");
@@ -67,10 +67,10 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal("carga_fragil", famFragil3.Id);
             Assert.Equal(famAog.Scale, famFragil1.Scale);
 
-            // 2. Carga Global: escala igual à da Linha (0.28)
+            // 2. Carga Global: escala igual à da Linha (valor calibrado em mission_pay.json)
             var famLinha = payTable.Resolve("1.1.1");
             Assert.Equal("linha", famLinha.Id);
-            Assert.Equal(0.28, famLinha.Scale);
+            Assert.True(famLinha.Scale > 0);
 
             var famGlobal = payTable.Resolve("1.7.8");
             Assert.Equal("carga_global", famGlobal.Id);

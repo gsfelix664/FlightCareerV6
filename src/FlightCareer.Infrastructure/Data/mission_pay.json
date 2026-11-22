@@ -29,7 +29,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.10,
-      "scale": 1.5
+      "scale": 2.0
     },
     {
       "id": "instrucao",
@@ -39,7 +39,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.10,
-      "scale": 1.5
+      "scale": 2.0
     },
     {
       "id": "medevac",
@@ -99,7 +99,7 @@
       "ratePerPaxMile": 1.5,
       "paxAtLeastOne": true,
       "ratePerPayloadLb": 0.12,
-      "scale": 0.28
+      "scale": 0.35
     },
     {
       "id": "carga_expressa",
@@ -119,7 +119,7 @@
       "ratePerPaxMile": 0.45,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.08,
-      "scale": 0.28
+      "scale": 0.35
     },
     {
       "id": "linha",
@@ -129,7 +129,7 @@
       "ratePerPaxMile": 0.30,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.05,
-      "scale": 0.28
+      "scale": 0.35
     },
     {
       "id": "carga_global",
@@ -139,7 +139,7 @@
       "ratePerPaxMile": 0.0,
       "paxAtLeastOne": false,
       "ratePerPayloadLb": 0.05,
-      "scale": 0.28
+      "scale": 0.35
     },
     {
       "id": "aerofoto",
