@@ -338,6 +338,7 @@ namespace FlightCareer.Infrastructure.Services
                     AirframeCondition = listing.AirframeCondition,
                     AvionicsCondition = listing.AvionicsCondition,
                     CurrentAirframeHours = listing.AirframeHours,
+                    LandingsCount = (int)Math.Round(listing.AirframeHours),
                     FuelAmount = listing.FuelAmount,
                     CurrentLocationICAO = pilot.CurrentAirportICAO,
                     EngineTboRemainingHours = Math.Max(25.0, listing.TboHours - listing.TsmoHours)
@@ -369,7 +370,8 @@ namespace FlightCareer.Infrastructure.Services
                         listing.EngineCondition,
                         listing.TiresCondition,
                         listing.AirframeCondition,
-                        listing.AvionicsCondition);
+                        listing.AvionicsCondition,
+                        listing.TsmoHours);
                 }
 
                 _context.PilotAircrafts.Add(newAircraft);

@@ -61,7 +61,8 @@ namespace FlightCareer.Infrastructure.Services
             double engineCondition = 100.0,
             double tiresCondition = 100.0,
             double airframeCondition = 100.0,
-            double avionicsCondition = 100.0)
+            double avionicsCondition = 100.0,
+            double? tsmoHours = null)
         {
             if (aircraft == null) throw new ArgumentNullException(nameof(aircraft));
 
@@ -91,12 +92,24 @@ namespace FlightCareer.Infrastructure.Services
                         double delta = (rnd.NextDouble() * 6.0) - 3.0; // Variação pequena de +-3%
                         health = Math.Clamp(Math.Round(baseHealth + delta, 1), 10.0, 100.0);
 
-                        double deficit = Math.Max(0.0, 100.0 - health);
-                        hoursSince = def.LifeHours > 0 ? (deficit / 70.0) * def.LifeHours : 0.0;
-                        hoursSince = Math.Min(aircraft.CurrentAirframeHours, Math.Max(0.0, hoursSince));
+                        // Horas: clamp((100 - saúde) / 30 * vidaHoras, 0, horas de célula)
+                        double rawHours = def.LifeHours > 0 ? ((100.0 - health) / 30.0) * def.LifeHours : 0.0;
+                        hoursSince = Math.Clamp(rawHours, 0.0, aircraft.CurrentAirframeHours);
 
-                        cyclesSince = def.LifeCycles.HasValue ? (int)Math.Round((deficit / 70.0) * def.LifeCycles.Value) : 0;
-                        cyclesSince = Math.Min(aircraft.LandingsCount, Math.Max(0, cyclesSince));
+                        // Peças do motor coerentes com o TSMO (nunca mais horas que o TSMO)
+                        bool isEnginePart = IsEngineGroup(def.Group);
+                        if (isEnginePart && tsmoHours.HasValue)
+                        {
+                            hoursSince = Math.Min(hoursSince, tsmoHours.Value);
+                        }
+
+                        // Ciclos: clamp((100 - saúde) / 30 * vidaCiclos, 0, pousos estimados)
+                        int estimatedLandings = aircraft.LandingsCount > 0 
+                            ? aircraft.LandingsCount 
+                            : (int)Math.Round(aircraft.CurrentAirframeHours);
+
+                        double rawCycles = def.LifeCycles.HasValue ? ((100.0 - health) / 30.0) * def.LifeCycles.Value : 0.0;
+                        cyclesSince = def.LifeCycles.HasValue ? (int)Math.Clamp(Math.Round(rawCycles), 0, estimatedLandings) : 0;
                     }
 
                     aircraft.Parts.Add(new AircraftPart
@@ -106,6 +119,7 @@ namespace FlightCareer.Infrastructure.Services
                         PartId = def.Id,
                         EngineIndex = engIdx,
                         Health = health,
+                        KnownHealth = health, // O comprador fez a inspeção pré-compra
                         HoursSinceReplacement = hoursSince,
                         CyclesSinceReplacement = cyclesSince,
                         LastReplacedAtUtc = aircraft.Pilot?.CareerClockUtc ?? DateTime.UtcNow,
@@ -350,6 +364,13 @@ namespace FlightCareer.Infrastructure.Services
             }
 
             return airframeCondition;
+        }
+
+        private bool IsEngineGroup(string? group)
+        {
+            if (string.IsNullOrWhiteSpace(group)) return false;
+            var kind = _mapping.ResolveComponentKind(group);
+            return kind is ComponentKind.Engine or ComponentKind.HotSection or ComponentKind.Oil or ComponentKind.Ignition;
         }
     }
 }

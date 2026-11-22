@@ -463,7 +463,7 @@ namespace FlightCareer.Infrastructure.Services
             var processedIcaos = new HashSet<string>();
             int count = 0;
             
-            string[] hardSurfaces = { "ASPH", "CON", "CONC", "HARD", "BIT", "PEM", "ASP" };
+
 
             while (await csv.ReadAsync())
             {
@@ -486,7 +486,7 @@ namespace FlightCareer.Infrastructure.Services
                 {
                     if (runwaySurfaces.TryGetValue(icao, out var surfaces))
                     {
-                        if (surfaces.Any(s => hardSurfaces.Any(h => s.Contains(h))))
+                        if (surfaces.Any(RunwaySurface.IsHard))
                             tier = 3;
                     }
                 }

@@ -2830,3 +2830,29 @@
   - Fallback por faixas de componentes para aeronaves legadas sem peças.
 - Build com 0 erros, `dotnet test` com 834/834 testes aprovados (100%).
 - Não visto na tela / não testado no MSFS.
+
+## 2026-11-22 - XP estimado no quadro, infrações, pista difícil no pagamento e usado coerente (XP-PONTAS) (Gemini)
+- `Domain/Xp/XpCalculator.cs`: implementada a função pura `XpCalculator.Estimate(...)` para cálculo prévio de "≈ XP" a partir da distância, velocidade de cruzeiro, complexidade da família (`M_Tipo`), qualidade 1,0, realismo 1,0, bônus de pista de origem/destino e prazo "no prazo" (+15).
+- `UI/ViewModels/MissionDisplayItem.cs`: tabela de missões exibe `XpDisplay => "≈ N XP"` calculada ao lado do pagamento.
+- `Domain/Entities/RunwaySurface.cs`: centralização da classificação de superfícies duras e não pavimentadas (`IsHard` e `IsUnpaved`), eliminando as duplicações de código no `FlightMonitor` e no `DataSeeder`.
+- `Domain/Xp/FlightInfractionTracker.cs`: rastreador desacoplado e 100% testável de infrações operacionais:
+  - Estol: borda de subida de `STALL WARNING` no ar (ignorado em missões de instrução).
+  - Velocidade: borda de subida de IAS > 250 kt com altitude < 10.000 ft.
+  - Luzes: farol de pouso e táxi simultaneamente desligados na decolagem (+1) e no toque final (+1).
+  - Vne: borda de subida de overspeed estrutural.
+  - Adicionadas linhas explicativas de penalidades por infração no resumo do XP (`XpBreakdown.Lines`).
+- `Domain/Entities/SimTelemetry.cs` e `UI/Services/SimConnectService.cs`: adicionadas 3 novas SimVars no fim da struct e definições `AddToDef`: `STALL WARNING` (Bool), `LIGHT LANDING` (Bool) e `LIGHT TAXI` (Bool).
+- `UI/Services/FlightMonitor.cs`: integração contínua do `FlightInfractionTracker` no tick de telemetria, na decolagem e nos pousos/toque final, repassando `VneOrStallInfractions` e `LightsOrSpeedInfractions` para o fechamento do voo.
+- `Application/Services/MissionGenerator.cs`: `CalculateReward` atualizado para receber informação de pista do destino (`destRunway` / `isDifficultRunway`); o bônus bush (+25%) agora premia aeródromos com pista não pavimentada (`RunwaySurface.IsUnpaved`) ou com comprimento < 2.500 ft (com cache `_runwayCache` por aeroporto para evitar consultas repetidas por missão; destinos sem dado de pista caem no tier 4 como reserva).
+- `Infrastructure/Services/PartMigrationService.cs` e `MarketSimulationService.cs`: provisionamento coerente de peças de aeronaves adquiridas no mercado usado:
+  - Horas das peças: `clamp((100 - saúde) / 30 × vidaHoras, 0, horas de célula)`.
+  - Ciclos das peças: `clamp((100 - saúde) / 30 × vidaCiclos, 0, pousos estimados)`.
+  - Peças do motor limitadas pelo TSMO (`hoursSince <= tsmoHours`).
+  - `KnownHealth = health` em todas as peças compradas (inspeção pré-compra realizada).
+- Suíte de testes:
+  - `XpEstimatorAndInfractionTests.cs`: testes unitários do estimador (exemplo do plano 60 NM a 100 kt instrução = 182 XP, bônus de pista), bordas de estol e isolamento de instrução, bordas de 250 kt abaixo de 10.000 ft, regras de luzes de decolagem/toque final e classificação de superfícies duras/não pavimentadas.
+  - `DifficultRunwayRewardTests.cs`: validação do bônus bush (+25%) para destino tier 2 com grama, dest tier 4 com asfalto longo sem bônus e fallback sem dado de pista.
+  - `CoherentUsedAircraftProvisioningTests.cs`: validação do caso real PP-UZJ (7.221 h célula, TSMO 0,8 h -> peças do motor <= 0,8 h, peças estruturais envelhecidas proporcionalmente, KnownHealth == health).
+  - `TelemetryDefinitionTests.cs`: conformidade de layout de memória do `SimTelemetry` aprovada (6/6).
+- `dotnet build` 0 erros, `dotnet test` 850/850 aprovados (100%), fuzz testing (10 corridas) aprovado com 100% sem nenhuma regressão.
+- Não testado no MSFS.

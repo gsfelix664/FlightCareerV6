@@ -168,7 +168,8 @@ namespace FlightCareer.UI.ViewModels
             _ => "800m"
         };
 
-        public string XpDisplay => $"+{ExperienceGain} XP";
+        public int EstimatedXp { get; private set; }
+        public string XpDisplay => $"≈ {EstimatedXp} XP";
         public string FlightRulesDisplay => WeatherCategory == "IFR" ? "IFR" : "VFR";
         public string FlightRulesColor => WeatherCategory == "IFR" ? "#FF5252" : "#00E676";
 
@@ -370,6 +371,18 @@ namespace FlightCareer.UI.ViewModels
                 EstimatedFuelGallons = Math.Round(hours * gph, 1);
                 EstimatedFuelLbs = Math.Round(EstimatedFuelGallons * 6.0, 0); // 1 gal Avgas ~ 6 lbs
             }
+
+            // Estimativa de XP para exibição no quadro (XP-PONTAS)
+            double estSpeed = activeAircraft?.AircraftType?.CruiseSpeedKts > 0 ? activeAircraft.AircraftType.CruiseSpeedKts : 110.0;
+            bool isCircuitOrTgl = mission.SubId == "3.4.1" || string.Equals(mission.OriginICAO, mission.DestinationICAO, StringComparison.OrdinalIgnoreCase);
+            int legs = isCircuitOrTgl ? 2 : 1;
+            EstimatedXp = FlightCareer.Domain.Xp.XpCalculator.Estimate(
+                distanceNm: mission.DistanceNM,
+                cruiseSpeedKts: estSpeed,
+                missionFamilyOrSubId: mission.SubId,
+                origin: null,
+                destination: null,
+                legs: legs);
         }
 
         [Obsolete("Utilize o construtor com CareerPhase")]
