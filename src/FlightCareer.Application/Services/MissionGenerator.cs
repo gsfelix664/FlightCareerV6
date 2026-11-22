@@ -14,6 +14,7 @@ namespace FlightCareer.Application.Services
     {
         private readonly IAppDbContext _context;
         private readonly IHubDataService _hubService;
+        private readonly Dictionary<string, Runway?> _runwayCache = new(StringComparer.OrdinalIgnoreCase);
         private readonly Random _random;
         private bool? _hasSimScenery;
         private DateTime? _currentReferenceTime;
@@ -66,6 +67,7 @@ namespace FlightCareer.Application.Services
         public async Task<IEnumerable<Mission>> GenerateMissionsAsync(Airport currentAirport, DateTime? referenceTime = null)
         {
             _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
+            _runwayCache.Clear();
             var now = referenceTime ?? DateTime.Now;
             _currentReferenceTime = now;
             // 1. Limpar missões expiradas (que não foram aceitas)
@@ -226,7 +228,8 @@ namespace FlightCareer.Application.Services
 
             if (sub.Id == "3.4.1") 
             {
-                return await CreateMissionObject(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight);
+                var originRwy = await GetDestinationRunwayAsync(origin.ICAO);
+                return await CreateMissionObject(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight, destRunway: originRwy);
             }
 
             if (sub.Id == "3.5.1")
@@ -331,9 +334,24 @@ namespace FlightCareer.Application.Services
 
             string? titleOverride = sub.Id == "3.5.3" ? $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}" : null;
             string? descOverride = sub.Id == "3.5.3" ? $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial." : null;
+            var destRunway = await GetDestinationRunwayAsync(selected.Airport.ICAO);
 
             return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight,
-                requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride);
+                requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride, destRunway: destRunway);
+        }
+
+        private async Task<Runway?> GetDestinationRunwayAsync(string icao)
+        {
+            if (_runwayCache.TryGetValue(icao, out var cached))
+                return cached;
+
+            var rwys = await _context.Runways
+                .Where(r => r.AirportIdent == icao)
+                .ToListAsync();
+
+            var best = rwys.OrderByDescending(r => r.LengthFt).FirstOrDefault();
+            _runwayCache[icao] = best;
+            return best;
         }
 
         private Task<Mission> CreateMissionObject(
@@ -347,12 +365,13 @@ namespace FlightCareer.Application.Services
             int requiredTouchAndGoes = 0,
             string? overflyWaypoints = null,
             string? titleOverride = null,
-            string? descriptionOverride = null)
+            string? descriptionOverride = null,
+            Runway? destRunway = null)
         {
             var m = CreateMissionObjectSync(
                 origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, 
                 _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable,
-                requiredTouchAndGoes, overflyWaypoints, titleOverride, descriptionOverride);
+                requiredTouchAndGoes, overflyWaypoints, titleOverride, descriptionOverride, destRunway);
             return Task.FromResult(m);
         }
 
@@ -371,13 +390,15 @@ namespace FlightCareer.Application.Services
             int requiredTouchAndGoes = 0,
             string? overflyWaypoints = null,
             string? titleOverride = null,
-            string? descriptionOverride = null)
+            string? descriptionOverride = null,
+            Runway? destRunway = null)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
             // Determinar a Fase Regulatória Requerida da Missão (Fases 1 a 7 conforme catálogo e subtipo)
             var requiredPhase = CareerPhaseCatalog.Instance.ResolvePhase(sub.Id, fallback: CareerPhase.Phase1_FlightSchool);
             string categoryType = requiredPhase.GetDisplayName();
+            bool? isDifficult = destRunway != null ? IsDifficultRunway(destRunway) : null;
 
             return new Mission
             {
@@ -395,7 +416,7 @@ namespace FlightCareer.Application.Services
                 CargoWeightLbs = Math.Round(cargoWeight, 0),
                 PayloadLbs = Math.Round(totalPayload, 0),
                 Urgency = sub.Urgency,
-                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random, payMultiplier, payTable),
+                RewardMoney = CalculateReward(dist, totalPayload, sub.Urgency, sub.Id, paxCount, origin.Tier, dest.Tier, random, payMultiplier, payTable, isDifficult),
                 ExperienceGain = (int)(dist * 0.5 * sub.Urgency),
                 ExpirationTime = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)),
                 RequiredPhase = requiredPhase,
@@ -841,6 +862,12 @@ namespace FlightCareer.Application.Services
             return items.LastOrDefault();
         }
 
+        public static bool IsDifficultRunway(Runway? runway)
+        {
+            if (runway == null) return false;
+            return RunwaySurface.IsUnpaved(runway.Surface) || (runway.LengthFt > 0 && runway.LengthFt < 2500);
+        }
+
         public double CalculateReward(
             double distance, 
             double payload, 
@@ -848,9 +875,28 @@ namespace FlightCareer.Application.Services
             string subId = "", 
             int paxCount = 0, 
             int originTier = 3, 
-            int destTier = 3)
+            int destTier = 3,
+            Runway? destRunway = null)
         {
-            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, _random, PayMultiplier, PayTable);
+            bool? isDifficult = destRunway != null ? IsDifficultRunway(destRunway) : null;
+            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, _random, PayMultiplier, PayTable, isDifficult);
+        }
+
+        public static double CalculateReward(
+            double distance, 
+            double payload, 
+            double urgency, 
+            string subId, 
+            int paxCount, 
+            int originTier, 
+            int destTier, 
+            Runway? destRunway,
+            Random? random = null,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
+        {
+            bool? isDifficult = destRunway != null ? IsDifficultRunway(destRunway) : null;
+            return CalculateReward(distance, payload, urgency, subId, paxCount, originTier, destTier, random, payMultiplier, payTable, isDifficult);
         }
 
         public static double CalculateReward(
@@ -863,7 +909,8 @@ namespace FlightCareer.Application.Services
             int destTier, 
             Random? random = null,
             double payMultiplier = 1.0,
-            MissionPayTable? payTable = null)
+            MissionPayTable? payTable = null,
+            bool? isDifficultRunway = null)
         {
             payTable ??= MissionPayTable.Shared;
             var family = payTable.Resolve(subId);
@@ -888,7 +935,10 @@ namespace FlightCareer.Application.Services
             };
 
             // 4. Adicional de Pista Desafiadora / Não Pavimentada (Bush Premium: +25% de taxa de risco)
-            double bushBonus = (destTier == 4) ? 1.25 : 1.00;
+            // Se houver informação de pista: não pavimentada ou maior pista < 2.500 ft; sem dado de pista: fallback no tier 4
+            double bushBonus = isDifficultRunway.HasValue 
+                ? (isDifficultRunway.Value ? 1.25 : 1.00) 
+                : ((destTier == 4) ? 1.25 : 1.00);
 
             // 5. Flutuação de Mercado Orgânica (+/- 14% de variação estocástica realista)
             double marketSpread = 0.88 + ((random ?? new Random()).NextDouble() * 0.26);

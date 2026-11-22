@@ -310,6 +310,11 @@ namespace FlightCareer.UI.Services
                 AddToDef("AMBIENT IN CLOUD", "Bool");
                 AddToDef("DENSITY ALTITUDE", "Feet");
 
+                // 16. Alertas e Luzes para Infrações de XP (XP-PONTAS) (3 doubles)
+                AddToDef("STALL WARNING", "Bool");
+                AddToDef("LIGHT LANDING", "Bool");
+                AddToDef("LIGHT TAXI", "Bool");
+
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
                 // Estado rápido de panes (vigilância contínua das panes persistentes + panes nativas)

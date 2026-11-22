@@ -105,6 +105,11 @@ namespace FlightCareer.Domain.Entities
         public double AmbientInCloud;         // AMBIENT IN CLOUD (Bool, 1=On)
         public double DensityAltitude;        // DENSITY ALTITUDE (Feet)
 
+        // Alertas e Luzes para Infrações de XP (XP-PONTAS) (3 doubles)
+        public double StallWarning;           // STALL WARNING (Bool, 1=Active)
+        public double LightLanding;           // LIGHT LANDING (Bool, 1=On)
+        public double LightTaxi;              // LIGHT TAXI (Bool, 1=On)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;
@@ -126,6 +131,9 @@ namespace FlightCareer.Domain.Entities
         public bool IsCrashDetectionOn => RealismCrashDetection > 0.5;
         public bool IsAutoCoordinationOn => AutoCoordination > 0.5;
         public bool IsInCloud => AmbientInCloud > 0.5;
+        public bool IsStallWarning => StallWarning > 0.5;
+        public bool IsLandingLightOn => LightLanding > 0.5;
+        public bool IsTaxiLightOn => LightTaxi > 0.5;
         public double CrosswindComponentKnots
         {
             get

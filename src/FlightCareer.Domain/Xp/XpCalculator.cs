@@ -60,16 +60,28 @@ namespace FlightCareer.Domain.Xp
             }
 
             if (i.VneOrStallInfractions > 0)
+            {
                 mQualityDelta -= i.VneOrStallInfractions * r.Quality.VneOrStallPenalty;
+                lines.Add($"- Vne / Estol ({i.VneOrStallInfractions}x): -{i.VneOrStallInfractions * r.Quality.VneOrStallPenalty:F2}");
+            }
 
             if (i.GExcessInfractionsWithPax > 0)
+            {
                 mQualityDelta -= i.GExcessInfractionsWithPax * r.Quality.GExcessPaxPenalty;
+                lines.Add($"- Força G excessiva c/ PAX ({i.GExcessInfractionsWithPax}x): -{i.GExcessInfractionsWithPax * r.Quality.GExcessPaxPenalty:F2}");
+            }
 
             if (i.LightsOrSpeedInfractions > 0)
+            {
                 mQualityDelta -= i.LightsOrSpeedInfractions * r.Quality.LightsOrSpeedPenalty;
+                lines.Add($"- Luzes / Vel. > 250 kt ({i.LightsOrSpeedInfractions}x): -{i.LightsOrSpeedInfractions * r.Quality.LightsOrSpeedPenalty:F2}");
+            }
 
             if (i.OffRunwayOrExcursion)
+            {
                 mQualityDelta -= r.Quality.OffRunwayPenalty;
+                lines.Add($"- Pouso fora de pista / excursão: -{r.Quality.OffRunwayPenalty:F2}");
+            }
 
             double mQuality = Math.Clamp(r.Quality.BaseValue + mQualityDelta, r.Quality.Min, r.Quality.Max);
             lines.Add($"Mult. Qualidade: {mQuality:F2}x");
@@ -190,6 +202,65 @@ namespace FlightCareer.Domain.Xp
 
             detail = $"Short={isShort}, Unpaved={isUnpaved}, Combo={isBushCombo}";
             return bonus;
+        }
+
+        /// <summary>
+        /// Estima o XP previsto para uma missão exibida no quadro (XP-PONTAS).
+        /// Considera minutos no ar (distância / velocidade de cruzeiro), pernas (1 ou N+1 para circuito/TGL),
+        /// M_Tipo da família, realismo 1.0, qualidade 1.0, bônus de pista e bônus de prazo no prazo (+15).
+        /// </summary>
+        public static int Estimate(
+            double distanceNm,
+            double cruiseSpeedKts,
+            string? missionFamilyOrSubId = null,
+            RunwayFacts? origin = null,
+            RunwayFacts? destination = null,
+            int legs = 1,
+            XpRules? rules = null)
+        {
+            var r = rules ?? XpRules.Default;
+            double speed = cruiseSpeedKts > 0 ? cruiseSpeedKts : 100.0;
+            double distance = Math.Max(0.0, distanceNm);
+            double airborneMinutes = (distance / speed) * 60.0;
+
+            // 1. XP Base
+            double baseAirborne = airborneMinutes * r.Base.AirborneRate;
+            double baseDistance = distance * r.Base.DistanceRate;
+            double baseLegs = Math.Max(1, legs) * r.Base.LegBonus;
+            double baseXP = baseAirborne + baseDistance + baseLegs;
+
+            // 2. M_Tipo
+            double mType = ResolveTypeMultiplierFromFamilyOrSubId(missionFamilyOrSubId, r);
+
+            // 3 & 4. M_Realismo e M_Qualidade = 1.00
+            double mRealism = 1.0;
+            double mQuality = 1.0;
+
+            // 5. Bônus de Pista (origem ou destino)
+            double originRunwayBonus = origin != null ? ComputeRunwayBonus(origin, r, out _) : 0.0;
+            double destRunwayBonus = destination != null ? ComputeRunwayBonus(destination, r, out _) : 0.0;
+            double bestRunwayBonus = Math.Max(originRunwayBonus, destRunwayBonus);
+
+            // 6. Prazo "no prazo" (+15)
+            double onTimeBonus = r.Bonuses.AcceptableTimeBonus;
+
+            double totalBonuses = bestRunwayBonus + onTimeBonus;
+            return (int)Math.Round(baseXP * mType * mRealism * mQuality + totalBonuses);
+        }
+
+        private static double ResolveTypeMultiplierFromFamilyOrSubId(string? familyOrSubId, XpRules r)
+        {
+            if (string.IsNullOrWhiteSpace(familyOrSubId))
+                return r.TypeMultipliers.GetValueOrDefault("fallback", 1.00);
+
+            if (r.TypeMultipliers.TryGetValue(familyOrSubId, out double directMult))
+                return directMult;
+
+            var resolvedFamily = FlightCareer.Domain.Economy.MissionPayTable.Shared.Resolve(familyOrSubId);
+            if (resolvedFamily != null && r.TypeMultipliers.TryGetValue(resolvedFamily.Id, out double mappedMult))
+                return mappedMult;
+
+            return r.TypeMultipliers.GetValueOrDefault("fallback", 1.00);
         }
     }
 }

@@ -112,8 +112,7 @@ namespace FlightCareer.UI.Services
         private double _worstTouchdownG = 1.0;
         private int _flightTouchdowns;
         private int _flightLandingsCount;
-        private int _overspeedInfractions;
-        private bool _prevHasOverspeed;
+        private FlightInfractionTracker _infractionTracker = new();
         private readonly Queue<(double SimSec, double WindKnots)> _windHistory = new();
         // Últimos 5 min simulados de visibilidade/nuvem: o bônus de IMC vale só na aproximação, não em cruzeiro
         private readonly Queue<(double SimSec, double VisibilityM, bool InCloud)> _approachEnvHistory = new();
@@ -708,8 +707,11 @@ namespace FlightCareer.UI.Services
             _worstTouchdownG = 1.0;
             _flightTouchdowns = 0;
             _flightLandingsCount = 0;
-            _overspeedInfractions = 0;
-            _prevHasOverspeed = false;
+            var firstMission = _activeMissions.FirstOrDefault();
+            string? missionFamilyId = firstMission != null ? MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id : null;
+            bool isInstruction = string.Equals(missionFamilyId, "instrucao", StringComparison.OrdinalIgnoreCase) ||
+                                 string.Equals(missionFamilyId, "instrucao_basica", StringComparison.OrdinalIgnoreCase);
+            _infractionTracker = new FlightInfractionTracker(isInstruction);
             _windHistory.Clear();
             _approachEnvHistory.Clear();
             _landingCrosswindKt = 0;
@@ -1121,8 +1123,12 @@ namespace FlightCareer.UI.Services
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
             if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
-            if (data.HasOverspeed && !_prevHasOverspeed) _overspeedInfractions++;
-            _prevHasOverspeed = data.HasOverspeed;
+            _infractionTracker.OnTelemetryTick(
+                isAirborne: _isAirborne && !data.IsOnGround,
+                stallWarning: data.IsStallWarning,
+                airspeedKnots: data.Airspeed,
+                altitudeFeet: data.Altitude,
+                hasOverspeedVne: data.HasOverspeed);
 
             if (_isAirborne && !data.IsOnGround)
             {
@@ -1228,6 +1234,7 @@ namespace FlightCareer.UI.Services
             {
                 _isAirborne = true;
                 _hasTouchedDown = false;
+                _infractionTracker.OnTakeoff(data.IsLandingLightOn, data.IsTaxiLightOn);
                 _currentStatus = data.IsEngineRunning ? "VOANDO" : "VOANDO (PLANANDO / MOTOR CORTADO)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
@@ -1429,6 +1436,7 @@ namespace FlightCareer.UI.Services
         private void RegisterLanding(double touchdownFpm, SimTelemetry data, bool isBounce)
         {
             if (_aircraft == null) return;
+            _infractionTracker.OnTouchdown(data.IsLandingLightOn, data.IsTaxiLightOn, isBounce);
             if (!isBounce)
             {
                 _aircraft.LandingsCount++;
@@ -1644,18 +1652,17 @@ namespace FlightCareer.UI.Services
                 var destRwys = await rwyCtx.Runways.Where(r => r.AirportIdent == destinationIcao).ToListAsync();
 
                 double minRunwayReq = _aircraft?.AircraftType?.MinRunwayLength ?? 0.0;
-                string[] hardSurfaces = { "ASPH", "CON", "CONC", "HARD", "BIT", "PEM", "ASP" };
 
                 if (origAirp != null && origRwys.Count > 0)
                 {
                     var best = origRwys.OrderByDescending(r => r.LengthFt).First();
-                    bool unpaved = !hardSurfaces.Any(h => best.Surface.Contains(h, StringComparison.OrdinalIgnoreCase));
+                    bool unpaved = RunwaySurface.IsUnpaved(best.Surface);
                     originFacts = new RunwayFacts(best.LengthFt, minRunwayReq, unpaved, origAirp.ElevationFt);
                 }
                 if (destAirp != null && destRwys.Count > 0)
                 {
                     var best = destRwys.OrderByDescending(r => r.LengthFt).First();
-                    bool unpaved = !hardSurfaces.Any(h => best.Surface.Contains(h, StringComparison.OrdinalIgnoreCase));
+                    bool unpaved = RunwaySurface.IsUnpaved(best.Surface);
                     destFacts = new RunwayFacts(best.LengthFt, minRunwayReq, unpaved, destAirp.ElevationFt);
                 }
             }
@@ -1717,9 +1724,9 @@ namespace FlightCareer.UI.Services
                 WorstTouchdownFpm: _worstTouchdownFpm,
                 WorstTouchdownG: _worstTouchdownG,
                 TouchdownCount: Math.Max(1, _flightTouchdowns),
-                VneOrStallInfractions: _overspeedInfractions,
+                VneOrStallInfractions: _infractionTracker.VneOrStallInfractions,
                 GExcessInfractionsWithPax: gPaxViolations,
-                LightsOrSpeedInfractions: 0,
+                LightsOrSpeedInfractions: _infractionTracker.LightsOrSpeedInfractions,
                 OffRunwayOrExcursion: isOffFieldLanding,
                 Origin: originFacts,
                 Destination: destFacts,
