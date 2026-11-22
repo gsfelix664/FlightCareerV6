@@ -323,15 +323,24 @@ namespace FlightCareer.Application.Services
                     }
                     else
                     {
-                        // Missão não concluída: volta ao mercado com o mesmo valor (como na regra de descarregar)
-                        mission.IsAccepted = false;
-                        mission.PilotId = null;
+                        // Só volta ao mercado o contrato que pousou no destino sem cumprir a exigência (pontos de sobrevoo ou TGL).
+                        // Pouso intermediário (multi-leg) ou voo invalidado: a missão continua aceita, com a origem atualizada (regra antiga).
+                        bool landedAtDestination = string.Equals(mission.DestinationICAO, destinationIcao, StringComparison.OrdinalIgnoreCase);
+                        bool returnToMarket = landedAtDestination && !isFlightInvalidated && !completion.IsCompleted;
+                        if (returnToMarket)
+                        {
+                            mission.IsAccepted = false;
+                            mission.PilotId = null;
+                        }
                         mission.OriginICAO = destinationIcao;
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null)
                         {
-                            dbMission.IsAccepted = false;
-                            dbMission.PilotId = null;
+                            if (returnToMarket)
+                            {
+                                dbMission.IsAccepted = false;
+                                dbMission.PilotId = null;
+                            }
                             dbMission.OriginICAO = destinationIcao;
                             var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
                             var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
@@ -344,7 +353,7 @@ namespace FlightCareer.Application.Services
                         }
                         missionsRemaining++;
 
-                        if (!completion.IsCompleted && !string.IsNullOrEmpty(completion.Reason))
+                        if (returnToMarket && !string.IsNullOrEmpty(completion.Reason))
                         {
                             uncompletedMissionReasons.Add($"{mission.Title}: {completion.Reason}");
                         }
