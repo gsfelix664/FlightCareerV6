@@ -831,6 +831,9 @@ namespace FlightCareer.UI.Services
                 {
                     System.Diagnostics.Debug.WriteLine($"Error saving state: {ex.Message}");
                 }
+
+                // Voo cancelado também passa o tempo de carreira (tempo simulado voado + solo), como o fim de voo normal
+                await _flightService.ProcessFlightCancellationAsync(_pilot.Id, _simulatedFlightTimeSeconds / 3600.0);
             }
             else if (!IsFlightActive && _parts.HasPreflightChanges && _aircraft != null)
             {
