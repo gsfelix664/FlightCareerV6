@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Utils;
 using FlightCareer.UI.ViewModels;
 
@@ -30,10 +31,14 @@ namespace FlightCareer.UI.Utils
         private readonly List<GMapMarker> _multiLegMarkers = new List<GMapMarker>();
         private readonly List<GMapMarker> _airportMarkers = new List<GMapMarker>();
         private readonly List<GMapMarker> _missionClusterMarkers = new List<GMapMarker>();
+        private readonly List<GMapMarker> _contractMarkers = new List<GMapMarker>();
+        private readonly List<GMapRoute> _contractRoutes = new List<GMapRoute>();
 
         // Dependency Properties
         public static readonly DependencyProperty RecordedPathProperty = DependencyProperty.Register("RecordedPath", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRecordedPathChanged));
         public static readonly DependencyProperty RouteLegsProperty = DependencyProperty.Register("RouteLegs", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRouteLegsChanged));
+        public static readonly DependencyProperty ContractMarkersProperty = DependencyProperty.Register(nameof(ContractMarkers), typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnContractMarkersChanged));
+        public static readonly DependencyProperty SurveyAreaProperty = DependencyProperty.Register(nameof(SurveyArea), typeof(SurveyMapArea), typeof(FlightMapControl), new PropertyMetadata(null, OnSurveyAreaChanged));
         public static readonly DependencyProperty AircraftLatProperty = DependencyProperty.Register("AircraftLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty AircraftLonProperty = DependencyProperty.Register("AircraftLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty OriginLatProperty = DependencyProperty.Register("OriginLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnOriginChanged));
@@ -82,6 +87,8 @@ namespace FlightCareer.UI.Utils
         public bool ShowWaypointsOverlay { get => (bool)GetValue(ShowWaypointsOverlayProperty); set => SetValue(ShowWaypointsOverlayProperty, value); }
         public System.Collections.IEnumerable? MissionsSource { get => (System.Collections.IEnumerable?)GetValue(MissionsSourceProperty); set => SetValue(MissionsSourceProperty, value); }
         public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
+        public System.Collections.IEnumerable? ContractMarkers { get => (System.Collections.IEnumerable?)GetValue(ContractMarkersProperty); set => SetValue(ContractMarkersProperty, value); }
+        public SurveyMapArea? SurveyArea { get => (SurveyMapArea?)GetValue(SurveyAreaProperty); set => SetValue(SurveyAreaProperty, value); }
 
         public FlightMapControl()
         {
@@ -199,6 +206,236 @@ namespace FlightCareer.UI.Utils
         private void RouteLegs_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             UpdateMultiLegRoute();
+        }
+
+        private static void OnContractMarkersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
+                    oldColl.CollectionChanged -= map.ContractMarkers_CollectionChanged;
+
+                if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
+                    newColl.CollectionChanged += map.ContractMarkers_CollectionChanged;
+
+                map.UpdateContractVisuals();
+            }
+        }
+
+        private void ContractMarkers_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            UpdateContractVisuals();
+        }
+
+        private static void OnSurveyAreaChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateContractVisuals();
+            }
+        }
+
+        private static List<PointLatLng> GenerateCirclePoints(double centerLat, double centerLon, double radiusNm, int segments = 36)
+        {
+            var points = new List<PointLatLng>(segments + 1);
+            double latRad = centerLat * Math.PI / 180.0;
+            double lonRad = centerLon * Math.PI / 180.0;
+            double dR = radiusNm / 3440.065;
+
+            for (int i = 0; i <= segments; i++)
+            {
+                double bearing = (i * 360.0 / segments) * Math.PI / 180.0;
+                double pLat = Math.Asin(Math.Sin(latRad) * Math.Cos(dR) + Math.Cos(latRad) * Math.Sin(dR) * Math.Cos(bearing));
+                double pLon = lonRad + Math.Atan2(Math.Sin(bearing) * Math.Sin(dR) * Math.Cos(latRad), Math.Cos(dR) - Math.Sin(latRad) * Math.Sin(pLat));
+                points.Add(new PointLatLng(pLat * 180.0 / Math.PI, pLon * 180.0 / Math.PI));
+            }
+            return points;
+        }
+
+        private void UpdateContractVisuals()
+        {
+            foreach (var m in _contractMarkers) MainMap.Markers.Remove(m);
+            _contractMarkers.Clear();
+            foreach (var r in _contractRoutes) MainMap.Markers.Remove(r);
+            _contractRoutes.Clear();
+
+            var framingPoints = new List<PointLatLng>();
+
+            if (OriginLat != 0 && OriginLon != 0)
+            {
+                framingPoints.Add(new PointLatLng(OriginLat, OriginLon));
+            }
+
+            if (DestLat != 0 && DestLon != 0)
+            {
+                framingPoints.Add(new PointLatLng(DestLat, DestLon));
+            }
+
+            if (ContractMarkers != null)
+            {
+                foreach (var item in ContractMarkers)
+                {
+                    if (item is MapContractMarker marker)
+                    {
+                        var pos = new PointLatLng(marker.Lat, marker.Lon);
+                        framingPoints.Add(pos);
+
+                        switch (marker.Kind)
+                        {
+                            case ContractMarkerKind.Point:
+                            {
+                                var badge = CreatePinBadge(marker.Label, "#FFD600");
+                                var gMarker = new GMapMarker(pos)
+                                {
+                                    ZIndex = 120,
+                                    Shape = badge,
+                                    Offset = new Point(-5, -12)
+                                };
+                                _contractMarkers.Add(gMarker);
+                                MainMap.Markers.Add(gMarker);
+                                break;
+                            }
+
+                            case ContractMarkerKind.Area:
+                            {
+                                double r = Math.Max(0.5, marker.RadiusNm);
+                                var circlePts = GenerateCirclePoints(marker.Lat, marker.Lon, r);
+                                framingPoints.AddRange(circlePts);
+
+                                var circleRoute = new GMapRoute(circlePts)
+                                {
+                                    ZIndex = 95,
+                                    Shape = new Path
+                                    {
+                                        Stroke = (Brush)new BrushConverter().ConvertFromString("#FFD600")!,
+                                        StrokeThickness = 1.5,
+                                        StrokeDashArray = new DoubleCollection { 4, 3 },
+                                        Opacity = 0.9
+                                    }
+                                };
+                                _contractRoutes.Add(circleRoute);
+                                MainMap.Markers.Add(circleRoute);
+
+                                var badge = CreatePinBadge(marker.Label, "#FFD600");
+                                var gMarker = new GMapMarker(pos)
+                                {
+                                    ZIndex = 120,
+                                    Shape = badge,
+                                    Offset = new Point(-5, -12)
+                                };
+                                _contractMarkers.Add(gMarker);
+                                MainMap.Markers.Add(gMarker);
+                                break;
+                            }
+
+                            case ContractMarkerKind.DropZone:
+                            {
+                                double r = Math.Max(0.5, marker.RadiusNm);
+                                var dzPts = GenerateCirclePoints(marker.Lat, marker.Lon, r);
+                                framingPoints.AddRange(dzPts);
+
+                                var dzRoute = new GMapRoute(dzPts)
+                                {
+                                    ZIndex = 95,
+                                    Shape = new Path
+                                    {
+                                        Stroke = (Brush)new BrushConverter().ConvertFromString("#FF9100")!,
+                                        StrokeThickness = 2.0,
+                                        Opacity = 0.95
+                                    }
+                                };
+                                _contractRoutes.Add(dzRoute);
+                                MainMap.Markers.Add(dzRoute);
+
+                                var badge = CreatePinBadge(marker.Label, "#FF9100");
+                                var gMarker = new GMapMarker(pos)
+                                {
+                                    ZIndex = 120,
+                                    Shape = badge,
+                                    Offset = new Point(-5, -12)
+                                };
+                                _contractMarkers.Add(gMarker);
+                                MainMap.Markers.Add(gMarker);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (SurveyArea != null)
+            {
+                if (SurveyArea.Corners != null && SurveyArea.Corners.Count >= 3)
+                {
+                    var rectPts = SurveyArea.Corners.Select(c => new PointLatLng(c.Lat, c.Lon)).ToList();
+                    rectPts.Add(rectPts[0]); // close loop
+                    framingPoints.AddRange(rectPts);
+
+                    var surveyRect = new GMapRoute(rectPts)
+                    {
+                        ZIndex = 96,
+                        Shape = new Path
+                        {
+                            Stroke = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!,
+                            StrokeThickness = 1.8,
+                            Opacity = 0.95
+                        }
+                    };
+                    _contractRoutes.Add(surveyRect);
+                    MainMap.Markers.Add(surveyRect);
+                }
+
+                if (SurveyArea.Legs != null)
+                {
+                    foreach (var leg in SurveyArea.Legs)
+                    {
+                        if (leg == null || leg.Count < 2) continue;
+                        var legPts = new List<PointLatLng>
+                        {
+                            new PointLatLng(leg[0].Lat, leg[0].Lon),
+                            new PointLatLng(leg[1].Lat, leg[1].Lon)
+                        };
+                        framingPoints.AddRange(legPts);
+
+                        var legRoute = new GMapRoute(legPts)
+                        {
+                            ZIndex = 94,
+                            Shape = new Path
+                            {
+                                Stroke = (Brush)new BrushConverter().ConvertFromString("#8000E5FF")!,
+                                StrokeThickness = 1.0,
+                                StrokeDashArray = new DoubleCollection { 2, 2 }
+                            }
+                        };
+                        _contractRoutes.Add(legRoute);
+                        MainMap.Markers.Add(legRoute);
+                    }
+                }
+            }
+
+            if (framingPoints.Count >= 2)
+            {
+                try
+                {
+                    double minLat = framingPoints.Min(p => p.Lat);
+                    double maxLat = framingPoints.Max(p => p.Lat);
+                    double minLon = framingPoints.Min(p => p.Lng);
+                    double maxLon = framingPoints.Max(p => p.Lng);
+
+                    double latSpan = Math.Max(0.06, maxLat - minLat);
+                    double lonSpan = Math.Max(0.06, maxLon - minLon);
+
+                    var rect = RectLatLng.FromLTRB(
+                        minLon - (lonSpan * 0.30),
+                        maxLat + (latSpan * 0.30),
+                        maxLon + (lonSpan * 0.30),
+                        minLat - (latSpan * 0.30)
+                    );
+
+                    MainMap.SetZoomToFitRect(rect);
+                }
+                catch { }
+            }
         }
 
         private static void OnAirportsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

@@ -2935,3 +2935,28 @@
 
 ## 2026-11-22 - Calibração do pagamento com XP e fases (Claude)
 - `mission_pay.json`: instrução 2,0; táxi aéreo, regional, linha e carga global 0,35. Rodada de 3 anos registrada em `docs/plans/economia-estabilidade.md` › 4.5 (Médio: 1ª compra dia 55–113, classe F no 1º ano; Difícil ≈ 1,5× mais lento; sem falências).
+## 2026-11-22 - Locais reais, textos de RP e marcadores no briefing (MISSOES-LOCAIS) (Gemini)
+- **Bancos de locais reais (`Application/Services/PlacesDataService.cs` e `Data/places/`):**
+  - Integração com lazy loading das 3 bases em JSON: `tourist_pois.json` (pontos turísticos com indexação espacial por células de 1° de lat/lon), `training_aerodromes.json` (aeródromos de instrução unificados a `HubDataService.IsInstructionHub`) e `dropzones.json` (zonas de salto de paraquedismo com coordenadas).
+  - Csproj de Infrastructure atualizado para copiar `Data\places\*.json` para a pasta de saída.
+  - Registro de `IPlacesDataService` como Singleton no container de injeção de dependência (`App.xaml.cs`).
+- **Pontos de sobrevoo por coordenada (`Domain/Missions/OverflyWaypointCodec.cs` e `OverflyPoint`):**
+  - Novo padrão de codificação para waypoints: `P:<nome>@<lat>,<lon>[,<raioNM>[,<maxAglFt>]]`.
+  - Suporte a raio horizontal customizado (padrão 2.0 NM) e teto AGL customizado (padrão 3.000 ft) em `OverflyPoint` e `OverflyTracker`.
+  - Atualização do `FlightMonitor` para carregar coordenadas `P:` direto do codec usando elevação do aeródromo de origem, e de `MissionCompletion` para checar todos os waypoints visitados.
+- **Remodelação dos subtipos de voo local (`MissionGenerator.cs` e `MissionRules.cs`):**
+  - `3.4.1` (Instrução local): origem = destino, área de instrução a 5–15 NM (raio 3 NM, até 6.000 ft AGL) evitando tráfego de aeroportos tier 1–2, 1–3 TGLs requeridos, manobras procedurais no briefing e distância calculada `2 × dist + 10 NM`.
+  - `3.4.3` (Voo de cheque): origem = destino (removida travessia de 30–120 NM), 1 pax examinador, 2 TGLs, texto citando pane simulada de motor e examinador credenciado.
+  - `3.5.1` (Panorâmico): busca POIs reais a 5–30 NM (até 45 NM) via `FindPois`, sorteando de 2 a 3 pontos ponderados por popularidade `p`, espaçados em $\ge 3$ NM e ordenados por azimute; fallback para aeródromos quando não houver POIs.
+  - `3.6.1` (Aerofoto): prioriza centralizar a área de levantamento em POI geográfico de infraestrutura/natureza a 5–25 NM com cliente institucional contextualizado.
+  - `3.6.2` (Paraquedismo): centraliza na zona de salto do aeródromo quando existente, com altitude conforme a motorização (pistão 10.000–12.000 ft AGL, turboélice 12.000–14.000 ft AGL) e nome da DZ no briefing.
+  - Calibração de pesos: aeródromo com DZ ganha +40 em SAE (3.6) e 80% de chance de 3.6.2 contra 20% de 3.6.1 (sem DZ: 15% vs 85%). Aeródromos de instrução recebem +45 em 3.4 e +15 em 3.5.
+- **Catálogo de Textos de RP (`Infrastructure/Data/mission_texts.json` e `Domain/Missions/MissionTextCatalog.cs`):**
+  - 59 subtipos com $\ge 3$ variantes imersivas de título e briefing de operações em português, com interpolação limpa de marcadores e sem deixar chaves soltas `{}`.
+- **Visualização tática no Briefing (`Domain/Missions/ContractMarkerBuilder.cs`, `FlightMapControl.xaml.cs` e `BriefingViewModel.cs`):**
+  - Renderização no mapa de briefing de marcadores amarelos para pontos turísticos e áreas de instrução, círculos tracejados de raio para áreas, círculos neon laranja para zonas de salto, e retângulo ciano com pernas de voo finas para aerofoto.
+  - Enquadramento automático cobrindo aeronave, pernas e todos os pontos/áreas contratuais.
+- **Suíte de Testes:**
+  - Adicionados testes em `FlightCareer.Tests/Missions/`: `OverflyWaypointCodecTests`, `OverflyTrackerTests`, `MissionCompletionLocalTests`, `ContractMarkerBuilderTests`, `MissionTextCatalogTests`, `PlacesDataServiceTests`, `MissionGeneratorLocalTests`.
+  - Total de 925/925 testes xUnit aprovados (100%).
+- Não testado no MSFS / não visto na tela.

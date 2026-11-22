@@ -698,13 +698,30 @@ namespace FlightCareer.UI.Services
                 {
                     if (!string.IsNullOrWhiteSpace(m.OverflyWaypoints))
                     {
-                        var idents = m.OverflyWaypoints.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                        foreach (var ident in idents)
+                        var parsedItems = OverflyWaypointCodec.Parse(m.OverflyWaypoints);
+                        double originElev = 0.0;
+                        if (parsedItems.Any(i => !i.IsAirport))
                         {
-                            var airp = wpContext.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == ident);
-                            if (airp != null && !wpList.Any(p => p.Ident.Equals(airp.ICAO, StringComparison.OrdinalIgnoreCase)))
+                            var originAirp = wpContext.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == m.OriginICAO);
+                            if (originAirp != null) originElev = originAirp.ElevationFt;
+                        }
+
+                        foreach (var item in parsedItems)
+                        {
+                            if (item.IsAirport)
                             {
-                                wpList.Add(new OverflyPoint(airp.ICAO, airp.Latitude, airp.Longitude, airp.ElevationFt));
+                                var airp = wpContext.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == item.Ident);
+                                if (airp != null && !wpList.Any(p => p.Ident.Equals(airp.ICAO, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    wpList.Add(new OverflyPoint(airp.ICAO, airp.Latitude, airp.Longitude, airp.ElevationFt, item.RadiusNm, item.MaxAglFt));
+                                }
+                            }
+                            else if (item.Lat.HasValue && item.Lon.HasValue)
+                            {
+                                if (!wpList.Any(p => p.Ident.Equals(item.Ident, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    wpList.Add(new OverflyPoint(item.Ident, item.Lat.Value, item.Lon.Value, originElev, item.RadiusNm, item.MaxAglFt));
+                                }
                             }
                         }
                     }
