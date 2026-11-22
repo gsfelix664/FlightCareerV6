@@ -1,6 +1,6 @@
 # PARADA-REAL — Oficina em tempo real, serviço expresso e prazos reais na tela
 
-**Branch:** feat/parada-real · **Commit:** pendente · **Data:** 2026-11-22
+**Branch:** feat/parada-real · **Commit:** 5fcee86 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - Domain: adicionar `CompressionFactor = 4.0`, `RealHours` e `RealCycles` em `MaintenancePricing`; criar `Domain/Components/WorkshopDowntime.cs` com cálculo puro de minutos reais, serviço expresso e checagem de oficina.
