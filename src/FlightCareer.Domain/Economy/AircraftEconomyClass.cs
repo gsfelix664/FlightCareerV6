@@ -1,5 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 
 namespace FlightCareer.Domain.Economy
 {
@@ -8,27 +12,59 @@ namespace FlightCareer.Domain.Economy
     /// </summary>
     public static class AircraftEconomyClass
     {
+        /// <summary>Valores de reserva (iguais ao `economy_targets.json` de 2026-11-19) se o arquivo não for encontrado.</summary>
+        public static readonly IReadOnlyDictionary<string, double> DefaultPartPriceMultipliers = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["A"] = 0.75, ["B"] = 1.25, ["C"] = 1.25, ["D"] = 1.25, ["E"] = 1.5,
+            ["F"] = 1.75, ["G"] = 1.75, ["H"] = 2.5, ["I"] = 3.25, ["J"] = 5.5
+        };
+
+        private static readonly Lazy<IReadOnlyDictionary<string, double>> _multipliers = new(() => LoadPartPriceMultipliers());
+
         /// <summary>
-        /// Multiplicador de peças escaláveis por classe de aeronave para calibrar custo/hora de manutenção dentro das metas econômicas.
-        /// A 0,75 · B 1,25 · C 1,25 · D 1,25 · E 1,5 · F 1,75 · G 1,75 · H 2,5 · I 3,25 · J 5,5
+        /// Multiplicador de peças escaláveis por classe de aeronave (fonte única: `partPriceMultiplier` de
+        /// `Infrastructure/Data/economy_targets.json`; antes ficava duplicado aqui num switch).
         /// </summary>
         public static double GetPartPriceMultiplier(string classKey)
         {
             if (string.IsNullOrWhiteSpace(classKey)) return 1.0;
-            return classKey.Trim().ToUpperInvariant() switch
+            return _multipliers.Value.TryGetValue(classKey.Trim(), out double m) ? m : 1.0;
+        }
+
+        /// <summary>Lê `classes.&lt;X&gt;.partPriceMultiplier` do economy_targets.json; classes ausentes usam a reserva.</summary>
+        public static IReadOnlyDictionary<string, double> LoadPartPriceMultipliers(string? directory = null)
+        {
+            var result = new Dictionary<string, double>(DefaultPartPriceMultipliers, StringComparer.OrdinalIgnoreCase);
+            var candidates = new List<string>();
+            if (!string.IsNullOrWhiteSpace(directory)) candidates.Add(Path.Combine(directory, "economy_targets.json"));
+            candidates.Add(Path.Combine(AppContext.BaseDirectory, "Data", "economy_targets.json"));
+            candidates.Add(Path.Combine(Directory.GetCurrentDirectory(), "src", "FlightCareer.Infrastructure", "Data", "economy_targets.json"));
+            candidates.Add(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "FlightCareer.Infrastructure", "Data", "economy_targets.json"));
+
+            string? path = candidates.FirstOrDefault(File.Exists);
+            if (path == null)
             {
-                "A" => 0.75,
-                "B" => 1.25,
-                "C" => 1.25,
-                "D" => 1.25,
-                "E" => 1.5,
-                "F" => 1.75,
-                "G" => 1.75,
-                "H" => 2.5,
-                "I" => 3.25,
-                "J" => 5.5,
-                _ => 1.0
-            };
+                Debug.WriteLine("[AircraftEconomyClass] economy_targets.json não encontrado; usando multiplicadores de reserva.");
+                return result;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions { CommentHandling = JsonCommentHandling.Skip, AllowTrailingCommas = true });
+                if (doc.RootElement.TryGetProperty("classes", out var classes))
+                {
+                    foreach (var cls in classes.EnumerateObject())
+                    {
+                        if (cls.Value.TryGetProperty("partPriceMultiplier", out var m) && m.TryGetDouble(out double v) && v > 0)
+                            result[cls.Name] = v;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[AircraftEconomyClass] Erro ao ler '{path}': {ex.Message}; usando multiplicadores de reserva.");
+            }
+            return result;
         }
 
         /// <summary>

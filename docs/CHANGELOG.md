@@ -2833,3 +2833,6 @@
 
 ## 2026-11-22 - Pacotes com vulnerabilidade conhecida fixados em versões corrigidas (Claude)
 - `SQLitePCLRaw.bundle_e_sqlite3` 2.1.14 (Infrastructure), no lugar do `SQLitePCLRaw.lib.e_sqlite3` 2.1.11 vindo do EF Core Sqlite (GHSA-2m69-gcr7-jv3q, alta); `System.Data.SqlClient` 4.8.6 (UI), no lugar do 4.8.3 vindo do GMap.NET (GHSA-98g6-xh36-x2p7 alta, GHSA-8g2p-5pqh-5jmc moderada). Restore sem avisos NU190x; suíte 840/840 (SQLite real em memória). Não aberto na tela.
+
+## 2026-11-22 - Multiplicador de preço de peças por classe com fonte única (Claude)
+- `AircraftEconomyClass.GetPartPriceMultiplier` lê `classes.<X>.partPriceMultiplier` do `economy_targets.json` (antes um `switch` duplicava os valores do JSON); reserva embutida igual aos valores atuais se o arquivo faltar. Testes `AircraftEconomyClassMultiplierTests` (JSON real, classe ausente, arquivo alterado). Suíte 849/849.
