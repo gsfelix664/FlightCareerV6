@@ -1,6 +1,6 @@
 # HANGAR-ICONES-PECAS — Estado das peças por ícone (sem % visível) e horas corretas por grupo
 
-**Branch:** feat/hangar-icones-pecas · **Commit:** (a gerar) · **Data:** 2026-11-22
+**Branch:** feat/hangar-icones-pecas · **Commit:** eea3098 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - No `FlightCareer.Domain/Parts/PartHangarView.cs`:
