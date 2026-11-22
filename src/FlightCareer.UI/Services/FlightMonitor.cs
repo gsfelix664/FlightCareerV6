@@ -1,4 +1,5 @@
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
 using FlightCareer.Domain.Integrity;
@@ -509,7 +510,8 @@ namespace FlightCareer.UI.Services
 
                 string fuelType = aircraft.AircraftType?.FuelType ?? "AVGAS";
                 double pricePerGallon = FlightCareer.Application.Services.FuelPriceService.GetCurrentPrice(fuelType, airportTier);
-                double cost = Math.Round(deliveredGallons * pricePerGallon, 2);
+                double costMultiplier = DifficultyEconomy.For(pilot.Difficulty).CostMultiplier;
+                double cost = Math.Round(deliveredGallons * pricePerGallon * costMultiplier, 2);
 
                 aircraft.FuelAmount = newFuel;
 
@@ -627,6 +629,10 @@ namespace FlightCareer.UI.Services
             _aircraft = aircraft;
             _activeMissions = missions;
             _originIcao = pilot.CurrentAirportICAO;
+
+            double failureMultiplier = DifficultyEconomy.For(pilot.Difficulty).FailureMultiplier;
+            _failures.HazardMultiplier = failureMultiplier;
+            _parts.HazardMultiplier = failureMultiplier;
 
             // Panes persistentes primeiro: registram os toggles que o início do voo não pode desfazer
             _persistentFailures.Start(aircraft, () => _currentStatus);

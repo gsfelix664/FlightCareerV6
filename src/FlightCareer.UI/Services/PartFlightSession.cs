@@ -47,6 +47,7 @@ namespace FlightCareer.UI.Services
         public bool IsActive => _tracker.IsActive;
         public bool HasPreflightChanges => _tracker.HasPreflightChanges;
         public IReadOnlyList<AircraftPart> Parts => _tracker.Parts;
+        public double HazardMultiplier { get; set; } = 1.0;
 
         public void Begin(List<AircraftPart> copies, AircraftLimitProfile? profile, IReadOnlyList<string> features)
         {
@@ -62,7 +63,7 @@ namespace FlightCareer.UI.Services
                 "jet" => EngineClass.Jet,
                 _ => EngineClass.Piston
             };
-            _failureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, _random);
+            _failureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, _random) { HazardMultiplier = HazardMultiplier };
         }
 
         public void Reset()

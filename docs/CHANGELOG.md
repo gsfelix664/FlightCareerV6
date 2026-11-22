@@ -2638,3 +2638,34 @@
 
 ## 2026-11-21 - Pneus, freios e rodas envelhecem por pouso (Claude)
 - Achado no voo de SNEJ: no jogo, as peças de vida em ciclos (pneus 75, freios 150, rodas 350) só se gastavam por eventos (pouso duro, frenagem, deriva, táxi) e `CyclesSinceReplacement` só subia nas peças da regra `landing_cycle_structural_stress`; o simulador de carreira já gastava 70 %/vida por pouso. Novo `PartWearEngine.ApplyLandingCycle` (chamado pelo `PartFlightTracker.ProcessTouchdown` em todo toque que não é bounce): aplica as regras de ciclo, conta +1 ciclo em toda peça com vida em ciclos (sem contar duas vezes) e aplica o desgaste natural 70/vida × faixa amarela nas que não têm vida em horas. Testes: `LandingCycleWearTests` (5); suíte 697/697 com replay e fuzz. Não testado no MSFS.
+
+## 2026-11-21 - ECON-DIFF: Calibração de pagamento em JSON e economia por dificuldade (Gemini)
+- **Tabela de remuneração de missões desacoplada (`MissionPayTable.cs`, `mission_pay.json`)**:
+  - Parâmetros tarifários das missões movidos do código para `src/FlightCareer.Infrastructure/Data/mission_pay.json` com 11 famílias ordenadas (`instrucao_basica`, `instrucao`, `medevac`, `aog`, `agro_bush`, `agro_municipal`, `taxi_aereo`, `carga_expressa`, `regional`, `linha`, `fallback`), cada uma com fator `scale` (padrão 1.0).
+  - Resolução determinística por ordem de precedência (`Resolve`) casando IDs exatos (ex.: `4.3.1`, `3.2.1`, `3.4.1`) e prefixos (ex.: `4.`, `3.2`, `1.1`), com fallback automático idêntico aos valores originais em caso de arquivo ausente ou corrompido.
+  - `MissionGenerator.CalculateReward` e `GenerateMissionsInMemory` agora recebem e aplicam `family.Scale * payMultiplier`.
+- **Configurações e multiplicadores por dificuldade (`DifficultyEconomy.cs`, `CareerStart.cs`)**:
+  - Saldo inicial da dificuldade Fácil ajustado de $1 bi para $1.000.000 (Médio permanece em $100.000 e Difícil em $10.000).
+  - Multiplicadores aprovados:
+    - **Fácil**: `PayMultiplier = 1.25`, `CostMultiplier = 0.80`, `FailureMultiplier = 1.00`.
+    - **Médio**: `PayMultiplier = 1.00`, `CostMultiplier = 1.00`, `FailureMultiplier = 1.00` (zero desvio em relação ao comportamento nominal).
+    - **Difícil**: `PayMultiplier = 0.85`, `CostMultiplier = 1.15`, `FailureMultiplier = 1.25`.
+- **Aplicação no jogo e Hangar**:
+  - No `MainViewModel`, `MissionGenerator.PayMultiplier` é configurado a partir da dificuldade do piloto ativo antes da geração e no recálculo de rotas.
+  - No `FlightService`, custos de combustível e taxas aeroportuárias são multiplicados por `CostMultiplier`.
+  - No `HangarViewModel.RunPaidServiceAsync`, custos de manutenção/reparos recebem o multiplicador e o diálogo de autorização informa `Dificuldade {nome}: custos ×{m:0.00}` quando o fator difere de 1,0.
+  - No `FlightMonitor`, entregas por caminhão de combustível aplicam `CostMultiplier`.
+- **Multiplicador de panes (`FailureEngine.cs`, `PartFailureEngine.cs`, `ComponentFlightSession.cs`, `PartFlightSession.cs`)**:
+  - Adicionada propriedade `HazardMultiplier` que escala a taxa de risco $\lambda$ antes do cálculo da probabilidade de falha exponencial.
+  - `FlightMonitor.StartMonitoring` injeta `FailureMultiplier` da dificuldade do piloto nas sessões de voo.
+- **Simulador de progressão (`CareerProgressionSimulator.cs`)**:
+  - Isolamento do cache de missões por chave de aeroporto, dia e dificuldade.
+  - Aplicação de `PayMultiplier` em todas as missões geradas e de `CostMultiplier` em combustível, taxas, peças, revisões de manutenção, seguro e retífica.
+  - Injeção de `HazardMultiplier` nos motores de pane do bot.
+- **Testes e Validação**:
+  - Nova suíte `DifficultyEconomyTests.cs` com 8 testes validando os valores da dificuldade, saldo de $1M, equivalência matemática exata com a fórmula antiga, proporcionalidade de multiplicador e escala por família, integridade do JSON e taxa de risco dobrada.
+  - Simulação `career-stab` (30 dias, 1 bot, equilibrado, all): Dia 30 do Médio com saldo $150.162 e patrimônio $196.962 (idêntico à referência nominal).
+  - `dotnet build`: 0 erros. Suíte xUnit: 692/692 testes aprovados (100%).
+
+## 2026-11-22 - Revisão e merge da ECON-DIFF (Claude)
+- `feat/econ-diff` aprovada (`docs/reviews/ECON-DIFF-revisao.md`) e mergeada. `career-stab --days 30 --bots 1 --difficulty medium --policy equilibrado` rodado duas vezes na branch e duas na base com o hash estável: resultados idênticos (saldo $133.933, patrimônio $180.733 no dia 30), então a simulação é reprodutível e o Médio não mudou. Não testado no MSFS.

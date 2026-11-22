@@ -18,7 +18,7 @@ namespace FlightCareer.Domain.Entities
         public string InitialBaseICAO { get; set; } = string.Empty;
         public string CurrentAirportICAO { get; set; } = string.Empty;
         public double Balance { get; set; }
-        public DifficultyMode Difficulty { get; set; }
+        public DifficultyMode Difficulty { get; set; } = DifficultyMode.Medium;
         public double TotalHours { get; set; }
         public int ExperiencePoints { get; set; }
         public string Rank { get; set; } = "Student Pilot";

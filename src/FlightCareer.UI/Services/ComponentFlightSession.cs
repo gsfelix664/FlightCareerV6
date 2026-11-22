@@ -58,6 +58,7 @@ namespace FlightCareer.UI.Services
         public bool IsEngineOnFire => _actuator.IsEngineOnFire;
         public bool CrashApplied => _crashApplied;
         public bool PartsDriven { get; set; }
+        public double HazardMultiplier { get; set; } = 1.0;
         public Action<ComponentKind, double>? PartDamageSink { get; set; }
         public Func<double, Func<ComponentKind, bool>, IReadOnlyCollection<ComponentKind>, IReadOnlyList<PartFailure>>? PartFailureSource { get; set; }
         public Action<Guid>? PartBreakSink { get; set; }
@@ -94,7 +95,7 @@ namespace FlightCareer.UI.Services
         private void CreateEngines()
         {
             _wear = new WearEngine(_catalog, EngineClass, _engineLimits ?? _catalog.LimitsFor(EngineClass), _airframeLimits ?? _catalog.AirframeLimits);
-            _failures = new FailureEngine(_catalog, EngineClass, _random);
+            _failures = new FailureEngine(_catalog, EngineClass, _random) { HazardMultiplier = HazardMultiplier };
             _external = new ExternalEventEngine(_catalog.ExternalEvents, EngineClass, _random);
             _carbIce = new CarbIcingMonitor(_catalog.CarbIcing);
         }

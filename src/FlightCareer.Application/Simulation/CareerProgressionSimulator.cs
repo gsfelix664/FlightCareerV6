@@ -157,7 +157,7 @@ namespace FlightCareer.Application.Simulation
             var startDate = new DateTime(2024, 1, 1);
 
             // Cache de missões por (ICAO, Dia) para evitar recomputações
-            var missionCache = new Dictionary<(string Icao, int Day), List<Mission>>();
+            var missionCache = new Dictionary<(string Icao, int Day, DifficultyMode Difficulty), List<Mission>>();
 
             int groupIndex = 0;
             foreach (var difficulty in difficulties)
@@ -174,6 +174,7 @@ namespace FlightCareer.Application.Simulation
                         var sysRnd = new Random(botSeed);
 
                         string botId = $"Bot-{difficulty}-{policy}-{botNum}";
+                        var diffEcon = DifficultyEconomy.For(difficulty);
                         double balance = CareerStart.GetInitialBalance(difficulty);
                         var category = PilotCategory.Category1_FlightSchool;
                         double totalHours = 0.0;
@@ -209,8 +210,8 @@ namespace FlightCareer.Application.Simulation
                         // Componentes virtuais e peças individuais provisionadas
                         var mapping = PartComponentMapping.CreateDefault();
                         (var features, int engineCount, var engineClass) = ResolveAircraftConfiguration(currentAircraftType, _componentCatalog, _limitResolver);
-                        var failureEngine = new FailureEngine(_componentCatalog, engineClass, rnd);
-                        var partFailureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, rnd, mapping);
+                        var failureEngine = new FailureEngine(_componentCatalog, engineClass, rnd) { HazardMultiplier = diffEcon.FailureMultiplier };
+                        var partFailureEngine = new PartFailureEngine(_componentCatalog, _partCatalog, engineClass, rnd, mapping) { HazardMultiplier = diffEcon.FailureMultiplier };
                         var components = _componentCatalog.Components
                             .Where(c => c.AppliesTo.Contains(engineClass))
                             .Select(c => new AircraftComponent
@@ -271,7 +272,7 @@ namespace FlightCareer.Application.Simulation
                             // 1. Seguro a cada 30 dias (Dia 1, 31, 61...)
                             if ((day - 1) % 30 == 0)
                             {
-                                double premium = EconomyServices.CalculateMonthlyPremium(currentAircraftType.PurchasePrice);
+                                double premium = EconomyServices.CalculateMonthlyPremium(currentAircraftType.PurchasePrice) * diffEcon.CostMultiplier;
                                 balance -= premium;
                                 cumInsuranceCost += premium;
                             }
@@ -298,10 +299,10 @@ namespace FlightCareer.Application.Simulation
                                 while (dayHoursFlown < options.HoursPerDay && !isBankrupt)
                                 {
                                     // Obter missões geradas para o aeroporto neste dia (com semente determinística do aeródromo)
-                                    var cacheKey = (currentAirport.ICAO, day);
+                                    var cacheKey = (currentAirport.ICAO, day, difficulty);
                                     if (!missionCache.TryGetValue(cacheKey, out var availableMissions))
                                     {
-                                        int apSeed = unchecked((currentAirport.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                        int apSeed = unchecked((StableHash(currentAirport.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
                                         var apRnd = new Random(apSeed & 0x7FFFFFFF);
                                         availableMissions = MissionGenerator.GenerateMissionsInMemory(
                                             currentAirport,
@@ -309,7 +310,8 @@ namespace FlightCareer.Application.Simulation
                                             _hubDataService,
                                             apRnd,
                                             simulatedDate,
-                                            countOverride: 80);
+                                            countOverride: 80,
+                                            payMultiplier: diffEcon.PayMultiplier);
                                         missionCache[cacheKey] = availableMissions;
                                     }
 
@@ -330,11 +332,11 @@ namespace FlightCareer.Application.Simulation
 
                                     List<Mission> MissionsAt(Airport ap)
                                     {
-                                        var key = (ap.ICAO, day);
+                                        var key = (ap.ICAO, day, difficulty);
                                         if (!missionCache.TryGetValue(key, out var list))
                                         {
-                                            int seedAp = unchecked((ap.ICAO.GetHashCode() * 397) ^ (day * 101) ^ (options.Seed * 17));
-                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80);
+                                            int seedAp = unchecked((StableHash(ap.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
+                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier);
                                             missionCache[key] = list;
                                         }
                                         return list;
@@ -406,13 +408,13 @@ namespace FlightCareer.Application.Simulation
 
                                             double fuelUsedLocal = currentAircraftType.FuelConsumptionGPH * localDuration;
                                             double fuelPriceLocal = FuelPriceService.GetCurrentPrice(currentAircraftType.FuelType ?? "AVGAS", currentAirport.Tier, simulatedDate);
-                                            double fuelCostLocal = Math.Round(fuelUsedLocal * fuelPriceLocal, 2);
+                                            double fuelCostLocal = Math.Round(fuelUsedLocal * fuelPriceLocal * diffEcon.CostMultiplier, 2);
 
                                             double mtowLocal = AircraftWeightSpecs.GetMtow(currentAircraftType.Model, currentAircraftType);
                                             var feeCtxLocal = new FeeContext(currentAirport.Tier, currentAirport.ICAO, mtowLocal, passengers: 0, hasMission: false, parkedGameHours: 0.0);
-                                            double totalFeesLocal = GroundServiceCalculator.Calculate(feeCtxLocal).Sum(f => f.Total);
+                                            double totalFeesLocal = GroundServiceCalculator.Calculate(feeCtxLocal).Sum(f => f.Total) * diffEcon.CostMultiplier;
 
-                                            double lessonIncome = Math.Round(localDuration * 220.0, 2);
+                                            double lessonIncome = Math.Round(localDuration * 220.0 * diffEcon.PayMultiplier, 2);
                                             balance += lessonIncome - fuelCostLocal - totalFeesLocal;
                                             cumRevenue += lessonIncome;
                                             cumFuelCost += fuelCostLocal;
@@ -457,11 +459,11 @@ namespace FlightCareer.Application.Simulation
 
                                         double fuelUsedFerry = currentAircraftType.FuelConsumptionGPH * ferryDuration;
                                         double fuelPriceFerry = FuelPriceService.GetCurrentPrice(currentAircraftType.FuelType ?? "AVGAS", bestHub.Tier, simulatedDate);
-                                        double fuelCostFerry = Math.Round(fuelUsedFerry * fuelPriceFerry, 2);
+                                        double fuelCostFerry = Math.Round(fuelUsedFerry * fuelPriceFerry * diffEcon.CostMultiplier, 2);
 
                                         double mtowFerry = AircraftWeightSpecs.GetMtow(currentAircraftType.Model, currentAircraftType);
                                         var feeCtxFerry = new FeeContext(bestHub.Tier, bestHub.ICAO, mtowFerry, passengers: 0, hasMission: false, parkedGameHours: 0.0);
-                                        double totalFeesFerry = GroundServiceCalculator.Calculate(feeCtxFerry).Sum(f => f.Total);
+                                        double totalFeesFerry = GroundServiceCalculator.Calculate(feeCtxFerry).Sum(f => f.Total) * diffEcon.CostMultiplier;
 
                                         if (balance < fuelCostFerry && balance < 0)
                                         {
@@ -549,9 +551,10 @@ namespace FlightCareer.Application.Simulation
                                             var plan = PartReplacementPlanner.Plan(toFix, _partCatalog, currentClassKey, simulatedDate, bands: walkaroundBands);
                                             if (plan.Items.Count > 0)
                                             {
-                                                balance -= plan.TotalCost;
-                                                cumPartsCost += plan.TotalCost;
-                                                cumMaintCost += plan.TotalCost;
+                                                double planCost = plan.TotalCost * diffEcon.CostMultiplier;
+                                                balance -= planCost;
+                                                cumPartsCost += planCost;
+                                                cumMaintCost += planCost;
                                                 replacedPartsCount += plan.Items.Count;
                                                 maintEvents++;
                                                 remainingDowntimeHours += plan.DowntimeHours;
@@ -564,7 +567,7 @@ namespace FlightCareer.Application.Simulation
                                     // Custos operacionais do voo
                                     double fuelUsed = currentAircraftType.FuelConsumptionGPH * flightDuration;
                                     double fuelPrice = FuelPriceService.GetCurrentPrice(currentAircraftType.FuelType ?? "AVGAS", destAirport.Tier, simulatedDate);
-                                    double fuelCost = Math.Round(fuelUsed * fuelPrice, 2);
+                                    double fuelCost = Math.Round(fuelUsed * fuelPrice * diffEcon.CostMultiplier, 2);
 
                                     double mtowLbs = AircraftWeightSpecs.GetMtow(currentAircraftType.Model, currentAircraftType);
                                     var feeCtx = new FeeContext(
@@ -575,7 +578,7 @@ namespace FlightCareer.Application.Simulation
                                         hasMission: true,
                                         parkedGameHours: 0.0);
                                     var feeLines = GroundServiceCalculator.Calculate(feeCtx);
-                                    double totalFees = feeLines.Sum(f => f.Total);
+                                    double totalFees = feeLines.Sum(f => f.Total) * diffEcon.CostMultiplier;
 
                                     // Checagem de falência antes do voo: sem dinheiro para o combustível
                                     if (balance < fuelCost && balance < 0)
@@ -656,16 +659,17 @@ namespace FlightCareer.Application.Simulation
                                         if (partsToFix.Count > 0)
                                         {
                                             var fixPlan = PartReplacementPlanner.Plan(partsToFix, _partCatalog, currentClassKey, simulatedDate, bands: _componentCatalog.PartBands);
-                                            if (balance < fixPlan.TotalCost && balance < 0)
+                                            double fixCost = fixPlan.TotalCost * diffEcon.CostMultiplier;
+                                            if (balance < fixCost && balance < 0)
                                             {
                                                 isBankrupt = true;
                                                 bankruptcyDay = day;
                                                 break;
                                             }
 
-                                            balance -= fixPlan.TotalCost;
-                                            cumPartsCost += fixPlan.TotalCost;
-                                            cumMaintCost += fixPlan.TotalCost;
+                                            balance -= fixCost;
+                                            cumPartsCost += fixCost;
+                                            cumMaintCost += fixCost;
                                             replacedPartsCount += fixPlan.Items.Count;
                                             maintEvents++;
                                             remainingDowntimeHours += Math.Max(12.0, fixPlan.DowntimeHours);
@@ -742,7 +746,8 @@ namespace FlightCareer.Application.Simulation
                                 day,
                                 ref isBankrupt,
                                 ref bankruptcyDay,
-                                _componentCatalog.PartBands);
+                                _componentCatalog.PartBands,
+                                costMultiplier: diffEcon.CostMultiplier);
 
                             if (isBankrupt)
                             {
@@ -812,7 +817,8 @@ namespace FlightCareer.Application.Simulation
                                 policy,
                                 category,
                                 simulatedDate,
-                                day);
+                                day,
+                                failureMultiplier: diffEcon.FailureMultiplier);
 
                             // 7. Registro do marco se o dia atual for um dos marcos
                             if (milestones.Contains(day))
@@ -1084,7 +1090,8 @@ namespace FlightCareer.Application.Simulation
             int day,
             ref bool isBankrupt,
             ref int? bankruptcyDay,
-            PartBandSettings? bands = null)
+            PartBandSettings? bands = null,
+            double costMultiplier = 1.0)
         {
             bands ??= new PartBandSettings();
             bool isPiston = engineClass == EngineClass.Piston;
@@ -1095,7 +1102,7 @@ namespace FlightCareer.Application.Simulation
                 // 1. Só a inspeção anual (25h / 100h regulatória mandatória): paga taxa e inspeciona
                 if (hoursUntil100h <= 0)
                 {
-                    double cost = MaintenancePricing.Cost100hInspection;
+                    double cost = MaintenancePricing.Cost100hInspection * costMultiplier;
                     if (balance < cost && balance < 0)
                     {
                         isBankrupt = true;
@@ -1123,15 +1130,16 @@ namespace FlightCareer.Application.Simulation
                         var plan = PartReplacementPlanner.Plan(brokenOrNoGo, partCatalog, classKey, simulatedDate, bands: bands);
                         if (plan.Items.Count > 0)
                         {
-                            if (balance < plan.TotalCost && balance < 0)
+                            double planCost = plan.TotalCost * costMultiplier;
+                            if (balance < planCost && balance < 0)
                             {
                                 isBankrupt = true;
                                 bankruptcyDay = day;
                                 return;
                             }
-                            balance -= plan.TotalCost;
-                            cumPartsCost += plan.TotalCost;
-                            cumMaintCost += plan.TotalCost;
+                            balance -= planCost;
+                            cumPartsCost += planCost;
+                            cumMaintCost += planCost;
                             replacedPartsCount += plan.Items.Count;
                             remainingDowntimeHours += plan.DowntimeHours;
                             maintEvents++;
@@ -1149,7 +1157,7 @@ namespace FlightCareer.Application.Simulation
             // 1. Inspeção anual (100h / 25h): SÓ inspeciona (não troca óleo nem zera contador de 12h)
             if (hoursUntil100h <= 0)
             {
-                double cost = MaintenancePricing.Cost100hInspection;
+                double cost = MaintenancePricing.Cost100hInspection * costMultiplier;
                 if (balance < cost && balance < 0)
                 {
                     isBankrupt = true;
@@ -1181,15 +1189,16 @@ namespace FlightCareer.Application.Simulation
                     var plan = PartReplacementPlanner.Plan(toFix, partCatalog, classKey, simulatedDate, bands: bands);
                     if (plan.Items.Count > 0)
                     {
-                        if (balance < plan.TotalCost && balance < 0)
+                        double planCost = plan.TotalCost * costMultiplier;
+                        if (balance < planCost && balance < 0)
                         {
                             isBankrupt = true;
                             bankruptcyDay = day;
                             return;
                         }
-                        balance -= plan.TotalCost;
-                        cumPartsCost += plan.TotalCost;
-                        cumMaintCost += plan.TotalCost;
+                        balance -= planCost;
+                        cumPartsCost += planCost;
+                        cumMaintCost += planCost;
                         replacedPartsCount += plan.Items.Count;
                         remainingDowntimeHours += plan.DowntimeHours;
                         PartReplacementPlanner.Apply(plan, airframeHours, simulatedDate);
@@ -1201,7 +1210,7 @@ namespace FlightCareer.Application.Simulation
             // 2. Troca de óleo (50h / 12h): troca óleo e filtro
             if (hoursUntil50h <= 0)
             {
-                double serviceCost = MaintenancePricing.Cost50hInspection;
+                double serviceCost = MaintenancePricing.Cost50hInspection * costMultiplier;
                 if (balance >= serviceCost || balance >= 0)
                 {
                     balance -= serviceCost;
@@ -1243,9 +1252,10 @@ namespace FlightCareer.Application.Simulation
                         var extraPlan = PartReplacementPlanner.Plan(oilGroupFix, partCatalog, classKey, simulatedDate, bands: bands);
                         if (extraPlan.Items.Count > 0)
                         {
-                            balance -= extraPlan.TotalCost;
-                            cumPartsCost += extraPlan.TotalCost;
-                            cumMaintCost += extraPlan.TotalCost;
+                            double extraCost = extraPlan.TotalCost * costMultiplier;
+                            balance -= extraCost;
+                            cumPartsCost += extraCost;
+                            cumMaintCost += extraCost;
                             replacedPartsCount += extraPlan.Items.Count;
                             remainingDowntimeHours += extraPlan.DowntimeHours;
                             PartReplacementPlanner.Apply(extraPlan, airframeHours, simulatedDate);
@@ -1258,7 +1268,7 @@ namespace FlightCareer.Application.Simulation
             // 3. Revisão de ignição (pistão a cada 125h)
             if (isPiston && hoursUntil500h <= 0)
             {
-                double cost = MaintenancePricing.Cost500hInspection;
+                double cost = MaintenancePricing.Cost500hInspection * costMultiplier;
                 if (balance >= cost || balance >= 0)
                 {
                     balance -= cost;
@@ -1288,7 +1298,7 @@ namespace FlightCareer.Application.Simulation
             // 4. Overhaul (TBO)
             if (tboRemaining <= 0)
             {
-                double cost = MaintenancePricing.CalculateOverhaulCost(aircraftType.PurchasePrice);
+                double cost = MaintenancePricing.CalculateOverhaulCost(aircraftType.PurchasePrice) * costMultiplier;
                 if (balance < cost && balance < 0)
                 {
                     isBankrupt = true;
@@ -1384,7 +1394,8 @@ namespace FlightCareer.Application.Simulation
             string policy,
             PilotCategory pilotCategory,
             DateTime simulatedDate,
-            int day)
+            int day,
+            double failureMultiplier = 1.0)
         {
             if (currentLadderIdx + 1 >= ladder.Count) return;
 
@@ -1440,8 +1451,8 @@ namespace FlightCareer.Application.Simulation
                 var config = ResolveAircraftConfiguration(targetType, componentCatalog, limitResolver);
                 engineClass = config.EngineClass;
                 var currentEngClass = engineClass;
-                failureEngine = new FailureEngine(componentCatalog, currentEngClass, rnd);
-                partFailureEngine = new PartFailureEngine(componentCatalog, partCatalog, currentEngClass, rnd, mapping);
+                failureEngine = new FailureEngine(componentCatalog, currentEngClass, rnd) { HazardMultiplier = failureMultiplier };
+                partFailureEngine = new PartFailureEngine(componentCatalog, partCatalog, currentEngClass, rnd, mapping) { HazardMultiplier = failureMultiplier };
                 components = componentCatalog.Components
                     .Where(c => c.AppliesTo.Contains(currentEngClass))
                     .Select(c => new AircraftComponent
@@ -1479,6 +1490,24 @@ namespace FlightCareer.Application.Simulation
             return monthlyInsurance + monthlyFuel + monthlyMaintAndFees;
         }
 
+        /// <summary>
+        /// Hash FNV-1a estável entre execuções. string.GetHashCode() é aleatório por processo no .NET,
+        /// o que tornava a ECON-STAB não reprodutível com a mesma semente.
+        /// </summary>
+        public static int StableHash(string? text)
+        {
+            unchecked
+            {
+                uint hash = 2166136261;
+                foreach (char c in text ?? string.Empty)
+                {
+                    hash ^= c;
+                    hash *= 16777619;
+                }
+                return (int)hash;
+            }
+        }
+
         public static int DeriveBotSeed(int baseSeed, DifficultyMode difficulty, string policy, int botIndex)
         {
             unchecked
@@ -1486,7 +1515,7 @@ namespace FlightCareer.Application.Simulation
                 int hash = 17;
                 hash = hash * 31 + baseSeed;
                 hash = hash * 31 + (int)difficulty * 1009;
-                hash = hash * 31 + (policy != null ? StringComparer.OrdinalIgnoreCase.GetHashCode(policy) : 0);
+                hash = hash * 31 + (policy != null ? StableHash(policy.ToLowerInvariant()) : 0);
                 hash = hash * 31 + botIndex * 503;
                 int seed = hash & 0x7FFFFFFF;
                 return seed == 0 ? 1 : seed;
