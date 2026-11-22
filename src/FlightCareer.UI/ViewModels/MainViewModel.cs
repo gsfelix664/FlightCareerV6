@@ -527,7 +527,10 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task RefreshBriefingAircraftAsync()
         {
+            // Sem rastreamento: o _context é de longa duração e devolvia o avião em cache, com o combustível
+            // de antes de abastecer no Hangar (o briefing seguia conferindo a quantidade antiga).
             var pilot = await _context.Pilots
+                .AsNoTracking()
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)
                 .FirstOrDefaultAsync(p => p.Name == PilotName);
