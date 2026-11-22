@@ -13,6 +13,13 @@ namespace FlightCareer.Domain.Components
         public const double Cost500hInspection = 362.50;
         public const double MinOverhaulCost = 6250.0;
         public const double OverhaulRate = 0.05;
+        /// <summary>Fator fixo de compressão temporal da carreira: o tempo da vida real é 4× o do jogo (PARADA-REAL).</summary>
+        public const double CompressionFactor = 4.0;
+        /// <summary>Converte horas de voo do jogo no prazo equivalente da vida real (× 4).</summary>
+        public static double RealHours(double gameHours) => gameHours * CompressionFactor;
+        /// <summary>Converte ciclos do jogo nos ciclos equivalentes da vida real (× 4).</summary>
+        public static double RealCycles(double gameCycles) => gameCycles * CompressionFactor;
+
         /// <summary>Intervalos e TBO comprimidos ÷ 4 (decisão do usuário 2026-11-17/19).</summary>
         public const double OilChangeIntervalHours = 12.0;
         public const double AnnualInspectionIntervalHours = 25.0;

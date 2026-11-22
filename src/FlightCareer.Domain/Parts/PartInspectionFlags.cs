@@ -59,25 +59,31 @@ namespace FlightCareer.Domain.Parts
 
             if (def.LifeHours > 0)
             {
+                double realLife = MaintenancePricing.RealHours(def.LifeHours);
                 if (part.HoursSinceReplacement >= def.LifeHours)
                 {
-                    return $"Vida vencida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h";
+                    double overdue = part.HoursSinceReplacement - def.LifeHours;
+                    return $"Vida {realLife:F0} h (vida real) · vencida há {overdue:F0} h de voo";
                 }
                 if (part.HoursSinceReplacement >= def.LifeHours * LifeWarningFraction)
                 {
-                    return $"Vida: {part.HoursSinceReplacement:F0} / {def.LifeHours:F0} h";
+                    double remaining = Math.Max(0.0, def.LifeHours - part.HoursSinceReplacement);
+                    return $"Vida {realLife:F0} h (vida real) · faltam {remaining:F0} h de voo";
                 }
             }
 
             if (def.LifeCycles.HasValue && def.LifeCycles.Value > 0)
             {
+                double realCycles = MaintenancePricing.RealCycles(def.LifeCycles.Value);
                 if (part.CyclesSinceReplacement >= def.LifeCycles.Value)
                 {
-                    return $"Ciclos vencidos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}";
+                    int overdue = part.CyclesSinceReplacement - def.LifeCycles.Value;
+                    return $"Ciclos {realCycles:F0} (vida real) · vencidos há {overdue} ciclos de voo";
                 }
                 if (part.CyclesSinceReplacement >= def.LifeCycles.Value * LifeWarningFraction)
                 {
-                    return $"Ciclos: {part.CyclesSinceReplacement} / {def.LifeCycles.Value}";
+                    int remaining = Math.Max(0, def.LifeCycles.Value - part.CyclesSinceReplacement);
+                    return $"Ciclos {realCycles:F0} (vida real) · faltam {remaining} ciclos de voo";
                 }
             }
 

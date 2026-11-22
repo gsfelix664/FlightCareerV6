@@ -267,7 +267,7 @@ namespace FlightCareer.Tests.Parts
 
             var text = PartHangarView.GroupLifeText(ComponentKind.Oil, aircraft, EngineClass.Piston);
 
-            Assert.Equal("Troca de óleo em 8 h (de 12)", text);
+            Assert.Equal("Troca de óleo a cada 48 h (vida real) · faltam 8 h de voo", text);
         }
 
         [Fact]
@@ -280,7 +280,7 @@ namespace FlightCareer.Tests.Parts
 
             var text = PartHangarView.GroupLifeText(ComponentKind.Ignition, aircraft, EngineClass.Piston);
 
-            Assert.Equal("Revisão de ignição vencida há 3 h", text);
+            Assert.Equal("Revisão de ignição vencida há 3 h de voo", text);
         }
 
         [Fact]
@@ -303,7 +303,7 @@ namespace FlightCareer.Tests.Parts
 
             var text = PartHangarView.GroupLifeText(ComponentKind.Engine, aircraft, EngineClass.Piston);
 
-            Assert.Equal("TBO: 450 h restantes (de 500)", text);
+            Assert.Equal("TBO 2.000 h (vida real) · faltam 450 h de voo", text);
         }
 
         [Fact]

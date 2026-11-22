@@ -2725,3 +2725,14 @@
 - Suíte `GroundAndEngineMetricsTests` com 10 testes cobrindo todas as novas regras e métricas.
 - Replay do voo real C152 (`20261122-1007-Cessna_C152.csv`) confirmou emissão de partida com luzes acesas (`startLightsOnCount: 3.0`) e compensador (`trimCycles: 1.0`).
 - Não testado no MSFS.
+
+## 2026-11-22 - Oficina em tempo real, serviço expresso e prazos reais (PARADA-REAL) (Gemini)
+- `Domain/Components/WorkshopDowntime.cs`: classe estática pura implementando as regras de parada na oficina em minutos de relógio real do computador (`RealMinutesFor = clamp(round(2 × √horasDeJogo), 1, 20)`), serviço expresso (`Apply(gameHours, express)` com +50% no custo, metade das horas de jogo e dos minutos reais), conferência de disponibilidade (`IsInWorkshop`), tempo restante (`Remaining`) e cálculo de prazo sobre parada em andamento usando o maior prazo (`CalculateNewUntilUtc`).
+- `Domain/Components/MaintenancePricing.cs`: unificação do fator de compressão regulatória `CompressionFactor = 4.0` e funções puras `RealHours(gameHours)` e `RealCycles(gameCycles)`.
+- `Domain/Entities/PilotAircraft.cs` e `Infrastructure/Persistence/AppDbContext.cs`: novas colunas `WorkshopUntilUtc` (TEXT/DateTime? em UTC) e `WorkshopDescription` (TEXT) com migração idempotente em `EnsureSchemaUpdatedAsync`.
+- `Domain/Parts/PartHangarView.cs` e `Domain/Parts/PartInspectionFlags.cs`: `GroupLifeInfo` e `LifeNote` atualizados para exibir os prazos da vida real (× 4) e o restante em horas de voo do jogo com o rótulo "de voo", acompanhados de estado vencido.
+- `UI/Views/ThemedDialog.cs`: novo método `ConfirmService` permitindo ao piloto escolher entre serviço Normal e Expresso (+50% no custo, metade do tempo de parada real e de jogo).
+- `UI/ViewModels/HangarViewModel.cs` e `PilotAircraftWrapper.cs`: `RunPaidServiceAsync` grava o prazo de oficina e descrição, além do avanço do relógio de carreira; `DispatcherTimer` de 1 s ativo exclusivamente enquanto houver aeronave na oficina da frota atualizando a contagem regressiva; card do avião no Hangar exibe faixa estilizada de liberação estimada ("Na oficina — libera em mm:ss (serviço)"); rótulos de inspeções e revisões no XAML vinculados a propriedades dinâmicas do wrapper baseadas em `MaintenancePricing` com legenda fixa explicativa sobre o ritmo acelerado (×4).
+- `UI/ViewModels/MainViewModel.cs` e `BriefingViewModel.cs`: início de voo bloqueado em `StartFlight` com modal explicativo e checklist de despacho no Briefing bloqueado com aviso "Na oficina — libera em mm:ss" quando a aeronave ativa estiver em manutenção na oficina.
+- Suíte `WorkshopDowntimeTests` com testes unitários cobrindo conversão de minutos, piso, teto, serviço expresso, relógio injetado e cálculo de maior prazo sobre parada; atualização em `PartDisplayStateTests`, `PartInspectionFlagsTests`, `PartHealthBandsAndFailuresTests` e teste de migração em banco antigo em `ComponentPersistenceTests`.
+- Não testado no MSFS.
