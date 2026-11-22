@@ -2960,3 +2960,9 @@
   - Adicionados testes em `FlightCareer.Tests/Missions/`: `OverflyWaypointCodecTests`, `OverflyTrackerTests`, `MissionCompletionLocalTests`, `ContractMarkerBuilderTests`, `MissionTextCatalogTests`, `PlacesDataServiceTests`, `MissionGeneratorLocalTests`.
   - Total de 925/925 testes xUnit aprovados (100%).
 - Não testado no MSFS / não visto na tela.
+
+## 2026-11-22 - Zonas de paraquedismo e aeródromos turísticos curados (Claude)
+- `tools/places/dropzones_curated.csv`: 32 zonas de salto da lista do usuário (11 no Brasil + 21 no mundo), com nome e descrição; `dropzones.json` passa a 180 zonas (13 no Brasil). A descrição entra no texto do 3.6.2 (`{dz_note}`).
+- `tools/places/scenic_aerodromes_curated.csv`: 16 aeródromos de voo panorâmico (8 no Brasil) com as atrações; `scenic_aerodromes.json` com 59 pontos de coordenada real (banco de pontos ou Wikidata, ≤ 75 NM). Ainda não usado pelo gerador.
+- `build_places.py --lnm`: confere cada código na base do MSFS 2024 (o OurAirports traz KL65/KE60/KX26, o simulador usa L65/E60/X26; Skydive Dubai = OMDU); 13 aeródromos de instrução que não existem no simulador saíram.
+- `PlacesDataServiceTests`: o teste de Boituva usava SDTI (código errado; Boituva é SDOI) e passava sem conferir nada; trocado por zonas curadas reais.

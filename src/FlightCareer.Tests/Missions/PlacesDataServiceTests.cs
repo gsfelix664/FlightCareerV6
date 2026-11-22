@@ -25,17 +25,18 @@ namespace FlightCareer.Tests.Missions
             Assert.NotEmpty(pois);
         }
 
-        [Fact]
-        public void GetDropZone_KnownDropZone_ReturnsData()
+        [Theory]
+        [InlineData("SDOI", "Centro Nacional de Paraquedismo")]
+        [InlineData("SIZD", "DropZone 47 Clube Escola de Paraquedismo")]
+        [InlineData("L65", "Skydive Perris")]
+        [InlineData("OMDU", "Skydive Dubai Palm Dropzone")]
+        public void Zonas_curadas_tem_nome_e_nota_com_o_codigo_do_simulador(string icao, string name)
         {
-            var service = new PlacesDataService();
-            // Boituva (SDTI) é a mais famosa dropzone do Brasil
-            var dz = service.GetDropZone("SDTI");
-            if (dz != null)
-            {
-                Assert.Equal("SDTI", dz.Icao);
-                Assert.False(string.IsNullOrWhiteSpace(dz.Name));
-            }
+            var dz = new PlacesDataService().GetDropZone(icao);
+
+            Assert.NotNull(dz);
+            Assert.Equal(name, dz!.Name);
+            Assert.False(string.IsNullOrWhiteSpace(dz.Note));
         }
     }
 }
