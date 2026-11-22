@@ -611,17 +611,20 @@ namespace FlightCareer.Domain.Parts
                 return;
             }
 
-            if (!TryGetGroundSpeed(frame, out double gsKnots))
+            // Curva no táxi exige a GS de verdade: a velocidade verdadeira inclui o vento (5–10 kt a mais no táxi)
+            if (!TryGetGroundSpeed(frame, out double gsKnots, allowTrueAirspeedFallback: false))
             {
                 ReportDiagnosticOnce("taxi-steer-missing-gs", "Regra 'taxi_high_speed_turn' desativada: velocidade de solo ausente no frame de sensores.");
                 return;
             }
 
             double absSteer = Math.Abs(steerAnglePct);
+            // Potência de decolagem não é táxi: no alinhamento/corrida a bequilha mexe com o motor a pleno (replay C152 de 2026-11-15).
+            bool takeoffPower = IsTakeoffPower(frame);
 
             if (!_isTaxiTurnOccurrence)
             {
-                if (onGround && gsKnots < 40.0 && absSteer >= 30.0)
+                if (onGround && gsKnots < 40.0 && absSteer >= 30.0 && !takeoffPower)
                 {
                     _isTaxiTurnOccurrence = true;
                     _taxiTurnMaxGs = gsKnots;
@@ -630,7 +633,8 @@ namespace FlightCareer.Domain.Parts
             }
             else
             {
-                if (gsKnots > _taxiTurnMaxGs)
+                // Só conta a velocidade enquanto a bequilha está de fato virada (antes contava a aceleração depois da curva)
+                if (absSteer >= 30.0 && !takeoffPower && gsKnots > _taxiTurnMaxGs)
                 {
                     _taxiTurnMaxGs = gsKnots;
                 }
@@ -644,7 +648,7 @@ namespace FlightCareer.Domain.Parts
                     _taxiTurnLowTimeSec = 0.0;
                 }
 
-                bool endOccurrence = !onGround || gsKnots < 3.0 || _taxiTurnLowTimeSec >= 2.0;
+                bool endOccurrence = !onGround || gsKnots < 3.0 || _taxiTurnLowTimeSec >= 2.0 || takeoffPower;
                 if (endOccurrence)
                 {
                     if (_taxiTurnMaxGs >= 15.0)
@@ -657,6 +661,23 @@ namespace FlightCareer.Domain.Parts
                     _taxiTurnLowTimeSec = 0.0;
                 }
             }
+        }
+
+        /// <summary>
+        /// Motor 1 em potência de decolagem: RPM ≥ 80 % da linha vermelha (pistão, se configurada), manete ≥ 70 %
+        /// ou torque ≥ 70 % (turbina). Sem nenhum desses sensores, considera que não está.
+        /// </summary>
+        private bool IsTakeoffPower(SensorFrame frame)
+        {
+            if (_engineLimitsConfig?.RpmRedline is double redline && redline > 0 &&
+                frame.Values.TryGetValue("eng-rpm:1", out double rpm) && rpm >= 0.8 * redline)
+                return true;
+            if (frame.Values.TryGetValue("eng-throttle-lever-position:1", out double throttle) && throttle >= 70.0)
+                return true;
+            if ((frame.Values.TryGetValue("turb-max-torque-percent:1", out double torque) ||
+                 frame.Values.TryGetValue("turb-eng-torque-percent:1", out torque)) && torque >= 70.0)
+                return true;
+            return false;
         }
 
         private void CheckGroundTireSkid(SensorFrame frame, double dtSimSeconds, bool onGround, List<DerivedPartEvent> events)
@@ -993,11 +1014,17 @@ namespace FlightCareer.Domain.Parts
             }
         }
 
-        private static bool TryGetGroundSpeed(SensorFrame frame, out double gsKnots)
+        /// <summary>
+        /// Velocidade no solo: sensor `ground-velocity` (GROUND VELOCITY, gravado a cada quadro desde 2026-11-22).
+        /// Logs antigos não têm esse sensor: usa a velocidade verdadeira (`af-airspeed-true`) como reserva, que no
+        /// solo difere da GS só pelo vento (aceitável para táxi, frenagem e derrapagem).
+        /// </summary>
+        private static bool TryGetGroundSpeed(SensorFrame frame, out double gsKnots, bool allowTrueAirspeedFallback = true)
         {
-            if (frame.Values.TryGetValue("ctx-ground-velocity", out gsKnots) ||
+            if (frame.Values.TryGetValue("ground-velocity", out gsKnots) ||
                 frame.Values.TryGetValue("gps-ground-speed", out gsKnots) ||
-                frame.Values.TryGetValue("ground-velocity", out gsKnots))
+                frame.Values.TryGetValue("ctx-ground-velocity", out gsKnots) ||
+                (allowTrueAirspeedFallback && frame.Values.TryGetValue("af-airspeed-true", out gsKnots)))
             {
                 return true;
             }

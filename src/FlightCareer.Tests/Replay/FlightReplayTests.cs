@@ -205,7 +205,9 @@ namespace FlightCareer.Tests.Replay
 
             // Perdas dentro da faixa esperada com vida / 4 (dano de impacto + desgaste natural acelerado)
             Assert.InRange(mainTires.HealthLoss, 3.5, 4.8);
-            Assert.InRange(noseTires.HealthLoss, 3.5, 4.8);
+            // +0,2 % no nariz desde a METRICAS-A: 2 s de derrapagem no toque duro de 658 fpm (regra ground_tire_skid);
+            // pouso suave não marca derrapagem (conferido no voo de 2026-11-22).
+            Assert.InRange(noseTires.HealthLoss, 3.5, 5.1);
             Assert.InRange(mainStruts.HealthLoss, 2.52 * 0.85, 2.52 * 1.15);
             Assert.InRange(noseStrut.HealthLoss, 2.52 * 0.85, 2.52 * 1.15);
 

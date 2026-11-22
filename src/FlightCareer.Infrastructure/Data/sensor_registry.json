@@ -3085,6 +3085,13 @@
       "unit": "bool",
       "group": "electrical",
       "perEngine": false
+    },
+    {
+      "key": "ground-velocity",
+      "simVar": "GROUND VELOCITY",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
     }
   ]
 }
