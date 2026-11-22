@@ -116,3 +116,9 @@ Leia junto: `AGENTS.md` (§3 comandos, §6 regras, §7 estado), `CLAUDE.md`, `do
 
 ## Pendências antigas que precisam do simulador
 - SimvarWatcher com as listas novas; SimVarProbe com `--filter "^(?!ATC |AI )"`; escrita de turbina, combustível, slew; teste de panes (`BREAKER_*_SET`, `PARTIAL PANEL *`, `FUELSYSTEM_*`, `HYDRAULIC_ACTUATOR_ACTIVE_SET`, trim disabled); `FlightSave`/`FlightLoad`; Flow API; índices elétricos reais por avião; voos em outros aviões; F4.2e, crash declarado, pista de terra.
+
+
+## 2026-11-22 (fim do dia) — Claude
+- Mergeado na base e enviado: calibração do pagamento (t8, `economia-estabilidade.md` › 4.5) e MISSOES-LOCAIS (bancos de locais reais em `Data/places/`, script `tools/places/build_places.py`, textos de RP em `mission_texts.json`, marcadores no mapa do briefing; revisão em `docs/reviews/MISSOES-LOCAIS-revisao.md`).
+- Decisões pendentes do usuário: patrimônio do Médio no 3º ano (~16 mi) × meta ≤ 20×; bots do Médio parados na classe G do dia 540 ao 1095 (provável trava de fase 6); 7 melhorias propostas em `docs/plans/missoes-locais-rp.md` › 3.
+- Testes no PC: `docs/agents/TESTES-PC-2026-11-22.md` (seções 1–5). Nada disso foi visto na tela nem testado no MSFS.
