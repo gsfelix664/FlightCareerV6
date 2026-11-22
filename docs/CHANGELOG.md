@@ -2932,3 +2932,6 @@
 - **Suíte de Testes:**
   - `Phase3To7ContractsTests.cs`: 12 testes cobrindo integridade do catálogo, oráculos do gerador com sementes fixas para os 8 contratos, regras geográficas/pistas de destino, escalas de pagamento e persistência no banco. Total de 898/898 testes aprovados (100%).
 - Não testado no MSFS / não visto na tela.
+
+## 2026-11-22 - Calibração do pagamento com XP e fases (Claude)
+- `mission_pay.json`: instrução 2,0; táxi aéreo, regional, linha e carga global 0,35. Rodada de 3 anos registrada em `docs/plans/economia-estabilidade.md` › 4.5 (Médio: 1ª compra dia 55–113, classe F no 1º ano; Difícil ≈ 1,5× mais lento; sem falências).
