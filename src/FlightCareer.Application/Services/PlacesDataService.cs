@@ -132,10 +132,11 @@ namespace FlightCareer.Application.Services
                         string name = elem.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
                         double lat = elem.GetProperty("lat").GetDouble();
                         double lon = elem.GetProperty("lon").GetDouble();
+                        string note = elem.TryGetProperty("note", out var nt) ? nt.GetString() ?? "" : "";
 
                         if (!string.IsNullOrEmpty(icao))
                         {
-                            s_dropZones[icao] = new DropZoneInfo(icao, airport, cc, name, lat, lon);
+                            s_dropZones[icao] = new DropZoneInfo(icao, airport, cc, name, lat, lon, note);
                         }
                     }
                 }

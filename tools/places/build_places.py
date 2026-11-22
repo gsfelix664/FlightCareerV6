@@ -6,8 +6,12 @@ Fontes abertas (nada inventado):
   - Aeródromos: src/FlightCareer.Infrastructure/CSV/airports.csv (OurAirports, domínio público).
 
 Uso:
-  python tools/places/build_places.py --cache <pasta de downloads> [--download]
+  python tools/places/build_places.py --cache <pasta de downloads> [--download] [--lnm <little_navmap_msfs24.sqlite>]
 Sem --download, reaproveita os arquivos já baixados na pasta de cache.
+Com --lnm (recomendado), cada aeródromo usa o código que existe no simulador (ex.: L65 e não KL65, OMDU para a
+Skydive Dubai) e aeródromos que não existem no simulador ficam de fora.
+Zonas de salto curadas à mão: tools/places/dropzones_curated.csv (icao, name, cc, note); se o código não existir
+no simulador, usa o aeródromo do simulador mais próximo do mesmo tipo (até 30 NM).
 Só biblioteca padrão.
 """
 import argparse
@@ -24,6 +28,8 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 AIRPORTS_CSV = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "CSV", "airports.csv")
+CURATED_DZ_CSV = os.path.join(ROOT, "tools", "places", "dropzones_curated.csv")
+CURATED_SCENIC_CSV = os.path.join(ROOT, "tools", "places", "scenic_aerodromes_curated.csv")
 HUBS_JSON = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "Data", "hubs_data.json")
 OUT_DIR = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "Data", "places")
 UA = "FlightCareerDataBuilder/1.0"
@@ -101,16 +107,36 @@ def nm(lat1, lon1, lat2, lon2):
     return 2 * 3440.065 * math.asin(math.sqrt(a))
 
 
-def load_airports():
+def load_sim_idents(lnm_path):
+    """Códigos de aeródromo que existem no simulador (base do Little Navmap), com coordenadas."""
+    if not lnm_path:
+        return None
+    import sqlite3
+    con = sqlite3.connect(f"file:{lnm_path}?mode=ro", uri=True)
+    try:
+        return {row[0].upper(): (row[1], row[2], row[3]) for row in
+                con.execute("select ident, laty, lonx, name from airport where ident is not null")}
+    finally:
+        con.close()
+
+
+def load_airports(sim=None):
     out = []
     for r in csv.DictReader(open(AIRPORTS_CSV, encoding="utf-8")):
         if r["type"] not in ("small_airport", "medium_airport", "large_airport"):
             continue
-        icao = (r["icao_code"] or r["gps_code"] or r["ident"]).strip().upper()
-        if not re.fullmatch(r"[A-Z0-9]{3,4}", icao):
-            continue  # idents tipo "BR-0086" não existem no banco do simulador
+        candidates = [c.strip().upper() for c in (r["icao_code"], r["gps_code"], r["ident"], r["local_code"]) if c and c.strip()]
+        if sim is not None:
+            icao = next((c for c in candidates if c in sim), None)
+            if icao is None:
+                continue  # não existe no simulador
+        else:
+            icao = next((c for c in candidates if re.fullmatch(r"[A-Z0-9]{3,4}", c)), None)
+            if icao is None:
+                continue  # idents tipo "BR-0086" não existem no banco do simulador
         out.append({"icao": icao, "name": r["name"], "lat": float(r["latitude_deg"]), "lon": float(r["longitude_deg"]),
-                    "cc": r["iso_country"], "kw": r["keywords"] or ""})
+                    "cc": r["iso_country"], "kw": r["keywords"] or "", "type": r["type"],
+                    "aliases": set(candidates)})
     return out
 
 
@@ -199,7 +225,61 @@ def build_training(airports, grid, cache):
     return sorted(found.values(), key=lambda x: (x["cc"], x["icao"]))
 
 
-def build_dropzones(airports, grid, cache):
+def raw_airport(code):
+    """Linha do OurAirports com este código (mesmo que não exista no simulador), para achar um substituto."""
+    for r in csv.DictReader(open(AIRPORTS_CSV, encoding="utf-8")):
+        if code in {c.strip().upper() for c in (r["icao_code"], r["gps_code"], r["ident"], r["local_code"]) if c}:
+            return {"lat": float(r["latitude_deg"]), "lon": float(r["longitude_deg"]), "type": r["type"]}
+    return None
+
+
+def nearest_same_type(airports, lat, lon, kind, max_nm=30.0):
+    best, best_d = None, max_nm
+    for a in airports:
+        if a["type"] == kind:
+            d = nm(lat, lon, a["lat"], a["lon"])
+            if d <= best_d:
+                best, best_d = a, d
+    return best
+
+
+def add_curated_dropzones(found, airports, sim=None):
+    """Lista curada pelo usuário: tem prioridade sobre o OSM (nome e nota).
+    Código ausente do simulador -> aeródromo do simulador mais próximo do mesmo tipo (até 30 NM)."""
+    if not os.path.exists(CURATED_DZ_CSV):
+        return
+    by_alias = {}
+    for a in airports:
+        for alias in a["aliases"] | {a["icao"]}:
+            by_alias.setdefault(alias, a)
+    for row in csv.DictReader(open(CURATED_DZ_CSV, encoding="utf-8")):
+        code = row["icao"].strip().upper()
+        a = by_alias.get(code)
+        substitute_for = None
+        if a is None and sim is not None and code in sim:
+            lat, lon, name = sim[code]
+            a = {"icao": code, "name": name, "lat": lat, "lon": lon, "cc": row["cc"], "type": "", "aliases": {code}}
+        if a is None:
+            raw = raw_airport(code)
+            a = nearest_same_type(airports, raw["lat"], raw["lon"], raw["type"]) if raw else None
+            if a is None:
+                log(f"AVISO: {code} ({row['name']}) sem aeródromo no simulador a até 30 NM; ignorado")
+                continue
+            substitute_for = code
+            log(f"  {code} não existe no simulador: usando {a['icao']} ({a['name']})")
+        elif a["icao"] != code:
+            log(f"  {code} -> {a['icao']} (código do simulador)")
+        e = {"icao": a["icao"], "airport": a["name"], "cc": row["cc"] or a["cc"], "name": row["name"],
+             "lat": round(a["lat"], 5), "lon": round(a["lon"], 5), "sources": ["curado"], "note": row["note"]}
+        if substitute_for:
+            e["substituteFor"] = substitute_for
+        old = found.get(a["icao"])
+        if old:
+            e["sources"] += [src for src in old["sources"] if src != "curado"]
+        found[a["icao"]] = e
+
+
+def build_dropzones(airports, grid, cache, sim=None):
     found = {}
     for tags, lat, lon, ref in osm_elements(os.path.join(cache, "osm_dz.json")):
         a, d = grid.nearest(lat, lon, 3.0)
@@ -216,8 +296,87 @@ def build_dropzones(airports, grid, cache):
                                              "lat": round(a["lat"], 5), "lon": round(a["lon"], 5), "sources": []})
             if "ourairports-nome" not in e["sources"]:
                 e["sources"].append("ourairports-nome")
+    add_curated_dropzones(found, airports, sim)
     return sorted(found.values(), key=lambda x: (x["cc"], x["icao"]))
 
+
+
+def _norm(text):
+    import unicodedata
+    t = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9 ]", " ", t).split()
+
+
+def _wikidata_lookup(name, cache):
+    """Busca o nome no Wikidata (pt e en) e devolve [(id, rótulo, lat, lon)] dos resultados com coordenada."""
+    path = os.path.join(cache, "scenic_lookup.json")
+    memo = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    if name not in memo:
+        found = []
+        for lang in ("pt", "en"):
+            url = ("https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&limit=7&language="
+                   f"{lang}&search={urllib.parse.quote(name)}")
+            ids = [x["id"] for x in json.loads(fetch(url)).get("search", [])]
+            if not ids:
+                continue
+            ent = json.loads(fetch("https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&props=claims|labels"
+                                   f"&languages=pt|en&ids={'|'.join(ids)}"))["entities"]
+            for qid, e in ent.items():
+                for c in e.get("claims", {}).get("P625", []):
+                    v = c.get("mainsnak", {}).get("datavalue", {}).get("value")
+                    if v:
+                        label = (e.get("labels", {}).get("pt") or e.get("labels", {}).get("en") or {}).get("value", name)
+                        found.append([qid, label, v["latitude"], v["longitude"]])
+                        break
+            time.sleep(1)
+        memo[name] = found
+        json.dump(memo, open(path, "w", encoding="utf-8"), ensure_ascii=False)
+    return memo[name]
+
+
+def build_scenic(airports, pois, cache, sim=None, max_nm=75.0):
+    """Aeródromos turísticos curados; cada atração vira um ponto com coordenada real (POI do banco ou Wikidata),
+    aceito só se estiver a até 75 NM do aeródromo (rotas de flightseeing reais chegam a ~60 NM, ex.: Talkeetna–Denali). Atração sem coordenada confiável fica de fora (logada)."""
+    if not os.path.exists(CURATED_SCENIC_CSV):
+        return []
+    by_alias = {}
+    for a in airports:
+        for alias in a["aliases"] | {a["icao"]}:
+            by_alias.setdefault(alias, a)
+    out = []
+    for row in csv.DictReader(open(CURATED_SCENIC_CSV, encoding="utf-8")):
+        code = row["icao"].strip().upper()
+        a = by_alias.get(code)
+        if a is None and sim is not None and code in sim:
+            lat, lon, nm_ = sim[code]
+            a = {"icao": code, "name": nm_, "lat": lat, "lon": lon}
+        if a is None:
+            log(f"AVISO: {code} não existe no simulador; ignorado")
+            continue
+        points = []
+        for attr in [x.strip() for x in row["attractions"].split("|") if x.strip()]:
+            words = set(_norm(attr))
+            best = None
+            for p in pois:
+                d = nm(a["lat"], a["lon"], p["lat"], p["lon"])
+                if d <= max_nm and words and words <= set(_norm(p["n"])):
+                    if best is None or p["p"] > best[1]["p"]:
+                        best = (d, p)
+            if best:
+                p = best[1]
+                points.append({"n": attr, "lat": p["lat"], "lon": p["lon"], "src": p["id"]})
+                continue
+            cands = [(nm(a["lat"], a["lon"], la, lo), q, lab, la, lo) for q, lab, la, lo in _wikidata_lookup(attr, cache)]
+            cands = [c for c in cands if c[0] <= max_nm]
+            if cands:
+                d, q, lab, la, lo = min(cands)
+                points.append({"n": attr, "lat": round(la, 5), "lon": round(lo, 5), "src": q})
+                if d > 40:
+                    log(f"  {code}: '{attr}' a {d:.0f} NM ({lab})")
+            else:
+                log(f"  {code}: '{attr}' sem coordenada a até {max_nm:.0f} NM; ignorado")
+        out.append({"icao": a["icao"], "name": row["name"], "cc": row["cc"], "note": row["note"], "points": points})
+    return out
 
 def write(name, key, items, note):
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -233,18 +392,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cache", required=True)
     ap.add_argument("--download", action="store_true")
+    ap.add_argument("--lnm", help="base little_navmap_msfs24.sqlite para conferir os códigos do simulador")
     args = ap.parse_args()
     if args.download:
         download(args.cache)
-    airports = load_airports()
+    sim = load_sim_idents(args.lnm)
+    if sim is None:
+        log("AVISO: sem --lnm, os códigos não são conferidos com o simulador")
+    airports = load_airports(sim)
     grid = Grid(airports)
-    write("tourist_pois.json", "pois", build_pois(args.cache),
+    pois = build_pois(args.cache)
+    write("tourist_pois.json", "pois", pois,
           "Wikidata (CC0). k = tipo, cc = país ISO, p = nº de sitelinks (popularidade).")
     write("training_aerodromes.json", "aerodromes", build_training(airports, grid, args.cache),
           "hubs_data (curado) + nome do aeródromo no OurAirports + escolas/aeroclubes do OpenStreetMap (ODbL) a ≤ 3 NM.")
-    write("dropzones.json", "dropzones", build_dropzones(airports, grid, args.cache),
+    write("dropzones.json", "dropzones", build_dropzones(airports, grid, args.cache, sim),
           "OpenStreetMap (ODbL) sport=parachuting a ≤ 3 NM de um aeródromo + nome do aeródromo no OurAirports. "
           "Altitude de salto não vem da fonte: regra do gerador por classe da aeronave.")
+    write("scenic_aerodromes.json", "aerodromes", build_scenic(airports, pois, args.cache, sim),
+          "Lista curada (tools/places/scenic_aerodromes_curated.csv); coordenadas das atrações do Wikidata (CC0), "
+          "aceitas só a até 75 NM do aeródromo.")
 
 
 if __name__ == "__main__":

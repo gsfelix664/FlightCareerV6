@@ -674,15 +674,15 @@
   "3.6.2": [
     {
       "title": "Lançamento de Paraquedistas: {dz} ({alt} ft AGL)",
-      "description": "Operação de paraquedismo esportivo com {pax} saltadores na vertical de {dz}. Subida até {alt} ft AGL sobre a zona (raio ≤ 2 NM), estabilização a velocidade segura (≤ {speed} kt) para o salto e descida controlada sem choque térmico para pouso em {origin}."
+      "description": "Operação de paraquedismo esportivo com {pax} saltadores na vertical de {dz}. Subida até {alt} ft AGL sobre a zona (raio ≤ 2 NM), estabilização a velocidade segura (≤ {speed} kt) para o salto e descida controlada sem choque térmico para pouso em {origin}. {dz_note}"
     },
     {
       "title": "Salto Esportivo de Paraquedismo: {dz}",
-      "description": "Lançamento de {pax} paraquedistas na zona de salto em {dz}. Voe até a altitude de lançamento ({alt} ft AGL), mantenha voo nivelado a {speed} kt por 30 s para a largada e retorne com descida suave a {origin}."
+      "description": "Lançamento de {pax} paraquedistas na zona de salto em {dz}. Voe até a altitude de lançamento ({alt} ft AGL), mantenha voo nivelado a {speed} kt por 30 s para a largada e retorne com descida suave a {origin}. {dz_note}"
     },
     {
       "title": "Voo de Lançamento de Paraquedistas em {dz}",
-      "description": "Decolagem de {origin} transportando {pax} atletas de salto. Subida com motor estabilizado até {alt} ft AGL sobre {dz}, ejeção segura e retorno para pouso em {origin} protegendo os cilindros do motor."
+      "description": "Decolagem de {origin} transportando {pax} atletas de salto. Subida com motor estabilizado até {alt} ft AGL sobre {dz}, ejeção segura e retorno para pouso em {origin} protegendo os cilindros do motor. {dz_note}"
     }
   ],
   "3.7.1": [

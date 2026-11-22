@@ -965,6 +965,7 @@ namespace FlightCareer.Application.Services
                 ["origin"] = origin.ICAO,
                 ["dest"] = origin.ICAO,
                 ["dz"] = dzName,
+                ["dz_note"] = dz?.Note ?? string.Empty,
                 ["alt"] = targetAglFt.ToString("N0"),
                 ["speed"] = maxDropSpeedKt.ToString("F0"),
                 ["pax"] = paxCount.ToString(),
