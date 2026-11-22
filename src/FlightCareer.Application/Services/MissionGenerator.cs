@@ -837,8 +837,9 @@ namespace FlightCareer.Application.Services
                 string fallbackTitle = $"{scenicAerodrome.Name} ({string.Join(" • ", picked.Select(p => p.Name))})";
                 string fallbackDesc = $"{scenicAerodrome.Note} Voo panorâmico sobrevoando {poiListStr}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 1,5 NM e abaixo de 3.000 ft AGL).";
 
+                // Variantes com {scenic_name}/{scenic_note} só nos aeródromos turísticos (em outros o título ficaria cortado).
                 var catalog = textCatalog ?? MissionTextCatalog.Default;
-                var rendered = catalog.Render("3.5.1", random, values, fallbackTitle, fallbackDesc);
+                var rendered = catalog.Render("3.5.1-turistico", random, values, fallbackTitle, fallbackDesc);
 
                 return CreateMissionObjectSync(
                     origin, origin, totalTourDist, sub, tourPax, Math.Min(tourPax * 15.0, 30.0), 0,

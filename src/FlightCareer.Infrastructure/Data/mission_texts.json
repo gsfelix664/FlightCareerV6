@@ -635,14 +635,20 @@
     {
       "title": "Tour Aéreo Panorâmico sobre {poi_list}",
       "description": "Voo panorâmico regional saindo de {origin}. Contemple e fotografe {poi_list} a bordo de voo visual agradável e estável. Retorne para pouso na pista de {origin}."
-    },
+    }
+  ],
+  "3.5.1-turistico": [
     {
-      "title": "Circuito Panorâmico Curado: {scenic_name}",
+      "title": "Circuito Panorâmico: {scenic_name}",
       "description": "Voo panorâmico sobrevoando {poi_list}. {scenic_note} Mantenha sobrevoo a até 1,5 NM e abaixo de 3.000 ft AGL nos pontos visuais, com retorno e pouso em {origin} ({distance_nm} NM)."
     },
     {
       "title": "Excursão Aérea Guiada: {scenic_name}",
       "description": "Passeio turístico panorâmico com partida e chegada em {origin}. {scenic_note} Rota sobrevoando as atrações de destaque: {poi_list} ({distance_nm} NM). Mantenha voo estável para contemplação dos passageiros."
+    },
+    {
+      "title": "{scenic_name}: Voo Panorâmico com {pax} Passageiro(s)",
+      "description": "Passeio aéreo de {scenic_name} com saída e retorno a {origin}. {scenic_note} Roteiro de {distance_nm} NM sobre {poi_list}, passando a até 1,5 NM de cada ponto e abaixo de 3.000 ft AGL, com curvas suaves para as fotos dos passageiros."
     }
   ],
   "3.5.2": [
