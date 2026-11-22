@@ -47,4 +47,4 @@
 1. Minutos reais: **aprovada** a sugestão da § 3.1 (`clamp(round(2 × √horasDeJogo), 1, 20)`).
 2. Serviço expresso: **sim** (+50 % no preço, metade dos minutos reais e das horas de jogo).
 3. Prazo real: **sempre × 4** (não usar o valor do fabricante por motor).
-4. Como mostrar o restante: em discussão.
+4. Restante: **(b)** — prazo em horas reais e o restante em horas de voo do jogo, com o rótulo "de voo" (ex.: "TBO 2.000 h (vida real) · faltam 280 h de voo"); cai 1 h a cada hora voada.
