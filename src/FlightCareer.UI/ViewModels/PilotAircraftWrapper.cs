@@ -74,7 +74,7 @@ namespace FlightCareer.UI.ViewModels
             {
                 var def = catalog.Components.FirstOrDefault(d => d.Kind == c.Kind);
                 if (def == null || !def.AppliesTo.Contains(EngineClass)) continue;
-                Components.Add(new ComponentRowViewModel(c, def, catalog, EngineClass, PurchasePrice, aircraft.CurrentAirframeHours, repairCommand));
+                Components.Add(new ComponentRowViewModel(c, def, catalog, EngineClass, PurchasePrice, aircraft.CurrentAirframeHours, repairCommand, aircraft));
             }
 
             _targetFuel = aircraft.FuelAmount;
@@ -115,15 +115,107 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private bool _isActive;
 
         // --- Saúde geral e status ---
+        public bool HasPartsDriven => PartComponentBridge.HasParts(Aircraft);
+
         private AircraftHealthSummary Summary =>
             AircraftHealthSummary.Compute(Components.Select(r => r.Component), _catalog, EngineClass, Aircraft.CurrentAirframeHours);
 
-        public string AirworthinessText => Summary.DisplayedAirworthiness.ToString();
-        public string ConditionText => Summary.DisplayedCondition.ToString();
+        public string AirworthinessText
+        {
+            get
+            {
+                if (HasPartsDriven)
+                {
+                    return PartsAirworthinessState switch
+                    {
+                        PartDisplayState.Broken => "Peça quebrada",
+                        PartDisplayState.Red => "Risco de pane",
+                        PartDisplayState.Yellow => "Atenção",
+                        PartDisplayState.Green => "Em ordem",
+                        PartDisplayState.Worn => "Em ordem",
+                        PartDisplayState.Uncertain => "Incerta — faça uma inspeção",
+                        _ => "Em ordem"
+                    };
+                }
+                return Summary.DisplayedAirworthiness.ToString();
+            }
+        }
+
+        public string ConditionText
+        {
+            get
+            {
+                if (HasPartsDriven)
+                {
+                    return PartsConditionSummaryText;
+                }
+                return Summary.DisplayedCondition.ToString();
+            }
+        }
+
         public double AirworthinessMid => Summary.DisplayedAirworthiness.Mid;
-        public SolidColorBrush AirworthinessBrush => HangarPalette.ForHealth(AirworthinessMid);
+
+        public SolidColorBrush AirworthinessBrush
+        {
+            get
+            {
+                if (HasPartsDriven)
+                {
+                    return PartsAirworthinessBrush;
+                }
+                return HangarPalette.ForHealth(AirworthinessMid);
+            }
+        }
+
         public GridLength AirworthinessFill => new(Math.Max(0, AirworthinessMid), GridUnitType.Star);
         public GridLength AirworthinessEmpty => new(Math.Max(0, 100 - AirworthinessMid), GridUnitType.Star);
+
+        // --- Suporte a peças no topo ---
+        private PartDisplayState _partsAirworthinessState = PartDisplayState.Green;
+        public PartDisplayState PartsAirworthinessState => _partsAirworthinessState;
+
+        public Geometry PartsAirworthinessIconGeometry => HangarIcons.ForDisplayState(_partsAirworthinessState);
+
+        public SolidColorBrush PartsAirworthinessBrush => HangarPalette.ForDisplayState(_partsAirworthinessState);
+
+        private string _partsConditionSummaryText = string.Empty;
+        public string PartsConditionSummaryText => _partsConditionSummaryText;
+
+        private void RecalculateTopBoxes()
+        {
+            if (!HasPartsDriven)
+            {
+                _partsAirworthinessState = PartDisplayState.Green;
+                _partsConditionSummaryText = string.Empty;
+                return;
+            }
+
+            var allPartDisplays = Components
+                .SelectMany(c => c.Parts)
+                .Select(p => p.Row.Display)
+                .ToList();
+
+            var (_, overallCounts) = PartHangarView.Summarize(allPartDisplays);
+
+            _partsConditionSummaryText = HangarPalette.CountsText(overallCounts);
+
+            var criticalDisplays = Components
+                .Where(c => c.IsCritical)
+                .SelectMany(c => c.Parts)
+                .Select(p => p.Row.Display)
+                .ToList();
+
+            var (worstCritical, _) = PartHangarView.Summarize(criticalDisplays);
+            _partsAirworthinessState = worstCritical;
+
+            OnPropertyChanged(nameof(PartsAirworthinessState));
+            OnPropertyChanged(nameof(PartsAirworthinessIconGeometry));
+            OnPropertyChanged(nameof(PartsAirworthinessBrush));
+            OnPropertyChanged(nameof(PartsConditionSummaryText));
+            OnPropertyChanged(nameof(AirworthinessText));
+            OnPropertyChanged(nameof(ConditionText));
+            OnPropertyChanged(nameof(AirworthinessBrush));
+        }
 
         private AircraftStatus Status
         {
@@ -304,6 +396,7 @@ namespace FlightCareer.UI.ViewModels
                     row.SetReplacementPlan(null);
                     row.SetParts(Array.Empty<PartRowViewModel>());
                 }
+                RecalculateTopBoxes();
                 return;
             }
 
@@ -326,6 +419,7 @@ namespace FlightCareer.UI.ViewModels
             }
 
             int engineCount = Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+            double growthPerHour = _catalog.Visibility?.GrowthPerHour ?? 0.4;
 
             foreach (var row in Components)
             {
@@ -335,7 +429,7 @@ namespace FlightCareer.UI.ViewModels
                     var plan = PartReplacementPlanner.Plan(recommended, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
                     row.SetReplacementPlan(plan);
 
-                    var hangarRows = PartHangarView.BuildList(groupParts, _partCatalog, engineCount, Aircraft.CurrentAirframeHours, CareerClock, _catalog.PartBands);
+                    var hangarRows = PartHangarView.BuildList(groupParts, _partCatalog, engineCount, Aircraft.CurrentAirframeHours, CareerClock, _catalog.PartBands, growthPerHour);
                     var partRowViewModels = new List<PartRowViewModel>();
                     foreach (var hRow in hangarRows)
                     {
@@ -352,6 +446,8 @@ namespace FlightCareer.UI.ViewModels
                 }
             }
 
+            RecalculateTopBoxes();
+
             OnPropertyChanged(nameof(TotalRepairCost));
             OnPropertyChanged(nameof(HasRepairs));
             OnPropertyChanged(nameof(RepairAllText));
@@ -361,8 +457,9 @@ namespace FlightCareer.UI.ViewModels
         public void Refresh()
         {
             UpdateReplacementPlans();
-            foreach (var row in Components) row.Refresh(Aircraft.CurrentAirframeHours);
+            foreach (var row in Components) row.Refresh(Aircraft.CurrentAirframeHours, Aircraft);
             if (TargetFuel < Aircraft.FuelAmount) TargetFuel = Aircraft.FuelAmount;
+            RecalculateTopBoxes();
             OnPropertyChanged(string.Empty);
         }
     }

@@ -2673,3 +2673,14 @@
 ## 2026-11-22 - Hangar: faixa de saúde sem "51–51%" e legenda atualizada (Claude)
 - `HealthRange.ToString` mostra "~51%" (estimativa) quando os dois lados da faixa arredondam para o mesmo inteiro (logo após inspeção a faixa abre ±0,4 %/h e aparecia "51–51%"). Teste `Texto_da_faixa_nao_repete_o_mesmo_numero`.
 - Legenda do Hangar atualizada para as faixas atuais (verde > 40 %, amarelo 40–20 %, vermelho < 20 %); citava marcas de 20/30 % das barras antigas. Não visto na tela.
+
+## 2026-11-22 - HANGAR-ICONES-PECAS Estado das peças por ícone e horas por grupo (Gemini)
+- No Hangar de aeronaves com peças (`HasParts`), remoção de porcentagens visíveis em peças, grupos e caixas do topo, substituídas por ícones vetoriais de estado (`Check`, `Warning`, `Broken`, `Question`) e contagens resumidas de peças.
+- Implementação de `PartDisplayState`, `PartDisplayInfo`, `PartHangarView.DisplayState`, `Summarize` e `GroupLifeText`/`GroupLifeInfo`. Peças tornam-se `Uncertain` ("?") quando nunca vistas ou quando a margem de incerteza por horas decorridas (`growthPerHour × horas`) indica risco de ter caído para faixa inferior. Peças vermelhas e quebradas nunca viram incertas.
+- Cabeçalhos de grupos exibem o ícone do pior estado entre as peças e a contagem compacta de estados presentes (`✖ n · ⚠ n · ? n · ✓ n`).
+- Caixa de Aeronavegabilidade passa a exibir o pior estado entre as peças de grupos críticos (`ComponentDefinition.Critical`) com texto explicativo correspondente; Condição Geral resume a contagem total de peças.
+- Textos de vida e horas nos grupos Motor, Óleo e Ignição passam a refletir os dados de manutenção reais da aeronave (TBO, troca de óleo 12 h, revisão 125 h), sem texto de horas nos demais grupos.
+- Aeronaves legadas sem peças mantêm integralmente a visualização anterior de barras numéricas e faixas percentuais.
+- Nova suíte de testes unitários `PartDisplayStateTests` cobrindo todas as regras de transição de faixa, incerteza, isolamento da saúde real e resumos.
+- Não visto na tela / não testado no MSFS.
+- Ajustes do revisor (Claude): quinto estado `Worn` ("gasta mas boa", 80–40 %, ícone de meio círculo com check em verde-limão), pedido do usuário para imitar o mecânico que vê o desgaste sem %; a marca de 80 % não gera "?". Ícone de quebrado trocado por círculo trincado (o "X" lia como "proibido"); contagem junta vermelho e quebrado num só "✖" e foi centralizada em `HangarPalette.CountsText`; tooltips e legenda sem %. Testes `Faixa_gasta_mas_boa_entre_80_e_40` e `Resumo_gasta_e_pior_que_nova_e_melhor_que_incerta`; suíte 737/737.
