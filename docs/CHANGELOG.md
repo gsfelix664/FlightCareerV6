@@ -2700,3 +2700,6 @@
 - `TouchdownDetectorTests.cs`: novos testes unitários cobrindo pouso suave com nariz alto (C152 ~100 fpm com nariz alto e Body Y de -10,6 ft/s), fallback para vertical speed ignorando Body Y, valor inalterado no contato, pouso duro e crash por velocidade normal; teste anterior atualizado para confirmar que `BodyVerticalFps` é ignorado.
 - `TelemetryDefinitionTests.cs`: novo teste `FastFlightState_DatumCount_MatchesSimFastFlightStateFields` garantindo que os 9 campos da struct correspondem aos datums registrados em `AddFastDef`.
 - Não testado no MSFS.
+
+## 2026-11-22 - App encerra ao fechar a janela principal (Claude)
+- O processo do FlightCareer continuava vivo, sem janelas, depois de fechar o app (travava as DLLs e o `dotnet build`). Causa: `ShutdownMode="OnLastWindowClose"` e janelas que só se escondem (`AlertOverlayService` faz `Hide()` no overlay de alertas; HUD). Agora `ShutdownMode="OnMainWindowClose"` (o login já troca `Application.MainWindow` para a janela principal). Não visto na tela.
