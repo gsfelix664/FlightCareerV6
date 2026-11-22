@@ -123,6 +123,14 @@
     {
       "title": "Reposicionamento de Frota para {dest}",
       "description": "Translado operacional da aeronave de {origin} para a base principal em {dest} ({distance_nm} NM), visando readequação da malha de voos."
+    },
+    {
+      "title": "Entrega Técnica de Aeronave ao Proprietário em {dest}",
+      "description": "Translado técnico de aeronave entregue ao novo proprietário em {dest} ({distance_nm} NM). Voo de reposicionamento partindo de {origin} sem passageiros comerciais."
+    },
+    {
+      "title": "Translado Pós-Revisão ao Proprietário em {dest}",
+      "description": "Aeronave recém-saída da oficina de manutenção em {origin}, sendo entregue em voo direto ao proprietário na base de {dest} ({distance_nm} NM)."
     }
   ],
   "1.3.4": [
@@ -627,6 +635,14 @@
     {
       "title": "Tour Aéreo Panorâmico sobre {poi_list}",
       "description": "Voo panorâmico regional saindo de {origin}. Contemple e fotografe {poi_list} a bordo de voo visual agradável e estável. Retorne para pouso na pista de {origin}."
+    },
+    {
+      "title": "Circuito Panorâmico Curado: {scenic_name}",
+      "description": "Voo panorâmico sobrevoando {poi_list}. {scenic_note} Mantenha sobrevoo a até 1,5 NM e abaixo de 3.000 ft AGL nos pontos visuais, com retorno e pouso em {origin} ({distance_nm} NM)."
+    },
+    {
+      "title": "Excursão Aérea Guiada: {scenic_name}",
+      "description": "Passeio turístico panorâmico com partida e chegada em {origin}. {scenic_note} Rota sobrevoando as atrações de destaque: {poi_list} ({distance_nm} NM). Mantenha voo estável para contemplação dos passageiros."
     }
   ],
   "3.5.2": [
@@ -655,6 +671,14 @@
     {
       "title": "Reposicionamento de Aeronave de Instrução para {dest}",
       "description": "Deslocamento de aeronave entre aeródromos vizinhos ({origin} para {dest}, {distance_nm} NM). Siga rota visual direta com segurança."
+    },
+    {
+      "title": "Entrega de Aeronave ao Proprietário em {dest}",
+      "description": "Voo de translado para entrega de aeronave ao seu proprietário em {dest} ({distance_nm} NM). Operação técnica de reposicionamento saindo de {origin} sem passageiros a bordo."
+    },
+    {
+      "title": "Translado de Aeronave Revisada para {dest}",
+      "description": "Aeronave recém-saída da revisão na oficina de {origin}, entregue em voo de translado ao proprietário em {dest} ({distance_nm} NM). Voo em condições visuais."
     }
   ],
   "3.6.1": [
@@ -781,6 +805,14 @@
     {
       "title": "Voo Ferry de Apoio a Pilotos: {dest}",
       "description": "Deslocamento pontual de aeronave de apoio transportando piloto de {origin} para a base avançada em {dest} ({distance_nm} NM)."
+    },
+    {
+      "title": "Entrega de Aeronave Agrícola ao Proprietário em {dest}",
+      "description": "Voo de translado para entrega de aeronave agrícola ao produtor rural em {dest} ({distance_nm} NM). Saída de {origin} sem defensivos ou carga comercial a bordo."
+    },
+    {
+      "title": "Translado de Aeronave Revisada para a Fazenda em {dest}",
+      "description": "Aeronave recém-saída de revisão geral de entressafra em {origin}, entregue em voo direto ao proprietário no hangar rural de {dest} ({distance_nm} NM)."
     }
   ],
   "4.2.3": [

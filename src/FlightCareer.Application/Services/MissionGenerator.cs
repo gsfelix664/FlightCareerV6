@@ -741,6 +741,114 @@ namespace FlightCareer.Application.Services
             MissionTextCatalog? textCatalog = null)
         {
             var places = placesService ?? new PlacesDataService();
+            var scenicAerodrome = places.GetScenicAerodrome(origin.ICAO);
+
+            if (scenicAerodrome != null && scenicAerodrome.Points.Count >= 2)
+            {
+                int targetCount = Math.Min(scenicAerodrome.Points.Count, random.Next(2, 5));
+                var picked = new List<ScenicPoint>();
+
+                for (int setAttempt = 0; setAttempt < 10 && picked.Count < 2; setAttempt++)
+                {
+                    var pool = new List<ScenicPoint>(scenicAerodrome.Points);
+                    picked.Clear();
+                    int attempts = 0;
+                    while (picked.Count < targetCount && pool.Count > 0 && attempts < 30)
+                    {
+                        attempts++;
+                        int idx = random.Next(pool.Count);
+                        var candidate = pool[idx];
+                        pool.RemoveAt(idx);
+
+                        bool tooClose = false;
+                        for (int j = 0; j < picked.Count; j++)
+                        {
+                            double d = CalculateDistance(candidate.Lat, candidate.Lon, picked[j].Lat, picked[j].Lon);
+                            if (d < 2.0)
+                            {
+                                tooClose = true;
+                                break;
+                            }
+                        }
+
+                        if (!tooClose)
+                        {
+                            picked.Add(candidate);
+                        }
+                    }
+                }
+
+                if (picked.Count < 2 && scenicAerodrome.Points.Count >= 2)
+                {
+                    // Fallback de maior separação se a malha de pontos for densa (< 2 NM entre pares sorteados)
+                    ScenicPoint bestA = scenicAerodrome.Points[0];
+                    ScenicPoint bestB = scenicAerodrome.Points[1];
+                    double maxD = 0;
+                    for (int i = 0; i < scenicAerodrome.Points.Count; i++)
+                    {
+                        for (int j = i + 1; j < scenicAerodrome.Points.Count; j++)
+                        {
+                            double d = CalculateDistance(scenicAerodrome.Points[i].Lat, scenicAerodrome.Points[i].Lon,
+                                                         scenicAerodrome.Points[j].Lat, scenicAerodrome.Points[j].Lon);
+                            if (d > maxD)
+                            {
+                                maxD = d;
+                                bestA = scenicAerodrome.Points[i];
+                                bestB = scenicAerodrome.Points[j];
+                            }
+                        }
+                    }
+                    picked = new List<ScenicPoint> { bestA, bestB };
+                }
+
+                if (picked.Count < 2) return null;
+
+                picked = picked.OrderBy(p => Math.Atan2(p.Lat - origin.Latitude, p.Lon - origin.Longitude)).ToList();
+
+                double totalTourDist = CalculateDistance(origin.Latitude, origin.Longitude, picked[0].Lat, picked[0].Lon);
+                for (int i = 0; i < picked.Count - 1; i++)
+                {
+                    totalTourDist += CalculateDistance(picked[i].Lat, picked[i].Lon, picked[i + 1].Lat, picked[i + 1].Lon);
+                }
+                totalTourDist += CalculateDistance(picked[^1].Lat, picked[^1].Lon, origin.Latitude, origin.Longitude);
+                totalTourDist = Math.Round(totalTourDist, 0);
+
+                var wpItems = picked.Select(p => $"P:{OverflyWaypointCodec.SanitizeName(p.Name)}@{p.Lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},{p.Lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},1.5,3000");
+                string wpString = string.Join(";", wpItems);
+
+                var poiNames = picked.Select(p => p.Name).ToList();
+                string poiListStr = poiNames.Count == 2
+                    ? $"{poiNames[0]} e {poiNames[1]}"
+                    : $"{string.Join(", ", poiNames.Take(poiNames.Count - 1))} e {poiNames[^1]}";
+
+                int tourPax = random.Next(1, 4);
+
+                var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["origin"] = origin.ICAO,
+                    ["dest"] = origin.ICAO,
+                    ["poi_list"] = poiListStr,
+                    ["pax"] = tourPax.ToString(),
+                    ["distance_nm"] = totalTourDist.ToString("F0"),
+                    ["scenic_name"] = scenicAerodrome.Name,
+                    ["scenic_note"] = scenicAerodrome.Note
+                };
+
+                string fallbackTitle = $"{scenicAerodrome.Name} ({string.Join(" • ", picked.Select(p => p.Name))})";
+                string fallbackDesc = $"{scenicAerodrome.Note} Voo panorâmico sobrevoando {poiListStr}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 1,5 NM e abaixo de 3.000 ft AGL).";
+
+                var catalog = textCatalog ?? MissionTextCatalog.Default;
+                var rendered = catalog.Render("3.5.1", random, values, fallbackTitle, fallbackDesc);
+
+                return CreateMissionObjectSync(
+                    origin, origin, totalTourDist, sub, tourPax, Math.Min(tourPax * 15.0, 30.0), 0,
+                    random, referenceTime, payMultiplier, payTable,
+                    requiredTouchAndGoes: 0,
+                    overflyWaypoints: wpString,
+                    titleOverride: rendered.Title,
+                    descriptionOverride: rendered.Description);
+            }
+
             var pois = places.FindPois(origin.Latitude, origin.Longitude, 5.0, 30.0);
             if (pois.Count < 2)
             {
@@ -750,21 +858,21 @@ namespace FlightCareer.Application.Services
             if (pois.Count < 2) return null;
 
             int targetPoiCount = Math.Min(pois.Count, random.Next(2, 4));
-            var pool = new List<TouristPoiInfo>(pois);
-            var picked = new List<TouristPoiInfo>();
+            var poolLegacy = new List<TouristPoiInfo>(pois);
+            var pickedLegacy = new List<TouristPoiInfo>();
 
-            int attempts = 0;
-            while (picked.Count < targetPoiCount && pool.Count > 0 && attempts < 30)
+            int attemptsLegacy = 0;
+            while (pickedLegacy.Count < targetPoiCount && poolLegacy.Count > 0 && attemptsLegacy < 30)
             {
-                attempts++;
-                var candidate = PickWeightedPoi(pool, random);
+                attemptsLegacy++;
+                var candidate = PickWeightedPoi(poolLegacy, random);
                 if (candidate == null) break;
-                pool.Remove(candidate);
+                poolLegacy.Remove(candidate);
 
                 bool tooClose = false;
-                for (int j = 0; j < picked.Count; j++)
+                for (int j = 0; j < pickedLegacy.Count; j++)
                 {
-                    double d = CalculateDistance(candidate.Lat, candidate.Lon, picked[j].Lat, picked[j].Lon);
+                    double d = CalculateDistance(candidate.Lat, candidate.Lon, pickedLegacy[j].Lat, pickedLegacy[j].Lon);
                     if (d < 3.0)
                     {
                         tooClose = true;
@@ -774,54 +882,54 @@ namespace FlightCareer.Application.Services
 
                 if (!tooClose)
                 {
-                    picked.Add(candidate);
+                    pickedLegacy.Add(candidate);
                 }
             }
 
-            if (picked.Count < 2) return null;
+            if (pickedLegacy.Count < 2) return null;
 
-            picked = picked.OrderBy(p => Math.Atan2(p.Lat - origin.Latitude, p.Lon - origin.Longitude)).ToList();
+            pickedLegacy = pickedLegacy.OrderBy(p => Math.Atan2(p.Lat - origin.Latitude, p.Lon - origin.Longitude)).ToList();
 
-            double totalTourDist = CalculateDistance(origin.Latitude, origin.Longitude, picked[0].Lat, picked[0].Lon);
-            for (int i = 0; i < picked.Count - 1; i++)
+            double totalTourDistLegacy = CalculateDistance(origin.Latitude, origin.Longitude, pickedLegacy[0].Lat, pickedLegacy[0].Lon);
+            for (int i = 0; i < pickedLegacy.Count - 1; i++)
             {
-                totalTourDist += CalculateDistance(picked[i].Lat, picked[i].Lon, picked[i + 1].Lat, picked[i + 1].Lon);
+                totalTourDistLegacy += CalculateDistance(pickedLegacy[i].Lat, pickedLegacy[i].Lon, pickedLegacy[i + 1].Lat, pickedLegacy[i + 1].Lon);
             }
-            totalTourDist += CalculateDistance(picked[^1].Lat, picked[^1].Lon, origin.Latitude, origin.Longitude);
-            totalTourDist = Math.Round(totalTourDist, 0);
+            totalTourDistLegacy += CalculateDistance(pickedLegacy[^1].Lat, pickedLegacy[^1].Lon, origin.Latitude, origin.Longitude);
+            totalTourDistLegacy = Math.Round(totalTourDistLegacy, 0);
 
-            var wpItems = picked.Select(p => $"P:{OverflyWaypointCodec.SanitizeName(p.Name)}@{p.Lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},{p.Lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},1.5,3000");
-            string wpString = string.Join(";", wpItems);
+            var wpItemsLegacy = pickedLegacy.Select(p => $"P:{OverflyWaypointCodec.SanitizeName(p.Name)}@{p.Lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},{p.Lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},1.5,3000");
+            string wpStringLegacy = string.Join(";", wpItemsLegacy);
 
-            var poiNamesFormatted = picked.Select(FormatPoiWithKind).ToList();
-            string poiListStr = poiNamesFormatted.Count == 2
+            var poiNamesFormatted = pickedLegacy.Select(FormatPoiWithKind).ToList();
+            string poiListStrLegacy = poiNamesFormatted.Count == 2
                 ? $"{poiNamesFormatted[0]} e {poiNamesFormatted[1]}"
                 : $"{string.Join(", ", poiNamesFormatted.Take(poiNamesFormatted.Count - 1))} e {poiNamesFormatted[^1]}";
 
-            int tourPax = random.Next(1, 4);
+            int tourPaxLegacy = random.Next(1, 4);
 
-            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            var valuesLegacy = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["origin"] = origin.ICAO,
                 ["dest"] = origin.ICAO,
-                ["poi_list"] = poiListStr,
-                ["pax"] = tourPax.ToString(),
-                ["distance_nm"] = totalTourDist.ToString("F0")
+                ["poi_list"] = poiListStrLegacy,
+                ["pax"] = tourPaxLegacy.ToString(),
+                ["distance_nm"] = totalTourDistLegacy.ToString("F0")
             };
 
-            string fallbackTitle = $"Voo Panorâmico ({string.Join(" • ", picked.Select(p => p.Name))})";
-            string fallbackDesc = $"Voo panorâmico sobrevoando {poiListStr}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 1,5 NM e abaixo de 3.000 ft AGL).";
+            string fallbackTitleLegacy = $"Voo Panorâmico ({string.Join(" • ", pickedLegacy.Select(p => p.Name))})";
+            string fallbackDescLegacy = $"Voo panorâmico sobrevoando {poiListStrLegacy}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 1,5 NM e abaixo de 3.000 ft AGL).";
 
-            var catalog = textCatalog ?? MissionTextCatalog.Default;
-            var rendered = catalog.Render("3.5.1", random, values, fallbackTitle, fallbackDesc);
+            var catalogLegacy = textCatalog ?? MissionTextCatalog.Default;
+            var renderedLegacy = catalogLegacy.Render("3.5.1", random, valuesLegacy, fallbackTitleLegacy, fallbackDescLegacy);
 
             return CreateMissionObjectSync(
-                origin, origin, totalTourDist, sub, tourPax, Math.Min(tourPax * 15.0, 30.0), 0,
+                origin, origin, totalTourDistLegacy, sub, tourPaxLegacy, Math.Min(tourPaxLegacy * 15.0, 30.0), 0,
                 random, referenceTime, payMultiplier, payTable,
                 requiredTouchAndGoes: 0,
-                overflyWaypoints: wpString,
-                titleOverride: rendered.Title,
-                descriptionOverride: rendered.Description);
+                overflyWaypoints: wpStringLegacy,
+                titleOverride: renderedLegacy.Title,
+                descriptionOverride: renderedLegacy.Description);
         }
 
         public static Mission CreateSurveyMissionSync(
@@ -1555,6 +1663,42 @@ namespace FlightCareer.Application.Services
                 }
             }
 
+            // Se for aeródromo turístico curado e não tem Categoria 3.5 (ex: Tier 1), importa 3.5
+            var scenicAerodrome = placesService?.GetScenicAerodrome(airport.ICAO);
+            if (scenicAerodrome != null && !categories.Any(c => c.Id == "3.5"))
+            {
+                foreach (var t in MissionRules.Rules.Values)
+                {
+                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.5");
+                    if (found != null)
+                    {
+                        categories.Add(new CategoryConfig
+                        {
+                            Id = found.Id,
+                            Name = found.Name,
+                            Weight = 5,
+                            SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
+                            {
+                                Id = s.Id,
+                                Name = s.Name,
+                                Description = s.Description,
+                                Weight = s.Weight,
+                                MinExpHours = s.MinExpHours,
+                                MaxExpHours = s.MaxExpHours,
+                                RequiresHardSurface = s.RequiresHardSurface,
+                                MinRunwayDest = s.MinRunwayDest,
+                                LuggageWeightKg = s.LuggageWeightKg,
+                                Urgency = s.Urgency,
+                                PaxRules = new List<ProbRange>(s.PaxRules),
+                                LbsRules = new List<ProbRange>(s.LbsRules),
+                                RangeRules = new List<ProbRange>(s.RangeRules)
+                            }).ToList()
+                        });
+                        break;
+                    }
+                }
+            }
+
             // Se for Hub de Saúde / Aeromédico e o Tier não possui nativamente a Categoria 3.3 (ex: Tier 1/2),
             // importamos a definição de Categoria 3.3 (Saúde / Remoção UTI Aérea)
             if (hubTypes.Contains(HubType.Health) && !categories.Any(c => c.Id == "3.3"))
@@ -1610,6 +1754,22 @@ namespace FlightCareer.Application.Services
                 var s362 = cat36.SubCategories.FirstOrDefault(s => s.Id == "3.6.2");
                 if (s361 != null) s361.Weight = 85;
                 if (s362 != null) s362.Weight = 15;
+            }
+
+            // Ajuste de pesos por Aeródromo Turístico (voo panorâmico 3.5.1):
+            if (scenicAerodrome != null)
+            {
+                AddCategoryWeight(categories, "3.5", 40);
+                var cat35 = categories.FirstOrDefault(c => c.Id == "3.5");
+                if (cat35 != null)
+                {
+                    var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.1");
+                    var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.2");
+                    var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.3");
+                    if (s351 != null) s351.Weight = 70;
+                    if (s352 != null) s352.Weight = 15;
+                    if (s353 != null) s353.Weight = 15;
+                }
             }
 
             // Bônus para aeródromos de instrução:
