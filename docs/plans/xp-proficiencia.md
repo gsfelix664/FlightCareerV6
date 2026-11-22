@@ -185,4 +185,4 @@ Calibrar na ECON-STAB junto com o pagamento: os bots precisam de nota fixa por p
 
 Com ~250–500 XP/h, isso dá algo como 30 h até a fase 2, ~150 h até a 3 e ~1.300–1.500 h até a 7. As horas regulatórias continuam como mínimo (40 / 150 / 500 / 1.500 h, a distribuir entre as 7 fases). Calibrar com a ECON-STAB contra a curva de economia D.
 
-**Pendente do usuário:** (a) as 7 fases **substituem** as 5 categorias (com custo de homologação por fase e limite de missões) ou ficam como camada de patente por cima delas; (b) a fase limita **quais aviões** o piloto pode comprar/voar ou só as missões. O arquivo do usuário `REGRAS_tiers.txt` (ainda não analisado, a pedido) provavelmente se relaciona com isto.
+**Decidido (2026-11-22):** as 7 fases **substituem** as 5 categorias e limitam **o aceite de missões**, não a compra de avião. Contratos por fase e impacto no código: `docs/plans/fases-carreira.md`. O arquivo do usuário `REGRAS_tiers.txt` (ainda não analisado, a pedido) provavelmente se relaciona com isto.
