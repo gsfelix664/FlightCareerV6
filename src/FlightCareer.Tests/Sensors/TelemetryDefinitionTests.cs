@@ -81,6 +81,24 @@ namespace FlightCareer.Tests.Sensors
         }
 
         [Fact]
+        public void FastFlightState_DatumCount_MatchesSimFastFlightStateFields()
+        {
+            string source = File.ReadAllText(FindSimConnectService());
+            var datums = Regex.Matches(source, @"\bAddFastDef\(\s*""([^""]+)""")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            var match = Regex.Match(source, @"struct\s+SimFastFlightState\s*\{([^}]+)\}");
+            Assert.True(match.Success);
+            var fields = Regex.Matches(match.Groups[1].Value, @"public\s+double\s+(\w+)\s*;")
+                .Select(m => m.Groups[1].Value)
+                .ToArray();
+
+            Assert.Equal(9, fields.Length);
+            Assert.Equal(fields.Length, datums.Length);
+        }
+
+        [Fact]
         public void TelemetryDefinitions_UseNoKnownInvalidSimVar()
         {
             string source = File.ReadAllText(FindSimConnectService());

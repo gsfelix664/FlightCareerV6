@@ -17,7 +17,8 @@ namespace FlightCareer.Domain.Components
         double NoseUpDeg,
         double BankDeg,
         double IndicatedKnots,
-        double GroundSpeedKnots);
+        double GroundSpeedKnots,
+        double TouchdownNormalFps = double.NaN);
 
     public enum TouchdownKind { Normal, Crash }
 
@@ -36,8 +37,11 @@ namespace FlightCareer.Domain.Components
     /// <summary>
     /// Detecta cada contato com o solo (ar → solo) e classifica Normal ou Crash pelos limites do catálogo
     /// (<see cref="LandingSettings"/>), independentemente de o simulador acusar o acidente (com "Desativar Danos de
-    /// Colisão" marcado, o MSFS não envia Crashed nem CRASH FLAG). O dano de pouso duro continua no WearEngine,
-    /// que recebe a razão de descida medida aqui. Lógica pura: o tempo vem das amostras.
+    /// Colisão" marcado, o MSFS não envia Crashed nem CRASH FLAG). Mede a razão de descida no toque prioritariamente
+    /// pela SimVar PLANE TOUCHDOWN NORMAL VELOCITY (velocidade normal ao solo no último toque calculada pelo simulador)
+    /// e, caso indisponível ou inalterada em relação ao pré-contato, pela VERTICAL SPEED na janela antes do toque
+    /// (sem usar VELOCITY BODY Y). O dano de pouso duro continua no WearEngine, que recebe a razão de descida medida aqui.
+    /// Lógica pura: o tempo vem das amostras.
     /// </summary>
     public sealed class TouchdownDetector
     {
@@ -103,12 +107,34 @@ namespace FlightCareer.Domain.Components
             var around = _buffer.Where(x => x.TimeSec >= contact - 0.2 && x.TimeSec <= contact + _settings.ContactWindowAfterSec).ToList();
             var atContact = _buffer.First(x => x.TimeSec >= contact);
 
-            double fpm = 0;
+            // (a) vsFpm = maior -VerticalSpeedFpm (positivo = descendo) nas amostras before (sem BodyVerticalFps)
+            double vsFpm = 0;
             foreach (var x in before)
             {
-                if (x.VerticalSpeedFpm < 0) fpm = Math.Max(fpm, -x.VerticalSpeedFpm);
-                if (x.BodyVerticalFps < 0) fpm = Math.Max(fpm, -x.BodyVerticalFps * 60.0);
+                if (x.VerticalSpeedFpm < 0) vsFpm = Math.Max(vsFpm, -x.VerticalSpeedFpm);
             }
+
+            // (b) normalFpm: valor de referência = TouchdownNormalFps da última amostra com TimeSec < contact (se não houver, NaN);
+            // entre as amostras de contact até contact + ContactWindowAfterSec, pegar a última com TouchdownNormalFps finito
+            // e diferente da referência (|Δ| > 1e-6); se existir, normalFpm = Math.Abs(valor) * 60.
+            double? normalFpm = null;
+            var beforeContact = _buffer.Where(x => x.TimeSec < contact).ToList();
+            double refNormal = beforeContact.Count > 0 ? beforeContact.Last().TouchdownNormalFps : double.NaN;
+
+            var afterContact = _buffer.Where(x => x.TimeSec >= contact && x.TimeSec <= contact + _settings.ContactWindowAfterSec).ToList();
+            var changedSample = afterContact.LastOrDefault(x =>
+                !double.IsNaN(x.TouchdownNormalFps) &&
+                !double.IsInfinity(x.TouchdownNormalFps) &&
+                (double.IsNaN(refNormal) || Math.Abs(x.TouchdownNormalFps - refNormal) > 1e-6));
+
+            if (changedSample != null)
+            {
+                normalFpm = Math.Abs(changedSample.TouchdownNormalFps) * 60.0;
+            }
+
+            // (c) fpm = normalFpm se existir; senão vsFpm.
+            double fpm = normalFpm ?? vsFpm;
+
             double peakG = around.Count > 0 ? around.Max(x => x.GForce) : atContact.GForce;
 
             // Atitude no contato: o pior valor entre o último instante no ar e o contato
