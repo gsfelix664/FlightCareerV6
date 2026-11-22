@@ -2725,3 +2725,19 @@
 - Suíte `GroundAndEngineMetricsTests` com 10 testes cobrindo todas as novas regras e métricas.
 - Replay do voo real C152 (`20261122-1007-Cessna_C152.csv`) confirmou emissão de partida com luzes acesas (`startLightsOnCount: 3.0`) e compensador (`trimCycles: 1.0`).
 - Não testado no MSFS.
+
+## 2026-11-22 - Métricas de sistemas e cobertura das regras por avião (METRICAS-B) (Gemini)
+- Implementado no `PartEventDeriver` o cálculo das 8 métricas de sistemas que estavam sem produtor:
+  - `icingExposureMinutes`: tempo acumulado em minutos no ar com gelo estrutural $\ge 5\%$ ou gelo no pitot $\ge 10\%$, emitindo nos cruzamentos de 5, 15 e 30 minutos, com reinício após 10 minutos sem gelo.
+  - `deiceCycles`: contagem de ciclos de acionamento das botas de degelo (`inst-structural-deice-switch` 0→1) para aeronaves com feature `deIceBoots`, emitindo em 2, 6 e 12 ciclos.
+  - `propDeiceCycles`: contagem de ciclos de degelo de hélice (`inst-prop-deice-switch` 0→1), emitindo em 2, 6 e 12 ciclos.
+  - `glowPlugCycles`: contagem de partidas de motor para aeronaves com motor `diesel`, emitindo em 1, 3 e 5 ciclos.
+  - `dryRunPumpMinutes`: tempo acumulado com bomba de combustível ligada em condição de tanque seco ($< 0,5$ gal) ou no solo com motor desligado, emitindo em 2, 5 e 10 minutos com reinício após 1 minuto fora.
+  - `lowHydraulicPressureMinutes`: tempo acumulado com pressão hidráulica abaixo de 50% da máxima vista com motor em combustão, armado apenas após o sistema registrar pressão $\ge 500$ psi, emitindo em 3, 8 e 15 minutos.
+  - `pressurizationCycles`: contagem de ciclos de pressurização de cabine para aeronaves com feature `pressurized` (diferencial sobe acima de 2 psi e retorna abaixo de 0,5 psi), emitindo em 1, 2 e 4 ciclos.
+  - `rapidDecompressionDeltaPsf`: detecção de descompressão rápida para aeronaves `pressurized` com taxa de queda do diferencial $\ge 150$ psf/s em janela de 1 s, emitindo o pico do evento após estabilização ($< 20$ psf/s por 5 s).
+- `PartEventDeriver.ProducedMetrics` e `PartFlightTracker.ProducedMetrics`: vocabulário estático de métricas produzidas exposto no domínio, totalizando exatamente as 29 métricas do catálogo fechado `WearRuleMetrics.All` sem nenhuma constante órfã.
+- Sincronização em `wear_rules.json`: regra `turbine_start_cycle` atualizada para `"metric": "turbineStartCycle"` (alinhando a regra com o evento emitido pelo derivador para turbinas).
+- `WearRuleMetricCoverageTests`: nova suíte xUnit garantindo que 100% das regras de evento possuem produtor ativo, 100% das regras contínuas utilizam sensores registrados e chaves de limite válidas, além de 8 testes cobrindo thresholds, sensores zerados e guardas de feature de cada métrica.
+- `RuleCoverageService` e comando `coverage` no `FlightCareer.Replay`: geração automática de relatório completo de cobertura das 47 regras para os 46 modelos do catálogo em `docs/plans/cobertura-regras-por-aviao.md`.
+- Não testado no MSFS.

@@ -20,6 +20,21 @@ namespace FlightCareer.Domain.Parts
             "eng-cht-cooling-rate"
         };
 
+        /// <summary>
+        /// Vocabulário completo de métricas de evento produzidas durante o voo
+        /// (toque rápido, ciclos de pouso e eventos derivados pelo PartEventDeriver).
+        /// </summary>
+        public static readonly IReadOnlySet<string> ProducedMetrics = new HashSet<string>(
+            PartEventDeriver.ProducedMetrics.Concat(new[]
+            {
+                WearRuleMetrics.TouchdownFpm,
+                WearRuleMetrics.TouchdownPitchDegrees,
+                WearRuleMetrics.TouchdownBankDegrees,
+                WearRuleMetrics.TouchdownLateralFps,
+                WearRuleMetrics.LandingCycles
+            }),
+            StringComparer.OrdinalIgnoreCase);
+
         private readonly PartCatalog _partsCatalog;
         private readonly WearRuleCatalog _wearRuleCatalog;
         private readonly AircraftLimitResolver _resolver;
