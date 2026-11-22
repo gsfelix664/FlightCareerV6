@@ -248,6 +248,11 @@ namespace FlightCareer.Domain.Xp
             return (int)Math.Round(baseXP * mType * mRealism * mQuality + totalBonuses);
         }
 
+        public static double ResolveTypeMultiplier(string? familyOrSubId, XpRules? rules = null)
+        {
+            return ResolveTypeMultiplierFromFamilyOrSubId(familyOrSubId, rules ?? XpRules.Default);
+        }
+
         private static double ResolveTypeMultiplierFromFamilyOrSubId(string? familyOrSubId, XpRules r)
         {
             if (string.IsNullOrWhiteSpace(familyOrSubId))
