@@ -618,7 +618,7 @@
   "3.5.1": [
     {
       "title": "Voo Panorâmico: Rota Cênica sobre a Região",
-      "description": "Voo panorâmico turístico com partida e chegada em {origin}. Rota cênica sobrevoando {poi_list}. Mantenha sobrevoo a até 2 NM dos pontos turísticos e abaixo de 3.000 ft AGL para melhor visibilidade dos passageiros, retornando para pouso em {origin}."
+      "description": "Voo panorâmico turístico com partida e chegada em {origin}. Rota cênica sobrevoando {poi_list}. Mantenha sobrevoo a até 1,5 NM dos pontos turísticos e abaixo de 3.000 ft AGL para melhor visibilidade dos passageiros, retornando para pouso em {origin}."
     },
     {
       "title": "Passeio Aéreo Cênico: Atrações Locais ({origin})",

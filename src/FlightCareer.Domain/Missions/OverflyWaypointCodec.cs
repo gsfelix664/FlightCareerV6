@@ -15,6 +15,10 @@ namespace FlightCareer.Domain.Missions
 
     public static class OverflyWaypointCodec
     {
+        /// <summary>Remove os separadores do formato (';', '@', ',') de nomes vindos dos bancos de locais.</summary>
+        public static string SanitizeName(string name) =>
+            string.IsNullOrWhiteSpace(name) ? "Ponto" : name.Replace(';', ' ').Replace('@', ' ').Replace(',', ' ').Trim();
+
         public static IReadOnlyList<OverflyWaypointItem> Parse(string? waypoints)
         {
             var result = new List<OverflyWaypointItem>();
@@ -87,7 +91,7 @@ namespace FlightCareer.Domain.Missions
                 else
                 {
                     sb.Append("P:");
-                    sb.Append(item.Ident.Trim());
+                    sb.Append(SanitizeName(item.Ident));
                     sb.Append('@');
                     sb.Append((item.Lat ?? 0.0).ToString("F5", CultureInfo.InvariantCulture));
                     sb.Append(',');
@@ -111,7 +115,7 @@ namespace FlightCareer.Domain.Missions
         {
             var sb = new StringBuilder();
             sb.Append("P:");
-            sb.Append(name.Trim());
+            sb.Append(SanitizeName(name));
             sb.Append('@');
             sb.Append(lat.ToString("F5", CultureInfo.InvariantCulture));
             sb.Append(',');

@@ -790,7 +790,7 @@ namespace FlightCareer.Application.Services
             totalTourDist += CalculateDistance(picked[^1].Lat, picked[^1].Lon, origin.Latitude, origin.Longitude);
             totalTourDist = Math.Round(totalTourDist, 0);
 
-            var wpItems = picked.Select(p => $"P:{p.Name}@{p.Lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},{p.Lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},1.5,3000");
+            var wpItems = picked.Select(p => $"P:{OverflyWaypointCodec.SanitizeName(p.Name)}@{p.Lat.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},{p.Lon.ToString("F5", System.Globalization.CultureInfo.InvariantCulture)},1.5,3000");
             string wpString = string.Join(";", wpItems);
 
             var poiNamesFormatted = picked.Select(FormatPoiWithKind).ToList();

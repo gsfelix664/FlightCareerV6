@@ -104,5 +104,16 @@ namespace FlightCareer.Tests.Missions
                 CultureInfo.CurrentCulture = origCulture;
             }
         }
+    
+        [Fact]
+        public void Nome_com_separadores_e_higienizado_e_volta_igual()
+        {
+            string wp = OverflyWaypointCodec.FormatCoordinatePoint("Ponte A; B @ C, D", -22.5, -43.1, 1.5, 3000);
+            var items = OverflyWaypointCodec.Parse(wp);
+            Assert.Single(items);
+            Assert.Equal("Ponte A  B   C  D", items[0].Ident);
+            Assert.Equal(-22.5, items[0].Lat);
+            Assert.Equal(1.5, items[0].RadiusNm);
+        }
     }
 }
