@@ -2687,3 +2687,8 @@
 
 ## 2026-11-22 - Briefing não via o combustível abastecido no Hangar depois de aceitar a missão (Claude)
 - Achado do usuário (C152, SNEJ→SBJD): com 6,7 gal aceitou a missão, abasteceu até 10 gal no Hangar e o briefing continuou conferindo 6,7 gal (verde com 6,7 no sim). Causa: `MainViewModel.RefreshBriefingAircraftAsync` lia o avião pelo contexto de longa duração e o EF devolvia a entidade em cache (AGENTS › 6). Agora a leitura é `AsNoTracking`. O início do voo já lia o banco atualizado (`PilotRepository.GetAllAsync` limpa o cache), então não era possível decolar com combustível divergente: o `StartMonitoring` bloquearia. Sem teste automatizado (lógica de ViewModel fora do projeto de testes); não visto na tela.
+
+## 2026-11-22 - Voo invalidado sem XP e valor da missão fixo ao remover do manifesto (Claude)
+- `FlightService.ProcessFlightFinishAsync`: voo invalidado (slew, congelamento, combustível) mostrava 0 XP no resultado, mas o XP era somado ao piloto; agora zera antes de somar. Teste `InvalidatedFlightXpTests` (válido soma, invalidado não).
+- `MainViewModel.RemoveMission`: remover uma missão do manifesto recalculava o pagamento com nova flutuação de mercado sorteada e com a família errada (passava o título no lugar do subId), então remover e aceitar de novo mudava o valor. Agora só a distância restante e o XP da missão são atualizados; o valor fica fixo (pouso intermediário já mantinha o valor no `FlightService`). Texto do aviso de descarregamento ajustado.
+- `Mission.SubId` (coluna nova `Missions.SubId`, nula em missões antigas) gravado pelo gerador: base para os critérios de XP por tipo de missão (`xp-proficiencia.md` › 5.2). Suíte 739/739. Não visto na tela.

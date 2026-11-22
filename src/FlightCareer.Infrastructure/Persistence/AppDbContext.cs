@@ -148,6 +148,7 @@ namespace FlightCareer.Infrastructure.Persistence
                 "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';",
+                "ALTER TABLE Missions ADD COLUMN SubId TEXT DEFAULT NULL;",
 
                 // Normalização de Dados Aeronáuticos e Correção de Bases Existentes
                 "UPDATE Airports SET Country = 'BR' WHERE (ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%') AND (Country IN ('SB','SS','SW','SJ','SD','SI','SN') OR Country = '' OR Country IS NULL);",
