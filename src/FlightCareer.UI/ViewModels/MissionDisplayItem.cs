@@ -72,6 +72,8 @@ namespace FlightCareer.UI.ViewModels
         public double CargoWeightLbs => Mission.CargoWeightLbs;
         public double RewardMoney => Mission.RewardMoney;
         public int ExperienceGain => Mission.ExperienceGain;
+        public CareerPhase RequiredPhase => Mission.RequiredPhase;
+        [Obsolete("Utilize RequiredPhase")]
         public PilotCategory RequiredCategory => Mission.RequiredCategory;
         public string MissionCategoryType => Mission.MissionCategoryType;
         public DateTime ExpirationTime => Mission.ExpirationTime;
@@ -148,8 +150,10 @@ namespace FlightCareer.UI.ViewModels
         public string CategoryColor => SemanticTextColor;
         public string CategoryBadgeBackground => SemanticBadgeBackground;
 
-        public string RequiredCategoryDisplay => RequiredCategory.GetShortName();
-        public string RequiredCategoryTooltip => RequiredCategory.GetDisplayName();
+        public string RequiredCategoryDisplay => RequiredPhase.GetShortName();
+        public string RequiredCategoryTooltip => RequiredPhase.GetDisplayName();
+        public string RequiredPhaseDisplay => RequiredPhase.GetShortName();
+        public string RequiredPhaseTooltip => RequiredPhase.GetDisplayName();
 
         // Metadados Formatados para a Tabela e Cards Operacionais
         public string PayloadFormatted => PassengerCount > 0 
@@ -273,7 +277,7 @@ namespace FlightCareer.UI.ViewModels
         public string ExpirationBadgeBorder => ExpirationColor == "#FF5252" ? "#5A1E24" : (ExpirationColor == "#FFB300" ? "#593D0F" : "#263545");
         public string ExpirationTooltip => $"Validade do contrato até {ExpirationTime:dd/MM/yyyy HH:mm}";
 
-        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory, Airport? originAirport = null)
+        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, CareerPhase pilotPhase, Airport? originAirport = null)
         {
             Mission = mission;
 
@@ -330,11 +334,11 @@ namespace FlightCareer.UI.ViewModels
                 HeadingDisplay = "---";
             }
 
-            // Checagem de Homologação
-            if (mission.RequiredCategory > pilotCategory)
+            // Checagem de Homologação pela Fase
+            if (mission.RequiredPhase > pilotPhase)
             {
                 IsEligibleForPilot = false;
-                IneligibilityReason = $"Exige {mission.RequiredCategory.GetDisplayName()}";
+                IneligibilityReason = $"Exige {mission.RequiredPhase.GetDisplayName()}";
             }
 
             // Cálculos com Aeronave Ativa
@@ -366,6 +370,12 @@ namespace FlightCareer.UI.ViewModels
                 EstimatedFuelGallons = Math.Round(hours * gph, 1);
                 EstimatedFuelLbs = Math.Round(EstimatedFuelGallons * 6.0, 0); // 1 gal Avgas ~ 6 lbs
             }
+        }
+
+        [Obsolete("Utilize o construtor com CareerPhase")]
+        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory, Airport? originAirport = null)
+            : this(mission, destAirport, activeAircraft, (CareerPhase)(int)pilotCategory, originAirport)
+        {
         }
 
         private static bool IsValidCityName(string? city, string? country)

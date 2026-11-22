@@ -468,7 +468,7 @@ namespace FlightCareer.Tests.Parts
 
             using (var setupContext = new AppDbContext(options))
             {
-                var pilot = new Pilot { Id = Guid.NewGuid(), Name = "Test Pilot", PilotCategory = PilotCategory.Category1_FlightSchool };
+                var pilot = new Pilot { Id = Guid.NewGuid(), Name = "Test Pilot", CareerPhase = CareerPhase.Phase1_FlightSchool };
                 setupContext.Pilots.Add(pilot);
 
                 var type = new AircraftType

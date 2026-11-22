@@ -75,8 +75,16 @@ namespace FlightCareer.Infrastructure.Persistence
             modelBuilder.Entity<Pilot>()
                 .Ignore(p => p.CompanyTier);
 
+            modelBuilder.Entity<Pilot>()
+                .Property(p => p.CareerPhase)
+                .HasDefaultValue(CareerPhase.Phase1_FlightSchool);
+
             modelBuilder.Entity<Mission>()
                 .Ignore(m => m.RequiredTier);
+
+            modelBuilder.Entity<Mission>()
+                .Property(m => m.RequiredPhase)
+                .HasDefaultValue(CareerPhase.Phase1_FlightSchool);
 
             modelBuilder.Entity<MarketListing>(entity =>
             {
@@ -141,6 +149,12 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE Missions ADD COLUMN RequiredCategory INTEGER DEFAULT 1;",
                 "UPDATE Missions SET RequiredCategory = RequiredTier WHERE RequiredTier IS NOT NULL AND (RequiredCategory IS NULL OR RequiredCategory = 1);",
                 "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';",
+
+                // 7 Fases da Carreira por Nível de Experiência (FASES-1: 1→1, 2→2, 3→3, 4→5, 5→6)
+                "ALTER TABLE Pilots ADD COLUMN CareerPhase INTEGER DEFAULT 1;",
+                "UPDATE Pilots SET CareerPhase = CASE PilotCategory WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 3 THEN 3 WHEN 4 THEN 5 WHEN 5 THEN 6 ELSE 1 END WHERE PilotCategory IS NOT NULL AND (CareerPhase IS NULL OR CareerPhase = 1);",
+                "ALTER TABLE Missions ADD COLUMN RequiredPhase INTEGER DEFAULT 1;",
+                "UPDATE Missions SET RequiredPhase = CASE RequiredCategory WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 3 THEN 3 WHEN 4 THEN 5 WHEN 5 THEN 6 ELSE 1 END WHERE RequiredCategory IS NOT NULL AND (RequiredPhase IS NULL OR RequiredPhase = 1);",
 
                 // Cenário MSFS 2024 e Divergências de ICAO
                 "ALTER TABLE Airports ADD COLUMN IsInSimulator INTEGER DEFAULT 0;",

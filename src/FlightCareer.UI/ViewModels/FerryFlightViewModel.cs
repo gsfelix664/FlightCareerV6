@@ -227,7 +227,7 @@ namespace FlightCareer.UI.ViewModels
                 ExpirationTime = DateTime.Now.AddHours(72),
                 IsAccepted = true,
                 PilotId = _pilot.Id,
-                RequiredCategory = PilotCategory.Category1_FlightSchool,
+                RequiredPhase = CareerPhase.Phase1_FlightSchool,
                 MissionCategoryType = "Translado / Ferry"
             };
 

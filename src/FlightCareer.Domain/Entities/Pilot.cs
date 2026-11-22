@@ -31,14 +31,19 @@ namespace FlightCareer.Domain.Entities
         /// </summary>
         public DateTime CareerClockUtc { get; set; } = DateTime.UtcNow;
 
-        // Progressão Regulatória da Empresa (Categorias 1 a 5)
+        // Progressão da Carreira do Piloto (Fases 1 a 7)
+        public CareerPhase CareerPhase { get; set; } = CareerPhase.Phase1_FlightSchool;
+
+        // Coluna mantida no banco para compatibilidade com schema legado
+        [Obsolete("Utilize CareerPhase")]
         public PilotCategory PilotCategory { get; set; } = PilotCategory.Category1_FlightSchool;
 
-        // Mantido para compatibilidade com código existente
+        // Mantido para compatibilidade transitória
+        [Obsolete("Utilize CareerPhase")]
         public CompanyTier CompanyTier
         {
-            get => (CompanyTier)(int)PilotCategory;
-            set => PilotCategory = (PilotCategory)(int)value;
+            get => (CompanyTier)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
         }
 
         // Licenças e Habilitações Aeronáuticas

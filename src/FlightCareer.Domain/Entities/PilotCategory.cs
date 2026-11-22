@@ -1,5 +1,8 @@
+using System;
+
 namespace FlightCareer.Domain.Entities
 {
+    [Obsolete("Utilize CareerPhase (as 7 fases da carreira substituem as antigas 5 categorias)")]
     public enum PilotCategory
     {
         Category1_FlightSchool = 1,  // CIAC / Aeroclube - Instrução de Alunos (PP/PC/INVA)
@@ -9,7 +12,8 @@ namespace FlightCareer.Domain.Entities
         Category5_MajorAirline = 5   // Grande Linha Aérea Regular
     }
 
-    // Enum mantido para compatibilidade com código existente
+    // Enum mantido para compatibilidade com código legado
+    [Obsolete("Utilize CareerPhase")]
     public enum CompanyTier
     {
         Tier1_FlightSchool = 1,

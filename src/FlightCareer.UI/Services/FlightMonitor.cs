@@ -598,10 +598,10 @@ namespace FlightCareer.UI.Services
                 return false;
             }
 
-            var prohibitedMission = missions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
+            var prohibitedMission = missions.FirstOrDefault(m => m.RequiredPhase > pilot.CareerPhase);
             if (prohibitedMission != null)
             {
-                OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa está operando em {pilot.PilotCategory.GetDisplayName()}!", true);
+                OnAlert?.Invoke("OPERAÇÃO NÃO HOMOLOGADA", $"A missão '{prohibitedMission.Title}' exige a {prohibitedMission.RequiredPhase.GetDisplayName()}, mas sua empresa está operando na {pilot.CareerPhase.GetDisplayName()}!", true);
                 return false;
             }
 
