@@ -343,6 +343,7 @@ namespace FlightCareer.Application.Services
             return new Mission
             {
                 Id = Guid.NewGuid(),
+                SubId = sub.Id,
                 Title = sub.Name,
                 Description = sub.Description,
                 OriginICAO = origin.ICAO,

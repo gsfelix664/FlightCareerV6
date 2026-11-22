@@ -261,6 +261,8 @@ namespace FlightCareer.Application.Services
                 int tierBonusXP = (int)(baseXP * (airportTier * 0.2)); 
                 int totalXP = (int)((baseXP + tierBonusXP) * qualityMultiplier);
                 totalXP = ProcedurePenalties.ApplyAutoStartPenalty(totalXP, autoStartUsed);
+                // Voo invalidado (slew, congelamento, combustível): sem XP. Antes o resultado mostrava 0, mas o XP era somado ao piloto.
+                if (isFlightInvalidated) totalXP = 0;
 
                 int missionsDone = 0;
                 int missionsRemaining = 0;

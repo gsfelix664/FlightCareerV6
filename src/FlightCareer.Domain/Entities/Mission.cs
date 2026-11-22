@@ -42,5 +42,7 @@ namespace FlightCareer.Domain.Entities
             set => RequiredCategory = (PilotCategory)(int)value;
         }
         public string MissionCategoryType { get; set; } = "Instrucao"; // Instrucao, SAE_Foto, SAE_Reboque, SAE_Carga, Taxi_Charter, etc.
+        /// <summary>Subcategoria do gerador (ex.: "3.4.1"): define a família de pagamento em mission_pay.json. Nulo em missões antigas.</summary>
+        public string? SubId { get; set; }
     }
 }

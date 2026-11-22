@@ -572,7 +572,7 @@ namespace FlightCareer.UI.ViewModels
                 {
                     var result = System.Windows.MessageBox.Show(
                         $"ATENÇÃO: Esta carga foi transportada de {mission.OriginICAO} até {CurrentAirportICAO}.\n\n" +
-                        "Se você descarregar agora, você NÃO receberá o pagamento por este transporte e a missão voltará ao mercado local com valor atualizado.\n\n" +
+                        "Se você descarregar agora, você NÃO receberá o pagamento por este transporte e a missão voltará ao mercado local, com o mesmo valor, saindo daqui.\n\n" +
                         "Deseja realmente descarregar e cancelar?", 
                         "Confirmar Descarregamento", 
                         System.Windows.MessageBoxButton.YesNo, 
@@ -597,7 +597,9 @@ namespace FlightCareer.UI.ViewModels
                 // Persistência: A carga agora está no aeroporto atual
                 mission.OriginICAO = CurrentAirportICAO;
 
-                // Recalcular distância e recompensa do novo ponto de origem até o destino
+                // Distância restante a partir do aeroporto atual. O valor da missão NÃO é recalculado: antes ele era
+                // sorteado de novo (flutuação de mercado) e com a família errada (título no lugar do subId), e remover
+                // e aceitar de novo mudava o pagamento.
                 var origin = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.OriginICAO);
                 var dest = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
 
@@ -605,20 +607,7 @@ namespace FlightCareer.UI.ViewModels
                 {
                     double newDist = Domain.Utils.LocationUtils.CalculateDistance(origin.Latitude, origin.Longitude, dest.Latitude, dest.Longitude);
                     mission.DistanceNM = Math.Round(newDist, 0);
-                    
-                    // Recalcular usando a lógica do gerador
-                    if (_missionGenerator is MissionGenerator mg)
-                    {
-                        mission.RewardMoney = mg.CalculateReward(
-                            newDist, 
-                            mission.PayloadLbs, 
-                            mission.Urgency, 
-                            mission.Title, 
-                            mission.PassengerCount, 
-                            origin.Tier, 
-                            dest.Tier);
-                        mission.ExperienceGain = (int)(newDist * 0.5 * mission.Urgency);
-                    }
+                    mission.ExperienceGain = (int)(newDist * 0.5 * mission.Urgency);
                 }
 
                 AvailableMissions.Add(mission);
