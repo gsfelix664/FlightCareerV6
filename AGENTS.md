@@ -218,6 +218,10 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - `CostMultiplier`: aplicado a combustível e taxas de aeroporto no fim do voo (`FlightService`), em todos os serviços pagos do Hangar com aviso explicativo (`HangarViewModel.RunPaidServiceAsync`), no abastecimento por caminhão (`FlightMonitor.ProcessFuelTruckDelivery`) e em todos os custos operacionais/manutenção do simulador de progressão (`CareerProgressionSimulator`).
   - `FailureMultiplier` / `HazardMultiplier`: multiplica a taxa de risco $\lambda$ antes do sorteio de pane exponencial em `FailureEngine` e `PartFailureEngine`. Configurado no início do voo pelo `FlightMonitor` nas sessões ativa (`ComponentFlightSession`) e de peças (`PartFlightSession`).
 
+### HUD Overlay e Mini-GPS (HUD-ICONES)
+- **Ponto de partida no mapa ao vivo:** `FlightMapControl` suporta `OriginLat`/`OriginLon` e renderiza o ponto de partida em ciano neon (`#00E5FF`) com tooltip do ICAO, enquadrando origem e destino no pan-zoom tático. `DebugOverlayViewModel` preenche as coordenadas pelo aeroporto de origem da missão ativa ou pela posição GPS onde o voo começou em circuito/voo local.
+- **Saúde por ícone sem vazamento de saúde real:** As barras percentuais (`ProgressBar` e `{0:F0}%`) de Célula, Motor e Pneus foram removidas do HUD flutuante. `HudHealthSummary` resume a saúde conhecida das peças instaladas (`KnownHealth` / `DisplayState` via `PartHangarView.Summarize`) ou a faixa exibida dos componentes em aviões sem peças (`HealthVisibility`), exibindo exclusivamente os ícones vetoriais de estado do Hangar (`HangarIcons.ForDisplayState`) e texto curto de estado ("Em ordem", "Em uso", "Atenção", "Risco", "Incerta") na cor da paleta do Hangar (`HangarPalette.ForDisplayState`), eliminando qualquer vazamento da saúde real em voo. Não testado no MSFS / tela do app.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

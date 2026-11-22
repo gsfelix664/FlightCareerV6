@@ -2808,3 +2808,25 @@
   - Atualização dos testes existentes `CareerProgressionTests.cs` e `PartFlightIntegrationTests.cs`.
 - `dotnet build` 0 erros, `dotnet test` 827/827 testes aprovados (100%), simulação `career-stab --days 90 --bots 1 --difficulty medium --policy equilibrado` executada com sucesso absoluto.
 - Não testado no MSFS / não visto na tela.
+
+## 2026-11-22 - Ponto de partida no mapinha do HUD e saúde por ícone (HUD-ICONES) (Gemini)
+- `FlightMapControl.xaml.cs`: adicionadas propriedades de dependência `OriginLat` e `OriginLon` com callback `OnOriginChanged`, renderizando ao vivo na partida um marcador circular ciano neon (`#00E5FF`, 9×9 com borda preta) idêntico em estilo ao ponto de chegada com tooltip do ICAO de origem (`ToolTip = $"ORIGEM: {OriginIcao}"`), integrando ao enquadramento suave de pan-zoom tático.
+- `DebugOverlayViewModel.cs`:
+  - Propriedades observáveis `OriginLat` e `OriginLon` preenchidas com as coordenadas do aeroporto de origem da missão ativa (`FindAirport` via `AsNoTracking` e contexto curto) ou, em voos locais/circuito sem missão, pela posição GPS em que o monitoramento do voo começou.
+  - Eliminação total da leitura das colunas legadas `AirframeCondition`, `EngineCondition` e `TiresCondition` que vazavam a saúde real oculta da aeronave em tempo real no voo.
+  - `RefreshAircraftHealth`: carrega as peças do avião ativo (ou componentes) via contexto curto com `AsNoTracking` e invoca `HudHealthSummary.Build` (ou `BuildFromComponents`).
+  - Novas propriedades reativas de status para os três grupos: `AirframeStatusText`, `AirframeStatusBrush`, `AirframeStatusIconGeometry`, e equivalentes para `Engine` e `Tires`.
+- `DebugOverlayWindow.xaml`:
+  - `FlightMapControl` no HUD recebe bindings para `OriginLat="{Binding OriginLat}"` e `OriginLon="{Binding OriginLon}"`.
+  - Grupo 5 ("INTEGRIDADE DA AERONAVE & DESGASTE"): removidas todas as porcentagens numéricas e `ProgressBar`s. Cada grupo (Célula, Motor, Pneus) agora exibe o ícone de estado vetorial idêntico ao Hangar (`HangarIcons.ForDisplayState`) e texto curto de estado ("Em ordem", "Em uso", "Atenção", "Risco", "Incerta") na cor da paleta do Hangar (`HangarPalette.ForDisplayState`).
+- `Domain/Parts/HudHealthSummary.cs`: módulo de lógica pura que agrupa as peças nos 3 sistemas exibidos (Célula, Motor e Pneus/Freios), obtém o `PartDisplayInfo` pela saúde conhecida (`KnownHealth` / `KnownAtAirframeHours` com crescimento de incerteza por hora de voo) e calcula o resumo do pior estado (`PartHangarView.Summarize`) sem jamais vazar a saúde oculta real. Fornece fallback `BuildFromComponents` para aviões sem peças baseado nas faixas de inspeção (`HealthVisibility`).
+- `Tests/Parts/HudHealthSummaryTests.cs`: suíte de testes xUnit cobrindo:
+  - Não vazamento de saúde real (peça com saúde real 5 e saúde conhecida 90 vistas há 0 h reporta "Em ordem" verde).
+  - Peça amarela conhecida reporta "Atenção".
+  - Peça nunca inspecionada reporta "Incerta".
+  - Peça gasta reporta "Em uso".
+  - Peça quebrada reporta "Quebrada".
+  - Priorização de pior estado no agregado do grupo.
+  - Fallback por faixas de componentes para aeronaves legadas sem peças.
+- Build com 0 erros, `dotnet test` com 834/834 testes aprovados (100%).
+- Não visto na tela / não testado no MSFS.

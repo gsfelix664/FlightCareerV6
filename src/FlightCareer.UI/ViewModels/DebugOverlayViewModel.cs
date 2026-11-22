@@ -1,13 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Sensors;
 using FlightCareer.Infrastructure.Persistence;
 using FlightCareer.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace FlightCareer.UI.ViewModels
@@ -19,6 +24,9 @@ namespace FlightCareer.UI.ViewModels
         private readonly HangarViewModel _hangarViewModel;
         private readonly SensorRecorder _sensorRecorder;
         private readonly AppDbContext? _context;
+        private readonly IDbContextFactory<AppDbContext>? _dbContextFactory;
+        private readonly ComponentCatalog _componentCatalog;
+        private readonly PartCatalog _partCatalog;
 
         // --- CONTROLES DE JANELA (HUD OVERLAY) ---
         [ObservableProperty] private bool _isTopmost = true;
@@ -35,6 +43,8 @@ namespace FlightCareer.UI.ViewModels
         // --- NAVEGAÇÃO & MOVING MAP (MINI-GPS) ---
         [ObservableProperty] private double _latitude = 0;
         [ObservableProperty] private double _longitude = 0;
+        [ObservableProperty] private double _originLat = 0;
+        [ObservableProperty] private double _originLon = 0;
         [ObservableProperty] private double _destLat = 0;
         [ObservableProperty] private double _destLon = 0;
         [ObservableProperty] private string _originIcao = string.Empty;
@@ -92,13 +102,25 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _maxGrossWeightLbs = 0;
         [ObservableProperty] private double _weightPercentage = 0;
 
-        // --- SAÚDE DA CÉLULA E DESGASTE (HANGAR) ---
-        [ObservableProperty] private double _airframeCondition = 100;
-        [ObservableProperty] private string _airframeConditionColor = "#00E676";
-        [ObservableProperty] private double _engineCondition = 100;
-        [ObservableProperty] private string _engineConditionColor = "#00E676";
-        [ObservableProperty] private double _tiresCondition = 100;
-        [ObservableProperty] private string _tiresConditionColor = "#00E676";
+        // --- SAÚDE DA CÉLULA E DESGASTE (HANGAR - SAÚDE CONHECIDA / SEM VAZAR REAL) ---
+        [ObservableProperty] private string _airframeStatusText = "Em ordem";
+        [ObservableProperty] private string _airframeStatusColor = "#00E676";
+        [ObservableProperty] private SolidColorBrush _airframeStatusBrush = HangarPalette.Green;
+        [ObservableProperty] private Geometry _airframeStatusIconGeometry = HangarIcons.Check;
+
+        [ObservableProperty] private string _engineStatusText = "Em ordem";
+        [ObservableProperty] private string _engineStatusColor = "#00E676";
+        [ObservableProperty] private SolidColorBrush _engineStatusBrush = HangarPalette.Green;
+        [ObservableProperty] private Geometry _engineStatusIconGeometry = HangarIcons.Check;
+
+        [ObservableProperty] private string _tiresStatusText = "Em ordem";
+        [ObservableProperty] private string _tiresStatusColor = "#00E676";
+        [ObservableProperty] private SolidColorBrush _tiresStatusBrush = HangarPalette.Green;
+        [ObservableProperty] private Geometry _tiresStatusIconGeometry = HangarIcons.Check;
+
+        public string AirframeConditionColor => AirframeStatusColor;
+        public string EngineConditionColor => EngineStatusColor;
+        public string TiresConditionColor => TiresStatusColor;
 
         // --- SEGURANÇA E ALERTAS ---
         [ObservableProperty] private bool _overspeedWarning = false;
@@ -133,13 +155,19 @@ namespace FlightCareer.UI.ViewModels
             FlightMonitor flightMonitor,
             HangarViewModel hangarViewModel,
             SensorRecorder sensorRecorder,
-            AppDbContext? context = null)
+            AppDbContext? context = null,
+            IDbContextFactory<AppDbContext>? dbContextFactory = null,
+            ComponentCatalog? componentCatalog = null,
+            PartCatalog? partCatalog = null)
         {
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
             _hangarViewModel = hangarViewModel;
             _sensorRecorder = sensorRecorder;
             _context = context;
+            _dbContextFactory = dbContextFactory;
+            _componentCatalog = componentCatalog ?? ComponentCatalog.LoadDefault();
+            _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnConnected += (s, e) => UpdateConnectionStatus();
@@ -186,10 +214,6 @@ namespace FlightCareer.UI.ViewModels
                 if (activeAircraft != null)
                 {
                     AircraftPrefix = activeAircraft.Prefix;
-                    AirframeCondition = Math.Round(activeAircraft.AirframeCondition, 1);
-                    EngineCondition = Math.Round(activeAircraft.EngineCondition, 1);
-                    TiresCondition = Math.Round(activeAircraft.TiresCondition, 1);
-                    UpdateConditionColors();
                 }
 
                 // Posição GPS em Tempo Real
@@ -203,13 +227,22 @@ namespace FlightCareer.UI.ViewModels
                     RouteText = $"{m.OriginICAO} ➔ {m.DestinationICAO} ({m.DistanceNM:N0} NM)";
                     OriginIcao = m.OriginICAO;
                     DestIcao = m.DestinationICAO;
-                    if (_context != null && (DestLat == 0 || DestLon == 0))
+                    if (DestLat == 0 || DestLon == 0)
                     {
-                        var destApt = _context.Airports.FirstOrDefault(a => a.ICAO == m.DestinationICAO);
+                        var destApt = FindAirport(m.DestinationICAO);
                         if (destApt != null)
                         {
                             DestLat = destApt.Latitude;
                             DestLon = destApt.Longitude;
+                        }
+                    }
+                    if (OriginLat == 0 || OriginLon == 0)
+                    {
+                        var origApt = FindAirport(m.OriginICAO);
+                        if (origApt != null)
+                        {
+                            OriginLat = origApt.Latitude;
+                            OriginLon = origApt.Longitude;
                         }
                     }
                 }
@@ -219,6 +252,12 @@ namespace FlightCareer.UI.ViewModels
                     DestLat = 0;
                     DestLon = 0;
                     DestIcao = string.Empty;
+                    if (OriginLat == 0 && OriginLon == 0 && (data.PlaneLatitude != 0 || data.PlaneLongitude != 0))
+                    {
+                        OriginLat = data.PlaneLatitude;
+                        OriginLon = data.PlaneLongitude;
+                        OriginIcao = "PARTIDA";
+                    }
                 }
                 else
                 {
@@ -226,6 +265,9 @@ namespace FlightCareer.UI.ViewModels
                     DestLat = 0;
                     DestLon = 0;
                     DestIcao = string.Empty;
+                    OriginLat = 0;
+                    OriginLon = 0;
+                    OriginIcao = string.Empty;
                 }
 
                 // Velocidades e Altitude
@@ -320,14 +362,86 @@ namespace FlightCareer.UI.ViewModels
         private void RefreshAircraftHealth()
         {
             var activeAircraft = _flightMonitor.CurrentAircraft ?? _hangarViewModel.SelectedAircraft?.Aircraft;
-            if (activeAircraft != null)
+            if (activeAircraft == null)
             {
-                AircraftPrefix = activeAircraft.Prefix;
-                AirframeCondition = Math.Round(activeAircraft.AirframeCondition, 1);
-                EngineCondition = Math.Round(activeAircraft.EngineCondition, 1);
-                TiresCondition = Math.Round(activeAircraft.TiresCondition, 1);
-                UpdateConditionColors();
+                ApplyHudSummary(HudHealthSummary.Build(Array.Empty<AircraftPart>(), _partCatalog, 0, 0.4));
+                return;
             }
+
+            AircraftPrefix = activeAircraft.Prefix;
+            double airframeHours = activeAircraft.CurrentAirframeHours;
+
+            List<AircraftPart>? parts = null;
+            List<AircraftComponent>? components = null;
+
+            if (_dbContextFactory != null)
+            {
+                using var ctx = _dbContextFactory.CreateDbContext();
+                parts = ctx.AircraftParts.AsNoTracking().Where(p => p.PilotAircraftId == activeAircraft.Id).ToList();
+                components = ctx.AircraftComponents.AsNoTracking().Where(c => c.PilotAircraftId == activeAircraft.Id).ToList();
+            }
+            else if (_context != null)
+            {
+                parts = _context.AircraftParts.AsNoTracking().Where(p => p.PilotAircraftId == activeAircraft.Id).ToList();
+                components = _context.AircraftComponents.AsNoTracking().Where(c => c.PilotAircraftId == activeAircraft.Id).ToList();
+            }
+            else
+            {
+                parts = activeAircraft.Parts?.ToList();
+                components = activeAircraft.Components?.ToList();
+            }
+
+            HudHealthSummary summary;
+            if (parts != null && parts.Count > 0)
+            {
+                summary = HudHealthSummary.Build(
+                    parts,
+                    _partCatalog,
+                    airframeHours,
+                    _componentCatalog.Visibility?.GrowthPerHour ?? 0.4,
+                    _componentCatalog.PartBands);
+            }
+            else if (components != null && components.Count > 0)
+            {
+                summary = HudHealthSummary.BuildFromComponents(
+                    components,
+                    airframeHours,
+                    _componentCatalog.Visibility);
+            }
+            else
+            {
+                summary = HudHealthSummary.Build(
+                    Array.Empty<AircraftPart>(),
+                    _partCatalog,
+                    airframeHours,
+                    _componentCatalog.Visibility?.GrowthPerHour ?? 0.4,
+                    _componentCatalog.PartBands);
+            }
+
+            ApplyHudSummary(summary);
+        }
+
+        private void ApplyHudSummary(HudHealthSummary summary)
+        {
+            AirframeStatusText = summary.Airframe.StatusText;
+            AirframeStatusBrush = HangarPalette.ForDisplayState(summary.Airframe.State);
+            AirframeStatusColor = BrushToHex(AirframeStatusBrush);
+            AirframeStatusIconGeometry = HangarIcons.ForDisplayState(summary.Airframe.State);
+
+            EngineStatusText = summary.Engine.StatusText;
+            EngineStatusBrush = HangarPalette.ForDisplayState(summary.Engine.State);
+            EngineStatusColor = BrushToHex(EngineStatusBrush);
+            EngineStatusIconGeometry = HangarIcons.ForDisplayState(summary.Engine.State);
+
+            TiresStatusText = summary.Tires.StatusText;
+            TiresStatusBrush = HangarPalette.ForDisplayState(summary.Tires.State);
+            TiresStatusColor = BrushToHex(TiresStatusBrush);
+            TiresStatusIconGeometry = HangarIcons.ForDisplayState(summary.Tires.State);
+        }
+
+        private static string BrushToHex(SolidColorBrush brush)
+        {
+            return $"#{brush.Color.R:X2}{brush.Color.G:X2}{brush.Color.B:X2}";
         }
 
         private void UpdateVerticalSpeedColor()
@@ -353,11 +467,19 @@ namespace FlightCareer.UI.ViewModels
             else FlightPhaseColor = "#8B9BAE";
         }
 
-        private void UpdateConditionColors()
+        private Airport? FindAirport(string icao)
         {
-            AirframeConditionColor = AirframeCondition > 70 ? "#00E676" : (AirframeCondition > 35 ? "#FFB300" : "#FF5252");
-            EngineConditionColor = EngineCondition > 70 ? "#00E676" : (EngineCondition > 35 ? "#FFB300" : "#FF5252");
-            TiresConditionColor = TiresCondition > 70 ? "#00E676" : (TiresCondition > 35 ? "#FFB300" : "#FF5252");
+            if (string.IsNullOrWhiteSpace(icao)) return null;
+            if (_dbContextFactory != null)
+            {
+                using var ctx = _dbContextFactory.CreateDbContext();
+                return ctx.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == icao);
+            }
+            if (_context != null)
+            {
+                return _context.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == icao);
+            }
+            return null;
         }
 
         [RelayCommand]
