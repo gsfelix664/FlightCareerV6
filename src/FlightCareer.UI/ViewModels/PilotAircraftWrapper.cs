@@ -132,6 +132,7 @@ namespace FlightCareer.UI.ViewModels
                         PartDisplayState.Red => "Risco de pane",
                         PartDisplayState.Yellow => "Atenção",
                         PartDisplayState.Green => "Em ordem",
+                        PartDisplayState.Worn => "Em ordem",
                         PartDisplayState.Uncertain => "Incerta — faça uma inspeção",
                         _ => "Em ordem"
                     };
@@ -175,15 +176,7 @@ namespace FlightCareer.UI.ViewModels
 
         public Geometry PartsAirworthinessIconGeometry => HangarIcons.ForDisplayState(_partsAirworthinessState);
 
-        public SolidColorBrush PartsAirworthinessBrush => _partsAirworthinessState switch
-        {
-            PartDisplayState.Broken => HangarPalette.Red,
-            PartDisplayState.Red => HangarPalette.Red,
-            PartDisplayState.Yellow => HangarPalette.Amber,
-            PartDisplayState.Green => HangarPalette.Green,
-            PartDisplayState.Uncertain => HangarPalette.Amber,
-            _ => HangarPalette.Muted
-        };
+        public SolidColorBrush PartsAirworthinessBrush => HangarPalette.ForDisplayState(_partsAirworthinessState);
 
         private string _partsConditionSummaryText = string.Empty;
         public string PartsConditionSummaryText => _partsConditionSummaryText;
@@ -204,19 +197,7 @@ namespace FlightCareer.UI.ViewModels
 
             var (_, overallCounts) = PartHangarView.Summarize(allPartDisplays);
 
-            var conditionParts = new List<string>();
-            if (overallCounts.TryGetValue(PartDisplayState.Green, out int g) && g > 0)
-                conditionParts.Add($"✓ {g}");
-            if (overallCounts.TryGetValue(PartDisplayState.Yellow, out int y) && y > 0)
-                conditionParts.Add($"⚠ {y}");
-            if (overallCounts.TryGetValue(PartDisplayState.Broken, out int b) && b > 0)
-                conditionParts.Add($"✖ {b}");
-            if (overallCounts.TryGetValue(PartDisplayState.Red, out int r) && r > 0)
-                conditionParts.Add($"✖ {r}");
-            if (overallCounts.TryGetValue(PartDisplayState.Uncertain, out int u) && u > 0)
-                conditionParts.Add($"? {u}");
-
-            _partsConditionSummaryText = string.Join(" · ", conditionParts);
+            _partsConditionSummaryText = HangarPalette.CountsText(overallCounts);
 
             var criticalDisplays = Components
                 .Where(c => c.IsCritical)

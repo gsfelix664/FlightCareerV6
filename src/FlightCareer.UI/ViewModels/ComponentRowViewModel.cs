@@ -16,6 +16,8 @@ namespace FlightCareer.UI.ViewModels
     public static class HangarPalette
     {
         public static readonly SolidColorBrush Green = Freeze(0x00, 0xE6, 0x76);
+        /// <summary>Verde-limão: peça gasta mas boa (80–40 %), sem cara de alerta.</summary>
+        public static readonly SolidColorBrush Lime = Freeze(0xB2, 0xE0, 0x3A);
         public static readonly SolidColorBrush Amber = Freeze(0xFF, 0xB3, 0x00);
         public static readonly SolidColorBrush Orange = Freeze(0xFF, 0x70, 0x43);
         public static readonly SolidColorBrush Red = Freeze(0xFF, 0x52, 0x52);
@@ -55,6 +57,7 @@ namespace FlightCareer.UI.ViewModels
                 PartDisplayState.Red => Red,
                 PartDisplayState.Yellow => Amber,
                 PartDisplayState.Green => Green,
+                PartDisplayState.Worn => Lime,
                 PartDisplayState.Uncertain => ForBand(info.LastKnownBand),
                 _ => Muted
             };
@@ -66,9 +69,24 @@ namespace FlightCareer.UI.ViewModels
             PartDisplayState.Red => Red,
             PartDisplayState.Yellow => Amber,
             PartDisplayState.Green => Green,
+            PartDisplayState.Worn => Lime,
             PartDisplayState.Uncertain => Amber,
             _ => Muted
         };
+
+        /// <summary>Contagem compacta por estado (só os presentes), do pior para o melhor. Vermelho e quebrado contam juntos.</summary>
+        public static string CountsText(IReadOnlyDictionary<PartDisplayState, int> counts)
+        {
+            int Get(PartDisplayState s) => counts.TryGetValue(s, out int n) ? n : 0;
+            var list = new List<string>();
+            int red = Get(PartDisplayState.Broken) + Get(PartDisplayState.Red);
+            if (red > 0) list.Add($"✖ {red}");
+            if (Get(PartDisplayState.Yellow) > 0) list.Add($"⚠ {Get(PartDisplayState.Yellow)}");
+            if (Get(PartDisplayState.Uncertain) > 0) list.Add($"? {Get(PartDisplayState.Uncertain)}");
+            if (Get(PartDisplayState.Worn) > 0) list.Add($"◐ {Get(PartDisplayState.Worn)}");
+            if (Get(PartDisplayState.Green) > 0) list.Add($"✓ {Get(PartDisplayState.Green)}");
+            return string.Join(" · ", list);
+        }
 
         private static SolidColorBrush Freeze(byte r, byte g, byte b)
         {
@@ -175,15 +193,7 @@ namespace FlightCareer.UI.ViewModels
 
         public Geometry GroupStateIconGeometry => HangarIcons.ForDisplayState(_groupWorstState);
 
-        public SolidColorBrush GroupStateBrush => _groupWorstState switch
-        {
-            PartDisplayState.Broken => HangarPalette.Red,
-            PartDisplayState.Red => HangarPalette.Red,
-            PartDisplayState.Yellow => HangarPalette.Amber,
-            PartDisplayState.Green => HangarPalette.Green,
-            PartDisplayState.Uncertain => HangarPalette.Amber,
-            _ => HangarPalette.Muted
-        };
+        public SolidColorBrush GroupStateBrush => HangarPalette.ForDisplayState(_groupWorstState);
 
         private string _groupCountsSummary = string.Empty;
         public string GroupCountsSummary => _groupCountsSummary;
@@ -199,20 +209,7 @@ namespace FlightCareer.UI.ViewModels
 
             var (worst, counts) = PartHangarView.Summarize(Parts.Select(p => p.Row.Display));
             _groupWorstState = worst;
-
-            var partsList = new List<string>();
-            if (counts.TryGetValue(PartDisplayState.Broken, out int broken) && broken > 0)
-                partsList.Add($"✖ {broken}");
-            if (counts.TryGetValue(PartDisplayState.Red, out int red) && red > 0)
-                partsList.Add($"✖ {red}");
-            if (counts.TryGetValue(PartDisplayState.Yellow, out int yellow) && yellow > 0)
-                partsList.Add($"⚠ {yellow}");
-            if (counts.TryGetValue(PartDisplayState.Uncertain, out int uncertain) && uncertain > 0)
-                partsList.Add($"? {uncertain}");
-            if (counts.TryGetValue(PartDisplayState.Green, out int green) && green > 0)
-                partsList.Add($"✓ {green}");
-
-            _groupCountsSummary = string.Join(" · ", partsList);
+            _groupCountsSummary = HangarPalette.CountsText(counts);
 
             OnPropertyChanged(nameof(GroupWorstState));
             OnPropertyChanged(nameof(GroupStateIconGeometry));
@@ -320,10 +317,11 @@ namespace FlightCareer.UI.ViewModels
         public string StateTooltip => DisplayState switch
         {
             PartDisplayState.Broken => "Peça quebrada",
-            PartDisplayState.Red => "Risco de pane (< 20%)",
-            PartDisplayState.Yellow => "Atenção (20–40%)",
-            PartDisplayState.Green => "Em ordem (≥ 40%)",
-            PartDisplayState.Uncertain => "Incerta — faça uma inspeção",
+            PartDisplayState.Red => "No limite: risco de pane, trocar",
+            PartDisplayState.Yellow => "Atenção: desgaste acelerado",
+            PartDisplayState.Worn => "Em uso: desgaste normal, ainda boa",
+            PartDisplayState.Green => "Nova ou quase nova",
+            PartDisplayState.Uncertain => "Incerta: pode ter piorado desde a última inspeção",
             _ => string.Empty
         };
 

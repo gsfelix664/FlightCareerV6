@@ -17,7 +17,8 @@ namespace FlightCareer.Domain.Parts
 
     public enum PartDisplayState
     {
-        Green,
+        Green,      // conhecida >= 80 %: nova ou quase nova
+        Worn,       // conhecida 80–40 %: em uso, desgaste normal, ainda boa
         Yellow,
         Red,
         Broken,
@@ -49,6 +50,9 @@ namespace FlightCareer.Domain.Parts
                 ? $"{def.Name} (motor {part.EngineIndex})"
                 : def.Name;
         }
+
+        /// <summary>Acima deste valor conhecido a peça aparece como nova (check verde); abaixo, até o amarelo, como gasta mas boa.</summary>
+        public const double GoodAbovePct = 80.0;
 
         public static PartDisplayInfo DisplayState(
             AircraftPart part,
@@ -103,7 +107,10 @@ namespace FlightCareer.Domain.Parts
                 return new PartDisplayInfo(PartDisplayState.Uncertain, knownBand, hoursSince);
             }
 
-            PartDisplayState state = knownBand == PartKnownBand.Green ? PartDisplayState.Green : PartDisplayState.Yellow;
+            // A marca de 80 % só muda o ícone; não gera "?" (só 40 % e 20 % mudam o jogo).
+            PartDisplayState state = knownBand == PartKnownBand.Yellow
+                ? PartDisplayState.Yellow
+                : known >= GoodAbovePct ? PartDisplayState.Green : PartDisplayState.Worn;
             return new PartDisplayInfo(state, knownBand, hoursSince);
         }
 
@@ -113,6 +120,7 @@ namespace FlightCareer.Domain.Parts
             var counts = new Dictionary<PartDisplayState, int>
             {
                 [PartDisplayState.Green] = 0,
+                [PartDisplayState.Worn] = 0,
                 [PartDisplayState.Yellow] = 0,
                 [PartDisplayState.Red] = 0,
                 [PartDisplayState.Broken] = 0,
@@ -150,8 +158,9 @@ namespace FlightCareer.Domain.Parts
                 PartDisplayState.Red => 1,
                 PartDisplayState.Yellow => 2,
                 PartDisplayState.Uncertain => 3,
-                PartDisplayState.Green => 4,
-                _ => 5
+                PartDisplayState.Worn => 4,
+                PartDisplayState.Green => 5,
+                _ => 6
             };
         }
 

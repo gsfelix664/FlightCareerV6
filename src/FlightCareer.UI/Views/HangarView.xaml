@@ -356,7 +356,7 @@
                             <!-- Legenda para aeronave com peças -->
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
                                        Visibility="{Binding HasPartsDriven, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                       Text="Estados de inspeção: ✓ verde (em ordem, ≥ 40%) · ⚠ amarelo (atenção, 20–40%) · ✖ vermelho (risco de pane ou peça quebrada, &lt; 20%) · ? cinza/amarelo (incerto — a peça pode ter caído de faixa desde a última inspeção)."/>
+                                       Text="Estado das peças pela última inspeção: ✓ nova · ◐ em uso, desgaste normal · ⚠ atenção, desgaste acelerado · ✖ no limite ou quebrada, risco de pane · ? incerta, pode ter piorado desde que foi vista (faça uma inspeção)."/>
                             <!-- Legenda clássica (sem peças) -->
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
                                        Visibility="{Binding HasPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}"

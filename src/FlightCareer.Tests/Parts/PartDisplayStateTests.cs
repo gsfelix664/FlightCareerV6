@@ -97,7 +97,7 @@ namespace FlightCareer.Tests.Parts
         [Fact]
         public void Verde_perto_do_limite_ainda_verde()
         {
-            // known 43, visto há 5 h: 43 - 0.4*5 = 43 - 2 = 41 >= 40 -> Green
+            // known 43, visto há 5 h: 43 - 0.4*5 = 41 >= 40 -> não incerta; abaixo de 80 -> Worn (gasta mas boa)
             var part = new AircraftPart
             {
                 Id = Guid.NewGuid(),
@@ -110,7 +110,7 @@ namespace FlightCareer.Tests.Parts
 
             var info = PartHangarView.DisplayState(part, airframeHours: 100.0, growthPerHour: GrowthPerHour, _bands);
 
-            Assert.Equal(PartDisplayState.Green, info.State);
+            Assert.Equal(PartDisplayState.Worn, info.State);
             Assert.Equal(PartKnownBand.Green, info.LastKnownBand);
             Assert.Equal(5.0, info.HoursSinceSeen!.Value, 3);
         }
@@ -317,6 +317,48 @@ namespace FlightCareer.Tests.Parts
             var text = PartHangarView.GroupLifeText(ComponentKind.HotSection, aircraft, EngineClass.Turboprop);
 
             Assert.Equal(string.Empty, text);
+        }
+
+        private static AircraftPart Vista(double known, double knownAt) => new()
+        {
+            Id = Guid.NewGuid(),
+            PartId = "engine.cylinders",
+            Health = known,
+            KnownHealth = known,
+            KnownAtAirframeHours = knownAt,
+        };
+
+        [Theory]
+        [InlineData(80.0, 0.0, PartDisplayState.Green)]   // limite: 80 conta como nova
+        [InlineData(79.9, 0.0, PartDisplayState.Worn)]
+        [InlineData(60.0, 0.0, PartDisplayState.Worn)]
+        [InlineData(40.0, 0.0, PartDisplayState.Worn)]    // 40 ainda é verde (não amarelo)
+        [InlineData(39.9, 0.0, PartDisplayState.Yellow)]
+        [InlineData(82.0, 10.0, PartDisplayState.Green)]  // a marca de 80 não gera "?"
+        [InlineData(60.0, 60.0, PartDisplayState.Uncertain)] // 60 - 24 = 36 < 40
+        public void Faixa_gasta_mas_boa_entre_80_e_40(double known, double horasDesdeVista, PartDisplayState esperado)
+        {
+            var info = PartHangarView.DisplayState(Vista(known, 100.0), 100.0 + horasDesdeVista, GrowthPerHour, _bands);
+            Assert.Equal(esperado, info.State);
+        }
+
+        [Fact]
+        public void Resumo_gasta_e_pior_que_nova_e_melhor_que_incerta()
+        {
+            var (worst1, counts) = PartHangarView.Summarize(new[]
+            {
+                new PartDisplayInfo(PartDisplayState.Green, PartKnownBand.Green, 0),
+                new PartDisplayInfo(PartDisplayState.Worn, PartKnownBand.Green, 0),
+            });
+            Assert.Equal(PartDisplayState.Worn, worst1);
+            Assert.Equal(1, counts[PartDisplayState.Worn]);
+
+            var (worst2, _) = PartHangarView.Summarize(new[]
+            {
+                new PartDisplayInfo(PartDisplayState.Worn, PartKnownBand.Green, 0),
+                new PartDisplayInfo(PartDisplayState.Uncertain, PartKnownBand.Green, 30),
+            });
+            Assert.Equal(PartDisplayState.Uncertain, worst2);
         }
     }
 }

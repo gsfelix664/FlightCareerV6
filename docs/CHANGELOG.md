@@ -2683,3 +2683,4 @@
 - Aeronaves legadas sem peças mantêm integralmente a visualização anterior de barras numéricas e faixas percentuais.
 - Nova suíte de testes unitários `PartDisplayStateTests` cobrindo todas as regras de transição de faixa, incerteza, isolamento da saúde real e resumos.
 - Não visto na tela / não testado no MSFS.
+- Ajustes do revisor (Claude): quinto estado `Worn` ("gasta mas boa", 80–40 %, ícone de meio círculo com check em verde-limão), pedido do usuário para imitar o mecânico que vê o desgaste sem %; a marca de 80 % não gera "?". Ícone de quebrado trocado por círculo trincado (o "X" lia como "proibido"); contagem junta vermelho e quebrado num só "✖" e foi centralizada em `HangarPalette.CountsText`; tooltips e legenda sem %. Testes `Faixa_gasta_mas_boa_entre_80_e_40` e `Resumo_gasta_e_pior_que_nova_e_melhor_que_incerta`; suíte 737/737.

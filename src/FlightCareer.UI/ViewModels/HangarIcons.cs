@@ -37,9 +37,12 @@ namespace FlightCareer.UI.ViewModels
         };
 
         // Geometrias de estado de saúde/inspeção (caixa 24×24)
-        public static readonly Geometry Check = Freeze("M4,12.5 L9.5,18 L20,6.5");
+        // Nova: círculo completo com check. Gasta mas boa: só meio círculo (vida consumida) com o mesmo check.
+        public static readonly Geometry Check = Freeze("M12,2.5 A9.5,9.5 0 1 1 11.99,2.5 M7.5,12.5 L10.8,15.8 L16.8,9");
+        public static readonly Geometry Worn = Freeze("M12,2.5 A9.5,9.5 0 0 0 12,21.5 M7.5,12.5 L10.8,15.8 L16.8,9");
         public static readonly Geometry Warning = Freeze("M12,3 L22,20.5 H2 Z M12,9 V14.5 M12,17.5 V18");
-        public static readonly Geometry Broken = Freeze("M5,5 L19,19 M19,5 L5,19");
+        // Quebrada: círculo partido por uma trinca em zigue-zague (não é o "X" de "proibido").
+        public static readonly Geometry Broken = Freeze("M10.5,3 A9,9 0 0 0 9.5,20.6 M13.5,3.4 A9,9 0 0 1 14.5,20.6 M12,2 L10,7.5 L13,11 L10.5,15.5 L12.5,22");
         public static readonly Geometry Question = Freeze("M8.5,8.5 A4,4 0 0 1 15.5,8 C15.5,10.5 12,11.5 12,14 M12,17.5 V18");
 
         private static readonly Geometry Fallback = Freeze("M5,5 H19 V19 H5 Z");
@@ -49,6 +52,7 @@ namespace FlightCareer.UI.ViewModels
         public static Geometry ForDisplayState(PartDisplayState state) => state switch
         {
             PartDisplayState.Green => Check,
+            PartDisplayState.Worn => Worn,
             PartDisplayState.Yellow => Warning,
             PartDisplayState.Red => Broken,
             PartDisplayState.Broken => Broken,
