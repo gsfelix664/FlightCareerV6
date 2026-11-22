@@ -1,6 +1,6 @@
 # METRICAS-B — Métricas de sistemas e garantia de que nenhuma regra fica sem cálculo
 
-**Branch:** feat/metricas-b · **Commit:** pendente · **Data:** 2026-11-22
+**Branch:** feat/metricas-b · **Commit:** 9463924 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - Implementar no `PartEventDeriver` o cálculo das 8 métricas de sistemas restantes (`icingExposureMinutes`, `deiceCycles`, `propDeiceCycles`, `glowPlugCycles`, `dryRunPumpMinutes`, `lowHydraulicPressureMinutes`, `pressurizationCycles`, `rapidDecompressionDeltaPsf`) conforme o contrato da especificação, com reset completo no método `Reset()`.
