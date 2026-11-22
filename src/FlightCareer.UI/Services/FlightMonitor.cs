@@ -1205,7 +1205,7 @@ namespace FlightCareer.UI.Services
 
             var ev = _touchdown.Update(new FastFlightSample(
                 _fastClock.Elapsed.TotalSeconds, s.OnGround >= 0.5, s.VerticalSpeed, s.BodyVertical, s.GForce,
-                -s.Pitch, s.Bank, s.Airspeed, s.GroundSpeed));
+                -s.Pitch, s.Bank, s.Airspeed, s.GroundSpeed, s.TouchdownNormalVelocity));
             if (ev != null) HandleTouchdown(ev);
         }
 

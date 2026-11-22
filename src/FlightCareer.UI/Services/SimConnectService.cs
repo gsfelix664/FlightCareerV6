@@ -76,6 +76,7 @@ namespace FlightCareer.UI.Services
         public double Bank;              // PLANE BANK DEGREES
         public double Airspeed;          // AIRSPEED INDICATED (kt)
         public double GroundSpeed;       // GROUND VELOCITY (kt)
+        public double TouchdownNormalVelocity; // PLANE TOUCHDOWN NORMAL VELOCITY (ft/s, normal ao solo no último toque)
     }
 
     /// <summary>
@@ -331,6 +332,7 @@ namespace FlightCareer.UI.Services
                 AddFastDef("PLANE BANK DEGREES", "degrees");
                 AddFastDef("AIRSPEED INDICATED", "knots");
                 AddFastDef("GROUND VELOCITY", "knots");
+                AddFastDef("PLANE TOUCHDOWN NORMAL VELOCITY", "feet per second");
                 _simConnect.RegisterDataDefineStruct<SimFastFlightState>(DEFINITIONS.FastFlight);
 
                 // Escritas diretas (testadas no MSFS 2024: o valor gravado persiste)
