@@ -328,20 +328,38 @@
                                         ToolTip="Pior componente crítico: decide alertas e risco de pane">
                                     <StackPanel>
                                         <TextBlock Text="AERONAVEGABILIDADE" Style="{StaticResource HgLabel}" FontSize="10.5" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding AirworthinessText}" Style="{StaticResource HgValue}" FontSize="18" Foreground="{Binding AirworthinessBrush}"/>
+                                        <!-- Modo com peças: ícone de estado + texto -->
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0"
+                                                    Visibility="{Binding HasPartsDriven, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Viewbox Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Path Data="{Binding PartsAirworthinessIconGeometry}" Stroke="{Binding AirworthinessBrush}" StrokeThickness="2.2"
+                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                      Width="24" Height="24" Stretch="None"/>
+                                            </Viewbox>
+                                            <TextBlock Text="{Binding AirworthinessText}" Style="{StaticResource HgValue}" FontSize="16" Foreground="{Binding AirworthinessBrush}" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <!-- Modo clássico (sem peças): texto da faixa % -->
+                                        <TextBlock Text="{Binding AirworthinessText}" Style="{StaticResource HgValue}" FontSize="18" Foreground="{Binding AirworthinessBrush}"
+                                                   Visibility="{Binding HasPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Grid.Column="1" Background="{StaticResource HgBase}" CornerRadius="6" Padding="12,8" Margin="6,0,0,0"
-                                        ToolTip="Média ponderada de todos os componentes: decide o valor de mercado">
+                                        ToolTip="Condição das peças ou média dos componentes">
                                     <StackPanel>
                                         <TextBlock Text="CONDIÇÃO GERAL" Style="{StaticResource HgLabel}" FontSize="10.5" FontWeight="Bold"/>
-                                        <TextBlock Text="{Binding ConditionText}" Style="{StaticResource HgValue}" FontSize="18"/>
+                                        <TextBlock Text="{Binding ConditionText}" Style="{StaticResource HgValue}" FontSize="16"/>
                                     </StackPanel>
                                 </Border>
                             </Grid>
 
                             <!-- Legenda -->
+                            <!-- Legenda para aeronave com peças -->
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
+                                       Visibility="{Binding HasPartsDriven, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                       Text="Estados de inspeção: ✓ verde (em ordem, ≥ 40%) · ⚠ amarelo (atenção, 20–40%) · ✖ vermelho (risco de pane ou peça quebrada, &lt; 20%) · ? cinza/amarelo (incerto — a peça pode ter caído de faixa desde a última inspeção)."/>
+                            <!-- Legenda clássica (sem peças) -->
+                            <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
+                                       Visibility="{Binding HasPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                        Text="Faixa (ex.: 48–52%) = estimativa: abre com as horas desde a última inspeção ou walkaround. Verde acima de 40%; amarelo 40–20% (desgaste acelerado e perda de desempenho); vermelho abaixo de 20% (risco de pane)."/>
 
                             <ItemsControl ItemsSource="{Binding Components}">
@@ -356,8 +374,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Ícone do grupo no tom da saúde (verde / amarelo / vermelho) -->
-                                                <Grid Grid.Column="0" Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Top"
-                                                      ToolTip="{Binding RangeText}">
+                                                <Grid Grid.Column="0" Width="44" Height="44" Margin="0,0,14,0" VerticalAlignment="Top">
                                                     <Border Background="{Binding Brush}" Opacity="0.12" CornerRadius="10"/>
                                                     <Border BorderBrush="{Binding Brush}" BorderThickness="1" Opacity="0.45" CornerRadius="10"/>
                                                     <Viewbox Width="24" Height="24">
@@ -377,11 +394,34 @@
                                                                 <TextBlock Text="CRÍTICO" Foreground="{StaticResource HgText2}" FontSize="9.5" FontWeight="Bold" FontFamily="{StaticResource HgMono}"/>
                                                             </Border>
                                                         </StackPanel>
-                                                        <TextBlock Text="{Binding RangeText}" HorizontalAlignment="Right" Foreground="{Binding Brush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="13"/>
+
+                                                        <!-- Cabeçalho do grupo em aeronave com peças: ícone do pior estado + contagem compacta -->
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                                                    Visibility="{Binding IsGroupPartsDriven, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                            <Viewbox Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center">
+                                                                <Path Data="{Binding GroupStateIconGeometry}" Stroke="{Binding GroupStateBrush}" StrokeThickness="2.2"
+                                                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                                      Width="24" Height="24" Stretch="None"/>
+                                                            </Viewbox>
+                                                            <TextBlock Text="{Binding GroupCountsSummary}" Foreground="{Binding GroupStateBrush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/>
+                                                        </StackPanel>
+
+                                                        <!-- Cabeçalho do grupo em aeronave clássica (sem peças): texto % da faixa -->
+                                                        <TextBlock Text="{Binding RangeText}" HorizontalAlignment="Right" Foreground="{Binding Brush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="13"
+                                                                   Visibility="{Binding IsGroupPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                                     </Grid>
 
                                                     <Border Height="4"/>
-                                                    <StackPanel Orientation="Horizontal">
+                                                    <!-- Subtítulo de horas em aeronave com peças (quando houver texto de vida) -->
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Visibility="{Binding IsGroupPartsDriven, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                        <TextBlock Text="{Binding LifeText}" Foreground="{Binding LifeBrush}" FontSize="11.5"
+                                                                   Visibility="{Binding HasLifeText, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                                    </StackPanel>
+
+                                                    <!-- Subtítulo clássico (sem peças): vida útil · estimativa -->
+                                                    <StackPanel Orientation="Horizontal"
+                                                                Visibility="{Binding IsGroupPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                                         <TextBlock Text="{Binding LifeText}" Foreground="{Binding LifeBrush}" FontSize="11.5"/>
                                                         <TextBlock Text="  ·  " Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
                                                         <TextBlock Text="{Binding VisibilityText}" Foreground="{StaticResource HgMuted}" FontSize="11.5"/>
@@ -429,9 +469,14 @@
                                                                                            Visibility="{Binding HasLifeNote, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                                                             </StackPanel>
 
-                                                                            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0">
-                                                                                <TextBlock Text="{Binding HealthText}" Foreground="{Binding Brush}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="12" HorizontalAlignment="Right"/>
-                                                                                <TextBlock Text="{Binding SeenText}" Foreground="{StaticResource HgMuted}" FontSize="10.5" FontFamily="{StaticResource HgSans}" HorizontalAlignment="Right"/>
+                                                                            <!-- Estado da peça: ícone de estado + texto "visto há X h" -->
+                                                                            <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0" Orientation="Horizontal" ToolTip="{Binding StateTooltip}">
+                                                                                <Viewbox Width="14" Height="14" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                                                    <Path Data="{Binding StateIconGeometry}" Stroke="{Binding StateBrush}" StrokeThickness="2.2"
+                                                                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                                                          Width="24" Height="24" Stretch="None"/>
+                                                                                </Viewbox>
+                                                                                <TextBlock Text="{Binding SeenText}" Foreground="{StaticResource HgMuted}" FontSize="11" FontFamily="{StaticResource HgSans}" VerticalAlignment="Center"/>
                                                                             </StackPanel>
 
                                                                             <Button Grid.Column="2" Style="{StaticResource HgSecondary}" VerticalAlignment="Center" Padding="8,4" FontSize="11"

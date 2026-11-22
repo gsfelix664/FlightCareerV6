@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.Windows.Media;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Parts;
 
 namespace FlightCareer.UI.ViewModels
 {
     /// <summary>
-    /// Ícones vetoriais (sintaxe de path do SVG, caixa 24×24, traço) de cada grupo de componentes do Hangar.
-    /// Desenhados para o app; renderizados com <c>Path</c> no tom da saúde do grupo.
+    /// Ícones vetoriais (sintaxe de path do SVG, caixa 24×24, traço) de cada grupo de componentes do Hangar
+    /// e dos estados de inspeção/saúde das peças (check, exclamação, quebrado, interrogação).
+    /// Desenhados para o app; renderizados com <c>Path</c> no tom da saúde do grupo/peça.
     /// </summary>
     public static class HangarIcons
     {
@@ -34,9 +36,25 @@ namespace FlightCareer.UI.ViewModels
             [ComponentKind.Airframe] = Freeze("M12,2.5 C12.9,2.5 13.3,3.8 13.3,5 V9.5 L21.5,14 V16 L13.3,13.5 V18.5 L16,20.5 V21.8 L12,20.7 L8,21.8 V20.5 L10.7,18.5 V13.5 L2.5,16 V14 L10.7,9.5 V5 C10.7,3.8 11.1,2.5 12,2.5 Z"),
         };
 
+        // Geometrias de estado de saúde/inspeção (caixa 24×24)
+        public static readonly Geometry Check = Freeze("M4,12.5 L9.5,18 L20,6.5");
+        public static readonly Geometry Warning = Freeze("M12,3 L22,20.5 H2 Z M12,9 V14.5 M12,17.5 V18");
+        public static readonly Geometry Broken = Freeze("M5,5 L19,19 M19,5 L5,19");
+        public static readonly Geometry Question = Freeze("M8.5,8.5 A4,4 0 0 1 15.5,8 C15.5,10.5 12,11.5 12,14 M12,17.5 V18");
+
         private static readonly Geometry Fallback = Freeze("M5,5 H19 V19 H5 Z");
 
         public static Geometry For(ComponentKind kind) => Icons.TryGetValue(kind, out var g) ? g : Fallback;
+
+        public static Geometry ForDisplayState(PartDisplayState state) => state switch
+        {
+            PartDisplayState.Green => Check,
+            PartDisplayState.Yellow => Warning,
+            PartDisplayState.Red => Broken,
+            PartDisplayState.Broken => Broken,
+            PartDisplayState.Uncertain => Question,
+            _ => Question
+        };
 
         private static Geometry Freeze(string pathData)
         {

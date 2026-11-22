@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -36,6 +37,39 @@ namespace FlightCareer.UI.ViewModels
             _ => Muted
         };
 
+        public static SolidColorBrush ForBand(PartKnownBand band) => band switch
+        {
+            PartKnownBand.Broken => Red,
+            PartKnownBand.Red => Red,
+            PartKnownBand.Yellow => Amber,
+            PartKnownBand.Green => Green,
+            _ => Muted
+        };
+
+        public static SolidColorBrush ForDisplayState(PartDisplayInfo info)
+        {
+            if (info == null) return Muted;
+            return info.State switch
+            {
+                PartDisplayState.Broken => Red,
+                PartDisplayState.Red => Red,
+                PartDisplayState.Yellow => Amber,
+                PartDisplayState.Green => Green,
+                PartDisplayState.Uncertain => ForBand(info.LastKnownBand),
+                _ => Muted
+            };
+        }
+
+        public static SolidColorBrush ForDisplayState(PartDisplayState state) => state switch
+        {
+            PartDisplayState.Broken => Red,
+            PartDisplayState.Red => Red,
+            PartDisplayState.Yellow => Amber,
+            PartDisplayState.Green => Green,
+            PartDisplayState.Uncertain => Amber,
+            _ => Muted
+        };
+
         private static SolidColorBrush Freeze(byte r, byte g, byte b)
         {
             var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
@@ -51,9 +85,11 @@ namespace FlightCareer.UI.ViewModels
         private readonly EngineClass _engineClass;
         private readonly double _purchasePrice;
         private double _airframeHours;
+        private PilotAircraft? _aircraft;
 
         public ComponentRowViewModel(AircraftComponent component, ComponentDefinition definition, ComponentCatalog catalog,
-            EngineClass engineClass, double purchasePrice, double airframeHours, IRelayCommand<ComponentRowViewModel> repairCommand)
+            EngineClass engineClass, double purchasePrice, double airframeHours, IRelayCommand<ComponentRowViewModel> repairCommand,
+            PilotAircraft? aircraft = null)
         {
             Component = component;
             Definition = definition;
@@ -62,6 +98,7 @@ namespace FlightCareer.UI.ViewModels
             _purchasePrice = purchasePrice;
             _airframeHours = airframeHours;
             RepairCommand = repairCommand;
+            _aircraft = aircraft;
         }
 
         public AircraftComponent Component { get; }
@@ -76,7 +113,7 @@ namespace FlightCareer.UI.ViewModels
         public HealthRange Range => HealthVisibility.GetDisplayedRange(Component, _airframeHours, _catalog.Visibility);
         public bool IsExact => Range.IsExact;
         public string RangeText => Range.ToString();
-        public SolidColorBrush Brush => HangarPalette.ForHealth(Range.Mid);
+        public SolidColorBrush Brush => IsGroupPartsDriven ? GroupStateBrush : HangarPalette.ForHealth(Range.Mid);
         public Geometry IconGeometry => HangarIcons.For(Kind);
 
         // Barra: [preenchido 0..Min][faixa Min..Max][vazio Max..100]
@@ -98,6 +135,11 @@ namespace FlightCareer.UI.ViewModels
         {
             get
             {
+                if (IsGroupPartsDriven)
+                {
+                    return PartHangarView.GroupLifeText(Kind, _aircraft, _engineClass);
+                }
+
                 var (remaining, life, isCycles) = ComponentMaintenance.RemainingLife(Definition, Component, _engineClass);
                 if (life <= 0) return string.Empty;
                 string unit = isCycles ? "pousos" : "h";
@@ -107,14 +149,76 @@ namespace FlightCareer.UI.ViewModels
             }
         }
 
+        public bool HasLifeText => !string.IsNullOrEmpty(LifeText);
+
         public SolidColorBrush LifeBrush
         {
             get
             {
+                if (IsGroupPartsDriven)
+                {
+                    var (_, isOverdue) = PartHangarView.GroupLifeInfo(Kind, _aircraft, _engineClass);
+                    return isOverdue ? HangarPalette.Red : HangarPalette.Secondary;
+                }
+
                 var (remaining, life, _) = ComponentMaintenance.RemainingLife(Definition, Component, _engineClass);
                 if (life <= 0) return HangarPalette.Secondary;
                 return remaining <= 0 ? HangarPalette.Red : remaining < life * 0.1 ? HangarPalette.Amber : HangarPalette.Secondary;
             }
+        }
+
+        // --- Estado de grupo por peças ---
+        public bool IsGroupPartsDriven => HasParts;
+
+        private PartDisplayState _groupWorstState = PartDisplayState.Green;
+        public PartDisplayState GroupWorstState => _groupWorstState;
+
+        public Geometry GroupStateIconGeometry => HangarIcons.ForDisplayState(_groupWorstState);
+
+        public SolidColorBrush GroupStateBrush => _groupWorstState switch
+        {
+            PartDisplayState.Broken => HangarPalette.Red,
+            PartDisplayState.Red => HangarPalette.Red,
+            PartDisplayState.Yellow => HangarPalette.Amber,
+            PartDisplayState.Green => HangarPalette.Green,
+            PartDisplayState.Uncertain => HangarPalette.Amber,
+            _ => HangarPalette.Muted
+        };
+
+        private string _groupCountsSummary = string.Empty;
+        public string GroupCountsSummary => _groupCountsSummary;
+
+        private void RecalculateGroupState()
+        {
+            if (!HasParts)
+            {
+                _groupWorstState = PartDisplayState.Green;
+                _groupCountsSummary = string.Empty;
+                return;
+            }
+
+            var (worst, counts) = PartHangarView.Summarize(Parts.Select(p => p.Row.Display));
+            _groupWorstState = worst;
+
+            var partsList = new List<string>();
+            if (counts.TryGetValue(PartDisplayState.Broken, out int broken) && broken > 0)
+                partsList.Add($"✖ {broken}");
+            if (counts.TryGetValue(PartDisplayState.Red, out int red) && red > 0)
+                partsList.Add($"✖ {red}");
+            if (counts.TryGetValue(PartDisplayState.Yellow, out int yellow) && yellow > 0)
+                partsList.Add($"⚠ {yellow}");
+            if (counts.TryGetValue(PartDisplayState.Uncertain, out int uncertain) && uncertain > 0)
+                partsList.Add($"? {uncertain}");
+            if (counts.TryGetValue(PartDisplayState.Green, out int green) && green > 0)
+                partsList.Add($"✓ {green}");
+
+            _groupCountsSummary = string.Join(" · ", partsList);
+
+            OnPropertyChanged(nameof(GroupWorstState));
+            OnPropertyChanged(nameof(GroupStateIconGeometry));
+            OnPropertyChanged(nameof(GroupStateBrush));
+            OnPropertyChanged(nameof(GroupCountsSummary));
+            OnPropertyChanged(nameof(Brush));
         }
 
         private PartReplacementPlan? _replacementPlan;
@@ -178,16 +282,23 @@ namespace FlightCareer.UI.ViewModels
             }
             OnPropertyChanged(nameof(HasParts));
             OnPropertyChanged(nameof(PartsHeader));
+            OnPropertyChanged(nameof(IsGroupPartsDriven));
+            OnPropertyChanged(nameof(LifeText));
+            OnPropertyChanged(nameof(HasLifeText));
+            OnPropertyChanged(nameof(LifeBrush));
+            RecalculateGroupState();
         }
 
-        public void Refresh(double airframeHours)
+        public void Refresh(double airframeHours, PilotAircraft? aircraft = null)
         {
             _airframeHours = airframeHours;
+            if (aircraft != null) _aircraft = aircraft;
+            RecalculateGroupState();
             OnPropertyChanged(string.Empty);
         }
     }
 
-    /// <summary>Linha de peça no Hangar com saúde conhecida e troca individual.</summary>
+    /// <summary>Linha de peça no Hangar com estado por ícone e troca individual.</summary>
     public sealed class PartRowViewModel
     {
         public PartHangarRow Row { get; }
@@ -198,6 +309,24 @@ namespace FlightCareer.UI.ViewModels
         public string SeenText => Row.SeenText;
         public string? LifeNote => Row.LifeNote;
         public bool HasLifeNote => !string.IsNullOrEmpty(LifeNote);
+
+        public PartDisplayInfo Display => Row.Display;
+        public PartDisplayState DisplayState => Display.State;
+
+        public Geometry StateIconGeometry => HangarIcons.ForDisplayState(DisplayState);
+
+        public SolidColorBrush StateBrush => HangarPalette.ForDisplayState(Display);
+
+        public string StateTooltip => DisplayState switch
+        {
+            PartDisplayState.Broken => "Peça quebrada",
+            PartDisplayState.Red => "Risco de pane (< 20%)",
+            PartDisplayState.Yellow => "Atenção (20–40%)",
+            PartDisplayState.Green => "Em ordem (≥ 40%)",
+            PartDisplayState.Uncertain => "Incerta — faça uma inspeção",
+            _ => string.Empty
+        };
+
         public SolidColorBrush Brush => Row.Band switch
         {
             PartKnownBand.Broken => HangarPalette.Red,
@@ -206,6 +335,7 @@ namespace FlightCareer.UI.ViewModels
             PartKnownBand.Green => HangarPalette.Green,
             _ => HangarPalette.Muted
         };
+
         public string ReplaceText { get; }
         public IRelayCommand<PartRowViewModel>? ReplaceCommand { get; }
 
