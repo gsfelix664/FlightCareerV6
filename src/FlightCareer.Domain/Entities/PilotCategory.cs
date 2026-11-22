@@ -88,10 +88,10 @@ namespace FlightCareer.Domain.Entities
         {
             return currentCategory switch
             {
-                PilotCategory.Category1_FlightSchool => 2500,     // Formação Básica e Prática
-                PilotCategory.Category2_SAE => 12000,             // Proficiência Comercial
-                PilotCategory.Category3_AirTaxi => 45000,         // Experiência em Rotas e Gestão
-                PilotCategory.Category4_Regional => 150000,       // Alta Performance e Precisão IFR
+                PilotCategory.Category1_FlightSchool => 10000,    // Formação Básica e Prática
+                PilotCategory.Category2_SAE => 45000,            // Proficiência Comercial
+                PilotCategory.Category3_AirTaxi => 175000,       // Experiência em Rotas e Gestão
+                PilotCategory.Category4_Regional => 600000,      // Alta Performance e Precisão IFR
                 _ => 0
             };
         }

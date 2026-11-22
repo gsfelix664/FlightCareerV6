@@ -302,6 +302,14 @@ namespace FlightCareer.UI.Services
                 // 14. Estado de falha elétrica (1 double)
                 AddToDef("PARTIAL PANEL ELECTRICAL", "Enum");
 
+                // 15. Realismo e Ambiente para XP (6 doubles)
+                AddToDef("REALISM CRASH DETECTION", "Bool");
+                AddToDef("AUTO COORDINATION", "Bool");
+                AddToDef("REALISM", "Number");
+                AddToDef("AMBIENT VISIBILITY", "Meters");
+                AddToDef("AMBIENT IN CLOUD", "Bool");
+                AddToDef("DENSITY ALTITUDE", "Feet");
+
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
                 // Estado rápido de panes (vigilância contínua das panes persistentes + panes nativas)

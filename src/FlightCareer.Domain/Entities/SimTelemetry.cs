@@ -97,6 +97,14 @@ namespace FlightCareer.Domain.Entities
         // Estado de falha elétrica (1 double)
         public double PartialPanelElectrical; // PARTIAL PANEL ELECTRICAL (0=OK, 1=Falha)
 
+        // Realismo e Ambiente (XP-NOVO) (6 doubles)
+        public double RealismCrashDetection;  // REALISM CRASH DETECTION (Bool, 1=On)
+        public double AutoCoordination;       // AUTO COORDINATION (Bool, 1=On)
+        public double Realism;                // REALISM (Number, 0-100)
+        public double AmbientVisibility;      // AMBIENT VISIBILITY (Meters)
+        public double AmbientInCloud;         // AMBIENT IN CLOUD (Bool, 1=On)
+        public double DensityAltitude;        // DENSITY ALTITUDE (Feet)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;
@@ -115,6 +123,9 @@ namespace FlightCareer.Domain.Entities
         public bool IsPrecipitating => AmbientPrecipState > 0.5;
         public bool IsCarbHeatOn => EngAntiIce > 0.5;
         public bool HasCarbHeat => CarbHeatAvailable > 0.5;
+        public bool IsCrashDetectionOn => RealismCrashDetection > 0.5;
+        public bool IsAutoCoordinationOn => AutoCoordination > 0.5;
+        public bool IsInCloud => AmbientInCloud > 0.5;
         public double CrosswindComponentKnots
         {
             get

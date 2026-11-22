@@ -219,7 +219,8 @@ namespace FlightCareer.UI.ViewModels
         public FinanceViewModel Finance => _financeViewModel;
         public FlightLogsViewModel FlightLogs => _flightLogsViewModel;
         public string CashDisplay => $"$ {Balance:N2}";
-        public string RankDisplay => Rank?.ToUpper() ?? "STUDENT";
+        public int PilotLevel => FlightCareer.Domain.Xp.PilotLevel.ForXp(ExperiencePoints);
+        public string RankDisplay => $"{Rank?.ToUpper() ?? "STUDENT"} · NÍVEL {PilotLevel}";
         public double XpProgress => (TotalHours % 100);
         public string CurrentLocation => $"{CurrentAirportICAO} - {CurrentAirportName}";
 

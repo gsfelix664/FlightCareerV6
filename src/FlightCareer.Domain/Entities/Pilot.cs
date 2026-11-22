@@ -21,6 +21,7 @@ namespace FlightCareer.Domain.Entities
         public DifficultyMode Difficulty { get; set; } = DifficultyMode.Medium;
         public double TotalHours { get; set; }
         public int ExperiencePoints { get; set; }
+        public int Level => FlightCareer.Domain.Xp.PilotLevel.ForXp(ExperiencePoints);
         public string Rank { get; set; } = "Student Pilot";
         public Guid? ActiveAircraftId { get; set; }
 

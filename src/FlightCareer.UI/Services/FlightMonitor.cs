@@ -7,6 +7,7 @@ using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
+using FlightCareer.Domain.Xp;
 using FlightCareer.Application.DTOs;
 using FlightCareer.Application.Services;
 using FlightCareer.Infrastructure.Services;
@@ -100,6 +101,25 @@ namespace FlightCareer.UI.Services
         public PersistentFailureService PersistentFailures => _persistentFailures;
         private readonly PersistentFailureService _persistentFailures;
         private PilotAircraft? _watchedAircraft;
+
+        // Métricas e fatos operacionais para XP (XP-NOVO)
+        private double _airborneSeconds;
+        private bool _usedTimeAcceleration;
+        private double _worstTouchdownFpm;
+        private double _worstTouchdownG = 1.0;
+        private int _flightTouchdowns;
+        private int _flightLandingsCount;
+        private int _overspeedInfractions;
+        private bool _prevHasOverspeed;
+        private readonly Queue<(double SimSec, double WindKnots)> _windHistory = new();
+        // Últimos 5 min simulados de visibilidade/nuvem: o bônus de IMC vale só na aproximação, não em cruzeiro
+        private readonly Queue<(double SimSec, double VisibilityM, bool InCloud)> _approachEnvHistory = new();
+        private double _landingCrosswindKt;
+        private double _landingGustSpreadKt;
+        private double _landingDensityAltitudeFt;
+        private double _landingVisibilityM = 10000.0;
+        private bool _landingInCloud;
+        private bool _landingNight;
 
         [ActivatorUtilitiesConstructor]
         public FlightMonitor(
@@ -653,6 +673,23 @@ namespace FlightCareer.UI.Services
             _lastTick = DateTime.MinValue;
             _lastPreflightTick = DateTime.MinValue;
 
+            _airborneSeconds = 0;
+            _usedTimeAcceleration = false;
+            _worstTouchdownFpm = 0;
+            _worstTouchdownG = 1.0;
+            _flightTouchdowns = 0;
+            _flightLandingsCount = 0;
+            _overspeedInfractions = 0;
+            _prevHasOverspeed = false;
+            _windHistory.Clear();
+            _approachEnvHistory.Clear();
+            _landingCrosswindKt = 0;
+            _landingGustSpreadKt = 0;
+            _landingDensityAltitudeFt = 0;
+            _landingVisibilityM = 10000.0;
+            _landingInCloud = false;
+            _landingNight = false;
+
             _touchdown.Reset();
             _impactCrashHandled = false;
             _totalLossInProgress = false;
@@ -1047,6 +1084,23 @@ namespace FlightCareer.UI.Services
                 _simulatedFlightTimeSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
             }
 
+            // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
+            if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
+            if (data.HasOverspeed && !_prevHasOverspeed) _overspeedInfractions++;
+            _prevHasOverspeed = data.HasOverspeed;
+
+            if (_isAirborne && !data.IsOnGround)
+            {
+                _airborneSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
+                _approachEnvHistory.Enqueue((_simulatedFlightTimeSeconds, data.AmbientVisibility, data.IsInCloud));
+                while (_approachEnvHistory.Count > 0 && (_simulatedFlightTimeSeconds - _approachEnvHistory.Peek().SimSec) > 300.0)
+                    _approachEnvHistory.Dequeue();
+            }
+
+            _windHistory.Enqueue((_simulatedFlightTimeSeconds, data.AmbientWindVelocity));
+            while (_windHistory.Count > 0 && (_simulatedFlightTimeSeconds - _windHistory.Peek().SimSec) > 180.0)
+                _windHistory.Dequeue();
+
             // --- MONITORAMENTO DE INTEGRIDADE DE COMBUSTÍVEL EM VOO ---
             if (_fuelIntegrity != null)
             {
@@ -1259,6 +1313,11 @@ namespace FlightCareer.UI.Services
 
             if (ev.Kind == TouchdownKind.Crash)
             {
+                _flightTouchdowns++;
+                if (ev.TouchdownFpm > _worstTouchdownFpm) _worstTouchdownFpm = ev.TouchdownFpm;
+                if (ev.PeakG > _worstTouchdownG) _worstTouchdownG = ev.PeakG;
+                UpdateLandingEnvironmentSnapshot();
+
                 _impactCrashHandled = true;
                 _failures.MarkCrashApplied();
                 _telemetryLogger.LogEvent("CRASH_ADDON", $"{ev.Reason} ({summary})");
@@ -1273,6 +1332,11 @@ namespace FlightCareer.UI.Services
 
             _telemetryLogger.LogEvent("TOQUE", summary);
             _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+            _flightTouchdowns++;
+            if (ev.TouchdownFpm > _worstTouchdownFpm) _worstTouchdownFpm = ev.TouchdownFpm;
+            if (ev.PeakG > _worstTouchdownG) _worstTouchdownG = ev.PeakG;
+            UpdateLandingEnvironmentSnapshot();
+
             if (!_isAirborne) return; // contato antes de decolar de fato (ex.: salto na corrida): só registro
 
             if (!_hasTouchedDown)
@@ -1294,11 +1358,51 @@ namespace FlightCareer.UI.Services
             }
         }
 
+        private void UpdateLandingEnvironmentSnapshot()
+        {
+            if (_lastData is { } data)
+            {
+                _landingCrosswindKt = data.CrosswindComponentKnots;
+                _landingDensityAltitudeFt = data.DensityAltitude;
+            }
+            if (_windHistory.Count > 0)
+            {
+                double minW = double.MaxValue;
+                double maxW = double.MinValue;
+                foreach (var (_, w) in _windHistory)
+                {
+                    if (w < minW) minW = w;
+                    if (w > maxW) maxW = w;
+                }
+                _landingGustSpreadKt = Math.Max(0.0, maxW - minW);
+            }
+            if (_approachEnvHistory.Count > 0)
+            {
+                double minVis = double.MaxValue;
+                bool cloud = false;
+                foreach (var (_, vis, inCloud) in _approachEnvHistory)
+                {
+                    if (vis > 0 && vis < minVis) minVis = vis;
+                    cloud |= inCloud;
+                }
+                _landingVisibilityM = minVis < double.MaxValue ? minVis : 10000.0;
+                _landingInCloud = cloud;
+            }
+        }
+
         /// <summary>Toque na pista: ciclo de trem/pneus/freios e dano por impacto. Bounce não conta como novo pouso.</summary>
         private void RegisterLanding(double touchdownFpm, SimTelemetry data, bool isBounce)
         {
             if (_aircraft == null) return;
-            if (!isBounce) _aircraft.LandingsCount++;
+            if (!isBounce)
+            {
+                _aircraft.LandingsCount++;
+                _flightLandingsCount++;
+            }
+            if (touchdownFpm > _worstTouchdownFpm) _worstTouchdownFpm = touchdownFpm;
+            if (data.GForce > _worstTouchdownG) _worstTouchdownG = data.GForce;
+            UpdateLandingEnvironmentSnapshot();
+
             _failures.ProcessLanding(touchdownFpm, data.VelocityBodyX, data.IsWetOrContaminatedSurface);
 
             if (_parts.IsActive)
@@ -1493,6 +1597,103 @@ namespace FlightCareer.UI.Services
                 System.Diagnostics.Debug.WriteLine($"Error saving components at flight end: {ex.Message}");
             }
 
+            RunwayFacts? originFacts = null;
+            RunwayFacts? destFacts = null;
+            try
+            {
+                await using var rwyCtx = await CreateDbContextAsync();
+                var origAirp = await rwyCtx.Airports.FirstOrDefaultAsync(a => a.ICAO == _originIcao);
+                var destAirp = await rwyCtx.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
+
+                var origRwys = await rwyCtx.Runways.Where(r => r.AirportIdent == _originIcao).ToListAsync();
+                var destRwys = await rwyCtx.Runways.Where(r => r.AirportIdent == destinationIcao).ToListAsync();
+
+                double minRunwayReq = _aircraft?.AircraftType?.MinRunwayLength ?? 0.0;
+                string[] hardSurfaces = { "ASPH", "CON", "CONC", "HARD", "BIT", "PEM", "ASP" };
+
+                if (origAirp != null && origRwys.Count > 0)
+                {
+                    var best = origRwys.OrderByDescending(r => r.LengthFt).First();
+                    bool unpaved = !hardSurfaces.Any(h => best.Surface.Contains(h, StringComparison.OrdinalIgnoreCase));
+                    originFacts = new RunwayFacts(best.LengthFt, minRunwayReq, unpaved, origAirp.ElevationFt);
+                }
+                if (destAirp != null && destRwys.Count > 0)
+                {
+                    var best = destRwys.OrderByDescending(r => r.LengthFt).First();
+                    bool unpaved = !hardSurfaces.Any(h => best.Surface.Contains(h, StringComparison.OrdinalIgnoreCase));
+                    destFacts = new RunwayFacts(best.LengthFt, minRunwayReq, unpaved, destAirp.ElevationFt);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error resolving runway facts for XP: {ex.Message}");
+            }
+
+            // ENGINE TYPE: 0 pistão, 1 jato, 5 turboélice. Turboélice usa o limite de vento cruzado do monomotor (12 kt).
+            bool isJet = data.EngineType == 1.0;
+
+            var landingEnv = new EnvFacts(
+                CrosswindKt: _landingCrosswindKt,
+                IsJet: isJet,
+                GustSpreadKt: _landingGustSpreadKt,
+                DensityAltitudeFt: _landingDensityAltitudeFt,
+                Night: _landingNight,
+                VisibilityM: _landingVisibilityM,
+                InCloud: _landingInCloud
+            );
+
+            double cruiseSpeed = _aircraft?.AircraftType?.CruiseSpeedKts ?? 100.0;
+            if (cruiseSpeed <= 0) cruiseSpeed = 100.0;
+            // ETE pela distância direta origem → destino (a distância voada inclui desvios e deixaria quase todo voo "no prazo")
+            double plannedNm = _distanceTraveled;
+            try
+            {
+                await using var etaCtx = await CreateDbContextAsync();
+                var o = await etaCtx.Airports.AsNoTracking().FirstOrDefaultAsync(a => a.ICAO == _originIcao);
+                var d = await etaCtx.Airports.AsNoTracking().FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
+                if (o != null && d != null)
+                    plannedNm = LocationUtils.CalculateDistance(o.Latitude, o.Longitude, d.Latitude, d.Longitude);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error computing planned distance for ETE: {ex.Message}");
+            }
+            double eteMinutes = (plannedNm / cruiseSpeed) * 60.0 + 15.0;
+
+            var firstMission = _activeMissions.FirstOrDefault();
+            string? missionFamilyId = firstMission != null ? MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id : null;
+            bool isFerry = _activeMissions.Count == 0;
+            bool isUrgent = _activeMissions.Any(m => m.Urgency > 1.0 || (m.SubId != null && (m.SubId.StartsWith("3.3") || m.SubId.StartsWith("4.3.1"))));
+
+            int gPaxViolations = (_qualityService.IsPaxFlight && (_qualityService.MaxGForce > 2.2 || _qualityService.MinGForce < -0.5)) ? 1 : 0;
+            double airborneMin = _airborneSeconds > 0 ? _airborneSeconds / 60.0 : flightDurationMinutes;
+
+            var xpInputs = new XpFlightInputs(
+                AirborneMinutes: airborneMin,
+                DistanceNm: _distanceTraveled,
+                LegsCompleted: Math.Max(1, _flightLandingsCount),
+                MissionFamilyId: missionFamilyId,
+                IsFerryOrNoMission: isFerry,
+                UsedTimeAcceleration: _usedTimeAcceleration,
+                CrashDetectionOn: data.IsCrashDetectionOn,
+                AutoCoordinationOn: data.IsAutoCoordinationOn,
+                RealismPct: data.Realism > 0 ? data.Realism : 100.0,
+                AutoStartUsed: _autoStartUsed,
+                WorstTouchdownFpm: _worstTouchdownFpm,
+                WorstTouchdownG: _worstTouchdownG,
+                TouchdownCount: Math.Max(1, _flightTouchdowns),
+                VneOrStallInfractions: _overspeedInfractions,
+                GExcessInfractionsWithPax: gPaxViolations,
+                LightsOrSpeedInfractions: 0,
+                OffRunwayOrExcursion: isOffFieldLanding,
+                Origin: originFacts,
+                Destination: destFacts,
+                Landing: landingEnv,
+                BlockMinutes: flightDurationMinutes,
+                EteMinutes: eteMinutes,
+                IsUrgentMission: isUrgent
+            );
+
             var outcome = await _flightService.ProcessFlightFinishAsync(
                 _pilot.Id,
                 _aircraft.Id,
@@ -1517,7 +1718,8 @@ namespace FlightCareer.UI.Services
                 realFuelUsed: realFuelUsed,
                 isFlightInvalidated: _flightInvalidated,
                 invalidationReason: _flightInvalidationReason,
-                autoStartUsed: _autoStartUsed
+                autoStartUsed: _autoStartUsed,
+                xpInputs: xpInputs
             );
 
             OnFlightFinished?.Invoke(outcome);

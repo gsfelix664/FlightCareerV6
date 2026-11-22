@@ -2750,3 +2750,24 @@
 - `WearRuleMetricCoverageTests`: nova suíte xUnit garantindo que 100% das regras de evento possuem produtor ativo, 100% das regras contínuas utilizam sensores registrados e chaves de limite válidas, além de 8 testes cobrindo thresholds, sensores zerados e guardas de feature de cada métrica.
 - `RuleCoverageService` e comando `coverage` no `FlightCareer.Replay`: geração automática de relatório completo de cobertura das 47 regras para os 46 modelos do catálogo em `docs/plans/cobertura-regras-por-aviao.md`.
 - Não testado no MSFS.
+
+## 2026-11-22 - XP por esforço e habilidade com bônus fixos e nível do piloto (XP-NOVO) (Gemini)
+- `Domain/Xp/`: módulo de lógica pura implementando o cálculo aprovado do plano `xp-proficiencia.md` § 6:
+  - `XpFlightInputs.cs`: records imutáveis de entrada de fatos de voo (`XpFlightInputs`), fatos de pista de origem/destino (`RunwayFacts`), fatos ambientais e aproximação (`EnvFacts`) e detalhamento de cálculo (`XpBreakdown`).
+  - `PilotLevel.cs`: modelo de progressão por nível contínuo sem nível máximo baseado na curva quadrática $300 \times (L - 1)^2$ (`ForXp` e `XpForLevel`).
+  - `XpRules.cs` e `Infrastructure/Data/xp_rules.json`: calibração 100% desacoplada em dados com fallback embutido idêntico para taxas base (2 XP/min no ar, 0,5 XP/NM, 50 XP/perna), multiplicadores de tipo (`M_Tipo`), multiplicadores de realismo (`M_Realismo` 0,80 a 1,20), multiplicadores de qualidade e infrações (`M_Qualidade` 0,50 a 1,15) e bônus fixos de pista, ambiente e prazo ETE.
+  - `XpCalculator.cs`: classe estática pura computando `Total = round(Base × M_Tipo × M_Realismo × M_Qualidade + Bônus)` e gerando lista explicativa de linhas para o resumo do voo.
+- `Pilot.cs`: nova propriedade calculada `Level => PilotLevel.ForXp(ExperiencePoints)` sem adicionar coluna nova no banco.
+- `PilotCategory.cs`: novos requisitos de XP regulatório para homologação de categorias (10.000 / 45.000 / 175.000 / 600.000) adaptados à escala da curva de níveis.
+- `SimTelemetry.cs` e `SimConnectService.cs`: adicionadas 6 novas SimVars no final da struct e definições `AddToDef` mantendo correspondência exata de posições e tipos: `REALISM CRASH DETECTION` (Bool), `AUTO COORDINATION` (Bool), `REALISM` (Number), `AMBIENT VISIBILITY` (Meters), `AMBIENT IN CLOUD` (Bool), `DENSITY ALTITUDE` (Feet).
+- `FlightOutcome.cs`: nova propriedade `XpBreakdownLines` para transporte do detalhamento do cálculo.
+- `FlightService.cs`: `ProcessFlightFinishAsync` atualizado para receber `XpFlightInputs? xpInputs = null`, calculando o XP pelo `XpCalculator.Compute` (com fallback seguro base × M_Tipo × qualidade da nota se ausente), preservando XP 0 para voos invalidados e anexando linhas explicativas em `outcome.Message`.
+- `FlightMonitor.cs`: coleta em tempo de voo dos minutos no ar (`_airborneSeconds`), aceleração de tempo (`_usedTimeAcceleration`), pior toque de pernas/TGL (`_worstTouchdownFpm`, `_worstTouchdownG`, `_flightTouchdowns`), contagem de infrações de Vne (`_overspeedInfractions`), rajadas em janela de 3 minutos (`_landingGustSpreadKt`), condições de aproximação (nuvens, visibilidade e altitude-densidade), resolução de fatos de pista do banco e repasse dos dados consolidados ao `ProcessFlightFinishAsync`.
+- `MainViewModel.cs`: interface principal exibe a patente e o nível do piloto no formato "PATENTE · NÍVEL N".
+- `CareerProgressionSimulator.cs`: simulador de carreira atualizado para utilizar o `XpCalculator.Compute` com estimativas operacionais de pista, distância e pontualidade nos voos de missões, traslados e voos locais dos bots.
+- Suíte de testes:
+  - `PilotLevelTests.cs`: testes unitários de marcos de nível da curva, progressão sem limite superior e invariante de consistência `XpForLevel(ForXp(x)) <= x`.
+  - `XpCalculatorTests.cs`: testes de validação cobrindo o exemplo do plano (185 XP), pior toque de pernas com TGL, combo bush em altitude com pista de terra, pouso fora de pista com zeramento de bônus de pouso e penalidade, pisos/tetos dos multiplicadores e faixas de cumprimento de prazo.
+  - `FlightFinishXpPersistenceTests.cs`: teste de integração em SQLite em memória conferindo persistência exata de XP, avanço de nível do piloto e zeramento em voo invalidado.
+- Build 0 erros, `dotnet test` 809/809 testes aprovados (100%), Fuzz Testing em todas as 46 aeronaves (920 voos) 100% aprovado sem nenhuma violação.
+- Não testado no MSFS. Bônus noturno desligado (não confirmada SimVar direta no SDK); infrações de estol e luzes/velocidade não monitoradas atualmente pelo monitor entram como 0.
