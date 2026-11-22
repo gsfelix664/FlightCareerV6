@@ -64,8 +64,10 @@ namespace FlightCareer.Tests.Components
             var pilot = await check.Pilots.FindAsync(pilotId);
 
             Assert.Equal(49, aircraft!.HoursUntilNext50hInspection, 3);
-            Assert.True(pilot!.Balance < balanceBefore, "o custo do voo 2 é descontado do saldo atual");
-            Assert.True(pilot.Balance <= balanceBefore - 1, "o gasto de 2.000 do Hangar não pode ser desfeito pelo FlightService");
+            // Com a decisão de 2026-11-21, o voo não debita mais combustível consumido. Sem taxas aeroportuárias
+            // aplicáveis, o saldo permanece igual a balanceBefore, garantindo que o gasto de 2.000 do Hangar não foi desfeito.
+            Assert.Equal(balanceBefore, pilot!.Balance, 2);
+            Assert.True(pilot.Balance <= 8_000, "o gasto de 2.000 do Hangar não pode ser desfeito pelo FlightService");
         }
 
         [Fact]

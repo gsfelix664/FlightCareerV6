@@ -2703,3 +2703,11 @@
 
 ## 2026-11-22 - App encerra ao fechar a janela principal (Claude)
 - O processo do FlightCareer continuava vivo, sem janelas, depois de fechar o app (travava as DLLs e o `dotnet build`). Causa: `ShutdownMode="OnLastWindowClose"` e janelas que só se escondem (`AlertOverlayService` faz `Hide()` no overlay de alertas; HUD). Agora `ShutdownMode="OnMainWindowClose"` (o login já troca `Application.MainWindow` para a janela principal). Não visto na tela.
+
+## 2026-11-22 - FIM-VOO-ACIDENTE: Combustível cobrado uma vez, acidente no diário e missões devolvidas na perda total (Gemini)
+- `FlightService.ProcessFlightFinishAsync`: removida a cobrança duplicada de combustível consumido (débito no saldo e transações "Combustível") nos caminhos normal e de pouso fora de pista, alinhando com a decisão de 2026-11-21 em que o combustível é pago na compra no Hangar (`outcome.FuelCost = 0` mantendo `outcome.FuelUsed` para o blackbox); `AircraftModel` preenchido no registro de `Flight`.
+- `FlightService.ProcessTotalLossAsync`: novo método para persistência de acidente na perda total gravando o `Flight` (origem, destino do local do impacto ou "ACIDENTE", `AircraftModel`, XP e Revenue 0), somando horas voadas ao piloto (`TotalHours`), avançando o relógio de carreira (`CareerClock.AdvanceFlight`) e devolvendo missões ativas ao mercado (`IsAccepted = false`, `PilotId = null`, `OriginICAO` revertido para a origem do voo e distância recalculada, mantendo o `RewardMoney` intacto).
+- `FlightMonitor`: em `HandleTouchdown` (ramo `Crash`), chamada a `_qualityService.RecordTouchdownFpm(ev.TouchdownFpm)` antes de `HandleTotalLossAsync` para que o resumo do blackbox use a medição do detector; em `HandleTotalLossAsync`, captura prévia dos dados do voo antes de `StopMonitoring()` e invocação de `_flightService.ProcessTotalLossAsync` antes de `OnTotalLoss`.
+- `FlightLogEntry`: status `PERDA_TOTAL_DESTRUIDA` mapeado para `StatusDisplay` "✖ ACIDENTE", `StatusColor` "#FF5252" e `StatusBg` "#2E1214".
+- Suíte `FlightFinishTotalLossTests` com 3 novos testes unitários validando fim de voo sem cobrança de combustível, pouso fora de pista sem cobrança e registro de perda total com devolução de missões; ajuste no teste `FlightPersistenceTests.Segundo_voo_ve_inspecao_e_gastos_feitos_entre_os_voos`.
+- Não testado no MSFS.
