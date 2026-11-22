@@ -42,3 +42,9 @@
 2. Serviço expresso: sim ou não; preço e redução.
 3. Prazo real: sempre × 4 ou o valor do fabricante por motor/peça quando o catálogo tiver.
 4. Restante: em horas de jogo (b, sugerido) ou convertido em horas reais (a).
+
+## 6. Decisões do usuário (2026-11-22, respostas à § 5)
+1. Minutos reais: **aprovada** a sugestão da § 3.1 (`clamp(round(2 × √horasDeJogo), 1, 20)`).
+2. Serviço expresso: **sim** (+50 % no preço, metade dos minutos reais e das horas de jogo).
+3. Prazo real: **sempre × 4** (não usar o valor do fabricante por motor).
+4. Como mostrar o restante: em discussão.
