@@ -1,6 +1,6 @@
 # FASES-2A — Contratos novos da fase 1: voo panorâmico, circuito de TGL e translado básico
 
-**Branch:** feat/fases-2a · **Commit:** pendente · **Data:** 2026-11-22
+**Branch:** feat/fases-2a · **Commit:** b02bfa3 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - Estender `Mission` com `RequiredTouchAndGoes` (int) e `OverflyWaypoints` (string), atualizando `EnsureSchemaUpdatedAsync` com as migrações idempotentes e cobrindo no teste de schema legado.
