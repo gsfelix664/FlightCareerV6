@@ -60,3 +60,4 @@ Os ids são os subtipos atuais (o primeiro dígito é o tier do aeroporto de ori
 | 5 Regional | 29 | 500 h | $500.000 |
 | 6 Doméstica | 37 | 1.000 h | $1.200.000 |
 | 7 Internacional | 45 | 1.500 h | $2.000.000 |
+- **Depois da fase 7 (decisão do usuário, 2026-11-22):** os níveis continuam subindo **sem limite** pelo XP (mesma curva 300 × (L − 1)², sem nível máximo), mas não há mais fases nem destraves além da 7. O nível alto vira só marca de experiência (exibida no perfil).
