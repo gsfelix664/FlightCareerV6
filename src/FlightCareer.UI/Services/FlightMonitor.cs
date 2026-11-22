@@ -112,6 +112,8 @@ namespace FlightCareer.UI.Services
         private int _overspeedInfractions;
         private bool _prevHasOverspeed;
         private readonly Queue<(double SimSec, double WindKnots)> _windHistory = new();
+        // Últimos 5 min simulados de visibilidade/nuvem: o bônus de IMC vale só na aproximação, não em cruzeiro
+        private readonly Queue<(double SimSec, double VisibilityM, bool InCloud)> _approachEnvHistory = new();
         private double _landingCrosswindKt;
         private double _landingGustSpreadKt;
         private double _landingDensityAltitudeFt;
@@ -680,6 +682,7 @@ namespace FlightCareer.UI.Services
             _overspeedInfractions = 0;
             _prevHasOverspeed = false;
             _windHistory.Clear();
+            _approachEnvHistory.Clear();
             _landingCrosswindKt = 0;
             _landingGustSpreadKt = 0;
             _landingDensityAltitudeFt = 0;
@@ -1089,13 +1092,9 @@ namespace FlightCareer.UI.Services
             if (_isAirborne && !data.IsOnGround)
             {
                 _airborneSeconds += SimTimeStep.ToSimSeconds(dt, data.SimulationRate);
-                if (data.Altitude < 3000 || _simulatedFlightTimeSeconds > 60)
-                {
-                    if (data.AmbientVisibility > 0)
-                        _landingVisibilityM = Math.Min(_landingVisibilityM, data.AmbientVisibility);
-                    if (data.IsInCloud)
-                        _landingInCloud = true;
-                }
+                _approachEnvHistory.Enqueue((_simulatedFlightTimeSeconds, data.AmbientVisibility, data.IsInCloud));
+                while (_approachEnvHistory.Count > 0 && (_simulatedFlightTimeSeconds - _approachEnvHistory.Peek().SimSec) > 300.0)
+                    _approachEnvHistory.Dequeue();
             }
 
             _windHistory.Enqueue((_simulatedFlightTimeSeconds, data.AmbientWindVelocity));
@@ -1377,6 +1376,18 @@ namespace FlightCareer.UI.Services
                 }
                 _landingGustSpreadKt = Math.Max(0.0, maxW - minW);
             }
+            if (_approachEnvHistory.Count > 0)
+            {
+                double minVis = double.MaxValue;
+                bool cloud = false;
+                foreach (var (_, vis, inCloud) in _approachEnvHistory)
+                {
+                    if (vis > 0 && vis < minVis) minVis = vis;
+                    cloud |= inCloud;
+                }
+                _landingVisibilityM = minVis < double.MaxValue ? minVis : 10000.0;
+                _landingInCloud = cloud;
+            }
         }
 
         /// <summary>Toque na pista: ciclo de trem/pneus/freios e dano por impacto. Bounce não conta como novo pouso.</summary>
@@ -1618,10 +1629,8 @@ namespace FlightCareer.UI.Services
                 System.Diagnostics.Debug.WriteLine($"Error resolving runway facts for XP: {ex.Message}");
             }
 
-            bool isJet = (data.EngineType == 1.0 || data.EngineType == 5.0) ||
-                (_aircraft?.AircraftType != null &&
-                 (_aircraft.AircraftType.Model.Contains("Jet", StringComparison.OrdinalIgnoreCase) ||
-                  (string.Equals(_aircraft.AircraftType.FuelType, "JET-A", StringComparison.OrdinalIgnoreCase) && _aircraft.AircraftType.CruiseSpeedKts > 350)));
+            // ENGINE TYPE: 0 pistão, 1 jato, 5 turboélice. Turboélice usa o limite de vento cruzado do monomotor (12 kt).
+            bool isJet = data.EngineType == 1.0;
 
             var landingEnv = new EnvFacts(
                 CrosswindKt: _landingCrosswindKt,
@@ -1635,7 +1644,21 @@ namespace FlightCareer.UI.Services
 
             double cruiseSpeed = _aircraft?.AircraftType?.CruiseSpeedKts ?? 100.0;
             if (cruiseSpeed <= 0) cruiseSpeed = 100.0;
-            double eteMinutes = (_distanceTraveled / cruiseSpeed) * 60.0 + 15.0;
+            // ETE pela distância direta origem → destino (a distância voada inclui desvios e deixaria quase todo voo "no prazo")
+            double plannedNm = _distanceTraveled;
+            try
+            {
+                await using var etaCtx = await CreateDbContextAsync();
+                var o = await etaCtx.Airports.AsNoTracking().FirstOrDefaultAsync(a => a.ICAO == _originIcao);
+                var d = await etaCtx.Airports.AsNoTracking().FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
+                if (o != null && d != null)
+                    plannedNm = LocationUtils.CalculateDistance(o.Latitude, o.Longitude, d.Latitude, d.Longitude);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error computing planned distance for ETE: {ex.Message}");
+            }
+            double eteMinutes = (plannedNm / cruiseSpeed) * 60.0 + 15.0;
 
             var firstMission = _activeMissions.FirstOrDefault();
             string? missionFamilyId = firstMission != null ? MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id : null;
