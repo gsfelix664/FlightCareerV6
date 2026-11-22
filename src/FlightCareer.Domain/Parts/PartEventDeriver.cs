@@ -28,6 +28,7 @@ namespace FlightCareer.Domain.Parts
 
         // Configuração e estado do subsistema elétrico (F2.4b-CAL)
         private ElectricalConfig? _electricalConfig;
+        private EngineLimitsConfig? _engineLimitsConfig;
         private int _avionicsStartSpikesCount;
 
         private double _batteryDeepDischargeSec;
@@ -37,6 +38,45 @@ namespace FlightCareer.Domain.Parts
         private double _overloadSec;
         private double _overloadOffSec;
         private readonly HashSet<double> _overloadThresholdsEmitted = new();
+
+        // 1. Freio (brakeEnergyPctRef)
+        private bool _isBrakingOccurrence;
+        private double _brakeEnergySum;
+        private double _prevBrakeVelocityMs;
+        private double _brakeLowTimeSec;
+
+        // 2. Curva rápida em táxi (taxiTurnSpeedKnots)
+        private bool _isTaxiTurnOccurrence;
+        private double _taxiTurnMaxGs;
+        private double _taxiTurnLowTimeSec;
+
+        // 3. Derrapagem de pneus no solo (skidSeconds)
+        private bool _isSkidOccurrence;
+        private double _skidAccumulatedSec;
+        private double _skidOffTimeSec;
+
+        // 5. Alta potência com óleo frio (highPowerColdOilMinutes) por motor
+        private readonly Dictionary<int, double> _coldOilSecByEngine = new();
+        private readonly Dictionary<int, double> _coldOilOffSecByEngine = new();
+        private readonly Dictionary<int, HashSet<double>> _coldOilThresholdsByEngine = new();
+
+        // 6. Ciclos de compensador de profundor (trimCycles)
+        private double? _trimAnchor;
+        private double? _trimDirection; // +1.0 ou -1.0
+        private int _trimCycleCount;
+        private readonly HashSet<double> _trimThresholdsEmitted = new();
+
+        // 7. Turbulência com AP (turbulenceGExceedanceCycles)
+        private bool _gExceedanceActive;
+        private int _gExceedanceCycleCount;
+        private readonly HashSet<double> _gExceedanceThresholdsEmitted = new();
+
+        // 8. Transientes rápidos de torque turboélice (rapidPowerTransientCycles) por motor
+        private readonly Dictionary<int, Queue<(double TimeSec, double Torque)>> _torqueHistoryByEngine = new();
+        private double _transientSimTimeSec;
+        private readonly Dictionary<int, int> _transientCycleCountByEngine = new();
+        private readonly Dictionary<int, HashSet<double>> _transientThresholdsByEngine = new();
+        private readonly Dictionary<int, double> _transientCooldownByEngine = new();
 
         private readonly List<string> _diagnosticMessages = new();
         private readonly HashSet<string> _diagnosticKeysReported = new(StringComparer.Ordinal);
@@ -60,6 +100,11 @@ namespace FlightCareer.Domain.Parts
             _electricalConfig = config;
         }
 
+        public void ConfigureEngine(EngineLimitsConfig? config)
+        {
+            _engineLimitsConfig = config;
+        }
+
         public void Reset()
         {
             _wasCombustion.Clear();
@@ -77,6 +122,38 @@ namespace FlightCareer.Domain.Parts
             _overloadSec = 0.0;
             _overloadOffSec = 0.0;
             _overloadThresholdsEmitted.Clear();
+
+            _isBrakingOccurrence = false;
+            _brakeEnergySum = 0.0;
+            _prevBrakeVelocityMs = 0.0;
+            _brakeLowTimeSec = 0.0;
+
+            _isTaxiTurnOccurrence = false;
+            _taxiTurnMaxGs = 0.0;
+            _taxiTurnLowTimeSec = 0.0;
+
+            _isSkidOccurrence = false;
+            _skidAccumulatedSec = 0.0;
+            _skidOffTimeSec = 0.0;
+
+            _coldOilSecByEngine.Clear();
+            _coldOilOffSecByEngine.Clear();
+            _coldOilThresholdsByEngine.Clear();
+
+            _trimAnchor = null;
+            _trimDirection = null;
+            _trimCycleCount = 0;
+            _trimThresholdsEmitted.Clear();
+
+            _gExceedanceActive = false;
+            _gExceedanceCycleCount = 0;
+            _gExceedanceThresholdsEmitted.Clear();
+
+            _torqueHistoryByEngine.Clear();
+            _transientSimTimeSec = 0.0;
+            _transientCycleCountByEngine.Clear();
+            _transientThresholdsByEngine.Clear();
+            _transientCooldownByEngine.Clear();
 
             _diagnosticMessages.Clear();
             _diagnosticKeysReported.Clear();
@@ -121,6 +198,12 @@ namespace FlightCareer.Domain.Parts
                 {
                     string startKey = isTurbine ? WearRuleMetrics.TurbineStartCycle : WearRuleMetrics.EngineStartCycle;
                     events.Add(new DerivedPartEvent(startKey, 1.0, eng));
+
+                    // Regra nova engine_start_electrical_load (métrica startLightsOnCount)
+                    if (!featSet.Contains(AircraftFeatures.NoElectrical) && !featSet.Contains("noElectrical"))
+                    {
+                        CheckStartLightsOnLoad(frame, eng, events);
+                    }
                 }
 
                 // Segundos acumulados de starter (tempo simulado)
@@ -180,6 +263,15 @@ namespace FlightCareer.Domain.Parts
                     events.Add(new DerivedPartEvent(WearRuleMetrics.FlightCycles, 1.0, null));
                 }
             }
+
+            // 5. Novas métricas e regras da spec METRICAS-A
+            CheckBrakeEnergy(frame, dtSimSeconds, onGround, events);
+            CheckTaxiTurnSpeed(frame, dtSimSeconds, onGround, featSet, events);
+            CheckGroundTireSkid(frame, dtSimSeconds, onGround, events);
+            CheckHighPowerColdOil(frame, dtSimSeconds, featSet, isTurbine, events);
+            CheckTrimCycles(frame, onGround, events);
+            CheckTurbulenceGExceedance(frame, onGround, events);
+            CheckRapidPowerTransient(frame, dtSimSeconds, featSet, events);
 
             return events;
         }
@@ -405,6 +497,530 @@ namespace FlightCareer.Domain.Parts
 
             position = 0.0;
             return false;
+        }
+
+        private void CheckStartLightsOnLoad(SensorFrame frame, int eng, List<DerivedPartEvent> events)
+        {
+            int lightsCount = 0;
+            if (frame.Values.TryGetValue("light-landing-on", out double landing) && landing >= 0.5) lightsCount++;
+            if (frame.Values.TryGetValue("light-taxi-on", out double taxi) && taxi >= 0.5) lightsCount++;
+            if (frame.Values.TryGetValue("light-strobe-on", out double strobe) && strobe >= 0.5) lightsCount++;
+
+            if (lightsCount >= 1)
+            {
+                events.Add(new DerivedPartEvent(WearRuleMetrics.StartLightsOnCount, lightsCount, eng));
+            }
+        }
+
+        private void CheckBrakeEnergy(SensorFrame frame, double dtSimSeconds, bool onGround, List<DerivedPartEvent> events)
+        {
+            if (!TryGetGroundSpeed(frame, out double gsKnots))
+            {
+                ReportDiagnosticOnce("brake-missing-gs", "Regra 'brake_high_energy_antiskid' desativada: velocidade de solo ausente no frame de sensores.");
+                return;
+            }
+
+            if (!frame.Values.TryGetValue("brake-left-position", out double bLeft) ||
+                !frame.Values.TryGetValue("brake-right-position", out double bRight))
+            {
+                ReportDiagnosticOnce("brake-missing-pos", "Regra 'brake_high_energy_antiskid' desativada: posição de freios ausente no frame de sensores.");
+                return;
+            }
+
+            frame.Values.TryGetValue("brake-parking-position", out double parkingBrake);
+            bool hasParkingBrake = parkingBrake >= 0.5;
+
+            // Posição média normalizada (0..32767 -> 0..1)
+            double brakeLeftNorm = Math.Clamp(bLeft / 32767.0, 0.0, 1.0);
+            double brakeRightNorm = Math.Clamp(bRight / 32767.0, 0.0, 1.0);
+            double brakeAvg = (brakeLeftNorm + brakeRightNorm) / 2.0;
+
+            double currentVelocityMs = gsKnots * 0.5144;
+
+            if (!_isBrakingOccurrence)
+            {
+                if (onGround && gsKnots > 5.0 && brakeAvg >= 0.30 && !hasParkingBrake)
+                {
+                    _isBrakingOccurrence = true;
+                    _brakeEnergySum = 0.0;
+                    _prevBrakeVelocityMs = currentVelocityMs;
+                    _brakeLowTimeSec = 0.0;
+                }
+            }
+            else
+            {
+                // Durante a ocorrência: se no solo e freio aplicado, computar deceleração
+                if (currentVelocityMs < _prevBrakeVelocityMs)
+                {
+                    double deltaKinetic = (_prevBrakeVelocityMs * _prevBrakeVelocityMs - currentVelocityMs * currentVelocityMs) / 2.0;
+                    _brakeEnergySum += deltaKinetic;
+                }
+                _prevBrakeVelocityMs = currentVelocityMs;
+
+                bool isLowBrake = brakeAvg < 0.10;
+                if (isLowBrake)
+                {
+                    _brakeLowTimeSec += Math.Max(0.0, dtSimSeconds);
+                }
+                else
+                {
+                    _brakeLowTimeSec = 0.0;
+                }
+
+                bool endOccurrence = !onGround || hasParkingBrake || gsKnots < 2.0 || _brakeLowTimeSec >= 2.0;
+                if (endOccurrence)
+                {
+                    // Determinar Vs0
+                    double vs0Knots = 50.0;
+                    if (frame.Values.TryGetValue("af-design-speed-vs0", out double vs0Val) && vs0Val > 0.0)
+                    {
+                        vs0Knots = vs0Val;
+                    }
+                    else
+                    {
+                        ReportDiagnosticOnce("brake-vs0-default", "Regra 'brake_high_energy_antiskid': af-design-speed-vs0 ausente ou <= 0; usando 50 kt como referência.");
+                    }
+
+                    double vs0Ms = vs0Knots * 0.5144;
+                    double refEnergy = Math.Pow(1.3 * vs0Ms, 2) / 2.0;
+                    double pctRef = refEnergy > 0 ? (100.0 * _brakeEnergySum / refEnergy) : 0.0;
+
+                    if (pctRef >= 60.0)
+                    {
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.BrakeEnergyPctRef, pctRef, null));
+                    }
+
+                    _isBrakingOccurrence = false;
+                    _brakeEnergySum = 0.0;
+                    _prevBrakeVelocityMs = 0.0;
+                    _brakeLowTimeSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckTaxiTurnSpeed(SensorFrame frame, double dtSimSeconds, bool onGround, HashSet<string> features, List<DerivedPartEvent> events)
+        {
+            if (!features.Contains("noseWheelSteering") && !features.Contains(AircraftFeatures.NoseWheelSteering))
+            {
+                return;
+            }
+
+            if (!frame.Values.TryGetValue("gear-steer-angle-pct", out double steerAnglePct))
+            {
+                ReportDiagnosticOnce("taxi-steer-missing-sensor", "Regra 'taxi_high_speed_turn' desativada: SimVar 'gear-steer-angle-pct' ausente no frame de sensores.");
+                return;
+            }
+
+            if (!TryGetGroundSpeed(frame, out double gsKnots))
+            {
+                ReportDiagnosticOnce("taxi-steer-missing-gs", "Regra 'taxi_high_speed_turn' desativada: velocidade de solo ausente no frame de sensores.");
+                return;
+            }
+
+            double absSteer = Math.Abs(steerAnglePct);
+
+            if (!_isTaxiTurnOccurrence)
+            {
+                if (onGround && gsKnots < 40.0 && absSteer >= 30.0)
+                {
+                    _isTaxiTurnOccurrence = true;
+                    _taxiTurnMaxGs = gsKnots;
+                    _taxiTurnLowTimeSec = 0.0;
+                }
+            }
+            else
+            {
+                if (gsKnots > _taxiTurnMaxGs)
+                {
+                    _taxiTurnMaxGs = gsKnots;
+                }
+
+                if (absSteer < 15.0)
+                {
+                    _taxiTurnLowTimeSec += Math.Max(0.0, dtSimSeconds);
+                }
+                else
+                {
+                    _taxiTurnLowTimeSec = 0.0;
+                }
+
+                bool endOccurrence = !onGround || gsKnots < 3.0 || _taxiTurnLowTimeSec >= 2.0;
+                if (endOccurrence)
+                {
+                    if (_taxiTurnMaxGs >= 15.0)
+                    {
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.TaxiTurnSpeedKnots, _taxiTurnMaxGs, null));
+                    }
+
+                    _isTaxiTurnOccurrence = false;
+                    _taxiTurnMaxGs = 0.0;
+                    _taxiTurnLowTimeSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckGroundTireSkid(SensorFrame frame, double dtSimSeconds, bool onGround, List<DerivedPartEvent> events)
+        {
+            if (!frame.Values.TryGetValue("gear-is-skidding", out double isSkidding))
+            {
+                ReportDiagnosticOnce("skid-missing-sensor", "Regra 'ground_tire_skid' desativada: SimVar 'gear-is-skidding' ausente no frame de sensores.");
+                return;
+            }
+
+            if (!TryGetGroundSpeed(frame, out double gsKnots))
+            {
+                ReportDiagnosticOnce("skid-missing-gs", "Regra 'ground_tire_skid' desativada: velocidade de solo ausente no frame de sensores.");
+                return;
+            }
+
+            bool skidding = onGround && gsKnots > 3.0 && isSkidding >= 0.5;
+
+            if (skidding)
+            {
+                _isSkidOccurrence = true;
+                _skidAccumulatedSec += Math.Max(0.0, dtSimSeconds);
+                _skidOffTimeSec = 0.0;
+            }
+            else if (_isSkidOccurrence)
+            {
+                _skidOffTimeSec += Math.Max(0.0, dtSimSeconds);
+                if (_skidOffTimeSec >= 3.0)
+                {
+                    if (_skidAccumulatedSec >= 1.0)
+                    {
+                        events.Add(new DerivedPartEvent(WearRuleMetrics.SkidSeconds, _skidAccumulatedSec, null));
+                    }
+
+                    _isSkidOccurrence = false;
+                    _skidAccumulatedSec = 0.0;
+                    _skidOffTimeSec = 0.0;
+                }
+            }
+        }
+
+        private void CheckHighPowerColdOil(SensorFrame frame, double dtSimSeconds, HashSet<string> features, bool isTurbine, List<DerivedPartEvent> events)
+        {
+            int engineCount = DetectEngineCount(frame);
+
+            for (int eng = 1; eng <= engineCount; eng++)
+            {
+                if (!TryGetEngineValues(frame, eng, out double combustion, out _))
+                {
+                    if (eng > 1) continue;
+                }
+
+                bool isRunning = combustion > 0.5;
+
+                // Temperatura do óleo
+                double oilTemp;
+                bool hasOil = frame.Values.TryGetValue($"oil-temperature:{eng}", out oilTemp) ||
+                              (eng == 1 && frame.Values.TryGetValue("oil-temperature", out oilTemp));
+
+                if (!hasOil)
+                {
+                    ReportDiagnosticOnce($"cold-oil-missing-sensor-{eng}", $"Regra 'engine_high_power_cold_oil' desativada para motor {eng}: sensor 'oil-temperature' ausente.");
+                    continue;
+                }
+
+                // Limite mínimo de temperatura do óleo
+                double minOilTemp;
+                if (_engineLimitsConfig?.OilTempMin.HasValue == true)
+                {
+                    minOilTemp = _engineLimitsConfig.OilTempMin.Value;
+                }
+                else
+                {
+                    minOilTemp = isTurbine ? 0.0 : 24.0;
+                    ReportDiagnosticOnce($"cold-oil-default-limit-{eng}",
+                        $"Regra 'engine_high_power_cold_oil': oilTempMin ausente no catálogo; usando padrão {minOilTemp:F0} °C.");
+                }
+
+                // Condição de alta potência
+                bool isHighPower = false;
+                if (!isTurbine)
+                {
+                    double rpm = 0.0;
+                    bool hasRpm = frame.Values.TryGetValue($"eng-rpm:{eng}", out rpm) ||
+                                  (eng == 1 && frame.Values.TryGetValue("eng-rpm", out rpm));
+
+                    double throttle = 0.0;
+                    bool hasThrottle = frame.Values.TryGetValue($"eng-throttle-lever-position:{eng}", out throttle) ||
+                                       (eng == 1 && frame.Values.TryGetValue("eng-throttle-lever-position", out throttle));
+
+                    double redline = _engineLimitsConfig?.RpmRedline ?? 2700.0;
+                    if (hasRpm && redline > 0 && rpm >= 0.90 * redline)
+                    {
+                        isHighPower = true;
+                    }
+                    else if (hasThrottle && throttle >= 80.0)
+                    {
+                        isHighPower = true;
+                    }
+                }
+                else
+                {
+                    double torquePct = 0.0;
+                    bool hasTorquePct = frame.Values.TryGetValue($"turb-max-torque-percent:{eng}", out torquePct) ||
+                                        (eng == 1 && frame.Values.TryGetValue("turb-max-torque-percent", out torquePct));
+                    if (!hasTorquePct)
+                    {
+                        hasTorquePct = frame.Values.TryGetValue($"turb-eng-torque:{eng}", out torquePct) ||
+                                       (eng == 1 && frame.Values.TryGetValue("turb-eng-torque", out torquePct));
+                    }
+
+                    if (hasTorquePct && torquePct >= 80.0)
+                    {
+                        isHighPower = true;
+                    }
+                }
+
+                bool isCondition = isRunning && (oilTemp < minOilTemp) && isHighPower;
+
+                if (!_coldOilThresholdsByEngine.TryGetValue(eng, out var thresholdsEmitted))
+                {
+                    thresholdsEmitted = new HashSet<double>();
+                    _coldOilThresholdsByEngine[eng] = thresholdsEmitted;
+                }
+
+                if (isCondition)
+                {
+                    double sec = _coldOilSecByEngine.GetValueOrDefault(eng, 0.0) + Math.Max(0.0, dtSimSeconds);
+                    _coldOilSecByEngine[eng] = sec;
+                    _coldOilOffSecByEngine[eng] = 0.0;
+
+                    double accumulatedMinutes = sec / 60.0;
+                    double[] thresholds = { 1.0, 3.0, 6.0 };
+                    foreach (var th in thresholds)
+                    {
+                        if (accumulatedMinutes >= th && !thresholdsEmitted.Contains(th))
+                        {
+                            thresholdsEmitted.Add(th);
+                            events.Add(new DerivedPartEvent(WearRuleMetrics.HighPowerColdOilMinutes, th, eng));
+                        }
+                    }
+                }
+                else
+                {
+                    double offSec = _coldOilOffSecByEngine.GetValueOrDefault(eng, 0.0) + Math.Max(0.0, dtSimSeconds);
+                    _coldOilOffSecByEngine[eng] = offSec;
+
+                    if (offSec >= 120.0) // 2 minutos fora da condição
+                    {
+                        _coldOilSecByEngine[eng] = 0.0;
+                        thresholdsEmitted.Clear();
+                        _coldOilOffSecByEngine[eng] = 0.0;
+                    }
+                }
+            }
+        }
+
+        private void CheckTrimCycles(SensorFrame frame, bool onGround, List<DerivedPartEvent> events)
+        {
+            if (onGround) return; // Contar ciclos no voo (no ar)
+
+            if (!frame.Values.TryGetValue("af-elevator-trim-position", out double trimPos))
+            {
+                ReportDiagnosticOnce("trim-missing-sensor", "Regra 'trim_actuator_cycle_stress' desativada: SimVar 'af-elevator-trim-position' ausente no frame de sensores.");
+                return;
+            }
+
+            if (!_trimAnchor.HasValue)
+            {
+                _trimAnchor = trimPos;
+                _trimDirection = null;
+                return;
+            }
+
+            double delta = trimPos - _trimAnchor.Value;
+
+            if (!_trimDirection.HasValue)
+            {
+                if (Math.Abs(delta) >= 0.10)
+                {
+                    _trimDirection = Math.Sign(delta);
+                }
+            }
+            else
+            {
+                double dir = _trimDirection.Value;
+                double travel = delta * dir;
+
+                // Se andou >= 10% na direção e agora recuou ou inverteu (travel < 0.09)
+                if (travel < 0.09)
+                {
+                    _trimCycleCount++;
+                    _trimAnchor = trimPos;
+                    _trimDirection = null;
+
+                    int[] thresholds = { 1, 4, 8 };
+                    foreach (var th in thresholds)
+                    {
+                        if (_trimCycleCount >= th && !_trimThresholdsEmitted.Contains(th))
+                        {
+                            _trimThresholdsEmitted.Add(th);
+                            events.Add(new DerivedPartEvent(WearRuleMetrics.TrimCycles, th, null));
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CheckTurbulenceGExceedance(SensorFrame frame, bool onGround, List<DerivedPartEvent> events)
+        {
+            if (onGround) return;
+
+            if (!frame.Values.TryGetValue("af-autopilot-master", out double apMaster) ||
+                !frame.Values.TryGetValue("af-g-force", out double gForce))
+            {
+                ReportDiagnosticOnce("ap-g-missing-sensor", "Regra 'autopilot_turbulence_servo_stress' desativada: 'af-autopilot-master' ou 'af-g-force' ausente no frame de sensores.");
+                return;
+            }
+
+            bool isApOn = apMaster >= 0.5;
+            if (!isApOn)
+            {
+                _gExceedanceActive = false;
+                return;
+            }
+
+            double deltaG = Math.Abs(gForce - 1.0);
+
+            if (!_gExceedanceActive)
+            {
+                if (deltaG >= 0.5)
+                {
+                    _gExceedanceActive = true;
+                    _gExceedanceCycleCount++;
+
+                    int[] thresholds = { 10, 25, 50 };
+                    foreach (var th in thresholds)
+                    {
+                        if (_gExceedanceCycleCount >= th && !_gExceedanceThresholdsEmitted.Contains(th))
+                        {
+                            _gExceedanceThresholdsEmitted.Add(th);
+                            events.Add(new DerivedPartEvent(WearRuleMetrics.TurbulenceGExceedanceCycles, th, null));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (deltaG < 0.2)
+                {
+                    _gExceedanceActive = false;
+                }
+            }
+        }
+
+        private void CheckRapidPowerTransient(SensorFrame frame, double dtSimSeconds, HashSet<string> features, List<DerivedPartEvent> events)
+        {
+            if (!features.Contains("turboprop") && !features.Contains(AircraftFeatures.Turboprop))
+            {
+                return;
+            }
+
+            _transientSimTimeSec += Math.Max(0.0, dtSimSeconds);
+            int engineCount = DetectEngineCount(frame);
+
+            for (int eng = 1; eng <= engineCount; eng++)
+            {
+                double torque = 0.0;
+                bool hasTorque = frame.Values.TryGetValue($"turb-max-torque-percent:{eng}", out torque) ||
+                                 (eng == 1 && frame.Values.TryGetValue("turb-max-torque-percent", out torque));
+                if (!hasTorque)
+                {
+                    hasTorque = frame.Values.TryGetValue($"turb-eng-torque:{eng}", out torque) ||
+                                (eng == 1 && frame.Values.TryGetValue("turb-eng-torque", out torque));
+                }
+
+                if (!hasTorque)
+                {
+                    ReportDiagnosticOnce($"transient-torque-missing-sensor-{eng}", $"Regra 'turboprop_rapid_power_lever_movement' desativada para motor {eng}: sensor de torque ausente.");
+                    continue;
+                }
+
+                if (!_torqueHistoryByEngine.TryGetValue(eng, out var history))
+                {
+                    history = new Queue<(double TimeSec, double Torque)>();
+                    _torqueHistoryByEngine[eng] = history;
+                }
+
+                history.Enqueue((_transientSimTimeSec, torque));
+
+                // Remove pontos mais antigos que 2 s
+                while (history.Count > 0 && (_transientSimTimeSec - history.Peek().TimeSec) > 2.0)
+                {
+                    history.Dequeue();
+                }
+
+                double minTorque = double.MaxValue;
+                double maxTorque = double.MinValue;
+                foreach (var pt in history)
+                {
+                    if (pt.Torque < minTorque) minTorque = pt.Torque;
+                    if (pt.Torque > maxTorque) maxTorque = pt.Torque;
+                }
+
+                double deltaTorque = maxTorque - minTorque;
+
+                double cooldown = _transientCooldownByEngine.GetValueOrDefault(eng, 0.0);
+                if (cooldown > 0.0)
+                {
+                    _transientCooldownByEngine[eng] = Math.Max(0.0, cooldown - dtSimSeconds);
+                }
+                else if (deltaTorque >= 40.0)
+                {
+                    int currentCount = _transientCycleCountByEngine.GetValueOrDefault(eng, 0) + 1;
+                    _transientCycleCountByEngine[eng] = currentCount;
+                    _transientCooldownByEngine[eng] = 2.0; // Cooldown de 2 s para a mesma oscilação
+
+                    if (!_transientThresholdsByEngine.TryGetValue(eng, out var thresholdsEmitted))
+                    {
+                        thresholdsEmitted = new HashSet<double>();
+                        _transientThresholdsByEngine[eng] = thresholdsEmitted;
+                    }
+
+                    int[] thresholds = { 3, 8, 15 };
+                    foreach (var th in thresholds)
+                    {
+                        if (currentCount >= th && !thresholdsEmitted.Contains(th))
+                        {
+                            thresholdsEmitted.Add(th);
+                            events.Add(new DerivedPartEvent(WearRuleMetrics.RapidPowerTransientCycles, th, eng));
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool TryGetGroundSpeed(SensorFrame frame, out double gsKnots)
+        {
+            if (frame.Values.TryGetValue("ctx-ground-velocity", out gsKnots) ||
+                frame.Values.TryGetValue("gps-ground-speed", out gsKnots) ||
+                frame.Values.TryGetValue("ground-velocity", out gsKnots))
+            {
+                return true;
+            }
+
+            gsKnots = 0.0;
+            return false;
+        }
+
+        private static int DetectEngineCount(SensorFrame frame)
+        {
+            int maxEngine = 1;
+            foreach (var key in frame.Values.Keys)
+            {
+                int colonIdx = key.LastIndexOf(':');
+                if (colonIdx >= 0 && colonIdx < key.Length - 1)
+                {
+                    if (int.TryParse(key.AsSpan(colonIdx + 1), out int n) && n > maxEngine)
+                    {
+                        maxEngine = n;
+                    }
+                }
+            }
+            return maxEngine;
         }
 
         private static bool TryGetFlightPhase(SensorFrame frame, out bool onGround)

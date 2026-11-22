@@ -72,6 +72,7 @@ namespace FlightCareer.Domain.Parts
             _wearEngine.ResetExceedanceTracking();
             _eventDeriver.Reset();
             _eventDeriver.ConfigureElectrical(BuildElectricalConfig(profile));
+            _eventDeriver.ConfigureEngine(BuildEngineLimits(profile));
             _pausedReported = false;
             _reportedDiagnostics.Clear();
             _accumulatedSimSeconds = 0.0;
@@ -105,6 +106,21 @@ namespace FlightCareer.Domain.Parts
                 DeepDischargeVolts = deepDischargeLimit?.Value ?? (voltsLimit != null ? voltsLimit.Value * (22.0 / 28.0) : null),
                 BatteryDeepDischargeThresholds = deepDischargeRule?.Bands.Select(b => b.Threshold).OrderBy(t => t).ToList() ?? new List<double> { 10.0, 25.0, 45.0 },
                 ElectricalOverloadThresholds = overloadRule?.Bands.Select(b => b.Threshold).OrderBy(t => t).ToList() ?? new List<double> { 5.0, 15.0, 30.0 }
+            };
+        }
+
+        private EngineLimitsConfig BuildEngineLimits(AircraftLimitProfile? profile)
+        {
+            if (profile == null) return new EngineLimitsConfig();
+
+            string cls = profile.Class ?? string.Empty;
+            var rpmRedlineLimit = _resolver.Get(profile, cls, LimitKeys.RpmRedline);
+            var oilTempMinLimit = _resolver.Get(profile, cls, LimitKeys.OilTempMin);
+
+            return new EngineLimitsConfig
+            {
+                RpmRedline = rpmRedlineLimit?.Value,
+                OilTempMin = oilTempMinLimit?.Value
             };
         }
 

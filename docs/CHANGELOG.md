@@ -2703,3 +2703,19 @@
 
 ## 2026-11-22 - App encerra ao fechar a janela principal (Claude)
 - O processo do FlightCareer continuava vivo, sem janelas, depois de fechar o app (travava as DLLs e o `dotnet build`). Causa: `ShutdownMode="OnLastWindowClose"` e janelas que só se escondem (`AlertOverlayService` faz `Hide()` no overlay de alertas; HUD). Agora `ShutdownMode="OnMainWindowClose"` (o login já troca `Application.MainWindow` para a janela principal). Não visto na tela.
+
+## 2026-11-22 - Métricas de solo, partida e motor que as regras usam mas ninguém calcula (METRICAS-A) (Gemini)
+- Implementado no `PartEventDeriver` o cálculo das 6 métricas operacionais pendentes do catálogo de regras de desgaste (`wear_rules.json`):
+  - `brakeEnergyPctRef`: cálculo de energia específica de frenagem no solo $100 \times \sum \Delta(v^2/2) / ((1,3 \times V_{so})^2 / 2)$ em m/s, com acompanhamento de frenagem contínua (freios $\ge 30\%$, sem freio de estacionamento) e finalização após 2 s com freio $< 10\%$ ou GS $< 2$ kt. Limites na regra `brake_high_energy_antiskid` atualizados para as faixas 60, 100 e 150.
+  - `taxiTurnSpeedKnots`: monitoramento de velocidade máxima no solo durante curvas de táxi ($|\text{ângulo de direção}| \ge 30\%$, GS $< 40$ kt) para aeronaves com `noseWheelSteering`, emitindo a maior velocidade atingida se $\ge 15$ kt após retorno da direção por 2 s ou GS $< 3$ kt.
+  - `highPowerColdOilMinutes`: minutos acumulados em tempo simulado com óleo abaixo da temperatura mínima (`oilTempMin` do perfil ou padrão 24 °C pistão / 0 °C turbina) e potência elevada (RPM $\ge 90\%$ da redline ou manete $\ge 80\%$ em pistão; torque $\ge 80\%$ em turbina) com motor em combustão. Emissão nos cruzamentos de 1, 3 e 6 minutos com reinício após 2 minutos fora da condição.
+  - `trimCycles`: contagem de ciclos de deflexão de compensador de profundor no ar ($\ge 10\%$ do curso com reversão ou parada). Emissão nos cruzamentos de 1, 4 e 8 ciclos.
+  - `turbulenceGExceedanceCycles`: contagem de ciclos de variação de G no ar com piloto automático ativo ($|G - 1| \ge 0,5$, rearmando com $|G - 1| < 0,2$). Emissão nos cruzamentos de 10, 25 e 50 ciclos.
+  - `rapidPowerTransientCycles`: contagem de transientes rápidos de potência em turboélices (variação de torque $\ge 40$ pp em janela de 2 s simulados). Emissão nos cruzamentos de 3, 8 e 15 ciclos.
+- Novas regras de desgaste em `wear_rules.json`:
+  - `ground_tire_skid` (métrica `skidSeconds`): tempo acumulado de derrapagem de pneus no solo (GS $> 3$ kt com `gear-is-skidding` ativo), emitindo nas faixas de 1 s, 3 s e 6 s (com inspeção `TIRE_FLAT_SPOT_INSPECTION` na faixa grave).
+  - `engine_start_electrical_load` (métrica `startLightsOnCount`): partida com cargas elétricas acesas, contando farol de pouso, táxi e strobe acesos durante o ciclo de partida (faixas 1, 2 e 3 lâmpadas).
+- Novo suporte a `oilTempMin` em `LimitKeys` e `EngineLimitsConfig` no `PartFlightTracker`, lido do perfil da aeronave ou usando padrões com diagnóstico único quando ausente.
+- Suíte `GroundAndEngineMetricsTests` com 10 testes cobrindo todas as novas regras e métricas.
+- Replay do voo real C152 (`20261122-1007-Cessna_C152.csv`) confirmou emissão de partida com luzes acesas (`startLightsOnCount: 3.0`) e compensador (`trimCycles: 1.0`).
+- Não testado no MSFS.

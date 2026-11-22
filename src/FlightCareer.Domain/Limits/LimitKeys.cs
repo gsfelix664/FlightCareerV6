@@ -13,6 +13,7 @@ namespace FlightCareer.Domain.Limits
         public const string RpmNativeOnset = "rpmNativeOnset";
         public const string ChtMax = "chtMax";
         public const string OilTempMax = "oilTempMax";
+        public const string OilTempMin = "oilTempMin";
         public const string OilPressMin = "oilPressMin";
         public const string EgtMax = "egtMax";
         public const string IttMax = "ittMax";
@@ -53,6 +54,7 @@ namespace FlightCareer.Domain.Limits
             [RpmNativeOnset] = "rpm",
             [ChtMax] = "celsius",
             [OilTempMax] = "celsius",
+            [OilTempMin] = "celsius",
             [OilPressMin] = "psi",
             [EgtMax] = "celsius",
             [IttMax] = "celsius",

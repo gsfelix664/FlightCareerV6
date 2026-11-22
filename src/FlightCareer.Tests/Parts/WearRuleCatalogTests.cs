@@ -35,6 +35,24 @@ namespace FlightCareer.Tests.Parts
                 set.Add(el.GetProperty("key").GetString()!);
             }
 
+            // Também carrega context_registry.json para suportar sensores de contexto (ex: ctx-ground-velocity)
+            string[] contextCandidates =
+            {
+                Path.Combine(AppContext.BaseDirectory, "Data", "context_registry.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "Data", "context_registry.json"),
+                Path.Combine(Directory.GetCurrentDirectory(), "src", "FlightCareer.Infrastructure", "Data", "context_registry.json"),
+                Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "FlightCareer.Infrastructure", "Data", "context_registry.json")
+            };
+            var ctxPath = contextCandidates.FirstOrDefault(File.Exists);
+            if (ctxPath != null)
+            {
+                using var ctxDoc = JsonDocument.Parse(File.ReadAllText(ctxPath));
+                foreach (var el in ctxDoc.RootElement.GetProperty("sensors").EnumerateArray())
+                {
+                    set.Add(el.GetProperty("key").GetString()!);
+                }
+            }
+
             foreach (var dk in PartFlightTracker.DerivedSensorKeys)
             {
                 set.Add(dk);
@@ -302,7 +320,7 @@ namespace FlightCareer.Tests.Parts
             var brake = Catalog.Rules.FirstOrDefault(r => r.Id == "brake_high_energy_antiskid");
             Assert.NotNull(brake);
             Assert.Equal(WearRuleKind.Event, brake.Kind);
-            Assert.Equal("brakeEnergyMkJ", brake.Metric);
+            Assert.Equal("brakeEnergyPctRef", brake.Metric);
         }
 
         [Fact]
