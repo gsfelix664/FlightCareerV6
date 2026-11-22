@@ -13,11 +13,13 @@ namespace FlightCareer.Application.Services
 
         private static readonly Dictionary<string, DropZoneInfo> s_dropZones = new(StringComparer.OrdinalIgnoreCase);
         private static readonly HashSet<string> s_trainingAerodromes = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, ScenicAerodromeInfo> s_scenicAerodromes = new(StringComparer.OrdinalIgnoreCase);
         private static readonly Dictionary<(int LatCell, int LonCell), List<TouristPoiInfo>> s_poiGrid = new();
         private static readonly List<TouristPoiInfo> s_allPois = new();
 
         private readonly Dictionary<string, DropZoneInfo>? _customDropZones;
         private readonly HashSet<string>? _customTrainingAerodromes;
+        private readonly Dictionary<string, ScenicAerodromeInfo>? _customScenicAerodromes;
         private readonly Dictionary<(int LatCell, int LonCell), List<TouristPoiInfo>>? _customPoiGrid;
         private readonly List<TouristPoiInfo>? _customAllPois;
 
@@ -29,9 +31,10 @@ namespace FlightCareer.Application.Services
         public PlacesDataService(
             IEnumerable<DropZoneInfo>? dropZones,
             IEnumerable<string>? trainingAerodromes,
-            IEnumerable<TouristPoiInfo>? pois)
+            IEnumerable<TouristPoiInfo>? pois,
+            IEnumerable<ScenicAerodromeInfo>? scenicAerodromes = null)
         {
-            if (dropZones != null || trainingAerodromes != null || pois != null)
+            if (dropZones != null || trainingAerodromes != null || pois != null || scenicAerodromes != null)
             {
                 _customDropZones = new Dictionary<string, DropZoneInfo>(StringComparer.OrdinalIgnoreCase);
                 if (dropZones != null)
@@ -50,6 +53,16 @@ namespace FlightCareer.Application.Services
                     {
                         if (!string.IsNullOrWhiteSpace(icao))
                             _customTrainingAerodromes.Add(icao.Trim().ToUpperInvariant());
+                    }
+                }
+
+                if (scenicAerodromes != null)
+                {
+                    _customScenicAerodromes = new Dictionary<string, ScenicAerodromeInfo>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var sc in scenicAerodromes)
+                    {
+                        if (!string.IsNullOrWhiteSpace(sc.Icao))
+                            _customScenicAerodromes[sc.Icao.Trim().ToUpperInvariant()] = sc;
                     }
                 }
 
@@ -86,6 +99,7 @@ namespace FlightCareer.Application.Services
 
                 LoadDropZones();
                 LoadTrainingAerodromes();
+                LoadScenicAerodromes();
                 LoadTouristPois();
 
                 s_loaded = true;
@@ -180,6 +194,57 @@ namespace FlightCareer.Application.Services
             }
         }
 
+        private static void LoadScenicAerodromes()
+        {
+            try
+            {
+                var path = ResolvePlacesFilePath("scenic_aerodromes.json");
+                if (path == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[PlacesDataService] scenic_aerodromes.json não encontrado.");
+                    return;
+                }
+
+                using var stream = File.OpenRead(path);
+                using var doc = JsonDocument.Parse(stream);
+                if (doc.RootElement.TryGetProperty("aerodromes", out var arrayElem) && arrayElem.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var elem in arrayElem.EnumerateArray())
+                    {
+                        string icao = elem.GetProperty("icao").GetString()?.Trim().ToUpperInvariant() ?? "";
+                        string name = elem.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                        string cc = elem.TryGetProperty("cc", out var c) ? c.GetString() ?? "" : "";
+                        string note = elem.TryGetProperty("note", out var nt) ? nt.GetString() ?? "" : "";
+
+                        var points = new List<ScenicPoint>();
+                        if (elem.TryGetProperty("points", out var ptsElem) && ptsElem.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var pt in ptsElem.EnumerateArray())
+                            {
+                                string ptName = pt.GetProperty("n").GetString() ?? "";
+                                double lat = pt.GetProperty("lat").GetDouble();
+                                double lon = pt.GetProperty("lon").GetDouble();
+                                if (!string.IsNullOrWhiteSpace(ptName))
+                                {
+                                    points.Add(new ScenicPoint(ptName, lat, lon));
+                                }
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(icao))
+                        {
+                            s_scenicAerodromes[icao] = new ScenicAerodromeInfo(icao, name, cc, note, points);
+                        }
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine($"[PlacesDataService] Carregados {s_scenicAerodromes.Count} aeródromos turísticos.");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PlacesDataService] Erro ao carregar scenic_aerodromes.json: {ex.Message}");
+            }
+        }
+
         private static void LoadTouristPois()
         {
             try
@@ -228,6 +293,7 @@ namespace FlightCareer.Application.Services
         public int TouristPoisCount => _customAllPois != null ? _customAllPois.Count : s_allPois.Count;
         public int TrainingAerodromesCount => _customTrainingAerodromes != null ? _customTrainingAerodromes.Count : s_trainingAerodromes.Count;
         public int DropZonesCount => _customDropZones != null ? _customDropZones.Count : s_dropZones.Count;
+        public int ScenicAerodromesCount => _customScenicAerodromes != null ? _customScenicAerodromes.Count : s_scenicAerodromes.Count;
 
         public bool IsTrainingAerodrome(string icao)
         {
@@ -249,6 +315,18 @@ namespace FlightCareer.Application.Services
             }
 
             return s_dropZones.TryGetValue(key, out var globalDz) ? globalDz : null;
+        }
+
+        public ScenicAerodromeInfo? GetScenicAerodrome(string icao)
+        {
+            if (string.IsNullOrWhiteSpace(icao)) return null;
+            string key = icao.Trim().ToUpperInvariant();
+            if (_customScenicAerodromes != null)
+            {
+                return _customScenicAerodromes.TryGetValue(key, out var sc) ? sc : null;
+            }
+
+            return s_scenicAerodromes.TryGetValue(key, out var globalSc) ? globalSc : null;
         }
 
         public IReadOnlyList<TouristPoiInfo> FindPois(double lat, double lon, double minNm, double maxNm, IReadOnlySet<string>? kinds = null)

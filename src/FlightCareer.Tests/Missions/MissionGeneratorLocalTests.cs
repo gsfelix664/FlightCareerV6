@@ -214,5 +214,173 @@ namespace FlightCareer.Tests.Missions
             // Proporção esperada: 80% de 3.6.2 vs 20% de 3.6.1. Tolerância estatística [0.70, 0.90].
             Assert.InRange(skydiveRatio, 0.70, 0.90);
         }
+
+        [Fact]
+        public void Subtype351_ScenicTour_WithCuratedAerodrome_UsesCuratedPointsAndAttributes()
+        {
+            var origin = CreateOriginAirport("SBJR", -22.98, -43.37);
+            var sub = GetSubConfig("3.5.1");
+            var rng = new Random(555);
+
+            var mockPoints = new List<ScenicPoint>
+            {
+                new("Cristo Redentor", -22.95192, -43.21046),
+                new("Pão de Açúcar", -22.94944, -43.15667),
+                new("Lagoa Rodrigo de Freitas", -22.97111, -43.21167),
+                new("Copacabana", -22.96703, -43.1807),
+                new("Ipanema", -22.98382, -43.20453)
+            };
+
+            var mockScenic = new List<ScenicAerodromeInfo>
+            {
+                new("SBJR", "Passeios aéreos do Rio de Janeiro", "BR", "Corredores visuais dedicados (REA) sobre a Baía.", mockPoints)
+            };
+
+            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+
+            var mission = MissionGenerator.CreateScenicTourMissionSync(
+                origin, sub, rng, DateTime.UtcNow, placesService: places);
+
+            Assert.NotNull(mission);
+            Assert.Equal("3.5.1", mission!.SubId);
+            Assert.Equal(origin.ICAO, mission.OriginICAO);
+            Assert.Equal(origin.ICAO, mission.DestinationICAO);
+
+            var parsedWaypoints = OverflyWaypointCodec.Parse(mission.OverflyWaypoints);
+            Assert.InRange(parsedWaypoints.Count, 2, 4);
+
+            var pointNames = mockPoints.Select(p => OverflyWaypointCodec.SanitizeName(p.Name)).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            foreach (var wp in parsedWaypoints)
+            {
+                Assert.Contains(wp.Ident, pointNames);
+                Assert.Equal(1.5, wp.RadiusNm);
+                Assert.Equal(3000, wp.MaxAglFt);
+            }
+
+            Assert.DoesNotMatch(@"\{[a-zA-Z0-9_]+\}", mission.Title);
+            Assert.DoesNotMatch(@"\{[a-zA-Z0-9_]+\}", mission.Description);
+        }
+
+        [Fact]
+        public void Subtype351_ScenicTour_NonCuratedAerodrome_UsesTouristPois()
+        {
+            var origin = CreateOriginAirport("SBJD", -23.18, -46.94);
+            var sub = GetSubConfig("3.5.1");
+            var rng = new Random(666);
+
+            var mockPois = new List<TouristPoiInfo>
+            {
+                new("poi1", "Parque da Cidade", -23.01, -46.94, "parque", "BR", 80),
+                new("poi2", "Serra do Japi", -23.18, -46.67, "parque_nacional", "BR", 90),
+                new("poi3", "Represa Municipal", -23.51, -46.94, "lago", "BR", 70)
+            };
+
+            var mockScenic = new List<ScenicAerodromeInfo>
+            {
+                new("SBJR", "Rio Panorâmico", "BR", "Nota", new List<ScenicPoint> { new("Cristo", -22.95, -43.21) })
+            };
+
+            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: mockPois, scenicAerodromes: mockScenic);
+
+            var mission = MissionGenerator.CreateScenicTourMissionSync(
+                origin, sub, rng, DateTime.UtcNow, placesService: places);
+
+            Assert.NotNull(mission);
+            var parsed = OverflyWaypointCodec.Parse(mission!.OverflyWaypoints);
+            Assert.InRange(parsed.Count, 2, 3);
+            Assert.All(parsed, wp => Assert.Contains(wp.Ident, mockPois.Select(p => p.Name)));
+        }
+
+        [Fact]
+        public void MissionGenerator_CuratedScenicAerodrome_WeightsAndGeneratesRoughly70PercentScenicTour()
+        {
+            var origin = CreateOriginAirport("SBJR", -22.98, -43.37);
+            var mockPoints = new List<ScenicPoint>
+            {
+                new("Cristo Redentor", -22.95192, -43.21046),
+                new("Pão de Açúcar", -22.94944, -43.15667),
+                new("Copacabana", -22.96703, -43.1807)
+            };
+            var mockScenic = new List<ScenicAerodromeInfo>
+            {
+                new("SBJR", "Rio Scenic", "BR", "Nota", mockPoints)
+            };
+
+            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+            var allAirports = new List<Airport> { origin };
+            var rng = new Random(888);
+
+            int scenicTourCount = 0;
+            int otherClubCount = 0;
+
+            for (int i = 0; i < 500; i++)
+            {
+                var missions = MissionGenerator.GenerateMissionsInMemory(
+                    currentAirport: origin,
+                    allAirports: allAirports,
+                    hubService: null,
+                    random: rng,
+                    referenceTime: DateTime.UtcNow,
+                    countOverride: 15,
+                    placesService: places);
+
+                foreach (var m in missions)
+                {
+                    if (m.SubId == "3.5.1") scenicTourCount++;
+                    else if (m.SubId == "3.5.2" || m.SubId == "3.5.3") otherClubCount++;
+                }
+            }
+
+            int totalClub = scenicTourCount + otherClubCount;
+            Assert.True(totalClub > 0, "Deveria ter gerado missões do Aeroclube (3.5.x)");
+
+            double scenicRatio = (double)scenicTourCount / totalClub;
+            // Proporção esperada: 70% de 3.5.1 vs 30% das outras (15+15). Faixa estatística [0.55, 0.85].
+            Assert.InRange(scenicRatio, 0.55, 0.85);
+        }
+
+        [Fact]
+        public void GetCalibratedCategories_CuratedScenicAerodrome_ImportsCategory35AndSkewsWeights()
+        {
+            // Aeródromo Tier 1 (que não possui nativamente a Categoria 3.5)
+            var origin = new Airport
+            {
+                ICAO = "SBFI",
+                Name = "Foz do Iguaçu",
+                Tier = 1,
+                Latitude = -25.59,
+                Longitude = -54.58
+            };
+
+            var mockScenic = new List<ScenicAerodromeInfo>
+            {
+                new("SBFI", "Foz Panorâmica", "BR", "Tríplice fronteira", new List<ScenicPoint>
+                {
+                    new("Cataratas", -25.69, -54.43),
+                    new("Itaipu", -25.04, -54.45)
+                })
+            };
+
+            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+            var tierConfig = MissionRules.Rules[1]; // Tier 1
+
+            var categories = MissionGenerator.GetCalibratedCategories(origin, tierConfig, null!, places);
+
+            var cat35 = categories.FirstOrDefault(c => c.Id == "3.5");
+            Assert.NotNull(cat35);
+            Assert.True(cat35!.Weight >= 40, $"Peso de 3.5 deve ter recebido o bônus de 40, encontrado {cat35.Weight}");
+
+            var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.1");
+            var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.2");
+            var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.3");
+
+            Assert.NotNull(s351);
+            Assert.NotNull(s352);
+            Assert.NotNull(s353);
+
+            Assert.Equal(70, s351!.Weight);
+            Assert.Equal(15, s352!.Weight);
+            Assert.Equal(15, s353!.Weight);
+        }
     }
 }

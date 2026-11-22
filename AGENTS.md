@@ -281,6 +281,11 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Visualização tática no Briefing (`Domain/Missions/ContractMarkerBuilder.cs`, `FlightMapControl.xaml.cs` e `BriefingViewModel.cs`):**
   - Marcadores de contrato e sobrevoo renderizados no mapa: pontos turísticos com marcador amarelo e badge de identificação, áreas com círculo tracejado do raio, zonas de salto com círculo laranja neon e aerofoto com o retângulo da área e linhas finas das pernas de voo.
   - Auto-enquadramento automático do mapa incluindo origem, destino, pernas e todos os marcadores de contrato. Não testado visualmente na tela / MSFS.
+- **Aeródromos turísticos curados e ferry de entrega (PANORAMICOS-CURADOS):**
+  - Integração da base `scenic_aerodromes.json` (16 aeródromos curados, 59 pontos de coordenadas reais) em `PlacesDataService` (`ScenicAerodromeInfo`, `ScenicPoint`).
+  - No voo panorâmico (`3.5.1`), se a origem for aeródromo turístico curado com $\ge 2$ pontos, sorteia 2 a 4 atrações da lista curada ($\ge 2$ NM entre si, ordenadas por azimute), calcula distância real do circuito origem ➔ pontos ➔ origem e injeta marcadores `{scenic_name}` e `{scenic_note}` no briefing.
+  - Calibração de pesos: aeródromo turístico curado recebe bônus de +40 na Categoria 3.5 (importando a categoria se ausente no Tier da localidade, ex.: Tier 1), com peso 70 em 3.5.1 contra 15/15 em 3.5.2 e 3.5.3.
+  - Textos de RP (`mission_texts.json`): 2 novas variantes para 3.5.1 usando `{scenic_name}` e `{scenic_note}`; 2 novas variantes cada em 3.5.3, 1.3.3 e 4.2.2 de "entrega de aeronave ao proprietário" (pós-revisão ou compra). Não testado no MSFS / não visto na tela.
 
 ## 8. Definição de pronto
 

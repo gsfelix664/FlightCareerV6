@@ -2966,3 +2966,20 @@
 - `tools/places/scenic_aerodromes_curated.csv`: 16 aeródromos de voo panorâmico (8 no Brasil) com as atrações; `scenic_aerodromes.json` com 59 pontos de coordenada real (banco de pontos ou Wikidata, ≤ 75 NM). Ainda não usado pelo gerador.
 - `build_places.py --lnm`: confere cada código na base do MSFS 2024 (o OurAirports traz KL65/KE60/KX26, o simulador usa L65/E60/X26; Skydive Dubai = OMDU); 13 aeródromos de instrução que não existem no simulador saíram.
 - `PlacesDataServiceTests`: o teste de Boituva usava SDTI (código errado; Boituva é SDOI) e passava sem conferir nada; trocado por zonas curadas reais.
+
+## 2026-11-22 - Aeródromos turísticos curados no voo panorâmico e ferry de entrega (PANORAMICOS-CURADOS) (Gemini)
+- **Base de aeródromos turísticos (`PlacesDataService.cs` e `IPlacesDataService.cs`):**
+  - Carga lazy e thread-safe de `scenic_aerodromes.json` (16 aeródromos e 59 atrações com coordenadas reais), expondo `ScenicPoint`, `ScenicAerodromeInfo`, `ScenicAerodromesCount` e lookup `GetScenicAerodrome(icao)`.
+  - Construtor com injeção de dependência atualizado para permitir mocks determinísticos nos testes.
+- **Gerador de voos panorâmicos (`MissionGenerator.cs`):**
+  - Em aeródromos turísticos com $\ge 2$ pontos curados, `CreateScenicTourMissionSync` seleciona de 2 a 4 atrações da lista curada sem peso de popularidade, mantendo distância mínima de 2 NM entre si e ordenadas por azimute, calculando a distância pelo percurso real `origem ➔ pontos ➔ origem`.
+  - Injeção dos novos marcadores operacionais `{scenic_name}` (nome do circuito turístico) e `{scenic_note}` (descrição contextual) nos dicionários de renderização de briefing. Fallback seguro para aeródromos sem curadoria via busca espacial `FindPois`.
+  - Calibração de pesos em `GetCalibratedCategories`: aeródromos turísticos curados recebem bônus de +40 na Categoria 3.5 (importando a categoria caso ausente no Tier do aeroporto, ex.: Tier 1), com distribuição interna de 70 para 3.5.1 (voo panorâmico) contra 15/15 para 3.5.2 (TGL) e 3.5.3 (translado básico).
+- **Textos de RP (`mission_texts.json`):**
+  - `3.5.1`: 2 novas variantes utilizando `{scenic_name}` e `{scenic_note}`.
+  - `3.5.3`, `1.3.3` e `4.2.2`: 2 novas variantes cada focadas em entrega técnica / ferry de aeronave ao proprietário (pós-revisão na oficina ou venda/entrega rural).
+- **Suíte de Testes:**
+  - `PlacesDataServiceTests`: teste de carregamento do arquivo real com 16 aeródromos e validação dos pontos e notas de SBJR.
+  - `MissionGeneratorLocalTests`: testes com dados mockados injetados validando waypoints `P:`, atributos (raio 1,5 NM, 3.000 ft AGL), percurso real, ausência de marcadores soltos, fallback para POIs, skew de peso em 500 corridas (~70% de 3.5.1) e importação de categoria em aeródromo Tier 1.
+  - Total de 934/934 testes xUnit aprovados (100%).
+- Não testado no MSFS / não visto na tela.

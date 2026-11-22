@@ -78,5 +78,15 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal(title1, title2);
             Assert.Equal(desc1, desc2);
         }
+
+        [Fact]
+        public void Variantes_turisticas_ficam_so_na_chave_propria()
+        {
+            var catalog = MissionTextCatalog.LoadDefault();
+
+            Assert.True(catalog.Templates["3.5.1-turistico"].Count >= 2);
+            Assert.All(catalog.Templates["3.5.1"], v =>
+                Assert.DoesNotContain("{scenic_", v.Title + v.Description));
+        }
     }
 }
