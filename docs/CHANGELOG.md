@@ -2888,3 +2888,6 @@
   - `TelemetryDefinitionTests.cs`: conformidade de layout de memória do `SimTelemetry` aprovada (6/6).
 - `dotnet build` 0 erros, `dotnet test` 850/850 aprovados (100%), fuzz testing (10 corridas) aprovado com 100% sem nenhuma regressão.
 - Não testado no MSFS.
+
+## 2026-11-22 - Cancelar um voo ativo avança o relógio de carreira (Claude)
+- `FlightMonitor.CancelMonitoringAsync` chama `FlightService.ProcessFlightCancellationAsync` (tempo simulado voado + 0,5 h de solo) depois de salvar o estado; o método existia mas nunca era chamado (pendência de 2026-11-19). Teste `FlightCancellationClockTests`. Suíte 873/873. Não testado no MSFS.
