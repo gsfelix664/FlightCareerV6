@@ -68,3 +68,92 @@ A nota de qualidade (que vira o fator 0,5–1,2 do XP) passa a avaliar **o que i
 | Agro / bush | precisão em pista curta/terra, controle no toque, limites | conforto |
 
 O que ainda não é medido e precisa de sensor/regra nova: contagem de TGL (toque sem parada seguido de decolagem), aproximação estabilizada, tempo de chegada contra o estimado da missão (o prazo `ExpirationTime` existe, o tempo estimado de voo não). Calibrar os pesos com voos gravados (replay) antes de ligar. **Decisão do usuário (2026-11-22): os critérios por tipo só afetam o XP; o pagamento da missão nunca depende da nota nem da pontualidade.** Pendente: os pesos de cada tipo.
+
+## 6. Modelo novo de XP (proposta do usuário, 2026-11-22) — substitui a § 3 e a fórmula da § 5.1
+Princípio: **separar esforço** (tempo e distância) **de risco e habilidade** (multiplicadores) e pagar a dificuldade com **bônus fixos aditivos**, para que um voo curto bem feito em pista difícil renda XP de verdade e voos longos não explodam a escala.
+
+```
+XP = (XP Base × M_Tipo × M_Realismo × M_Qualidade) + Bônus fixos (pista, ambiente, prazo)
+```
+
+### 6.1 XP Base (esforço)
+- **2 XP por minuto no ar** (decolagem → toque final; táxi não conta) + **0,5 XP por NM** + **50 XP por perna concluída** (decolagem + pouso).
+- Ex.: 60 NM em 40 min → 80 + 30 + 50 = **160 XP Base**.
+
+### 6.2 M_Tipo (complexidade da missão; usa `Mission.SubId` → família de `mission_pay.json`)
+| Tipo (proposta) | Famílias do jogo | M_Tipo |
+|---|---|---|
+| Voo livre / traslado (ferry) | ferry, sem missão | 0,80 |
+| Carga geral / correio | `carga_expressa`, `fallback` | 1,00 |
+| Instrução | `instrucao_basica`, `instrucao` | 1,10 *(sugestão do Claude: foco em pousos/TGL)* |
+| Turismo / foto / agro / bush | `agro_municipal`, `agro_bush` | 1,15 |
+| Passageiros / táxi aéreo / regional / linha | `taxi_aereo`, `regional`, `linha` | 1,25 |
+| Carga frágil / perecível / AOG | `aog` *(não há família de carga frágil; criar se quiser)* | 1,35 |
+| Resgate / aeromédico | `medevac` | 1,50 |
+
+### 6.3 M_Realismo (não confundir com a dificuldade Fácil/Médio/Difícil da economia)
+Começa em 1,0 e sobe até ~1,2 premiando quem desliga facilidades, lido por SimVar ou pelo próprio app. Itens propostos (**cada um precisa ser confirmado no SDK antes de implementar**; o que não tiver SimVar fica de fora):
+- voo **sem aceleração de tempo** (o app já lê `SIMULATION RATE`): +0,05;
+- **sem pausa longa** (> 2 min) no voo: +0,05 *(a detecção atual de pausa não bate com a pausa do MSFS: ver HANDOFF, teste de tempo acelerado)*;
+- **dano estrutural ligado** e **clima em tempo real**: +0,05 cada, só se houver SimVar que informe a opção;
+- assistências desligadas (ex.: auto-leme `AUTO COORDINATION`): +0,05 *(confirmar)*;
+- a penalidade existente de partida automática (−10 %) passa a ser um item negativo deste multiplicador.
+
+### 6.4 M_Qualidade (substitui o mapeamento atual da nota 0–100 %)
+Começa em 1,0; piso **0,5**, teto **1,15**.
+- **Toque** (medido pelo `TouchdownDetector`, velocidade normal ao solo do MSFS):
+  - manteiga **< 120 fpm** e < 1,15 G: **+0,15**;
+  - firme **120–250 fpm** e < 1,4 G: **+0,05**;
+  - duro **251–450 fpm**: **−0,10**;
+  - violento **> 450 fpm** ou **> 2,0 G**: **−0,30** (o desgaste do trem/freios já vem das regras de desgaste, que começam em 400 fpm).
+- **Infrações** (cumulativas), pesadas por tipo de missão conforme a § 5.2 (ex.: carga não perde por inclinação):
+  - Vne excedida ou estol fora de missão de instrução: −0,15;
+  - G > 2,2 ou < −0,5 com passageiros: −0,15;
+  - luzes de pouso/táxi esquecidas ou > 250 KIAS abaixo de 10.000 ft: −0,05 cada;
+  - pouso fora da pista ou saída lateral: −0,40 e anula os bônus de pouso.
+- Com TGL, cada toque conta: vale o **pior** toque da perna (a nota não pode ser "lavada" com um último pouso bom).
+
+### 6.5 Bônus fixos (aditivos)
+- **Pista** (origem ou destino, banco de aeroportos):
+  - curta (pista disponível entre 1,0 e 1,25 × `AircraftType.MinRunwayLength`): +40;
+  - não pavimentada (`Runways.Surface`): +30;
+  - inclinada > 2 %: +25 *(o banco atual não tem declividade; fica pendente de fonte de dados)*;
+  - combo bush (curta + não pavimentada + elevação): +30 extras.
+- **Ambiente** (no pouso):
+  - vento cruzado > 12 kt (monomotor) ou > 20 kt (jato): +35 (o app já calcula `CrosswindComponentKnots`);
+  - rajadas (variação do vento > 8 kt na aproximação, medida pelo app): +20;
+  - aeroporto > 4.000 ft ou altitude-densidade > 6.000 ft: +25;
+  - noturno (pouso ou decolagem entre o pôr e o nascer do sol; confirmar SimVar de período do dia): +30;
+  - IMC (visibilidade < 3 SM ou em nuvem na aproximação; `AMBIENT VISIBILITY`, `AMBIENT IN CLOUD`): +50.
+- **Prazo** (ETE = distância / velocidade de cruzeiro + 15 min; tempo de bloco):
+  - até 90 % do ETE: +30 (+60 em médico/urgente);
+  - de 90 a 115 %: +15;
+  - acima de 115 %: 0.
+  - Decisão do usuário de 2026-11-22: prazo e nota **só** afetam o XP, nunca o pagamento.
+
+### 6.6 Progressão adaptada aos valores novos
+Estimativa com a fórmula nova e nota média 1,0:
+- C152 em pernas de 40 min: ~250–280 XP/h;
+- turboélice: ~330–380 XP/h;
+- jato: ~450–500 XP/h, porque a parcela de distância pesa mais.
+
+Hoje a régua é de 62–100 XP/h. Proposta: manter as **horas** exigidas (regulatórias) e escalar o **XP** para que um piloto médio cumpra os dois juntos. Quem voa mal precisa de mais horas para fechar o XP, e quem voa bem e encara condições difíceis fecha o XP antes, mas ainda espera as horas.
+
+| Promoção | Horas (mantidas) | XP hoje | **XP proposto** | Razão |
+|---|---|---|---|---|
+| Cat 1 → 2 (SAE) | 40 h | 2.500 | **10.000** | 250 XP/h |
+| Cat 2 → 3 (táxi aéreo) | 150 h | 12.000 | **45.000** | 300 XP/h |
+| Cat 3 → 4 (regional) | 500 h | 45.000 | **175.000** | 350 XP/h |
+| Cat 4 → 5 (linha aérea) | 1.500 h | 150.000 | **600.000** | 400 XP/h |
+
+Os saltos entre categorias (4,5× → 3,9× → 3,4×) **diminuem**, como numa curva polinomial suave, em vez de crescer como na exponencial.
+
+**Níveis** (novo, opcional): **XP acumulado do nível L = 100 × L²**. Exemplos: L10 = 10.000, L20 = 40.000, L30 = 90.000, L50 = 250.000. As categorias caem perto dos níveis 10, 21, 42 e 77, então o nível dá uma sensação de progresso contínuo entre as promoções. As patentes (PPL/CPL/ATP) continuam por horas, como as licenças reais (40/250/1.500 h).
+
+Calibrar na ECON-STAB junto com o pagamento: os bots precisam de nota fixa por política e de bônus estimados pelo aeroporto. Meta: as promoções caem perto da curva de economia D (`economia-estabilidade.md` › 4.3).
+
+### 6.7 Decisões pendentes do usuário
+1. M_Tipo da instrução (1,10?) e se cria uma família de carga frágil/perecível.
+2. Itens do M_Realismo depois da checagem no SDK (o que não tiver SimVar sai).
+3. Exigências de XP da § 6.6 e o sistema de níveis (sim/não).
+4. Declividade de pista: buscar fonte de dados ou deixar fora.
