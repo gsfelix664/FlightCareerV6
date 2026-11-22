@@ -155,5 +155,34 @@ Calibrar na ECON-STAB junto com o pagamento: os bots precisam de nota fixa por p
 ### 6.7 Decisões pendentes do usuário
 1. M_Tipo da instrução (1,10?) e se cria uma família de carga frágil/perecível.
 2. Itens do M_Realismo depois da checagem no SDK (o que não tiver SimVar sai).
-3. Exigências de XP da § 6.6 e o sistema de níveis (sim/não).
-4. Declividade de pista: buscar fonte de dados ou deixar fora.
+3. Exigências de XP da § 6.6 e o sistema de níveis → **níveis aprovados** como base das 7 fases (§ 6.8); valores a calibrar.
+4. ~~Declividade de pista~~ **Decidido (2026-11-22): fora por enquanto** (sem fonte de dados).
+
+### 6.8 Fases da carreira por nível (tabela do usuário, 2026-11-22)
+| Fase | Nome | Níveis | Aeronaves típicas | Foco |
+|---|---|---|---|---|
+| 1 | Escola de aviação / aeroclube | 1–5 | C152, C172, PA-28 | instrução, voos locais, circuitos, VFR curta |
+| 2 | Serviços aéreos especializados (SAE) | 6–12 | C182, PA-18, Husky, DHC-2 | foto aérea, paraquedistas, bush, carga leve |
+| 3 | Táxi aéreo e carga regional leve | 13–20 | C208B, Baron 58, Bonanza | executivo curto, fretamento de carga, pistas não pavimentadas, IFR básico |
+| 4 | Aviação executiva e turboélices | 21–28 | King Air 350i, PC-12, TBM 930 | VIP, aeromédico, pistas curtas em altitude, todo-tempo |
+| 5 | Aviação regional (commuter) | 29–36 | ATR 72-600, Dash 8 Q400, CRJ-700 | rotas alimentadoras, horários rígidos, IFR complexo |
+| 6 | Linha aérea doméstica (narrowbody) | 37–44 | A320neo, 737-800 | hubs, gestão de combustível e peso, alta rotatividade |
+| 7 | Companhia internacional (widebody) | 45–50+ | 777, 787, A330/A350 | ETOPS, longo alcance, carga pesada |
+
+**Hoje são 5 categorias** (`PilotCategory`, gravadas como inteiro 1–5): Cat 1 escola, Cat 2 SAE, Cat 3 táxi aéreo, Cat 4 regional, Cat 5 linha regular. Cada uma tem custo de homologação ($35 mil … $2 mi), horas e XP para promover, e limita as missões (`Mission.RequiredCategory`, decidido pela carga e pelos passageiros no `MissionGenerator`). Mapeamento proposto: Cat 1 → Fase 1, Cat 2 → 2, Cat 3 → 3, **Fase 4 nova** (executiva/turboélice, hoje dividida entre Cat 3 e 4), Cat 4 → 5, Cat 5 → dividida em **6 e 7** (doméstica × internacional). Pilotos existentes migram pelo nível equivalente ao XP convertido.
+
+**Curva de níveis** (substitui a sugestão L² da § 6.6 para caber nas 7 fases): XP acumulado do nível L = **300 × (L − 1)²**. Entrada de cada fase:
+
+| Fase | Nível de entrada | XP acumulado |
+|---|---|---|
+| 2 | L6 | 7.500 |
+| 3 | L13 | 43.200 |
+| 4 | L21 | 120.000 |
+| 5 | L29 | 235.200 |
+| 6 | L37 | 388.800 |
+| 7 | L45 | 580.800 |
+| — | L50 | 720.300 |
+
+Com ~250–500 XP/h, isso dá algo como 30 h até a fase 2, ~150 h até a 3 e ~1.300–1.500 h até a 7. As horas regulatórias continuam como mínimo (40 / 150 / 500 / 1.500 h, a distribuir entre as 7 fases). Calibrar com a ECON-STAB contra a curva de economia D.
+
+**Pendente do usuário:** (a) as 7 fases **substituem** as 5 categorias (com custo de homologação por fase e limite de missões) ou ficam como camada de patente por cima delas; (b) a fase limita **quais aviões** o piloto pode comprar/voar ou só as missões. O arquivo do usuário `REGRAS_tiers.txt` (ainda não analisado, a pedido) provavelmente se relaciona com isto.
