@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Cessna Citation CJ4",
   "class": "Jet",
   "engineCount": 2,
@@ -154,6 +154,14 @@
       "unit": "g",
       "source": "POH",
       "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Cessna Model 525C (Citation CJ4) AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 172.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=2.5); atualizar pelo POH",
       "notes": null
     }
   ]

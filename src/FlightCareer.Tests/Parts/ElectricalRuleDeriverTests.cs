@@ -355,5 +355,179 @@ namespace FlightCareer.Tests.Parts
 
             Assert.Empty(emitted);
         }
+
+        [Fact]
+        public void DeteccaoBarramento_BateriaLigada_DetectaIndice2()
+        {
+            var deriver = new PartEventDeriver();
+            var cfg = new ElectricalConfig
+            {
+                SystemVolts = 28.0,
+                MainBusIndex = null // sem índice no catálogo
+            };
+            deriver.ConfigureElectrical(cfg);
+
+            var readings = new Dictionary<string, double>
+            {
+                ["ctx-simulation-rate"] = 1.0,
+                ["elec-master-battery"] = 1.0,
+                ["elec-bus-voltage-1"] = 0.0,
+                ["elec-bus-voltage-2"] = 28.0
+            };
+            var frame = new SensorFrame(readings, DateTime.UtcNow, 1.0);
+
+            deriver.Update(frame, 1.0, Features);
+
+            Assert.Equal(2, deriver.DetectedMainBusIndex);
+            var diags = deriver.DrainDiagnostics();
+            Assert.Contains(diags, d => d.Contains("barramento principal detectado: 2 (28 V)"));
+        }
+
+        [Fact]
+        public void DeteccaoBarramento_BateriaDesligada_NaoDetecta()
+        {
+            var deriver = new PartEventDeriver();
+            var cfg = new ElectricalConfig
+            {
+                SystemVolts = 28.0,
+                MainBusIndex = null
+            };
+            deriver.ConfigureElectrical(cfg);
+
+            var readings = new Dictionary<string, double>
+            {
+                ["ctx-simulation-rate"] = 1.0,
+                ["elec-master-battery"] = 0.0,
+                ["elec-bus-voltage-1"] = 0.0,
+                ["elec-bus-voltage-2"] = 28.0
+            };
+            var frame = new SensorFrame(readings, DateTime.UtcNow, 1.0);
+
+            deriver.Update(frame, 1.0, Features);
+
+            Assert.Null(deriver.DetectedMainBusIndex);
+            var diags = deriver.DrainDiagnostics();
+            Assert.DoesNotContain(diags, d => d.Contains("barramento principal detectado"));
+        }
+
+        [Fact]
+        public void DeteccaoTensao_Sistema14V_Detectado()
+        {
+            var deriver = new PartEventDeriver();
+            var cfg = new ElectricalConfig
+            {
+                SystemVolts = null,
+                MainBusIndex = null
+            };
+            deriver.ConfigureElectrical(cfg);
+
+            // Alternador ligado, barramento com 14.0 V (< 20 V)
+            var readings = new Dictionary<string, double>
+            {
+                ["ctx-simulation-rate"] = 1.0,
+                ["elec-master-battery"] = 1.0,
+                ["elec-master-alternator:1"] = 1.0,
+                ["elec-bus-voltage-1"] = 14.0
+            };
+            var frame = new SensorFrame(readings, DateTime.UtcNow, 1.0);
+
+            deriver.Update(frame, 1.0, Features);
+
+            Assert.Equal(14.0, deriver.DetectedSystemVolts);
+            Assert.Equal(1, deriver.DetectedMainBusIndex);
+            var diags = deriver.DrainDiagnostics();
+            Assert.Contains(diags, d => d.Contains("barramento principal detectado: 1 (14 V)"));
+        }
+
+        [Fact]
+        public void DescargaProfunda_SemIndicesNoPerfil_DisparaPorDeteccao()
+        {
+            var deriver = new PartEventDeriver();
+            // Perfil sem MainBusIndex (como o catálogo real do C152/outros aviões sem índice fixado)
+            var cfg = new ElectricalConfig
+            {
+                SystemVolts = 28.0,
+                MainBusIndex = null,
+                DeepDischargeVolts = 22.0,
+                BatteryDeepDischargeThresholds = new[] { 10.0, 25.0, 45.0 }
+            };
+            deriver.ConfigureElectrical(cfg);
+
+            // Tick 1 com bateria ligada e 24 V (detecta barramento 1, pois 24 V >= 14 V)
+            var frameInit = new SensorFrame(new Dictionary<string, double>
+            {
+                ["ctx-simulation-rate"] = 1.0,
+                ["elec-master-battery"] = 1.0,
+                ["elec-bus-voltage-1"] = 24.0
+            }, DateTime.UtcNow, 1.0);
+            deriver.Update(frameInit, 1.0, Features);
+            Assert.Equal(1, deriver.DetectedMainBusIndex);
+
+            // Agora mantém em descarga profunda (21 V) por 11 minutos (660 s)
+            var emitted = new List<DerivedPartEvent>();
+            for (int i = 0; i < 660; i++)
+            {
+                var frame = new SensorFrame(new Dictionary<string, double>
+                {
+                    ["ctx-simulation-rate"] = 1.0,
+                    ["elec-master-battery"] = 1.0,
+                    ["elec-bus-voltage-1"] = 21.0
+                }, DateTime.UtcNow, 1.0);
+
+                var evts = deriver.Update(frame, 1.0, Features);
+                emitted.AddRange(evts.Where(e => e.MetricKey == "batteryDeepDischargeMinutes"));
+            }
+
+            Assert.Single(emitted);
+            Assert.Equal(10.0, emitted[0].Value);
+        }
+
+        [Fact]
+        public void Sobrecarga_SemIndicesNoPerfil_DisparaPorDeteccao()
+        {
+            var deriver = new PartEventDeriver();
+            var cfg = new ElectricalConfig
+            {
+                SystemVolts = 28.0,
+                MainBusIndex = null, // Sem índice no catálogo
+                AlternatorRatedAmps = 60.0, // Padrão de classe pistão
+                ElectricalOverloadThresholds = new[] { 5.0, 15.0, 30.0 }
+            };
+            deriver.ConfigureElectrical(cfg);
+
+            // Tick 1 detecta barramento 1 (28 V)
+            var frameInit = new SensorFrame(new Dictionary<string, double>
+            {
+                ["ctx-simulation-rate"] = 1.0,
+                ["elec-master-battery"] = 1.0,
+                ["elec-master-alternator:1"] = 1.0,
+                ["elec-bus-voltage-1"] = 28.0,
+                ["elec-total-load-amps"] = 20.0,
+                ["eng-combustion:1"] = 1.0
+            }, DateTime.UtcNow, 1.0);
+            deriver.Update(frameInit, 1.0, Features);
+            Assert.Equal(1, deriver.DetectedMainBusIndex);
+
+            // Próximos 360 s (6 min): sobrecarga com sag em 25.5 V e carga de 75 A (> 60 A)
+            var emitted = new List<DerivedPartEvent>();
+            for (int i = 0; i < 360; i++)
+            {
+                var frame = new SensorFrame(new Dictionary<string, double>
+                {
+                    ["ctx-simulation-rate"] = 1.0,
+                    ["elec-master-battery"] = 1.0,
+                    ["elec-master-alternator:1"] = 1.0,
+                    ["elec-bus-voltage-1"] = 25.5,
+                    ["elec-total-load-amps"] = 75.0,
+                    ["eng-combustion:1"] = 1.0
+                }, DateTime.UtcNow, 1.0);
+
+                var evts = deriver.Update(frame, 1.0, Features);
+                emitted.AddRange(evts.Where(e => e.MetricKey == "electricalOverloadMinutes"));
+            }
+
+            Assert.Single(emitted);
+            Assert.Equal(5.0, emitted[0].Value);
+        }
     }
 }

@@ -46,6 +46,7 @@ namespace FlightCareer.Domain.Parts
         public const string Fms = "fms";
         public const string Autopilot = "autopilot";
         public const string WeatherRadar = "weatherRadar";
+        public const string NoAvionicsMaster = "noAvionicsMaster";
 
         // Aerodinâmica e superfícies
         public const string Slats = "slats";
@@ -106,6 +107,7 @@ namespace FlightCareer.Domain.Parts
             Fms,
             Autopilot,
             WeatherRadar,
+            NoAvionicsMaster,
             Slats,
             Spoilers,
             ThsTrim,

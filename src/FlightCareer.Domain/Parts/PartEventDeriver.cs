@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using FlightCareer.Domain.Sensors;
 
@@ -58,10 +59,16 @@ namespace FlightCareer.Domain.Parts
         private bool _wasInAir;
         private bool _flightCycleEmitted;
 
-        // Configuração e estado do subsistema elétrico (F2.4b-CAL)
+        // Configuração e estado do subsistema elétrico (F2.4b-CAL e LIMITES-FALTANTES)
         private ElectricalConfig? _electricalConfig;
         private EngineLimitsConfig? _engineLimitsConfig;
         private int _avionicsStartSpikesCount;
+
+        private int? _detectedMainBusIndex;
+        private double? _detectedSystemVolts;
+
+        public int? DetectedMainBusIndex => _electricalConfig?.MainBusIndex ?? _detectedMainBusIndex;
+        public double? DetectedSystemVolts => _electricalConfig?.SystemVolts ?? _detectedSystemVolts;
 
         private double _batteryDeepDischargeSec;
         private double _batteryDeepDischargeOffSec;
@@ -189,6 +196,9 @@ namespace FlightCareer.Domain.Parts
             _wasInAir = false;
             _flightCycleEmitted = false;
 
+            _detectedMainBusIndex = null;
+            _detectedSystemVolts = null;
+
             _avionicsStartSpikesCount = 0;
             _batteryDeepDischargeSec = 0.0;
             _batteryDeepDischargeOffSec = 0.0;
@@ -299,7 +309,7 @@ namespace FlightCareer.Domain.Parts
                 // Borda 0 -> 1 do starter para qualquer motor: checa partida com aviônicos ligados (Regra 1)
                 if (!prevStarter && curStarter)
                 {
-                    CheckAvionicsStartWithMasterOn(frame, eng, events);
+                    CheckAvionicsStartWithMasterOn(frame, eng, featSet, events);
                 }
 
                 // Borda de combustão 0 -> 1 com starter engatado no frame anterior ou no atual
@@ -342,6 +352,7 @@ namespace FlightCareer.Domain.Parts
             }
 
             // 2. Regras elétricas contínuas (Regra 2: Descarga Profunda, Regra 3: Sobrecarga de Amperagem)
+            UpdateElectricalDetection(frame);
             CheckBatteryDeepDischarge(frame, dtSimSeconds, events);
             CheckElectricalOverload(frame, dtSimSeconds, events);
 
@@ -400,8 +411,88 @@ namespace FlightCareer.Domain.Parts
             return events;
         }
 
-        private void CheckAvionicsStartWithMasterOn(SensorFrame frame, int eng, List<DerivedPartEvent> events)
+        private void UpdateElectricalDetection(SensorFrame frame)
         {
+            // 1. Tensão do sistema (se ausente no config e ainda não detectada)
+            if ((_electricalConfig?.SystemVolts == null || _electricalConfig.SystemVolts.Value <= 0.0) &&
+                !_detectedSystemVolts.HasValue)
+            {
+                bool anyAlt = false;
+                if (frame.Values.TryGetValue("elec-master-alternator", out double a0) && a0 > 0.5)
+                {
+                    anyAlt = true;
+                }
+                else
+                {
+                    for (int eng = 1; eng <= 4; eng++)
+                    {
+                        if (frame.Values.TryGetValue($"elec-master-alternator:{eng}", out double aVal) && aVal > 0.5)
+                        {
+                            anyAlt = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (anyAlt)
+                {
+                    double maxBus = 0.0;
+                    bool hasBusReading = false;
+                    for (int k = 1; k <= 5; k++)
+                    {
+                        if (frame.Values.TryGetValue($"elec-bus-voltage-{k}", out double v) && v > 0.0)
+                        {
+                            hasBusReading = true;
+                            if (v > maxBus) maxBus = v;
+                        }
+                    }
+
+                    if (hasBusReading)
+                    {
+                        _detectedSystemVolts = (maxBus >= 20.0) ? 28.0 : 14.0;
+                    }
+                }
+            }
+
+            // 2. Barramento principal (se ausente no config e ainda não detectado)
+            if ((_electricalConfig?.MainBusIndex == null || _electricalConfig.MainBusIndex.Value <= 0) &&
+                !_detectedMainBusIndex.HasValue)
+            {
+                double? currentSysVolts = _electricalConfig?.SystemVolts ?? _detectedSystemVolts;
+                if (currentSysVolts.HasValue && currentSysVolts.Value > 0.0)
+                {
+                    bool batOn = frame.Values.TryGetValue("elec-master-battery", out double bat) && bat >= 0.5;
+                    if (batOn)
+                    {
+                        double threshold = 0.5 * currentSysVolts.Value;
+                        for (int k = 1; k <= 5; k++)
+                        {
+                            if (frame.Values.TryGetValue($"elec-bus-voltage-{k}", out double v))
+                            {
+                                if (v >= threshold)
+                                {
+                                    _detectedMainBusIndex = k;
+                                    string vStr = (Math.Abs(v - Math.Round(v)) < 0.05)
+                                        ? Math.Round(v).ToString("F0", CultureInfo.InvariantCulture)
+                                        : v.ToString("0.#", CultureInfo.InvariantCulture);
+                                    ReportDiagnosticOnce($"elec-main-bus-detected-{k}", $"barramento principal detectado: {k} ({vStr} V)");
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void CheckAvionicsStartWithMasterOn(SensorFrame frame, int eng, IReadOnlySet<string> featSet, List<DerivedPartEvent> events)
+        {
+            if (featSet.Contains(AircraftFeatures.NoAvionicsMaster) || featSet.Contains("noAvionicsMaster") ||
+                featSet.Contains(AircraftFeatures.NoElectrical) || featSet.Contains("noElectrical"))
+            {
+                return;
+            }
+
             if (_electricalConfig == null || !_electricalConfig.AvionicsCircuitIndex.HasValue || _electricalConfig.AvionicsCircuitIndex.Value <= 0)
             {
                 ReportDiagnosticOnce("elec-avionics-missing-param",
@@ -428,27 +519,28 @@ namespace FlightCareer.Domain.Parts
 
         private void CheckBatteryDeepDischarge(SensorFrame frame, double dtSimSeconds, List<DerivedPartEvent> events)
         {
-            if (_electricalConfig == null || !_electricalConfig.MainBusIndex.HasValue || _electricalConfig.MainBusIndex.Value <= 0 ||
-                !_electricalConfig.SystemVolts.HasValue || _electricalConfig.SystemVolts.Value <= 0.0)
+            int? busIdx = _electricalConfig?.MainBusIndex ?? _detectedMainBusIndex;
+            double? systemVolts = _electricalConfig?.SystemVolts ?? _detectedSystemVolts;
+
+            if (!busIdx.HasValue || busIdx.Value <= 0 || !systemVolts.HasValue || systemVolts.Value <= 0.0)
             {
-                ReportDiagnosticOnce("elec-deep-discharge-missing-param",
-                    "Regra 'battery_deep_discharge_damage' desativada: elecMainBusIndex ou elecSystemVolts ausente no catálogo da aeronave.");
+                // Regra em espera pela detecção de barramento/tensão em voo — sem emitir diagnóstico de "desativada"
                 return;
             }
 
-            int busIdx = _electricalConfig.MainBusIndex.Value;
-            string busKey = $"elec-bus-voltage-{busIdx}";
+            int bus = busIdx.Value;
+            string busKey = $"elec-bus-voltage-{bus}";
 
             if (!frame.Values.TryGetValue("elec-master-battery", out double masterBat) ||
                 !frame.Values.TryGetValue(busKey, out double busVolts))
             {
-                ReportDiagnosticOnce($"elec-battery-missing-sensor-{busIdx}",
+                ReportDiagnosticOnce($"elec-battery-missing-sensor-{bus}",
                     $"Regra 'battery_deep_discharge_damage' desativada: 'elec-master-battery' ou '{busKey}' ausente no frame de sensores.");
                 return;
             }
 
-            double systemVolts = _electricalConfig.SystemVolts.Value;
-            double deepDischargeVolts = _electricalConfig.DeepDischargeVolts ?? (systemVolts * (22.0 / 28.0));
+            double sysVolts = systemVolts.Value;
+            double deepDischargeVolts = _electricalConfig?.DeepDischargeVolts ?? (sysVolts * (22.0 / 28.0));
 
             bool isDeepDischarge = masterBat >= 0.5 && busVolts >= 1.0 && busVolts <= deepDischargeVolts;
 
@@ -458,7 +550,7 @@ namespace FlightCareer.Domain.Parts
                 _batteryDeepDischargeOffSec = 0.0;
                 double accumulatedMinutes = _batteryDeepDischargeSec / 60.0;
 
-                var thresholds = _electricalConfig.BatteryDeepDischargeThresholds ?? new[] { 10.0, 25.0, 45.0 };
+                var thresholds = _electricalConfig?.BatteryDeepDischargeThresholds ?? new[] { 10.0, 25.0, 45.0 };
                 foreach (var th in thresholds.OrderBy(t => t))
                 {
                     if (accumulatedMinutes >= th && !_batteryThresholdsEmitted.Contains(th))
@@ -489,21 +581,22 @@ namespace FlightCareer.Domain.Parts
                 return;
             }
 
-            if (!_electricalConfig.MainBusIndex.HasValue || _electricalConfig.MainBusIndex.Value <= 0 ||
-                !_electricalConfig.SystemVolts.HasValue || _electricalConfig.SystemVolts.Value <= 0.0)
+            int? busIdx = _electricalConfig.MainBusIndex ?? _detectedMainBusIndex;
+            double? systemVolts = _electricalConfig.SystemVolts ?? _detectedSystemVolts;
+
+            if (!busIdx.HasValue || busIdx.Value <= 0 || !systemVolts.HasValue || systemVolts.Value <= 0.0)
             {
-                ReportDiagnosticOnce("elec-overload-missing-bus",
-                    "Regra 'electrical_system_overload_amps' desativada: elecMainBusIndex ou elecSystemVolts ausente no catálogo da aeronave.");
+                // Regra em espera pela detecção de barramento/tensão em voo — sem emitir diagnóstico de "desativada"
                 return;
             }
 
-            int busIdx = _electricalConfig.MainBusIndex.Value;
-            string busKey = $"elec-bus-voltage-{busIdx}";
+            int bus = busIdx.Value;
+            string busKey = $"elec-bus-voltage-{bus}";
 
             if (!frame.Values.TryGetValue("elec-total-load-amps", out double totalLoadAmps) ||
                 !frame.Values.TryGetValue(busKey, out double busVolts))
             {
-                ReportDiagnosticOnce($"elec-overload-missing-sensor-{busIdx}",
+                ReportDiagnosticOnce($"elec-overload-missing-sensor-{bus}",
                     $"Regra 'electrical_system_overload_amps' desativada: 'elec-total-load-amps' ou '{busKey}' ausente no frame de sensores.");
                 return;
             }
@@ -532,7 +625,7 @@ namespace FlightCareer.Domain.Parts
                 }
             }
 
-            double systemVolts = _electricalConfig.SystemVolts.Value;
+            double sysVolts = systemVolts.Value;
             double ratedAmps = _electricalConfig.AlternatorRatedAmps.Value;
 
             // Heurística de Sobrecarga Elétrica Real (Decisão FIX-REPLAY-BUGS):
@@ -545,8 +638,8 @@ namespace FlightCareer.Domain.Parts
             //    - Tensão colapsada (< 0.88 * systemVolts, ex: < 24.64V em sistema 28V): a tensão caiu para o patamar da bateria isolada (~24V),
             //      indicando que o alternador desarmou, queimou ou foi desligado (bateria sozinha descarregando, coberta pela regra de descarga profunda).
             //    - Faixa intermediária [0.88, 0.95): alternador ativo porém operando em sobrecarga térmica real, incapaz de manter a tensão regulada.
-            double vSagMin = 0.88 * systemVolts;
-            double vSagMax = 0.95 * systemVolts;
+            double vSagMin = 0.88 * sysVolts;
+            double vSagMax = 0.95 * sysVolts;
             bool voltageSag = busVolts >= vSagMin && busVolts < vSagMax;
 
             bool isOverload = anyAlternatorAndCombustion && !anyStarter && (totalLoadAmps > ratedAmps) && voltageSag;

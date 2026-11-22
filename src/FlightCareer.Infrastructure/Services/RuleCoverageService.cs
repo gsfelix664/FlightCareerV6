@@ -20,7 +20,8 @@ namespace FlightCareer.Infrastructure.Services
         string Description,
         WearRuleKind Kind,
         RuleApplicabilityStatus Status,
-        string? Reason
+        string? Reason,
+        bool InFlightDetection = false
     );
 
     public sealed record AircraftCoverageSummary(
@@ -64,8 +65,8 @@ namespace FlightCareer.Infrastructure.Services
 
                 foreach (var rule in _wearRuleCatalog.Rules)
                 {
-                    var (status, reason) = EvaluateRule(rule, profile, featSet, resolver);
-                    results.Add(new RuleApplicabilityResult(rule.Id, rule.Description, rule.Kind, status, reason));
+                    var (status, reason, inFlightDetection) = EvaluateRule(rule, profile, featSet, resolver);
+                    results.Add(new RuleApplicabilityResult(rule.Id, rule.Description, rule.Kind, status, reason, inFlightDetection));
                 }
 
                 summaries.Add(new AircraftCoverageSummary(profile.AircraftId, profile.Class, profile.Features, results));
@@ -74,7 +75,7 @@ namespace FlightCareer.Infrastructure.Services
             return summaries;
         }
 
-        private static (RuleApplicabilityStatus Status, string? Reason) EvaluateRule(
+        private static (RuleApplicabilityStatus Status, string? Reason, bool InFlightDetection) EvaluateRule(
             WearRule rule,
             AircraftLimitProfile profile,
             HashSet<string> featSet,
@@ -103,7 +104,7 @@ namespace FlightCareer.Infrastructure.Services
                 }
 
                 string reason = reasons.Count > 0 ? string.Join("; ", reasons) : "filtros de feature da regra não atendidos";
-                return (RuleApplicabilityStatus.NotApplicableByFeature, reason);
+                return (RuleApplicabilityStatus.NotApplicableByFeature, reason, false);
             }
 
             // 2. Verificação de Limites Operacionais para Regras Contínuas
@@ -113,14 +114,14 @@ namespace FlightCareer.Infrastructure.Services
                 {
                     if (featSet.Contains("noFlaps") || featSet.Contains(AircraftFeatures.NoFlaps))
                     {
-                        return (RuleApplicabilityStatus.NotApplicableByFeature, "aeronave sem flaps (feature 'noFlaps')");
+                        return (RuleApplicabilityStatus.NotApplicableByFeature, "aeronave sem flaps (feature 'noFlaps')", false);
                     }
 
                     // Verifica se existe algum limite Vfe configurado
                     bool hasAnyVfe = profile.Limits.Any(l => l.Key.StartsWith("vfe", StringComparison.OrdinalIgnoreCase));
                     if (!hasAnyVfe)
                     {
-                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, "nenhum limite Vfe configurado para os dentes de flap");
+                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, "nenhum limite Vfe configurado para os dentes de flap", false);
                     }
                 }
                 else if (!string.IsNullOrWhiteSpace(rule.LimitKey))
@@ -128,7 +129,7 @@ namespace FlightCareer.Infrastructure.Services
                     var limit = resolver.Get(profile, profile.Class, rule.LimitKey);
                     if (limit == null || double.IsNaN(limit.Value) || double.IsInfinity(limit.Value) || limit.Value == 0.0)
                     {
-                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"limite operacional '{rule.LimitKey}' ausente no perfil e nos padrões de classe");
+                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"limite operacional '{rule.LimitKey}' ausente no perfil e nos padrões de classe", false);
                     }
                 }
             }
@@ -141,31 +142,34 @@ namespace FlightCareer.Infrastructure.Services
                     var lim = resolver.Get(profile, profile.Class, LimitKeys.ElecAvionicsCircuitIndex);
                     if (lim == null || lim.Value <= 0)
                     {
-                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"parâmetro '{LimitKeys.ElecAvionicsCircuitIndex}' ausente no catálogo da aeronave");
+                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"parâmetro '{LimitKeys.ElecAvionicsCircuitIndex}' ausente no catálogo da aeronave", false);
                     }
                 }
                 else if (string.Equals(rule.Metric, WearRuleMetrics.BatteryDeepDischargeMinutes, StringComparison.OrdinalIgnoreCase))
                 {
+                    // Barramento e tensão são detectados dinamicamente em voo se ausentes (LIMITES-FALTANTES)
                     var busLim = resolver.Get(profile, profile.Class, LimitKeys.ElecMainBusIndex);
                     var voltLim = resolver.Get(profile, profile.Class, LimitKeys.ElecSystemVolts);
-                    if (busLim == null || busLim.Value <= 0 || voltLim == null || voltLim.Value <= 0)
-                    {
-                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"parâmetro '{LimitKeys.ElecMainBusIndex}' ou '{LimitKeys.ElecSystemVolts}' ausente");
-                    }
+                    bool inFlight = busLim == null || busLim.Value <= 0 || voltLim == null || voltLim.Value <= 0;
+                    return (RuleApplicabilityStatus.Active, null, inFlight);
                 }
                 else if (string.Equals(rule.Metric, WearRuleMetrics.ElectricalOverloadMinutes, StringComparison.OrdinalIgnoreCase))
                 {
                     var ampsLim = resolver.Get(profile, profile.Class, LimitKeys.AlternatorRatedAmps);
+                    if (ampsLim == null || ampsLim.Value <= 0)
+                    {
+                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"parâmetro '{LimitKeys.AlternatorRatedAmps}' ausente no catálogo da aeronave", false);
+                    }
+
+                    // Barramento e tensão são detectados dinamicamente em voo se ausentes (LIMITES-FALTANTES)
                     var busLim = resolver.Get(profile, profile.Class, LimitKeys.ElecMainBusIndex);
                     var voltLim = resolver.Get(profile, profile.Class, LimitKeys.ElecSystemVolts);
-                    if (ampsLim == null || ampsLim.Value <= 0 || busLim == null || busLim.Value <= 0 || voltLim == null || voltLim.Value <= 0)
-                    {
-                        return (RuleApplicabilityStatus.InactiveMissingLimitOrParam, $"parâmetro '{LimitKeys.AlternatorRatedAmps}', '{LimitKeys.ElecMainBusIndex}' ou '{LimitKeys.ElecSystemVolts}' ausente");
-                    }
+                    bool inFlight = busLim == null || busLim.Value <= 0 || voltLim == null || voltLim.Value <= 0;
+                    return (RuleApplicabilityStatus.Active, null, inFlight);
                 }
             }
 
-            return (RuleApplicabilityStatus.Active, null);
+            return (RuleApplicabilityStatus.Active, null, false);
         }
 
         public string GenerateMarkdownReport()
@@ -176,6 +180,21 @@ namespace FlightCareer.Infrastructure.Services
             sb.AppendLine("# Relatório de Cobertura das Regras de Desgaste por Aeronave");
             sb.AppendLine();
             sb.AppendLine("> Relatório gerado automaticamente cobrindo os 46 modelos do catálogo contra as 47 regras de desgaste.");
+            sb.AppendLine();
+
+            int totalAircraft = summaries.Count;
+            double grandAvgActive = summaries.Average(s => s.ActiveCount);
+            double grandAvgInactive = summaries.Average(s => s.InactiveMissingCount);
+            double grandAvgNotApp = summaries.Average(s => s.NotApplicableCount);
+
+            // Comparativo Antes / Depois (LIMITES-FALTANTES)
+            sb.AppendLine("## 0. Comparativo Antes / Depois (LIMITES-FALTANTES)");
+            sb.AppendLine();
+            sb.AppendLine("| Métrica | Antes (Fase Inicial) | Depois (LIMITES-FALTANTES) | Variação |");
+            sb.AppendLine("|---|---|---|---|");
+            sb.AppendLine($"| **Média Ativas Geral** | 30,3 | {grandAvgActive:F1} | +{grandAvgActive - 30.3:F1} |");
+            sb.AppendLine($"| **Média Inativas (Falta Parâm.) Geral** | 4,5 | {grandAvgInactive:F1} | -{4.5 - grandAvgInactive:F1} |");
+            sb.AppendLine($"| **Média Não Aplicáveis (Feature) Geral** | 12,1 | {grandAvgNotApp:F1} | +{grandAvgNotApp - 12.1:F1} |");
             sb.AppendLine();
 
             // Resumo no topo por classe
@@ -194,10 +213,6 @@ namespace FlightCareer.Infrastructure.Services
                 sb.AppendLine($"| **{g.Key}** | {count} | {avgActive:F1} | {avgInactive:F1} | {avgNotApp:F1} |");
             }
 
-            int totalAircraft = summaries.Count;
-            double grandAvgActive = summaries.Average(s => s.ActiveCount);
-            double grandAvgInactive = summaries.Average(s => s.InactiveMissingCount);
-            double grandAvgNotApp = summaries.Average(s => s.NotApplicableCount);
             sb.AppendLine($"| **Total Geral** | **{totalAircraft}** | **{grandAvgActive:F1}** | **{grandAvgInactive:F1}** | **{grandAvgNotApp:F1}** |");
             sb.AppendLine();
 
@@ -241,7 +256,7 @@ namespace FlightCareer.Infrastructure.Services
                 if (active.Count > 0)
                 {
                     sb.AppendLine("#### ✅ Regras Ativas:");
-                    sb.AppendLine(string.Join(", ", active.Select(r => $"`{r.RuleId}`")));
+                    sb.AppendLine(string.Join(", ", active.Select(r => r.InFlightDetection ? $"`{r.RuleId}` (detecção em voo)" : $"`{r.RuleId}`")));
                     sb.AppendLine();
                 }
 

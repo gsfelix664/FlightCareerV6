@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "ES30",
   "class": "Turboprop",
   "engineCount": 4,
@@ -98,6 +98,14 @@
       "unit": "volts",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: híbrido elétrico; só voltagem",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 166.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=2.5); atualizar pelo POH",
       "notes": null
     }
   ]

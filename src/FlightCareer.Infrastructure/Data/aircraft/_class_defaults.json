@@ -63,6 +63,14 @@
       "source": "ClassDefault",
       "reference": "estimativa — revisar: MAX EGT informado pelo MSFS no C152 (≈1640 °F)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH: padrão de 60 A por motor para classe pistão",
+      "notes": "Estimativa padrão da classe pistão"
     }
   ],
   "Turboprop": [
@@ -121,6 +129,14 @@
       "source": "ClassDefault",
       "reference": "FAR 23 Categoria Normal (component_catalog.json)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH: padrão de 250 A por gerador para classe turboélice",
+      "notes": "Estimativa padrão da classe turboélice"
     }
   ],
   "Jet": [
@@ -179,6 +195,14 @@
       "source": "ClassDefault",
       "reference": "FAR 25 Categoria Transporte (component_catalog.json)",
       "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH: padrão de 400 A por gerador para classe jato",
+      "notes": "Estimativa padrão da classe jato"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 6,
+  "dataVersion": 7,
   "id": "C400 Corvalis",
   "class": "Piston",
   "engineCount": 1,
@@ -113,6 +113,14 @@
       "unit": "rpm",
       "source": "ClassDefault",
       "reference": "estimativa — atualizar pelo POH real: Continental TSIO-550-C",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 140.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=3.8); atualizar pelo POH",
       "notes": null
     }
   ]
