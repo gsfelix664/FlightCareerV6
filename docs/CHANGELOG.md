@@ -2891,3 +2891,20 @@
 
 ## 2026-11-22 - Cancelar um voo ativo avança o relógio de carreira (Claude)
 - `FlightMonitor.CancelMonitoringAsync` chama `FlightService.ProcessFlightCancellationAsync` (tempo simulado voado + 0,5 h de solo) depois de salvar o estado; o método existia mas nunca era chamado (pendência de 2026-11-19). Teste `FlightCancellationClockTests`. Suíte 873/873. Não testado no MSFS.
+
+## 2026-11-22 - Contratos da Fase 2: Levantamento Aéreo e Lançamento de Paraquedistas (FASES-2B) (Gemini)
+- **Categoria 3.6 Serviços Aéreos Especializados (SAE) (`MissionRules.cs`):** adicionada nos Tiers 2, 3 e 4 com os contratos:
+  - `3.6.1` Levantamento / Fotografia Aérea: área retangular de 2–4 NM de lado a 5–25 NM da origem, altitude-alvo sorteada (2.000–6.000 ft MSL), velocidade-alvo (cruzeiro × 0,75), 3–5 pernas paralelas na orientação sorteada. Conclusão exige cruzar a área de borda a borda com rumo dentro de ±15° da orientação, altitude ±150 ft e velocidade ±10 kt em $\ge 80\%$ das amostras dentro da área para cada perna, com retorno à origem. Família `aerofoto` (base $600, 6,0/NM do percurso estimado, escala 1,0, M_Tipo 1,15).
+  - `3.6.2` Lançamento de Paraquedistas: zona de salto no aeródromo de origem, altitude de salto 10.000–12.000 ft AGL, 4–10 paraquedistas. Conclusão exige subida até altitude de salto a $\le 2$ NM da zona, estabilização dentro de ±200 ft e IAS $\le 1,3 \times Vs1$ (ou $\le 90$ kt) por $\ge 30$ s contínuos sobre a zona (salto feito) e descida com pouso na origem. Choque térmico da CHT na descida (> 28 °C/min) emite aviso explicativo no resultado do voo sem reprovação. Paraquedistas saltam em voo e são isentos da taxa de embarque de passageiros no pouso. Família `paraquedismo` (base $120/saltador + 4,0/NM, `paxAtLeastOne`, escala 1,0, M_Tipo 1,15).
+- **Rastreadores de Domínio (`Domain/Missions/`):**
+  - `SurveyLegTracker`: projeção em coordenadas rotacionadas $u$ (longitudinal) e $v$ (transversal), validação contínua de tolerâncias e cômputo de travessia borda-a-borda ($\Delta u \ge 0.75 \times L$).
+  - `SkydiveDropTracker`: rastreia janela estável contínua de 30 s sobre a zona de salto e monitora choque térmico da CHT durante a descida após o salto.
+  - `MissionCompletion.Evaluate`: estendido com validações dos contratos 3.6.1 e 3.6.2, gerando motivos descritivos quando incompleto e repassando alertas de choque térmico.
+- **Persistência de Dados e Integração:**
+  - `Mission.cs` e `AppDbContext.EnsureSchemaUpdatedAsync`: adicionada coluna `ContractData` (TEXT DEFAULT NULL) para parâmetros específicos serializados em JSON (`SurveyContractData` e `SkydiveContractData`).
+  - `PartFlightTracker.cs` e `PartFlightSession.cs`: exposta a propriedade `LatestChtCoolingRate`.
+  - `FlightMonitor.cs`: inicialização e alimentação dos rastreadores com telemetria e taxa de resfriamento da CHT, repassando ao `FlightService.ProcessFlightFinishAsync`.
+  - `FlightService.cs`: avaliação de conclusão, isenção de taxa de embarque no pouso para paraquedistas e inclusão de avisos no resultado.
+- **Calibração em dados:** `career_phases.json` (3.6.x na fase 2), `mission_pay.json` (famílias `aerofoto` e `paraquedismo`) e `xp_rules.json` (M_Tipo 1,15).
+- Suíte de testes: `Phase2ContractTests.cs` (13 novos testes) cobrindo rastreadores, completion, gerador, migração de banco e isenção de taxas. Total de 886/886 testes xUnit aprovados (100%), fuzz testing (10 corridas) com 100% de aprovação e 0 falhas.
+- Não testado no MSFS / não visto na tela.

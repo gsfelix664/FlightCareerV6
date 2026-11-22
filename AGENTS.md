@@ -237,6 +237,17 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Persistência de Dados (`Mission.cs`, `AppDbContext.cs`):** colunas `RequiredTouchAndGoes` (int, default 0) e `OverflyWaypoints` (string, default NULL) adicionadas com suporte a migração idempotente de bancos legados em `EnsureSchemaUpdatedAsync` e default value 0 no EF Core.
 - **Calibração em dados (`career_phases.json`, `mission_pay.json`, `xp_rules.json`):** mapeamento 3.5.x para fase 1, tarifas em dados com fallback seguro em `MissionPayTable.Defaults` e multiplicadores de XP dedicados. Não testado no MSFS.
 
+### Contratos da Fase 2: Levantamento Aéreo e Lançamento de Paraquedistas (FASES-2B)
+- **Categoria 3.6 Serviços Aéreos Especializados (SAE) (`MissionRules.cs`):** adicionada nos Tiers de origem 2, 3 e 4 com peso 5, composta pelos dois novos contratos:
+  - `3.6.1` Levantamento / Fotografia Aérea (família `aerofoto`, base $600, 6,0/NM do percurso estimado, M_Tipo 1,15, fase 2): área retangular de 2–4 NM de lado centrada entre 5 e 25 NM da origem; altitude-alvo sorteada (2.000–6.000 ft MSL, acima de terreno + 1.000 ft); velocidade-alvo (cruzeiro × 0,75); 3–5 pernas paralelas na orientação sorteada. Conclusão exige cruzar a área de borda a borda com rumo dentro de ±15° da orientação, altitude ±150 ft e IAS ±10 kt durante $\ge 80\%$ do trecho dentro da área para cada perna, e pousar na origem.
+  - `3.6.2` Lançamento de Paraquedistas (família `paraquedismo`, base $120/saltador + 4,0/NM com `paxAtLeastOne`, M_Tipo 1,15, fase 2): zona de salto no aeródromo de origem; altitude de salto 10.000–12.000 ft AGL; 4–10 paraquedistas. Conclusão exige subir até altitude de salto a $\le 2$ NM da zona, estabilizar dentro de ±200 ft e IAS $\le 1,3 \times Vs1$ (ou $\le 90$ kt) por $\ge 30$ s contínuos sobre a zona (salto feito) e descer/pousar na origem. Choque térmico na desciva (> 28 °C/min) gera aviso explicativo no resultado sem reprovação. Paraquedistas saltam em voo e não são cobrados na taxa de embarque de passageiros no pouso.
+- **Rastreadores de Domínio (`Domain/Missions/`):**
+  - `SurveyLegTracker`: projeta posição local em coordenadas $u$ (longitudinal) e $v$ (transversal) da área retangular orientada, valida qualidade das amostras em voo e contabiliza pernas completadas de borda a borda.
+  - `SkydiveDropTracker`: gerencia a janela de estabilização contínua de 30 s sobre a zona de salto e monitora choque térmico da CHT durante a descida e pouso.
+  - `MissionCompletion.Evaluate`: estendido com validações dedicadas para os subtipos 3.6.1 e 3.6.2 com motivos descritivos em caso de descumprimento operacional.
+- **Persistência de Dados e Integração:** coluna `ContractData` (TEXT DEFAULT NULL) adicionada em `Mission` e migrada em `EnsureSchemaUpdatedAsync`. `FlightMonitor` atualiza trackers e repassa métricas para `FlightService.ProcessFlightFinishAsync`.
+- **Calibração em dados:** subtipos 3.6.x mapeados para fase 2 em `career_phases.json`, famílias `aerofoto` e `paraquedismo` adicionadas em `mission_pay.json` e `xp_rules.json`. Não testado no MSFS / tela do app.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

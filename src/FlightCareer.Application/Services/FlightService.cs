@@ -55,7 +55,11 @@ namespace FlightCareer.Application.Services
             bool autoStartUsed = false,
             XpFlightInputs? xpInputs = null,
             IReadOnlySet<string>? visitedWaypoints = null,
-            int touchAndGoCount = 0)
+            int touchAndGoCount = 0,
+            int surveyLegsCompleted = 0,
+            bool skydiveDropCompleted = false,
+            bool skydiveThermalShock = false,
+            double skydiveMaxCoolingRate = 0.0)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -293,10 +297,13 @@ namespace FlightCareer.Application.Services
                 int missionsRemaining = 0;
                 int passengersCompleted = 0;
                 var uncompletedMissionReasons = new List<string>();
+                var missionWarnings = new List<string>();
 
                 foreach (var mission in activeMissions)
                 {
-                    var completion = MissionCompletion.Evaluate(mission, destinationIcao, visitedWaypoints, touchAndGoCount);
+                    var completion = MissionCompletion.Evaluate(
+                        mission, destinationIcao, visitedWaypoints, touchAndGoCount,
+                        surveyLegsCompleted, skydiveDropCompleted, skydiveThermalShock, skydiveMaxCoolingRate);
 
                     if (!isFlightInvalidated && completion.IsCompleted)
                     {
@@ -304,7 +311,16 @@ namespace FlightCareer.Application.Services
                         double missionReward = mission.RewardMoney;
                         totalRevenue += missionReward;
                         missionsDone++;
-                        passengersCompleted += mission.PassengerCount;
+                        // Paraquedistas não contam como passageiros no pouso (taxa de embarque) depois do salto
+                        if (mission.SubId != "3.6.2")
+                        {
+                            passengersCompleted += mission.PassengerCount;
+                        }
+
+                        if (!string.IsNullOrEmpty(completion.Warning))
+                        {
+                            missionWarnings.Add(completion.Warning);
+                        }
                         
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null) _context.Missions.Remove(dbMission);
@@ -481,6 +497,10 @@ namespace FlightCareer.Application.Services
                 if (uncompletedMissionReasons.Count > 0)
                 {
                     outcome.Message += $" | Contrato(s) não concluído(s): {string.Join(" • ", uncompletedMissionReasons)}";
+                }
+                if (missionWarnings.Count > 0)
+                {
+                    outcome.Message += $" | {string.Join(" • ", missionWarnings)}";
                 }
                 return outcome;
             }

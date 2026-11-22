@@ -1,6 +1,7 @@
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Career;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -290,6 +291,16 @@ namespace FlightCareer.Application.Services
                     requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
             }
 
+            if (sub.Id == "3.6.1")
+            {
+                return CreateSurveyMissionSync(origin, sub, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable);
+            }
+
+            if (sub.Id == "3.6.2")
+            {
+                return CreateSkydiveMissionSync(origin, sub, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable);
+            }
+
             if (sub.Id == "3.5.3")
             {
                 paxCount = 0;
@@ -366,12 +377,13 @@ namespace FlightCareer.Application.Services
             string? overflyWaypoints = null,
             string? titleOverride = null,
             string? descriptionOverride = null,
-            Runway? destRunway = null)
+            Runway? destRunway = null,
+            string? contractData = null)
         {
             var m = CreateMissionObjectSync(
                 origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, 
                 _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable,
-                requiredTouchAndGoes, overflyWaypoints, titleOverride, descriptionOverride, destRunway);
+                requiredTouchAndGoes, overflyWaypoints, titleOverride, descriptionOverride, destRunway, contractData);
             return Task.FromResult(m);
         }
 
@@ -391,7 +403,8 @@ namespace FlightCareer.Application.Services
             string? overflyWaypoints = null,
             string? titleOverride = null,
             string? descriptionOverride = null,
-            Runway? destRunway = null)
+            Runway? destRunway = null,
+            string? contractData = null)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -424,8 +437,93 @@ namespace FlightCareer.Application.Services
                 RequiredTier = (CompanyTier)(int)requiredPhase,
                 MissionCategoryType = categoryType,
                 RequiredTouchAndGoes = requiredTouchAndGoes,
-                OverflyWaypoints = overflyWaypoints
+                OverflyWaypoints = overflyWaypoints,
+                ContractData = contractData
             };
+        }
+
+        public static Mission CreateSurveyMissionSync(
+            Airport origin,
+            SubCategoryConfig sub,
+            Random random,
+            DateTime referenceTime,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
+        {
+            double distToCenter = 5.0 + (random.NextDouble() * 20.0);
+            double azRad = random.NextDouble() * 2.0 * Math.PI;
+            double centerLat = origin.Latitude + ((distToCenter / 60.0) * Math.Cos(azRad));
+            double cosOriginLat = Math.Cos(origin.Latitude * Math.PI / 180.0);
+            if (Math.Abs(cosOriginLat) < 0.01) cosOriginLat = 0.01;
+            double centerLon = origin.Longitude + ((distToCenter / (60.0 * cosOriginLat)) * Math.Sin(azRad));
+
+            double widthNM = Math.Round(2.0 + (random.NextDouble() * 2.0), 1);
+            double lengthNM = Math.Round(2.0 + (random.NextDouble() * 2.0), 1);
+            double orientationDeg = random.Next(0, 36) * 10.0;
+            int requiredLegs = random.Next(3, 6);
+
+            double minAlt = Math.Max(2000.0, origin.ElevationFt + 1000.0);
+            double maxAlt = Math.Max(minAlt + 500.0, 6000.0);
+            double targetAltitudeFt = Math.Round((minAlt + (random.NextDouble() * (maxAlt - minAlt))) / 100.0) * 100.0;
+            double targetSpeedKt = 80.0 + (random.Next(0, 4) * 5.0);
+
+            double estimatedDist = (2.0 * distToCenter) + (requiredLegs * lengthNM) + ((requiredLegs - 1) * (widthNM / requiredLegs));
+            estimatedDist = Math.Round(estimatedDist, 0);
+
+            var surveyData = new SurveyContractData
+            {
+                CenterLatitude = Math.Round(centerLat, 4),
+                CenterLongitude = Math.Round(centerLon, 4),
+                WidthNM = widthNM,
+                LengthNM = lengthNM,
+                OrientationDeg = orientationDeg,
+                RequiredLegs = requiredLegs,
+                TargetAltitudeFt = targetAltitudeFt,
+                TargetSpeedKt = targetSpeedKt
+            };
+            string contractJson = System.Text.Json.JsonSerializer.Serialize(surveyData);
+
+            string title = $"Levantamento Aéreo ({requiredLegs} pernas • {targetAltitudeFt:F0} ft)";
+            string desc = $"Levantamento fotográfico em área a {distToCenter:F0} NM de {origin.ICAO}. Exige {requiredLegs} pernas a {targetAltitudeFt:F0} ft e {targetSpeedKt:F0} kt, rumo {(int)orientationDeg:D3}°. Retorno para pouso em {origin.ICAO}.";
+
+            return CreateMissionObjectSync(
+                origin, origin, estimatedDist, sub, 0, 0, 80.0,
+                random, referenceTime, payMultiplier, payTable,
+                requiredTouchAndGoes: 0, overflyWaypoints: null,
+                titleOverride: title, descriptionOverride: desc, destRunway: null, contractData: contractJson);
+        }
+
+        public static Mission CreateSkydiveMissionSync(
+            Airport origin,
+            SubCategoryConfig sub,
+            Random random,
+            DateTime referenceTime,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null)
+        {
+            double targetAglFt = 10000.0 + (random.Next(0, 5) * 500.0);
+            int paxCount = random.Next(4, 11);
+            double maxDropSpeedKt = 90.0;
+            double estimatedDist = 25.0;
+
+            var skydiveData = new SkydiveContractData
+            {
+                DropZoneLatitude = origin.Latitude,
+                DropZoneLongitude = origin.Longitude,
+                DropZoneElevationFt = origin.ElevationFt,
+                TargetAltitudeAglFt = targetAglFt,
+                MaxDropSpeedKt = maxDropSpeedKt
+            };
+            string contractJson = System.Text.Json.JsonSerializer.Serialize(skydiveData);
+
+            string title = $"Lançamento de Paraquedistas ({paxCount} saltadores)";
+            string desc = $"Lançamento de {paxCount} paraquedistas sobre {origin.ICAO}. Subida para salto a {targetAglFt:N0} ft AGL sobre a zona (≤ 2 NM), estabilização a velocidade segura (≤ {maxDropSpeedKt:F0} kt) por ≥ 30 s e descida sem choque térmico. Retorno para pouso em {origin.ICAO}.";
+
+            return CreateMissionObjectSync(
+                origin, origin, estimatedDist, sub, paxCount, paxCount * 25.0, 0.0,
+                random, referenceTime, payMultiplier, payTable,
+                requiredTouchAndGoes: 0, overflyWaypoints: null,
+                titleOverride: title, descriptionOverride: desc, destRunway: null, contractData: contractJson);
         }
 
         public static IReadOnlyList<string> ResolveG20Hubs(string subId, DestinationProfile profile)
@@ -660,6 +758,16 @@ namespace FlightCareer.Application.Services
                 return CreateMissionObjectSync(origin, origin, tglDist, sub, tglPax, 0, 0,
                     random, referenceTime, payMultiplier, payTable,
                     requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
+            }
+
+            if (sub.Id == "3.6.1")
+            {
+                return CreateSurveyMissionSync(origin, sub, random, referenceTime, payMultiplier, payTable);
+            }
+
+            if (sub.Id == "3.6.2")
+            {
+                return CreateSkydiveMissionSync(origin, sub, random, referenceTime, payMultiplier, payTable);
             }
 
             if (sub.Id == "3.5.3")
@@ -917,7 +1025,7 @@ namespace FlightCareer.Application.Services
 
             double effectivePax = family.PaxAtLeastOne ? Math.Max(1, paxCount) : paxCount;
             double ratePerMile = family.RatePerMile + (effectivePax * family.RatePerPaxMile);
-            double baseFee = family.BaseFee;
+            double baseFee = family.BaseFee + (effectivePax * family.BaseFeePerPax);
             double ratePerPayloadLb = family.RatePerPayloadLb;
 
             // 2. Base Bruta multiplicada pela Urgência da Missão

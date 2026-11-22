@@ -15,7 +15,8 @@ namespace FlightCareer.Domain.Economy
         double RatePerPaxMile,
         bool PaxAtLeastOne,
         double RatePerPayloadLb,
-        double Scale);
+        double Scale,
+        double BaseFeePerPax = 0.0);
 
     public sealed class MissionPayTable
     {
@@ -47,6 +48,8 @@ namespace FlightCareer.Domain.Economy
             new("carga_expressa", new[] { "2.3" }, 500.0, 4.0, 0.0, false, 0.22, 1.0),
             new("regional", new[] { "2.1" }, 1800.0, 6.0, 0.45, false, 0.08, 1.0),
             new("linha", new[] { "1.1", "1.2" }, 5500.0, 8.0, 0.30, false, 0.05, 1.0),
+            new("aerofoto", new[] { "3.6.1" }, 600.0, 6.0, 0.0, false, 0.10, 1.0, 0.0),
+            new("paraquedismo", new[] { "3.6.2" }, 0.0, 4.0, 0.0, true, 0.10, 1.0, 120.0),
             new("fallback", Array.Empty<string>(), 400.0, 5.5, 0.0, false, 0.10, 1.0)
         }));
 
@@ -68,7 +71,8 @@ namespace FlightCareer.Domain.Economy
                 f.RatePerPaxMile,
                 f.PaxAtLeastOne,
                 f.RatePerPayloadLb,
-                f.Scale <= 0 ? 1.0 : f.Scale
+                f.Scale <= 0 ? 1.0 : f.Scale,
+                f.BaseFeePerPax
             )).ToList();
 
             return new MissionPayTable(families);
@@ -160,6 +164,7 @@ namespace FlightCareer.Domain.Economy
             public string? Id { get; set; }
             public string[]? Prefixes { get; set; }
             public double BaseFee { get; set; }
+            public double BaseFeePerPax { get; set; }
             public double RatePerMile { get; set; }
             public double RatePerPaxMile { get; set; }
             public bool PaxAtLeastOne { get; set; }

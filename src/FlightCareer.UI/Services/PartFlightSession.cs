@@ -46,6 +46,7 @@ namespace FlightCareer.UI.Services
 
         public bool IsActive => _tracker.IsActive;
         public bool HasPreflightChanges => _tracker.HasPreflightChanges;
+        public double LatestChtCoolingRate => _tracker.LatestChtCoolingRate;
         public IReadOnlyList<AircraftPart> Parts => _tracker.Parts;
         public double HazardMultiplier { get; set; } = 1.0;
 
