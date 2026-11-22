@@ -222,6 +222,18 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Ponto de partida no mapa ao vivo:** `FlightMapControl` suporta `OriginLat`/`OriginLon` e renderiza o ponto de partida em ciano neon (`#00E5FF`) com tooltip do ICAO, enquadrando origem e destino no pan-zoom tático. `DebugOverlayViewModel` preenche as coordenadas pelo aeroporto de origem da missão ativa ou pela posição GPS onde o voo começou em circuito/voo local.
 - **Saúde por ícone sem vazamento de saúde real:** As barras percentuais (`ProgressBar` e `{0:F0}%`) de Célula, Motor e Pneus foram removidas do HUD flutuante. `HudHealthSummary` resume a saúde conhecida das peças instaladas (`KnownHealth` / `DisplayState` via `PartHangarView.Summarize`) ou a faixa exibida dos componentes em aviões sem peças (`HealthVisibility`), exibindo exclusivamente os ícones vetoriais de estado do Hangar (`HangarIcons.ForDisplayState`) e texto curto de estado ("Em ordem", "Em uso", "Atenção", "Risco", "Incerta") na cor da paleta do Hangar (`HangarPalette.ForDisplayState`), eliminando qualquer vazamento da saúde real em voo. Não testado no MSFS / tela do app.
 
+### Contratos da Fase 1: Voo Panorâmico, Circuito de TGL e Translado Básico (FASES-2A)
+- **Categoria 3.5 Aeroclube (`MissionRules.cs`):** adicionada nos Tiers de origem 2, 3 e 4 com peso 5, composta pelos três novos contratos:
+  - `3.5.1` Voo Panorâmico (família `panoramico`, base $300, 6,5/NM, M_Tipo 1,15, fase 1): origem = destino, 2 ou 3 aeródromos vizinhos (8–30 NM da origem) como pontos de sobrevoo obrigatório ordenados por azimute contínuo, 1–3 passageiros. Percurso total calculado `origem → p1 → p2 (→ p3) → origem` usado para distância, ETE e pagamento.
+  - `3.5.2` Circuito de TGL (família `instrucao_basica`, base $220, 6,5/NM, M_Tipo 1,10, fase 1): origem = destino, 3 a 6 toques e arremetidas obrigatórios (`RequiredTouchAndGoes`) e pouso final completo na origem, 0–1 passageiro (instrutor).
+  - `3.5.3` Translado Básico (família `translado`, base $250, 5,0/NM, M_Tipo 0,80, fase 1): aeródromo vizinho < 80 NM, 0 passageiros e carga $\le 50$ lb.
+- **Lógica de Conclusão e Telemetria pura (`Domain/Missions/`):**
+  - `OverflyTracker`: monitora waypoints por distância horizontal $\le 2$ NM e altitude $\le$ elevação + 3.000 ft.
+  - `TouchAndGoCounter`: máquina de estados de TGL (toque $\ge 1$ s sem quique, GS máxima no solo $> 20$ kt, sem parada completa $\text{GS} < 5$ kt, decolagem subsequente; decolagem inicial do voo ignorada).
+  - `MissionCompletion.Evaluate`: avalia pouso no destino esperado, cumprimento de TGLs exigidos e sobrevoo de todos os pontos obrigatórios. Se não concluída, a missão volta ao mercado pelo mesmo valor e o motivo é exibido no resumo do voo (`outcome.Message`).
+- **Persistência de Dados (`Mission.cs`, `AppDbContext.cs`):** colunas `RequiredTouchAndGoes` (int, default 0) e `OverflyWaypoints` (string, default NULL) adicionadas com suporte a migração idempotente de bancos legados em `EnsureSchemaUpdatedAsync` e default value 0 no EF Core.
+- **Calibração em dados (`career_phases.json`, `mission_pay.json`, `xp_rules.json`):** mapeamento 3.5.x para fase 1, tarifas em dados com fallback seguro em `MissionPayTable.Defaults` e multiplicadores de XP dedicados. Não testado no MSFS.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

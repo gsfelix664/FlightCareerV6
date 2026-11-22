@@ -4,6 +4,7 @@ using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
 using FlightCareer.Domain.Integrity;
 using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Utils;
 using FlightCareer.Domain.Services;
@@ -38,6 +39,8 @@ namespace FlightCareer.UI.Services
         private readonly PartFlightSession _parts;
         private readonly FuelUsageAccumulator _fuelAccumulator = new();
         private readonly FuelTruckDelivery _fuelTruck = new();
+        private readonly TouchAndGoCounter _touchAndGoCounter = new();
+        private readonly OverflyTracker _overflyTracker = new();
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -661,6 +664,32 @@ namespace FlightCareer.UI.Services
             LoadFlightComponents(aircraft);
             _failures.Reset(clearSimState: true); // Desfaz no MSFS falhas remanescentes do voo anterior (exceto panes abertas)
             _fuelAccumulator.Reset();
+            _touchAndGoCounter.Reset(_simConnect.CurrentData.IsOnGround);
+            _overflyTracker.Reset();
+            if (missions.Any(m => !string.IsNullOrWhiteSpace(m.OverflyWaypoints)))
+            {
+                using var wpContext = _contextFactory.CreateDbContext();
+                var wpList = new List<OverflyPoint>();
+                foreach (var m in missions)
+                {
+                    if (!string.IsNullOrWhiteSpace(m.OverflyWaypoints))
+                    {
+                        var idents = m.OverflyWaypoints.Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        foreach (var ident in idents)
+                        {
+                            var airp = wpContext.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == ident);
+                            if (airp != null && !wpList.Any(p => p.Ident.Equals(airp.ICAO, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                wpList.Add(new OverflyPoint(airp.ICAO, airp.Latitude, airp.Longitude, airp.ElevationFt));
+                            }
+                        }
+                    }
+                }
+                if (wpList.Count > 0)
+                {
+                    _overflyTracker.ConfigureWaypoints(wpList);
+                }
+            }
             _fuelIntegrity = new FuelIntegrityMonitor(fuelCapacity, fuelTolerance);
             _slewMonitor = new SlewMonitor();
             _flightInvalidated = false;
@@ -966,6 +995,12 @@ namespace FlightCareer.UI.Services
         {
             if (!IsMonitoring) return;
             _lastData = data;
+
+            _touchAndGoCounter.Update(data.IsOnGround, data.GroundSpeed, _simulatedFlightTimeSeconds);
+            if (_overflyTracker.HasWaypoints)
+            {
+                _overflyTracker.Update(data.Latitude, data.Longitude, data.Altitude);
+            }
 
             // --- MONITORAMENTO DE INTEGRIDADE: SLEW E CONGELAMENTOS ---
             var integrityState = _simConnect.CurrentIntegrityState;
@@ -1719,7 +1754,9 @@ namespace FlightCareer.UI.Services
                 isFlightInvalidated: _flightInvalidated,
                 invalidationReason: _flightInvalidationReason,
                 autoStartUsed: _autoStartUsed,
-                xpInputs: xpInputs
+                xpInputs: xpInputs,
+                visitedWaypoints: _overflyTracker.VisitedWaypoints,
+                touchAndGoCount: _touchAndGoCounter.Count
             );
 
             OnFlightFinished?.Invoke(outcome);
