@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 7,
+  "dataVersion": 8,
   "id": "Cessna C152",
   "class": "Piston",
   "engineCount": 1,
@@ -181,14 +181,6 @@
       "source": "POH",
       "reference": "Cessna 152 POH 1979, Sec. 7 p. 7-22 (28-volt DC 60-amp alternator, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
       "notes": null
-    },
-    {
-      "key": "elecAvionicsCircuitIndex",
-      "value": 0.0,
-      "unit": "index",
-      "source": "POH",
-      "reference": "Cessna 152 POH 1979, Sec. 7 p. 7-22: aeronave não possui chave geral de aviônicos (Avionics Master Switch)",
-      "notes": "Aeronave não possui chave de aviônicos; regra não se aplica"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataVersion": 8,
+  "dataVersion": 9,
   "id": "CAP-4",
   "class": "Piston",
   "engineCount": 1,
@@ -97,10 +97,10 @@
     },
     {
       "key": "va",
-      "value": 72.0,
+      "value": 91.0,
       "unit": "knots",
       "source": "ClassDefault",
-      "reference": "estimativa — Va = Vs1·√n (n=3.8); atualizar pelo POH",
+      "reference": "estimativa — Va = Vs1·√n (n=6, categoria acrobática); atualizar pelo POH",
       "notes": null
     }
   ]
