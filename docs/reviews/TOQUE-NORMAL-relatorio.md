@@ -1,6 +1,6 @@
 # TOQUE-NORMAL — Razão de descida do toque pela SimVar do simulador
 
-**Branch:** fix/toque-normal · **Commit:** PENDENTE · **Data:** 2026-11-22
+**Branch:** fix/toque-normal · **Commit:** 68c65f9 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - Estender `SimFastFlightState` e `AddFastDef` no `SimConnectService.cs` com `PLANE TOUCHDOWN NORMAL VELOCITY` ("feet per second") no final da definição rápida.
