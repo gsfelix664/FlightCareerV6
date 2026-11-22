@@ -22,7 +22,7 @@ namespace FlightCareer.Tests.Components
         }
 
         [Theory]
-        [InlineData(51.2, 51.4, "51%")]   // faixa estreita que arredonda igual: um valor só
+        [InlineData(51.2, 51.4, "~51%")]  // estimativa estreita que arredonda igual: um valor só, com ~
         [InlineData(55.2, 55.6, "55–56%")]
         [InlineData(48.0, 52.0, "48–52%")]
         [InlineData(63.4, 63.4, "63%")]   // exato
