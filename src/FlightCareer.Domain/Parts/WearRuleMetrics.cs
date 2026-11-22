@@ -55,9 +55,19 @@ namespace FlightCareer.Domain.Parts
         public const string ElectricalOverloadMinutes = "electricalOverloadMinutes";
 
         /// <summary>
-        /// Energia cinética total dissipada pelos freios nas frenagens (MJ), calculada por massa da aeronave e variação de velocidade ao frear.
+        /// Energia cinética de frenagem dissipada em relação à energia de referência (100 * soma(Δ(v²/2)) / ((1.3 * Vs0)² / 2)).
         /// </summary>
-        public const string BrakeEnergyMkJ = "brakeEnergyMkJ";
+        public const string BrakeEnergyPctRef = "brakeEnergyPctRef";
+
+        /// <summary>
+        /// Segundos simulados acumulados de derrapagem / travamento de pneus no solo (gear-is-skidding == 1 com GS > 3 kt).
+        /// </summary>
+        public const string SkidSeconds = "skidSeconds";
+
+        /// <summary>
+        /// Quantidade de faróis de alta carga elétrica (pouso, táxi e strobe) acesos durante o acionamento do motor.
+        /// </summary>
+        public const string StartLightsOnCount = "startLightsOnCount";
 
         /// <summary>
         /// Ciclos de inflamento e desinflamento das botas pneumáticas de degelo da asa (STRUCTURAL DEICE SWITCH 0-&gt;1).
@@ -158,7 +168,9 @@ namespace FlightCareer.Domain.Parts
             AvionicsMasterStartSpikes,
             BatteryDeepDischargeMinutes,
             ElectricalOverloadMinutes,
-            BrakeEnergyMkJ,
+            BrakeEnergyPctRef,
+            SkidSeconds,
+            StartLightsOnCount,
             DeiceCycles,
             PropDeiceCycles,
             DryRunPumpMinutes,

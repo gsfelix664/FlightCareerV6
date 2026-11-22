@@ -3069,11 +3069,12 @@
       "kind": "Event",
       "limitKey": null,
       "limitDirection": null,
-      "metric": "brakeEnergyMkJ",
+      "metric": "brakeEnergyPctRef",
       "sensors": [
-        "brake-left-temperature",
-        "brake-right-temperature",
-        "brake-antiskid-active"
+        "brake-left-position",
+        "brake-right-position",
+        "brake-parking-position",
+        "af-design-speed-vs0"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
@@ -3081,7 +3082,7 @@
       "bands": [
         {
           "name": "Cautela (Frenagem moderada / aquecimento)",
-          "threshold": 15.0,
+          "threshold": 60.0,
           "parts": [
             {
               "partId": "brakes.pads_discs",
@@ -3100,7 +3101,7 @@
         },
         {
           "name": "Alerta (Frenagem intensa no limite)",
-          "threshold": 35.0,
+          "threshold": 100.0,
           "parts": [
             {
               "partId": "brakes.pads_discs",
@@ -3127,7 +3128,7 @@
         },
         {
           "name": "Grave (RTO / Parada de emergência de alta energia)",
-          "threshold": 60.0,
+          "threshold": 150.0,
           "parts": [
             {
               "partId": "brakes.pads_discs",
@@ -3601,7 +3602,8 @@
       "sensors": [
         "oil-temperature",
         "eng-rpm",
-        "turb-eng-torque"
+        "turb-eng-torque",
+        "eng-throttle-lever-position"
       ],
       "nativeOverstress": null,
       "appliesTo": {},
@@ -3905,6 +3907,162 @@
             "isGrounding": true,
             "minDurationSeconds": 0.0
           }
+        }
+      ]
+    },
+    {
+      "id": "ground_tire_skid",
+      "description": "Derrapagem e travamento de pneus no solo em velocidade",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "skidSeconds",
+      "sensors": [
+        "gear-is-skidding"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {},
+      "source": "estimativa — revisar (pneus com flat spot por travamento/derrapagem)",
+      "bands": [
+        {
+          "name": "Leve (1 s de derrapagem)",
+          "threshold": 1.0,
+          "parts": [
+            {
+              "partId": "tires.main",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "tires.nose",
+              "eventDamagePct": 0.2
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Moderada (3 s de derrapagem)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "tires.main",
+              "eventDamagePct": 0.8
+            },
+            {
+              "partId": "tires.nose",
+              "eventDamagePct": 0.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (6 s de derrapagem)",
+          "threshold": 6.0,
+          "parts": [
+            {
+              "partId": "tires.main",
+              "eventDamagePct": 2.0
+            },
+            {
+              "partId": "tires.nose",
+              "eventDamagePct": 1.2
+            }
+          ],
+          "inspection": {
+            "defectCode": "TIRE_FLAT_SPOT_INSPECTION",
+            "isGrounding": false,
+            "minDurationSeconds": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "engine_start_electrical_load",
+      "description": "Partida do motor realizada com faróis e luzes de alta carga elétrica acesas",
+      "kind": "Event",
+      "limitKey": null,
+      "limitDirection": null,
+      "metric": "startLightsOnCount",
+      "sensors": [
+        "light-landing-on",
+        "light-taxi-on",
+        "light-strobe-on"
+      ],
+      "nativeOverstress": null,
+      "appliesTo": {
+        "none": [
+          "noElectrical"
+        ]
+      },
+      "source": "estimativa — revisar (sobrecarga na bateria e componentes de partida com luzes de alta potência acesas)",
+      "bands": [
+        {
+          "name": "Leve (1 luz de alta potência acesa)",
+          "threshold": 1.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 0.3
+            },
+            {
+              "partId": "engine.starter",
+              "eventDamagePct": 0.2
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 0.2
+            },
+            {
+              "partId": "engine.pneumatic_starter",
+              "eventDamagePct": 0.2
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Moderada (2 luzes de alta potência acesas)",
+          "threshold": 2.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 0.6
+            },
+            {
+              "partId": "engine.starter",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 0.5
+            },
+            {
+              "partId": "engine.pneumatic_starter",
+              "eventDamagePct": 0.5
+            }
+          ],
+          "inspection": null
+        },
+        {
+          "name": "Severa (3 luzes de alta potência acesas)",
+          "threshold": 3.0,
+          "parts": [
+            {
+              "partId": "electrical.battery",
+              "eventDamagePct": 1.0
+            },
+            {
+              "partId": "engine.starter",
+              "eventDamagePct": 0.8
+            },
+            {
+              "partId": "electrical.starter_generator",
+              "eventDamagePct": 0.8
+            },
+            {
+              "partId": "engine.pneumatic_starter",
+              "eventDamagePct": 0.8
+            }
+          ],
+          "inspection": null
         }
       ]
     }
