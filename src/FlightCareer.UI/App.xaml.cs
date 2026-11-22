@@ -180,6 +180,7 @@ namespace FlightCareer.UI
             services.AddSingleton<IPilotRepository, PilotRepository>();
             services.AddSingleton<IDataSeeder, DataSeeder>();
             services.AddSingleton<IHubDataService, HubDataService>();
+            services.AddSingleton<IPlacesDataService, PlacesDataService>();
             services.AddSingleton<IMsfsScenerySyncService, MsfsScenerySyncService>();
             services.AddSingleton<IMissionGenerator, MissionGenerator>();
             services.AddSingleton<IMarketSimulationService, MarketSimulationService>();

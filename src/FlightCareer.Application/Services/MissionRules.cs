@@ -270,7 +270,7 @@ namespace FlightCareer.Application.Services
                 Description = "Avaliação prática com examinador da ANAC a bordo.",
                 Weight = 10, MinExpHours = 2, MaxExpHours = 4, RequiresHardSurface = false, MinRunwayDest = 1200, Urgency = 1.2,
                 PaxRules = { new(100, 1, 1) },
-                RangeRules = { new(70, 30, 60), new(30, 61, 120) }
+                RangeRules = { new(100, 20, 40) }
             });
             t2.Categories.Add(c2_5);
             t2.Categories.Add(CreateAeroclubeCategory());
@@ -387,7 +387,7 @@ namespace FlightCareer.Application.Services
                 Description = "Avaliação prática com examinador da ANAC a bordo.",
                 Weight = 10, MinExpHours = 2, MaxExpHours = 4, RequiresHardSurface = false, MinRunwayDest = 1200, Urgency = 1.2,
                 PaxRules = { new(100, 1, 1) },
-                RangeRules = { new(70, 30, 60), new(30, 61, 120) }
+                RangeRules = { new(100, 20, 40) }
             });
             t3.Categories.Add(c3_4);
             t3.Categories.Add(CreateAeroclubeCategory());
@@ -498,7 +498,7 @@ namespace FlightCareer.Application.Services
                 Description = "Avaliação prática com examinador a bordo.",
                 Weight = 10, MinExpHours = 2, MaxExpHours = 4, RequiresHardSurface = false, MinRunwayDest = 1000, Urgency = 1.2,
                 PaxRules = { new(100, 1, 1) },
-                RangeRules = { new(70, 30, 60), new(30, 61, 120) }
+                RangeRules = { new(100, 20, 40) }
             });
             t4.Categories.Add(c4_4);
             t4.Categories.Add(CreateAeroclubeCategory());

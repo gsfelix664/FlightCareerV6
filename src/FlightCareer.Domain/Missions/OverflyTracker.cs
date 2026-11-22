@@ -47,9 +47,9 @@ namespace FlightCareer.Domain.Missions
                 if (_visited.Contains(point.Ident)) continue;
 
                 double distNM = CalculateDistanceNM(currentLat, currentLon, point.Latitude, point.Longitude);
-                double maxAllowedAltitudeFt = point.ElevationFt + 3000.0;
+                double maxAllowedAltitudeFt = point.ElevationFt + point.MaxAglFt;
 
-                if (distNM <= 2.0 && currentAltitudeFt <= maxAllowedAltitudeFt)
+                if (distNM <= point.RadiusNm && currentAltitudeFt <= maxAllowedAltitudeFt)
                 {
                     _visited.Add(point.Ident);
                 }

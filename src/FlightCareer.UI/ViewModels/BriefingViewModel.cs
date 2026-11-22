@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Enums;
+using FlightCareer.Domain.Missions;
 using FlightCareer.UI.Services;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
@@ -161,6 +162,11 @@ namespace FlightCareer.UI.ViewModels
         // Coleções do Briefing Multi-Leg e Checklist
         public ObservableCollection<Mission> AcceptedMissions { get; }
         public ObservableCollection<FlightLegModel> RouteLegs { get; } = new();
+        public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
+
+        [ObservableProperty]
+        private SurveyMapArea? _surveyArea;
+
         public ObservableCollection<PreFlightCheckItem> ChecklistItems { get; } = new();
 
         public double TotalManifestWeight => AcceptedMissions.Sum(m => m.PayloadLbs) + 170; // +170 lbs Piloto
@@ -298,6 +304,18 @@ namespace FlightCareer.UI.ViewModels
             try
             {
                 RouteLegs.Clear();
+                ContractMarkers.Clear();
+
+                var activeMissions = AcceptedMissions.Any()
+                    ? (IEnumerable<Mission>)AcceptedMissions
+                    : (SelectedMission != null ? new[] { SelectedMission } : Array.Empty<Mission>());
+                var visuals = ContractMarkerBuilder.Build(activeMissions);
+                foreach (var marker in visuals.Markers)
+                {
+                    ContractMarkers.Add(marker);
+                }
+                SurveyArea = visuals.SurveyArea;
+
                 string originIcao = string.IsNullOrWhiteSpace(HangarAircraftLocation) || HangarAircraftLocation == "---"
                     ? (AcceptedMissions.FirstOrDefault()?.OriginICAO ?? "SBJD")
                     : HangarAircraftLocation;

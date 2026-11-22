@@ -261,6 +261,27 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - `xp_rules.json`, `XpRules.cs` e `XpCalculator.cs`: configurados multiplicadores `carga_fragil` (1.35), `carga_global` (1.35) e `1.7.6` (1.00).
 - Não testado no MSFS / não visto na tela.
 
+### Missões locais com dados reais, textos de RP e marcadores no mapa (MISSOES-LOCAIS)
+- **Bancos de locais reais (`Application/Services/PlacesDataService.cs` e `Data/places/`):**
+  - Três bases integradas e indexadas: `tourist_pois.json` (pontos turísticos e geográficos indexados em grade espacial de 1° de lat/lon), `training_aerodromes.json` (aeródromos de instrução unificados a `HubDataService.IsInstructionHub`) e `dropzones.json` (zonas de salto de paraquedismo).
+  - Carregamento lazy thread-safe via singleton no DI (`IPlacesDataService`), com fallback de diretórios e construtor testável para injeção de dados.
+- **Pontos de sobrevoo por coordenada (`Domain/Missions/OverflyWaypointCodec.cs` e `OverflyPoint`):**
+  - Novo formato de waypoint em `Mission.OverflyWaypoints`: `P:<nome>@<lat>,<lon>[,<raioNM>[,<maxAglFt>]]`, compatível com códigos ICAO de aeródromos legados.
+  - `OverflyPoint` e `OverflyTracker` respeitam raio horizontal customizado (padrão 2.0 NM) e teto AGL customizado (padrão 3.000 ft sobre a elevação). Para pontos sem elevação própria, utiliza-se a elevação do aeródromo de origem da missão.
+  - `FlightMonitor` decodifica waypoints via codec e despacha ICAO para o banco e pontos `P:` diretamente para o tracker; `MissionCompletion` verifica todos os idents e áreas requeridas.
+- **Subtipos de voo local remodelados (`MissionGenerator.cs` e `MissionRules.cs`):**
+  - **3.4.1 (Instrução Local):** Origem = Destino. Área de instrução sorteada a 5–15 NM (raio 3,0 NM, até 6.000 ft AGL) rejeitando proximidade (< 5 NM) de aeródromos tier 1–2. Circuito com 1 a 3 TGLs requeridos, manobras operacionais sorteadas no briefing e distância total proporcional (`2 × dist + 10 NM`).
+  - **3.4.3 (Voo de Cheque):** Origem = Destino (removido range de travessia 30–120 NM nos Tiers 2, 3 e 4). 1 passageiro (examinador de voo credenciado), 2 TGLs obrigatórios e texto com simulação de pane de motor e pouso de precisão.
+  - **3.5.1 (Panorâmico):** Busca POIs reais a 5–30 NM (até 45 NM) via `FindPois`, selecionando de 2 a 3 pontos ponderados por popularidade `p`, espaçados em $\ge 3$ NM e ordenados por azimute, citando os nomes reais. Fallback aos aeródromos vizinhos se não houver POIs suficientes.
+  - **3.6.1 (Aerofoto / Levantamento):** Prioriza centralizar a área de levantamento em POI geográfico de infraestrutura/natureza (barragem, porto, ponte, ilha, lago, estádio, parque, praia, reserva) a 5–25 NM com cliente institucional coerente.
+  - **3.6.2 (Paraquedismo):** Em aeródromo com zona de salto cadastrada (`dropzones.json`), centraliza na DZ com altitude conforme a motorização (pistão: 10.000–12.000 ft AGL; turboélice: 12.000–14.000 ft AGL) e nome da DZ no briefing.
+  - **Pesos e vocações:** Aeródromo com DZ confere +40 em SAE (3.6) e inclina 3.6.2 para 80% dos contratos contra 20% de 3.6.1 (sem DZ: 15% vs 85%). Aeródromos de instrução recebem +45 em 3.4 e +15 em 3.5.
+- **Textos de RP variados (`Infrastructure/Data/mission_texts.json` e `Domain/Missions/MissionTextCatalog.cs`):**
+  - Catálogo em JSON contendo $\ge 3$ variantes ricas e imersivas de título e descrição para todos os 59 subtipos do `MissionRules`, com interpolação limpa de marcadores operacionais (`{origin}`, `{dest}`, `{pax}`, `{cargo_lbs}`, `{area_dir}`, `{alt_band}`, `{maneuvers}`, `{tgl}`, `{target}`, `{client}`, etc.) sem deixar chaves `{}` não preenchidas.
+- **Visualização tática no Briefing (`Domain/Missions/ContractMarkerBuilder.cs`, `FlightMapControl.xaml.cs` e `BriefingViewModel.cs`):**
+  - Marcadores de contrato e sobrevoo renderizados no mapa: pontos turísticos com marcador amarelo e badge de identificação, áreas com círculo tracejado do raio, zonas de salto com círculo laranja neon e aerofoto com o retângulo da área e linhas finas das pernas de voo.
+  - Auto-enquadramento automático do mapa incluindo origem, destino, pernas e todos os marcadores de contrato. Não testado visualmente na tela / MSFS.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

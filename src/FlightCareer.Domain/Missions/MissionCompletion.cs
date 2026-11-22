@@ -45,15 +45,14 @@ namespace FlightCareer.Domain.Missions
 
             if (!string.IsNullOrWhiteSpace(mission.OverflyWaypoints))
             {
-                var waypoints = mission.OverflyWaypoints
-                    .Split(new[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var waypoints = OverflyWaypointCodec.Parse(mission.OverflyWaypoints);
 
                 var missing = new List<string>();
                 foreach (var wp in waypoints)
                 {
-                    if (visitedWaypoints == null || !visitedWaypoints.Contains(wp))
+                    if (visitedWaypoints == null || !visitedWaypoints.Contains(wp.Ident))
                     {
-                        missing.Add(wp);
+                        missing.Add(wp.Ident);
                     }
                 }
 

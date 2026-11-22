@@ -273,6 +273,8 @@
                     <utils:FlightMapControl AircraftLat="{Binding Latitude}" 
                                             AircraftLon="{Binding Longitude}"
                                             RouteLegs="{Binding RouteLegs}"
+                                            ContractMarkers="{Binding ContractMarkers}"
+                                            SurveyArea="{Binding SurveyArea}"
                                             DestLat="{Binding DestLat}" 
                                             DestLon="{Binding DestLon}"
                                             OriginIcao="{Binding HangarAircraftLocation}"
