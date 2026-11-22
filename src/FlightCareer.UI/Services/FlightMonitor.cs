@@ -678,7 +678,7 @@ namespace FlightCareer.UI.Services
                         var survey = System.Text.Json.JsonSerializer.Deserialize<SurveyContractData>(m.ContractData);
                         if (survey != null) _surveyTracker.Configure(survey);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de levantamento inválido ({m.Id}): {ex.Message}"); }
                 }
                 else if (m.SubId == "3.6.2" && !string.IsNullOrWhiteSpace(m.ContractData))
                 {
@@ -687,7 +687,7 @@ namespace FlightCareer.UI.Services
                         var skydive = System.Text.Json.JsonSerializer.Deserialize<SkydiveContractData>(m.ContractData);
                         if (skydive != null) _skydiveTracker.Configure(skydive);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de paraquedismo inválido ({m.Id}): {ex.Message}"); }
                 }
             }
             if (missions.Any(m => !string.IsNullOrWhiteSpace(m.OverflyWaypoints)))
