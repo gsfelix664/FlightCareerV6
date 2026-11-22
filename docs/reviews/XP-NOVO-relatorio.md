@@ -1,6 +1,6 @@
 # XP-NOVO — XP por esforço × habilidade + bônus fixos, e nível do piloto
 
-**Branch:** feat/xp-novo · **Commit:** pendente · **Data:** 2026-11-22
+**Branch:** feat/xp-novo · **Commit:** a970820 · **Data:** 2026-11-22
 
 ## Plano (antes de codar)
 - Criar modelo de domínio puro em `Domain/Xp/` (`XpFlightInputs`, `PilotLevel`, `XpRules`, `XpCalculator`), desacoplado e 100% testável.
