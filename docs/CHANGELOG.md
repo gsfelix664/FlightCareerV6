@@ -2830,3 +2830,6 @@
   - Fallback por faixas de componentes para aeronaves legadas sem peças.
 - Build com 0 erros, `dotnet test` com 834/834 testes aprovados (100%).
 - Não visto na tela / não testado no MSFS.
+
+## 2026-11-22 - Pacotes com vulnerabilidade conhecida fixados em versões corrigidas (Claude)
+- `SQLitePCLRaw.bundle_e_sqlite3` 2.1.14 (Infrastructure), no lugar do `SQLitePCLRaw.lib.e_sqlite3` 2.1.11 vindo do EF Core Sqlite (GHSA-2m69-gcr7-jv3q, alta); `System.Data.SqlClient` 4.8.6 (UI), no lugar do 4.8.3 vindo do GMap.NET (GHSA-98g6-xh36-x2p7 alta, GHSA-8g2p-5pqh-5jmc moderada). Restore sem avisos NU190x; suíte 840/840 (SQLite real em memória). Não aberto na tela.
