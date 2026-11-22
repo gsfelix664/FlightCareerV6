@@ -10,7 +10,13 @@ namespace FlightCareer.Domain.Components
     {
         public bool IsExact => Max - Min < 0.05;
         public double Mid => (Min + Max) / 2.0;
-        public override string ToString() => IsExact ? $"{Min:F0}%" : $"{Min:F0}–{Max:F0}%";
+        /// <summary>Faixa que arredonda para o mesmo inteiro (ex.: 51,2–51,4) mostra um valor só, sem "51–51%".</summary>
+        public override string ToString()
+        {
+            string min = Min.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
+            string max = Max.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
+            return IsExact || min == max ? $"{min}%" : $"{min}–{max}%";
+        }
     }
 
     /// <summary>

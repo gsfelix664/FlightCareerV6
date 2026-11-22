@@ -21,6 +21,16 @@ namespace FlightCareer.Tests.Components
             Assert.DoesNotContain(ComponentKind.Ignition, turboprop);
         }
 
+        [Theory]
+        [InlineData(51.2, 51.4, "51%")]   // faixa estreita que arredonda igual: um valor só
+        [InlineData(55.2, 55.6, "55–56%")]
+        [InlineData(48.0, 52.0, "48–52%")]
+        [InlineData(63.4, 63.4, "63%")]   // exato
+        public void Texto_da_faixa_nao_repete_o_mesmo_numero(double min, double max, string esperado)
+        {
+            Assert.Equal(esperado, new HealthRange(min, max).ToString());
+        }
+
         [Fact]
         public void Logo_apos_inspecao_completa_o_valor_e_exato()
         {

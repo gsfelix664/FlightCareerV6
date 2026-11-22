@@ -342,7 +342,7 @@
 
                             <!-- Legenda -->
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
-                                       Text="Faixa clara = estimativa (ainda não inspecionado). Marcas em 20% e 30%: abaixo de 30% surgem sintomas; abaixo de 20% há risco de pane."/>
+                                       Text="Faixa (ex.: 48–52%) = estimativa: abre com as horas desde a última inspeção ou walkaround. Verde acima de 40%; amarelo 40–20% (desgaste acelerado e perda de desempenho); vermelho abaixo de 20% (risco de pane)."/>
 
                             <ItemsControl ItemsSource="{Binding Components}">
                                 <ItemsControl.ItemTemplate>
