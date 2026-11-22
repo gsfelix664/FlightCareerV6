@@ -820,6 +820,26 @@ namespace FlightCareer.UI.Services
             if (_aircraft == null || _totalLossInProgress) return;
             _totalLossInProgress = true;
             
+            // Capturar dados do voo antes de parar o monitoramento (que zera o estado)
+            var pilot = _pilot;
+            var aircraft = _aircraft;
+            string originIcao = _originIcao ?? "";
+            double durationMinutes = _simulatedFlightTimeSeconds / 60.0;
+            double distanceNM = _distanceTraveled;
+            var activeMissions = _activeMissions != null ? new List<Mission>(_activeMissions) : new List<Mission>();
+            string crashSiteIcao = "";
+            if (_lastData != null)
+            {
+                try
+                {
+                    crashSiteIcao = await GetNearestAirportICAO(_lastData.Value.Latitude, _lastData.Value.Longitude);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error finding nearest airport for crash site: {ex.Message}");
+                }
+            }
+
             double fpm = _qualityService.TouchdownFPM > 0 ? _qualityService.TouchdownFPM : (_lastData != null ? Math.Abs(_lastData.Value.VerticalSpeed) : 0);
             FlushExceedanceLog();
             _telemetryLogger.StopFlightLog("PERDA_TOTAL_DESTRUIDA", Math.Round(fpm, 0), 0);
@@ -859,6 +879,26 @@ namespace FlightCareer.UI.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error saving total loss: {ex.Message}");
+            }
+
+            if (pilot != null && aircraft != null)
+            {
+                try
+                {
+                    await _flightService.ProcessTotalLossAsync(
+                        pilot.Id,
+                        aircraft.Id,
+                        originIcao,
+                        crashSiteIcao,
+                        durationMinutes,
+                        distanceNM,
+                        activeMissions
+                    );
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error processing total loss flight: {ex.Message}");
+                }
             }
 
             OnTotalLoss?.Invoke(_aircraft);
@@ -1226,6 +1266,7 @@ namespace FlightCareer.UI.Services
                 _currentStatus = "ACIDENTE";
                 OnStatusChanged?.Invoke(_currentStatus);
                 OnAlert?.Invoke("ACIDENTE", $"Impacto com o solo: {ev.Reason}. A aeronave foi perdida.", true);
+                _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
                 _ = HandleTotalLossAsync();
                 return;
             }

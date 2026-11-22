@@ -203,28 +203,7 @@ namespace FlightCareer.Application.Services
                         missionsRemainingOff++;
                     }
 
-                    // Custos de Combustível Consumido
-                    double costMultiplierOff = DifficultyEconomy.For(pilot.Difficulty).CostMultiplier;
-                    double fuelUsedOff = outcome.FuelUsed;
-                    string fuelTypeOff = aircraft.AircraftType?.FuelType ?? "AVGAS";
-                    double fuelPriceOff = FuelPriceService.GetCurrentPrice(fuelTypeOff);
-                    double fuelCostOff = Math.Round(fuelUsedOff * fuelPriceOff * costMultiplierOff, 2);
-
-                    if (fuelCostOff > 0)
-                    {
-                        pilot.Balance -= fuelCostOff;
-                        _context.FinancialTransactions.Add(new FinancialTransaction
-                        {
-                            Id = Guid.NewGuid(),
-                            PilotId = pilot.Id,
-                            Date = DateTime.Now,
-                            Type = TransactionType.Expense,
-                            Category = "Combustível",
-                            Amount = fuelCostOff,
-                            Description = $"Combustível consumido ({fuelUsedOff:F1} GAL {fuelTypeOff} @ {fuelPriceOff:C2}/gal)"
-                        });
-                    }
-
+                    // Decisão 2026-11-21 (AGENTS.md › 6): combustível é pago na compra no Hangar. O consumo só é descontado dos tanques.
                     pilot.TotalHours += hours;
 
                     // Registrar Voo no Logbook
@@ -238,7 +217,8 @@ namespace FlightCareer.Application.Services
                         DistanceNM = distanceNM,
                         Date = DateTime.Now,
                         Revenue = 0,
-                        XP = 0
+                        XP = 0,
+                        AircraftModel = aircraft.AircraftType?.Model ?? ""
                     };
                     _context.Flights.Add(flightOff);
 
@@ -246,7 +226,7 @@ namespace FlightCareer.Application.Services
 
                     outcome.Success = false;
                     outcome.Revenue = 0;
-                    outcome.FuelCost = fuelCostOff;
+                    outcome.FuelCost = 0;
                     outcome.LandingFee = 0;
                     outcome.XP = 0;
                     outcome.CompletedMissions = 0;
@@ -313,27 +293,9 @@ namespace FlightCareer.Application.Services
                     }
                 }
 
-                // 3. Custos Operacionais: Combustível Consumido (SimConnect) e Taxa de Pouso (MTOW & Classificação)
+                // 3. Custos Operacionais: Taxa de Pouso (MTOW & Classificação)
+                // Decisão 2026-11-21 (AGENTS.md › 6): combustível é pago na compra no Hangar. O consumo só é descontado dos tanques.
                 double costMultiplier = DifficultyEconomy.For(pilot.Difficulty).CostMultiplier;
-                double fuelUsed = outcome.FuelUsed;
-                string fuelType = aircraft.AircraftType?.FuelType ?? "AVGAS";
-                double fuelPrice = FuelPriceService.GetCurrentPrice(fuelType);
-                double fuelCost = Math.Round(fuelUsed * fuelPrice * costMultiplier, 2);
-
-                if (fuelCost > 0)
-                {
-                    pilot.Balance -= fuelCost;
-                    _context.FinancialTransactions.Add(new FinancialTransaction
-                    {
-                        Id = Guid.NewGuid(),
-                        PilotId = pilot.Id,
-                        Date = DateTime.Now,
-                        Type = TransactionType.Expense,
-                        Category = "Combustível",
-                        Amount = fuelCost,
-                        Description = $"Combustível consumido ({fuelUsed:F1} GAL {fuelType} @ {fuelPrice:C2}/gal)"
-                    });
-                }
 
                 // Cálculo das taxas aeroportuárias (Pouso, Embarque, Handling, Navegação/Terminal) via catálogo
                 double mtowLbs = AircraftWeightSpecs.GetMtow(aircraft.AircraftType?.Model, aircraft.AircraftType);
@@ -406,7 +368,8 @@ namespace FlightCareer.Application.Services
                     DistanceNM = distanceNM,
                     Date = DateTime.Now,
                     Revenue = totalRevenue,
-                    XP = totalXP
+                    XP = totalXP,
+                    AircraftModel = aircraft.AircraftType?.Model ?? ""
                 };
                 _context.Flights.Add(flight);
 
@@ -416,7 +379,7 @@ namespace FlightCareer.Application.Services
                 {
                     outcome.Success = false;
                     outcome.Revenue = 0;
-                    outcome.FuelCost = fuelCost;
+                    outcome.FuelCost = 0;
                     outcome.LandingFee = totalFees;
                     outcome.XP = 0;
                     outcome.CompletedMissions = 0;
@@ -427,7 +390,7 @@ namespace FlightCareer.Application.Services
 
                 outcome.Success = true;
                 outcome.Revenue = totalRevenue;
-                outcome.FuelCost = fuelCost;
+                outcome.FuelCost = 0;
                 outcome.LandingFee = totalFees;
                 outcome.XP = totalXP;
                 outcome.CompletedMissions = missionsDone;
@@ -484,6 +447,79 @@ namespace FlightCareer.Application.Services
             {
                 System.Diagnostics.Debug.WriteLine($"[FlightService] Erro ao avançar relógio de carreira no cancelamento: {ex.Message}");
             }
+        }
+
+        /// <summary>
+        /// Processa a perda total da aeronave em acidente: registra voo no logbook (Revenue/XP 0),
+        /// soma horas ao piloto, avança relógio de carreira e devolve as missões ativas ao mercado
+        /// com a origem redefinida para o aeroporto de partida do voo e distância recalculada.
+        /// </summary>
+        public async Task ProcessTotalLossAsync(
+            Guid pilotId,
+            Guid aircraftId,
+            string originIcao,
+            string crashSiteIcao,
+            double flightDurationMinutes,
+            double distanceNM,
+            List<Mission> activeMissions)
+        {
+            _context.ChangeTracker.Clear();
+            var pilot = await _context.Pilots
+                .Include(p => p.Hangar).ThenInclude(a => a.AircraftType)
+                .FirstOrDefaultAsync(p => p.Id == pilotId);
+
+            if (pilot == null) return;
+
+            var aircraft = pilot.Hangar.FirstOrDefault(a => a.Id == aircraftId);
+            string destination = string.IsNullOrWhiteSpace(crashSiteIcao) ? "ACIDENTE" : crashSiteIcao;
+            double hours = flightDurationMinutes / 60.0;
+
+            var flight = new Flight
+            {
+                Id = Guid.NewGuid(),
+                PilotId = pilot.Id,
+                OriginICAO = originIcao,
+                DestinationICAO = destination,
+                DurationHours = hours,
+                DistanceNM = distanceNM,
+                Date = DateTime.Now,
+                Revenue = 0,
+                XP = 0,
+                AircraftModel = aircraft?.AircraftType?.Model ?? ""
+            };
+            _context.Flights.Add(flight);
+
+            pilot.TotalHours += hours;
+            pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
+
+            if (activeMissions != null)
+            {
+                foreach (var mission in activeMissions)
+                {
+                    mission.IsAccepted = false;
+                    mission.PilotId = null;
+                    mission.OriginICAO = originIcao;
+
+                    var dbMission = await _context.Missions.FindAsync(mission.Id);
+                    if (dbMission != null)
+                    {
+                        dbMission.IsAccepted = false;
+                        dbMission.PilotId = null;
+                        dbMission.OriginICAO = originIcao;
+
+                        var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
+                        var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == originIcao);
+                        if (destAirp != null && curAirp != null)
+                        {
+                            double newDist = LocationUtils.CalculateDistance(curAirp.Latitude, curAirp.Longitude, destAirp.Latitude, destAirp.Longitude);
+                            dbMission.DistanceNM = Math.Round(newDist, 0);
+                            mission.DistanceNM = dbMission.DistanceNM;
+                        }
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }
