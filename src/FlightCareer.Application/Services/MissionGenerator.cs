@@ -229,6 +229,71 @@ namespace FlightCareer.Application.Services
                 return await CreateMissionObject(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight);
             }
 
+            if (sub.Id == "3.5.1")
+            {
+                // Voo panorâmico: 2 a 3 aeródromos a 8-30 NM da origem, percurso total, retorno à origem
+                double maxDegWp = 35.0 / 50.0;
+                var wpCandidates = await query
+                    .Where(a => a.ICAO != origin.ICAO)
+                    .Where(a => a.Latitude >= origin.Latitude - maxDegWp && a.Latitude <= origin.Latitude + maxDegWp)
+                    .Where(a => a.Longitude >= origin.Longitude - maxDegWp && a.Longitude <= origin.Longitude + maxDegWp)
+                    .ToListAsync();
+
+                var validWps = wpCandidates
+                    .Select(a => new { Airport = a, Dist = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude) })
+                    .Where(x => x.Dist >= 8.0 && x.Dist <= 30.0)
+                    .ToList();
+
+                if (validWps.Count < 2)
+                {
+                    validWps = wpCandidates
+                        .Select(a => new { Airport = a, Dist = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude) })
+                        .Where(x => x.Dist >= 5.0 && x.Dist <= 45.0)
+                        .ToList();
+                }
+
+                if (validWps.Count < 2) return null;
+
+                int pointsCount = Math.Min(validWps.Count, _random.Next(2, 4));
+                var picked = validWps.OrderBy(_ => _random.Next()).Take(pointsCount).Select(x => x.Airport).ToList();
+                // Ordenação por azimute angular em relação à origem para rota circular contínua
+                picked = picked.OrderBy(a => Math.Atan2(a.Latitude - origin.Latitude, a.Longitude - origin.Longitude)).ToList();
+
+                double totalTourDist = CalculateDistance(origin.Latitude, origin.Longitude, picked[0].Latitude, picked[0].Longitude);
+                for (int i = 0; i < picked.Count - 1; i++)
+                {
+                    totalTourDist += CalculateDistance(picked[i].Latitude, picked[i].Longitude, picked[i + 1].Latitude, picked[i + 1].Longitude);
+                }
+                totalTourDist += CalculateDistance(picked[^1].Latitude, picked[^1].Longitude, origin.Latitude, origin.Longitude);
+
+                string wpString = string.Join(";", picked.Select(p => p.ICAO));
+                int tourPax = Math.Clamp(paxCount > 0 ? paxCount : _random.Next(1, 4), 1, 3);
+                string title = $"Voo Panorâmico ({string.Join(" • ", picked.Select(p => p.ICAO))})";
+                string desc = $"Voo panorâmico sobrevoando os aeródromos da região: {string.Join(", ", picked.Select(p => p.ICAO))}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 2 NM e abaixo de 3.000 ft AGL).";
+
+                return await CreateMissionObject(origin, origin, totalTourDist, sub, tourPax, Math.Min(luggageWeightLbs, 30.0), 0,
+                    requiredTouchAndGoes: 0, overflyWaypoints: wpString, titleOverride: title, descriptionOverride: desc);
+            }
+
+            if (sub.Id == "3.5.2")
+            {
+                int tglCount = _random.Next(3, 7);
+                int tglPax = _random.Next(0, 2);
+                double tglDist = tglCount * 4.0;
+                string title = $"Circuito de Tráfego ({tglCount} TGLs)";
+                string desc = $"Treinamento em circuito de tráfego padrão em {origin.ICAO}. Exige {tglCount} toques e arremetidas (TGL) seguidos de pouso final completo.";
+
+                return await CreateMissionObject(origin, origin, tglDist, sub, tglPax, 0, 0,
+                    requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
+            }
+
+            if (sub.Id == "3.5.3")
+            {
+                paxCount = 0;
+                luggageWeightLbs = 0;
+                cargoWeight = Math.Min(cargoWeight, 50.0);
+            }
+
             double maxDeg = (maxRange / 50.0); 
             var possibleDestinations = await query
                 .Where(a => a.ICAO != origin.ICAO)
@@ -264,12 +329,30 @@ namespace FlightCareer.Application.Services
             var preferredCandidates = validDestinations.Where(x => preferredList.Contains(x.Airport.ICAO)).ToList();
             var selected = preferredCandidates.Any() ? preferredCandidates[_random.Next(preferredCandidates.Count)] : validDestinations[_random.Next(validDestinations.Count)];
 
-            return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight);
+            string? titleOverride = sub.Id == "3.5.3" ? $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}" : null;
+            string? descOverride = sub.Id == "3.5.3" ? $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial." : null;
+
+            return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight,
+                requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride);
         }
 
-        private Task<Mission> CreateMissionObject(Airport origin, Airport dest, double dist, SubCategoryConfig sub, int paxCount, double luggageWeightLbs, double cargoWeight)
+        private Task<Mission> CreateMissionObject(
+            Airport origin, 
+            Airport dest, 
+            double dist, 
+            SubCategoryConfig sub, 
+            int paxCount, 
+            double luggageWeightLbs, 
+            double cargoWeight,
+            int requiredTouchAndGoes = 0,
+            string? overflyWaypoints = null,
+            string? titleOverride = null,
+            string? descriptionOverride = null)
         {
-            var m = CreateMissionObjectSync(origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable);
+            var m = CreateMissionObjectSync(
+                origin, dest, dist, sub, paxCount, luggageWeightLbs, cargoWeight, 
+                _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable,
+                requiredTouchAndGoes, overflyWaypoints, titleOverride, descriptionOverride);
             return Task.FromResult(m);
         }
 
@@ -284,7 +367,11 @@ namespace FlightCareer.Application.Services
             Random random, 
             DateTime referenceTime,
             double payMultiplier = 1.0,
-            MissionPayTable? payTable = null)
+            MissionPayTable? payTable = null,
+            int requiredTouchAndGoes = 0,
+            string? overflyWaypoints = null,
+            string? titleOverride = null,
+            string? descriptionOverride = null)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -296,8 +383,8 @@ namespace FlightCareer.Application.Services
             {
                 Id = Guid.NewGuid(),
                 SubId = sub.Id,
-                Title = sub.Name,
-                Description = sub.Description,
+                Title = titleOverride ?? sub.Name,
+                Description = descriptionOverride ?? sub.Description,
                 OriginICAO = origin.ICAO,
                 DestinationICAO = dest.ICAO,
                 OriginMsfsIdent = origin.MsfsIdent ?? origin.ICAO,
@@ -314,7 +401,9 @@ namespace FlightCareer.Application.Services
                 RequiredPhase = requiredPhase,
                 RequiredCategory = (PilotCategory)(int)requiredPhase,
                 RequiredTier = (CompanyTier)(int)requiredPhase,
-                MissionCategoryType = categoryType
+                MissionCategoryType = categoryType,
+                RequiredTouchAndGoes = requiredTouchAndGoes,
+                OverflyWaypoints = overflyWaypoints
             };
         }
 
@@ -486,6 +575,79 @@ namespace FlightCareer.Application.Services
                 return CreateMissionObjectSync(origin, origin, 10.0, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable);
             }
 
+            if (sub.Id == "3.5.1")
+            {
+                // Voo panorâmico: 2 a 3 aeródromos a 8-30 NM da origem, percurso total, retorno à origem
+                var validWps = new List<(Airport Airport, double Dist)>();
+                for (int i = 0; i < allAirports.Count; i++)
+                {
+                    var a = allAirports[i];
+                    if (string.Equals(a.ICAO, origin.ICAO, StringComparison.OrdinalIgnoreCase)) continue;
+                    double dist = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude);
+                    if (dist >= 8.0 && dist <= 30.0)
+                    {
+                        validWps.Add((a, dist));
+                    }
+                }
+
+                if (validWps.Count < 2)
+                {
+                    for (int i = 0; i < allAirports.Count; i++)
+                    {
+                        var a = allAirports[i];
+                        if (string.Equals(a.ICAO, origin.ICAO, StringComparison.OrdinalIgnoreCase)) continue;
+                        double dist = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude);
+                        if (dist >= 5.0 && dist <= 45.0 && !validWps.Any(x => x.Airport.ICAO == a.ICAO))
+                        {
+                            validWps.Add((a, dist));
+                        }
+                    }
+                }
+
+                if (validWps.Count < 2) return null;
+
+                int pointsCount = Math.Min(validWps.Count, random.Next(2, 4));
+                var picked = validWps.OrderBy(_ => random.Next()).Take(pointsCount).Select(x => x.Airport).ToList();
+                // Ordenação por azimute angular em relação à origem para rota circular contínua
+                picked = picked.OrderBy(a => Math.Atan2(a.Latitude - origin.Latitude, a.Longitude - origin.Longitude)).ToList();
+
+                double totalTourDist = CalculateDistance(origin.Latitude, origin.Longitude, picked[0].Latitude, picked[0].Longitude);
+                for (int i = 0; i < picked.Count - 1; i++)
+                {
+                    totalTourDist += CalculateDistance(picked[i].Latitude, picked[i].Longitude, picked[i + 1].Latitude, picked[i + 1].Longitude);
+                }
+                totalTourDist += CalculateDistance(picked[^1].Latitude, picked[^1].Longitude, origin.Latitude, origin.Longitude);
+
+                string wpString = string.Join(";", picked.Select(p => p.ICAO));
+                int tourPax = Math.Clamp(paxCount > 0 ? paxCount : random.Next(1, 4), 1, 3);
+                string title = $"Voo Panorâmico ({string.Join(" • ", picked.Select(p => p.ICAO))})";
+                string desc = $"Voo panorâmico sobrevoando os aeródromos da região: {string.Join(", ", picked.Select(p => p.ICAO))}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 2 NM e abaixo de 3.000 ft AGL).";
+
+                return CreateMissionObjectSync(origin, origin, totalTourDist, sub, tourPax, Math.Min(luggageWeightLbs, 30.0), 0,
+                    random, referenceTime, payMultiplier, payTable,
+                    requiredTouchAndGoes: 0, overflyWaypoints: wpString, titleOverride: title, descriptionOverride: desc);
+            }
+
+            if (sub.Id == "3.5.2")
+            {
+                int tglCount = random.Next(3, 7);
+                int tglPax = random.Next(0, 2);
+                double tglDist = tglCount * 4.0;
+                string title = $"Circuito de Tráfego ({tglCount} TGLs)";
+                string desc = $"Treinamento em circuito de tráfego padrão em {origin.ICAO}. Exige {tglCount} toques e arremetidas (TGL) seguidos de pouso final completo.";
+
+                return CreateMissionObjectSync(origin, origin, tglDist, sub, tglPax, 0, 0,
+                    random, referenceTime, payMultiplier, payTable,
+                    requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
+            }
+
+            if (sub.Id == "3.5.3")
+            {
+                paxCount = 0;
+                luggageWeightLbs = 0;
+                cargoWeight = Math.Min(cargoWeight, 50.0);
+            }
+
             double maxDeg = maxRange / 50.0;
             var candidates = new List<(Airport Airport, double Dist)>();
 
@@ -529,7 +691,11 @@ namespace FlightCareer.Application.Services
                 ? preferredCandidates[random.Next(preferredCandidates.Count)]
                 : candidates[random.Next(candidates.Count)];
 
-            return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable);
+            string? titleOverride = sub.Id == "3.5.3" ? $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}" : null;
+            string? descOverride = sub.Id == "3.5.3" ? $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial." : null;
+
+            return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable,
+                requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride);
         }
 
         private List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig)

@@ -35,7 +35,9 @@ namespace FlightCareer.Domain.Economy
 
         private static readonly Lazy<MissionPayTable> _defaults = new(() => new MissionPayTable(new List<MissionPayFamily>
         {
-            new("instrucao_basica", new[] { "3.4.1" }, 220.0, 6.5, 0.0, false, 0.10, 1.0),
+            new("panoramico", new[] { "3.5.1" }, 300.0, 6.5, 0.0, false, 0.10, 1.0),
+            new("translado", new[] { "3.5.3" }, 250.0, 5.0, 0.0, false, 0.10, 1.0),
+            new("instrucao_basica", new[] { "3.4.1", "3.5.2" }, 220.0, 6.5, 0.0, false, 0.10, 1.0),
             new("instrucao", new[] { "3.4" }, 350.0, 6.5, 0.0, false, 0.10, 1.0),
             new("medevac", new[] { "4.3.1", "3.3" }, 2400.0, 14.0, 0.0, false, 0.25, 1.0),
             new("aog", new[] { "4.3.2", "3.2.1" }, 950.0, 8.0, 0.0, false, 0.35, 1.0),

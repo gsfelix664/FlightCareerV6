@@ -2830,3 +2830,31 @@
   - Fallback por faixas de componentes para aeronaves legadas sem peças.
 - Build com 0 erros, `dotnet test` com 834/834 testes aprovados (100%).
 - Não visto na tela / não testado no MSFS.
+
+## 2026-11-22 - Contratos novos da Fase 1: voo panorâmico, circuito de TGL e translado básico (FASES-2A) (Gemini)
+- `Mission.cs`: novas propriedades `RequiredTouchAndGoes` (int, default 0) e `OverflyWaypoints` (string, default NULL).
+- `AppDbContext.cs`:
+  - Adicionadas colunas `RequiredTouchAndGoes` e `OverflyWaypoints` na lista de migrações idempotentes de `EnsureSchemaUpdatedAsync`.
+  - Configurado `HasDefaultValue(0)` em `RequiredTouchAndGoes` no `OnModelCreating` para compatibilidade com DDL SQLite.
+- Configurações JSON e Tabelas de Domínio:
+  - `career_phases.json`: mapeamento dos subtipos `3.5.1`, `3.5.2` e `3.5.3` para a Fase 1 (`CareerPhase.Phase1_FlightSchool`).
+  - `mission_pay.json` e `MissionPayTable.cs`: adicionadas famílias `panoramico` (3.5.1: base $300, 6,5/NM, 0,10/lb, escala 1,0), `translado` (3.5.3: base $250, 5,0/NM, escala 1,0) e inclusão de `3.5.2` na família `instrucao_basica`. Paridade garantida entre JSON e `MissionPayTable.Defaults`.
+  - `xp_rules.json`: multiplicadores de tipo `panoramico` (1,15) e `translado` (0,80).
+- `MissionRules.cs`: categoria nova "3.5 Aeroclube" adicionada nos Tiers 2, 3 e 4 com peso 5, contendo os subtipos 3.5.1 (Panorâmico), 3.5.2 (Circuito TGL) e 3.5.3 (Translado Básico).
+- `MissionGenerator.cs`:
+  - `3.5.1 Voo Panorâmico`: busca 2 a 3 aeródromos vizinhos (8–30 NM da origem, com fallback para 45 NM), ordena por azimute angular ao redor da origem formando rota circular sem ziguezague, calcula percurso total do circuito para distância e remuneração, gera lista `OverflyWaypoints` e 1–3 passageiros.
+  - `3.5.2 Circuito de TGL`: sorteia 3 a 6 toques (`RequiredTouchAndGoes`), 0 a 1 passageiro (instrutor), calcula distância estimada do circuito e formata descrição e título específicos.
+  - `3.5.3 Translado Básico`: aeródromo vizinho a < 80 NM, 0 passageiros e carga $\le 50$ lb ("avião de manutenção").
+- Lógica Pura no Domínio (`Domain/Missions/`):
+  - `OverflyPoint`: record com `Ident`, `Latitude`, `Longitude` e `ElevationFt`.
+  - `OverflyTracker`: rastreia waypoints por proximidade horizontal ($\le 2$ NM) e teto de altitude ($\le$ elevação + 3.000 ft).
+  - `TouchAndGoCounter`: máquina de estados precisa para TGL (rolo no solo $\ge 1$ s, GS máxima $> 20$ kt, sem parada completa $\text{GS} < 5$ kt, e nova decolagem; primeira decolagem do voo ignorada).
+  - `MissionCompletion.Evaluate`: avalia pouso na origem/destino esperado, conferência de TGLs mínimos e sobrevoo de todos os pontos obrigatórios.
+- `FlightMonitor.cs`: integrado `TouchAndGoCounter` e `OverflyTracker` alimentados pela telemetria em voo monitorado e repassados no encerramento para o `FlightService`.
+- `FlightService.cs`:
+  - Avaliação de conclusão via `MissionCompletion.Evaluate`.
+  - Se os requisitos não forem atendidos (falta de pontos ou TGLs insuficientes), a missão não é concluída, retorna ao mercado no aeroporto atual com o mesmo valor (regra de descarregar) e uma mensagem detalhada do que faltou é adicionada ao `FlightOutcome.Message`.
+- Suíte de Testes xUnit:
+  - `Phase1ContractsTests.cs`: 11 testes cobrindo `MissionCompletion` (panorâmico aprovado/rejeitado, circuito aprovado/rejeitado), `TouchAndGoCounter` (TGL válido, quique rejeitado, parada completa rejeitada, decolagem inicial ignorada), `OverflyTracker` (distância e teto válidos/inválidos), gerador de contratos e migração idempotente de banco legado.
+  - 851/851 testes xUnit aprovados (100%).
+- Não visto na tela / não testado no MSFS.

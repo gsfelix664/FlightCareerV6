@@ -49,5 +49,11 @@ namespace FlightCareer.Domain.Entities
         public string MissionCategoryType { get; set; } = "Instrucao"; // Instrucao, SAE_Foto, SAE_Reboque, SAE_Carga, Taxi_Charter, etc.
         /// <summary>Subcategoria do gerador (ex.: "3.4.1"): define a família de pagamento em mission_pay.json. Nulo em missões antigas.</summary>
         public string? SubId { get; set; }
+
+        /// <summary>Número obrigatório de toques e arremetidas (TGL) exigidos na missão. 0 = não se aplica.</summary>
+        public int RequiredTouchAndGoes { get; set; }
+
+        /// <summary>Identificadores de pontos/aeródromos de sobrevoo obrigatório (ex.: "SBXX;SDYY;SNZZ"). Nulo/vazio = não se aplica.</summary>
+        public string? OverflyWaypoints { get; set; }
     }
 }

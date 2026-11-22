@@ -272,6 +272,7 @@ namespace FlightCareer.Application.Services
                 RangeRules = { new(70, 30, 60), new(30, 61, 120) }
             });
             t2.Categories.Add(c2_5);
+            t2.Categories.Add(CreateAeroclubeCategory());
             Rules.Add(2, t2);
 
             // TIER 3
@@ -386,6 +387,7 @@ namespace FlightCareer.Application.Services
                 RangeRules = { new(70, 30, 60), new(30, 61, 120) }
             });
             t3.Categories.Add(c3_4);
+            t3.Categories.Add(CreateAeroclubeCategory());
             Rules.Add(3, t3);
 
             // TIER 4
@@ -494,7 +496,39 @@ namespace FlightCareer.Application.Services
                 RangeRules = { new(70, 30, 60), new(30, 61, 120) }
             });
             t4.Categories.Add(c4_4);
+            t4.Categories.Add(CreateAeroclubeCategory());
             Rules.Add(4, t4);
+        }
+
+        private static CategoryConfig CreateAeroclubeCategory()
+        {
+            var cat = new CategoryConfig { Id = "3.5", Name = "Aeroclube", Weight = 5 };
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.5.1", Name = "Voo Panorâmico",
+                Description = "Voo panorâmico sobrevoando pontos turísticos e aeródromos da região e retornando à origem.",
+                Weight = 35, MinExpHours = 2, MaxExpHours = 6, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(60, 1, 2), new(40, 3, 3) },
+                RangeRules = { new(100, 20, 80) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.5.2", Name = "Circuito de Tráfego (TGL)",
+                Description = "Sessão de treinamento de circuito de tráfego com toques e arremetidas no aeródromo de origem.",
+                Weight = 35, MinExpHours = 1, MaxExpHours = 3, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(50, 0, 0), new(50, 1, 1) },
+                RangeRules = { new(100, 10, 25) }
+            });
+            cat.SubCategories.Add(new SubCategoryConfig
+            {
+                Id = "3.5.3", Name = "Translado Básico",
+                Description = "Translado de aeronave vazia para oficina ou manutenção em aeródromo vizinho (< 80 NM).",
+                Weight = 30, MinExpHours = 2, MaxExpHours = 8, RequiresHardSurface = false, MinRunwayDest = 1000,
+                PaxRules = { new(100, 0, 0) },
+                LbsRules = { new(100, 10, 50) },
+                RangeRules = { new(100, 10, 80) }
+            });
+            return cat;
         }
     }
 }

@@ -1,5 +1,6 @@
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Economy;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
 using FlightCareer.Domain.Utils;
@@ -52,7 +53,9 @@ namespace FlightCareer.Application.Services
             bool isFlightInvalidated = false,
             string? invalidationReason = null,
             bool autoStartUsed = false,
-            XpFlightInputs? xpInputs = null)
+            XpFlightInputs? xpInputs = null,
+            IReadOnlySet<string>? visitedWaypoints = null,
+            int touchAndGoCount = 0)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -289,10 +292,13 @@ namespace FlightCareer.Application.Services
                 int missionsDone = 0;
                 int missionsRemaining = 0;
                 int passengersCompleted = 0;
+                var uncompletedMissionReasons = new List<string>();
 
                 foreach (var mission in activeMissions)
                 {
-                    if (!isFlightInvalidated && mission.DestinationICAO.ToUpper() == destinationIcao.ToUpper())
+                    var completion = MissionCompletion.Evaluate(mission, destinationIcao, visitedWaypoints, touchAndGoCount);
+
+                    if (!isFlightInvalidated && completion.IsCompleted)
                     {
                         // PAGAMENTO INTEGRAL (Independente da qualidade, exceto se crashar)
                         double missionReward = mission.RewardMoney;
@@ -317,10 +323,15 @@ namespace FlightCareer.Application.Services
                     }
                     else
                     {
+                        // Missão não concluída: volta ao mercado com o mesmo valor (como na regra de descarregar)
+                        mission.IsAccepted = false;
+                        mission.PilotId = null;
                         mission.OriginICAO = destinationIcao;
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null)
                         {
+                            dbMission.IsAccepted = false;
+                            dbMission.PilotId = null;
                             dbMission.OriginICAO = destinationIcao;
                             var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
                             var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
@@ -332,6 +343,11 @@ namespace FlightCareer.Application.Services
                             }
                         }
                         missionsRemaining++;
+
+                        if (!completion.IsCompleted && !string.IsNullOrEmpty(completion.Reason))
+                        {
+                            uncompletedMissionReasons.Add($"{mission.Title}: {completion.Reason}");
+                        }
                     }
                 }
 
@@ -452,6 +468,10 @@ namespace FlightCareer.Application.Services
                     {
                         outcome.Message += " | Partida automática usada (−10% XP)";
                     }
+                }
+                if (uncompletedMissionReasons.Count > 0)
+                {
+                    outcome.Message += $" | Contrato(s) não concluído(s): {string.Join(" • ", uncompletedMissionReasons)}";
                 }
                 return outcome;
             }
