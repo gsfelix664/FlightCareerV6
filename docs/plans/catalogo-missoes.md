@@ -302,3 +302,48 @@ Gerado: `Data/places/airport_profiles.json` (`tools/places/airport_profiles.py`)
 | evacuacao_por_do_sol | — | — | baixa | média | isolado ×3 | tier 2–3 com pista iluminada |
 
 Pendente de validação: ferramenta que gera mil quadros em ~10 aeroportos reais e mostra a porcentagem de cada missão, para o usuário conferir antes da simulação de carreira.
+
+### 9.4 Verificação pedida pelo usuário (2026-11-23) — depois de cada etapa
+Ferramenta de conferência (subcomando do `FlightCareer.Replay`, ex.: `board-report`) que gera ~1.000 quadros por aeroporto real (tier 1: SBGR, KMEM; tier 2: SBKP, SBTF; tier 3: SDCO, SDOI, SBJR; tier 4: fazenda no MT, PABE; militar: SBAN) e mostra:
+1. **tipos de missão por tier**: porcentagem de cada tipo; tier 1 deve concentrar linha aérea, carga pesada, executiva; tier 3/4 instrução, agro, remotas;
+2. **destinos preferenciais por tipo**: porcentagem dos destinos com o perfil esperado (ex.: órgãos → hospital de referência; translado para manutenção → MRO; carga perecível → hub de carga; regional essencial → capital regional);
+3. **pax e carga por missão**: mínimo, média e máximo sorteados por tipo, conferindo que respeitam as faixas da missão e variam aleatoriamente (não repetem o mesmo valor).
+O usuário confere o relatório antes da simulação de carreira.
+
+### 9.5 Cobertura de destinos (usuário, 2026-11-23): todo aeroporto precisa ter chance de receber voo
+Achados no gerador atual (`MissionGenerator.CreateMissionFromSubCategory`, caminho do jogo):
+1. **Preferencial exclusivo:** se houver ao menos um destino preferencial dentro da faixa de distância, o sorteio é feito **só entre os preferenciais** (`preferredCandidates.Any() ? preferred : todos`). Os vizinhos não preferenciais nunca recebem essa missão.
+2. **Corte alfabético:** os candidatos são lidos do banco numa faixa de latitude, `OrderBy(ICAO).Take(500)`. Em regiões densas (EUA, Europa, Brasil) só os 500 primeiros em ordem alfabética entram; os demais nunca são destino.
+Regra para a etapa 2:
+- Preferência por **peso**, nunca exclusiva: destino preferencial ×k (tabela § 9.3), não preferencial ×1; nenhum destino válido fica com peso 0 por não ser preferencial.
+- Candidatos por área real (latitude **e** longitude dentro do raio), sem corte alfabético; se precisar limitar, amostra aleatória com a semente do gerador.
+- Teste/relatório de cobertura (`board-report --coverage`): para todos os aeroportos do MSFS, quantas missões cada um recebe como destino numa simulação ampla; listar os que ficam com 0 e o motivo (nenhuma missão permite pela pista/tier/distância — aceitável — ou foram excluídos pelo sorteio — erro).
+
+### 9.6 Bagagem por pessoa realista (usuário, 2026-11-23)
+Hoje (`MissionGenerator`, os dois caminhos): bagagem = nº de pax × um único sorteio de 0–50 lb (o mesmo valor para todos), igual em qualquer missão; o campo `LuggageWeightKg` de cada subtipo não é usado; sem pax a bagagem é 0, e no translado básico é zerada.
+Regra para a etapa 2 (faixas por pessoa no catálogo, sorteio **individual** por pessoa, valores em kg convertidos para lb):
+| Tipo de missão | Bagagem por pessoa | Tripulação/apoio a bordo (sempre, mesmo sem pax) |
+|---|---|---|
+| Instrução, TGL, navegação, STOL, cheque | mochila 2–6 kg | instrutor/examinador + aluno: 2–6 kg cada |
+| Panorâmico, safári, voo de demonstração | 0–5 kg (câmera, bolsa) | — |
+| Paraquedismo | equipamento 12–16 kg por saltador | — |
+| Táxi aéreo, executiva, VIP, autoridades | 8–23 kg | — |
+| Linha doméstica, regional, feeder, sub-regional | 5–23 kg (média ~12) | — |
+| Longo curso, regional internacional | 15–32 kg | — |
+| Charter de lazer, pousada de pesca/lodge | 15–30 kg (tralha de pesca, esqui) | — |
+| Rodízio de turno, brigadistas, equipes, pessoas remotas | 15–30 kg (15–30 dias / equipamento) | — |
+| Regional essencial, combi, táxi social | 5–25 kg | — |
+| Saúde (UTI, medevac, órgãos, ronda) | acompanhante 3–10 kg | equipe médica 3–8 kg cada (o equipamento médico continua como carga) |
+| Ferry, translado, check flight, ferry permit | — | piloto 3–10 kg |
+| Carga pura (sem pax) | — | — |
+- O total de bagagem conta no peso da missão e no limite da aeronave, como hoje.
+- O relatório do gerador (§ 9.4) mostra mínimo, média e máximo da bagagem por tipo.
+
+### 9.7 Revisão das faixas de pax, carga e distância (usuário, 2026-11-23) — antes dos testes do gerador
+Para cada um dos 69 tipos, revisar e calibrar as faixas sorteadas (`paxRules`, `lbsRules`, `rangeRules`) contra a operação real:
+- **Aeronave típica** da missão (ex.: instrução C152/C172; táxi aéreo Baron/King Air/Citation; regional ATR/E-Jet; linha A320/737; longo curso 777/A350; carga pesada 747F/777F; agrícola Air Tractor/Ipanema) e a capacidade/payload dela, para que a faixa caiba em quem faz essa missão no mundo real.
+- **Distâncias reais** por tipo (ex.: instrução local 5–20 NM; panorâmico 10–60 NM de percurso; ponte aérea 150–300 NM; regional 100–500 NM; longo curso 2.500–7.500 NM; ferry de fazenda 20–150 NM), com exemplos de rotas reais.
+- **Carga** coerente com o tipo (malotes leves, ULD pesados, tambores de combustível ~180 kg cada, insumos agro em lotes, órgão em caixa térmica leve).
+- **Pax** coerente (instrução 1–2, cheque 1 examinador, paraquedismo pela capacidade do avião de salto, rodízio de turno pela equipe, linha pela cabine).
+- O limite do avião continua filtrando no quadro (missão que não cabe aparece como acima do peso); a faixa do tipo não deve depender do avião do jogador.
+Entrega: tabela de faixas por tipo neste plano (com a aeronave de referência e a fonte), revisada pelo usuário; depois o catálogo é preenchido e o relatório § 9.4 confere.
