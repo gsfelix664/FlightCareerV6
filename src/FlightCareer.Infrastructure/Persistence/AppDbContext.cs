@@ -347,12 +347,15 @@ namespace FlightCareer.Infrastructure.Persistence
             {
                 try
                 {
-                    command.CommandText = $"UPDATE Missions SET SubId = '{newId}' WHERE SubId = '{legacyCode}';";
-                    await command.ExecuteNonQueryAsync();
+                    using var migrateCmd = connection.CreateCommand();
+                    migrateCmd.CommandText = "UPDATE Missions SET SubId = $new WHERE SubId = $old;";
+                    var pNew = migrateCmd.CreateParameter(); pNew.ParameterName = "$new"; pNew.Value = newId; migrateCmd.Parameters.Add(pNew);
+                    var pOld = migrateCmd.CreateParameter(); pOld.ParameterName = "$old"; pOld.Value = legacyCode; migrateCmd.Parameters.Add(pOld);
+                    await migrateCmd.ExecuteNonQueryAsync();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Tabela ainda vazia ou sem missões antigas (ignorar)
+                    System.Diagnostics.Debug.WriteLine($"[AppDbContext] Falha ao migrar SubId {legacyCode} -> {newId}: {ex.Message}");
                 }
             }
 
