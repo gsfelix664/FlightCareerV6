@@ -1,0 +1,211 @@
+icao,cc,note,tags
+SBGR,BR,Principal hub internacional do Brasil (LATAM/GOL/Azul),mega_hub|internacional
+SBKP,BR,Maior hub doméstico e internacional da Azul,hub|internacional|domestico
+SBSP,BR,Hub doméstico de alta frequência (GOL/LATAM),domestico|ponte_aerea|alta_frequencia
+SBBR,BR,Hub central de conexões domésticas,hub|domestico
+SBCF,BR,Segundo maior hub nacional da Azul,hub|domestico
+SBRF,BR,Hub da Azul para o Nordeste e voos internacionais,hub|internacional
+SBGL,BR,Hub internacional da GOL e base no Rio,hub|internacional
+SBRJ,BR,Hub doméstico da Ponte Aérea,domestico|ponte_aerea|alta_frequencia
+SBSV,BR,Hub regional da GOL e base da Azul/Voepass,regional|domestico
+SBFZ,BR,Conexões Nordeste–Europa/EUA,hub|internacional
+SBPA,BR,Principal hub do Sul do Brasil,hub|domestico
+SBCT,BR,Hub regional do Sul,regional|domestico
+SBBE,BR,Principal hub da Amazônia Oriental,regional|domestico
+SBEG,BR,Hub da Amazônia Ocidental,regional|domestico
+SBCY,BR,Hub regional da Azul para o Centro-Oeste e Norte,regional|domestico
+SBGO,BR,Base de conexões no Centro-Oeste,regional|domestico
+SBFL,BR,Hub sazonal e internacional do Cone Sul,regional|turistico|internacional
+SBVT,BR,Hub regional do Espírito Santo,regional
+SBSG,BR,Hub turístico e regional potiguar,regional|turistico
+SBMO,BR,Hub regional da costa leste nordestina,regional|turistico
+SBSL,BR,Conexão entre Norte e Nordeste,regional
+SBRP,BR,Hub regional da Voepass e malha interiorana,regional
+SBLO,BR,Hub regional do norte paranaense,regional
+SBUL,BR,Hub regional do Triângulo Mineiro,regional
+SBPV,BR,Distribuição regional de passageiros em Rondônia,regional
+KATL,US,Maior hub do mundo em passageiros (Delta),mega_hub|internacional
+KDFW,US,Mega-hub da American Airlines,mega_hub|internacional
+KORD,US,Dual-hub da United e American,mega_hub|internacional
+KDEN,US,"Mega-hub da United, Southwest e Frontier",mega_hub|low_cost
+KLAX,US,Hub multicompanhias da Costa Oeste,mega_hub|internacional
+KJFK,US,Principal portal internacional de Nova York,mega_hub|internacional
+KCLT,US,Segundo maior hub da American,hub|domestico
+KLAS,US,"Hub da Southwest, Allegiant e Spirit",low_cost|turistico
+KMCO,US,Hub doméstico e turístico,low_cost|turistico
+KMIA,US,Hub da American para América Latina e Caribe,hub|internacional
+KPHX,US,Hub da American e Southwest no Sudoeste,hub|low_cost
+KSEA,US,Hub da Alaska Airlines e internacional da Delta,hub|internacional
+KEWR,US,Mega-hub da United na Costa Leste,mega_hub|internacional
+KIAH,US,Hub da United para América Latina,hub|internacional
+KSFO,US,Hub transpacífico da United,hub|internacional
+KMSP,US,Segundo maior hub da Delta,hub
+KDTW,US,Grande hub da Delta,hub
+KBOS,US,Hub da Delta e JetBlue na Nova Inglaterra,hub|internacional
+KPHL,US,Hub transatlântico da American,hub|internacional
+KSLC,US,Hub da Delta nas Montanhas Rochosas,hub
+KDCA,US,Hub doméstico da American na capital,domestico|alta_frequencia
+KIAD,US,Hub internacional da United em Washington,hub|internacional
+KBWI,US,Grande hub da Southwest,low_cost
+KMDW,US,Base histórica da Southwest,low_cost
+KDAL,US,Sede e hub central da Southwest,low_cost
+KHOU,US,Hub doméstico e internacional da Southwest,low_cost
+KFLL,US,Hub da JetBlue e Spirit,low_cost|turistico
+KLGA,US,Hub doméstico de alta densidade,domestico|alta_frequencia
+KPDX,US,Hub secundário da Alaska Airlines,regional
+PHNL,US,Principal hub da Hawaiian Airlines,hub|turistico|interilhas
+PANC,US,Hub regional da Alaska Airlines,regional
+CYYZ,CA,Maior hub do Canadá,mega_hub|internacional
+CYVR,CA,Hub transpacífico do Canadá,hub|internacional
+CYUL,CA,Hub transatlântico e francófono,hub|internacional
+CYYC,CA,Principal hub da WestJet,hub
+CYHZ,CA,Hub atlântico canadense,regional
+CYTZ,CA,Hub regional urbano da Porter,regional|alta_frequencia
+MMMX,MX,Principal hub da Aeroméxico e Volaris,mega_hub|internacional
+MMUN,MX,Hub turístico internacional,turistico|internacional
+MMGL,MX,Principal base da Volaris,low_cost
+MMMY,MX,Principal hub da Viva Aerobus,low_cost
+MMTJ,MX,Hub fronteiriço binacional,low_cost
+MMSM,MX,Hub doméstico crescente,domestico
+KSTL,US,Base operacional da Southwest,low_cost
+KBNA,US,Hub de rápido crescimento da Southwest,low_cost
+MPTO,PA,Hub das Américas (Copa Airlines),mega_hub|internacional
+SKBO,CO,Principal hub da Avianca,hub|internacional
+SKRG,CO,Hub secundário da Avianca e base da JetSMART,regional|low_cost
+SPJC,PE,Grande hub sul-americano da LATAM,hub|internacional
+SCEL,CL,Sede e mega-hub do Grupo LATAM,mega_hub|internacional
+SAEZ,AR,Hub internacional da Aerolíneas Argentinas,hub|internacional
+SABE,AR,Hub doméstico e regional de Buenos Aires,domestico|alta_frequencia|low_cost
+SEQM,EC,Principal hub do Equador,hub
+SEGU,EC,Hub costeiro equatoriano,regional
+MSLP,SV,Hub centro-americano da Avianca,hub
+MROC,CR,Hub regional da Costa Rica,regional|turistico
+SUMU,UY,Principal porta de entrada do Uruguai,hub
+SLVR,BO,Principal hub da BoA,hub
+SVMI,VE,Hub da Conviasa e Laser,hub
+SGAS,PY,Hub da Paranair e LATAM Paraguay,hub
+TJSJ,PR,Hub caribenho da JetBlue e Frontier,hub|turistico
+MDSD,DO,Hub da Arajet,hub
+MDPC,DO,Mega-hub turístico caribenho,turistico
+MUHA,CU,Principal hub da Cubana,hub
+MKJP,JM,Hub da Caribbean Airlines na Jamaica,regional
+EGLL,GB,Maior hub da Europa (British Airways e Virgin),mega_hub|internacional
+LFPG,FR,Mega-hub da Air France,mega_hub|internacional
+EHAM,NL,Mega-hub da KLM e Transavia,mega_hub|internacional
+EDDF,DE,Mega-hub da Lufthansa e Condor,mega_hub|internacional
+EDDM,DE,Segundo mega-hub da Lufthansa,mega_hub|internacional
+LEMD,ES,Hub da Iberia e ponte Europa–América Latina,mega_hub|internacional
+LEBL,ES,Principal hub da Vueling e Level,hub|low_cost
+LTFM,TR,Mega-hub intercontinental da Turkish Airlines,mega_hub|internacional
+LTFJ,TR,Hub low-cost da Pegasus e AJet,low_cost
+LIRF,IT,Principal hub da ITA Airways,hub|internacional
+LIMC,IT,Hub internacional e base da Neos e easyJet,hub|low_cost
+LSZH,CH,Principal hub da Swiss,hub|internacional
+LSGG,CH,Hub secundário da Swiss e base da easyJet,hub|low_cost
+LOWW,AT,Principal hub da Austrian,hub|internacional
+EBBR,BE,Principal hub da Brussels Airlines,hub|internacional
+LPPT,PT,Principal hub da TAP e ponte para o Brasil,hub|internacional
+LPPR,PT,Base da TAP e Ryanair no norte de Portugal,regional|low_cost
+EIDW,IE,Sede da Ryanair e hub transatlântico da Aer Lingus,hub|low_cost|internacional
+EGKK,GB,Maior base da easyJet,hub|low_cost
+EGSS,GB,Maior base da Ryanair no Reino Unido,low_cost
+EGGW,GB,Hub low-cost da Wizz Air e easyJet,low_cost
+EGCC,GB,Principal hub do norte da Inglaterra,hub|turistico
+EGPH,GB,Principal hub da Escócia,regional
+LFPO,FR,Hub doméstico e ultramarino,domestico|internacional
+LFMN,FR,Segundo aeroporto mais movimentado da França,hub|turistico
+LFLL,FR,Hub regional francês,regional
+EKCH,DK,Principal hub escandinavo da SAS,hub|internacional
+ESSA,SE,Hub da SAS e base da Norwegian,hub
+ENGM,NO,Hub da Norwegian e SAS,hub
+EFHK,FI,Hub da Finnair para Ásia–Europa,hub|internacional
+EPWA,PL,Principal hub da LOT,hub
+EPKK,PL,Base regional da Ryanair e Wizz Air,low_cost
+LHBP,HU,Sede e principal hub da Wizz Air,low_cost
+LROP,RO,Hub da TAROM e base da Wizz Air,hub|low_cost
+LKPR,CZ,Base da Smartwings,hub
+LGAV,GR,Principal hub da Aegean,hub
+LEPA,ES,Mega-hub sazonal europeu,turistico|low_cost
+LEMG,ES,Grande hub turístico do sul da Espanha,turistico|low_cost
+GCLP,ES,Hub da Binter Canarias,regional|interilhas|turistico
+GCXO,ES,Hub interilhas das Canárias,regional|interilhas
+EDDL,DE,Hub da Eurowings,hub|low_cost
+EDDB,DE,Hub da capital alemã,hub|low_cost
+EDDH,DE,Base do norte da Alemanha,regional
+LIME,IT,Principal base italiana da Ryanair,low_cost
+LIML,IT,Hub doméstico e executivo de Milão,domestico|alta_frequencia
+LIPZ,IT,Hub do nordeste italiano,regional|turistico
+LIRN,IT,Hub do sul da Itália,regional|turistico
+BIKF,IS,Hub transatlântico da Icelandair e PLAY,hub|internacional
+LYBE,RS,Principal hub da Air Serbia,hub
+LDZA,HR,Principal hub da Croatia Airlines,regional
+EVRA,LV,Principal hub dos Países Bálticos (airBaltic),hub
+LBSF,BG,Principal hub da Bulgaria Air,regional
+LMML,MT,Hub da KM Malta Airlines,regional|turistico
+UUEE,RU,Principal hub da Aeroflot,mega_hub|internacional
+UUDD,RU,Hub da S7 e Ural Airlines,hub
+OMDB,AE,Mega-hub global da Emirates e flydubai,mega_hub|internacional
+OTHH,QA,Mega-hub global da Qatar Airways,mega_hub|internacional
+OMAA,AE,Hub global da Etihad,mega_hub|internacional
+OEJN,SA,Principal hub internacional da Saudia e Flynas,hub|internacional
+OERK,SA,Hub da Saudia e da Riyadh Air,hub
+OEDF,SA,Hub do leste saudita,regional
+OMSJ,AE,Sede e hub da Air Arabia,low_cost
+OBBI,BH,Principal hub da Gulf Air,hub
+OOMS,OM,Principal hub da Oman Air e SalamAir,hub
+OKBK,KW,Principal hub da Kuwait Airways e Jazeera,hub
+OJAI,JO,Principal hub da Royal Jordanian,hub
+LLBG,IL,Principal hub da El Al,hub|internacional
+OLBA,LB,Hub da Middle East Airlines,hub
+OIIE,IR,Principal hub internacional do Irã,hub|internacional
+HAAB,ET,Maior hub da África (Ethiopian),mega_hub|internacional
+HECA,EG,Principal hub da EgyptAir,hub|internacional
+FAOR,ZA,Principal hub da África Austral,hub|internacional
+FACT,ZA,Segundo maior hub sul-africano,hub|turistico
+GMMN,MA,Principal hub da Royal Air Maroc,hub|internacional
+HKJK,KE,Principal hub da Kenya Airways,hub
+DAAG,DZ,Principal hub da Air Algérie,hub
+DTTA,TN,Principal hub da Tunisair,hub
+DNMM,NG,Principal hub da Air Peace,hub
+FIMP,MU,Hub da Air Mauritius no Índico,hub|turistico
+FNLU,AO,Principal hub da TAAG,hub
+WSSS,SG,Mega-hub da Singapore Airlines e Scoot,mega_hub|internacional
+VHHH,HK,Mega-hub da Cathay Pacific,mega_hub|internacional
+RKSI,KR,Mega-hub da Korean Air e Asiana,mega_hub|internacional
+RJTT,JP,Principal hub doméstico e internacional da JAL e ANA,mega_hub|domestico|alta_frequencia
+RJAA,JP,"Hub internacional da ANA, JAL, Peach e ZIPAIR",hub|internacional|low_cost
+ZBAA,CN,Principal hub da Air China,mega_hub|internacional
+ZBAD,CN,Mega-hub da China Southern e China Eastern,mega_hub
+ZSPD,CN,Principal hub internacional da China Eastern,mega_hub|internacional
+ZSSS,CN,Grande hub doméstico da China Eastern e Spring,domestico|alta_frequencia
+ZGGG,CN,Sede e mega-hub da China Southern,mega_hub|internacional
+ZGSZ,CN,Hub da Shenzhen Airlines,hub
+ZUTF,CN,Grande hub do oeste chinês,hub
+ZUCK,CN,Hub doméstico e regional,regional
+ZPPP,CN,Hub chinês para o Sudeste Asiático,hub
+ZLXY,CN,Hub do noroeste da China,hub
+RCTP,TW,"Principal hub da EVA, China Airlines e STARLUX",mega_hub|internacional
+VTBS,TH,Principal hub da Thai Airways,mega_hub|internacional
+VTBD,TH,Maior hub low-cost da Thai AirAsia e Nok Air,low_cost
+WMKK,MY,Hub da Malaysia Airlines e sede da AirAsia,hub|low_cost
+WIII,ID,"Principal hub da Garuda, Lion Air e Citilink",mega_hub|low_cost
+WADD,ID,Hub turístico e regional da Indonésia,turistico|regional
+RPLL,PH,Principal hub da Philippine Airlines e Cebu Pacific,hub|low_cost
+VVTS,VN,Principal hub da Vietnam Airlines e VietJet,hub|low_cost
+VVNB,VN,Segundo grande hub do Vietnã,hub
+VIDP,IN,Maior hub da Índia,mega_hub|internacional|low_cost
+VABB,IN,Segundo maior hub indiano,hub|internacional
+VOBL,IN,Terceiro maior hub da Índia,hub
+VOHS,IN,Hub doméstico e do Oriente Médio,hub
+VOMM,IN,Principal hub do sul da Índia,hub
+VECC,IN,Principal hub do leste da Índia,hub
+RJBB,JP,Hub do oeste japonês (Peach/JAL/ANA),hub|low_cost
+RJFF,JP,Principal hub de Kyushu,regional|alta_frequencia
+RJCC,JP,Principal hub de Hokkaido,regional|alta_frequencia
+RKSS,KR,Hub doméstico e regional da Coreia,domestico|alta_frequencia
+YSSY,AU,Principal hub da Qantas e Virgin Australia,mega_hub|internacional
+YMML,AU,Segundo maior hub australiano,hub|low_cost
+YBBN,AU,Hub de Queensland e do Pacífico Sul,hub
+YPPH,AU,Hub da costa oeste e voos diretos à Europa,hub|internacional
+NZAA,NZ,Principal hub da Air New Zealand,hub|internacional
+NFFN,FJ,Principal hub da Fiji Airways no Pacífico Sul,hub|turistico

@@ -1,0 +1,258 @@
+icao,cc,note,tags
+SBSJ,BR,"Sede da Embraer: fabricação, entregas e centro de serviços",fabrica|entrega|executivo
+SBGP,BR,Unidade da Embraer de ensaios em voo e montagem,fabrica|ensaios
+SBCF,BR,Centro de manutenção pesada e pintura de B737,heavy_check|pintura
+SBKP,BR,Mega-hangar de manutenção pesada A320/A330/E-Jets/ATR,heavy_check
+SDSC,BR,Centro de manutenção pesada e pintura de companhia aérea,heavy_check|pintura
+SBGR,BR,Manutenção de linha e hangares de companhias,linha
+SBGL,BR,Parque histórico de manutenção pesada de fuselagem larga,heavy_check|widebody
+SDCO,BR,Maior polo de manutenção executiva da América Latina,executivo
+SBJD,BR,Oficinas homologadas de motores e aviônicos,geral|motores|avionicos
+SBMT,BR,Principal polo de manutenção de helicópteros e aviões leves,helicoptero|geral
+SDAM,BR,"Oficinas para pistão, turboélices e jatos leves",geral
+SBSP,BR,Hangares de manutenção de linha e executiva,linha|executivo
+SBJR,BR,Manutenção de helicópteros offshore,helicoptero|offshore
+SBME,BR,Maior base de helicópteros offshore da Bacia de Campos,helicoptero|offshore
+SBCP,BR,Base de manutenção e apoio offshore,offshore
+SBBH,BR,Grande parque de manutenção executiva e oficinas,executivo|geral
+SBLS,BR,Parque de manutenção pesada da força aérea,militar|heavy_check
+SBBI,BR,Polo de oficinas de manutenção geral e executiva do Paraná,geral|executivo
+SBPA,BR,Base histórica de manutenção comercial no Sul,linha
+SBPF,BR,Manutenção de aeronaves agrícolas,agricola
+SSZR,BR,Manutenção de aeronaves agrícolas,agricola
+SBGO,BR,Hangares de manutenção executiva e táxi aéreo,executivo
+SBCY,BR,Oficinas da frota agroindustrial,geral|agricola
+SBSO,BR,Manutenção rápida do agronegócio,geral|agricola
+SBRP,BR,Manutenção regional de ATR e aviação geral,regional|geral
+SDBK,BR,Fabricação e suporte do avião agrícola Ipanema,fabrica|agricola
+SBTA,BR,Manutenção e suprimento da aviação do Exército,militar|helicoptero
+SBRF,BR,Manutenção de linha e hangares regionais,linha
+SBSV,BR,Manutenção comercial e executiva da Bahia,linha|executivo
+SBBE,BR,Oficinas de Caravan e bimotores da Amazônia,geral|regional
+SBEG,BR,"Manutenção de hidroaviões, Caravan e táxi aéreo",geral|regional
+SWFN,BR,Manutenção de táxi aéreo amazônico,geral
+SBPV,BR,Suporte técnico regional de Rondônia,geral
+SBBV,BR,Oficinas para a frota de pistas curtas de Roraima,geral
+SBFL,BR,Hangares de manutenção executiva e comercial,executivo|linha
+SBNF,BR,Manutenção de helicópteros e aviação executiva,helicoptero|executivo
+KPAE,US,"Fábrica de widebodies, centro de entregas e MRO",fabrica|entrega|widebody
+KRNT,US,Linha de montagem do 737 e voos de aceitação,fabrica|entrega
+KBFI,US,"Testes de voo, pintura e entregas",ensaios|pintura|entrega
+KCHS,US,Linha de montagem do 787,fabrica
+KBFM,US,Linha de montagem de A320/A220 e MRO,fabrica|heavy_check
+KICT,US,Fábricas e centros de serviço de aviação geral e executiva,fabrica|executivo
+KBEC,US,Pista da fábrica de aviação executiva e geral,fabrica|entrega
+KSAV,US,Fábrica e principal centro MRO de jatos executivos,fabrica|executivo
+KMLB,US,Fábrica e serviços de jatos executivos,fabrica|executivo
+KVRB,US,Fábrica de aviões leves,fabrica|geral
+KDLH,US,Fábrica e entregas de aviões leves,fabrica|entrega
+KTYS,US,Acabamento e entregas de jato leve,entrega|executivo
+KDAB,US,Engenharia e oficinas executivas,geral
+KMZJ,US,"Armazenamento, desmontagem e MRO pesado",armazenamento|heavy_check
+KGYR,US,MRO de widebody e armazenamento no deserto,armazenamento|widebody
+KTUS,US,Polo MRO e armazenamento,armazenamento|executivo
+KVCV,US,"Armazenamento, pintura e conversão P2F",armazenamento|p2f|pintura
+KMHV,US,Ensaios em voo e armazenamento,ensaios|armazenamento
+KROW,US,"Armazenamento, pintura e revisão pesada",armazenamento|pintura|heavy_check
+KTUL,US,Maior base de manutenção pesada de companhia americana,heavy_check
+KMCI,US,Base histórica de manutenção pesada,heavy_check
+KATL,US,Maior MRO de companhia aérea da América do Norte,heavy_check|motores
+KMSP,US,Centro de revisão pesada,heavy_check
+KSFO,US,Complexo de manutenção pesada e motores,heavy_check|motores
+KIAH,US,Base MRO de companhia aérea,heavy_check
+KAFW,US,Mega-base de manutenção e centros executivos,heavy_check|executivo
+KDAL,US,Centros de serviço de jatos executivos,executivo
+KADS,US,Centros de serviço de jatos executivos,executivo
+KFTW,US,Centros de serviço de jatos executivos,executivo
+KSAT,US,Polo MRO militar e comercial,militar|heavy_check
+KLCQ,US,Conversão e revisão pesada,p2f|heavy_check
+KGSO,US,MRO e fábrica de jato executivo,fabrica|heavy_check
+KOSC,US,MRO de cargueiros e conversão,p2f|heavy_check
+KILN,US,Conversão de cargueiros e manutenção,p2f
+KBDL,US,Testes de motores e MRO executivo,motores|executivo
+KPSM,US,Hub MRO e parada técnica,heavy_check
+KSDF,US,Mega-centro de manutenção de cargueiros,heavy_check|cargueiros
+KMEM,US,Mega-centro de manutenção de frota de carga,heavy_check|cargueiros
+KIND,US,Base de manutenção pesada,heavy_check
+KAMA,US,Montagem de helicópteros e pintura comercial,fabrica|helicoptero|pintura
+KGEG,US,Manutenção regional,regional
+KSGU,US,Centro de manutenção pesada de companhia regional,regional|heavy_check
+KLIT,US,Acabamento interno e pintura de jatos executivos,executivo|pintura
+KHOU,US,Centros de serviço de jatos executivos,executivo
+KSGR,US,Centros de serviço de jatos executivos,executivo
+KOPF,US,Polo MRO para frotas latino-americanas e executivas,heavy_check|executivo
+KMIA,US,Polo MRO para frotas latino-americanas,heavy_check
+CYUL,CA,Fabricação e entrega de jatos executivos,fabrica|entrega|executivo
+CYMX,CA,Montagem do A220 e grandes centros MRO,fabrica|heavy_check
+CYYZ,CA,Grandes bases MRO,heavy_check
+CYHM,CA,Grandes bases MRO,heavy_check|p2f
+CYKF,CA,Simuladores e centro MRO,geral
+CYLW,CA,MRO de conversão de cargueiros,p2f|heavy_check
+CYVR,CA,Hub MRO e motores,motores
+MMQT,MX,Maior cluster aeroespacial e MRO do México,heavy_check|motores
+MSLP,SV,Um dos maiores MROs da América Latina,heavy_check
+MPTO,PA,Manutenção pesada de companhia aérea,heavy_check
+MROC,CR,MRO de fuselagem estreita das Américas,heavy_check
+SKBO,CO,Principal complexo MRO da Colômbia,heavy_check
+SKRG,CO,Centro de manutenção de companhia aérea,heavy_check
+SCEL,CL,Mega-base de manutenção de companhia aérea,heavy_check|widebody
+SCBQ,CL,Indústria aeronáutica chilena,fabrica|militar
+SAEZ,AR,Manutenção pesada de companhia aérea,heavy_check
+SACO,AR,Fábrica argentina de aviões,fabrica
+SACE,AR,Fábrica e escola militar,fabrica|militar
+SADF,AR,Maior polo de oficinas executivas e gerais da Argentina,executivo|geral
+SPJC,PE,Manutenção de linha e hangares,linha
+SPLP,PE,Manutenção militar,militar
+TJBQ,PR,MRO de revisão pesada de A320,heavy_check
+SUMU,UY,Manutenção regional e executiva,regional|executivo
+SLVR,BO,Base MRO de companhia aérea,heavy_check
+TTPP,TT,Base de manutenção de companhia aérea,heavy_check
+SVCS,VE,Polo de manutenção executiva,executivo
+LFBO,FR,Sede e linha de montagem final de Airbus e ATR,fabrica|entrega
+EDHI,DE,"Montagem final de A320, pintura e entregas",fabrica|entrega|pintura
+EDDH,DE,Sede e maior complexo MRO da Europa,heavy_check|motores
+EDDF,DE,Mega-hub MRO de motores e widebody,heavy_check|motores|widebody
+EDDM,DE,Complexo MRO de longa distância,heavy_check|widebody
+EDMO,DE,Polo aeroespacial e MRO executivo,executivo|fabrica
+EDDC,DE,Principal centro mundial de conversão P2F de Airbus,p2f
+EDVE,DE,Polo industrial e engenharia aeroespacial,fabrica
+EDDW,DE,Polo industrial da Airbus,fabrica
+LFPG,FR,Mega-complexo MRO de companhia aérea,heavy_check|widebody
+LFPO,FR,Complexo MRO de companhia aérea,heavy_check
+LFPB,FR,Maior polo europeu de manutenção executiva,executivo
+LFBD,FR,Fábrica de jatos executivos e MRO,fabrica|executivo
+LFRZ,FR,Polo industrial de fuselagens,fabrica
+LFML,FR,Maior fábrica de helicópteros do mundo,fabrica|helicoptero
+LFLL,FR,Pintura e revisão pesada,pintura|heavy_check
+LFBA,FR,Pintura e revisão pesada,pintura
+LFBZ,FR,Pintura e revisão pesada,pintura|heavy_check
+EHAM,NL,Mega-hub MRO de companhia aérea,heavy_check|motores
+EHWO,NL,Polo industrial e manutenção militar e civil,heavy_check|militar
+EHBK,NL,Pintura e manutenção de cargueiros,pintura|cargueiros
+EGLL,GB,Maior base de manutenção de linha do Reino Unido,linha
+EGFF,GB,Manutenção pesada de widebody,heavy_check|widebody
+EGSS,GB,Centros MRO executivos,executivo
+EGGW,GB,Centros MRO executivos,executivo
+EGKB,GB,Centros MRO executivos,executivo
+EGLF,GB,Centros MRO executivos,executivo
+EGGD,GB,Fábrica de asas,fabrica
+EGTG,GB,Fábrica histórica de asas,fabrica
+EGNR,GB,Fábrica de asas da Airbus,fabrica
+EGCC,GB,Pintura e MRO,pintura|heavy_check
+EGNX,GB,Pintura e MRO,pintura
+EGPK,GB,MRO de fuselagem estreita e motores,heavy_check|motores
+EINN,IE,"Cluster MRO, leasing e pintura",heavy_check|pintura|leasing
+EIDW,IE,Grande base MRO,heavy_check
+LSZH,CH,Um dos maiores MROs independentes do mundo,heavy_check|motores
+LFSB,FR,Maior polo de acabamento VIP de jatos de cabine larga,executivo|widebody
+LSZC,CH,Fábrica e entregas de turboélice e jato executivo,fabrica|entrega
+LSGG,CH,Polo MRO executivo,executivo
+LEMD,ES,Mega-complexo MRO de motores e fuselagem,heavy_check|motores
+LEZL,ES,Montagem final de aviões militares de transporte e MRO,fabrica|militar|heavy_check
+LETL,ES,Maior estacionamento e reciclagem de aeronaves da Europa,armazenamento
+LEDA,ES,Armazenamento e manutenção pesada,armazenamento|heavy_check
+LECH,ES,Armazenamento e manutenção pesada,armazenamento
+LFBT,FR,Fábrica de turboélice executivo e armazenamento,fabrica|armazenamento
+LPPT,PT,Principal complexo MRO de Portugal,heavy_check
+LPPR,PT,Base MRO de widebody,heavy_check|widebody
+LPBJ,PT,Estacionamento técnico,armazenamento
+LPLA,PT,Manutenção regional,regional
+LPCS,PT,Manutenção executiva e geral,executivo|geral
+LPAR,PT,Grande centro MRO e indústria aeronáutica,heavy_check|fabrica
+LIMC,IT,Hubs MRO italianos,heavy_check
+LIME,IT,Hubs MRO italianos,heavy_check
+LIML,IT,Hubs MRO italianos,executivo
+LIRN,IT,Maior MRO independente do sul da Europa,heavy_check
+LIPZ,IT,Polos MRO e indústria aeroespacial,heavy_check
+LIPH,IT,Polos MRO e indústria aeroespacial,heavy_check
+LIPE,IT,Polos MRO e indústria aeroespacial,geral
+LILC,IT,Fábrica de helicópteros,fabrica|helicoptero
+LOWW,AT,Base MRO de companhia aérea,heavy_check
+LOAN,AT,Fábrica e suporte de aviões leves,fabrica|geral
+EBBR,BE,Base MRO e indústria aeroespacial,heavy_check
+ELLX,LU,Manutenção de cargueiros B747F,heavy_check|cargueiros
+EKCH,DK,Base técnica de companhia escandinava,heavy_check
+ESSA,SE,Base técnica de companhia escandinava,heavy_check
+ENGM,NO,Base técnica de companhia escandinava,heavy_check
+EFHK,FI,Base MRO de companhia aérea,heavy_check
+EPWA,PL,Serviços de manutenção de companhia aérea,heavy_check
+EPKT,PL,Hub MRO emergente,heavy_check
+EPRZ,PL,Hub MRO e motores,motores
+LKPR,CZ,Serviços técnicos de companhia aérea,heavy_check
+LKVO,CZ,Fábrica de aeronaves,fabrica
+LHBP,HU,Grande polo MRO,heavy_check
+LROP,RO,Centros MRO de B737/A320,heavy_check
+LRBC,RO,Centros MRO de B737/A320,heavy_check
+LBSF,BG,Grande hub de revisão pesada de A320,heavy_check
+LTFM,TR,Mega-complexo de um dos maiores MROs do mundo,heavy_check|widebody
+LTFJ,TR,Complexo MRO,heavy_check
+LYBE,RS,Grande centro MRO dos Bálcãs,heavy_check
+OMDB,AE,Maiores hangares de A380 e B777 do planeta,heavy_check|widebody
+OMDW,AE,Grandes centros MRO executivos,executivo
+OMAA,AE,Manutenção pesada militar e civil,heavy_check|militar
+OMAL,AE,Manutenção pesada militar,militar
+OMSJ,AE,Base MRO,heavy_check
+OTHH,QA,Mega-base de manutenção de companhia aérea,heavy_check|widebody
+OTBD,QA,Base de manutenção,heavy_check
+OEJN,SA,Mega-complexo MRO saudita,heavy_check
+OERK,SA,Mega-complexo MRO saudita,heavy_check
+OJAI,JO,Maior MRO independente do Oriente Médio,heavy_check
+LLBG,IL,Líder mundial em conversão P2F e revisão de motores,p2f|motores
+HAAB,ET,Maior complexo MRO da África,heavy_check|widebody
+FAOR,ZA,Maior hub MRO da África Austral,heavy_check
+FALA,ZA,Maior polo de manutenção executiva e turboélice da África,executivo|geral
+HECA,EG,Hub MRO do Norte da África,heavy_check
+GMMN,MA,Cluster aeroespacial marroquino,heavy_check|fabrica
+HKJK,KE,MRO de jatos regionais,regional
+HKNW,KE,MRO de aeronaves bush,geral
+FNLU,AO,Base de manutenção de companhia aérea,heavy_check
+DAAG,DZ,Base MRO de companhia aérea,heavy_check
+DTTA,TN,Base técnica e cluster aeroespacial,heavy_check
+DNMM,NG,Base MRO na África Ocidental,heavy_check
+FIMP,MU,Hub MRO no Oceano Índico,heavy_check
+FVHA,ZW,Centro técnico histórico,geral
+WSSS,SG,Um dos maiores hubs MRO do planeta,heavy_check|motores|widebody
+WSSL,SG,Maior hub de manutenção executiva e motores do Sudeste Asiático,executivo|motores
+VHHH,HK,Mega-base MRO,heavy_check|widebody
+ZSAM,CN,Maior centro MRO de widebody da China,heavy_check|widebody|p2f
+ZGGG,CN,Maior MRO de companhia aérea da China,heavy_check
+ZBAA,CN,Grande MRO de companhia aérea,heavy_check
+ZSPD,CN,Linha de montagem final de jatos e MRO,fabrica|heavy_check
+ZUUU,CN,Grande hub industrial,fabrica
+ZUTF,CN,MRO de Airbus,heavy_check
+ZBTJ,CN,Linha de montagem final de Airbus e entregas,fabrica|entrega
+ZGSZ,CN,Base MRO,heavy_check
+RCTP,TW,Gigante de revisão pesada e conversões,heavy_check|p2f
+RKSI,KR,Mega-base MRO,heavy_check
+RKPK,KR,Complexo aeroespacial industrial e MRO,fabrica|militar
+RJTT,JP,Centros MRO de companhias japonesas,heavy_check
+RJAA,JP,Centros MRO de companhias japonesas,heavy_check
+RJGG,JP,Polo aeroespacial japonês,fabrica
+RJNA,JP,Polo aeroespacial japonês,fabrica
+RJBB,JP,Hub MRO de carga e linha aérea,heavy_check
+WMKK,MY,Maiores polos MRO da Malásia,heavy_check
+WMSA,MY,Maiores polos MRO da Malásia,heavy_check|helicoptero
+WIII,ID,Um dos maiores MROs da Ásia-Pacífico,heavy_check
+WICC,ID,Fábrica nacional de aeronaves,fabrica
+WIDD,ID,Hub MRO emergente,heavy_check
+RPLL,PH,Mega-base de revisão pesada de widebody,heavy_check|widebody
+RPLC,PH,Mega-base de revisão pesada,heavy_check
+VTBS,TH,Centros técnicos de companhia aérea,heavy_check
+VTBD,TH,Centros técnicos de companhia aérea,heavy_check
+VVTS,VN,Bases de engenharia de companhia aérea,heavy_check
+VVNB,VN,Bases de engenharia de companhia aérea,heavy_check
+VOHS,IN,Grande polo MRO indiano,heavy_check|motores
+VOBL,IN,Polo MRO e indústria aeronáutica,heavy_check
+VOBG,IN,Sede de indústria aeronáutica,fabrica|militar
+VABB,IN,Grandes hangares MRO,heavy_check
+VIDP,IN,Grandes hangares MRO,heavy_check
+VANP,IN,Grande hub central MRO da Índia,heavy_check
+VCBI,LK,Base MRO de companhia aérea,heavy_check
+YBBN,AU,Principal complexo MRO da Austrália,heavy_check|militar
+YMML,AU,Hangares de manutenção pesada,heavy_check
+YMAV,AU,Hangares de manutenção pesada,heavy_check|armazenamento
+YSSY,AU,Manutenção de linha e motores,linha|motores
+YPPH,AU,MRO de frota regional e mineração,regional
+NZAA,NZ,Principal complexo técnico da Nova Zelândia,heavy_check|motores
+NZCH,NZ,Revisão de motores e turboélices,motores
+NZWB,NZ,Manutenção pesada militar e regional,militar|regional

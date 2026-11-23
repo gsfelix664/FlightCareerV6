@@ -1,0 +1,209 @@
+icao,cc,note,tags
+SBKP,BR,Maior terminal de carga internacional e e-commerce do Brasil,internacional|ecommerce|cargueiros
+SBGR,BR,Principal hub de carga em porão e cargueiros da América do Sul,internacional|belly|cargueiros
+SBEG,BR,Zona Franca de Manaus e ponte aérea de componentes,industrial|eletronicos
+SBGL,BR,"Óleo e gás, farmacêuticos e carga internacional",oleo_gas|farma|internacional
+SBCT,BR,Polo industrial automotivo e de tecnologia do Sul,automotivo|industrial
+SBCF,BR,"Carga industrial, mineração e e-commerce",industrial|mineracao|ecommerce
+SBRF,BR,Distribuição de carga e encomendas do Nordeste,distribuicao|expressa
+SBSV,BR,"Hub petroquímico, industrial e logística baiana",oleo_gas|industrial
+SBFZ,BR,Exportação de perecíveis (frutas e pescado) para Europa e EUA,pereciveis
+SBPA,BR,"Calçadista, metalmecânico e carga do Mercosul",industrial|internacional
+SBBR,BR,Redistribuição postal e governamental,postal|governo|distribuicao
+SBBE,BR,Portal de carga da Amazônia Oriental e mineração,mineracao|distribuicao
+SBFL,BR,Eletrônicos e carga internacional catarinense,eletronicos|internacional
+SBNF,BR,Logística integrada ao complexo portuário de Itajaí,portuario|distribuicao
+SBSJ,BR,Hub aeroespacial e cargas industriais de alto valor,aeroespacial|alto_valor
+SBRP,BR,"Agronegócio, saúde e distribuição do interior paulista",agro|farma|distribuicao
+SBGO,BR,Polo farmacêutico e distribuição do Centro-Oeste,farma|distribuicao
+SBCY,BR,Peças agrícolas e suprimentos do agronegócio,agro
+SBCG,BR,Logística agropecuária e fronteira oeste,agro
+SBVT,BR,"Hub portuário, siderúrgico e de rochas ornamentais",portuario|industrial
+SBSL,BR,Apoio à logística portuária de Itaqui e mineração,portuario|mineracao
+SBSG,BR,Exportação de frutas tropicais em cargueiros,pereciveis
+SBMO,BR,Encomendas e perecíveis regionais,expressa|pereciveis
+SBPV,BR,Carga para a Amazônia Ocidental e Rondônia,distribuicao
+SBBV,BR,Suprimentos e carga para o extremo norte,distribuicao
+SBRB,BR,Suprimentos e carga aérea no Acre,distribuicao
+SBMQ,BR,Carga regional e conexão com a foz do Amazonas,distribuicao
+SBLO,BR,Hub agroindustrial do norte do Paraná,agro|industrial
+SBUL,BR,Maior centro atacadista e logístico do Triângulo Mineiro,distribuicao|ecommerce
+SBPL,BR,Exportação de mangas e uvas do Vale do São Francisco,pereciveis
+KMEM,US,Super-hub global da FedEx Express,integrador|expressa
+KSDF,US,Super-hub global da UPS (Worldport),integrador|expressa
+PANC,US,Escala técnica e hub transpacífico de cargueiros,escala_tecnica|cargueiros
+KMIA,US,Portal de carga EUA–América Latina (flores e perecíveis),pereciveis|internacional
+KLAX,US,Maior hub de carga da Costa Oeste,internacional|distribuicao
+KORD,US,Grande centro aéreo e ferroviário do Meio-Oeste,distribuicao|internacional
+KCVG,US,Super-hub da DHL nas Américas e hub principal da Amazon Air,integrador|ecommerce|expressa
+KJFK,US,Principal porta de entrada de carga da Costa Leste,internacional|belly
+KDFW,US,Grande hub de carga e distribuição do sul dos EUA,distribuicao
+KATL,US,Carga da Delta e distribuição do sudeste,distribuicao|belly
+KIND,US,Segundo maior hub nacional da FedEx,integrador|expressa
+KONT,US,Carga expressa da UPS e Amazon Air no sul da Califórnia,integrador|ecommerce
+KEWR,US,Grande hub da FedEx e carga internacional de Nova York,integrador|internacional
+KIAH,US,Óleo e gás e carga latino-americana,oleo_gas|internacional
+KSEA,US,Hub aeroespacial e rotas do Pacífico Norte,aeroespacial|internacional
+KSFO,US,Alta tecnologia e semicondutores,eletronicos|alto_valor
+KAFW,US,Aeroporto dedicado a carga (FedEx e Amazon),integrador|ecommerce|cargueiros
+KRFD,US,Hub de carga da UPS e Amazon Air,integrador|ecommerce
+KILN,US,Hub de carga da ATSG e Amazon Air,integrador|ecommerce
+KPHX,US,Distribuição do sudoeste americano,distribuicao
+KDEN,US,Hub central das Montanhas Rochosas,distribuicao
+KMSP,US,Logística do norte do Meio-Oeste,distribuicao
+KDTW,US,Hub da indústria automotiva americana,automotivo
+KCLT,US,Distribuição do Atlântico Médio,distribuicao
+KPHL,US,Hub regional da UPS na Costa Leste,integrador|expressa
+KBOS,US,"Biotecnologia, fármacos e carga da Nova Inglaterra",farma
+KMCO,US,Carga comercial e encomendas da Flórida Central,expressa
+KTPA,US,Carga e logística do Golfo,distribuicao
+KOAK,US,Hub regional da FedEx na Baía de São Francisco,integrador|expressa
+KSBD,US,Expansão logística e e-commerce da Amazon Air,integrador|ecommerce
+KELP,US,Carga industrial de fronteira (maquiladoras),industrial|automotivo
+KLRD,US,Peças automotivas na fronteira mexicana,automotivo
+KHSV,US,Carga fretada pesada e aeroespacial,heavy|aeroespacial
+CYYZ,CA,Maior hub de carga do Canadá,internacional|distribuicao
+CYVR,CA,Portal canadense para a Ásia-Pacífico,internacional
+CYHM,CA,Hub de cargueiros noturnos (Cargojet/DHL/UPS),integrador|expressa|noturno
+CYMX,CA,Carga e indústria aeroespacial,aeroespacial|cargueiros
+CYYC,CA,Carga e energia do oeste canadense,oleo_gas|distribuicao
+CYWG,CA,Hub central de carga doméstica,distribuicao|noturno
+MMMX,MX,Hub tradicional de carga em porão do México,belly|internacional
+MMSM,MX,Novo hub de grandes cargueiros da Cidade do México,cargueiros|internacional
+MMGL,MX,Eletrônicos e alta tecnologia,eletronicos
+MMMY,MX,Hub industrial e manufatureiro do norte,industrial|automotivo
+MMQT,MX,"Carga aeroespacial, automotiva e DHL",aeroespacial|automotivo|integrador
+MMTO,MX,Carga expressa (FedEx) no centro do México,integrador|expressa
+SKBO,CO,Maior volume de carga da América Latina (exportação de flores),pereciveis|cargueiros
+SKRG,CO,Exportação de flores e carga colombiana,pereciveis
+SCEL,CL,LATAM Cargo e exportação de salmão e frutas,pereciveis|cargueiros
+SAEZ,AR,Principal hub de carga internacional da Argentina,internacional
+SPJC,PE,Carga andina e exportação de aspargos,pereciveis|internacional
+SEQM,EC,Exportação de rosas e flores em cargueiros,pereciveis|cargueiros
+SEGU,EC,Hub portuário e exportação de frutos do mar,pereciveis|portuario
+MPTO,PA,Conexões e distribuição da América Central,distribuicao|internacional
+MROC,CR,"Dispositivos médicos, eletrônicos e perecíveis",farma|eletronicos|pereciveis
+MGGT,GT,Carga agrícola e têxtil centro-americana,agro|textil
+MSLP,SV,Manutenção e carga regional,distribuicao
+SUMU,UY,Zona franca aeroportuária do Cone Sul,distribuicao|internacional
+SGAS,PY,Importação e comércio regional,distribuicao
+SLVR,BO,Principal hub de carga da Bolívia,distribuicao
+SVMI,VE,Principal terminal de carga da Venezuela,internacional
+TJSJ,PR,Carga farmacêutica e expressa do Caribe,farma|expressa
+MDSD,DO,Distribuição do Caribe central,distribuicao
+TJBQ,PR,Cargueiros e manutenção no Caribe,cargueiros
+TNCC,CW,Zona franca do sul do Caribe,distribuicao
+MKJP,JM,Carga do Caribe anglófono,distribuicao
+EDDF,DE,Maior hub de carga da Europa (Lufthansa Cargo),internacional|cargueiros
+LFPG,FR,Air France Cargo e FedEx EuroHub,integrador|internacional
+EHAM,NL,"Flores, perecíveis e fármacos",pereciveis|farma|cargueiros
+ELLX,LU,Super-hub da Cargolux com cargueiros pesados,heavy|cargueiros
+EDDP,DE,Maior hub global da DHL,integrador|expressa|noturno
+EBLG,BE,E-commerce europeu e carga 24 h,ecommerce|cargueiros|noturno
+EGLL,GB,Maior hub de carga em porão do Reino Unido,belly|internacional
+EGNX,GB,Carga expressa (DHL/UPS/Royal Mail),integrador|expressa|postal|noturno
+EGSS,GB,Cargueiros e encomendas da região de Londres,cargueiros|expressa
+EDDK,DE,Hub europeu da UPS e operação noturna da FedEx,integrador|expressa|noturno
+EBBR,BE,Hub farmacêutico líder na Europa,farma
+LIMC,IT,"Moda, luxo e indústria do norte da Itália",alto_valor|industrial
+LIME,IT,Carga expressa italiana (DHL/UPS),integrador|expressa
+LIRF,IT,Carga internacional do centro-sul italiano,internacional
+LEMD,ES,Carga entre Europa e América Latina,internacional
+LEBL,ES,Hub industrial e logístico do Mediterrâneo,industrial|distribuicao
+LEVT,ES,Carga noturna e encomendas do norte espanhol,expressa|noturno
+LSZH,CH,"Carga de alto valor: ouro, relógios e fármacos",alto_valor|farma
+LFSB,FR,Hub da indústria farmacêutica suíça,farma
+LOWW,AT,Portal entre a Europa Ocidental e o Leste,internacional|distribuicao
+EKCH,DK,Maior hub de carga da Escandinávia,distribuicao
+ESSA,SE,Distribuição do norte europeu,distribuicao
+ENGM,NO,Maior exportação aérea de salmão fresco do mundo,pereciveis
+EFHK,FI,Hub nórdico na rota polar Europa–Ásia,internacional
+EPWA,PL,Principal hub da Europa Central e Oriental,distribuicao
+EPKT,PL,Hub regional de cargueiros,cargueiros
+LKPR,CZ,Hub logístico e industrial da Europa Central,industrial
+LHBP,HU,E-commerce asiático na Europa Central,ecommerce
+EIDW,IE,Carga farmacêutica e tecnológica,farma|eletronicos
+EINN,IE,Carga transatlântica e escala técnica,escala_tecnica
+LPPT,PT,Principal hub de carga de Portugal,internacional
+LPPR,PT,Carga têxtil e industrial do norte de Portugal,textil|industrial
+EDDM,DE,Carga automotiva e tecnologia da Baviera,automotivo|eletronicos
+EDDL,DE,Hub industrial do Reno-Ruhr,industrial
+EDDH,DE,Hub aeroespacial e portuário do norte alemão,aeroespacial|portuario
+EDDS,DE,Engenharia e autopeças de luxo,automotivo|alto_valor
+LFLL,FR,Hub industrial do sudeste francês,industrial
+LFML,FR,Logística e expressa do sul da França,expressa
+EHBK,NL,Aeroporto focado em cargueiros,cargueiros
+EBOS,BE,Cargueiros fretados e perecíveis,cargueiros|pereciveis
+LGAV,GR,Hub de carga do sudeste europeu,distribuicao
+LROP,RO,Hub de carga dos Bálcãs,distribuicao
+BIKF,IS,Carga do Atlântico Norte e pescado fresco,pereciveis
+UUEE,RU,Maior hub de carga da Rússia,internacional
+OMDB,AE,Hub global da Emirates SkyCargo,internacional|cargueiros
+OMDW,AE,Mega-hub dedicado a cargueiros em Dubai,cargueiros|heavy
+OTHH,QA,Super-hub da Qatar Airways Cargo,internacional|cargueiros
+OMAA,AE,Hub da Etihad Cargo,internacional
+OMSJ,AE,Cargueiros e fretamentos no Golfo,cargueiros|heavy
+LTFM,TR,Mega-hub intercontinental da Turkish Cargo,internacional|cargueiros
+LTFJ,TR,Carga e e-commerce de Istambul,ecommerce
+OEJN,SA,Portal de carga do Mar Vermelho,internacional
+OERK,SA,Hub logístico central da Arábia Saudita,distribuicao
+OEDF,SA,Carga da indústria petrolífera,oleo_gas
+OBBI,BH,Carga expressa (DHL) no Golfo,integrador|expressa
+OKBK,KW,Logística e energia do norte do Golfo,oleo_gas|distribuicao
+OOMS,OM,Carga do Mar da Arábia,internacional
+LLBG,IL,"Alta tecnologia, diamantes e agricultura",eletronicos|alto_valor|pereciveis
+OJAI,JO,Carga e distribuição do Levante,distribuicao
+HAAB,ET,Maior hub de carga da África,internacional|cargueiros|pereciveis
+HKJK,KE,Exportação de flores e hortaliças,pereciveis
+FAOR,ZA,Hub industrial e de mineração da África Austral,mineracao|industrial
+HECA,EG,Principal hub de carga do Norte da África,internacional
+GMMN,MA,Carga entre a Europa e a África Ocidental,internacional
+DNMM,NG,Principal portal de carga da África Ocidental,internacional|oleo_gas
+DGAA,GH,Logística e exportação agrícola oeste-africana,agro|pereciveis
+GOBD,SN,Carga atlântica e escala técnica,escala_tecnica
+FLKK,ZM,Carga regional da África Centro-Sul,mineracao|distribuicao
+HTDA,TZ,Carga da África Oriental,distribuicao
+VHHH,HK,Maior hub de carga aérea internacional do mundo,internacional|cargueiros|eletronicos
+ZSPD,CN,Maior hub de exportação manufatureira da China,industrial|eletronicos|cargueiros
+RKSI,KR,Semicondutores e eletrônicos,eletronicos|alto_valor|cargueiros
+RCTP,TW,Chips e hardware,eletronicos|alto_valor|cargueiros
+RJAA,JP,Principal hub internacional de carga do Japão,internacional|cargueiros
+WSSS,SG,Hub farmacêutico e logístico do Sudeste Asiático,farma|distribuicao
+ZGGG,CN,Super-hub asiático da FedEx e China Southern Cargo,integrador|cargueiros
+ZGSZ,CN,Eletrônicos de consumo e hub da SF Airlines,eletronicos|expressa
+ZBAA,CN,Carga tradicional do norte da China,internacional
+ZBAD,CN,Novo mega-hub de carga da capital chinesa,cargueiros|internacional
+ZUUU,CN,Carga industrial do oeste chinês,industrial
+ZUTF,CN,Novo mega-hub internacional de Sichuan,internacional|cargueiros
+ZUCK,CN,Polo mundial de notebooks e eletrônicos,eletronicos
+ZHHH,CN,Hub logístico central da China,distribuicao
+ZHCC,CN,Exportação de smartphones e hub da Cargolux na China,eletronicos|cargueiros
+ZSHC,CN,Base logística da Alibaba/Cainiao,ecommerce
+ZSNJ,CN,Carga postal (China Postal Airlines),postal|noturno
+ZSAM,CN,Manutenção de aeronaves e carga do estreito de Taiwan,distribuicao
+ZSSS,CN,Carga doméstica expressa de Xangai,expressa
+RJBB,JP,Carga industrial e e-commerce (FedEx North Pacific Hub),integrador|ecommerce|industrial
+RJGG,JP,Indústria automotiva e aeroespacial,automotivo|aeroespacial
+RJTT,JP,Carga doméstica e internacional de alta frequência,belly|distribuicao
+VTBS,TH,Carga e perecíveis da Indochina,pereciveis|internacional
+WMKK,MY,Eletrônicos e carga do Sudeste Asiático,eletronicos
+WMKP,MY,Semicondutores e DHL,eletronicos|integrador
+WIII,ID,Maior hub de carga da Indonésia,distribuicao
+RPLL,PH,Principal hub de carga das Filipinas,distribuicao
+RPLC,PH,Carga expressa da FedEx e UPS,integrador|expressa
+VVNB,VN,Exportação de eletrônicos do norte do Vietnã,eletronicos
+VVTS,VN,Hub industrial e têxtil do sul do Vietnã,industrial|textil
+VIDP,IN,Maior hub de carga do norte da Índia,distribuicao|internacional
+VABB,IN,Hub financeiro e farmacêutico da Índia,farma|alto_valor
+VOBL,IN,"Alta tecnologia, perecíveis e aeroespacial",eletronicos|pereciveis|aeroespacial
+VOMM,IN,Hub automotivo e manufatureiro do sul da Índia,automotivo|industrial
+VOHS,IN,Maior exportação farmacêutica da Índia,farma
+VGHS,BD,Maior exportação aérea têxtil do mundo,textil
+OPKC,PK,Principal hub comercial e de carga do Paquistão,distribuicao
+VCBI,LK,Carga e escala no Oceano Índico,escala_tecnica
+YSSY,AU,Maior hub de carga internacional da Austrália,internacional
+YMML,AU,Carga doméstica e exportação agrícola,distribuicao|pereciveis
+YBBN,AU,Carga de Queensland e conexões com o Pacífico,distribuicao
+YPPH,AU,Hub da mineração da Austrália Ocidental,mineracao
+NZAA,NZ,"Exportação de laticínios, carne e frutas",pereciveis
+NZCH,NZ,Carga da Ilha Sul e base logística para a Antártida,distribuicao|governo

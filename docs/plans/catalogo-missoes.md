@@ -201,3 +201,104 @@ Achados para depois:
 - **Tier distorcido** (não mexer por ora, decisão § 5): Congonhas, Santos Dumont, Viracopos, Porto Alegre etc. são tier 2; o perfil não corrige isso.
 - `hubs_data.json` precisa de revisão e cobertura mundial antes de virar perfil forte (hoje BR + uma lista "GLOBAL").
 - Sem dados para: área urbana (sem sobrevoo urbano), mineração/canteiro de obras, hospital real perto do aeroporto (usa `hub_health`), oficina homologada real (usa `hub_maintenance`).
+
+## 9. Dados curados e pesos por aeroporto (2026-11-23)
+
+### 9.1 Listas curadas (enviadas pelo usuário, códigos conferidos no MSFS 2024 pela base do Little Navmap)
+| Arquivo (`tools/places/`) | Papel | Linhas | Ajustes feitos na conferência |
+|---|---|---|---|
+| `scenic_aerodromes_curated.csv` (+ coluna `role`) | turístico (panorâmico / destino) | 104 | SDBZ→SBBZ (Búzios), SBLN→SBLE (Lençóis), SSBR→SSRS (Barreirinhas), SVLR→SVRS (Los Roques), OJAI→OJAQ (Aqaba), SCFA→SCCF (Calama); fora: CYBA e VDSA (não estão no MSFS), CYWH (hidrobase), LSEZ (heliporto) |
+| `scenic_pois_curated.csv` | 317 pontos turísticos → aeródromos | 317 | SDBZ→SBBZ, SNTF/SSPG removidos, FMMO→FMMV; fora: FSPP, MMTL, VVVD, WAHI |
+| `cargo_hubs_curated.csv` | carga | 208 | SBNT→SBSG, SPIM→SPJC, OKKK→OKBK, FLLS→FLKK; fora: LEZG e Ezhou (não estão no MSFS) |
+| `pax_hubs_curated.csv` | linha aérea | 210 | SBNT→SBSG, OKKK→OKBK |
+| `exec_hubs_curated.csv` | executiva/FBO | 249 | SSLT→SBSO (Sorriso), SWRD→SBRD; fora: SBNV, CYKZ, heliportos |
+| `feeder_hubs_curated.csv` | alimentador | 229 | SBCM→SBJA (Jaguaruna), SBQV→SBVC, SSLT→SBSO, ZUNN→ZGNN |
+| `health_hubs_curated.csv` | saúde/aeromédico | 259 | SBNT→SBSG; fora: SBNV, SDBB |
+| `training_hubs_curated.csv` | instrução | 258 | SDBB→SDBK (Botucatu), SDBK→SDIO (Itápolis), SDIH→SDIM, SSPG→SSZW, SSCB→SSKS, SSCL→SSKZ, SNCT→SNRU, SIXE→SWUZ (Luziânia); fora: SDNY (no MSFS é Ushuaia), FAPA, NZWG, VOJV, ZUSN, RPUO, WMKM, WARB |
+| `mro_hubs_curated.csv` | manutenção/fábrica | 257 | SBSC→SDSC (São Carlos), SDBB→SDBK, SSLT→SBSO; fora: FVRG |
+| `agro_hubs_curated.csv` | agro/aviação agrícola | 349 | códigos BR errados trocados pela cidade certa (ex.: SWLV→SBLU Lucas do Rio Verde, SWSO→SJIE Sapezal, SWCI→SBLQ Cristalina, SSMK→SSMJ Maracaju, SSVC→SNEE Vacaria); sem aeródromo no MSFS: Nova Mutum, Campo Novo do Parecis, Querência, Nova Andradina, Sidrolândia, Uruçuí, Guarapuava, Taquara |
+| `military_curated.csv` (`role` militar/misto) | militar e uso misto | 373 | SWTP→SBTS (Tiriós), WSTG→WSAT; fora: PHIK, SCRM, LFSX, LFOA, LEZG, LEMO, LEAB, OJMS, HECW |
+
+Gerado: `Data/places/airport_profiles.json` (`tools/places/airport_profiles.py`): 8.752 aeroportos do MSFS com perfis = listas curadas (com subtipos, ex.: `carga:pereciveis`, `saude:orgaos`, `mro:heavy_check`) + heurísticas (fazenda, isolado, interior distante, altitude, turístico por POIs). Os `hub_*` antigos (`hubs_data.json`) ficam só como reserva: as listas curadas têm prioridade.
+
+### 9.2 Como o peso é calculado (proposta para o catálogo)
+`peso(missão, aeroporto) = base[missão][tier] × produto dos multiplicadores dos perfis do aeroporto` (limitado a ×12), e só se o aeroporto passar nos requisitos da missão.
+- **Escala da base:** — 0 · rara 1 · baixa 3 · média 6 · alta 10.
+- **Multiplicadores:** ×2 preferência leve · ×3–4 forte · ×5–8 vocação · ×10 dedicado.
+- **Base militar pura (`militar`):** missões civis ×0,2 (exceto SAR, CAN/logística militar, autoridades, diplomático, humanitário, translado para manutenção).
+- **Destino:** cada missão sorteia o destino pela regra dela; o perfil do destino multiplica a chance de ser escolhido (coluna "Destino").
+
+### 9.3 Tabela de pesos (T1/T2/T3/T4 = base por tier)
+| Missão | T1 | T2 | T3 | T4 | Origem preferida | Destino |
+|---|---|---|---|---|---|---|
+| instrucao_local | rara | baixa | alta | média | instrucao ×4, aeroclube ×4 | volta à origem |
+| circuito_tgl | rara | baixa | alta | média | instrucao ×4, aeroclube ×4 | volta à origem |
+| navegacao_vfr | — | baixa | alta | média | instrucao ×3, aeroclube ×3 | triângulo de tier 3 a 30–80 NM |
+| instrucao_ifr | rara | média | média | — | instrucao:ifr ×5, instrucao:academia_linha ×3, instrucao ×2 | aeródromo próximo pavimentado (tier 1–3) |
+| adaptacao_noturna | rara | baixa | média | — | instrucao ×3, aeroclube ×3 | volta à origem (pista iluminada) |
+| cheque | rara | baixa | média | rara | instrucao ×3, instrucao:academia_linha ×3 | volta à origem |
+| ponte_aerea | alta | média | — | — | linha:ponte_aerea ×8, linha:alta_frequencia ×4 | outro ponte_aerea/alta_frequencia do mesmo país ≤ 300 NM ×8 |
+| troncal_domestico | alta | média | — | — | linha ×3, linha:domestico ×2 | linha do mesmo país ×4 |
+| regional_internacional | média | baixa | — | — | linha:internacional ×3 | tier 1–2 de país vizinho, linha ×3 |
+| longo_curso | média | — | — | — | linha:mega_hub ×4, linha:internacional ×3 | linha:mega_hub de outro país/continente ×5 |
+| feeder_inbound | rara | alta | média | — | alimentador ×5 | linha (hub) ≤ 500 NM ×5 |
+| feeder_outbound | média | baixa | — | — | linha ×3 | alimentador ≤ 500 NM ×5 |
+| sub_regional | — | média | alta | baixa | alimentador ×2, interior_distante ×2 | capital/tier 2 alimentador ×4 |
+| pinga_pinga | — | média | média | baixa | alimentador ×3, isolado ×2 | escalas tier 2–4 em sequência |
+| regional_essencial | — | baixa | média | média | isolado ×8, alimentador:amazonia ×4, alimentador:remoto ×4 | capital regional (tier 2 linha/alimentador) ×4 |
+| executivo_corporativo | média | alta | média | rara | executivo ×4, executivo:corporativo ×2 | executivo/tier 1–2 ×3 |
+| executivo_intercontinental | baixa | rara | — | — | executivo:dedicado ×4, executivo ×2 | executivo de outro continente ×4 |
+| vip_internacional | baixa | baixa | — | — | executivo ×3 | país vizinho: executivo:lazer ×3, tier 1–2 |
+| agro_executivo | — | média | alta | média | agro:executivo_rural ×4, agro ×3, fazenda ×3 | agro/fazenda ×4 |
+| familia_alto_padrao | rara | média | média | baixa | executivo:lazer ×3 | executivo:lazer ×3, turístico ×3 |
+| equipes_urgentes | baixa | média | média | baixa | mro ×2, carga:industrial ×2 | qualquer |
+| charter_lazer | média | média | baixa | rara | linha:turistico ×3, executivo:lazer ×3 | turístico (curado ×4, POI ×2), executivo:lazer ×3 |
+| charter_esportivo | média | média | — | — | linha ×2 | tier 1–2 do mesmo país |
+| transfer_metropolitano | baixa | média | baixa | — | executivo:urbano ×4, executivo:dedicado ×2 | executivo ≤ 150 NM ×4 |
+| panoramico | rara | baixa | média | baixa | turístico curado (base) ×8, turistico_poi ×3 | volta à origem |
+| demo_flight | rara | baixa | baixa | — | mro:fabrica ×8, mro:executivo ×3, executivo:dedicado ×2 | volta à origem |
+| carga_paletizada | alta | média | — | — | carga ×3, carga:cargueiros ×3 | carga ×4 |
+| carga_overnight | média | média | baixa | — | carga:integrador ×5, carga:noturno ×4, carga:expressa ×3, carga:postal ×3 | carga/alimentador ×3 |
+| malotes | — | média | média | baixa | carga:postal ×2, interior_distante ×2 | capital/tier 2 ×3 |
+| carga_valores | baixa | média | baixa | — | carga:alto_valor ×4 | carga/linha ×3 |
+| ecommerce | média | média | baixa | — | carga:ecommerce ×5, carga:integrador ×3 | alimentador/tier 2–3 ×3 |
+| carga_jit | média | média | média | baixa | carga:industrial ×3, carga:automotivo ×3, carga:eletronicos ×3, agro ×2 | carga:industrial ×3; variante safra: agro/fazenda ×5 |
+| cadeia_fria | média | média | baixa | — | carga:pereciveis ×6, agro:pereciveis ×5, agro:pescado ×4 | carga (exportação) ×4 |
+| carga_dgr | baixa | média | baixa | — | carga:farma ×5, carga:mineracao ×3, saude ×2 | carga:farma/hospital ×3; explosivos: carga:mineracao ×4 |
+| carga_sensivel | rara | média | média | média | agro:genetica ×5, agro:sementes ×4, agro ×2 | fazenda/agro ×4 |
+| carga_combi | — | baixa | média | média | isolado ×6, alimentador:amazonia ×4 | isolado tier 3–4 ×5 |
+| insumos_agro | — | média | alta | alta | agro ×4, fazenda ×4 | fazenda/agro ×5 |
+| suprimentos_remotos | — | baixa | média | alta | isolado ×4, fazenda ×3, interior_distante ×2 | fazenda/isolado tier 3–4 ×5 |
+| conexao_pista_curta | — | — | média | média | fazenda ×2, interior_distante ×2 | tier 4 ≤ 50 NM |
+| orgaos | média | média | baixa | — | saude:orgaos ×6, saude:hospital_referencia ×3 | saude:orgaos/hospital_referencia ×6 |
+| uti_inter_hospitalar | baixa | média | média | baixa | saude ×3 | saude:hospital_referencia ×5 |
+| medevac_remoto | — | baixa | média | alta | saude:medevac_remoto ×4, isolado ×4, fazenda ×2 | pista curta/não pavimentada; base de saúde ×3 |
+| uti_longa_distancia | baixa | baixa | — | — | saude:repatriacao ×6, saude:uti_aerea ×3 | saude:hospital_referencia de outro país ×5 |
+| saude_familia | — | média | média | baixa | saude ×3, alimentador ×2 | isolado tier 3–4 ×4 (ida e volta) |
+| aerolevantamento | rara | baixa | média | baixa | — | volta à origem |
+| paraquedismo | rara | rara | baixa | rara | zona_salto ×10 | volta à origem |
+| pulverizacao | — | — | média | alta | agro:pulverizacao ×6, fazenda ×4, agro ×3 (só avião agrícola) | volta à origem |
+| reboque_planador | — | rara | baixa | baixa | instrucao:planador ×10, aeroclube ×3 | volta à origem |
+| publicidade_aerea | — | baixa | baixa | — | turistico_poi ×4, turístico curado ×3 | volta à origem |
+| patrulha_vigilancia | — | baixa | média | média | isolado ×3, fazenda ×3, agro ×2, militar:fronteira ×2 | volta à origem |
+| inspecao_linhas | — | baixa | média | baixa | interior_distante ×2 | traçado e volta |
+| monitoramento_trafego | baixa | média | baixa | — | executivo:urbano ×2 | volta à origem |
+| sar | rara | baixa | baixa | baixa | militar:sar ×5, saude:resgate ×3 | volta à origem |
+| calibracao_auxilios | rara | média | baixa | — | — | aeródromo com ILS/VOR (tier 1–2) |
+| ferry_posicionamento | baixa | baixa | baixa | rara | mro ×2 | linha/executivo ×2 |
+| translado_manutencao | baixa | média | baixa | rara | — | mro ×6 (heavy_check para jatos, geral para leves, agricola para agrícolas, helicoptero) |
+| ferry_permit | rara | baixa | baixa | — | — | mro ×6 |
+| check_flight | rara | baixa | baixa | — | mro ×6 | volta à origem |
+| crew_parts | média | baixa | baixa | — | mro ×3, linha ×2 | linha/mro ×3 |
+| translado_piloto_agricola | — | baixa | média | média | agro:pulverizacao ×4, fazenda ×3 | agro/fazenda ×4 |
+| pessoas_remotas | — | média | média | alta | fazenda ×4, isolado ×3, agro ×2 | fazenda/isolado ×4 |
+| autoridades | baixa | média | baixa | rara | militar:vip ×4, executivo:governo ×3 | tier 1–2 do mesmo país |
+| diplomatico | média | baixa | — | — | militar:vip ×4, executivo:governo ×3 | capital (tier 1) de outro país ×3 |
+| militar_can | — | média | média | baixa | militar ×6, militar_misto ×3, militar:fronteira ×4 | militar:fronteira ×5, isolado ×3 |
+| humanitario | rara | baixa | média | média | saude:humanitario ×4, militar:transporte ×2 | isolado ×4 |
+| combustivel_tambor | — | baixa | média | alta | isolado ×3, alimentador:remoto ×3 | isolado/fazenda tier 4 ×4 |
+| apoio_acampamento | — | baixa | média | alta | carga:mineracao ×3, isolado ×4 | isolado tier 4 ×5 |
+| instrucao_stol | — | rara | baixa | média | aeroclube ×3, instrucao:bush ×4, altitude ×2 | pista curta tier 4 ≤ 30 NM |
+| evacuacao_por_do_sol | — | — | baixa | média | isolado ×3 | tier 2–3 com pista iluminada |
+
+Pendente de validação: ferramenta que gera mil quadros em ~10 aeroportos reais e mostra a porcentagem de cada missão, para o usuário conferir antes da simulação de carreira.

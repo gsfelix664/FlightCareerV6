@@ -1,6 +1,6 @@
 """Classificação dos aeroportos do jogo em tier + perfis (análise, passo 1 do catálogo de missões).
 
-Uso: python -I classify.py <raiz do repo> <saida_dir> [<lnm_msfs24.sqlite>]
+Uso: python -I airport_profiles.py <raiz do repo> <saida_dir> [<lnm_msfs24.sqlite> [<airport_profiles.json>]]
 """
 import csv, json, os, re, sqlite3, sys, collections
 import numpy as np
@@ -102,6 +102,45 @@ for a in aps:
         a['tags'].add('militar_misto' if (a['sched'] or re.search(r'international|internacional|regional|municipal', a['name'], re.I)) else 'militar')
     if a['elev'] >= 5000: a['tags'].add('altitude')
 
+# --- listas curadas pelo usuário (tools/places/*_curated.csv) ---------------------
+CURATED = {
+    'cargo_hubs_curated.csv': 'carga', 'pax_hubs_curated.csv': 'linha', 'exec_hubs_curated.csv': 'executivo',
+    'feeder_hubs_curated.csv': 'alimentador', 'health_hubs_curated.csv': 'saude', 'training_hubs_curated.csv': 'instrucao',
+    'mro_hubs_curated.csv': 'mro', 'agro_hubs_curated.csv': 'agro',
+}
+by_code = {}
+for a in aps:
+    by_code.setdefault(a['icao'].upper(), a)
+    by_code.setdefault(a['ident'].upper(), a)
+curated_info = collections.defaultdict(dict)
+tools_dir = os.path.join(root, 'tools', 'places')
+for fname, role in CURATED.items():
+    path = os.path.join(tools_dir, fname)
+    if not os.path.exists(path):
+        continue
+    for r in csv.DictReader(open(path, encoding='utf-8')):
+        a = by_code.get(r['icao'].upper())
+        if a is None:
+            continue
+        a['tags'].add(role)
+        for t in (r.get('tags') or '').split('|'):
+            if t:
+                a['tags'].add(f'{role}:{t}')
+        curated_info[a['icao']][role] = r['note']
+mil_path = os.path.join(tools_dir, 'military_curated.csv')
+if os.path.exists(mil_path):
+    for r in csv.DictReader(open(mil_path, encoding='utf-8')):
+        a = by_code.get(r['icao'].upper())
+        if a is None:
+            continue
+        a['tags'].discard('militar'); a['tags'].discard('militar_misto')
+        role = 'militar' if r['role'] == 'militar' else 'militar_misto'
+        a['tags'].add(role)
+        for t in (r.get('tags') or '').split('|'):
+            if t:
+                a['tags'].add(f'militar:{t}')
+        curated_info[a['icao']][role] = r['note']
+
 # --- isolamento: distância ao tier 1/2 mais próximo -----------------------------
 def to_xyz(lat, lon):
     la, lo = np.radians(lat), np.radians(lon)
@@ -150,6 +189,20 @@ with open(os.path.join(out, 'airport_profiles.csv'), 'w', newline='', encoding='
     for a in aps:
         w.writerow([a['icao'], a['name'], a['city'], a['cc'], a['tier'], a['in_sim'], a['maxlen'], int(a['lighted']),
                     a['elev'], round(a['nm_big']), round(a['nm_t1']), round(a['poi_score'], 2), ';'.join(sorted(a['tags']))])
+
+profiles_json = {}
+for a in aps:
+    if a['tags'] and (a['in_sim'] is None or a['in_sim']):
+        profiles_json[a['icao']] = {'t': sorted(a['tags'])}
+        if a['icao'] in curated_info:
+            profiles_json[a['icao']]['n'] = curated_info[a['icao']]
+if len(sys.argv) > 4:
+    doc = {'version': 1, 'generatedBy': 'tools/places/airport_profiles.py',
+           'note': 'Perfis dos aeroportos (tier não muda). Listas curadas: tools/places/*_curated.csv; heurísticas: nome, distância e POIs. t = perfis; n = descrição curada por papel.',
+           'airports': profiles_json}
+    with open(sys.argv[4], 'w', encoding='utf-8', newline=chr(10)) as f:
+        json.dump(doc, f, ensure_ascii=False, separators=(',', ':'))
+        f.write(chr(10))
 
 summary = {
     'total': len(aps),

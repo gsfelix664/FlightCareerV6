@@ -1,0 +1,374 @@
+icao,cc,role,note,tags
+SBAN,BR,militar,Principal base de defesa aérea da FAB,caca|radar
+SBSC,BR,militar,Aviação de caça tradicional e patrulha,caca|patrulha
+SBAF,BR,militar,Berço da aviação militar e unidades de transporte/paraquedismo,transporte|paraquedismo
+SBGL,BR,misto,Terminal internacional e ala de transporte estratégico e reabastecimento da FAB,transporte|reabastecimento
+SBYS,BR,militar,Academia da Força Aérea e Esquadrilha da Fumaça,instrucao|demonstracao
+SBTA,BR,misto,Comando de Aviação do Exército com aeroclube civil,helicoptero|instrucao
+SBES,BR,militar,Principal base da aviação naval da Marinha,naval|helicoptero|caca
+SBCO,BR,militar,Defesa aérea e transporte do Sul,caca|transporte
+SBSM,BR,misto,"Aviação regional e base de ataque, helicópteros e drones da FAB",caca|helicoptero|drones
+SBCG,BR,misto,"Voos comerciais e esquadrões de caça leve, transporte e SAR",caca|transporte|sar|fronteira
+SBNT,BR,misto,Operação mista e treinamento operacional da FAB,instrucao|transporte|helicoptero
+SBRF,BR,misto,Hub comercial e base de transporte e patrulha,transporte|patrulha
+SBSV,BR,misto,Terminal comercial e patrulha marítima da FAB,patrulha
+SBFZ,BR,misto,Aviação comercial e base de apoio aéreo,transporte
+SBBE,BR,misto,Terminal civil e transporte e patrulha amazônica,transporte|patrulha
+SBMN,BR,militar,Principal hub logístico da FAB na Amazônia Ocidental,transporte|helicoptero
+SBBV,BR,misto,Voos comerciais e defesa aérea da fronteira norte,caca|fronteira
+SBPV,BR,misto,Operação comercial e caça leve e helicópteros,caca|helicoptero
+SBBR,BR,misto,Hub comercial e Grupo de Transporte Especial,vip|transporte
+SBGP,BR,militar,Ensaios em voo militares,ensaios
+SBCC,BR,militar,Maior área de treinamento de tiro aéreo e testes da América Latina,ensaios|treinamento_tatico
+SBUA,BR,misto,Aviação regional e ponte aérea militar para os pelotões de fronteira,fronteira|transporte
+SBTT,BR,misto,Ponto militar estratégico na tríplice fronteira,fronteira|transporte
+SBTF,BR,misto,Apoio logístico do Exército e da FAB no Solimões,fronteira|transporte
+SBYA,BR,militar,Pista militar de fronteira na Cabeça do Cachorro,fronteira
+SBTS,BR,militar,Base militar de apoio fronteiriço com o Suriname,fronteira
+SWPI,BR,misto,Apoio logístico militar no Baixo Amazonas,transporte
+SBFN,BR,misto,Voos turísticos e destacamento de controle e apoio atlântico,controle
+SBFL,BR,misto,Terminal turístico e apoio logístico da FAB,transporte
+SBCT,BR,misto,Hub comercial e centro integrado de defesa aérea,controle
+SBLS,BR,misto,Parque de material aeronáutico e aeroclube,manutencao
+SBGW,BR,misto,Escola de especialistas da Aeronáutica e aviação civil,instrucao
+SBMQ,BR,misto,Terminal comercial e destacamento de apoio,transporte
+SBCR,BR,misto,Voos comerciais e helicópteros da Marinha e FAB no Pantanal,helicoptero|fronteira
+SBPA,BR,misto,Hub civil e apoio logístico da FAB,transporte
+SBSJ,BR,misto,Aviação civil e ensaios militares,ensaios
+SBRB,BR,misto,Aviação comercial e apoio logístico na fronteira ocidental,fronteira
+SBCZ,BR,misto,Voos comerciais e apoio às unidades do Vale do Juruá,fronteira
+SBBG,BR,misto,Aviação civil e apoio às unidades do Exército na fronteira sul,fronteira
+SBUG,BR,misto,Aviação comercial e destacamento fronteiriço,fronteira
+SBBI,BR,misto,Hub executivo e centro de defesa aérea e unidades da FAB,controle
+SBMT,BR,misto,Hub executivo e parque de material aeronáutico,manutencao|medico
+SBJR,BR,misto,Hub executivo/offshore e apoio operacional,controle
+SBRJ,BR,misto,Terminal central e transporte VIP,vip
+SBCF,BR,misto,Hub internacional e destacamento de controle e logística,transporte
+SBKP,BR,misto,Mega-hub de carga e apoio logístico militar,transporte
+KEDW,US,militar,Principal centro de ensaios em voo da USAF,ensaios
+KLSV,US,militar,Casa do piloto de caça e exercícios Red Flag,caca|treinamento_tatico
+KTIK,US,militar,Base de AWACS e manutenção pesada,radar|manutencao
+KOFF,US,militar,Comando estratégico e aeronaves de comando,comando
+KBAD,US,militar,Principal base de bombardeiros B-52,bombardeiro
+KSZL,US,militar,Base exclusiva de bombardeiros stealth,bombardeiro
+KDYS,US,militar,Bombardeiros supersônicos e transporte C-130J,bombardeiro|transporte
+KRCA,US,militar,Base de bombardeiros,bombardeiro
+KMIB,US,militar,Base estratégica de B-52 no norte,bombardeiro
+KDOV,US,militar,Maior hub de transporte estratégico pesado da Costa Leste,transporte_pesado
+KSUU,US,militar,Portal para o Pacífico: transporte e reabastecimento,transporte_pesado|reabastecimento
+KTCM,US,militar,Base de transporte estratégico C-17,transporte_pesado
+KWRI,US,militar,Mega-hub de reabastecimento e transporte,reabastecimento|transporte_pesado
+KCHS,US,misto,Aviação comercial e ala de transporte estratégico C-17,transporte_pesado
+KADW,US,militar,Base do Air Force One e transporte presidencial,vip
+KFFO,US,militar,Comando de material da USAF e museu,comando
+KVPS,US,misto,Terminal turístico dentro de complexo de testes de armamentos,ensaios|caca
+KPAM,US,militar,Superioridade aérea e treinamento de caças stealth,caca
+KLFI,US,militar,Base de caças stealth na Costa Leste,caca
+KLUF,US,militar,Maior centro mundial de treinamento de pilotos de caça,caca|instrucao
+KDMA,US,militar,Boneyard e esquadrões de ataque,armazenamento|caca
+KHMN,US,militar,Treinamento de caças e operações de drones,caca|drones
+KCVS,US,militar,Principal base de operações especiais da USAF,especial
+KHRT,US,militar,Quartel-general de operações especiais,especial
+KPOB,US,militar,Principal base de lançamento de paraquedistas,paraquedismo|transporte
+KNGU,US,militar,Maior estação aeronaval do Atlântico,naval
+KNTU,US,militar,Master Jet Base da Costa Leste,naval|caca
+KNLC,US,militar,Master Jet Base da Costa Oeste,naval|caca
+KNKX,US,militar,Principal base aérea dos fuzileiros na Costa Oeste,fuzileiros|caca|helicoptero
+KNKT,US,militar,Maior estação aérea dos fuzileiros na Costa Leste,fuzileiros
+KNYL,US,militar,Treinamento tático dos fuzileiros,fuzileiros|caca
+KNUQ,US,militar,Guarda Nacional Aérea (resgate) e pesquisa,sar
+KMCF,US,militar,Sede do CENTCOM e reabastecimento,reabastecimento|comando
+KSKF,US,militar,"Polo logístico, médico e de manutenção",manutencao|medico
+PAED,US,militar,"Base ártica de caças, transporte e AWACS",caca|artico|transporte_pesado
+PAEI,US,militar,Base ártica de caças e Red Flag Alaska,caca|artico
+PHNG,US,militar,Base aeronaval e de fuzileiros no Pacífico,naval|fuzileiros
+CYTR,CA,militar,Principal hub de transporte estratégico e SAR do Canadá,transporte_pesado|sar
+CYOD,CA,militar,Principal base de caças e polígono do Canadá,caca|treinamento_tatico
+CYBG,CA,militar,Defesa aérea do leste canadense,caca
+CYZX,CA,militar,Patrulha marítima e guerra antissubmarino,patrulha
+CYQQ,CA,militar,Patrulha marítima e SAR do Pacífico,patrulha|sar
+CYYR,CA,militar,Treinamento de voo baixo da OTAN e escala transatlântica,treinamento_tatico
+MMSM,MX,misto,Principal base da força aérea mexicana,transporte
+SADP,AR,militar,Transporte estratégico da força aérea argentina,transporte
+SAOR,AR,militar,Base de caças,caca
+SAZT,AR,militar,Base de caças,caca
+SCBQ,CL,militar,Escola de aviação e esquadrilha acrobática,instrucao|demonstracao
+SCFA,CL,misto,Voos de mineração e principal base de caças do norte chileno,caca
+SCCI,CL,misto,Hub patagônico e base estratégica antártica,polar|caca
+SKMA,CO,militar,Base aérea de transporte,transporte
+SKPQ,CO,militar,Principal base de caças e operações táticas da Colômbia,caca
+SKAP,CO,militar,Ataque leve e helicópteros,caca|helicoptero
+SPLP,PE,militar,Escola de oficiais e logística,instrucao|transporte
+SPSO,PE,misto,Voos turísticos e base de caças e transporte,caca|transporte
+SPTN,PE,militar,Base de caças e helicópteros de combate,caca|helicoptero
+SVBL,VE,militar,Principal base da aviação militar venezuelana,caca
+SUMU,UY,misto,Terminal internacional e principal hub da força aérea uruguaia,transporte|vip
+MUGM,CU,militar,Base aeronaval estratégica dos EUA no Caribe,naval
+ETAR,DE,militar,Quartel-general da USAF na Europa e hub logístico,transporte_pesado|comando
+ETAD,DE,militar,Base de caças da USAF na Alemanha,caca
+ETNG,DE,militar,Base da frota AWACS da OTAN,radar
+ETNL,DE,misto,Aeroporto regional e base de caças,caca
+ETSN,DE,militar,Alerta de defesa aérea do sul da Alemanha,caca
+ETSI,DE,misto,Voos executivos e centro de ensaios militares,ensaios
+EGVN,GB,militar,Maior estação da RAF: transporte e reabastecimento,transporte_pesado|reabastecimento
+EGXC,GB,militar,Defesa aérea do sul do Reino Unido,caca|historico
+EGQS,GB,militar,Defesa aérea do norte e patrulha marítima,caca|patrulha
+EGYM,GB,militar,Base dos caças stealth da RAF,caca
+EGUL,GB,militar,Maior base de caças da USAF na Europa,caca
+EGUN,GB,militar,Reabastecimento e operações especiais,reabastecimento|especial
+EGVA,GB,militar,Base avançada de bombardeiros e show aéreo,bombardeiro|demonstracao
+EGYD,GB,militar,Academia da RAF,instrucao
+LFOI,FR,militar,Principal hub de transporte tático e estratégico francês,transporte
+LFMI,FR,militar,"Base nuclear, reabastecimento e ensaios",reabastecimento|ensaios
+LFBM,FR,militar,Principal base de caças e experimentação,caca|ensaios
+LFBC,FR,militar,Escola de transição de caça e polígono,caca|instrucao
+LIPA,IT,militar,Base da USAF no norte da Itália,caca
+LICZ,IT,militar,Hub do Mediterrâneo da Marinha dos EUA e OTAN,naval|patrulha|drones
+LIED,IT,militar,Maior centro de treinamento de combate do Mediterrâneo,treinamento_tatico
+LIBV,IT,militar,Base de caças do sul da Itália,caca
+LIPL,IT,militar,Base de ataque da força aérea italiana,caca
+LIRE,IT,militar,"Maior base militar italiana: ensaios, VIP e reabastecimento",ensaios|vip|reabastecimento
+LETO,ES,militar,"Transporte VIP, reabastecimento e caças",vip|reabastecimento|caca
+LERT,ES,militar,Hub logístico naval e aéreo na entrada do Mediterrâneo,naval|transporte
+LPLA,PT,misto,Base transatlântica histórica e terminal insular,transporte|escala_tecnica
+LPMT,PT,militar,Principal hub de transporte tático e helicópteros de Portugal,transporte|helicoptero
+LPMR,PT,militar,Principal base de caças de Portugal,caca
+EHLW,NL,militar,Base de caças stealth da Holanda,caca
+EHVK,NL,militar,Segunda base de caças da Holanda,caca
+EHEH,NL,misto,Aeroporto comercial e comando europeu de transporte aéreo,transporte|reabastecimento
+EBBL,BE,militar,Principal base de caças da Bélgica,caca
+EBFS,BE,militar,Segunda base tática de caças da Bélgica,caca
+LSME,CH,militar,"Ensaios, drones e patrulha acrobática",ensaios|demonstracao
+LSMM,CH,militar,Base alpina com hangares dentro da montanha,caca|montanha
+LOXZ,AT,militar,Principal base de caças da Áustria,caca|demonstracao
+EKSP,DK,militar,Principal base de caças da Dinamarca,caca
+ENOL,NO,militar,Principal base ártica de caças da Noruega,caca|artico
+ENNA,NO,misto,Base avançada da OTAN no extremo norte,artico|treinamento_tatico
+ESIB,SE,militar,Principal ala de caças da Suécia,caca
+ESDF,SE,misto,Base de caças no Báltico,caca|helicoptero
+EFRO,FI,misto,Hub turístico da Lapônia e comando aéreo ártico,caca|artico
+EFTP,FI,misto,Voos comerciais e comando aéreo,ensaios|transporte
+EPKS,PL,militar,Principal base de caças da Polônia,caca
+EPLK,PL,militar,Base tática de caças na Polônia Central,caca
+EPMM,PL,militar,Defesa aérea próxima a Varsóvia,caca
+EYSA,LT,misto,Hub do policiamento aéreo do Báltico da OTAN,caca
+EEEI,EE,militar,Base avançada da OTAN na fronteira leste,caca
+LKCV,CZ,militar,Principal base tática da República Tcheca,caca
+LHKE,HU,militar,Principal base de caças e transporte da Hungria,caca|transporte
+OTBH,QA,militar,Maior hub militar dos EUA no Oriente Médio,comando|transporte_pesado
+OMAM,AE,militar,"Base estratégica conjunta dos Emirados, EUA e França",caca|reconhecimento
+OMDM,AE,militar,Hub logístico militar internacional no Golfo,transporte
+OEPS,SA,militar,Grande base aérea estratégica saudita,caca|transporte
+OEDR,SA,militar,Principal base de caças do leste saudita,caca
+OETB,SA,militar,Base aérea do noroeste saudita,caca
+OOTH,OM,militar,Maior base aérea de Omã no deserto,caca
+LLNV,IL,militar,Base de caças stealth e transporte estratégico,caca|transporte
+LLRM,IL,militar,Base tática de caças e helicópteros de ataque,caca|helicoptero
+LLRD,IL,militar,Principal base aérea do norte de Israel,caca
+LTAG,TR,militar,"Base estratégica conjunta da Turquia, EUA e OTAN",caca|reabastecimento
+LTAE,TR,militar,Centro de operações de drones armados,drones
+HDAM,DJ,misto,Terminal comercial e base conjunta estratégica no Chifre da África,comando|transporte
+FASK,ZA,militar,Base aérea mais antiga em operação contínua,historico|helicoptero
+FAWK,ZA,militar,Principal hub de transporte estratégico e VIP da SAAF,transporte|vip
+FALM,ZA,militar,Principal base de caças da SAAF,caca
+GMME,MA,militar,Transporte e helicópteros da força aérea marroquina,transporte|helicoptero
+RJTY,JP,militar,Quartel-general dos EUA no Japão e hub de transporte,transporte_pesado|comando
+RODN,JP,militar,Maior base aérea da USAF no Extremo Oriente,caca|radar|reabastecimento
+RJSM,JP,misto,Base conjunta de caças dos EUA e do Japão,caca
+RJOI,JP,misto,Maior base aeronaval e de fuzileiros dos EUA no Japão,fuzileiros|caca
+RJAH,JP,militar,Defesa aérea da região de Tóquio,caca
+RJNH,JP,militar,Base de AWACS e treinamento avançado,radar|instrucao
+RKSO,KR,militar,Principal base avançada da USAF na Coreia,caca|reconhecimento
+RKJK,KR,militar,Base de caças da USAF na Coreia,caca
+RKTN,KR,militar,Principal base de caças da Coreia do Sul,caca
+RKTU,KR,militar,Base de caças stealth da Coreia do Sul,caca
+PGUA,US,militar,Base estratégica de bombardeiros no Pacífico Ocidental,bombardeiro|drones
+RPLC,PH,misto,Hub aéreo histórico nas Filipinas,transporte
+RPMB,PH,militar,Base estratégica no Mar do Sul da China,caca
+WSAP,SG,militar,"Transporte, reabastecimento e caças de Singapura",transporte|reabastecimento|caca
+WSAT,SG,militar,Principal base de caças de Singapura,caca
+VTBU,TH,militar,Maior base aeronaval e hub militar da Tailândia,naval|transporte
+VTUN,TH,militar,Principal base de caças da Tailândia,caca|treinamento_tatico
+VTSB,TH,militar,Base de caças tailandeses,caca
+WIHH,ID,misto,Principal hub de transporte estratégico e VIP da Indonésia,transporte|vip
+WARI,ID,militar,Principal base de caças da Indonésia,caca
+VIDX,IN,militar,Maior base aérea da Ásia: transporte estratégico,transporte_pesado
+VIJO,IN,militar,Base de caças na fronteira oeste,caca|helicoptero
+VIAM,IN,militar,Principal base de caças Rafale da Índia,caca
+VEJT,IN,militar,Base estratégica de caças no nordeste indiano,caca|montanha
+VOTX,IN,militar,Formação de pilotos de transporte e instrutores,instrucao
+YWLM,AU,militar,Principal base de caças stealth e AEW da RAAF,caca|radar
+YAMB,AU,militar,Maior base operacional da RAAF,caca|transporte_pesado|reabastecimento
+YPTN,AU,militar,Base estratégica avançada no norte da Austrália,caca
+YMES,AU,militar,Academia de formação de pilotos da RAAF,instrucao
+NZOH,NZ,militar,Principal base operacional da força aérea neozelandesa,patrulha|helicoptero|instrucao
+PHNL,US,misto,Hub turístico e quartel-general do Pacífico,caca|transporte_pesado|reabastecimento
+KSAV,US,misto,Terminal comercial e Guarda Nacional Aérea,treinamento_tatico
+KPSM,US,misto,Voos comerciais e base de reabastecimento,reabastecimento
+KBDL,US,misto,Hub comercial e transporte C-130,transporte
+KSYR,US,misto,Aeroporto comercial e base de drones,drones
+KIAG,US,misto,Voos turísticos e base de reabastecimento,reabastecimento
+KBGR,US,misto,Escala transatlântica e reabastecimento,reabastecimento|escala_tecnica
+KBTV,US,misto,Terminal comercial e caças stealth da Guarda Nacional,caca
+KACY,US,misto,Aviação comercial e ala de caças,caca
+KMDT,US,misto,Aeroporto comercial e transporte especial,especial
+KPIT,US,misto,Hub comercial e alas de transporte e reabastecimento,transporte_pesado|reabastecimento
+KCRW,US,misto,Aeroporto no topo da montanha e transporte C-130J,transporte|montanha
+KCLT,US,misto,Mega-hub comercial e transporte tático,transporte
+KJAX,US,misto,Terminal comercial e caças da Guarda Nacional,caca
+KGPT,US,misto,Aeroporto comercial e centro de treinamento de combate,treinamento_tatico
+KMEM,US,misto,Super-hub de carga e transporte estratégico,transporte_pesado
+KBNA,US,misto,Hub comercial e transporte C-130J,transporte
+KSDF,US,misto,Super-hub de carga e transporte tático,transporte
+KTOL,US,misto,Carga e ala de caças,caca
+KFWA,US,misto,Terminal regional e ala de caças,caca
+KMKE,US,misto,Hub comercial e reabastecimento,reabastecimento
+KMSN,US,misto,Aeroporto comercial e caças stealth,caca
+KMSP,US,misto,Mega-hub e transporte tático da reserva,transporte
+KDLH,US,misto,Fábrica de aviões leves e ala de caças,caca
+KFSD,US,misto,Hub regional e esquadrão de caças,caca
+KFAR,US,misto,Aeroporto comercial e drones,drones
+KDSM,US,misto,Hub comercial e apoio aéreo,controle
+KSUX,US,misto,Aviação comercial e reabastecimento,reabastecimento
+KLNK,US,misto,Terminal regional e reabastecimento,reabastecimento
+KICT,US,misto,Polo aeroespacial integrado a base de reabastecimento,reabastecimento
+KTUL,US,misto,Hub comercial/MRO e ala de caças,caca
+KELP,US,misto,Terminal comercial e apoio a complexo militar,transporte
+KSAT,US,misto,Hub comercial e reserva militar,transporte
+KPHX,US,misto,Mega-hub comercial e reabastecimento,reabastecimento
+KTUS,US,misto,Aeroporto comercial e maior centro de treinamento de F-16,caca|instrucao
+KABQ,US,misto,Aviação comercial e operações especiais/resgate,especial|sar
+KSLC,US,misto,Mega-hub comercial e reabastecimento,reabastecimento
+KBOI,US,misto,Hub regional e base de ataque e helicópteros,caca|helicoptero
+KRNO,US,misto,Hub turístico e transporte C-130,transporte
+KFAT,US,misto,Hub comercial e ala de caças,caca
+KPDX,US,misto,Hub comercial e defesa aérea,caca
+KGEG,US,misto,Terminal comercial integrado a base de reabastecimento,reabastecimento
+CYOW,CA,misto,Capital do Canadá e transporte VIP/governamental,vip
+SCEL,CL,misto,Mega-hub comercial e transporte estratégico e VIP,transporte|vip|reabastecimento
+SCTE,CL,misto,Hub comercial e brigada aérea,helicoptero|transporte
+SCDA,CL,misto,Voos comerciais e brigada aérea de caças,caca
+SAEZ,AR,misto,Hub internacional e logística militar,transporte
+SABE,AR,misto,Hub doméstico e transporte presidencial,vip
+SAME,AR,misto,Hub turístico e escola de pilotos de caça,instrucao|caca
+SAWG,AR,misto,Voos comerciais e patrulha austral,patrulha|polar
+SKBO,CO,misto,Principal hub civil e comando de transporte militar,transporte
+SKSM,CO,misto,Voos turísticos e apoio aeronaval e policial,naval
+SPJC,PE,misto,Principal hub comercial e transporte presidencial,vip|transporte
+TJSJ,PR,misto,Principal hub do Caribe e transporte e resgate,transporte|sar
+LFPG,FR,misto,Mega-hub civil com área de Estado/VIP,vip
+LFPO,FR,misto,Hub civil com área de Estado/VIP,vip
+LFPB,FR,misto,Hub executivo e ligação governamental,vip
+LFST,FR,misto,Aeroporto comercial e ligação europeia,transporte
+LFBD,FR,misto,Terminal comercial e base de ensaios,ensaios
+LFBT,FR,misto,Voos religiosos e regimento de helicópteros,helicoptero
+LFKJ,FR,misto,Aeroporto turístico e base de defesa aérea,caca
+LFKB,FR,misto,Aeroporto turístico e base de defesa aérea,caca
+EDDK,DE,misto,Hub de carga e passageiros e transporte governamental,vip|transporte
+EDDB,DE,misto,Hub comercial e terminal governamental,vip
+LIRA,IT,misto,Hub low-cost e executivo e transporte de Estado,vip|medico
+LIRP,IT,misto,Aeroporto turístico e principal hub de transporte militar italiano,transporte
+LIPZ,IT,misto,Aeroporto comercial e apoio da Aeronáutica,manutencao
+LIPH,IT,misto,Aeroporto comercial e apoio da Aeronáutica,manutencao
+LIEE,IT,misto,Hub civil da Sardenha e patrulha marítima e SAR,patrulha|sar
+LICT,IT,misto,Voos comerciais e base de caças e AWACS da OTAN,caca|radar
+LEMD,ES,misto,Mega-hub comercial e setor VIP de Estado,vip
+LEZL,ES,misto,Hub comercial e montagem militar,ensaios|transporte
+LEPA,ES,misto,Mega-hub turístico e SAR no Mediterrâneo,sar
+GCLP,ES,misto,Hub turístico e base de caças e SAR,caca|sar
+LEVD,ES,misto,Aviação regional e treinamento militar,instrucao|transporte
+LESA,ES,misto,Aviação regional e treinamento militar,instrucao
+LPBJ,PT,misto,Terminal civil e treinamento avançado e transporte,instrucao|transporte
+EHRD,NL,misto,Aviação comercial e apoio governamental,vip|helicoptero
+EBBR,BE,misto,Hub comercial e ala de transporte da força aérea belga,transporte|vip
+LSZH,CH,misto,Mega-hub civil e transporte VIP do governo,vip
+LSGS,CH,misto,Aeroporto turístico e base militar histórica,caca|helicoptero
+LOWG,AT,misto,Aeroporto comercial e transporte e helicópteros militares,helicoptero|transporte
+LOWL,AT,misto,Aeroporto comercial e helicópteros militares,helicoptero
+LOWI,AT,misto,Aeroporto comercial e helicópteros militares,helicoptero|montanha
+EIDW,IE,misto,Operação mista governamental e civil,vip
+EIME,IE,militar,Base do corpo aéreo irlandês,transporte|sar
+EKAH,DK,misto,Aeroporto comercial e apoio militar,transporte
+EKYT,DK,misto,Aeroporto comercial e base de transporte tático,transporte
+ENBO,NO,misto,Hub regional e base militar ártica,artico|comando
+ESPA,SE,misto,Aeroporto comercial e base ártica de caças,caca|artico
+EFKU,FI,misto,Operação comercial e comando aéreo,caca
+EFJY,FI,misto,Operação comercial e academia da força aérea,instrucao
+EPWA,PL,misto,Hub comercial e transporte VIP polonês,vip
+EPRZ,PL,misto,Aeroporto comercial e principal hub logístico da OTAN no leste,transporte_pesado
+EPKK,PL,misto,Hub turístico e base de transporte,transporte
+LROP,RO,misto,Hub comercial e base de transporte romena,transporte
+LRCK,RO,misto,Voos turísticos e base conjunta da OTAN/USAF,caca|transporte
+LBSF,BG,misto,Hub comercial e transporte militar,transporte
+LBPD,BG,misto,Voos turísticos e helicópteros militares,helicoptero
+LGTS,GR,misto,Hub comercial e combate a incêndios e transporte,combate_incendio|transporte
+LGIR,GR,misto,Turismo de verão e ala de caças,caca
+LGSA,GR,misto,Turismo e base naval/aérea da OTAN,naval|caca
+LGLM,GR,misto,Voos turísticos e defesa aérea,caca
+LGMT,GR,misto,Voos turísticos e defesa aérea,caca
+LTAC,TR,misto,Hub da capital e terminal presidencial,vip
+LTAU,TR,misto,Porta turística da Capadócia e base de transporte,transporte
+LTAI,TR,misto,Mega-hub turístico com apoio da força aérea,caca
+LTBS,TR,misto,Mega-hub turístico com apoio da força aérea,caca
+BIKF,IS,misto,Hub internacional e base estratégica da OTAN no Atlântico Norte,patrulha|caca
+OMAA,AE,misto,Hub comercial e terminal de Estado,vip
+OMDW,AE,misto,Super-hub de carga e alas de transporte militar,transporte|demonstracao
+OERK,SA,misto,Mega-hub comercial e terminal real,vip|transporte
+OEJN,SA,misto,Hub comercial e base de transporte e VIP,vip|transporte
+OEDF,SA,misto,Hub comercial e força aérea saudita,caca
+OOMS,OM,misto,Hub comercial e transporte VIP e patrulha,vip|patrulha
+OOSA,OM,misto,Hub turístico e base aérea,transporte
+OBBI,BH,misto,Hub comercial e logística aeronaval,naval
+OKBK,KW,misto,Hub comercial e transporte estratégico,transporte_pesado
+OJAI,JO,misto,Hub comercial e destacamento real,vip
+LLBG,IL,misto,Principal hub e base de transporte pesado e reabastecimento,transporte_pesado|reabastecimento
+LLER,IL,misto,Aeroporto turístico e defesa aérea no sul,caca
+OLBA,LB,misto,Hub comercial e helicópteros e ataque leve,helicoptero|caca
+OIII,IR,misto,Hub doméstico civil e base aérea tática,caca
+HAAB,ET,misto,Mega-hub e terminal governamental,vip|transporte
+HKJK,KE,misto,Hub comercial e base da força aérea,transporte
+GMMN,MA,misto,Hub comercial e transporte real,vip
+GMTT,MA,misto,Aeroporto turístico com base aérea adjacente,caca
+GMMX,MA,misto,Aeroporto turístico com base aérea adjacente,caca
+DTTA,TN,misto,Hub comercial e transporte C-130J,transporte
+WSSS,SG,misto,"Aeroporto civil e base de caças, drones e transporte",caca|drones|transporte
+RJFK,JP,misto,Hub regional e força marítima,naval
+ROAH,JP,misto,Hub turístico e base de caças e AEW,caca|radar
+RJCC,JP,misto,Hub turístico ligado a base de caças e governamental,caca|vip
+RJCJ,JP,militar,Base de caças e transporte governamental,caca|vip
+RJNK,JP,misto,Aeroporto comercial e principal ala de caças,caca
+RJNA,JP,misto,Aviação executiva e transporte e reabastecimento,transporte|reabastecimento
+RJOK,JP,misto,Aeroporto regional e transporte militar,transporte
+RJOT,JP,misto,Aeroporto regional e transporte militar,transporte
+RJOH,JP,misto,Aeroporto regional e base de transporte,transporte
+RKPK,KR,misto,Aeroporto comercial e ala de mobilidade aérea,transporte|reabastecimento
+RKSS,KR,misto,Hub doméstico e instalações governamentais,vip
+RCSS,TW,misto,Hub urbano e transporte presidencial,vip
+RCKH,TW,misto,Aeroporto comercial e base de caças,caca
+RCYU,TW,misto,Aeroporto comercial e base de caças,caca
+RCFN,TW,misto,Aeroporto comercial e base de caças,caca
+RPLL,PH,misto,Principal hub comercial e quartel-general da força aérea,vip|transporte
+RPVM,PH,misto,Hub turístico e transporte e helicópteros,transporte|helicoptero
+RPMD,PH,misto,Aeroporto comercial e operações táticas,caca
+RPMZ,PH,misto,Aeroporto comercial e operações táticas,caca
+VTBD,TH,misto,Hub low-cost e executivo e transporte VIP real,vip|transporte
+VTCC,TH,misto,Aeroporto turístico e ala tática,caca
+VTCT,TH,misto,Aeroporto regional e ala tática,caca
+VTUK,TH,misto,Aeroporto regional e ala tática,caca
+VVDN,VN,misto,Hub turístico e divisão aérea de caças,caca
+VVCR,VN,misto,Hub turístico costeiro e base aeronaval,naval
+WIII,ID,misto,Hub civil e esquadrões da força aérea,transporte
+WADD,ID,misto,Mega-hub turístico e defesa aérea,caca|vip
+WAAA,ID,misto,Hub regional e base de caças e vigilância marítima,caca|patrulha
+VOGO,IN,misto,Destino turístico e base de caças navais,naval|caca
+VAPO,IN,misto,Aeroporto comercial e base de caças,caca
+VICG,IN,misto,Portal do Himalaia e base de transporte estratégico,transporte_pesado
+VISR,IN,misto,Aeroporto turístico de altitude e base aérea,caca|montanha
+VILH,IN,misto,Aeroporto turístico de altitude e base aérea,montanha|transporte
+VEBD,IN,misto,Portal turístico e base de caças,caca
+YPDN,AU,misto,Hub comercial e base de caças e exercícios,caca|treinamento_tatico
+YBTL,AU,misto,Hub regional e helicópteros de combate,helicoptero
+YPPH,AU,misto,Aeroporto comercial com apoio de defesa,transporte
+YPKG,AU,misto,Aeroporto comercial com apoio de defesa,transporte
+YBRM,AU,misto,Aeroporto comercial com apoio de defesa,transporte
+PGUM,GU,misto,Hub turístico e destacamentos militares,naval

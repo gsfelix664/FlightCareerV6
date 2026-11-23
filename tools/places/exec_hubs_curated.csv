@@ -1,0 +1,250 @@
+icao,cc,note,tags
+SBJH,BR,Aeroporto internacional dedicado à aviação executiva,dedicado|internacional
+SBMT,BR,Maior hub de helicópteros e aviação executiva urbana da América Latina,urbano|taxi_aereo|helicoptero
+SBJD,BR,Aeródromo executivo e de manutenção muito movimentado,manutencao|corporativo
+SDCO,BR,Polo de manutenção e hangares executivos,manutencao
+SBSP,BR,Aeroporto central para jatos corporativos em São Paulo,urbano|corporativo
+SDPW,BR,Aviação executiva corporativa e agronegócio,corporativo|agro
+SDAM,BR,"Aviação geral, táxi aéreo e hangares executivos",taxi_aereo
+SBJR,BR,"Aviação executiva, helicópteros offshore e táxi aéreo do Rio",taxi_aereo|offshore|helicoptero
+SBRJ,BR,Chegada executiva no centro do Rio,urbano|corporativo
+SBBH,BR,Principal hub executivo e de táxi aéreo de Minas Gerais,taxi_aereo|corporativo
+SBPR,BR,Aviação geral e táxi aéreo em Belo Horizonte,taxi_aereo
+SBLS,BR,Aviação executiva e geral na região de Belo Horizonte,taxi_aereo
+SBBI,BR,"Aviação executiva, táxi aéreo e hangares do Paraná",taxi_aereo|corporativo
+SBBZ,BR,Lazer de alto padrão na Região dos Lagos,lazer
+SDAG,BR,Destino executivo na Costa Verde,lazer
+SDTK,BR,Lazer e táxi aéreo no litoral sul fluminense,lazer|taxi_aereo
+SDUB,BR,Destino executivo no Litoral Norte paulista,lazer
+SBTV,BR,Aeroporto executivo privado de alto luxo no sul da Bahia,lazer|dedicado
+SIRI,BR,Aeródromo executivo e turístico na Península de Maraú,lazer
+SSCN,BR,Hub executivo da Serra Gaúcha,lazer
+SBBR,BR,"Jatos governamentais, diplomáticos e corporativos",governo|corporativo
+SBRP,BR,Hub executivo do agronegócio e de usinas,agro|corporativo
+SBGO,BR,Jatos executivos e turboélices do Centro-Oeste,corporativo|agro
+SBCY,BR,Base executiva do agronegócio mato-grossense,agro
+SBSO,BR,Grande hub de jatos e King Airs do agronegócio,agro
+SBRD,BR,Hub executivo agroindustrial de Mato Grosso,agro
+SWLC,BR,Polo executivo do agronegócio no sudoeste goiano,agro
+SBSJ,BR,Voos corporativos da indústria do Vale do Paraíba,corporativo
+SBPL,BR,Hub executivo da fruticultura irrigada,agro
+SBJE,BR,Fretados executivos e jatos privados no Nordeste,lazer
+KTEB,US,Maior hub de aviação executiva do mundo (Nova York),dedicado|corporativo
+KVNY,US,Principal hub de jatos privados de Los Angeles,dedicado|celebridades
+KOPF,US,Maior hub dedicado a jatos executivos de Miami,dedicado
+KPBI,US,Hub sazonal da elite financeira na Flórida,lazer|corporativo
+KHPN,US,Hub executivo do norte da região de Nova York,corporativo
+KDAL,US,Grande volume de FBOs e jatos executivos,corporativo
+KSDL,US,Hub executivo do deserto do Arizona,lazer
+KASE,US,Maior destino executivo de esqui da América do Norte,lazer|montanha
+KIAD,US,Hub executivo diplomático e governamental,governo
+KHOU,US,Hub executivo da indústria energética,corporativo|oleo_gas
+KLAS,US,Jatos privados para eventos e entretenimento,eventos
+KTMB,US,Grande hub executivo no sul de Miami,dedicado
+KFXE,US,Aeroporto executivo e porta para Bahamas e Caribe,dedicado
+KBCT,US,Hub executivo de Palm Beach County,dedicado
+KAPF,US,Hub executivo de alta renda no Golfo da Flórida,lazer
+KMMU,US,Alternativa executiva para Manhattan,corporativo
+KFRG,US,Principal base executiva de Long Island,corporativo
+KBED,US,Principal hub executivo de Boston,corporativo
+KPWK,US,Maior aeroporto executivo de Chicago,dedicado
+KDPA,US,Base executiva do oeste de Chicago,corporativo
+KMDW,US,FBOs próximos ao centro de Chicago,urbano
+KPDK,US,Principal aeroporto executivo de Atlanta,dedicado
+KFTY,US,Segundo hub executivo de Atlanta,corporativo
+KADS,US,Aeroporto executivo de pista única muito movimentado,dedicado
+KFTW,US,Hub executivo histórico do norte do Texas,corporativo
+KSGR,US,Hub executivo corporativo de Houston,corporativo
+KAUS,US,Hub executivo de tecnologia e eventos,eventos|corporativo
+KAPA,US,Um dos aeroportos executivos mais movimentados dos EUA,dedicado
+KBJC,US,Hub executivo entre Denver e Boulder,corporativo
+KEGE,US,Destino executivo de esqui,lazer|montanha
+KRIL,US,Alternativa executiva para Aspen e Vail,lazer|montanha
+KSUN,US,Retiro executivo e conferências,lazer|eventos
+KJAC,US,Hub executivo de luxo nas Montanhas Rochosas,lazer|montanha
+KBZN,US,Portal executivo para Big Sky,lazer|montanha
+KSNA,US,Principal hub executivo do sul de Los Angeles,corporativo
+KCRQ,US,Hub executivo do norte de San Diego,corporativo
+KPSP,US,Hub executivo do Vale de Coachella,lazer|eventos
+KTRM,US,Base executiva de resorts no deserto,lazer
+KSJC,US,Portal de jatos privados do Vale do Silício,corporativo|tecnologia
+KOAK,US,FBOs para São Francisco e Vale do Silício,corporativo
+KMRY,US,Destino executivo para Pebble Beach e Carmel,lazer
+KBFI,US,Principal hub executivo de Seattle,corporativo
+KDVT,US,Aviação geral muito movimentada em Phoenix,taxi_aereo
+KSTP,US,Hub executivo das Twin Cities,corporativo
+KPTK,US,Hub executivo da indústria automotiva,corporativo
+KCMH,US,Sede operacional da NetJets,frota_compartilhada
+KLUK,US,Hub executivo histórico de Cincinnati,corporativo
+KBNA,US,Hub executivo da indústria musical e corporativa,eventos|corporativo
+KSRQ,US,Hub executivo da costa oeste da Flórida,lazer
+CYYZ,CA,Maior terminal de FBOs do Canadá,corporativo
+CYOO,CA,Base executiva da Grande Toronto,corporativo
+CYHM,CA,Base executiva da Grande Toronto,corporativo
+CYUL,CA,Principal hub executivo do leste canadense,corporativo
+CYVR,CA,Portal executivo para a Ásia-Pacífico,corporativo
+MMTO,MX,Principal hub de aviação executiva da Cidade do México,dedicado|corporativo
+MMSD,MX,Maior destino de jatos privados de luxo do México,lazer
+MYNN,BS,Principal hub executivo das Bahamas,lazer
+MYEF,BS,Ilhas privadas e iates,lazer|ilha
+MYEM,BS,Pistas executivas de Eleuthera,lazer|ilha
+MYEH,BS,Acesso executivo a Harbour Island,lazer|ilha
+MBPV,TC,Jatos privados para resorts exclusivos,lazer|ilha
+TNCM,SX,Distribuição executiva no Caribe Oriental,lazer|ilha
+TFFJ,BL,Táxi aéreo executivo para Saint-Barthélemy,lazer|ilha|taxi_aereo
+TQPF,AI,Aeroporto executivo de resorts de luxo,lazer|ilha
+TAPA,AG,Iates e ilhas privadas,lazer|ilha
+MWCR,KY,Hub financeiro de jatos privados no Caribe,corporativo|ilha
+MDPC,DO,Terminal VIP com grande fluxo de jatos privados,lazer
+MDLR,DO,Aeroporto de resort e golfe,lazer
+TJSJ,PR,Hub executivo porto-riquenho,corporativo
+TJIG,PR,Aviação executiva urbana de San Juan,urbano
+SKBO,CO,Principal base executiva e de táxi aéreo da Colômbia,corporativo|taxi_aereo
+SKGY,CO,Aviação geral e executiva ao norte de Bogotá,taxi_aereo
+MPTO,PA,Base executiva do Panamá,corporativo
+MPMG,PA,Aviação executiva e táxi aéreo urbano do Panamá,urbano|taxi_aereo
+MRLB,CR,Jatos privados para resorts da Costa Rica,lazer
+SABE,AR,Portal executivo no centro de Buenos Aires,urbano|corporativo
+SADF,AR,Maior aeroporto de aviação executiva da Argentina,dedicado
+SULS,UY,Principal destino executivo de verão do Cone Sul,lazer
+SCEL,CL,Base executiva do Chile,corporativo
+SCTB,CL,Aviação executiva urbana de Santiago,urbano|taxi_aereo
+LFPB,FR,Maior aeroporto dedicado à aviação executiva da Europa,dedicado
+EGLF,GB,Principal aeroporto executivo do Reino Unido,dedicado
+EGKB,GB,Segundo hub executivo dedicado de Londres,dedicado
+EGGW,GB,Terminal de FBOs muito movimentado,corporativo
+EGWU,GB,Base militar e executiva VIP de Londres,governo
+EGSS,GB,Jatos executivos de longo alcance,corporativo
+EGKK,GB,Acesso executivo ao sul de Londres,corporativo
+EGKA,GB,Aviação geral e executiva na costa sul,taxi_aereo
+EGLC,GB,Acesso executivo ao distrito financeiro de Londres,urbano|corporativo
+LSGG,CH,"Bancos, diplomacia e esqui",corporativo|governo
+LSZH,CH,Hub financeiro de aviação executiva,corporativo
+LFMN,FR,Principal hub executivo da Riviera Francesa,lazer|eventos
+LFMD,FR,Aviação executiva para Cannes e Mônaco,dedicado|eventos
+LFTZ,FR,Pista curta exclusiva de luxo em Saint-Tropez,lazer
+LIML,IT,Principal hub executivo da Itália,corporativo|urbano
+LIRA,IT,Aviação executiva e voos de Estado em Roma,governo|corporativo
+LIEO,IT,Maior hub executivo de verão do Mediterrâneo,lazer
+LIRN,IT,Portal executivo para Capri e Costa Amalfitana,lazer
+LIPZ,IT,Hub executivo do norte da Itália,lazer
+LEMD,ES,Base executiva da capital espanhola,corporativo
+LETO,ES,Base executiva e governamental de Madri,governo
+LEIB,ES,Hub executivo de verão das Baleares,lazer
+LEPA,ES,Base executiva e de manutenção nas Baleares,lazer|manutencao
+LEMG,ES,Portal executivo para Marbella,lazer
+LEBL,ES,Hub executivo da Catalunha,corporativo
+LELL,ES,Aviação geral e executiva da Catalunha,taxi_aereo
+EDDM,DE,Principal hub executivo do sul da Alemanha,corporativo
+EDMO,DE,Aviação executiva e aeroespacial perto de Munique,dedicado
+EDDF,DE,Hub executivo de Frankfurt,corporativo
+EDFE,DE,Maior aeroporto de aviação geral e executiva da Alemanha,dedicado|taxi_aereo
+EDDB,DE,Hub executivo governamental e corporativo,governo|corporativo
+EDDL,DE,Hub executivo industrial,corporativo
+EDDH,DE,Hub executivo portuário,corporativo
+EHAM,NL,Base executiva dos Países Baixos,corporativo
+EHRD,NL,Base executiva de Roterdã e Haia,corporativo|governo
+EBBR,BE,Hub executivo da União Europeia,governo|corporativo
+EBAW,BE,Executivo do comércio de diamantes,corporativo
+ELLX,LU,Hub executivo financeiro e bancário,corporativo
+LOWW,AT,Principal hub executivo da Europa Central,corporativo
+LOWS,AT,Hub executivo dos Alpes austríacos,lazer|montanha
+LOWI,AT,Hub executivo dos Alpes austríacos,lazer|montanha
+LSZS,CH,Destino executivo alpino mais exclusivo da Europa,lazer|montanha
+LSGS,CH,"Acesso executivo a Verbier, Crans-Montana e Zermatt",lazer|montanha
+LFLJ,FR,Porta executiva dos Alpes franceses,lazer|montanha
+LFHM,FR,Porta executiva dos Alpes franceses,lazer|montanha
+LFLB,FR,Porta executiva dos Alpes franceses,lazer|montanha
+LPPT,PT,Hub executivo de Portugal,corporativo
+LPCS,PT,Aviação executiva e táxi aéreo em Cascais,dedicado|taxi_aereo
+LPFR,PT,Resorts e golfe no Algarve,lazer
+LGAV,GR,Hub executivo para o arquipélago grego,lazer
+LGMK,GR,Destino de jatos executivos no Egeu,lazer|ilha
+LGSR,GR,Destino de jatos executivos no Egeu,lazer|ilha
+LTBA,TR,"Aviação executiva, carga e voos governamentais",dedicado|governo
+LTFE,TR,Destino executivo de verão da Riviera Turca,lazer
+EIDW,IE,Hub executivo irlandês,corporativo
+EINN,IE,Escalas técnicas transatlânticas,escala_tecnica
+EKCH,DK,Hub executivo escandinavo,corporativo
+EKRK,DK,Aviação geral e executiva de Copenhague,taxi_aereo
+ESSA,SE,Hub executivo de Estocolmo,corporativo
+ESSB,SE,Aeroporto executivo urbano de Estocolmo,urbano
+ENGM,NO,Principal hub executivo norueguês,corporativo
+EFHK,FI,Hub executivo nórdico,corporativo
+EPWA,PL,Hub executivo do leste europeu,corporativo
+EPMO,PL,Base executiva de Varsóvia,corporativo
+LKPR,CZ,Principal base executiva tcheca,corporativo
+LHBP,HU,Hub executivo da Hungria,corporativo
+LYTV,ME,Destino executivo de super-iates no Adriático,lazer
+LDDU,HR,Hub executivo da costa dálmata,lazer
+LDSP,HR,Hub executivo da costa dálmata,lazer
+LMML,MT,Registro de aeronaves e aviação executiva no Mediterrâneo,corporativo
+UUWW,RU,Maior centro de aviação executiva da Europa Oriental,corporativo
+EGPC,GB,Escala técnica de ferry no Atlântico Norte,escala_tecnica
+OMDW,AE,Maior hub de aviação executiva VIP do Oriente Médio,dedicado
+OMDB,AE,Terminal executivo de altíssimo movimento,corporativo
+OMAD,AE,Aeroporto dedicado à aviação executiva,dedicado
+OMAA,AE,Hub executivo e governamental,governo
+OTHH,QA,Base executiva da Qatar Executive,corporativo
+OTBD,QA,Base executiva e governamental de Doha,governo
+OERK,SA,Hub executivo e governamental saudita,governo
+OEJN,SA,Portal executivo do Mar Vermelho,corporativo
+OEMA,SA,Executivo de negócios e peregrinação,corporativo
+OENN,SA,Executivo de megaprojetos,corporativo
+OBBI,BH,Hub executivo financeiro do Golfo,corporativo
+OKBK,KW,Jatos executivos de longo alcance,corporativo
+LLBG,IL,Hub executivo de tecnologia e negócios,corporativo
+FAOR,ZA,Hub executivo da África Austral,corporativo
+FALA,ZA,Aeroporto dedicado à aviação executiva e táxi aéreo,dedicado|taxi_aereo
+FACT,ZA,Hub executivo turístico e financeiro,lazer|corporativo
+GMMN,MA,Hub executivo do Norte da África,corporativo
+GMMX,MA,Destino executivo de lazer,lazer
+HECA,EG,Hub executivo egípcio,corporativo
+HESH,EG,Destino executivo de lazer no Mar Vermelho,lazer
+DNMM,NG,Mercado de jatos executivos da África Ocidental,corporativo|oleo_gas
+DNAA,NG,Mercado de jatos executivos da capital nigeriana,governo|corporativo
+HKJK,KE,Hub executivo da África Oriental,corporativo
+HKNW,KE,Maior hub de táxi aéreo e safáris da África Oriental,taxi_aereo|safari
+FBMN,BW,Táxi aéreo de luxo para o Delta do Okavango,taxi_aereo|safari
+FSIA,SC,Jatos privados e helicópteros VIP no Índico,lazer|ilha
+FIMP,MU,Resorts e negócios no Oceano Índico,lazer|ilha
+WSSL,SG,Principal hub dedicado à aviação executiva do Sudeste Asiático,dedicado|manutencao
+WSSS,SG,Terminal VIP para jatos de longo alcance,corporativo
+VHHH,HK,Maior hub de jatos executivos de cabine larga da Ásia,corporativo
+VMMC,MO,Hub executivo de entretenimento e cassinos,eventos|lazer
+RJTT,JP,Principal portal executivo no centro de Tóquio,urbano|corporativo
+RJAA,JP,Terminal executivo dedicado para voos internacionais,corporativo
+RJBB,JP,Base executiva de Kansai,corporativo
+RJBE,JP,Base executiva de Kansai,corporativo
+RJCC,JP,Portal executivo para os resorts de esqui de Niseko,lazer|montanha
+RKSS,KR,Principal hub de aviação executiva da Coreia do Sul,dedicado|urbano
+RKSI,KR,Hub executivo intercontinental,corporativo
+ZBAA,CN,Base de jatos executivos da capital chinesa,corporativo|governo
+ZBAD,CN,Base de jatos executivos da capital chinesa,corporativo
+ZSSS,CN,Principal hub de aviação executiva de Xangai,corporativo
+ZSPD,CN,Hub executivo intercontinental de Xangai,corporativo
+ZGSZ,CN,Hub executivo da Grande Baía,corporativo|tecnologia
+ZGGG,CN,Hub executivo da Grande Baía,corporativo
+RCTP,TW,Hub executivo de Taiwan,corporativo
+RCSS,TW,Principal aeroporto executivo urbano de Taiwan,urbano
+VTBD,TH,Principal hub de aviação executiva de Bangkok,dedicado
+VTSP,TH,Destino executivo de lazer da Tailândia,lazer|ilha
+VTSM,TH,Destino executivo de lazer da Tailândia,lazer|ilha
+WMSA,MY,Principal hub de aviação executiva da Malásia,dedicado
+WIHH,ID,Principal hub executivo urbano de Jacarta,urbano|governo
+WADD,ID,Grande hub executivo de lazer da Ásia-Pacífico,lazer
+RPLL,PH,Hub executivo das Filipinas,corporativo
+RPLC,PH,Hub executivo das Filipinas,corporativo
+VABB,IN,Maior hub de jatos privados e helicópteros da Índia,corporativo
+VIDP,IN,Principal hub executivo e governamental do norte indiano,governo|corporativo
+VOBL,IN,Hub executivo do polo tecnológico indiano,tecnologia
+VRMM,MV,Grande destino de jatos privados intercontinentais,lazer|ilha
+YSSY,AU,Base executiva de Sydney,corporativo
+YSBK,AU,Aviação geral e executiva de Sydney,taxi_aereo
+YMML,AU,Base executiva de Melbourne,corporativo
+YMEN,AU,Principal aeroporto dedicado à aviação executiva de Melbourne,dedicado
+YBBN,AU,Hub executivo de Queensland,corporativo
+YBCG,AU,Hub executivo da Gold Coast,lazer
+YPPH,AU,Hub executivo corporativo da mineração,corporativo|mineracao
+NZAA,NZ,Porta executiva da Nova Zelândia,corporativo
+NZQN,NZ,Porta executiva de lazer da Nova Zelândia,lazer|montanha

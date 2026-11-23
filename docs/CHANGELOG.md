@@ -2991,3 +2991,9 @@
 - Nova classificação pura pelo subtipo (`Domain/Missions/MissionBoardCategory`, a partir de `Mission.SubId`), usada pela etiqueta, pelas cores e pelo filtro (`MissionDisplayItem.BoardKind`, `MainViewModel.ApplyMissionFilters`). Missões sem subtipo (banco antigo, ferry manual) usam o texto antigo como reserva.
 - Instrução = 3.4.x e 3.5.2 (TGL); panorâmico em Táxi aéreo; aerofoto e paraquedismo em SAE; contratos das fases 3–7 nas categorias correspondentes; translados e governo em Geral.
 - Teste `MissionBoardCategoryTests` falha se um subtipo novo do gerador ficar sem categoria. Não visto na tela.
+
+## 2026-11-23 - Listas curadas de aeroportos, perfis e papel dos aeródromos turísticos (Claude)
+- Listas enviadas pelo usuário gravadas em `tools/places/*_curated.csv` (turísticos, pontos turísticos, carga, linha, executiva, alimentadores, saúde, instrução, manutenção, agro, militares/uso misto), com os códigos conferidos na base do MSFS 2024 (Little Navmap) e corrigidos ou removidos quando não existiam (lista em `docs/plans/catalogo-missoes.md` › 9.1).
+- `tools/places/airport_profiles.py` gera `Data/places/airport_profiles.json` (8.752 aeroportos do MSFS com perfis curados e heurísticos). Ainda não usado pelo gerador (entra no catálogo de missões).
+- Aeródromo turístico ganhou papel (`role`): só os de `panoramico` puxam a categoria de voo panorâmico no gerador; os de `destino` só fornecem os pontos (`ScenicAerodromeInfo.IsScenicBase`). `build_places.py` junta os pontos de `scenic_pois_curated.csv` aos aeródromos.
+- Tabela de pesos por missão e perfil de aeroporto proposta no plano (§ 9.3). Não visto na tela.
