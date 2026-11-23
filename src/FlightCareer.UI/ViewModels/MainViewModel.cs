@@ -1,3 +1,4 @@
+using FlightCareer.Domain.Missions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
@@ -656,22 +657,7 @@ namespace FlightCareer.UI.ViewModels
             // 1. Categoria
             if (!string.IsNullOrWhiteSpace(SelectedCategoryFilter) && SelectedCategoryFilter != "TODOS")
             {
-                query = query.Where(m =>
-                {
-                    if (SelectedCategoryFilter == "TÁXI AÉREO")
-                        return m.MissionCategoryType.Contains("Táxi", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Charter", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "LINHA REGIONAL")
-                        return m.MissionCategoryType.Contains("Linha Regional", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "LINHA REGULAR")
-                        return m.MissionCategoryType.Contains("Linha Regular", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Heavy", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "CARGA / SAE")
-                        return m.MissionCategoryType.Contains("Carga", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("SAE", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "INSTRUÇÃO")
-                        return m.MissionCategoryType.Contains("Instrução", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Treinamento", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "MÉDICA / ESPECIAL")
-                        return m.MissionCategoryType.Contains("Saúde", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Remoção", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Médica", StringComparison.OrdinalIgnoreCase);
-                    return true;
-                });
+                query = query.Where(m => MissionBoardCategory.MatchesFilter(m.BoardKind, SelectedCategoryFilter));
             }
 
             // 2. Busca Rápida (ICAO ou Cidade)

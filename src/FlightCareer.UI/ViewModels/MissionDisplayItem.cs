@@ -1,3 +1,4 @@
+using FlightCareer.Domain.Missions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
@@ -102,48 +103,39 @@ namespace FlightCareer.UI.ViewModels
             BatchSelectionChanged?.Invoke(this, value);
         }
 
+        // Categoria do quadro pelo subtipo (MissionCategoryType guarda o nome da fase desde FASES-1)
+        public MissionBoardKind BoardKind => MissionBoardCategory.Classify(Mission.SubId, Mission.MissionCategoryType);
+        private bool IsVip => Mission.SubId is "1.7.4" or "2.7.4";
+
         // Tag Curta para Badge da Categoria
-        public string CategoryShortTag => MissionCategoryType switch
-        {
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "INSTRUÇÃO",
-            var t when t.Contains("Táxi") || t.Contains("Charter") => "TÁXI AÉREO",
-            var t when t.Contains("Linha Regional") => "REGIONAL",
-            var t when t.Contains("Linha Regular") || t.Contains("Heavy") => "REGULAR",
-            var t when t.Contains("SAE") => "SAE",
-            var t when t.Contains("Carga") => "CARGA",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") => "MÉDICA",
-            _ => "GERAL"
-        };
+        public string CategoryShortTag => MissionBoardCategory.ShortTag(BoardKind);
 
         // Indicadores de Performance & Lucratividade
         public double ProfitPerNM => DistanceNM > 0 ? Math.Round(RewardMoney / DistanceNM, 1) : 0;
         public string ProfitPerNmDisplay => $"${ProfitPerNM:F1}/NM";
 
         // Badges Cromáticos Semânticos (Cores apenas para exceções/destaques; neutro sutil para padrão)
-        public string SemanticBorderBrush => MissionCategoryType switch
+        public string SemanticBorderBrush => IsVip ? "#F59E0B" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#F59E0B",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#A855F7",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            MissionBoardKind.Medica => "#EF4444",
+            MissionBoardKind.Instrucao => "#A855F7",
+            MissionBoardKind.Sae => "#00E5FF",
             _ => "#2A3749" // Neutro sutil
         };
 
-        public string SemanticBadgeBackground => MissionCategoryType switch
+        public string SemanticBadgeBackground => IsVip ? "#2E1E05" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#2E1E05",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#2E1214",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#251233",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#0B2730",
+            MissionBoardKind.Medica => "#2E1214",
+            MissionBoardKind.Instrucao => "#251233",
+            MissionBoardKind.Sae => "#0B2730",
             _ => "#161F2A" // Fundo neutro discreto
         };
 
-        public string SemanticTextColor => MissionCategoryType switch
+        public string SemanticTextColor => IsVip ? "#F59E0B" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#F59E0B",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#C084FC",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            MissionBoardKind.Medica => "#EF4444",
+            MissionBoardKind.Instrucao => "#C084FC",
+            MissionBoardKind.Sae => "#00E5FF",
             _ => "#94A3B8" // Neutro suave
         };
 

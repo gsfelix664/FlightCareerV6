@@ -2985,3 +2985,9 @@
 - Não testado no MSFS / não visto na tela.
 ## 2026-11-22 - Escada de aviões dos bots determinística (Claude)
 - `CareerProgressionSimulator.BuildAircraftLadder`: o avião de cada degrau era o primeiro do banco que continha algum dos nomes, e a ordem do banco segue a chave Guid (muda a cada execução). Na t8 o degrau H do Médio caiu no Citation Longitude ($28 mi) em vez do CJ4 e os bots ficaram parados na classe G do dia 540 ao 1095. Agora a escolha segue a ordem de preferência dos nomes (`FindByPreference`). Teste `AircraftLadderTests`.
+
+## 2026-11-23 - Filtro do quadro de missões volta a funcionar (Claude)
+- Desde as 7 fases (FASES-1), `Mission.MissionCategoryType` guarda o nome da fase, então a etiqueta e os filtros do quadro (INSTRUÇÃO, TÁXI AÉREO, CARGA / SAE...) não reconheciam mais nada e todas as missões apareciam como "GERAL".
+- Nova classificação pura pelo subtipo (`Domain/Missions/MissionBoardCategory`, a partir de `Mission.SubId`), usada pela etiqueta, pelas cores e pelo filtro (`MissionDisplayItem.BoardKind`, `MainViewModel.ApplyMissionFilters`). Missões sem subtipo (banco antigo, ferry manual) usam o texto antigo como reserva.
+- Instrução = 3.4.x e 3.5.2 (TGL); panorâmico em Táxi aéreo; aerofoto e paraquedismo em SAE; contratos das fases 3–7 nas categorias correspondentes; translados e governo em Geral.
+- Teste `MissionBoardCategoryTests` falha se um subtipo novo do gerador ficar sem categoria. Não visto na tela.
