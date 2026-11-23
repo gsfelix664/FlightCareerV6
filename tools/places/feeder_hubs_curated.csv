@@ -1,0 +1,230 @@
+icao,cc,note,tags
+SBRP,BR,Principal alimentador do interior paulista,feeder
+SBSR,BR,Coletor regional do noroeste paulista,feeder
+SBDN,BR,Alimentador do oeste paulista,feeder
+SBAE,BR,Alimentação regional do centro-oeste paulista,feeder
+SBML,BR,Alimentador de turboélices para Campinas,feeder|turboelice
+SBAU,BR,Coletor regional do noroeste de SP,feeder
+SBLO,BR,Principal alimentador do norte do Paraná,feeder
+SBMG,BR,Coletor regional do noroeste paranaense,feeder
+SBCA,BR,Alimentador do oeste do Paraná,feeder
+SBCH,BR,Alimentador do oeste catarinense e norte gaúcho,feeder
+SBJV,BR,Alimentador industrial do norte catarinense,feeder
+SBNF,BR,Coletor regional do Vale do Itajaí,feeder
+SBJA,BR,Alimentador do sul catarinense,feeder
+SBCX,BR,Alimentador da Serra Gaúcha,feeder
+SBPF,BR,Coletor do planalto médio gaúcho,feeder
+SBPK,BR,Alimentador do extremo sul gaúcho,feeder
+SBUG,BR,Alimentador de fronteira para Porto Alegre,feeder|fronteira
+SBUL,BR,Maior alimentador do Triângulo Mineiro,feeder
+SBUR,BR,Alimentador regional mineiro,feeder
+SBMK,BR,Principal alimentador do norte de Minas,feeder
+SBGV,BR,Coletor do Vale do Rio Doce para Confins,feeder
+SBIP,BR,Alimentador siderúrgico e corporativo,feeder
+SBZM,BR,Alimentador da Zona da Mata mineira,feeder
+SBVG,BR,Alimentador do sul de Minas,feeder
+SBDO,BR,Alimentador do sul de Mato Grosso do Sul,feeder
+SBCR,BR,Alimentador do Pantanal e fronteira boliviana,feeder|fronteira
+SBSI,BR,Principal alimentador do nortão mato-grossense,feeder
+SBSO,BR,Alimentador agroindustrial para Cuiabá e Brasília,feeder|agro
+SBAT,BR,Coletor do extremo norte de Mato Grosso,feeder|remoto
+SBVH,BR,Alimentador do cone sul de Rondônia,feeder
+SBMA,BR,Principal alimentador do sudeste paraense,feeder|mineracao
+SBSN,BR,Alimentador do oeste do Pará,feeder|amazonia
+SBHT,BR,Alimentador da região do Xingu,feeder|amazonia
+SBTF,BR,Hub sub-regional do Médio Solimões,feeder|amazonia|remoto
+SBTB,BR,Alimentador de mineração e comunidades ribeirinhas,feeder|mineracao|amazonia
+SBIL,BR,Alimentador do sul da Bahia,feeder
+SBVC,BR,Alimentador do sudoeste baiano,feeder
+SBLE,BR,Alimentador turístico da Chapada Diamantina,feeder|turistico
+SBJU,BR,Principal alimentador do interior nordestino,feeder
+SBKG,BR,Alimentador do interior da Paraíba,feeder
+KDSM,US,Alimentador agrícola do Meio-Oeste,feeder
+KOMA,US,"Coletor regional para United, Delta e American",feeder
+KICT,US,Alimentador aeroespacial,feeder
+KTUL,US,"Alimentador regional para Dallas, Houston e Chicago",feeder
+KOKC,US,Coletor de petróleo e gás e regional,feeder
+KLIT,US,Alimentador regional para Dallas e Atlanta,feeder
+KXNA,US,Alimentador corporativo de alta frequência,feeder
+KBHM,US,Alimentador do sul americano,feeder
+KHSV,US,Alimentador tecnológico e aeroespacial,feeder
+KTYS,US,Alimentador do leste do Tennessee,feeder
+KCHA,US,Alimentador de curto alcance para Atlanta,feeder
+KGSP,US,Alimentador industrial para Charlotte e Atlanta,feeder
+KCHS,US,Alimentador costeiro da Costa Leste,feeder
+KSAV,US,Coletor regional para Atlanta e Charlotte,feeder
+KRIC,US,Alimentador da Virgínia,feeder
+KORF,US,Alimentador naval e turístico,feeder
+KROA,US,Alimentador dos Apalaches,feeder
+KBUF,US,Alimentador do oeste de Nova York,feeder
+KROC,US,Coletor regional do estado de Nova York,feeder
+KSYR,US,Alimentador central de Nova York,feeder
+KALB,US,Alimentador da capital estadual de Nova York,feeder
+KBTV,US,Principal alimentador do norte da Nova Inglaterra,feeder
+KPWM,US,Alimentador costeiro do Maine,feeder
+KBGR,US,Alimentador do norte do Maine e escala transatlântica,feeder|escala_tecnica
+KGRR,US,Alimentador do oeste de Michigan,feeder
+KMSN,US,Alimentador universitário e tecnológico,feeder
+KGRB,US,Alimentador regional para Chicago e Detroit,feeder
+KFSD,US,Alimentador das planícies do norte,feeder
+KFAR,US,Coletor regional para Minneapolis e Chicago,feeder
+KBIL,US,Hub sub-regional de Montana,feeder
+KMSO,US,Alimentador das Montanhas Rochosas,feeder
+KBOI,US,Principal alimentador de Idaho,feeder
+KGEG,US,Coletor do interior do Noroeste Pacífico,feeder
+KEUG,US,Alimentador do vale do Willamette,feeder
+KMFR,US,Alimentador do sul do Oregon,feeder
+KFAT,US,Alimentador do Vale Central da Califórnia,feeder
+KSBA,US,Alimentador costeiro para LAX e SFO,feeder
+KABQ,US,Alimentador do Novo México,feeder
+KTUS,US,Alimentador do sul do Arizona,feeder
+PAFA,US,Alimentador do interior e Ártico do Alasca,feeder|remoto|artico
+PABE,US,Hub bush feeder coletando dezenas de vilas,feeder|bush|remoto
+PAOM,US,Alimentador do estreito de Bering,feeder|bush|remoto
+CYEG,CA,Alimentador do norte de Alberta,feeder
+CYWG,CA,Alimentador central e comunidades do norte,feeder|remoto
+CYQB,CA,Alimentador regional para Montréal e Toronto,feeder
+CYYT,CA,Principal alimentador do Atlântico Norte canadense,feeder
+CYZF,CA,Hub alimentador ártico,feeder|artico|remoto
+CYXY,CA,Principal alimentador do Yukon,feeder|remoto
+CYQT,CA,Alimentador do norte de Ontário,feeder|remoto
+MMHO,MX,Alimentador do noroeste mexicano,feeder
+SKCL,CO,Alimentador do sudoeste colombiano,feeder
+SKBQ,CO,Alimentador industrial da costa caribenha,feeder
+SKCG,CO,Alimentador turístico e regional,feeder|turistico
+SKBG,CO,Alimentador do nordeste andino,feeder
+SKPE,CO,Alimentador do Eixo Cafeeiro,feeder
+SPQU,PE,Principal alimentador do sul peruano,feeder
+SPZO,PE,Maior fluxo alimentador doméstico do Peru,feeder|turistico
+SPHI,PE,Alimentador da costa norte peruana,feeder
+SPQT,PE,Alimentador amazônico peruano,feeder|amazonia|remoto
+SCIE,CL,Alimentador do centro-sul chileno,feeder
+SCTE,CL,Alimentador da Patagônia Norte e Chiloé,feeder
+SCCI,CL,Alimentador austral e antártico,feeder|remoto
+SCDA,CL,Alimentador de mineração do norte chileno,feeder|mineracao
+SACO,AR,Principal alimentador interiorano da Argentina,feeder
+SAME,AR,Alimentador andino e vinícola,feeder
+SAAR,AR,Alimentador agroindustrial,feeder
+SANT,AR,Alimentador do noroeste argentino,feeder
+SLLP,BO,Alimentador do altiplano,feeder|altitude
+SLCB,BO,Alimentador central da Bolívia,feeder
+TTPP,TT,Alimentador do Caribe Oriental,feeder|interilhas
+EGPD,GB,Alimentador offshore e do norte escocês,feeder|offshore
+EGNT,GB,Alimentador do nordeste inglês,feeder
+EGGD,GB,Alimentador do sudoeste da Inglaterra,feeder
+EGBB,GB,Alimentador das Midlands,feeder
+EGAA,GB,Alimentador da Irlanda do Norte,feeder
+EGAC,GB,Alimentador urbano de Belfast,feeder
+EGJJ,GB,Alimentador insular das Ilhas do Canal,feeder|interilhas
+EICK,IE,Alimentador do sul da Irlanda,feeder
+LFBO,FR,Alimentador aeroespacial,feeder
+LFBD,FR,Alimentador do sudoeste francês,feeder
+LFRS,FR,Alimentador do oeste da França,feeder
+LFST,FR,Alimentador institucional europeu,feeder
+LFKJ,FR,Alimentador insular da Córsega,feeder|interilhas
+EDDW,DE,Alimentador industrial,feeder
+EDDN,DE,Alimentador da Francônia,feeder
+EDDV,DE,Coletor regional do norte alemão,feeder
+EDDC,DE,Alimentador da Saxônia,feeder
+EDDP,DE,Alimentador regional de passageiros,feeder
+LIPE,IT,Alimentador da Emília-Romanha,feeder
+LIRQ,IT,Alimentador de pista curta da Toscana,feeder
+LICJ,IT,Alimentador da Sicília ocidental,feeder
+LICC,IT,Maior fluxo alimentador doméstico da Itália,feeder
+LIEE,IT,Alimentador do sul da Sardenha,feeder
+LIBD,IT,Alimentador da Apúlia,feeder
+LEBB,ES,Alimentador do País Basco,feeder
+LEVC,ES,Alimentador mediterrâneo,feeder
+LEZL,ES,Alimentador da Andaluzia,feeder
+LEST,ES,Alimentador do noroeste espanhol,feeder
+LEMH,ES,Alimentador interinsular das Baleares,feeder|interilhas
+LEIB,ES,Alimentador interinsular das Baleares,feeder|interilhas
+LPPD,PT,Alimentador interinsular dos Açores,feeder|interilhas
+LPMA,PT,Alimentador atlântico para Lisboa e Porto,feeder|interilhas
+LOWG,AT,Alimentador austríaco para Viena e Frankfurt,feeder
+LOWL,AT,Alimentador austríaco para Viena e Frankfurt,feeder
+ESGG,SE,Alimentador do oeste sueco,feeder
+ESNU,SE,Alimentador do norte da Suécia,feeder|artico
+ESPA,SE,Alimentador da Lapônia sueca,feeder|artico
+ENBR,NO,Alimentador da costa oeste norueguesa,feeder
+ENVA,NO,Alimentador do centro da Noruega,feeder
+ENTC,NO,Alimentador do Ártico norueguês,feeder|artico|remoto
+ENBO,NO,Centro da rede STOL das ilhas Lofoten e fiordes,feeder|stol|remoto
+EFOU,FI,Alimentador do norte finlandês,feeder|artico
+EFRO,FI,Alimentador da Lapônia finlandesa,feeder|artico
+EKBI,DK,Alimentador da Jutlândia,feeder
+EPGD,PL,Alimentador báltico,feeder
+EPWR,PL,Alimentador do oeste polonês,feeder
+EPPO,PL,Alimentador do oeste polonês,feeder
+LJLJ,SI,Alimentador balcânico,feeder
+LGTS,GR,Segundo maior alimentador da Grécia,feeder
+LGIR,GR,Principal alimentador insular grego,feeder|interilhas
+BIEG,IS,Alimentador doméstico islandês,feeder
+BIAR,IS,Alimentador doméstico islandês,feeder
+OOSA,OM,Alimentador do sul de Omã,feeder
+OEDF,SA,Alimentador energético,feeder
+OEAB,SA,Alimentador do sudoeste montanhoso saudita,feeder
+OIKB,IR,Alimentador doméstico iraniano,feeder
+OIMM,IR,Alimentador doméstico iraniano,feeder
+OJAQ,JO,Alimentador do sul jordaniano,feeder
+HEGN,EG,Alimentador turístico do Mar Vermelho,feeder|turistico
+HELX,EG,Alimentador turístico do Alto Egito,feeder|turistico
+GMTT,MA,Alimentador marroquino,feeder
+GMFF,MA,Alimentador marroquino,feeder
+DABC,DZ,Alimentador doméstico argelino,feeder
+DAOO,DZ,Alimentador doméstico argelino,feeder
+FALE,ZA,Alimentador costeiro sul-africano,feeder
+FAPE,ZA,Alimentador do Cabo Oriental,feeder
+FBSK,BW,Alimentador regional de Botsuana,feeder
+FYWH,NA,Alimentador da Namíbia,feeder
+FQMA,MZ,Alimentador do sul de Moçambique,feeder
+HKMO,KE,Alimentador costeiro para Nairóbi,feeder
+HTKJ,TZ,Alimentador do norte da Tanzânia,feeder
+HUEN,UG,Alimentador dos Grandes Lagos,feeder
+HRYR,RW,Hub alimentador da RwandAir,feeder
+DNAA,NG,Alimentador interno nigeriano,feeder
+DFFD,BF,Alimentador do Sahel,feeder
+GABS,ML,Alimentador do Sahel,feeder
+FMMI,MG,Alimentador das ilhas do Índico,feeder|interilhas
+RJOO,JP,Maior alimentador doméstico do Japão,feeder|alta_frequencia
+RJGG,JP,Alimentador industrial japonês,feeder
+ROAH,JP,Alimentador das ilhas Ryukyu,feeder|interilhas
+RJSN,JP,Alimentador do norte de Honshu,feeder
+RJSS,JP,Alimentador do norte de Honshu,feeder
+RJFK,JP,Alimentador das ilhas do sul de Kyushu,feeder|interilhas
+RKPK,KR,Segundo maior alimentador sul-coreano,feeder
+RKPC,KR,Rota alimentadora de maior densidade do mundo,feeder|alta_frequencia|interilhas
+RCKH,TW,Alimentador do sul de Taiwan,feeder
+ZUGY,CN,Alimentador do sudoeste chinês,feeder
+ZGNN,CN,Alimentador do sudoeste chinês,feeder
+ZSNJ,CN,Alimentador do leste chinês,feeder
+ZSHC,CN,Alimentador do leste chinês,feeder
+ZYTL,CN,Alimentador do nordeste chinês,feeder
+ZYTX,CN,Alimentador do nordeste chinês,feeder
+ZJSY,CN,Alimentador da ilha de Hainan,feeder|turistico
+ZJHK,CN,Alimentador da ilha de Hainan,feeder
+VTCC,TH,Alimentador do norte da Tailândia,feeder
+VTSP,TH,Alimentador turístico,feeder|turistico
+VTSM,TH,Alimentador da Bangkok Airways,feeder|turistico
+WBKK,MY,Principal alimentador de Bornéu malaio,feeder|remoto
+WBGG,MY,Segundo alimentador de Bornéu,feeder
+WMKP,MY,Alimentador industrial,feeder
+WARR,ID,Segundo maior alimentador da Indonésia,feeder
+WAAA,ID,Alimentador do leste da Indonésia,feeder
+WAJJ,ID,Alimentador remoto de Papua,feeder|remoto|bush
+RPVM,PH,Alimentador das ilhas filipinas,feeder|interilhas
+RPMD,PH,Alimentador de Mindanao,feeder
+VVDN,VN,Alimentador do centro do Vietnã,feeder
+VOCI,IN,Alimentador do sul da Índia,feeder
+VAAH,IN,Alimentador industrial de Gujarat,feeder
+VEPT,IN,Alimentador do leste indiano,feeder
+VEGT,IN,Alimentador do nordeste indiano,feeder
+VAPO,IN,Alimentador automotivo e de TI,feeder
+OPIS,PK,Alimentador do norte paquistanês,feeder
+OPLA,PK,Alimentador do norte paquistanês,feeder
+YBCS,AU,Alimentador do norte de Queensland,feeder|turistico
+YPAD,AU,Alimentador do sul australiano,feeder
+YPDN,AU,Alimentador do norte australiano e Outback,feeder|remoto
+YBTL,AU,Alimentador regional de Queensland,feeder
+NZWN,NZ,Alimentador doméstico central da Nova Zelândia,feeder
+NZCH,NZ,Alimentador da Ilha Sul,feeder

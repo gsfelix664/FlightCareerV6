@@ -13,7 +13,12 @@ namespace FlightCareer.Application.Interfaces
         string Name,
         string Cc,
         string Note,
-        IReadOnlyList<ScenicPoint> Points);
+        IReadOnlyList<ScenicPoint> Points,
+        string Role = "panoramico")
+    {
+        /// <summary>Base de voos panorâmicos (puxa mais 3.5.1 no gerador). "destino" = destino turístico: só fornece os pontos.</summary>
+        public bool IsScenicBase => !string.Equals(Role, "destino", System.StringComparison.OrdinalIgnoreCase);
+    }
 
     public interface IPlacesDataService
     {

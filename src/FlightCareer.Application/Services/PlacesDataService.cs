@@ -233,7 +233,8 @@ namespace FlightCareer.Application.Services
 
                         if (!string.IsNullOrEmpty(icao))
                         {
-                            s_scenicAerodromes[icao] = new ScenicAerodromeInfo(icao, name, cc, note, points);
+                            string role = elem.TryGetProperty("role", out var roleElem) ? roleElem.GetString() ?? "panoramico" : "panoramico";
+                            s_scenicAerodromes[icao] = new ScenicAerodromeInfo(icao, name, cc, note, points, role);
                         }
                     }
                 }

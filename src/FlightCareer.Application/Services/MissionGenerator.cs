@@ -1665,7 +1665,9 @@ namespace FlightCareer.Application.Services
             }
 
             // Se for aeródromo turístico curado e não tem Categoria 3.5 (ex: Tier 1), importa 3.5
+            // Só bases de voo panorâmico puxam a categoria; destinos turísticos só fornecem os pontos.
             var scenicAerodrome = placesService?.GetScenicAerodrome(airport.ICAO);
+            if (scenicAerodrome != null && !scenicAerodrome.IsScenicBase) scenicAerodrome = null;
             if (scenicAerodrome != null && !categories.Any(c => c.Id == "3.5"))
             {
                 foreach (var t in MissionRules.Rules.Values)

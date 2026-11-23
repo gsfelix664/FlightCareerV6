@@ -30,6 +30,32 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 AIRPORTS_CSV = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "CSV", "airports.csv")
 CURATED_DZ_CSV = os.path.join(ROOT, "tools", "places", "dropzones_curated.csv")
 CURATED_SCENIC_CSV = os.path.join(ROOT, "tools", "places", "scenic_aerodromes_curated.csv")
+CURATED_SCENIC_POIS_CSV = os.path.join(ROOT, "tools", "places", "scenic_pois_curated.csv")
+
+
+def load_scenic_rows():
+    """Lista curada de aeródromos turísticos + pontos turísticos pareados com aeródromos (scenic_pois_curated.csv).
+    Cada ponto entra como atração de cada aeródromo indicado; aeródromo novo entra com papel 'destino'."""
+    rows, by_icao = [], {}
+    if os.path.exists(CURATED_SCENIC_CSV):
+        for row in csv.DictReader(open(CURATED_SCENIC_CSV, encoding="utf-8")):
+            row = dict(row)
+            row["_attr"] = [x.strip() for x in row["attractions"].split("|") if x.strip()]
+            rows.append(row)
+            by_icao[row["icao"].strip().upper()] = row
+    if os.path.exists(CURATED_SCENIC_POIS_CSV):
+        for poi in csv.DictReader(open(CURATED_SCENIC_POIS_CSV, encoding="utf-8")):
+            attrs = [x.strip() for x in poi["attractions"].split("|") if x.strip()]
+            for code in [c.strip().upper() for c in poi["icaos"].split("|") if c.strip()]:
+                row = by_icao.get(code)
+                if row is None:
+                    row = {"icao": code, "name": attrs[0], "cc": poi["cc"], "note": "", "role": "destino", "_attr": []}
+                    rows.append(row)
+                    by_icao[code] = row
+                for a in attrs:
+                    if a not in row["_attr"]:
+                        row["_attr"].append(a)
+    return rows
 HUBS_JSON = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "Data", "hubs_data.json")
 OUT_DIR = os.path.join(ROOT, "src", "FlightCareer.Infrastructure", "Data", "places")
 UA = "FlightCareerDataBuilder/1.0"
@@ -337,14 +363,15 @@ def _wikidata_lookup(name, cache):
 def build_scenic(airports, pois, cache, sim=None, max_nm=75.0):
     """Aeródromos turísticos curados; cada atração vira um ponto com coordenada real (POI do banco ou Wikidata),
     aceito só se estiver a até 75 NM do aeródromo (rotas de flightseeing reais chegam a ~60 NM, ex.: Talkeetna–Denali). Atração sem coordenada confiável fica de fora (logada)."""
-    if not os.path.exists(CURATED_SCENIC_CSV):
+    curated = load_scenic_rows()
+    if not curated:
         return []
     by_alias = {}
     for a in airports:
         for alias in a["aliases"] | {a["icao"]}:
             by_alias.setdefault(alias, a)
     out = []
-    for row in csv.DictReader(open(CURATED_SCENIC_CSV, encoding="utf-8")):
+    for row in curated:
         code = row["icao"].strip().upper()
         a = by_alias.get(code)
         if a is None and sim is not None and code in sim:
@@ -354,7 +381,7 @@ def build_scenic(airports, pois, cache, sim=None, max_nm=75.0):
             log(f"AVISO: {code} não existe no simulador; ignorado")
             continue
         points = []
-        for attr in [x.strip() for x in row["attractions"].split("|") if x.strip()]:
+        for attr in row["_attr"]:
             words = set(_norm(attr))
             best = None
             for p in pois:
@@ -375,7 +402,8 @@ def build_scenic(airports, pois, cache, sim=None, max_nm=75.0):
                     log(f"  {code}: '{attr}' a {d:.0f} NM ({lab})")
             else:
                 log(f"  {code}: '{attr}' sem coordenada a até {max_nm:.0f} NM; ignorado")
-        out.append({"icao": a["icao"], "name": row["name"], "cc": row["cc"], "note": row["note"], "points": points})
+        out.append({"icao": a["icao"], "name": row["name"], "cc": row["cc"], "note": row["note"],
+                    "role": (row.get("role") or "panoramico").strip(), "points": points})
     return out
 
 def write(name, key, items, note):
