@@ -3022,3 +3022,9 @@
   - Suíte de integridade `MissionCatalogTests` aprovada (unicidade dos 59 legacyCodes, validação de campos, integridade de textos, normalização, ausência de códigos literais no código-fonte de produção e teste de migração SQLite).
   - Simulação de 90 dias do `career-stab` (`--days 90 --bots 1 --seed 7 --fast`) com resultados financeiros e operacionais idênticos nos 9 perfis (Easy, Medium, Hard × Agressivo, Cauteloso, Equilibrado).
   - Total de 969/969 testes xUnit aprovados (100%). Não testado no MSFS.
+
+## 2026-11-23 - Atrações turísticas curadas no mundo todo (Claude)
+- `scenic_aerodromes.json` passou de 16 para 409 aeródromos (59 bases de voo panorâmico e 350 destinos turísticos, 844 pontos com coordenadas do Wikidata), gerado por `tools/places/build_places.py` a partir de `scenic_aerodromes_curated.csv` e `scenic_pois_curated.csv`. Só as bases `panoramico` reforçam a categoria de voo panorâmico.
+- `airport_profiles.json` regerado: 402 aeroportos com a etiqueta `turistico_curado` (antes 16).
+- Snapshot do gerador (`missions_golden.json`) regravado: só mudaram as missões de SBJR, SBFI e SDUB (bases panorâmicas com atrações novas); os outros 11 aeroportos ficaram idênticos. `PlacesDataServiceTests` não fixa mais a contagem em 16.
+- Não testado no MSFS / não visto na tela.
