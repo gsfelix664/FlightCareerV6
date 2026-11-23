@@ -347,3 +347,117 @@ Para cada um dos 69 tipos, revisar e calibrar as faixas sorteadas (`paxRules`, `
 - **Pax** coerente (instrução 1–2, cheque 1 examinador, paraquedismo pela capacidade do avião de salto, rodízio de turno pela equipe, linha pela cabine).
 - O limite do avião continua filtrando no quadro (missão que não cabe aparece como acima do peso); a faixa do tipo não deve depender do avião do jogador.
 Entrega: tabela de faixas por tipo neste plano (com a aeronave de referência e a fonte), revisada pelo usuário; depois o catálogo é preenchido e o relatório § 9.4 confere.
+
+#### 9.7.1 Tabela de faixas proposta (v1, Claude, 2026-11-23) — aguardando aprovação do usuário
+**Como a faixa é sorteada (mudança técnica):** hoje distância, pax e carga são sorteados **separados**, então sai um "linha" de 130 pax com 1.600 NM ou um cargueiro de 120.000 lb com 200 NM. Proposta: cada tipo tem 1 a 3 **perfis** (bandas com peso); o gerador sorteia o perfil e, **dentro dele**, distância, pax e carga. O perfil grande pesa mais em aeroporto grande (tier 1–2 ou etiqueta do tipo) e o pequeno em aeroporto pequeno; a missão não depende do avião do jogador (o quadro continua marcando o que não cabe).
+**Bagagem por pessoa:** a da tabela § 9.6, sorteada por pessoa (não repetida aqui). "Carga" abaixo é a carga paga, sem bagagem.
+**Aeronave de referência:** capacidades do `aircrafts.csv` do projeto (PaxMax / CargaMax) quando o avião existe no jogo; senão, ficha do fabricante (marcado †). Distâncias: ortodrômica de rotas reais citadas.
+
+Formato dos perfis: `peso% · distância NM · pax · carga lb`.
+
+**A. Instrução** (aluno = pax; o jogador é o instrutor)
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| instrucao_local | C152 (2 / 530), C172 (4 / 878), DA40 | 100 · área a 5–15 NM (percurso 2×+10 = 20–40) · 1 · 0 | igual a hoje; tirar o perfil de 0 pax (sempre há aluno) |
+| circuito_tgl | C152, C172 | 80 · 10–25 · 1 · 0 ; 20 · 10–25 · 0 · 0 (solo supervisionado do instrutor em checagem) | igual a hoje com 80/20 em vez de 50/50 |
+| navegacao_vfr | C172, PA-28, DA40 | 100 · triângulo de 80–250 (etapas 25–90) · 1 · 0 | hoje 50–300 numa etapa só; triângulos de aeroclube típicos de 2–3 h |
+| instrucao_ifr | C172 G1000, DA62, Baron | 100 · aeródromo a 20–80 (ida e volta 40–160) · 1 · 0 | 2–3 aproximações por sessão |
+| adaptacao_noturna | C172, PA-28 | 100 · local 10–30 · 1 · 0 | 5 pousos noturnos (exigência de experiência recente) |
+| cheque | C172, Baron, King Air | 100 · local 20–60 · 1 (examinador) · 0 | igual a hoje |
+| instrucao_stol | NXCub (2 / 1.000), Cub, C207 | 100 · pista curta a 10–40 · 1 · 0 | — |
+
+**B. Linha aérea**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| ponte_aerea | A320neo (195), 737 MAX 8 (210) | 100 · 150–400 · 120–195 · 0–6.000 (belly) | SBSP–SBRJ 197, JFK–BOS 160, MAD–BCN 260, HND–ITM 250, MEL–SYD 380 |
+| troncal_domestico | A320neo, 737 MAX 8, A321 (244) | 45 · 250–700 · 120–190 · 0–8.000 ; 40 · 700–1.400 · 140–210 · 0–10.000 ; 15 · 1.400–2.400 · 160–230 · 0–10.000 | GRU–REC 1.140, GRU–MAO 1.450, JFK–LAX 2.150; hoje teto 1.600 |
+| regional_internacional | A320neo, A321LR, 737 MAX | 40 · 400–1.000 · 120–190 · 0–8.000 ; 45 · 1.000–1.900 · 140–220 · 0–10.000 ; 15 · 1.900–3.000 · 160–220 · 0–8.000 | GRU–EZE 900, GRU–SCL 1.400, LHR–FCO 780, MIA–BOG 1.320 |
+| longo_curso | 787-10 (330), A330-300 (300), 747-400 (416) | 35 · 3.000–4.500 · 220–320 · 5.000–30.000 ; 50 · 4.500–6.500 · 250–380 · 5.000–35.000 ; 15 · 6.500–7.700 · 250–400 · 5.000–25.000 | GRU–LIS 4.300, GRU–LHR 5.100, GRU–DXB 6.600; teto pelo alcance do 747-8i (7.730) |
+| feeder_inbound / feeder_outbound | ATR 42 (48), ATR 72 (72), E175† (76–88) | 40 · 80–250 · 30–48 · 0–2.000 ; 45 · 150–400 · 45–72 · 0–3.000 ; 15 · 250–550 · 70–88 · 0–3.000 | hoje 45–160 pax: o perfil 111–160 (A320) sai do feeder |
+| sub_regional | C208B (14), Twin Otter (20), SkyCourier (19), ES30 (30) | 60 · 50–200 · 4–12 · 0–800 ; 40 · 100–300 · 10–19 · 0–1.000 | Cape Air (Cessna 402, 9 pax), Azul Conecta (C208), Twin Otter nas ilhas |
+| pinga_pinga | C208B, Twin Otter, Beech 1900† | 100 · 3–4 etapas de 25–120 (total 100–400) · 2–14 · 100–1.500 (malote/encomenda) | rotas postais do Alasca e Azul Conecta |
+| regional_essencial | C208B, Twin Otter, ATR 42 | 70 · 50–300 · 4–14 · 200–1.500 ; 30 · 100–350 · 20–48 · 500–3.000 | EAS nos EUA (9–30 assentos), Widerøe Dash 8† no norte da Noruega |
+
+**C. Executiva, charter e turismo**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| executivo_corporativo | Baron (6), King Air 250 (9), CJ4 (10), PC-24 (10), Longitude (12) | 45 · 100–400 · 1–4 · 0 ; 40 · 300–1.200 · 2–7 · 0 ; 15 · 1.000–2.000 · 4–10 · 0 | hoje 1–25 pax (25 não cabe em jato executivo): teto 12 |
+| executivo_intercontinental | Longitude (3.500 NM), Global 7500† (7.700), G650† | 70 · 2.500–3.500 · 2–8 · 0 ; 30 · 3.500–7.000 · 4–12 · 0 | GRU–MIA 3.550, TEB–LTN 3.000, LTN–DXB 3.000 |
+| vip_internacional | CJ4, PC-24, Longitude | 100 · 300–1.200 · 2–8 · 0 | hoje 300–900 |
+| agro_executivo | Baron, King Air C90 (8), PC-12 (10) | 60 · 80–300 · 1–4 · 0–200 ; 40 · 250–600 · 3–8 · 0–200 | Sorriso, Rio Verde, LEM a partir de capitais |
+| familia_alto_padrao | Bonanza G36 (6), PC-12, King Air | 100 · 100–800 · 2–7 · 0 | hoje 2–8 |
+| equipes_urgentes | Caravan, PC-12, King Air | 100 · 50–500 · 2–6 · 50–400 (equipamento) | — |
+| charter_lazer | Caravan, PC-12, King Air; pousada: Beaver†, C207 (7) | 60 · 100–800 · 4–9 · 0 (fim de semana) ; 40 · 40–300 · 2–8 · 0 (lodge, pista isolada) | pesca no Pantanal/Amazônia, lodges do Alasca e Canadá |
+| charter_esportivo | E190† (100), A320neo; banda ou time pequeno: ATR 72 | 60 · 200–1.200 · 30–70 · 0–4.000 (equipamento) ; 40 · 300–1.500 · 60–150 · 0–6.000 | time de futebol com comissão ~50–70 pessoas |
+| transfer_metropolitano | Baron, King Air, CJ4 | 100 · 50–250 · 1–6 · 0 | SBMT–SBJR 190, TEB–ACK 170 |
+| panoramico | C172, C208, Twin Otter (safári) | 70 · percurso 15–60 · 1–3 · 0 ; 30 · percurso 30–80 · 4–12 · 0 (turismo em grupo) | Grand Canyon (Twin Otter), Fiordes; hoje 1–3 |
+| demo_flight | qualquer (o avião do jogador) | 100 · local 20–60 · 1–3 (comprador + assessor) · 0 | — |
+
+**D. Carga**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| carga_paletizada | 737-800BCF† (~50.000 lb), A330-200F† (~130.000), 747-400 (475.000 no csv; ficha real ~250.000†) | 40 · 300–1.600 · 0 · 20.000–55.000 ; 40 · 600–2.600 · 0 · 55.000–120.000 ; 20 · 3.500–7.500 · 0 · 120.000–250.000 | VCP–MAO, MIA–BOG, LEJ–HKG; perfil pesado só de aeroporto `carga:cargueiros` |
+| carga_overnight | C208B (3.305), ATR 72F† (~18.000), 737F† | 45 · 100–400 · 0 · 1.000–3.300 ; 35 · 150–500 · 0 · 6.000–16.000 ; 20 · 300–1.500 · 0 · 20.000–50.000 | FedEx Feeder (Caravan), ASL ATR; hoje 20.000–60.000 só |
+| malotes | Baron, Seneca†, Caravan | 100 · 50–350 · 0–1 · 50–600 | hoje 50–1.000 e 50–600 NM |
+| carga_valores | King Air, Caravan, PC-12 | 100 · 100–600 · 1–2 (escolta) · 200–2.000 | 1 milhão em notas de 100 ≈ 10 kg; ouro em barras de 12,4 kg |
+| ecommerce | C208B, ATR 72F†, 737F† | 50 · 40–300 · 0 · 500–3.300 ; 35 · 100–500 · 0 · 4.000–15.000 ; 15 · 300–1.200 · 0 · 20.000–45.000 | hoje até 12.000 |
+| carga_jit | PC-12, King Air, Caravan, CJ4 | 70 · 50–800 · 0–2 (mecânico) · 50–1.500 ; 30 · harvest rescue 20–150 · 0–1 · 50–500 | — |
+| cadeia_fria | Caravan, ATR 72F†, 737F† | 40 · 80–400 · 0 · 800–3.300 ; 40 · 150–600 · 0 · 6.000–16.000 ; 20 · 400–1.500 · 0 · 20.000–45.000 | pescado de Manaus/Belém, salmão do sul do Chile, frutas do Vale do São Francisco |
+| carga_dgr | Caravan, King Air, Twin Otter | 70 · 100–800 · 0 · 100–2.000 (farmacêutica) ; 30 · 50–300 · 0 · 500–3.000 (explosivo de mineração) | — |
+| carga_sensivel | C207, Caravan, Baron | 100 · 50–400 · 0–1 (veterinário/biólogo) · 50–500 | botijão de sêmen ~30–60 lb |
+| carga_combi | C208B, Twin Otter, ATR 42 | 70 · 50–400 · 2–9 · 500–2.000 ; 30 · 100–400 · 15–30 · 3.000–6.000 | ATR combi no norte do Canadá |
+| insumos_agro | Caravan, C207, C404 Titan (3.500) | 100 · 30–400 · 0–1 · 200–3.000 | hoje 50–3.500 |
+| suprimentos_remotos | C207, Caravan, Twin Otter, NXCub | 60 · 15–150 · 0–1 · 300–1.500 ; 40 · 30–250 · 0–1 · 1.500–3.300 | hoje 50–1.500 |
+| conexao_pista_curta | C207, Caravan | 100 · 15–80 · 0–5 · 0–1.200 | — |
+
+**E. Saúde** (pax = paciente + acompanhante; equipe médica entra como tripulação de apoio, com bagagem 3–8 kg)
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| orgaos | CJ4, King Air, PC-12 | 100 · 50–700 · 2–3 (equipe de captação) · 20–60 (caixa térmica) | coração: isquemia fria ~4–6 h → teto ~700 NM em jato; hoje 100–600 sem carga |
+| uti_inter_hospitalar | King Air, PC-12, CJ4 | 100 · 80–500 · 1–2 (paciente + acompanhante) · 150–400 (maca, monitor, O₂) | hoje 3–4 pax sem carga |
+| medevac_remoto | Caravan, PC-12, C207 | 100 · 30–300 · 1–2 · 100–300 | hoje 1–2 / 300–600 lb (pesado para C207) |
+| uti_longa_distancia | CJ4, PC-24, Longitude | 100 · 800–3.000 · 1–2 · 200–400 | repatriação EUA–Brasil, Caribe–EUA |
+| saude_familia | Caravan, King Air, Twin Otter | 100 · 50–250 (ida) · 3–8 (equipe) · 100–600 (vacinas, odonto) | ronda indígena/ribeirinha |
+
+**F. Trabalho aéreo, agro e vigilância**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| aerolevantamento | C206†, C208, King Air | 100 · percurso 15–80 · 0–1 (operador) · 50–200 (câmera) | igual a hoje com operador opcional |
+| paraquedismo | C182† (4), C208B (14), Twin Otter (20) | 35 · zona a 0–5 · 3–5 · 0 ; 50 · 0–5 · 8–14 · 0 ; 15 · 0–5 · 15–20 · 0 | o equipamento de 12–16 kg passa a ser a bagagem por saltador; o perfil pesa conforme a DZ |
+| pulverizacao | Cessna 188 AGTruck (1.100), Ipanema† (~2.100), Air Tractor 802† (~6.600) | 60 · talhão a 2–15 · 0 · 800–2.200 ; 40 · 2–20 · 0 · 3.000–6.500 | só aviões agrícolas |
+| reboque_planador | NXCub, C172, Robin DR400 | 100 · local 5–15 · 0 · 0 | — |
+| publicidade_aerea | Cub, C172, NXCub | 100 · percurso 20–80 · 0 · 30–60 (faixa) | — |
+| patrulha_vigilancia | C172, C208, Bonanza | 100 · percurso 30–200 · 1–2 (observador) · 0 | — |
+| inspecao_linhas | C172, C208 | 100 · percurso 40–200 · 1 (inspetor) · 0 | — |
+| monitoramento_trafego | C172, Bonanza | 100 · percurso 10–40 · 1–2 (repórter, cinegrafista) · 0–50 | — |
+| sar | C208, King Air, PC-12 | 100 · percurso 40–250 · 1–3 (observadores) · 0 | — |
+| calibracao_auxilios | King Air 350†, CJ4 | 100 · 20–200 · 1–2 (técnico) · 300–800 (console) | — |
+
+**G. Operações técnicas e translados** (piloto com bagagem 3–10 kg)
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| ferry_posicionamento | avião da frota | 55 · 20–150 · 0 · 0 ; 35 · 150–600 · 0 · 0 ; 10 · 600–1.500 · 0 · 0 | hoje 30–500 com faixas sem continuidade (61–179 nunca saía) |
+| translado_manutencao | avião da frota | 100 · 20–400 · 0 · 0 | destino = oficina |
+| ferry_permit | avião da frota | 100 · 20–300 · 0 · 0 | — |
+| check_flight | avião da frota | 100 · local 20–60 · 0–1 (mecânico) · 0 | — |
+| crew_parts | PC-12, King Air, CJ4, Caravan | 60 · 50–800 · 1–6 (tripulação/mecânicos) · 50–600 ; 40 · 30–200 · 1–2 · 100–1.000 (field AOG: hélice, bateria) | hoje 4–18 pax sem carga |
+| translado_piloto_agricola | C172, Bonanza, Baron | 100 · 30–200 · 1–2 · 0 | igual a hoje |
+| pessoas_remotas | C207, Caravan, Twin Otter, SkyCourier | 60 · 15–150 · 1–6 · 0–300 ; 40 · 30–300 · 6–19 (turno, brigada) · 0–1.000 | hoje dividido em 3 tipos com 1–9 pax |
+
+**H. Governo, defesa e humanitário**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| autoridades | King Air, CJ4, PC-12 | 100 · 80–600 · 2–8 · 0–600 (urnas) | hoje 2–15 |
+| diplomatico | Longitude, Global†, A320neo (ACJ) | 60 · 300–3.000 · 4–12 · 0 ; 40 · 1.000–6.000 · 20–60 · 0–3.000 | — |
+| militar_can | Caravan, Casa C-295† (~20.000), A400M (120.000) | 40 · 100–600 · 0–9 · 500–3.000 ; 40 · 200–1.200 · 5–30 · 3.000–15.000 ; 20 · 300–2.000 · 10–60 · 15.000–60.000 | rotas do CAN para a fronteira |
+| humanitario | Caravan, Twin Otter, A400M | 70 · 50–400 · 0–4 · 1.000–4.500 ; 30 · 200–1.500 · 0–20 · 10.000–60.000 | — |
+
+**I. Remotas, bush e campo**
+| id | Referência | Perfis | Exemplo real / observação |
+|---|---|---|---|
+| combustivel_tambor | Caravan, Twin Otter, C207 | 100 · 20–200 · 0 · 2–10 tambores de 200 L (≈ 360 lb de AvGas ou 390 lb de Jet A/diesel cada, com o tambor) | Caravan leva ~8 tambores; C207 ~3–4 |
+| apoio_acampamento | C207, Caravan, NXCub | 100 · 30–300 · 0–4 · 200–2.000 | — |
+| evacuacao_por_do_sol | C207, Caravan, Bonanza | 100 · 30–250 · 1–6 · 0–300 | — |
+
+**Achados na faixa atual (corrigidos na tabela):** executiva até 25 pax; feeder até 160 pax (A320); cargueiro noturno sem perfil leve (Caravan nunca recebia); UTI sem a carga do equipamento médico; medevac bush com 300–600 lb (pesado para C207); `ferry` com buraco de 61–179 NM; carga e distância sorteadas separadas (cargueiro de 120.000 lb a 200 NM).
+**Pendências de dados (não inventar):** os aviões marcados † não estão no `aircrafts.csv`; se o usuário quiser limitar as faixas só aos aviões do jogo, os perfis com † caem para o maior avião do csv que faz a missão. O `CargaMax` do 747-400 no csv (475.000 lb) parece o peso máximo, não a carga paga (ficha real ~250.000 lb†): conferir à parte.
