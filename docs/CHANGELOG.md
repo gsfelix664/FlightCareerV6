@@ -2983,3 +2983,5 @@
   - `MissionGeneratorLocalTests`: testes com dados mockados injetados validando waypoints `P:`, atributos (raio 1,5 NM, 3.000 ft AGL), percurso real, ausência de marcadores soltos, fallback para POIs, skew de peso em 500 corridas (~70% de 3.5.1) e importação de categoria em aeródromo Tier 1.
   - Total de 934/934 testes xUnit aprovados (100%).
 - Não testado no MSFS / não visto na tela.
+## 2026-11-22 - Escada de aviões dos bots determinística (Claude)
+- `CareerProgressionSimulator.BuildAircraftLadder`: o avião de cada degrau era o primeiro do banco que continha algum dos nomes, e a ordem do banco segue a chave Guid (muda a cada execução). Na t8 o degrau H do Médio caiu no Citation Longitude ($28 mi) em vez do CJ4 e os bots ficaram parados na classe G do dia 540 ao 1095. Agora a escolha segue a ordem de preferência dos nomes (`FindByPreference`). Teste `AircraftLadderTests`.

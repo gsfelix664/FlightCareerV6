@@ -1690,44 +1690,50 @@ namespace FlightCareer.Application.Simulation
             };
         }
 
-        private static List<LadderStep> BuildAircraftLadder(IReadOnlyList<AircraftType> allTypes)
+        /// <summary>
+        /// Primeiro modelo que contém algum dos nomes, na ordem de preferência dos nomes (não na ordem do banco,
+        /// que segue a chave Guid e muda a cada execução: antes um degrau podia cair no Citation Longitude em vez do CJ4).
+        /// </summary>
+        private static AircraftType? FindByPreference(IReadOnlyList<AircraftType> types, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                var match = types.Where(t => t.Model.Contains(name, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(t => t.Model.Length).ThenBy(t => t.Model, StringComparer.Ordinal)
+                    .FirstOrDefault();
+                if (match != null) return match;
+            }
+            return null;
+        }
+
+        public static List<LadderStep> BuildAircraftLadder(IReadOnlyList<AircraftType> allTypes)
         {
             var list = new List<LadderStep>();
 
             // Escada A -> B -> E -> F -> G -> H -> I -> J mapeada para CareerPhase
-            var c152 = allTypes.FirstOrDefault(t => t.Model.Contains("152"))
+            var c152 = FindByPreference(allTypes, "C152", "152")
                 ?? throw new InvalidOperationException("C152 não encontrado.");
             list.Add(new LadderStep("A", "Cessna C152", CareerPhase.Phase1_FlightSchool, c152));
 
-            var c172 = allTypes.FirstOrDefault(t => t.Model.Contains("172"))
-                ?? c152;
+            var c172 = FindByPreference(allTypes, "C172SP G1000", "172") ?? c152;
             list.Add(new LadderStep("B", "C172SP G1000", CareerPhase.Phase1_FlightSchool, c172));
 
-            var baron = allTypes.FirstOrDefault(t => t.Model.Contains("Baron"))
-                ?? allTypes.FirstOrDefault(t => t.Model.Contains("DA62"))
-                ?? c172;
+            var baron = FindByPreference(allTypes, "Baron G58", "Baron", "DA62") ?? c172;
             list.Add(new LadderStep("E", "Beechcraft Baron G58", CareerPhase.Phase3_AirTaxi, baron));
 
-            var c208 = allTypes.FirstOrDefault(t => t.Model.Contains("208"))
-                ?? allTypes.FirstOrDefault(t => t.Model.Contains("TBM"))
-                ?? baron;
+            var c208 = FindByPreference(allTypes, "C208B", "208", "TBM") ?? baron;
             list.Add(new LadderStep("F", "C208B", CareerPhase.Phase3_AirTaxi, c208));
 
-            var kingAir = allTypes.FirstOrDefault(t => t.Model.Contains("King Air 250") || t.Model.Contains("King Air"))
-                ?? allTypes.FirstOrDefault(t => t.Model.Contains("ATR 42"))
-                ?? c208;
+            var kingAir = FindByPreference(allTypes, "King Air 250", "King Air", "ATR 42") ?? c208;
             list.Add(new LadderStep("G", "Beechcraft King Air 250", CareerPhase.Phase4_HighPerformanceAndMedevac, kingAir));
 
-            var cj4 = allTypes.FirstOrDefault(t => t.Model.Contains("CJ4") || t.Model.Contains("Citation"))
-                ?? kingAir;
+            var cj4 = FindByPreference(allTypes, "CJ4", "Citation") ?? kingAir;
             list.Add(new LadderStep("H", "Cessna Citation CJ4", CareerPhase.Phase4_HighPerformanceAndMedevac, cj4));
 
-            var a320 = allTypes.FirstOrDefault(t => t.Model.Contains("320") || t.Model.Contains("737"))
-                ?? cj4;
+            var a320 = FindByPreference(allTypes, "A320neo", "A320", "320", "737") ?? cj4;
             list.Add(new LadderStep("I", "A320neo", CareerPhase.Phase6_DomesticAirline, a320));
 
-            var a330 = allTypes.FirstOrDefault(t => t.Model.Contains("330") || t.Model.Contains("747") || t.Model.Contains("787"))
-                ?? a320;
+            var a330 = FindByPreference(allTypes, "A330-200", "330", "747", "787") ?? a320;
             list.Add(new LadderStep("J", "A330-200", CareerPhase.Phase7_InternationalAirline, a330));
 
             return list;
