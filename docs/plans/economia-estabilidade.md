@@ -121,4 +121,4 @@ Rodada t9 (mesmos parâmetros, com a correção `fix/escada-bots`):
 | Difícil (3 políticas) | 136–217 | E, ~$1,9–2,0 mi | F, ~$4,3–4,5 mi | H, ~$10,5–11,1 mi | 0 |
 
 - **Trava na classe G: bug do simulador, não da economia.** `BuildAircraftLadder` escolhia o avião de cada degrau com `FirstOrDefault` sobre `Contains` (ex.: "King Air" casava com King Air C90GTX ou 250 conforme a ordem do banco), então a escada mudava entre execuções e no Médio às vezes pulava o degrau do jato. Agora a escolha é determinística (nome mais curto, depois ordem alfabética) e testada (`AircraftLadderTests`). As rodadas anteriores à t9 podem ter usado escadas diferentes entre si: compare só a tendência.
-- Patrimônio do Médio no 3º ano subiu para ~$18 mi (pendência 1 continua com o usuário). Uma falência de agressivo no Médio (é o bot que aparece na classe B): dentro do esperado para a política que adia manutenção.
+- Patrimônio do Médio no 3º ano subiu para ~$18 mi (**decisão do usuário, 2026-11-23: manter as escalas como estão**). Uma falência de agressivo no Médio (é o bot que aparece na classe B): dentro do esperado para a política que adia manutenção.
