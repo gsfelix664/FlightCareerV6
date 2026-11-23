@@ -1,0 +1,203 @@
+# Catálogo de missões em JSON (plano)
+
+Estado: **aguardando a REORG-CATEGORIAS** (uma missão por código) e as decisões do usuário abaixo.
+
+## 1. Objetivo técnico
+Cada missão passa a ser um item de catálogo em JSON com id de texto estável (`medevac`, `carga_fragil`...) e declara: código exibido (ex.: 3.3.4), categoria, filtro do quadro, família de pagamento, fase, M_Tipo, regra de destino (`pista_curta`, `outro_pais`, `volta_a_origem`, `hub_de_saude`...), regras de conclusão e pesos por porte. O gerador aplica as regras pelas propriedades, não por `if (sub.Id == ...)`. Prova: `career-stab` com o mesmo resultado de antes.
+
+## 2. Pedido do usuário para o porte 1 (2026-11-23, texto resumido)
+**A. Transporte aéreo regular de passageiros**
+1. Troncal doméstico (trunk routes): capitais e grandes centros, alta densidade, pontualidade rígida (janela de block time), narrow-body.
+2. Longo curso internacional (long-haul / ETOPS): transcontinental, wide-body; combustível para alternados remotos, step climb; margem alta, custo alto.
+3. Alimentador de hub (feeder): voos curtos trazendo passageiros de aeroportos regionais para a malha internacional do hub.
+
+**B. Carga aérea pesada e expressa (all-cargo)**
+4. Carga geral paletizada (ULD): contêineres entre centros industriais, cargueiros dedicados.
+5. Logística expressa / e-commerce (overnight): voos noturnos com horário de corte; penalidade severa por atraso, bônus de pontualidade.
+6. Carga crítica / perigosa (DGR e cadeia fria): fármacos refrigerados, peças just-in-time; exige pouso suave (limite baixo de G) e razão de subida/descida controlada.
+
+**C. Aviação executiva de alta gama (FBO / GAT)**
+7. Táxi aéreo executivo internacional / intercontinental: CEOs, chefes de estado, celebridades em jatos de longo alcance.
+8. Repatriamento médico / UTI aérea de longa distância: entre grandes centros hospitalares, prioridade de ATC (Lifeguard), sem turbulência severa.
+
+**D. Operações técnicas, translados e governo**
+9. Translado (ferry / posicionamento): aeronave vazia entre hubs (cobrir AOG) ou entrega de fábrica; valor fixo.
+10. Translado para manutenção pesada (Check C / D): aeronave com restrição (trem travado embaixo, limite de altitude, sem pressurização abaixo do FL100) até um MRO grande.
+11. Fretamento especial (esportivo / diplomático): delegações, turnês, comitivas fora da grade regular.
+
+## 3. Comparação com o que existe (depois da REORG)
+| Pedido | Existe hoje | Falta |
+|---|---|---|
+| 1 Troncal | 1.1.1 Doméstico / Hub Link (absorveu a Ponte Aérea) | block time só no XP (bônus de prazo); exigência de narrow-body não existe |
+| 2 Long-haul | 1.1.3 Intercontinental | ETOPS, alternados e step climb só como texto |
+| 3 Feeder | 2.1.1 Alimentação de Hub (sai do porte 2) | não existe no porte 1 |
+| 4 ULD | 1.2.1 / 1.2.2 / 1.2.3 (por distância) | — |
+| 5 Overnight | absorvido no 1.2.1 | missão própria; horário de corte e penalidade de atraso (contraria a decisão "pagamento não depende de pontualidade") |
+| 6 DGR / cadeia fria | 3.2.4 Carga Frágil (sem regra de conclusão) | limite de G no pouso e de razão de subida/descida |
+| 7 Executivo intercontinental | 1.3.1 (até 2.500 NM) e 3.1.4 VIP (300–900 NM) | longo alcance intercontinental |
+| 8 UTI aérea longa distância | — (MEDEVAC 3.3.4 é 50–350 NM) | missão nova; regra de conforto (turbulência) |
+| 9 Ferry | 1.3.3 Translados / Ferry | valor fixo |
+| 10 Check C/D com restrição | — | missão nova; regra de voo restrito (altitude máx., trem embaixo) |
+| 11 Fretamento especial | 1.3.4 Diplomático e Militar | variantes esportivas |
+| (fora da lista) | 1.1.2 Regional Internacional, 1.2.2 Carga Regional Internacional, 1.3.2 Crew & Parts, 3.1.1 Executivo Regional, 3.2.4 Carga Frágil, 3.3.4 MEDEVAC | decidir se ficam no porte 1 |
+
+## 4. Decisões do usuário (2026-11-23)
+- As missões que já existem no porte 1 **ficam** (inclusive as que não estão na lista acima).
+- Atraso **só pesa no XP** (overnight e block time incluídos); o pagamento continua sem depender de pontualidade.
+- Ordem: (1) catálogo JSON como **reorganização técnica pura** (mesmas missões, mesmas chances, `career-stab` igual); (2) depois, numa etapa própria, as missões novas do porte 1 (feeder, overnight, UTI aérea longa distância, Check C/D) e as regras de conclusão novas (G/razão no DGR, turbulência na UTI, voo restrito no Check C/D).
+
+## 5. Nova diretriz do usuário (2026-11-23)
+- As missões **deixam de ser amarradas ao porte** (tier). Haverá **uma lista geral de tipos de missão**; cada tipo de aeroporto recebe mais de uns tipos do que de outros (ex.: tier 1 recebe pouca instrução, tier 3 recebe muita), além dos **aeroportos preferenciais** (ex.: aeródromo com dropzone recebe mais paraquedismo, aeroclube mais instrução, aeródromo turístico mais panorâmico).
+- Passos: (1) lista geral completa dos tipos de missão (abaixo; o usuário ainda vai mandar mais exemplos); (2) definir, por tipo de aeroporto, a frequência de cada missão e as preferências; (3) implementar no catálogo JSON.
+- Os tiers dos aeroportos (OurAirports large/medium/small) **não mudam por enquanto**.
+
+## 6. Lista geral de tipos de missão (rascunho v3, 2026-11-23)
+Junta as listas do usuário para os portes 1, 2 e 3 com o que já existe. A lista define **o tipo e as regras**; frequência, destinos, distância, pax e carga por tipo de aeroporto vêm no passo 2.
+
+Legenda de status: **E** = existe (código atual entre parênteses); **P** = parcial (existe parecida; falta o que está na coluna de regras); **N** = nova.
+Regras: o que o addon confere pela telemetria para dar o contrato como cumprido (sem regra = só pousar no destino). **HUD:** instruções dinâmicas mostradas durante o voo. Prazo de entrega e pontualidade pesam **só no XP** (decisão § 4). Itens com ⚠SDK dependem de confirmar SimVar/evento na documentação do MSFS 2024.
+
+### A. Instrução e formação
+| id | Missão | St. | Regras de conclusão / restrições | HUD |
+|---|---|---|---|---|
+| instrucao_local | Instrução local (área de instrução + TGL, volta à origem) | E (3.4.1) | passar ≤ 3 NM do centro da área abaixo do teto; N TGL; pouso completo na origem | "Siga para a área (rumo, distância)"; "Na área: manobras"; "TGL x/N" |
+| circuito_tgl | Circuito de tráfego (TGL, adaptação de aluno) | E (3.5.2) | 3–6 TGL válidos (toque ≥ 1 s, sem parar, nova decolagem); pouso completo | "TGL x/N"; aviso se o toque não valeu (quique, parou) |
+| navegacao_vfr | Navegação VFR (triângulo entre três aeródromos tier 3, ponto de reportagem obrigatório, pouso completo em cada etapa) | P (3.4.2: uma etapa só) | sobrevoar o ponto de reportagem (≤ 2 NM); pouso completo em cada aeródromo do triângulo, na ordem | "Próxima etapa: X (rumo, distância)"; "Reporte em P" |
+| instrucao_ifr | Instrução por instrumentos (aproximações RNP/NDB/VOR ou órbitas num aeródromo próximo) | N | N aproximações até o mínimo, com altitude ±100 ft e proa ±5° nos trechos estabilizados; ⚠SDK para conferir procedimento/auxílio sintonizado (sem isso: perfil vertical + alinhamento com a pista) | "Aproximação x/N"; desvio de altitude/proa ao vivo |
+| adaptacao_noturna | Adaptação noturna (decolagens e pousos locais à noite) | N | N pousos completos com sol abaixo do horizonte; luzes de navegação e pouso ligadas; ⚠SDK hora local/período do dia e balizamento acionado por rádio (PCL) | "Pouso x/N"; "Ligue as luzes" |
+| cheque | Cheque / revalidação (PC, IFR, multimotor) | P (3.4.3: área + 2 TGL) | trechos avaliados com altitude ±100 ft e velocidade ±5 kt; toque na faixa de toque; nota do cheque no resultado | "Tarefa atual: …"; tolerâncias ao vivo |
+
+### B. Linha aérea e regular
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| ponte_aerea | Ponte aérea de alta frequência (dois centros econômicos próximos) | P (absorvida no 1.1.1) | — | — |
+| troncal_domestico | Troncal doméstico (capitais e grandes centros; narrow-body) | E (1.1.1, 2.1.2) | block time só no XP | prazo de chegada |
+| regional_internacional | Regional internacional (países vizinhos) | E (1.1.2) | — | — |
+| longo_curso | Longo curso internacional (long-haul / ETOPS) | E (1.1.3) | ETOPS, alternados e step climb só como texto | — |
+| feeder_inbound | Alimentador de hub (interior → hub) | E (2.1.1) | — | — |
+| feeder_outbound | Distribuidor de hub (hub → polos regionais) | N | — | — |
+| sub_regional | Sub-regional / alimentador leve (cidades pequenas tier 3 ↔ capital estadual) | N | — | — |
+| pinga_pinga | Pinga-pinga (várias escalas curtas no mesmo contrato, sem reabastecer): regional de passageiros e **entrega postal / encomenda rural** em 3–4 pistas de fazenda na mesma manhã | P (multi-leg da fase 5) | pouso em cada escala na ordem; combustível não pode subir entre trechos | "Escala x/N: próxima Y" |
+| regional_essencial | Voo regional essencial subsidiado e **transporte comunitário / táxi aéreo social** (moradores, professores, trabalhadores entre pistas de aldeia e a cidade com banco e comércio) (comunidades isoladas ↔ capital regional: Amazônia, EAS nos EUA, PSO na Europa, norte do Canadá, Alasca, outback, Papua, ilhas do Pacífico) | N | — | — |
+
+### C. Executiva, charter e turismo
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| executivo_corporativo | Táxi aéreo corporativo (C-level; aeroportos executivos ↔ polos industriais) | E (1.3.1, 3.1.1) | conforto de passageiros no XP | — |
+| executivo_intercontinental | Executivo internacional / intercontinental (jatos de longo alcance) | P (1.3.1 até 2.500 NM) | — | — |
+| vip_internacional | VIP internacional curto (país vizinho) | E (1.7.4, 2.7.4) | — | — |
+| agro_executivo | Táxi aéreo do agronegócio (produtores, agrônomos, investidores; capitais/tier 2 ↔ cidades agrícolas) | E (2.2.1–2.2.3) | — | — |
+| familia_alto_padrao | Família de alto padrão | E (3.1.2) | — | — |
+| equipes_urgentes | Equipes urgentes | E (3.1.3) | — | — |
+| charter_lazer | Fretamento turístico (grupos em feriados/férias, weekend charter de hubs executivos, **transfer para pousada de pesca/lodge** em pista de grama isolada com bagagem pesada) | N | — | — |
+| charter_esportivo | Charter esportivo e de turnês (times, shows; madrugada pós-evento) | P (1.3.4, só texto) | — | — |
+| transfer_metropolitano | Transfer executivo inter-metropolitano (ponto a ponto curto) | N | — | — |
+| panoramico | Voo panorâmico local (sightseeing; volta à origem) e **safári aéreo / fotografia de fauna** (baixo e lento sobre áreas alagadas, rios, savanas e parques pelo mundo, saindo da pista da pousada) | E (3.5.1) | passar ≤ 1,5 NM de cada ponto abaixo de 3.000 ft AGL; **nova:** altitude e velocidade de observação mantidas sobre cada ponto (faixa por avião) | "Próximo ponto: X (rumo, distância)"; "Mantenha N kt / N ft" |
+| demo_flight | Voo de demonstração comercial (potencial comprador; decolagem curta e cruzeiro) | N | rolagem de decolagem ≤ referência do avião; cruzeiro estável por N min; pouso na origem | "Demonstre: decolagem curta"; "Cruzeiro estável x/N min" |
+
+### D. Carga
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| carga_paletizada | Carga geral paletizada (ULD; cargueiros dedicados) | E (1.2.1–1.2.3) | — | — |
+| carga_overnight | Carga expressa overnight (correios, centros de triagem; cargueiro noturno) | P (2.3.3, 1.7.6) | atraso só no XP | prazo |
+| malotes | Malotes bancários e documentos (fim da tarde, interior → centros de compensação) | E (2.3.3) | — | — |
+| carga_valores | Transporte de valores (numerário, metais preciosos) | P (2.3.3) | — | — |
+| ecommerce | E-commerce e carga fracionada (same-day/next-day; encomendas, eletrônicos e medicamentos no interior) | E (2.3.1) | atraso só no XP | prazo |
+| carga_jit | Carga industrial just-in-time / AOG (peças, eletrônicos, maquinário; inclui safra AOG e **harvest rescue**: peça hidráulica/eletrônica pousando na pista de terra da fazenda) | P (1.3.2, 3.2.1, 4.3.2) | atraso só no XP | prazo |
+| cadeia_fria | Cadeia fria e perecíveis (frutas, carnes, pescados frescos e produtos regionais de cidades litorâneas/ribeirinhas para hubs) | N | razão de subida/descida dentro de limite; atraso só no XP | razão ao vivo; prazo |
+| carga_dgr | Carga perigosa/controlada e farmacêutica (vacinas, medicamentos de alto custo, explosivos para mineração, químicos controlados) | P (1.7.2 Carga Frágil) | G máximo no pouso (baixíssimo nos explosivos); razão de subida/descida; **sem sobrevoo urbano** (aproximação: não passar a menos de N NM de aeroportos tier 1/2 fora da origem/destino; dados de área urbana não existem) | G e razão ao vivo; aviso de área urbana |
+| carga_sensivel | Carga leve sensível e viva: insumos biológicos e sementes nobres, genética bovina (botijões de nitrogênio) com veterinário de campo, soltura de fauna silvestre reabilitada em reserva com pista de apoio | N | prazo curto (XP); pouso suave (G) | prazo; G no pouso |
+| carga_combi | Carga combi (passageiros + suprimentos; Amazônia e regiões remotas) | N | — | — |
+| insumos_agro | Insumos e peças agro | E (2.3.2, 3.2.2, 3.2.3, 4.2.3) | — | — |
+| suprimentos_remotos | Abastecimento de rancho e mantimentos (fazenda, vilarejo ribeirinho, pelotão de fronteira, comunidade isolada) e materiais de construção/ferramentas (cimento, telhas, motosserras, geradores, peças de motor de barco) | E (4.1.1) | carga volumosa: ⚠ CG crítico só como texto (W&B não é conferido hoje) | — |
+| conexao_pista_curta | Conexão tier 3 → tier 4 (suprimentos ou passageiros para pista de terra/fazenda próxima) | N | destino tier 4 próximo | — |
+
+### E. Saúde
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| orgaos | Transporte de órgãos para transplante (contagem regressiva; atraso e arremetida tiram XP) | P (3.3.3) | prazo rígido (isquemia) e arremetida: **só perda de XP** (decisão 2026-11-23) | contagem regressiva |
+| uti_inter_hospitalar | Remoção aeromédica e UTI inter-hospitalar (hospital pequeno → referência tier 2) | E (3.3.1, 3.3.2) | conforto (turbulência/G) no XP | — |
+| medevac_remoto | Evacuação aeromédica remota / bush medevac (pista curta de terra ou grama, às vezes com obstáculos; acidente de trabalho, picada de cobra, parto complicado → hospital tier 2/3) | E (1.7.3, 2.7.3, 3.7.2, 4.3.1) | — | — |
+| uti_longa_distancia | Repatriamento médico / UTI de longa distância (Lifeguard) | N | evitar turbulência severa (G) | G ao vivo |
+| saude_familia | Equipes médicas e vacinas (especialistas para municípios afastados; **ronda médica e odontológica indígena/ribeirinha** com caixas térmicas) — ida e volta no mesmo dia | N | ida e volta no mesmo contrato; na ronda em aldeia: **pouso de volta antes do pôr do sol** (⚠SDK hora/sol) | "Etapa: ida / volta"; tempo até o pôr do sol |
+
+### F. Trabalho aéreo (SAE), agro e vigilância
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| aerolevantamento | Aerofotogrametria e mapeamento (pernas paralelas com altitude e proa constantes) | E (3.6.1) | N pernas: rumo ±15°, altitude ±150 ft, IAS ±10 kt em ≥ 80 % do trecho | "Perna x/N: rumo R, N ft, N kt"; desvio ao vivo |
+| paraquedismo | Lançamento de paraquedistas (12–14 mil ft; redução para o lançamento; descida rápida) | E (3.6.2) | subir à altitude de salto a ≤ 2 NM da zona; 30 s estável (±200 ft, IAS ≤ 1,3 Vs1); descida sem choque térmico (aviso) | "Suba para N ft sobre a zona"; "Reduza para N kt e mantenha 30 s — lançamento"; "Paraquedistas fora: desça" |
+| pulverizacao | Pulverização / aplicação aérea agrícola (passadas paralelas a 10–30 ft sobre o talhão; Air Tractor, Ipanema, Thrush) | N | N passadas dentro do polígono do talhão, rumo ±10°, 10–30 ft AGL, velocidade de aplicação; só aviões agrícolas | "Passada x/N"; altura AGL ao vivo; "Curva de balão" |
+| reboque_planador | Reboque de planadores (até 3.000–4.000 ft e volta ao aeroclube) | N | ⚠SDK planador engatado/liberado (o MSFS 2024 tem reboque nativo); sem isso: subida à altitude de liberação e pouso na origem | "Suba para N ft"; "Planador liberado: retorne" |
+| publicidade_aerea | Publicidade aérea (reboque de faixa sobre praias e eventos) | N | ⚠SDK faixa rebocada; trajeto ao longo da orla/evento a baixa velocidade e altura por N min | "Siga a orla"; velocidade/altura ao vivo |
+| patrulha_vigilancia | Patrulha e inspeção de área: prevenção de incêndios (reservas, parques, eucalipto), monitoramento de garimpo ilegal e desmatamento, inspeção de propriedade e contagem de gado (pastos, cercas, pivôs, aguadas) | N | cobrir N setores/pontos da área a baixa altura (≤ N ft AGL) e velocidade reduzida; inspeção de propriedade decola e pousa na pista da fazenda | "Setor x/N"; altura/velocidade ao vivo |
+| inspecao_linhas | Inspeção de linhas de transmissão, ferrovias e dutos (baixa altura seguindo o traçado) | N | seguir a sequência de pontos do traçado a ≤ 0,5 NM e abaixo de N ft AGL | "Ponto x/N"; desvio lateral |
+| monitoramento_trafego | Monitoramento de tráfego e eventos (órbitas sobre rodovias/eventos) | N | permanecer em órbita ≤ R NM do alvo por N min | "Órbita: x/N min" |
+| sar | Busca e salvamento visual (creeping line / expanding square em área rural, serrana ou costeira) | N | cumprir o padrão na área; alvo achado ao passar ≤ 0,3 NM dele | "Perna x/N do padrão" |
+| calibracao_auxilios | Calibração de auxílios (GEIV: órbitas e aproximações em ILS/VOR/PAPI) | N | ⚠SDK auxílio sintonizado; N aproximações alinhadas e órbitas a raio fixo | "Aproximação x/N"; "Órbita raio R" |
+
+### G. Operações técnicas e translados
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| ferry_posicionamento | Translado / reposicionamento (vazio, empty leg, cobrir AOG) e **extração de aeronave** de pista extremamente curta/alta (hot and high) até um tier 3 asfaltado | E (1.3.3, 3.5.3) | sem pax nem carga; na extração: combustível mínimo na partida (≤ N % ou o necessário + reserva) | combustível a bordo × limite |
+| translado_manutencao | Translado para oficina homologada (50 h/100 h, TBO, Check A/C/D, IAM, CVA) | P (2.4.1) | destino = oficina; prazo de horas só no XP | — |
+| ferry_permit | Translado com restrição técnica (flap inoperante, trem travado, sem pressurização abaixo de 10.000 ft) | N | altitude máxima; trem embaixo; flaps fixos (conforme a restrição sorteada) | restrição ativa e desvio |
+| check_flight | Voo de teste pós-manutenção e de aviônicos/bússola (swing check) | N | roteiro local: subida a N ft, potência/rotação, curvas pelos rumos cardinais, pouso na origem | "Passo x/N do teste" |
+| crew_parts | Logística de apoio a aeronaves (tripulação e peças; **field AOG rescue**: mecânico, ferramentas, bateria ou hélice até a pista de terra onde outro avião ficou preso) | E (1.3.2) | — | — |
+| translado_piloto_agricola | Transporte de piloto agrícola | E (4.2.2) | — | — |
+| pessoas_remotas | Transporte de pessoas para locais remotos: farm shuttle (patrão/gerente), equipe e batedor da fazenda, rodízio de turno de 15/30 dias (canteiros de barragem, ponte, linha de transmissão, mineração), brigadistas florestais com equipamento para pista avançada | E (4.1.2, 4.1.3, 4.2.1) | — | — |
+
+### H. Governo, defesa e humanitário
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| autoridades | Autoridades, comitivas e documentos oficiais (urnas) | E (2.4.2) | pontualidade só no XP | prazo |
+| diplomatico | Diplomático e comitivas de estado | E (1.3.4) | — | — |
+| militar_can | Correio Aéreo Nacional / logística militar (bases e pelotões de fronteira; equivalentes em outros países) | P (1.3.4) | — | — |
+| humanitario | Apoio humanitário e defesa civil (enchentes e secas: água potável, lonas, medicamentos em pistas parcialmente alagadas ou improvisadas) | N | — | — |
+
+### I. Operações remotas, bush e campo
+| id | Missão | St. | Regras / restrições | HUD |
+|---|---|---|---|---|
+| combustivel_tambor | Transporte de combustível em tambor (drum fuel run: gasolina, diesel, AvGas/Jet-A1 para geradores de comunidades remotas ou pontos de reabastecimento avançados) | N | carga perigosa: pouso suave (G); peso alto em pista curta | G no pouso |
+| apoio_acampamento | Apoio a acampamentos e expedições: suprimento de prospecção/mineração (sondagem, amostras, peças de bomba, alimentação), expedições científicas e documentários (biólogos, arqueólogos, cinegrafistas com câmeras, drones e baterias), reabastecimento de cache (suprimentos e combustível numa pista isolada para missões futuras) | N | equipamento delicado: pouso suave (G); cache: destino = pista remota sem estrutura | G no pouso |
+| instrucao_stol | Instrução bush / STOL (pouso curto, vento de través em terra, aproximação em rampa acentuada sobre obstáculos) | N | N pousos com parada em ≤ N ft após o toque; ângulo de aproximação ≥ N° nos últimos N ft; ao menos 1 pouso com vento de través ≥ N kt (quando houver) | "Pouso curto x/N: parou em N ft"; ângulo ao vivo |
+| evacuacao_por_do_sol | Evacuação pré-tempestade / limite de pôr do sol (decolar de pista sem luzes e chegar a aeródromo com balizamento antes do pôr do sol + 30 min) | N | prazo = pôr do sol + 30 min (⚠SDK hora/sol): **só perda de XP**, como órgãos; destino com pista iluminada (`runways.csv` tem `lighted`) | contagem regressiva até o limite |
+
+Resumo v3: 69 tipos — 27 existem, 13 parciais, 29 novos.
+
+## 7. Princípios da lista (usuário, 2026-11-23)
+- **O addon é global.** Nenhum tipo de missão é só do Brasil: os exemplos brasileiros são um caso de cada tipo. Ao montar os dados, levantar os equivalentes pelo mundo (ex.: regional essencial acima; CAN ↔ correio militar de outros países; agro ↔ polos agrícolas de cada continente). Confirmar exemplos reais antes de gravar dados (não inventar).
+- **A lista define o tipo e as regras; o aeroporto define a frequência.** Cada tipo declara o que é e como se cumpre; depois, por tipo/porte de aeroporto e preferências (dropzone, aeroclube, turístico, hub de saúde, MRO...), definem-se pesos de criação, destinos, distância, passageiros e carga.
+- **Sem duplicar por porte:** a mesma missão em portes diferentes muda de frequência e de tamanho, não de tipo.
+- **Cada tipo de missão tem no catálogo:**
+  1. id estável, nome, grupo, filtro do quadro, fase, família de pagamento, M_Tipo de XP;
+  2. **vários textos de RP** (≥ 3 variantes de título e descrição; neutros quanto a país, com marcadores de lugar, cliente, carga etc.; variantes regionais quando fizer sentido);
+  3. **dados procedurais quando necessário:** restrições (ex.: altitude máxima, trem embaixo, sem pressurização), regras de conclusão (ex.: G máximo no pouso, razão de subida/descida, área a sobrevoar, TGL), prazo (expiração do contrato e, quando houver, prazo de entrega que pesa só no XP), carga/pax típicos e regra de destino (`volta_a_origem`, `pista_curta`, `outro_pais`, `hub_de_saude`, `mro`...).
+- **HUD com instruções dinâmicas:** toda missão com regra de conclusão mostra no HUD o passo atual e as tolerâncias ao vivo (ex.: "Reduza para 80 kt e mantenha 30 s — lançamento", "Passada 3/6 — 18 ft AGL", "TGL 2/4"). As instruções ficam no catálogo (passos da missão), não fixas no código; o HUD só exibe o que o rastreador da missão informa.
+- **Decisões 2026-11-23:** (a) **nenhum prazo falha o contrato** — órgãos, evacuação antes do pôr do sol e qualquer outro prazo pesam **só no XP**; (b) **ferry só da própria frota**: não haverá ferry de entrega de aeronave nova/de terceiros por enquanto — os textos de "entrega ao proprietário/novo dono" do 3.5.3, 1.3.3 e 4.2.2 saem no catálogo; (c) **todo item que depende do simulador é conferido na documentação do SDK do MSFS 2024 antes de implementar** (⚠SDK), sem exceção.
+- **Tipo × variante de RP:** missões semelhantes são agrupadas num **tipo** (mesmas regras de conclusão), mas cada tipo tem **variantes de RP** com texto, cliente, carga/pax, distância e destino próprios (ex.: `pessoas_remotas` → farm shuttle, rodízio de turno, brigadistas; `apoio_acampamento` → mineração, expedição científica, cache). O quadro deve parecer ter muitas missões diferentes; o agrupamento é só técnico. Cada variante tem ≥ 3 textos.
+- **Regras reutilizáveis (modificadores):** regras que valem para vários tipos ficam como blocos combináveis no catálogo, não por tipo: `pouso_suave` (G máximo no toque), `razao_limitada` (subida/descida), `sem_sobrevoo_urbano`, `antes_do_por_do_sol` (⚠SDK), `combustivel_minimo_na_partida`, `passagem_baixa_antes_do_pouso` (**strip inspection pass**: passar a ≤ N ft AGL sobre a pista antes de pousar, usado em destinos tier 4), `ida_e_volta`, `escalas_em_ordem`, `area_a_cobrir`, `pernas_paralelas`, `orbita`, `seguir_tracado`.
+
+## 8. Passo 1 — perfis dos aeroportos (rascunho, 2026-11-23)
+Script: `tools/places/airport_profiles.py` (lê `airports.csv`, `runways.csv`, `Data/places/*.json`, `hubs_data.json` e, se houver, a base do Little Navmap para marcar o que existe no MSFS 2024). Mesmo filtro e mesmo tier do `DataSeeder`.
+
+- Banco do jogo: **47.718** aeroportos; **28.071 existem no MSFS 2024** (tier 1: 936 · tier 2: 3.794 · tier 3: 7.067 · tier 4: 16.274). Contagens abaixo = só os que existem no simulador.
+- Um aeroporto pode ter vários perfis; **19.932 não têm nenhum** (usam só a frequência base do tier).
+
+| Perfil | Critério | Qtde no MSFS | Por tier (1/2/3/4) | Conferência |
+|---|---|---|---|---|
+| zona_salto | `dropzones.json` | 158 | 8 / 33 / 56 / 61 | ok (curado + OSM) |
+| aeroclube | `training_aerodromes.json` | 407 | 41 / 139 / 131 / 96 | ok |
+| turistico_curado | `scenic_aerodromes.json` | 16 | 1 / 8 / 6 / 1 | ok |
+| turistico_poi | soma da popularidade dos POIs **naturais/lazer** (ilha, lago, parque nacional, cachoeira, pico, praia, caverna, cabo, montanha, vulcão, reserva, UNESCO, farol, castelo) a ≤ 15 NM; 3 % mais altos dos tier 2–4; nunca em base militar | 671 | — / 202 / 184 / 285 | razoável (Mount Cook, Kerama, Ærø, Portimão, Codrington); Dinamarca e Suíça aparecem muito pela densidade de castelos/ilhas — usar multiplicador moderado |
+| hub_cargo, hub_commercialpax, hub_executive, hub_feeder, hub_health, hub_instruction, hub_maintenance, hub_agro | `hubs_data.json` (só **BR** e **GLOBAL**) | 99–232 cada | concentrados nos tier 1–2 | ⚠ dados com ruído: Ubatuba e Santos Dumont como agro, Campo de Marte como saúde/agro; e só BR + lista global curta — revisar/expandir antes de usar como perfil forte |
+| fazenda | nome com fazenda, usina, sítio, agropecuária, agrícola, estância, hacienda, finca, granja, farm, ranch, plantation, station, estate (exceto air/naval/research station etc.), só tier 3–4 | 3.151 | — / — / 641 / 2.510 | bom no BR (1.630) e EUA (1.379); fraco fora deles (AU 52, AR 4) — nomes de fazenda em outros países nem sempre têm essas palavras |
+| militar | nome com air base, air force, AFB, base aérea, naval air, army airfield, RAF, militar… | 623 | 3 / 401 / 146 / 73 | ok (Grand Forks AFB, RAF Marham, Vidsel, bases na Síria/Ucrânia) |
+| militar_misto | militar + voo regular ou "international/regional/municipal" no nome (uso civil e militar) | 49 | 9 / 37 / 3 / — | ok (Bergamo, Sacheon, Karup, Sierra Vista) — missões civis normais + militares |
+| isolado | tier 3–4 a ≥ 150 NM do tier 1/2 mais próximo; tier 2 a ≥ 150 NM de outro tier 1/2 | 524 | — / 94 / 118 / 312 | ok (Tefé, São Gabriel da Cachoeira, Fernando de Noronha, Funafuti, Ilha de Páscoa, Kulusuk, Faroé, Alasca, Sibéria, Pacífico) |
+| interior_distante | tier 3–4 a 75–150 NM do tier 1/2 mais próximo | 2.439 | — / — / 576 / 1.863 | ok (interior agrícola e sertão) |
+| altitude | elevação ≥ 5.000 ft | 1.036 | 34 / 157 / 235 / 610 | ok (Lukla, Santa Fe, Andes, Himalaia, Mongólia) |
+
+Achados para depois:
+- **Tier distorcido** (não mexer por ora, decisão § 5): Congonhas, Santos Dumont, Viracopos, Porto Alegre etc. são tier 2; o perfil não corrige isso.
+- `hubs_data.json` precisa de revisão e cobertura mundial antes de virar perfil forte (hoje BR + uma lista "GLOBAL").
+- Sem dados para: área urbana (sem sobrevoo urbano), mineração/canteiro de obras, hospital real perto do aeroporto (usa `hub_health`), oficina homologada real (usa `hub_maintenance`).
