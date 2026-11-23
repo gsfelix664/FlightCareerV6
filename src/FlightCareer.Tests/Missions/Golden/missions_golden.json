@@ -2,7 +2,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBNP",
     "Pax": 212,
     "CargoLbs": 0,
@@ -16,7 +16,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.2.1",
+    "Subtype": "carga_heavy_nacional",
     "DestinationIcao": "SCEL",
     "Pax": 0,
     "CargoLbs": 49870,
@@ -30,7 +30,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.2.3",
+    "Subtype": "carga_heavy_long_haul",
     "DestinationIcao": "LFPG",
     "Pax": 0,
     "CargoLbs": 156271,
@@ -44,7 +44,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.2.3",
+    "Subtype": "carga_heavy_long_haul",
     "DestinationIcao": "KMIA",
     "Pax": 0,
     "CargoLbs": 256036,
@@ -58,7 +58,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "KMIA",
     "Pax": 361,
     "CargoLbs": 0,
@@ -72,7 +72,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.3.2",
+    "Subtype": "logistica_apoio_crew_parts",
     "DestinationIcao": "SBCF",
     "Pax": 0,
     "CargoLbs": 0,
@@ -86,7 +86,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBSV",
     "Pax": 175,
     "CargoLbs": 0,
@@ -100,7 +100,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.2.1",
+    "Subtype": "carga_heavy_nacional",
     "DestinationIcao": "SAEZ",
     "Pax": 0,
     "CargoLbs": 96190,
@@ -114,7 +114,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.2",
+    "Subtype": "linha_regional_internacional",
     "DestinationIcao": "SAEZ",
     "Pax": 197,
     "CargoLbs": 0,
@@ -128,7 +128,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SDRS",
     "Pax": 3,
     "CargoLbs": 0,
@@ -142,7 +142,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SDMC",
     "Pax": 155,
     "CargoLbs": 0,
@@ -156,7 +156,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.3.1",
+    "Subtype": "executiva_business",
     "DestinationIcao": "SBRF",
     "Pax": 7,
     "CargoLbs": 0,
@@ -170,7 +170,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.2",
+    "Subtype": "linha_regional_internacional",
     "DestinationIcao": "SAEZ",
     "Pax": 174,
     "CargoLbs": 0,
@@ -184,7 +184,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SDRS",
     "Pax": 3,
     "CargoLbs": 0,
@@ -198,7 +198,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SDVG",
     "Pax": 4,
     "CargoLbs": 0,
@@ -212,7 +212,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.3.4",
+    "Subtype": "diplomatico_militar",
     "DestinationIcao": "SBRF",
     "Pax": 6,
     "CargoLbs": 0,
@@ -226,7 +226,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBFI",
     "Pax": 175,
     "CargoLbs": 0,
@@ -240,7 +240,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.2",
+    "Subtype": "linha_regional_internacional",
     "DestinationIcao": "SCEL",
     "Pax": 138,
     "CargoLbs": 0,
@@ -254,7 +254,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.2.2",
+    "Subtype": "carga_heavy_internacional",
     "DestinationIcao": "SAEZ",
     "Pax": 0,
     "CargoLbs": 40479,
@@ -268,7 +268,7 @@
   {
     "Seed": 777000,
     "OriginIcao": "SBGR",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBCF",
     "Pax": 203,
     "CargoLbs": 0,
@@ -282,7 +282,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.3.1",
+    "Subtype": "executiva_business",
     "DestinationIcao": "SBRP",
     "Pax": 14,
     "CargoLbs": 0,
@@ -296,7 +296,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.2.1",
+    "Subtype": "carga_heavy_nacional",
     "DestinationIcao": "SBKP",
     "Pax": 0,
     "CargoLbs": 40175,
@@ -310,7 +310,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBNP",
     "Pax": 173,
     "CargoLbs": 0,
@@ -324,7 +324,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.3.1",
+    "Subtype": "executiva_business",
     "DestinationIcao": "SBMT",
     "Pax": 12,
     "CargoLbs": 0,
@@ -338,7 +338,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SBNP",
     "Pax": 181,
     "CargoLbs": 0,
@@ -352,7 +352,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.2",
+    "Subtype": "linha_regional_internacional",
     "DestinationIcao": "SBAR",
     "Pax": 197,
     "CargoLbs": 0,
@@ -366,7 +366,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "KMIA",
     "Pax": 252,
     "CargoLbs": 0,
@@ -380,7 +380,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.2.3",
+    "Subtype": "carga_heavy_long_haul",
     "DestinationIcao": "KMIA",
     "Pax": 0,
     "CargoLbs": 162776,
@@ -394,7 +394,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "3.3.3",
+    "Subtype": "transporte_orgaos",
     "DestinationIcao": "SBDN",
     "Pax": 2,
     "CargoLbs": 0,
@@ -408,7 +408,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBJD",
     "Pax": 4,
     "CargoLbs": 0,
@@ -422,7 +422,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.3.2",
+    "Subtype": "logistica_apoio_crew_parts",
     "DestinationIcao": "SBRP",
     "Pax": 16,
     "CargoLbs": 0,
@@ -436,7 +436,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SAEZ",
     "Pax": 135,
     "CargoLbs": 0,
@@ -450,7 +450,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBSJ",
     "Pax": 3,
     "CargoLbs": 0,
@@ -464,7 +464,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.2.1",
+    "Subtype": "carga_heavy_nacional",
     "DestinationIcao": "SAEZ",
     "Pax": 0,
     "CargoLbs": 48832,
@@ -478,7 +478,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBSJ",
     "Pax": 3,
     "CargoLbs": 0,
@@ -492,7 +492,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.2.3",
+    "Subtype": "carga_heavy_long_haul",
     "DestinationIcao": "LFPG",
     "Pax": 0,
     "CargoLbs": 218249,
@@ -506,7 +506,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SCEL",
     "Pax": 173,
     "CargoLbs": 0,
@@ -520,7 +520,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "SDCO",
     "Pax": 172,
     "CargoLbs": 0,
@@ -534,7 +534,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.3.1",
+    "Subtype": "executiva_business",
     "DestinationIcao": "SBGR",
     "Pax": 1,
     "CargoLbs": 0,
@@ -548,7 +548,7 @@
   {
     "Seed": 777137,
     "OriginIcao": "SBGL",
-    "Subtype": "1.3.3",
+    "Subtype": "translado_posicionamento_ferry",
     "DestinationIcao": "SDCO",
     "Pax": 0,
     "CargoLbs": 0,
@@ -562,7 +562,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 147,
     "CargoLbs": 0,
@@ -576,7 +576,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SBCF",
     "Pax": 332,
     "CargoLbs": 0,
@@ -590,7 +590,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 205,
     "CargoLbs": 0,
@@ -604,7 +604,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 157,
     "CargoLbs": 0,
@@ -618,7 +618,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 159,
     "CargoLbs": 0,
@@ -632,7 +632,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 150,
     "CargoLbs": 0,
@@ -646,7 +646,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SBCF",
     "Pax": 336,
     "CargoLbs": 0,
@@ -660,7 +660,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 148,
     "CargoLbs": 0,
@@ -674,7 +674,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 155,
     "CargoLbs": 0,
@@ -688,7 +688,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 144,
     "CargoLbs": 0,
@@ -702,7 +702,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "LFPG",
     "Pax": 380,
     "CargoLbs": 0,
@@ -716,7 +716,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SBBR",
     "Pax": 293,
     "CargoLbs": 0,
@@ -730,7 +730,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SAEZ",
     "Pax": 284,
     "CargoLbs": 0,
@@ -744,7 +744,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 126,
     "CargoLbs": 0,
@@ -758,7 +758,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "LFPG",
     "Pax": 287,
     "CargoLbs": 0,
@@ -772,7 +772,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SAEZ",
     "Pax": 325,
     "CargoLbs": 0,
@@ -786,7 +786,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.3",
+    "Subtype": "linha_long_haul",
     "DestinationIcao": "SAEZ",
     "Pax": 304,
     "CargoLbs": 0,
@@ -800,7 +800,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.1",
+    "Subtype": "linha_domestica_hub",
     "DestinationIcao": "KMIA",
     "Pax": 142,
     "CargoLbs": 0,
@@ -814,7 +814,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.7.7",
+    "Subtype": "long_haul_internacional",
     "DestinationIcao": "SAEZ",
     "Pax": 322,
     "CargoLbs": 0,
@@ -828,7 +828,7 @@
   {
     "Seed": 777274,
     "OriginIcao": "KJFK",
-    "Subtype": "1.1.2",
+    "Subtype": "linha_regional_internacional",
     "DestinationIcao": "KMIA",
     "Pax": 135,
     "CargoLbs": 0,
@@ -842,7 +842,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SBBR",
     "Pax": 4,
     "CargoLbs": 0,
@@ -856,7 +856,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.2",
+    "Subtype": "agro_tech",
     "DestinationIcao": "SBFI",
     "Pax": 4,
     "CargoLbs": 199,
@@ -870,7 +870,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SNAA",
     "Pax": 4,
     "CargoLbs": 354,
@@ -884,7 +884,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBDN",
     "Pax": 62,
     "CargoLbs": 0,
@@ -898,7 +898,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SBMT",
     "Pax": 1,
     "CargoLbs": 304,
@@ -912,7 +912,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.3",
+    "Subtype": "agro_investidores",
     "DestinationIcao": "SBBR",
     "Pax": 3,
     "CargoLbs": 100,
@@ -926,7 +926,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SDRS",
     "Pax": 4,
     "CargoLbs": 0,
@@ -940,7 +940,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBKP",
     "Pax": 8,
     "CargoLbs": 0,
@@ -954,7 +954,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SBKP",
     "Pax": 0,
     "CargoLbs": 80,
@@ -968,7 +968,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.3",
+    "Subtype": "agro_investidores",
     "DestinationIcao": "SBBR",
     "Pax": 4,
     "CargoLbs": 100,
@@ -982,7 +982,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SWCA",
     "Pax": 7,
     "CargoLbs": 216,
@@ -996,7 +996,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SDVG",
     "Pax": 95,
     "CargoLbs": 0,
@@ -1010,7 +1010,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBKP",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1024,7 +1024,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.3.1",
+    "Subtype": "ecommerce_varejo",
     "DestinationIcao": "SBRP",
     "Pax": 0,
     "CargoLbs": 1823,
@@ -1038,7 +1038,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SDOI",
     "Pax": 3,
     "CargoLbs": 243,
@@ -1052,7 +1052,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.3.3",
+    "Subtype": "malotes_documentos",
     "DestinationIcao": "SDVG",
     "Pax": 0,
     "CargoLbs": 252,
@@ -1066,7 +1066,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBDN",
     "Pax": 48,
     "CargoLbs": 0,
@@ -1080,7 +1080,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.3.1",
+    "Subtype": "ecommerce_varejo",
     "DestinationIcao": "SDMC",
     "Pax": 0,
     "CargoLbs": 2782,
@@ -1094,7 +1094,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.3.1",
+    "Subtype": "ecommerce_varejo",
     "DestinationIcao": "SNBB",
     "Pax": 0,
     "CargoLbs": 4257,
@@ -1108,7 +1108,7 @@
   {
     "Seed": 777411,
     "OriginIcao": "SBKP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBRP",
     "Pax": 147,
     "CargoLbs": 0,
@@ -1122,7 +1122,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.3.3",
+    "Subtype": "malotes_documentos",
     "DestinationIcao": "SBGR",
     "Pax": 0,
     "CargoLbs": 213,
@@ -1136,7 +1136,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.4.1",
+    "Subtype": "manutencao_regional",
     "DestinationIcao": "SBJD",
     "Pax": 1,
     "CargoLbs": 417,
@@ -1150,7 +1150,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.2",
+    "Subtype": "regional_direto",
     "DestinationIcao": "SBSJ",
     "Pax": 72,
     "CargoLbs": 0,
@@ -1164,7 +1164,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBRP",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1178,7 +1178,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.2.2",
+    "Subtype": "agro_tech",
     "DestinationIcao": "SDMC",
     "Pax": 2,
     "CargoLbs": 276,
@@ -1192,7 +1192,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBGR",
     "Pax": 100,
     "CargoLbs": 0,
@@ -1206,7 +1206,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBMT",
     "Pax": 59,
     "CargoLbs": 0,
@@ -1220,7 +1220,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBGR",
     "Pax": 64,
     "CargoLbs": 0,
@@ -1234,7 +1234,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBSJ",
     "Pax": 54,
     "CargoLbs": 0,
@@ -1248,7 +1248,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.3.1",
+    "Subtype": "ecommerce_varejo",
     "DestinationIcao": "SDOI",
     "Pax": 0,
     "CargoLbs": 1369,
@@ -1262,7 +1262,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.2.3",
+    "Subtype": "agro_investidores",
     "DestinationIcao": "SBFI",
     "Pax": 5,
     "CargoLbs": 100,
@@ -1276,7 +1276,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.2",
+    "Subtype": "regional_direto",
     "DestinationIcao": "SBBR",
     "Pax": 69,
     "CargoLbs": 0,
@@ -1290,7 +1290,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.2",
+    "Subtype": "regional_direto",
     "DestinationIcao": "SBSV",
     "Pax": 84,
     "CargoLbs": 0,
@@ -1304,7 +1304,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.3.1",
+    "Subtype": "ecommerce_varejo",
     "DestinationIcao": "SWCA",
     "Pax": 0,
     "CargoLbs": 1247,
@@ -1318,7 +1318,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBGR",
     "Pax": 104,
     "CargoLbs": 0,
@@ -1332,7 +1332,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBSJ",
     "Pax": 72,
     "CargoLbs": 0,
@@ -1346,7 +1346,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SDAA",
     "Pax": 1,
     "CargoLbs": 298,
@@ -1360,7 +1360,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBSJ",
     "Pax": 60,
     "CargoLbs": 0,
@@ -1374,7 +1374,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.2.2",
+    "Subtype": "agro_tech",
     "DestinationIcao": "SDRS",
     "Pax": 1,
     "CargoLbs": 296,
@@ -1388,7 +1388,7 @@
   {
     "Seed": 777548,
     "OriginIcao": "SBRP",
-    "Subtype": "2.3.2",
+    "Subtype": "agro_pecas_insumos",
     "DestinationIcao": "SBGL",
     "Pax": 0,
     "CargoLbs": 523,
@@ -1402,7 +1402,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SDVG",
     "Pax": 155,
     "CargoLbs": 0,
@@ -1416,7 +1416,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.4.1",
+    "Subtype": "manutencao_regional",
     "DestinationIcao": "SDRS",
     "Pax": 0,
     "CargoLbs": 134,
@@ -1430,7 +1430,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBGR",
     "Pax": 53,
     "CargoLbs": 0,
@@ -1444,7 +1444,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBJR",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1458,7 +1458,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBJR",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1472,7 +1472,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.7.3",
+    "Subtype": "medevac_regional",
     "DestinationIcao": "SDAA",
     "Pax": 2,
     "CargoLbs": 485,
@@ -1486,7 +1486,7 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBJR",
     "Pax": 4,
     "CargoLbs": 0,
@@ -1500,41 +1500,69 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBJR",
     "Pax": 2,
     "CargoLbs": 0,
-    "Reward": 479.28,
-    "DistanceNm": 25,
+    "Reward": 797.37,
+    "DistanceNm": 76,
     "Title": "Passeios aéreos do Rio de Janeiro: Voo Panorâmico com 2 Passageiro(s)",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ipanema@-22.98382,-43.20453,1.5,3000;P:Pão de Açúcar@-22.94944,-43.15667,1.5,3000",
+    "OverflyWaypoints": "P:Barra da Tijuca@-23.01050,-43.34288,1.5,3000;P:Pedra da Gávea@-22.99806,-43.28444,1.5,3000;P:Copacabana@-22.96703,-43.18070,1.5,3000;P:Parque Nacional da Serra dos Órgãos@-22.48211,-43.05679,1.5,3000",
     "ContractData": null
   },
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBJR",
-    "Pax": 1,
+    "Pax": 2,
     "CargoLbs": 0,
-    "Reward": 522.85,
-    "DistanceNm": 25,
-    "Title": "Passeios aéreos do Rio de Janeiro: Voo Panorâmico com 1 Passageiro(s)",
+    "Reward": 946.71,
+    "DistanceNm": 74,
+    "Title": "Circuito Panorâmico: Passeios aéreos do Rio de Janeiro",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ipanema@-22.98382,-43.20453,1.5,3000;P:Pão de Açúcar@-22.94944,-43.15667,1.5,3000",
+    "OverflyWaypoints": "P:Barra da Tijuca@-23.01050,-43.34288,1.5,3000;P:Pedra da Gávea@-22.99806,-43.28444,1.5,3000;P:Floresta da Tijuca@-22.96300,-43.24500,1.5,3000;P:Parque Nacional da Serra dos Órgãos@-22.48211,-43.05679,1.5,3000",
     "ContractData": null
   },
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.1.2",
-    "DestinationIcao": "SBNP",
-    "Pax": 81,
+    "Subtype": "aerolevantamento",
+    "DestinationIcao": "SBJR",
+    "Pax": 0,
+    "CargoLbs": 80,
+    "Reward": 932.32,
+    "DistanceNm": 43,
+    "Title": "Levantamento Aerofotogramétrico: a ilha Ilha da Laje (4 pernas)",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": "{\u0022CenterLatitude\u0022:-22.9346,\u0022CenterLongitude\u0022:-43.1472,\u0022WidthNM\u0022:3,\u0022LengthNM\u0022:3.7,\u0022OrientationDeg\u0022:10,\u0022RequiredLegs\u0022:4,\u0022TargetAltitudeFt\u0022:4600,\u0022TargetSpeedKt\u0022:95}"
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "paraquedismo",
+    "DestinationIcao": "SBJR",
+    "Pax": 9,
     "CargoLbs": 0,
-    "Reward": 10847.28,
-    "DistanceNm": 684,
-    "Title": "Voo Regional Direto: SBJR a SBNP",
+    "Reward": 1641.21,
+    "DistanceNm": 25,
+    "Title": "Voo de Lançamento de Paraquedistas em Paraquedismo Jacarepaguá",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": "{\u0022DropZoneLatitude\u0022:-22.98677,\u0022DropZoneLongitude\u0022:-43.37219,\u0022DropZoneElevationFt\u0022:10,\u0022TargetAltitudeAglFt\u0022:11000,\u0022MaxDropSpeedKt\u0022:90}"
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "agro_investidores",
+    "DestinationIcao": "SBDN",
+    "Pax": 3,
+    "CargoLbs": 100,
+    "Reward": 1877.23,
+    "DistanceNm": 367,
+    "Title": "Comitiva de Investidores do Agro para SBDN",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1542,11 +1570,53 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.5.3",
+    "Subtype": "voo_panoramico",
+    "DestinationIcao": "SBJR",
+    "Pax": 1,
+    "CargoLbs": 0,
+    "Reward": 467.2,
+    "DistanceNm": 19,
+    "Title": "Passeios aéreos do Rio de Janeiro: Voo Panorâmico com 1 Passageiro(s)",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": "P:Barra da Tijuca@-23.01050,-43.34288,1.5,3000;P:Lagoa Rodrigo de Freitas@-22.97111,-43.21167,1.5,3000",
+    "ContractData": null
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "alimentacao_hub",
+    "DestinationIcao": "SBKP",
+    "Pax": 130,
+    "CargoLbs": 0,
+    "Reward": 6006.81,
+    "DistanceNm": 208,
+    "Title": "Alimentador Regional (Feeder) para o Hub em SBKP",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "medevac_regional",
+    "DestinationIcao": "SNAA",
+    "Pax": 2,
+    "CargoLbs": 462,
+    "Reward": 9798.22,
+    "DistanceNm": 278,
+    "Title": "Resgate Médico Regional para SNAA",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "translado_basico",
     "DestinationIcao": "SDRS",
     "Pax": 0,
-    "CargoLbs": 50,
-    "Reward": 575.68,
+    "CargoLbs": 32,
+    "Reward": 582.49,
     "DistanceNm": 69,
     "Title": "Translado Básico: SBJR ➔ SDRS",
     "RequiredTouchAndGoes": 0,
@@ -1556,95 +1626,39 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "2.2.1",
+    "Subtype": "agro_legacy",
+    "DestinationIcao": "SDRS",
+    "Pax": 1,
+    "CargoLbs": 202,
+    "Reward": 572.72,
+    "DistanceNm": 69,
+    "Title": "Apoio a Unidade Agropecuária: SDRS",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "agro_legacy",
+    "DestinationIcao": "SDOI",
+    "Pax": 1,
+    "CargoLbs": 349,
+    "Reward": 1415.19,
+    "DistanceNm": 238,
+    "Title": "Deslocamento de Produtores Rurais: SDOI",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 777685,
+    "OriginIcao": "SBJR",
+    "Subtype": "agro_legacy",
     "DestinationIcao": "SDRS",
     "Pax": 2,
-    "CargoLbs": 178,
-    "Reward": 672.68,
-    "DistanceNm": 69,
-    "Title": "Deslocamento de Produtores Rurais: SDRS",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "3.5.1",
-    "DestinationIcao": "SBJR",
-    "Pax": 1,
-    "CargoLbs": 0,
-    "Reward": 463.06,
-    "DistanceNm": 24,
-    "Title": "Circuito Panorâmico: Passeios aéreos do Rio de Janeiro",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Lagoa Rodrigo de Freitas@-22.97111,-43.21167,1.5,3000;P:Pão de Açúcar@-22.94944,-43.15667,1.5,3000",
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.2.1",
-    "DestinationIcao": "SDCO",
-    "Pax": 1,
-    "CargoLbs": 350,
-    "Reward": 1043.34,
-    "DistanceNm": 229,
-    "Title": "Logística Agropecuária Tradicional para SDCO",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.7.2",
-    "DestinationIcao": "SDVG",
-    "Pax": 0,
-    "CargoLbs": 199,
-    "Reward": 2167.39,
-    "DistanceNm": 144,
-    "Title": "Remessa Crítica de Precisão: SBJR a SDVG",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.4.2",
-    "DestinationIcao": "SBKP",
-    "Pax": 4,
-    "CargoLbs": 0,
-    "Reward": 1303.74,
-    "DistanceNm": 208,
-    "Title": "Comitiva Governamental Estadual para SBKP",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.4.2",
-    "DestinationIcao": "SBRP",
-    "Pax": 3,
-    "CargoLbs": 0,
-    "Reward": 1410.36,
-    "DistanceNm": 269,
-    "Title": "Comitiva Governamental Estadual para SBRP",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.2.1",
-    "DestinationIcao": "SDRS",
-    "Pax": 1,
-    "CargoLbs": 379,
-    "Reward": 623.01,
+    "CargoLbs": 291,
+    "Reward": 716.89,
     "DistanceNm": 69,
     "Title": "Logística Agropecuária Tradicional para SDRS",
     "RequiredTouchAndGoes": 0,
@@ -1654,35 +1668,21 @@
   {
     "Seed": 777685,
     "OriginIcao": "SBJR",
-    "Subtype": "3.4.3",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBJR",
     "Pax": 1,
     "CargoLbs": 0,
-    "Reward": 1434.57,
-    "DistanceNm": 30,
-    "Title": "Voo de Cheque Prático: Avaliação com Examinador (2 TGL)",
+    "Reward": 949.26,
+    "DistanceNm": 25,
+    "Title": "Instrução de Manobras: Área S (8 NM)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução SE@-23.08906,-43.22699,3.0,6000",
-    "ContractData": null
-  },
-  {
-    "Seed": 777685,
-    "OriginIcao": "SBJR",
-    "Subtype": "2.1.1",
-    "DestinationIcao": "SBRP",
-    "Pax": 139,
-    "CargoLbs": 0,
-    "Reward": 7659.22,
-    "DistanceNm": 269,
-    "Title": "Conexão de Polo Regional com SBRP",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
+    "OverflyWaypoints": "P:Área de instrução S@-23.11347,-43.37494,3.0,6000",
     "ContractData": null
   },
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBMT",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1696,7 +1696,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.4.1",
+    "Subtype": "manutencao_regional",
     "DestinationIcao": "SBRP",
     "Pax": 1,
     "CargoLbs": 496,
@@ -1710,7 +1710,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.4.1",
+    "Subtype": "manutencao_regional",
     "DestinationIcao": "SBJD",
     "Pax": 0,
     "CargoLbs": 237,
@@ -1724,7 +1724,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.3.3",
+    "Subtype": "transporte_orgaos",
     "DestinationIcao": "SBJR",
     "Pax": 2,
     "CargoLbs": 0,
@@ -1738,7 +1738,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.4.1",
+    "Subtype": "manutencao_regional",
     "DestinationIcao": "SBKP",
     "Pax": 0,
     "CargoLbs": 203,
@@ -1752,7 +1752,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBJR",
     "Pax": 49,
     "CargoLbs": 0,
@@ -1766,7 +1766,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1780,7 +1780,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 3,
     "CargoLbs": 0,
@@ -1794,7 +1794,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 3,
     "CargoLbs": 0,
@@ -1808,7 +1808,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.2",
+    "Subtype": "regional_direto",
     "DestinationIcao": "SBGL",
     "Pax": 77,
     "CargoLbs": 0,
@@ -1822,7 +1822,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SBRP",
     "Pax": 157,
     "CargoLbs": 0,
@@ -1836,7 +1836,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.2.2",
+    "Subtype": "agro_tech",
     "DestinationIcao": "SDUB",
     "Pax": 4,
     "CargoLbs": 200,
@@ -1850,7 +1850,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SDVG",
     "Pax": 109,
     "CargoLbs": 0,
@@ -1864,7 +1864,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 3,
     "CargoLbs": 0,
@@ -1878,7 +1878,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SDRS",
     "Pax": 104,
     "CargoLbs": 0,
@@ -1892,7 +1892,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 2,
     "CargoLbs": 0,
@@ -1906,7 +1906,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.1.1",
+    "Subtype": "alimentacao_hub",
     "DestinationIcao": "SDRS",
     "Pax": 128,
     "CargoLbs": 0,
@@ -1920,7 +1920,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.4.2",
+    "Subtype": "navegacao_cross_country",
     "DestinationIcao": "SBRP",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1934,7 +1934,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBMT",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1948,7 +1948,7 @@
   {
     "Seed": 777822,
     "OriginIcao": "SBMT",
-    "Subtype": "2.7.1",
+    "Subtype": "fretamento_executivo_regional",
     "DestinationIcao": "SDMC",
     "Pax": 5,
     "CargoLbs": 0,
@@ -1962,7 +1962,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SDVG",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1976,7 +1976,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBGL",
     "Pax": 1,
     "CargoLbs": 0,
@@ -1990,7 +1990,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.7.2",
+    "Subtype": "medevac_municipal",
     "DestinationIcao": "SDUB",
     "Pax": 1,
     "CargoLbs": 547,
@@ -2004,7 +2004,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.7.2",
+    "Subtype": "medevac_municipal",
     "DestinationIcao": "SDRS",
     "Pax": 1,
     "CargoLbs": 538,
@@ -2018,7 +2018,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.5.2",
+    "Subtype": "circuito_tgl",
     "DestinationIcao": "SDCO",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2032,7 +2032,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.7.1",
+    "Subtype": "carga_fragil_municipal",
     "DestinationIcao": "SBRP",
     "Pax": 0,
     "CargoLbs": 573,
@@ -2046,7 +2046,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.2.3",
+    "Subtype": "agro_suprimento_campanha",
     "DestinationIcao": "SNBB",
     "Pax": 0,
     "CargoLbs": 1443,
@@ -2060,7 +2060,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.7.2",
+    "Subtype": "medevac_municipal",
     "DestinationIcao": "SNBB",
     "Pax": 2,
     "CargoLbs": 372,
@@ -2074,7 +2074,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2088,7 +2088,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SDCO",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2102,7 +2102,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.7.1",
+    "Subtype": "carga_fragil_municipal",
     "DestinationIcao": "SDRS",
     "Pax": 0,
     "CargoLbs": 681,
@@ -2116,7 +2116,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBNP",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2130,7 +2130,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBDN",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2144,7 +2144,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SDCO",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2158,7 +2158,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SDVG",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2172,7 +2172,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SDCO",
     "Pax": 0,
     "CargoLbs": 80,
@@ -2186,7 +2186,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SDCO",
     "Pax": 0,
     "CargoLbs": 80,
@@ -2200,7 +2200,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SNAA",
     "Pax": 0,
     "CargoLbs": 516,
@@ -2214,7 +2214,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SDCO",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2228,7 +2228,7 @@
   {
     "Seed": 777959,
     "OriginIcao": "SDCO",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SBGL",
     "Pax": 0,
     "CargoLbs": 303,
@@ -2242,7 +2242,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.4.2",
+    "Subtype": "navegacao_cross_country",
     "DestinationIcao": "SNAA",
     "Pax": 0,
     "CargoLbs": 0,
@@ -2256,7 +2256,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SDOI",
     "Pax": 0,
     "CargoLbs": 544,
@@ -2270,7 +2270,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SDVG",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2284,7 +2284,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SBFI",
     "Pax": 0,
     "CargoLbs": 357,
@@ -2298,7 +2298,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBRP",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2312,7 +2312,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SBJD",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2326,7 +2326,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBRP",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2340,7 +2340,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBRP",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2354,7 +2354,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2368,7 +2368,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SDAA",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2382,7 +2382,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBNP",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2396,7 +2396,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.2.2",
+    "Subtype": "agro_insumos_biotecnologia",
     "DestinationIcao": "SBSJ",
     "Pax": 1,
     "CargoLbs": 203,
@@ -2410,7 +2410,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SNBB",
     "Pax": 0,
     "CargoLbs": 708,
@@ -2424,7 +2424,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBGL",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2438,7 +2438,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.4.2",
+    "Subtype": "navegacao_cross_country",
     "DestinationIcao": "SDAA",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2452,7 +2452,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.4.2",
+    "Subtype": "navegacao_cross_country",
     "DestinationIcao": "SNAA",
     "Pax": 0,
     "CargoLbs": 0,
@@ -2466,7 +2466,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBGL",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2480,7 +2480,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.2.2",
+    "Subtype": "agro_insumos_biotecnologia",
     "DestinationIcao": "SBGR",
     "Pax": 1,
     "CargoLbs": 394,
@@ -2494,7 +2494,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBPA",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2508,7 +2508,7 @@
   {
     "Seed": 778096,
     "OriginIcao": "SBDN",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2522,7 +2522,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBJR",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2536,7 +2536,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SDVG",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2550,7 +2550,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBFI",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2564,7 +2564,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.3.3",
+    "Subtype": "transporte_orgaos",
     "DestinationIcao": "SBGL",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2578,7 +2578,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SBCF",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2592,7 +2592,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBDN",
     "Pax": 7,
     "CargoLbs": 0,
@@ -2606,7 +2606,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.3.3",
+    "Subtype": "transporte_orgaos",
     "DestinationIcao": "SBBW",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2620,7 +2620,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SDAA",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2634,7 +2634,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SDVG",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2648,7 +2648,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBCF",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2662,7 +2662,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.7.2",
+    "Subtype": "medevac_municipal",
     "DestinationIcao": "SWCA",
     "Pax": 1,
     "CargoLbs": 407,
@@ -2676,7 +2676,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SBPA",
     "Pax": 0,
     "CargoLbs": 590,
@@ -2690,7 +2690,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SDCO",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2704,7 +2704,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBGL",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2718,7 +2718,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2732,7 +2732,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SBRP",
     "Pax": 1,
     "CargoLbs": 522,
@@ -2746,7 +2746,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.3",
+    "Subtype": "equipes_urgentes",
     "DestinationIcao": "SDRS",
     "Pax": 2,
     "CargoLbs": 0,
@@ -2760,7 +2760,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SDMC",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2774,7 +2774,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SNBB",
     "Pax": 0,
     "CargoLbs": 739,
@@ -2788,7 +2788,7 @@
   {
     "Seed": 778233,
     "OriginIcao": "SBSJ",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SNBB",
     "Pax": 2,
     "CargoLbs": 447,
@@ -2802,7 +2802,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SBFI",
     "Pax": 0,
     "CargoLbs": 80,
@@ -2816,7 +2816,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBFI",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2830,7 +2830,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.1.1",
+    "Subtype": "executivo_regional",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 0,
@@ -2844,7 +2844,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.2.3",
+    "Subtype": "agro_suprimento_campanha",
     "DestinationIcao": "SNBB",
     "Pax": 0,
     "CargoLbs": 1299,
@@ -2858,7 +2858,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.2.3",
+    "Subtype": "agro_suprimento_campanha",
     "DestinationIcao": "SBNP",
     "Pax": 0,
     "CargoLbs": 1188,
@@ -2872,7 +2872,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBFI",
     "Pax": 10,
     "CargoLbs": 0,
@@ -2886,7 +2886,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBFI",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2900,7 +2900,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SBNP",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2914,7 +2914,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SBJD",
     "Pax": 5,
     "CargoLbs": 0,
@@ -2928,7 +2928,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBFI",
     "Pax": 7,
     "CargoLbs": 0,
@@ -2942,7 +2942,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SDRS",
     "Pax": 4,
     "CargoLbs": 0,
@@ -2956,7 +2956,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.1.2",
+    "Subtype": "familia_alto_padrao",
     "DestinationIcao": "SBNP",
     "Pax": 3,
     "CargoLbs": 0,
@@ -2970,7 +2970,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.2.1",
+    "Subtype": "aog_agro_suporte",
     "DestinationIcao": "SBNP",
     "Pax": 1,
     "CargoLbs": 666,
@@ -2984,7 +2984,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.7.2",
+    "Subtype": "medevac_municipal",
     "DestinationIcao": "SBDN",
     "Pax": 1,
     "CargoLbs": 352,
@@ -2998,7 +2998,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.3.1",
+    "Subtype": "remocao_urgencia",
     "DestinationIcao": "SBPA",
     "Pax": 3,
     "CargoLbs": 0,
@@ -3012,7 +3012,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBFI",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3026,7 +3026,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBFI",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3040,7 +3040,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SBFI",
     "Pax": 3,
     "CargoLbs": 0,
@@ -3048,13 +3048,13 @@
     "DistanceNm": 108,
     "Title": "Circuito Panorâmico: Voos panorâmicos de Foz do Iguaçu",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Parque Nacional do Iguaçu@-25.50000,-53.95000,1.5,3000;P:Itaipu@-25.04000,-54.45000,1.5,3000;P:Marco das Três Fronteiras@-25.59250,-54.59306,1.5,3000",
+    "OverflyWaypoints": "P:Garganta do Diabo@-25.69570,-54.43610,1.5,3000;P:Parque Nacional do Iguaçu@-25.50000,-53.95000,1.5,3000;P:Itaipu@-25.04000,-54.45000,1.5,3000",
     "ContractData": null
   },
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.6.2",
+    "Subtype": "paraquedismo",
     "DestinationIcao": "SBFI",
     "Pax": 7,
     "CargoLbs": 0,
@@ -3068,7 +3068,7 @@
   {
     "Seed": 778370,
     "OriginIcao": "SBFI",
-    "Subtype": "3.3.2",
+    "Subtype": "transferencia_eletiva",
     "DestinationIcao": "SBNP",
     "Pax": 6,
     "CargoLbs": 0,
@@ -3082,7 +3082,7 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.2.1",
+    "Subtype": "apoio_batedor",
     "DestinationIcao": "SBMT",
     "Pax": 2,
     "CargoLbs": 26,
@@ -3096,13 +3096,13 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.2.3",
-    "DestinationIcao": "SDCO",
+    "Subtype": "translado_basico",
+    "DestinationIcao": "SBSJ",
     "Pax": 0,
-    "CargoLbs": 323,
-    "Reward": 976.47,
-    "DistanceNm": 133,
-    "Title": "Entrega Crítica na Pista de Terra em SDCO",
+    "CargoLbs": 11,
+    "Reward": 421.08,
+    "DistanceNm": 45,
+    "Title": "Translado Básico: SDUB ➔ SBSJ",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3110,27 +3110,13 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.1.3",
-    "DestinationIcao": "SBMT",
-    "Pax": 3,
+    "Subtype": "troca_equipe",
+    "DestinationIcao": "SBSJ",
+    "Pax": 9,
     "CargoLbs": 0,
-    "Reward": 611.23,
-    "DistanceNm": 86,
-    "Title": "Revezamento de Funcionários no Retiro: SBMT",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.2.3",
-    "DestinationIcao": "SBSJ",
-    "Pax": 0,
-    "CargoLbs": 596,
-    "Reward": 611.65,
+    "Reward": 611.79,
     "DistanceNm": 45,
-    "Title": "Insumos Agrícolas de Emergência para SBSJ",
+    "Title": "Revezamento de Funcionários no Retiro: SBSJ",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3138,13 +3124,13 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.1.1",
-    "DestinationIcao": "SBSJ",
-    "Pax": 0,
-    "CargoLbs": 645,
-    "Reward": 474.97,
-    "DistanceNm": 45,
-    "Title": "Rancho e Suprimentos Básicos para SBSJ",
+    "Subtype": "translado_piloto_agricola",
+    "DestinationIcao": "SBJD",
+    "Pax": 2,
+    "CargoLbs": 0,
+    "Reward": 577.83,
+    "DistanceNm": 104,
+    "Title": "Ferry de Piloto para Base Operacional: SBJD",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3152,7 +3138,7 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.1.1",
+    "Subtype": "abastecimento_rancho",
     "DestinationIcao": "SDCO",
     "Pax": 0,
     "CargoLbs": 811,
@@ -3166,7 +3152,7 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SBMT",
     "Pax": 2,
     "CargoLbs": 0,
@@ -3180,13 +3166,97 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.2.2",
+    "Subtype": "voo_panoramico",
+    "DestinationIcao": "SDUB",
+    "Pax": 1,
+    "CargoLbs": 0,
+    "Reward": 872.89,
+    "DistanceNm": 52,
+    "Title": "Excursão Aérea Guiada: Litoral Norte de São Paulo",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": "P:Pico do Baepi@-23.79061,-45.33378,1.5,3000;P:Ilha Anchieta@-23.53881,-45.06851,1.5,3000;P:Ubatuba@-23.47230,-45.06565,1.5,3000",
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "voo_panoramico",
+    "DestinationIcao": "SDUB",
+    "Pax": 2,
+    "CargoLbs": 0,
+    "Reward": 734.48,
+    "DistanceNm": 55,
+    "Title": "Circuito Panorâmico: Litoral Norte de São Paulo",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": "P:Pico do Baepi@-23.79061,-45.33378,1.5,3000;P:Ilhabela@-23.80388,-45.21118,1.5,3000",
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "translado_basico",
+    "DestinationIcao": "SBSJ",
+    "Pax": 0,
+    "CargoLbs": 37,
+    "Reward": 471,
+    "DistanceNm": 45,
+    "Title": "Translado Básico: SDUB ➔ SBSJ",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "translado_basico",
+    "DestinationIcao": "SBSJ",
+    "Pax": 0,
+    "CargoLbs": 27,
+    "Reward": 450.31,
+    "DistanceNm": 45,
+    "Title": "Translado Básico: SDUB ➔ SBSJ",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "voo_panoramico",
+    "DestinationIcao": "SDUB",
+    "Pax": 2,
+    "CargoLbs": 0,
+    "Reward": 779.73,
+    "DistanceNm": 56,
+    "Title": "Excursão Aérea Guiada: Litoral Norte de São Paulo",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": "P:Pico do Baepi@-23.79061,-45.33378,1.5,3000;P:Ilhabela@-23.80388,-45.21118,1.5,3000;P:Ilha Anchieta@-23.53881,-45.06851,1.5,3000;P:Ubatuba@-23.47230,-45.06565,1.5,3000",
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "troca_equipe",
+    "DestinationIcao": "SBSJ",
+    "Pax": 3,
+    "CargoLbs": 0,
+    "Reward": 422.78,
+    "DistanceNm": 45,
+    "Title": "Transporte de Turma de Trabalho para SBSJ",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "transporte_patrao",
     "DestinationIcao": "SBSJ",
     "Pax": 2,
     "CargoLbs": 0,
-    "Reward": 478.74,
+    "Reward": 393.6,
     "DistanceNm": 45,
-    "Title": "Translado de Piloto Agrícola para SBSJ",
+    "Title": "Transporte do Patrão para a Fazenda em SBSJ",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3194,13 +3264,13 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.2.3",
-    "DestinationIcao": "SWCA",
-    "Pax": 1,
-    "CargoLbs": 475,
-    "Reward": 1533.9,
-    "DistanceNm": 134,
-    "Title": "Suprimento de Emergência no Campo: SWCA",
+    "Subtype": "apoio_batedor",
+    "DestinationIcao": "SDCO",
+    "Pax": 2,
+    "CargoLbs": 56,
+    "Reward": 655.53,
+    "DistanceNm": 133,
+    "Title": "Apoio ao Batedor e Inspeção de Pasto em SDCO",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3208,111 +3278,27 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "4.3.2",
-    "DestinationIcao": "SDRS",
-    "Pax": 0,
-    "CargoLbs": 1102,
-    "Reward": 2036.5,
-    "DistanceNm": 66,
-    "Title": "Envio Prioritário de Peça Mecânica Pesada para SDRS",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.1.1",
-    "DestinationIcao": "SBSJ",
-    "Pax": 1,
-    "CargoLbs": 689,
-    "Reward": 544.87,
-    "DistanceNm": 45,
-    "Title": "Abastecimento e Rancho de Sede: 689 lbs para SBSJ",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.1.3",
-    "DestinationIcao": "SBSJ",
-    "Pax": 7,
-    "CargoLbs": 0,
-    "Reward": 525.68,
-    "DistanceNm": 45,
-    "Title": "Revezamento de Funcionários no Retiro: SBSJ",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.2.2",
-    "DestinationIcao": "SBSJ",
-    "Pax": 1,
-    "CargoLbs": 0,
-    "Reward": 407.77,
-    "DistanceNm": 45,
-    "Title": "Ferry de Piloto para Base Operacional: SBSJ",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "3.6.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SDUB",
-    "Pax": 0,
-    "CargoLbs": 80,
-    "Reward": 957.56,
-    "DistanceNm": 29,
-    "Title": "Aerolevantamento Técnico de Precisão: a ilha Ilha do Mar Virado",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": "{\u0022CenterLatitude\u0022:-23.5663,\u0022CenterLongitude\u0022:-45.1563,\u0022WidthNM\u0022:2.2,\u0022LengthNM\u0022:2.4,\u0022OrientationDeg\u0022:220,\u0022RequiredLegs\u0022:4,\u0022TargetAltitudeFt\u0022:2600,\u0022TargetSpeedKt\u0022:90}"
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "3.4.2",
-    "DestinationIcao": "SDOI",
-    "Pax": 1,
-    "CargoLbs": 0,
-    "Reward": 3392.56,
-    "DistanceNm": 143,
-    "Title": "Treinamento de Rota Intermunicipal para SDOI",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "3.4.2",
-    "DestinationIcao": "SBMT",
-    "Pax": 1,
-    "CargoLbs": 0,
-    "Reward": 1837.37,
-    "DistanceNm": 86,
-    "Title": "Navegação Solo/Instrução: SDUB a SBMT",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": null
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.1.2",
-    "DestinationIcao": "SDRS",
     "Pax": 2,
     "CargoLbs": 0,
-    "Reward": 507.85,
-    "DistanceNm": 66,
-    "Title": "Transporte do Patrão para a Fazenda em SDRS",
+    "Reward": 811.09,
+    "DistanceNm": 56,
+    "Title": "Circuito Panorâmico: Litoral Norte de São Paulo",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": "P:Pico do Baepi@-23.79061,-45.33378,1.5,3000;P:Ilhabela@-23.80388,-45.21118,1.5,3000;P:Ilha Anchieta@-23.53881,-45.06851,1.5,3000;P:Ubatuba@-23.47230,-45.06565,1.5,3000",
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "insumos_urgentes_agro",
+    "DestinationIcao": "SBSJ",
+    "Pax": 0,
+    "CargoLbs": 853,
+    "Reward": 806.74,
+    "DistanceNm": 45,
+    "Title": "Entrega Crítica na Pista de Terra em SBSJ",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3320,35 +3306,21 @@
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "3.6.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SDUB",
-    "Pax": 0,
-    "CargoLbs": 80,
-    "Reward": 1039,
-    "DistanceNm": 39,
-    "Title": "Aerolevantamento Técnico de Precisão: a ilha Ilha das Couves",
+    "Pax": 3,
+    "CargoLbs": 0,
+    "Reward": 855.78,
+    "DistanceNm": 56,
+    "Title": "Litoral Norte de São Paulo: Voo Panorâmico com 3 Passageiro(s)",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": "{\u0022CenterLatitude\u0022:-23.42,\u0022CenterLongitude\u0022:-44.8525,\u0022WidthNM\u0022:3.9,\u0022LengthNM\u0022:2.8,\u0022OrientationDeg\u0022:260,\u0022RequiredLegs\u0022:4,\u0022TargetAltitudeFt\u0022:2800,\u0022TargetSpeedKt\u0022:85}"
+    "OverflyWaypoints": "P:Pico do Baepi@-23.79061,-45.33378,1.5,3000;P:Ilhabela@-23.80388,-45.21118,1.5,3000;P:Ilha Anchieta@-23.53881,-45.06851,1.5,3000;P:Ubatuba@-23.47230,-45.06565,1.5,3000",
+    "ContractData": null
   },
   {
     "Seed": 778507,
     "OriginIcao": "SDUB",
-    "Subtype": "3.6.1",
-    "DestinationIcao": "SDUB",
-    "Pax": 0,
-    "CargoLbs": 80,
-    "Reward": 960.67,
-    "DistanceNm": 33,
-    "Title": "Aerolevantamento Técnico de Precisão: a praia Praia da Maranduba",
-    "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": null,
-    "ContractData": "{\u0022CenterLatitude\u0022:-23.5404,\u0022CenterLongitude\u0022:-45.2275,\u0022WidthNM\u0022:4,\u0022LengthNM\u0022:3.1,\u0022OrientationDeg\u0022:350,\u0022RequiredLegs\u0022:3,\u0022TargetAltitudeFt\u0022:5400,\u0022TargetSpeedKt\u0022:90}"
-  },
-  {
-    "Seed": 778507,
-    "OriginIcao": "SDUB",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SDRS",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3360,9 +3332,37 @@
     "ContractData": null
   },
   {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "medivac_bush",
+    "DestinationIcao": "SBSJ",
+    "Pax": 3,
+    "CargoLbs": 173,
+    "Reward": 6021.26,
+    "DistanceNm": 45,
+    "Title": "Medivac Remoto do Campo para SBSJ",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
+    "Seed": 778507,
+    "OriginIcao": "SDUB",
+    "Subtype": "apoio_batedor",
+    "DestinationIcao": "SBMT",
+    "Pax": 2,
+    "CargoLbs": 91,
+    "Reward": 590,
+    "DistanceNm": 86,
+    "Title": "Apoio ao Batedor e Inspeção de Pasto em SBMT",
+    "RequiredTouchAndGoes": 0,
+    "OverflyWaypoints": null,
+    "ContractData": null
+  },
+  {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SWCA",
     "Pax": 0,
     "CargoLbs": 80,
@@ -3376,7 +3376,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.1",
+    "Subtype": "apoio_batedor",
     "DestinationIcao": "SDAA",
     "Pax": 2,
     "CargoLbs": 42,
@@ -3390,7 +3390,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SNAA",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3404,7 +3404,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.1",
+    "Subtype": "apoio_batedor",
     "DestinationIcao": "SDAA",
     "Pax": 1,
     "CargoLbs": 75,
@@ -3418,7 +3418,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.3",
+    "Subtype": "troca_equipe",
     "DestinationIcao": "SDAA",
     "Pax": 4,
     "CargoLbs": 0,
@@ -3432,7 +3432,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.1",
+    "Subtype": "apoio_batedor",
     "DestinationIcao": "SDAA",
     "Pax": 1,
     "CargoLbs": 34,
@@ -3446,7 +3446,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.1",
+    "Subtype": "abastecimento_rancho",
     "DestinationIcao": "SDVG",
     "Pax": 0,
     "CargoLbs": 1201,
@@ -3460,7 +3460,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.3",
+    "Subtype": "troca_equipe",
     "DestinationIcao": "SBKP",
     "Pax": 9,
     "CargoLbs": 0,
@@ -3474,7 +3474,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.3.2",
+    "Subtype": "aog_maquina_campo",
     "DestinationIcao": "SBMT",
     "Pax": 1,
     "CargoLbs": 507,
@@ -3488,7 +3488,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SBJD",
     "Pax": 2,
     "CargoLbs": 0,
@@ -3502,7 +3502,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SDAA",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3516,7 +3516,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "3.4.3",
+    "Subtype": "voo_de_cheque",
     "DestinationIcao": "SWCA",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3530,7 +3530,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.1",
+    "Subtype": "abastecimento_rancho",
     "DestinationIcao": "SNAA",
     "Pax": 1,
     "CargoLbs": 1185,
@@ -3544,7 +3544,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "3.5.2",
+    "Subtype": "circuito_tgl",
     "DestinationIcao": "SWCA",
     "Pax": 0,
     "CargoLbs": 0,
@@ -3558,7 +3558,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.3",
+    "Subtype": "troca_equipe",
     "DestinationIcao": "SDAA",
     "Pax": 3,
     "CargoLbs": 0,
@@ -3572,7 +3572,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.2",
+    "Subtype": "transporte_patrao",
     "DestinationIcao": "SDOI",
     "Pax": 4,
     "CargoLbs": 0,
@@ -3586,7 +3586,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.3",
+    "Subtype": "troca_equipe",
     "DestinationIcao": "SDAA",
     "Pax": 5,
     "CargoLbs": 0,
@@ -3600,7 +3600,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.2",
+    "Subtype": "transporte_patrao",
     "DestinationIcao": "SDAA",
     "Pax": 2,
     "CargoLbs": 0,
@@ -3614,7 +3614,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.1.1",
+    "Subtype": "abastecimento_rancho",
     "DestinationIcao": "SNAA",
     "Pax": 2,
     "CargoLbs": 96,
@@ -3628,7 +3628,7 @@
   {
     "Seed": 778644,
     "OriginIcao": "SWCA",
-    "Subtype": "4.2.2",
+    "Subtype": "translado_piloto_agricola",
     "DestinationIcao": "SBKP",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3642,7 +3642,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SSKW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3656,7 +3656,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SSKW",
     "Pax": 0,
     "CargoLbs": 80,
@@ -3670,7 +3670,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SSKW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3684,7 +3684,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "4.1.2",
+    "Subtype": "transporte_patrao",
     "DestinationIcao": "SBBW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3698,7 +3698,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.6.1",
+    "Subtype": "aerolevantamento",
     "DestinationIcao": "SSKW",
     "Pax": 0,
     "CargoLbs": 80,
@@ -3712,7 +3712,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.4.3",
+    "Subtype": "voo_de_cheque",
     "DestinationIcao": "SSKW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3726,7 +3726,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "4.1.2",
+    "Subtype": "transporte_patrao",
     "DestinationIcao": "SBBW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3740,7 +3740,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.4.1",
+    "Subtype": "instrucao_local",
     "DestinationIcao": "SSKW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3754,7 +3754,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.5.1",
+    "Subtype": "voo_panoramico",
     "DestinationIcao": "SSKW",
     "Pax": 1,
     "CargoLbs": 0,
@@ -3768,7 +3768,7 @@
   {
     "Seed": 778781,
     "OriginIcao": "SSKW",
-    "Subtype": "3.5.2",
+    "Subtype": "circuito_tgl",
     "DestinationIcao": "SSKW",
     "Pax": 0,
     "CargoLbs": 0,
