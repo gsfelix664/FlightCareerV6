@@ -261,6 +261,15 @@ namespace FlightCareer.Domain.Xp
             if (r.TypeMultipliers.TryGetValue(familyOrSubId, out double directMult))
                 return directMult;
 
+            var def = Missions.MissionCatalog.Shared.Get(familyOrSubId);
+            if (def != null)
+            {
+                if (!string.IsNullOrEmpty(def.XpType) && r.TypeMultipliers.TryGetValue(def.XpType, out double xpMult))
+                    return xpMult;
+                if (!string.IsNullOrEmpty(def.PayFamily) && r.TypeMultipliers.TryGetValue(def.PayFamily, out double payMult))
+                    return payMult;
+            }
+
             var resolvedFamily = FlightCareer.Domain.Economy.MissionPayTable.Shared.Resolve(familyOrSubId);
             if (resolvedFamily != null && r.TypeMultipliers.TryGetValue(resolvedFamily.Id, out double mappedMult))
                 return mappedMult;

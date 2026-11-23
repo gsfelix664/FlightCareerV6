@@ -1,5 +1,5 @@
 {
-  "1.1.1": [
+  "linha_domestica_hub": [
     {
       "title": "Linha Regular: Ligação Hub {dest} ({pax} pax)",
       "description": "Voo regular de passageiros conectando {origin} ao hub de operações em {dest}. Embarque de {pax} passageiros com bagagens despachadas ({distance_nm} NM). Mantenha pontualidade de slot e perfil de descida estabilizado."
@@ -13,7 +13,7 @@
       "description": "Atendimento à malha programada da companhia com {pax} ocupantes partindo de {origin} com destino a {dest}. Pouso previsto dentro da janela de conexões domésticas ({distance_nm} NM)."
     }
   ],
-  "1.1.2": [
+  "linha_regional_internacional": [
     {
       "title": "Linha Internacional Regional: {origin} a {dest}",
       "description": "Operação internacional de curto/médio alcance transportando {pax} passageiros para {dest}. Apresente documentação aduaneira e plano IFR transfronteiriço ({distance_nm} NM)."
@@ -27,7 +27,7 @@
       "description": "Transporte de passageiros entre polos econômicos vizinhos: saída de {origin} e chegada em {dest} ({pax} pax, {distance_nm} NM). Atenção às exigências de combustível de reserva internacional."
     }
   ],
-  "1.1.3": [
+  "linha_long_haul": [
     {
       "title": "Voo Intercontinental Long-Haul para {dest}",
       "description": "Etapa de longo curso transoceânica/intercontinental de {origin} até {dest}. Embarque de {pax} passageiros em aeronave wide-body ({distance_nm} NM). Gerencie consumo de combustível em cruzeiro e ETOPS."
@@ -41,7 +41,7 @@
       "description": "Transporte de longa distância transportando {pax} passageiros com destino ao hub intercontinental em {dest} ({distance_nm} NM). Procedimentos internacionais e slots de aprovação prévia."
     }
   ],
-  "1.2.1": [
+  "carga_heavy_nacional": [
     {
       "title": "Cargueiro Noturno Nacional: {cargo_lbs} lbs para {dest}",
       "description": "Transporte de paletes consolidados de carga geral partindo de {origin} com destino ao centro logístico de {dest}. {cargo_lbs} lbs de carga estivada ({distance_nm} NM)."
@@ -55,7 +55,7 @@
       "description": "Remessa programada de carga expressa e encomendas ({cargo_lbs} lbs) partindo de {origin} rumo ao terminal de carga de {dest} ({distance_nm} NM)."
     }
   ],
-  "1.2.2": [
+  "carga_heavy_internacional": [
     {
       "title": "Cargueiro Internacional Regional para {dest}",
       "description": "Remessa de importação e exportação de {cargo_lbs} lbs entre {origin} e {dest}. Manifesto de alfândega obrigatório para liberação aduaneira pós-pouso ({distance_nm} NM)."
@@ -69,7 +69,7 @@
       "description": "Voo de distribuição de carga no bloco regional com destino a {dest}. {cargo_lbs} lbs estivadas em compartimento principal ({distance_nm} NM)."
     }
   ],
-  "1.2.3": [
+  "carga_heavy_long_haul": [
     {
       "title": "Cargueiro Intercontinental Pesado: {dest}",
       "description": "Operação cargueira pesada de longo curso de {origin} para {dest}. {cargo_lbs} lbs de carga consolidada ({distance_nm} NM). Gerencie peso máximo de decolagem e pouso com precisão."
@@ -83,7 +83,7 @@
       "description": "Etapa intercontinental de transporte pesado ({cargo_lbs} lbs) com saída de {origin} e chegada programada em {dest} ({distance_nm} NM)."
     }
   ],
-  "1.3.1": [
+  "executiva_business": [
     {
       "title": "Fretamento Corporativo Executivo para {dest}",
       "description": "Deslocamento de diretoria corporativa ({pax} passageiros) de {origin} para reunião de negócios em {dest} ({distance_nm} NM). Serviço de bordo VIP e discrição operacional exigidos."
@@ -97,7 +97,7 @@
       "description": "Transporte executivo ponto a ponto de {pax} passageiros entre {origin} e o polo financeiro em {dest} ({distance_nm} NM). Mantenha conforto de voo e gradiente suave de cabine."
     }
   ],
-  "1.3.2": [
+  "logistica_apoio_crew_parts": [
     {
       "title": "Apoio Operacional: Tripulação e Peças para {dest}",
       "description": "Translado urgente de tripulantes ({pax} pax) e sobressalentes aeronáuticos ({cargo_lbs} lbs) de {origin} até {dest} ({distance_nm} NM) para liberação de aeronave da frota."
@@ -111,7 +111,7 @@
       "description": "Voo técnico transportando equipe técnica ({pax} pax) e ferramentas ({cargo_lbs} lbs) de {origin} a {dest} ({distance_nm} NM)."
     }
   ],
-  "1.3.3": [
+  "translado_posicionamento_ferry": [
     {
       "title": "Voo de Translado (Ferry Flight) para {dest}",
       "description": "Reposicionamento técnico de aeronave despressurizada/vazia de {origin} até o parque de manutenção em {dest} ({distance_nm} NM). Sem passageiros ou carga comercial."
@@ -133,7 +133,7 @@
       "description": "Aeronave recém-saída da oficina de manutenção em {origin}, sendo entregue em voo direto ao proprietário na base de {dest} ({distance_nm} NM)."
     }
   ],
-  "1.3.4": [
+  "diplomatico_militar": [
     {
       "title": "Missão Diplomática Especial para {dest}",
       "description": "Transporte de comitiva oficial do governo e corpo diplomático ({pax} ocupantes) de {origin} para {dest} ({distance_nm} NM). Procedimento de segurança estrita e plano especial."
@@ -147,7 +147,7 @@
       "description": "Atendimento a missão de estado transportando diplomatas e documentos confidenciais de {origin} para {dest} ({distance_nm} NM)."
     }
   ],
-  "1.7.1": [
+  "fretamento_executivo": [
     {
       "title": "Charter Executivo Prime para {dest}",
       "description": "Fretamento exclusivo para grupo de executivos ({pax} pax) entre {origin} e {dest} ({distance_nm} NM). Cliente exige rigor de horários e atendimento VIP completo."
@@ -161,7 +161,7 @@
       "description": "Contrato particular de táxi aéreo para {pax} passageiros de {origin} a {dest} ({distance_nm} NM). Coordenação de solo agendada no destino."
     }
   ],
-  "1.7.2": [
+  "carga_fragil": [
     {
       "title": "Carga Sensível e de Alto Valor para {dest}",
       "description": "Transporte urgente de componentes eletrônicos e materiais frágeis ({cargo_lbs} lbs) de {origin} a {dest} ({distance_nm} NM). Evite manobras bruscas e turbulência severa."
@@ -175,7 +175,7 @@
       "description": "Entrega imediata de carga sob custódia de alta relevância ({cargo_lbs} lbs) com saída de {origin} e entrega em {dest} ({distance_nm} NM)."
     }
   ],
-  "1.7.3": [
+  "medevac_dinamico": [
     {
       "title": "MEDEVAC UTI Aérea Prioridade Zero para {dest}",
       "description": "Evacuação aeromédica de emergência partindo de {origin} com destino ao complexo hospitalar de referência em {dest} ({distance_nm} NM). Paciente e equipe médica a bordo. Perfil de descida suave."
@@ -189,7 +189,7 @@
       "description": "Transferência médica inter-hospitalar urgente para centro cirúrgico em {dest} ({distance_nm} NM). Mantenha pressurização de cabine estável e aproximação rápida."
     }
   ],
-  "1.7.4": [
+  "vip_internacional_curto": [
     {
       "title": "Voo VIP Internacional Direto para {dest}",
       "description": "Fretamento internacional exclusivo para personalidades ({pax} pax) partindo de {origin} rumo ao terminal executivo de {dest} ({distance_nm} NM). Trâmites de imigração agilizados."
@@ -203,7 +203,7 @@
       "description": "Deslocamento privado entre capitais/polos vizinhos ({pax} passageiros, {distance_nm} NM). Saída de {origin} e recepção privativa em {dest}."
     }
   ],
-  "1.7.5": [
+  "ponte_aerea_troncal": [
     {
       "title": "Ponte Aérea Troncal: {origin} a {dest}",
       "description": "Operação de alta densidade no corredor principal entre {origin} e {dest} transportando {pax} passageiros ({distance_nm} NM). Atendimento rigoroso aos horários de pushback e slot."
@@ -217,7 +217,7 @@
       "description": "Atendimento à demanda corporativa contínua de {origin} a {dest} ({pax} passageiros, {distance_nm} NM). Retorno previsto na mesma jornada."
     }
   ],
-  "1.7.6": [
+  "cargueiro_noturno": [
     {
       "title": "Linha Cargueira Noturna: {origin} a {dest}",
       "description": "Voo noturno da malha postal/expressa transportando {cargo_lbs} lbs de mercadorias de {origin} para {dest} ({distance_nm} NM). Pouso antes do amanhecer para triagem logística."
@@ -231,7 +231,7 @@
       "description": "Transporte de carga geral e encomendas expressas ({cargo_lbs} lbs) durante a madrugada de {origin} até {dest} ({distance_nm} NM)."
     }
   ],
-  "1.7.7": [
+  "long_haul_internacional": [
     {
       "title": "Long-Haul Transcontinental: {origin} a {dest}",
       "description": "Etapa de longo curso internacional transportando {pax} passageiros de {origin} para {dest} ({distance_nm} NM). Gerenciamento minucioso de combustível e ventos em rota."
@@ -245,7 +245,7 @@
       "description": "Transporte intercontinental de passageiros conectando grandes capitais globais: {origin} a {dest} ({pax} ocupantes, {distance_nm} NM)."
     }
   ],
-  "1.7.8": [
+  "fretamento_global_carga_alto_valor": [
     {
       "title": "Carga de Alto Valor / Charter Global para {dest}",
       "description": "Missão internacional com carga sob custódia especial de {cargo_lbs} lbs de {origin} até {dest} ({distance_nm} NM). Escolta e conferência de segurança na decolagem e pouso."
@@ -259,7 +259,7 @@
       "description": "Transporte exclusivo de mercadorias de alto valor agregado ({cargo_lbs} lbs) de {origin} com destino seguro em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.1.1": [
+  "alimentacao_hub": [
     {
       "title": "Alimentador Regional (Feeder) para o Hub em {dest}",
       "description": "Voo regional transportando {pax} passageiros do interior em {origin} para conexões domésticas no hub em {dest} ({distance_nm} NM). Pontualidade de bancada mandatória."
@@ -273,7 +273,7 @@
       "description": "Ligação regular de passageiros de {origin} rumo ao hub de {dest} ({pax} ocupantes, {distance_nm} NM). Conexão direta com voos troncais."
     }
   ],
-  "2.1.2": [
+  "regional_direto": [
     {
       "title": "Linha Regional Ponto a Ponto: {origin} a {dest}",
       "description": "Voo comercial direto entre cidades do interior ({pax} passageiros) de {origin} até {dest} ({distance_nm} NM). Atendimento à demanda de passageiros locais sem conexão."
@@ -287,7 +287,7 @@
       "description": "Rota direta de transporte de passageiros atendendo {pax} ocupantes entre {origin} e o polo regional em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.2.1": [
+  "agro_legacy": [
     {
       "title": "Logística Agropecuária Tradicional para {dest}",
       "description": "Transporte de gestores e proprietários de fazendas ({pax} pax) de {origin} para a fazenda/polo agrícola em {dest} ({distance_nm} NM). Pista sem pavimentação no destino exige atenção."
@@ -301,7 +301,7 @@
       "description": "Transporte de equipe de campo e diretores ({pax} passageiros) com destino à comarca rural em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.2.2": [
+  "agro_tech": [
     {
       "title": "Consultoria AgroTech: Técnicos para {dest}",
       "description": "Transporte urgente de agrônomos, veterinários e consultores de tecnologia agrícola ({pax} pax) para visita técnica e laudo em lavouras de {dest} ({distance_nm} NM)."
@@ -315,7 +315,7 @@
       "description": "Voo de apoio ao agronegócio avançado levando consultores ({pax} pax) para supervisão de safra na região de {dest} ({distance_nm} NM)."
     }
   ],
-  "2.2.3": [
+  "agro_investidores": [
     {
       "title": "Comitiva de Investidores do Agro para {dest}",
       "description": "Fretamento para grupo de investidores e compradores de commodities ({pax} pax) em visita a cooperativas e leilões na região de {dest} ({distance_nm} NM)."
@@ -329,7 +329,7 @@
       "description": "Deslocamento executivo de compradores de terras e safras ({pax} ocupantes) de {origin} para negociações presenciais em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.3.1": [
+  "ecommerce_varejo": [
     {
       "title": "Distribuição de E-commerce: {cargo_lbs} lbs para {dest}",
       "description": "Carga expressa de compras online e pacotes de varejo para entrega rápida em {dest} ({distance_nm} NM). Remessa consolidada de {cargo_lbs} lbs saindo de {origin}."
@@ -343,7 +343,7 @@
       "description": "Voo logístico transportando pacotes prioritários de comércio eletrônico ({cargo_lbs} lbs) de {origin} com destino ao polo de distribuição em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.3.2": [
+  "agro_pecas_insumos": [
     {
       "title": "Peças e Insumos Agrícolas Urgentes para {dest}",
       "description": "Envio prioritário de componentes para maquinário e defensivos ({cargo_lbs} lbs) de {origin} a {dest} ({distance_nm} NM) para evitar paradas na colheita."
@@ -357,7 +357,7 @@
       "description": "Transporte aéreo de insumos e peças pesadas ({cargo_lbs} lbs) de {origin} para {dest} ({distance_nm} NM). Cliente no campo aguarda liberação na rampa."
     }
   ],
-  "2.3.3": [
+  "malotes_documentos": [
     {
       "title": "Malotes Bancários e Documentos Oficiais para {dest}",
       "description": "Transporte seguro de malotes bancários, cartórios e contratos corporativos ({cargo_lbs} lbs) de {origin} até {dest} ({distance_nm} NM). Pontualidade antes do fechamento de compensação."
@@ -371,7 +371,7 @@
       "description": "Voo de transporte de correspondências financeiras e documentos lacrados ({cargo_lbs} lbs) entre {origin} e o polo administrativo em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.4.1": [
+  "manutencao_regional": [
     {
       "title": "Translado para Manutenção Periódica em {dest}",
       "description": "Voo técnico sem passageiros de {origin} até a oficina homologada em {dest} ({distance_nm} NM) para inspeção programada de 100 horas e reparos estruturais."
@@ -385,7 +385,7 @@
       "description": "Deslocamento de aeronave de {origin} para a base técnica em {dest} ({distance_nm} NM). Siga parâmetros operacionais previstos na caderneta."
     }
   ],
-  "2.4.2": [
+  "governo_local_estadual": [
     {
       "title": "Comitiva Governamental Estadual para {dest}",
       "description": "Transporte de secretários de estado e autoridades governamentais ({pax} passageiros) de {origin} para agenda pública em {dest} ({distance_nm} NM). Discrição e pontualidade."
@@ -399,7 +399,7 @@
       "description": "Transporte oficial de comitiva regional de {origin} até o aeroporto de {dest} ({pax} ocupantes, {distance_nm} NM). Coordenação com autoridade local."
     }
   ],
-  "2.7.1": [
+  "fretamento_executivo_regional": [
     {
       "title": "Charter Executivo Regional para {dest}",
       "description": "Fretamento de médio porte transportando executivos e consultores ({pax} pax) de {origin} para negociações em {dest} ({distance_nm} NM). Excelente padrão de atendimento."
@@ -413,7 +413,7 @@
       "description": "Voo fretado exclusivo atendendo {pax} ocupantes entre {origin} e {dest} ({distance_nm} NM). Conforto de cruzeiro e aproximação estabilizada."
     }
   ],
-  "2.7.2": [
+  "carga_fragil_regional": [
     {
       "title": "Carga Frágil Expressa Regional para {dest}",
       "description": "Transporte de equipamentos hospitalares e instrumentos delicados ({cargo_lbs} lbs) de {origin} a {dest} ({distance_nm} NM). Cuidado redobrado no manuseio e pouso."
@@ -427,7 +427,7 @@
       "description": "Envio imediato de carga de alta precisão ({cargo_lbs} lbs) partindo de {origin} com entrega garantida em {dest} ({distance_nm} NM)."
     }
   ],
-  "2.7.3": [
+  "medevac_regional": [
     {
       "title": "Resgate Médico Regional para {dest}",
       "description": "Evacuação aeromédica de paciente e acompanhante com suporte médico partindo de {origin} para internação em {dest} ({distance_nm} NM). Prioridade em voo."
@@ -441,7 +441,7 @@
       "description": "Remoção médica urgente ligando centro do interior a unidade hospitalar com UTI em {dest} ({distance_nm} NM). Voo rápido com controle de altitude."
     }
   ],
-  "2.7.4": [
+  "vip_internacional_regional": [
     {
       "title": "Voo Executivo Internacional Curto para {dest}",
       "description": "Transporte privado de {pax} passageiros cruzando fronteira entre {origin} e {dest} ({distance_nm} NM). Conferência de documentação e imigração local."
@@ -455,7 +455,7 @@
       "description": "Voo fretado exclusivo atendendo comitiva privada ({pax} pax) com saída de {origin} e chegada programada em {dest} ({distance_nm} NM)."
     }
   ],
-  "3.1.1": [
+  "executivo_regional": [
     {
       "title": "Executivo Regional Bate-Volta para {dest}",
       "description": "Transporte de empresário local ({pax} pax) para reunião de negócios decisiva em {dest} ({distance_nm} NM). Retorno previsto na mesma tarde."
@@ -469,7 +469,7 @@
       "description": "Deslocamento de profissionais liberais e consultores ({pax} pax) rumo ao polo de {dest} ({distance_nm} NM). Voo sob demanda confortável."
     }
   ],
-  "3.1.2": [
+  "familia_alto_padrao": [
     {
       "title": "Férias em Família / Alto Padrão para {dest}",
       "description": "Transporte privativo de família e bagagens ({pax} pax) de {origin} com destino a balneário/estância turística em {dest} ({distance_nm} NM). Voo tranquilo e seguro."
@@ -483,7 +483,7 @@
       "description": "Viagem de lazer exclusiva partindo de {origin} com chegada ao aeroporto de {dest} ({pax} passageiros, {distance_nm} NM)."
     }
   ],
-  "3.1.3": [
+  "equipes_urgentes": [
     {
       "title": "Deslocamento de Equipe Emergencial para {dest}",
       "description": "Transporte rápido de engenheiros e técnicos de manutenção ({pax} pax) de {origin} para conter falha em planta industrial em {dest} ({distance_nm} NM)."
@@ -497,7 +497,7 @@
       "description": "Transporte de especialistas ({pax} ocupantes) para suporte de emergência em {dest} ({distance_nm} NM). Pouso sem atrasos no destino."
     }
   ],
-  "3.2.1": [
+  "aog_agro_suporte": [
     {
       "title": "AOG Agro: Peça de Colheitadeira Urgente para {dest}",
       "description": "Transporte imediato de módulo eletrônico e bomba hidráulica ({cargo_lbs} lbs) de {origin} para {dest} ({distance_nm} NM). Colheitadeira parada no pico da safra aguarda a peça."
@@ -511,7 +511,7 @@
       "description": "Frete aéreo de peças de reposição urgentes ({cargo_lbs} lbs) para desbloqueio de frota agrícola em {dest} ({distance_nm} NM)."
     }
   ],
-  "3.2.2": [
+  "agro_insumos_biotecnologia": [
     {
       "title": "Insumos Genéticos e Biológicos Refrigerados para {dest}",
       "description": "Transporte de botijões de sêmen bovino e vacinas de alta genética ({cargo_lbs} lbs) de {origin} até {dest} ({distance_nm} NM). Carga biológica com tempo limite de refrigeração."
@@ -525,7 +525,7 @@
       "description": "Envio aéreo com preservação térmica de material biológico ({cargo_lbs} lbs) partindo de {origin} rumo ao centro de reprodução de {dest} ({distance_nm} NM)."
     }
   ],
-  "3.2.3": [
+  "agro_suprimento_campanha": [
     {
       "title": "Suprimento de Campanha da Safra para {dest}",
       "description": "Abastecimento logístico com ferramentas, EPIs e lubrificantes ({cargo_lbs} lbs) de {origin} para a base agrícola em {dest} ({distance_nm} NM)."
@@ -539,7 +539,7 @@
       "description": "Transporte aéreo de suprimentos operacionais ({cargo_lbs} lbs) saindo de {origin} com descarga no barracão em {dest} ({distance_nm} NM)."
     }
   ],
-  "3.3.1": [
+  "remocao_urgencia": [
     {
       "title": "Remoção Aeromédica de Urgência para {dest}",
       "description": "Transferência imediata de paciente em estado grave de {origin} para centro de tratamento intensivo em {dest} ({distance_nm} NM). Médico a bordo; voo com máxima suavidade."
@@ -553,7 +553,7 @@
       "description": "Remoção médica urgente de emergência partindo de {origin} rumo ao hospital especializado em {dest} ({distance_nm} NM)."
     }
   ],
-  "3.3.2": [
+  "transferencia_eletiva": [
     {
       "title": "Transferência Médica Eletiva para {dest}",
       "description": "Deslocamento de paciente estável acompanhado por equipe de enfermagem de {origin} para consulta/procedimento agendado em {dest} ({distance_nm} NM)."
@@ -567,7 +567,7 @@
       "description": "Transporte de paciente sob cuidados moderados partindo de {origin} com destino à clínica em {dest} ({distance_nm} NM)."
     }
   ],
-  "3.3.3": [
+  "transporte_orgaos": [
     {
       "title": "Transporte de Órgãos para Transplante (Prioridade Zero) para {dest}",
       "description": "Missão de urgência vital transportando órgão humano para transplante imediato e equipe de captação de {origin} para {dest} ({distance_nm} NM). Isquemia em contagem regressiva; decolagem imediata."
@@ -581,7 +581,7 @@
       "description": "Transporte urgente de equipe médica e órgão transplantável saindo de {origin} com destino a {dest} ({distance_nm} NM). Cada minuto conta para o receptor."
     }
   ],
-  "3.4.1": [
+  "instrucao_local": [
     {
       "title": "Instrução Local: Manobras no Setor {area_dir} ({tgl} TGL)",
       "description": "Voo de instrução partindo de {origin}. Voe para a área de treinamento no rumo {area_dir} a {area_nm} NM ({alt_band}), executando {maneuvers}. Ao término, retorne para {tgl} toque(s) e arremetida(s) e pouso completo em {origin}."
@@ -595,7 +595,7 @@
       "description": "Voo de treinamento básico/avançado em {origin}. Desloque-se até a área de treinamento no setor {area_dir} ({alt_band}) para executar {maneuvers}. Reingresse no circuito para {tgl} TGL(s) e corte dos motores em {origin}."
     }
   ],
-  "3.4.2": [
+  "navegacao_cross_country": [
     {
       "title": "Navegação Visual de Treinamento para {dest}",
       "description": "Voo de treinamento de navegação estimada e contato visual de {origin} até {dest} ({distance_nm} NM). Aluno deve cumprir checkpoints de rota, monitorar ventos e efetuar pouso padrão."
@@ -609,7 +609,7 @@
       "description": "Etapa de navegação de instrução ligando {origin} ao aeródromo de {dest} ({distance_nm} NM). Pouso completo com conferência pós-voo pelo instrutor."
     }
   ],
-  "3.4.3": [
+  "voo_de_cheque": [
     {
       "title": "Voo de Cheque Prático: Avaliação com Examinador (2 TGL)",
       "description": "Voo de avaliação prática com examinador credenciado a bordo saindo de {origin}. Desloque-se até a área no setor {area_dir} a {area_nm} NM ({alt_band}). Demonstre procedimentos de emergência, pane simulada (falha de motor simulada pelo examinador) e retorne para 2 TGLs com pouso de precisão na marca em {origin}."
@@ -623,7 +623,7 @@
       "description": "Exame de voo com examinador a bordo. Procedimentos na área {area_dir} a {area_nm} NM ({alt_band}), simulação de falha de motor pelo examinador, aproximação em planeio e execução de 2 toques e arremetidas seguidos de pouso de precisão em {origin}."
     }
   ],
-  "3.5.1": [
+  "voo_panoramico": [
     {
       "title": "Voo Panorâmico: Rota Cênica sobre a Região",
       "description": "Voo panorâmico turístico com partida e chegada em {origin}. Rota cênica sobrevoando {poi_list}. Mantenha sobrevoo a até 1,5 NM dos pontos turísticos e abaixo de 3.000 ft AGL para melhor visibilidade dos passageiros, retornando para pouso em {origin}."
@@ -637,7 +637,7 @@
       "description": "Voo panorâmico regional saindo de {origin}. Contemple e fotografe {poi_list} a bordo de voo visual agradável e estável. Retorne para pouso na pista de {origin}."
     }
   ],
-  "3.5.1-turistico": [
+  "voo_panoramico-turistico": [
     {
       "title": "Circuito Panorâmico: {scenic_name}",
       "description": "Voo panorâmico sobrevoando {poi_list}. {scenic_note} Mantenha sobrevoo a até 1,5 NM e abaixo de 3.000 ft AGL nos pontos visuais, com retorno e pouso em {origin} ({distance_nm} NM)."
@@ -651,7 +651,7 @@
       "description": "Passeio aéreo de {scenic_name} com saída e retorno a {origin}. {scenic_note} Roteiro de {distance_nm} NM sobre {poi_list}, passando a até 1,5 NM de cada ponto e abaixo de 3.000 ft AGL, com curvas suaves para as fotos dos passageiros."
     }
   ],
-  "3.5.2": [
+  "circuito_tgl": [
     {
       "title": "Sessão de Circuito de Tráfego: {tgl} TGLs em {origin}",
       "description": "Treinamento intensivo de decolagens, aproximações e toques na pista de {origin}. Execute {tgl} toques e arremetidas no circuito padrão, seguido de pouso completo final."
@@ -665,7 +665,7 @@
       "description": "Padronização de aproximação e pouso com {tgl} TGLs seguidos de corte em {origin}. Mantenha coordenação de comandos e controle rigoroso de velocidade na final."
     }
   ],
-  "3.5.3": [
+  "translado_basico": [
     {
       "title": "Translado de Aeronave Leve para {dest}",
       "description": "Voo de translado desarmado de passageiros e carga entre {origin} e {dest} ({distance_nm} NM) para reposicionamento no hangar do aeroclube."
@@ -687,7 +687,7 @@
       "description": "Aeronave recém-saída da revisão na oficina de {origin}, entregue em voo de translado ao proprietário em {dest} ({distance_nm} NM). Voo em condições visuais."
     }
   ],
-  "3.6.1": [
+  "aerolevantamento": [
     {
       "title": "Levantamento Aerofotogramétrico: {target} ({legs} pernas)",
       "description": "Contrato especializado para {client}. Execute levantamento fotográfico detalhado sobre {target} com {legs} pernas paralelas no rumo {heading}° a {alt} ft e {speed} kt constantes. Mantenha estabilidade rigorosa para calibração das fotos e retorne a {origin}."
@@ -701,7 +701,7 @@
       "description": "Voo aerofotogramétrico solicitado por {client} para imageamento de {target}. Requer {legs} pernas alinhadas ({heading}°, {alt} ft, {speed} kt). Pouso completo na base em {origin}."
     }
   ],
-  "3.6.2": [
+  "paraquedismo": [
     {
       "title": "Lançamento de Paraquedistas: {dz} ({alt} ft AGL)",
       "description": "Operação de paraquedismo esportivo com {pax} saltadores na vertical de {dz}. Subida até {alt} ft AGL sobre a zona (raio ≤ 2 NM), estabilização a velocidade segura (≤ {speed} kt) para o salto e descida controlada sem choque térmico para pouso em {origin}. {dz_note}"
@@ -715,7 +715,7 @@
       "description": "Decolagem de {origin} transportando {pax} atletas de salto. Subida com motor estabilizado até {alt} ft AGL sobre {dz}, ejeção segura e retorno para pouso em {origin} protegendo os cilindros do motor. {dz_note}"
     }
   ],
-  "3.7.1": [
+  "carga_fragil_municipal": [
     {
       "title": "Carga Especial de Alto Valor: {origin} a {dest}",
       "description": "Transporte executivo de carga frágil e sobressalentes delicados ({cargo_lbs} lbs) de {origin} com entrega prioritária em {dest} ({distance_nm} NM). Sem turbulência ou solavancos."
@@ -729,7 +729,7 @@
       "description": "Voo cargueiro fretado transportando instrumentos tecnológicos ({cargo_lbs} lbs) entre {origin} e o polo de {dest} ({distance_nm} NM)."
     }
   ],
-  "3.7.2": [
+  "medevac_municipal": [
     {
       "title": "MEDEVAC UTI de Longo Alcance para {dest}",
       "description": "Transporte aeromédico intensivo transferindo paciente crítico de {origin} para complexo cirúrgico terciário em {dest} ({distance_nm} NM). Voo assistido com prioridade total de tráfego."
@@ -743,7 +743,7 @@
       "description": "Transporte de suporte avançado de vida em rota de {distance_nm} NM ligando {origin} a {dest}. Procedimento de aproximação rápida e suave."
     }
   ],
-  "4.1.1": [
+  "abastecimento_rancho": [
     {
       "title": "Abastecimento e Rancho de Sede: {cargo_lbs} lbs para {dest}",
       "description": "Transporte essencial de alimentos, galões de combustível e compras ({cargo_lbs} lbs) de {origin} para a sede isolada em {dest} ({distance_nm} NM). Pouso em pista de terra curta."
@@ -757,7 +757,7 @@
       "description": "Entrega aérea de comida, peças e diesel ({cargo_lbs} lbs) de {origin} para a equipe da fazenda em {dest} ({distance_nm} NM)."
     }
   ],
-  "4.1.2": [
+  "transporte_patrao": [
     {
       "title": "Transporte do Patrão para a Fazenda em {dest}",
       "description": "Deslocamento do proprietário da fazenda ({pax} pax) de {origin} até a pista da sede em {dest} ({distance_nm} NM). Pouso cauteloso e inspeção da pista de grama antes do toque."
@@ -771,7 +771,7 @@
       "description": "Transporte do titular do empreendimento rural partindo de {origin} com pouso na pista particular de {dest} ({distance_nm} NM)."
     }
   ],
-  "4.1.3": [
+  "troca_equipe": [
     {
       "title": "Troca de Equipe de Campo em {dest}",
       "description": "Transporte de vaqueiros, operadores de máquinas e capataz ({pax} pax) de {origin} para revezamento quinzenal na fazenda em {dest} ({distance_nm} NM)."
@@ -785,7 +785,7 @@
       "description": "Deslocamento de trabalhadores rurais ({pax} ocupantes) de {origin} até a fazenda em {dest} ({distance_nm} NM) para início de jornada."
     }
   ],
-  "4.2.1": [
+  "apoio_batedor": [
     {
       "title": "Apoio ao Batedor e Inspeção de Pasto em {dest}",
       "description": "Voo de apoio ao batedor e fiscalização de cercas e gado de {origin} para pouso na pista de apoio em {dest} ({distance_nm} NM). Pouso em pista rústica."
@@ -799,7 +799,7 @@
       "description": "Voo técnico em pista não pavimentada levando equipe de fiscalização de {origin} a {dest} ({distance_nm} NM)."
     }
   ],
-  "4.2.2": [
+  "translado_piloto_agricola": [
     {
       "title": "Translado de Piloto Agrícola para {dest}",
       "description": "Translado de piloto ({pax} pax) ou retorno de aeronave vazia de {origin} para assumir avião agrícola em {dest} ({distance_nm} NM)."
@@ -821,7 +821,7 @@
       "description": "Aeronave recém-saída de revisão geral de entressafra em {origin}, entregue em voo direto ao proprietário no hangar rural de {dest} ({distance_nm} NM)."
     }
   ],
-  "4.2.3": [
+  "insumos_urgentes_agro": [
     {
       "title": "Insumos Agrícolas de Emergência para {dest}",
       "description": "Transporte urgente de medicamentos veterinários e aditivos ({cargo_lbs} lbs) de {origin} para conter emergência sanitária na fazenda em {dest} ({distance_nm} NM)."
@@ -835,7 +835,7 @@
       "description": "Frete aéreo expresso com peças e insumos veterinários ({cargo_lbs} lbs) de {origin} para a comarca de {dest} ({distance_nm} NM)."
     }
   ],
-  "4.3.1": [
+  "medivac_bush": [
     {
       "title": "Resgate Médico Bush em Pista Remota: {origin} a {dest}",
       "description": "Evacuação médica de emergência retirando trabalhador acidentado ou morador ribeirinho de pista rústica em {origin} rumo ao pronto-socorro de {dest} ({distance_nm} NM)."
@@ -849,7 +849,7 @@
       "description": "Missão de salvamento e remoção médica de pista de terra em {origin} transportando enfermo para o hospital de referência em {dest} ({distance_nm} NM)."
     }
   ],
-  "4.3.2": [
+  "aog_maquina_campo": [
     {
       "title": "Peça Bruta de Maquinário Pesado (AOG) para {dest}",
       "description": "Transporte emergencial de eixo cardã e comando hidráulico ({cargo_lbs} lbs) de {origin} para colheitadeira paralisada na fazenda em {dest} ({distance_nm} NM)."

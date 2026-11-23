@@ -342,6 +342,23 @@ namespace FlightCareer.Infrastructure.Persistence
                 }
             }
 
+            // Migração de SubId de missões antigas para IDs textuais do catálogo (CATALOGO-MISSOES)
+            foreach (var (legacyCode, newId) in Domain.Missions.MissionCatalog.Shared.LegacyCodes)
+            {
+                try
+                {
+                    using var migrateCmd = connection.CreateCommand();
+                    migrateCmd.CommandText = "UPDATE Missions SET SubId = $new WHERE SubId = $old;";
+                    var pNew = migrateCmd.CreateParameter(); pNew.ParameterName = "$new"; pNew.Value = newId; migrateCmd.Parameters.Add(pNew);
+                    var pOld = migrateCmd.CreateParameter(); pOld.ParameterName = "$old"; pOld.Value = legacyCode; migrateCmd.Parameters.Add(pOld);
+                    await migrateCmd.ExecuteNonQueryAsync();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[AppDbContext] Falha ao migrar SubId {legacyCode} -> {newId}: {ex.Message}");
+                }
+            }
+
             // Higienização e extração inteligente de municípios via AviationDataNormalizer para aeroportos com City vazio
             try
             {

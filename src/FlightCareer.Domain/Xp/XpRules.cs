@@ -92,7 +92,7 @@ namespace FlightCareer.Domain.Xp
             ["aog"] = 1.35,
             ["carga_fragil"] = 1.35,
             ["carga_global"] = 1.35,
-            ["1.7.6"] = 1.00,
+            ["cargueiro_noturno"] = 1.00,
             ["medevac"] = 1.50
         };
         public XpRealismRules Realism { get; init; } = new();

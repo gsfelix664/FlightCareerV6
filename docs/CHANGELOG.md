@@ -2997,3 +2997,28 @@
 - `tools/places/airport_profiles.py` gera `Data/places/airport_profiles.json` (8.752 aeroportos do MSFS com perfis curados e heurísticos). Ainda não usado pelo gerador (entra no catálogo de missões).
 - Aeródromo turístico ganhou papel (`role`): só os de `panoramico` puxam a categoria de voo panorâmico no gerador; os de `destino` só fornecem os pontos (`ScenicAerodromeInfo.IsScenicBase`). `build_places.py` junta os pontos de `scenic_pois_curated.csv` aos aeródromos.
 - Tabela de pesos por missão e perfil de aeroporto proposta no plano (§ 9.3). Não visto na tela.
+
+## 2026-11-23 - Catálogo de missões em JSON com IDs de texto estáveis (CATALOGO-MISSOES) (Gemini)
+- **Catálogo de missões centralizado em JSON (`Infrastructure/Data/mission_catalog.json` e `Domain/Missions/MissionCatalog.cs`):**
+  - Todas as 59 missões extraídas de código puro (`MissionRules.cs` e condicionais numéricas) para um catálogo em JSON unificado, embutido como recurso em `FlightCareer.Domain` e copiado como arquivo de dados, com IDs estáveis em snake_case em português (`instrucao_local`, `voo_de_cheque`, `voo_panoramico`, `circuito_tgl`, `translado_basico`, `aerolevantamento`, `paraquedismo`, `linha_domestica_hub`, `carga_fragil`, `medevac_dinamico`...).
+  - Mapeamento bidirecional retrocompatível via `legacyCodes` em `MissionCatalog.Shared` com métodos `Get(id)`, `Normalize(idOuCodigo)`, `Tiers` e `AirportAdjustments`.
+- **Esquema de dados e entidades puras (`Domain/Missions/`):**
+  - Entidade pura `MissionDefinition` com `id`, `legacyCodes[]`, `name`, `description`, `board`, `vip`, `phase`, `payFamily`, `xpType`, `generator`, `destination`, `fixedTexts`, `rangeRules`, `paxRules`, `lbsRules`, `minExpHours`, `maxExpHours`, `urgency`, `requiresHardSurface`, `minRunwayDest`, `luggageWeightKg`.
+  - Value object `ProbRange` suportando deserialização dual (array `[peso, min, max]` ou objeto com propriedades) via `ProbRangeJsonConverter`.
+- **Refatoração do Gerador (`Application/Services/MissionGenerator.cs` e `MissionRules.cs`):**
+  - `MissionRules.cs` transformado em adaptador fino que monta `Rules` a partir do catálogo.
+  - Eliminação de todos os `if (sub.Id == "x.y.z")` do gerador (tanto síncrono quanto em memória), passando a rotear regras de destino por `Destination.Rule` (`same_country_tier_3_4`, `other_country`, `tier1_same_country`, `tier1`, `tier1_other_country`, `tier_max_2`, `short_or_unpaved`), geradores especiais por `Generator` (`local_instruction`, `checkride`, `scenic_tour`, `tgl_circuit`, `basic_ferry`, `survey`, `skydive`), textos fixos por `FixedTexts` e destinos preferenciais por `Destination.PreferredHubs`.
+  - Ajustes de pesos e importação dinâmica de grupos por aeródromo em `GetCalibratedCategories` refatorados para interpretar genericamente a lista `AirportAdjustments` de dados.
+- **Consumidores atualizados para os novos IDs:**
+  - `MissionPayTable.cs`: resolve família pelo `def.PayFamily` via `MissionCatalog.Shared.Get(subId)`; remoção de `prefixes` numéricos de `mission_pay.json` e dos defaults.
+  - `CareerPhaseCatalog.cs`: resolve fase pelo `def.Phase` do catálogo; remoção de `subIdToPhase` numérico de `career_phases.json`.
+  - `XpRules.cs` e `XpCalculator.cs`: chave de multiplicador `"cargueiro_noturno"` em `xp_rules.json`; `XpCalculator` resolve multiplicador através de `def.XpType`/`def.PayFamily`.
+  - `MissionTextCatalog.cs` e `mission_texts.json`: re-chaveado pelos novos IDs de texto (incluindo `voo_panoramico-turistico`); `Render` normaliza códigos legados transparentemente.
+  - `MissionCompletion.cs`, `FlightService.cs`, `FlightMonitor.cs`, `CareerProgressionSimulator.cs`, `MissionBoardCategory.cs` e `MissionDisplayItem.cs`: migrados para consultar `generator`, `board` ou `vip` do catálogo em vez de strings numéricas.
+- **Persistência e Migração de Banco (`AppDbContext.cs`):**
+  - Instruções idempotentes em `EnsureSchemaUpdatedAsync` atualizando `SubId` na tabela `Missions` para o ID textual correspondente a cada um dos 59 códigos antigos.
+- **Garantia de Equivalência e Testes:**
+  - Snapshot golden com 270 missões em 14 aeródromos (T1 a T4) validado com equivalência estrita (100% idêntico) via `MissionCatalogEquivalenceTests`.
+  - Suíte de integridade `MissionCatalogTests` aprovada (unicidade dos 59 legacyCodes, validação de campos, integridade de textos, normalização, ausência de códigos literais no código-fonte de produção e teste de migração SQLite).
+  - Simulação de 90 dias do `career-stab` (`--days 90 --bots 1 --seed 7 --fast`) com resultados financeiros e operacionais idênticos nos 9 perfis (Easy, Medium, Hard × Agressivo, Cauteloso, Equilibrado).
+  - Total de 969/969 testes xUnit aprovados (100%). Não testado no MSFS.

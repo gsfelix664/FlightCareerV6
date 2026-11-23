@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FlightCareer.Application.Interfaces;
 using FlightCareer.Application.Services;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Application.Simulation;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Economy;

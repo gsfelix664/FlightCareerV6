@@ -225,13 +225,13 @@ namespace FlightCareer.Tests.Missions
                 new() { ICAO = "SBLS", Name = "Aeroporto Lins", City = "Lins", Country = "BR", Tier = 3, Latitude = -21.660, Longitude = -49.730, ElevationFt = 1550 }
             };
 
-            var cat = MissionRules.Rules[2].Categories.FirstOrDefault(c => c.Id == "3.5");
+            var cat = MissionRules.Rules[2].Categories.FirstOrDefault(c => c.Id == "aeroclube");
             Assert.NotNull(cat);
             Assert.Equal("Aeroclube", cat.Name);
 
-            var subPanoramico = cat.SubCategories.First(s => s.Id == "3.5.1");
-            var subTgl = cat.SubCategories.First(s => s.Id == "3.5.2");
-            var subTranslado = cat.SubCategories.First(s => s.Id == "3.5.3");
+            var subPanoramico = cat.SubCategories.First(s => s.Id == "voo_panoramico");
+            var subTgl = cat.SubCategories.First(s => s.Id == "circuito_tgl");
+            var subTranslado = cat.SubCategories.First(s => s.Id == "translado_basico");
 
             var rng = new Random(42);
             var now = DateTime.UtcNow;
@@ -240,9 +240,9 @@ namespace FlightCareer.Tests.Missions
             var missionsPano = MissionGenerator.GenerateMissionsInMemory(
                 origin, neighborAirports, null, rng, now);
             // Verifica resolução das fases no catálogo
-            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("3.5.1"));
-            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("3.5.2"));
-            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("3.5.3"));
+            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("voo_panoramico"));
+            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("circuito_tgl"));
+            Assert.Equal(CareerPhase.Phase1_FlightSchool, CareerPhaseCatalog.Instance.ResolvePhase("translado_basico"));
 
             // 2. Multiplicadores de XP
             Assert.Equal(1.15, XpRules.Default.TypeMultipliers["panoramico"]);
@@ -250,9 +250,9 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal(1.10, XpRules.Default.TypeMultipliers["instrucao_basica"]);
 
             // 3. Famílias de pagamento
-            Assert.Equal("panoramico", MissionPayTable.Shared.Resolve("3.5.1")?.Id);
-            Assert.Equal("instrucao_basica", MissionPayTable.Shared.Resolve("3.5.2")?.Id);
-            Assert.Equal("translado", MissionPayTable.Shared.Resolve("3.5.3")?.Id);
+            Assert.Equal("panoramico", MissionPayTable.Shared.Resolve("voo_panoramico")?.Id);
+            Assert.Equal("instrucao_basica", MissionPayTable.Shared.Resolve("circuito_tgl")?.Id);
+            Assert.Equal("translado", MissionPayTable.Shared.Resolve("translado_basico")?.Id);
         }
 
         [Fact]

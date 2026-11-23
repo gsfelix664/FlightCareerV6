@@ -673,7 +673,7 @@ namespace FlightCareer.Application.Simulation
                                     RunwayFacts? botOrigRwy = currentAirport != null ? new RunwayFacts(Math.Max(botMinReqFt * 1.1, 3000.0), botMinReqFt, currentAirport.Tier >= 4, currentAirport.ElevationFt) : null;
                                     RunwayFacts? botDestRwy = destAirport != null ? new RunwayFacts(Math.Max(botMinReqFt * 1.1, 3000.0), botMinReqFt, destAirport.Tier >= 4, destAirport.ElevationFt) : null;
                                     string? botFamilyId = MissionPayTable.Shared.Resolve(chosen.SubId)?.Id;
-                                    bool botIsUrgent = chosen.Urgency > 1.0 || (chosen.SubId != null && (chosen.SubId.StartsWith("3.3") || chosen.SubId.StartsWith("4.3.1")));
+                                    bool botIsUrgent = chosen.Urgency > 1.0 || (chosen.SubId != null && Domain.Missions.MissionCatalog.Shared.Get(chosen.SubId)?.Board == Domain.Missions.MissionBoardKind.Medica);
                                     var botXpInputs = new XpFlightInputs(
                                         AirborneMinutes: botFlightMin,
                                         DistanceNm: chosen.DistanceNM,

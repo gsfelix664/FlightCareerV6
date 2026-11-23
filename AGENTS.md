@@ -286,6 +286,12 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - No voo panorâmico (`3.5.1`), se a origem for aeródromo turístico curado com $\ge 2$ pontos, sorteia 2 a 4 atrações da lista curada ($\ge 2$ NM entre si, ordenadas por azimute), calcula distância real do circuito origem ➔ pontos ➔ origem e injeta marcadores `{scenic_name}` e `{scenic_note}` no briefing.
   - Calibração de pesos: aeródromo turístico curado recebe bônus de +40 na Categoria 3.5 (importando a categoria se ausente no Tier da localidade, ex.: Tier 1), com peso 70 em 3.5.1 contra 15/15 em 3.5.2 e 3.5.3.
   - Textos de RP (`mission_texts.json`): 2 novas variantes para 3.5.1 usando `{scenic_name}` e `{scenic_note}`; 2 novas variantes cada em 3.5.3, 1.3.3 e 4.2.2 de "entrega de aeronave ao proprietário" (pós-revisão ou compra). Não testado no MSFS / não visto na tela.
+- **Catálogo de missões em JSON e IDs de texto estáveis (CATALOGO-MISSOES):**
+  - Todas as 59 missões extraídas de código para `Infrastructure/Data/mission_catalog.json` (embutido como recurso e copiado na saída) com IDs estáveis em snake_case em português (`instrucao_local`, `voo_panoramico`, `medevac_dinamico`...).
+  - Suporte a `legacyCodes` para compatibilidade retroativa e resolução bidirecional em `Domain/Missions/MissionCatalog.cs` (`Get`, `Normalize`, `Tiers`, `AirportAdjustments`).
+  - `MissionRules.cs` transformado em adaptador fino sobre o catálogo. `MissionGenerator.cs` refatorado para interpretar regras de destino, geradores especiais (`generator`) e textos fixos a partir do esquema do catálogo, e ajustes dinâmicos de aeródromo via `airportAdjustments`.
+  - Consumidores migrados: `MissionPayTable` (sem `prefixes`), `CareerPhaseCatalog` (sem `subIdToPhase`), `XpRules` (usando `xpType`), `mission_texts.json` (re-chaveado para os IDs novos), `MissionCompletion`, `FlightService`, `FlightMonitor`, `CareerProgressionSimulator`, `MissionBoardCategory`, `MissionDisplayItem`.
+  - Migração de banco idempotente em `AppDbContext.EnsureSchemaUpdatedAsync` atualizando `SubId` na tabela `Missions`. Determinismo 100% idêntico comprovado em suíte golden e simulação de 90 dias do `career-stab`. Não testado no MSFS.
 
 ## 8. Definição de pronto
 

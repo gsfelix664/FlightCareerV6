@@ -12,23 +12,23 @@ namespace FlightCareer.Tests.Missions
             MissionRules.Rules.Values.SelectMany(t => t.Categories).SelectMany(c => c.SubCategories).Select(s => s.Id).Distinct();
 
         [Theory]
+        [InlineData("instrucao_local", MissionBoardKind.Instrucao)]
+        [InlineData("navegacao_cross_country", MissionBoardKind.Instrucao)]
+        [InlineData("voo_de_cheque", MissionBoardKind.Instrucao)]
+        [InlineData("circuito_tgl", MissionBoardKind.Instrucao)]
+        [InlineData("voo_panoramico", MissionBoardKind.TaxiAereo)]
+        [InlineData("aerolevantamento", MissionBoardKind.Sae)]
+        [InlineData("paraquedismo", MissionBoardKind.Sae)]
+        [InlineData("linha_domestica_hub", MissionBoardKind.LinhaRegular)]
+        [InlineData("vip_internacional_curto", MissionBoardKind.TaxiAereo)]
+        [InlineData("cargueiro_noturno", MissionBoardKind.Carga)]
+        [InlineData("medevac_dinamico", MissionBoardKind.Medica)]
+        [InlineData("translado_basico", MissionBoardKind.Geral)]
         [InlineData("3.4.1", MissionBoardKind.Instrucao)]
-        [InlineData("3.4.2", MissionBoardKind.Instrucao)]
-        [InlineData("3.4.3", MissionBoardKind.Instrucao)]
-        [InlineData("3.5.2", MissionBoardKind.Instrucao)]
         [InlineData("3.5.1", MissionBoardKind.TaxiAereo)]
         [InlineData("3.6.1", MissionBoardKind.Sae)]
-        [InlineData("3.6.2", MissionBoardKind.Sae)]
         [InlineData("1.1.1", MissionBoardKind.LinhaRegular)]
-        [InlineData("1.7.5", MissionBoardKind.LinhaRegular)]
-        [InlineData("2.1.2", MissionBoardKind.LinhaRegional)]
-        [InlineData("3.1.1", MissionBoardKind.TaxiAereo)]
-        [InlineData("1.7.4", MissionBoardKind.TaxiAereo)]
-        [InlineData("2.3.1", MissionBoardKind.Carga)]
-        [InlineData("1.7.6", MissionBoardKind.Carga)]
-        [InlineData("3.3.1", MissionBoardKind.Medica)]
         [InlineData("1.7.3", MissionBoardKind.Medica)]
-        [InlineData("4.3.1", MissionBoardKind.Medica)]
         [InlineData("3.5.3", MissionBoardKind.Geral)]
         public void Subtipo_vai_para_a_categoria_do_quadro(string subId, MissionBoardKind expected)
         {
@@ -39,7 +39,7 @@ namespace FlightCareer.Tests.Missions
         [Fact]
         public void Todo_subtipo_do_gerador_tem_categoria_ou_esta_na_lista_de_geral()
         {
-            var geralIntencional = new HashSet<string> { "1.3.3", "2.4.2", "3.5.3", "4.2.1", "4.2.2" };
+            var geralIntencional = new HashSet<string> { "translado_posicionamento_ferry", "governo_local_estadual", "translado_basico", "apoio_batedor", "translado_piloto_agricola" };
             var semCategoria = AllSubIds()
                 .Where(id => MissionBoardCategory.Classify(id) == MissionBoardKind.Geral && !geralIntencional.Contains(id))
                 .ToList();
@@ -50,8 +50,8 @@ namespace FlightCareer.Tests.Missions
         public void Filtro_instrucao_mostra_as_missoes_de_instrucao_do_gerador()
         {
             var instrucao = AllSubIds().Where(id => MissionBoardCategory.MatchesFilter(MissionBoardCategory.Classify(id), "INSTRUÇÃO")).ToList();
-            Assert.Contains("3.4.1", instrucao);
-            Assert.Contains("3.5.2", instrucao);
+            Assert.Contains("instrucao_local", instrucao);
+            Assert.Contains("circuito_tgl", instrucao);
         }
 
         [Theory]

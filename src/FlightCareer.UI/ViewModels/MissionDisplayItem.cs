@@ -105,7 +105,7 @@ namespace FlightCareer.UI.ViewModels
 
         // Categoria do quadro pelo subtipo (MissionCategoryType guarda o nome da fase desde FASES-1)
         public MissionBoardKind BoardKind => MissionBoardCategory.Classify(Mission.SubId, Mission.MissionCategoryType);
-        private bool IsVip => Mission.SubId is "1.7.4" or "2.7.4";
+        private bool IsVip => MissionCatalog.Shared.Get(Mission.SubId)?.Vip ?? false;
 
         // Tag Curta para Badge da Categoria
         public string CategoryShortTag => MissionBoardCategory.ShortTag(BoardKind);
@@ -366,7 +366,8 @@ namespace FlightCareer.UI.ViewModels
 
             // Estimativa de XP para exibição no quadro (XP-PONTAS)
             double estSpeed = activeAircraft?.AircraftType?.CruiseSpeedKts > 0 ? activeAircraft.AircraftType.CruiseSpeedKts : 110.0;
-            bool isCircuitOrTgl = mission.SubId == "3.4.1" || string.Equals(mission.OriginICAO, mission.DestinationICAO, StringComparison.OrdinalIgnoreCase);
+            var def = MissionCatalog.Shared.Get(mission.SubId);
+            bool isCircuitOrTgl = (def?.Generator is "local_instruction" or "tgl_circuit") || string.Equals(mission.OriginICAO, mission.DestinationICAO, StringComparison.OrdinalIgnoreCase);
             int legs = isCircuitOrTgl ? 2 : 1;
             EstimatedXp = FlightCareer.Domain.Xp.XpCalculator.Estimate(
                 distanceNm: mission.DistanceNM,

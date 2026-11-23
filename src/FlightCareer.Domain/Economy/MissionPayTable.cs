@@ -36,22 +36,22 @@ namespace FlightCareer.Domain.Economy
 
         private static readonly Lazy<MissionPayTable> _defaults = new(() => new MissionPayTable(new List<MissionPayFamily>
         {
-            new("panoramico", new[] { "3.5.1" }, 300.0, 6.5, 0.0, false, 0.10, 1.0),
-            new("translado", new[] { "3.5.3" }, 250.0, 5.0, 0.0, false, 0.10, 1.0),
-            new("instrucao_basica", new[] { "3.4.1", "3.5.2" }, 220.0, 6.5, 0.0, false, 0.10, 1.0),
-            new("instrucao", new[] { "3.4" }, 350.0, 6.5, 0.0, false, 0.10, 1.0),
-            new("medevac", new[] { "4.3.1", "3.3", "1.7.3", "2.7.3", "3.7.2" }, 2400.0, 14.0, 0.0, false, 0.25, 1.0),
-            new("aog", new[] { "4.3.2", "3.2.1" }, 950.0, 8.0, 0.0, false, 0.35, 1.0),
-            new("carga_fragil", new[] { "1.7.2", "2.7.2", "3.7.1" }, 950.0, 8.0, 0.0, false, 0.35, 1.0),
-            new("agro_bush", new[] { "4." }, 380.0, 4.5, 0.0, false, 0.18, 1.0),
-            new("agro_municipal", new[] { "3.2" }, 450.0, 5.0, 0.0, false, 0.15, 1.0),
-            new("taxi_aereo", new[] { "3.1", "2.2", "1.3", "1.7.1", "2.7.1", "1.7.4", "2.7.4" }, 950.0, 7.5, 1.5, true, 0.12, 1.0),
-            new("carga_expressa", new[] { "2.3" }, 500.0, 4.0, 0.0, false, 0.22, 1.0),
-            new("regional", new[] { "2.1" }, 1800.0, 6.0, 0.45, false, 0.08, 1.0),
-            new("linha", new[] { "1.1", "1.2", "1.7.5", "1.7.6", "1.7.7" }, 5500.0, 8.0, 0.30, false, 0.05, 1.0),
-            new("carga_global", new[] { "1.7.8" }, 5500.0, 8.0, 0.0, false, 0.05, 1.0),
-            new("aerofoto", new[] { "3.6.1" }, 600.0, 6.0, 0.0, false, 0.10, 1.0, 0.0),
-            new("paraquedismo", new[] { "3.6.2" }, 0.0, 4.0, 0.0, true, 0.10, 1.0, 120.0),
+            new("panoramico", Array.Empty<string>(), 300.0, 6.5, 0.0, false, 0.10, 1.0),
+            new("translado", Array.Empty<string>(), 250.0, 5.0, 0.0, false, 0.10, 1.0),
+            new("instrucao_basica", Array.Empty<string>(), 220.0, 6.5, 0.0, false, 0.10, 1.0),
+            new("instrucao", Array.Empty<string>(), 350.0, 6.5, 0.0, false, 0.10, 1.0),
+            new("medevac", Array.Empty<string>(), 2400.0, 14.0, 0.0, false, 0.25, 1.0),
+            new("aog", Array.Empty<string>(), 950.0, 8.0, 0.0, false, 0.35, 1.0),
+            new("carga_fragil", Array.Empty<string>(), 950.0, 8.0, 0.0, false, 0.35, 1.0),
+            new("agro_bush", Array.Empty<string>(), 380.0, 4.5, 0.0, false, 0.18, 1.0),
+            new("agro_municipal", Array.Empty<string>(), 450.0, 5.0, 0.0, false, 0.15, 1.0),
+            new("taxi_aereo", Array.Empty<string>(), 950.0, 7.5, 1.5, true, 0.12, 1.0),
+            new("carga_expressa", Array.Empty<string>(), 500.0, 4.0, 0.0, false, 0.22, 1.0),
+            new("regional", Array.Empty<string>(), 1800.0, 6.0, 0.45, false, 0.08, 1.0),
+            new("linha", Array.Empty<string>(), 5500.0, 8.0, 0.30, false, 0.05, 1.0),
+            new("carga_global", Array.Empty<string>(), 5500.0, 8.0, 0.0, false, 0.05, 1.0),
+            new("aerofoto", Array.Empty<string>(), 600.0, 6.0, 0.0, false, 0.10, 1.0, 0.0),
+            new("paraquedismo", Array.Empty<string>(), 0.0, 4.0, 0.0, true, 0.10, 1.0, 120.0),
             new("fallback", Array.Empty<string>(), 400.0, 5.5, 0.0, false, 0.10, 1.0)
         }));
 
@@ -123,6 +123,14 @@ namespace FlightCareer.Domain.Economy
         {
             if (!string.IsNullOrWhiteSpace(subId))
             {
+                // Resolução direta pelo catálogo de missões (normaliza código numérico legado e busca PayFamily)
+                var def = Missions.MissionCatalog.Shared.Get(subId);
+                string familyId = def?.PayFamily ?? subId.Trim();
+
+                var matchedFamily = Families.FirstOrDefault(f => string.Equals(f.Id, familyId, StringComparison.OrdinalIgnoreCase));
+                if (matchedFamily != null)
+                    return matchedFamily;
+
                 foreach (var family in Families)
                 {
                     if (family.Id == "fallback" || family.Prefixes == null || family.Prefixes.Length == 0)

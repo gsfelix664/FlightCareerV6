@@ -84,8 +84,8 @@ namespace FlightCareer.Tests.Missions
         {
             var catalog = MissionTextCatalog.LoadDefault();
 
-            Assert.True(catalog.Templates["3.5.1-turistico"].Count >= 2);
-            Assert.All(catalog.Templates["3.5.1"], v =>
+            Assert.True(catalog.Templates["voo_panoramico-turistico"].Count >= 2);
+            Assert.All(catalog.Templates["voo_panoramico"], v =>
                 Assert.DoesNotContain("{scenic_", v.Title + v.Description));
         }
     }

@@ -11,6 +11,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="..\FlightCareer.Infrastructure\Data\mission_catalog.json" Link="mission_catalog.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="NewFolder\**" />
     <EmbeddedResource Remove="NewFolder\**" />
     <None Remove="NewFolder\**" />
