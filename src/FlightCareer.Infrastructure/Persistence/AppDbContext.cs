@@ -342,6 +342,20 @@ namespace FlightCareer.Infrastructure.Persistence
                 }
             }
 
+            // Migração de SubId de missões antigas para IDs textuais do catálogo (CATALOGO-MISSOES)
+            foreach (var (legacyCode, newId) in Domain.Missions.MissionCatalog.Shared.LegacyCodes)
+            {
+                try
+                {
+                    command.CommandText = $"UPDATE Missions SET SubId = '{newId}' WHERE SubId = '{legacyCode}';";
+                    await command.ExecuteNonQueryAsync();
+                }
+                catch
+                {
+                    // Tabela ainda vazia ou sem missões antigas (ignorar)
+                }
+            }
+
             // Higienização e extração inteligente de municípios via AviationDataNormalizer para aeroportos com City vazio
             try
             {

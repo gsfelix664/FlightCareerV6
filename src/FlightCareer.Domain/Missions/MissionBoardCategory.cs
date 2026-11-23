@@ -31,31 +31,10 @@ namespace FlightCareer.Domain.Missions
 
         private static MissionBoardKind FromSubId(string id)
         {
-            switch (id)
-            {
-                // Instrução: aeroclube/escola e circuito de TGL
-                case "3.5.2": return MissionBoardKind.Instrucao;
-                // Passageiros sob demanda (executivo, VIP, panorâmico, equipes)
-                case "1.3.1": case "1.3.4": case "1.7.1": case "1.7.4":
-                case "2.7.1": case "2.7.4": case "3.5.1": case "4.1.2": case "4.1.3":
-                    return MissionBoardKind.TaxiAereo;
-                case "1.7.5": case "1.7.7": return MissionBoardKind.LinhaRegular;
-                case "1.3.2": case "1.7.2": case "1.7.6": case "1.7.8": case "2.4.1": case "2.7.2":
-                case "3.7.1": case "4.1.1": case "4.2.3": case "4.3.2":
-                    return MissionBoardKind.Carga;
-                case "1.7.3": case "2.7.3": case "3.7.2": case "4.3.1": return MissionBoardKind.Medica;
-                // Translados/ferry e governo ficam em "geral"
-                case "1.3.3": case "2.4.2": case "3.5.3": case "4.2.1": case "4.2.2":
-                    return MissionBoardKind.Geral;
-            }
+            var def = MissionCatalog.Shared.Get(id);
+            if (def != null)
+                return def.Board;
 
-            if (id.StartsWith("3.4.", StringComparison.Ordinal)) return MissionBoardKind.Instrucao;
-            if (id.StartsWith("1.1.", StringComparison.Ordinal)) return MissionBoardKind.LinhaRegular;
-            if (id.StartsWith("2.1.", StringComparison.Ordinal)) return MissionBoardKind.LinhaRegional;
-            if (id.StartsWith("2.2.", StringComparison.Ordinal) || id.StartsWith("3.1.", StringComparison.Ordinal)) return MissionBoardKind.TaxiAereo;
-            if (id.StartsWith("1.2.", StringComparison.Ordinal) || id.StartsWith("2.3.", StringComparison.Ordinal) || id.StartsWith("3.2.", StringComparison.Ordinal)) return MissionBoardKind.Carga;
-            if (id.StartsWith("3.3.", StringComparison.Ordinal)) return MissionBoardKind.Medica;
-            if (id.StartsWith("3.6.", StringComparison.Ordinal)) return MissionBoardKind.Sae;
             return MissionBoardKind.Geral;
         }
 

@@ -64,8 +64,10 @@ namespace FlightCareer.Domain.Missions
                 }
             }
 
+            var def = MissionCatalog.Shared.Get(mission.SubId);
+
             // Levantamento / Fotografia Aérea (3.6.1)
-            if (mission.SubId == "3.6.1")
+            if (def?.Generator == "survey")
             {
                 int requiredLegs = 3;
                 if (!string.IsNullOrWhiteSpace(mission.ContractData))
@@ -90,7 +92,7 @@ namespace FlightCareer.Domain.Missions
             }
 
             // Lançamento de Paraquedistas (3.6.2)
-            if (mission.SubId == "3.6.2")
+            if (def?.Generator == "skydive")
             {
                 if (!skydiveDropCompleted)
                 {

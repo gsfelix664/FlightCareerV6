@@ -98,11 +98,12 @@ namespace FlightCareer.Tests.Missions
 
             Assert.Equal(1.35, xpRules.TypeMultipliers["carga_fragil"]);
             Assert.Equal(1.35, xpRules.TypeMultipliers["carga_global"]);
-            Assert.Equal(1.00, xpRules.TypeMultipliers["1.7.6"]);
+            Assert.Equal(1.00, xpRules.TypeMultipliers["cargueiro_noturno"]);
 
             // Resolução via XpCalculator
             Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("carga_fragil", xpRules));
             Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("carga_global", xpRules));
+            Assert.Equal(1.00, XpCalculator.ResolveTypeMultiplier("cargueiro_noturno", xpRules));
             Assert.Equal(1.00, XpCalculator.ResolveTypeMultiplier("1.7.6", xpRules));
             Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("1.7.2", xpRules)); // Carga frágil
             Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("1.7.8", xpRules)); // Carga global
@@ -127,7 +128,7 @@ namespace FlightCareer.Tests.Missions
                 new Airport { ICAO = "SAEZ", Country = "Argentina", Tier = 3, Latitude = -34.8222, Longitude = -58.5358 } // Outro país (não deve escolher)
             };
 
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "1.7").SubCategories.First(s => s.Id == "1.7.1");
+            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "fretamento_executivo");
 
             for (int seed = 1; seed <= 20; seed++)
             {
@@ -151,7 +152,7 @@ namespace FlightCareer.Tests.Missions
 
             // Teste com seleção in-memory
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(42), DateTime.UtcNow, countOverride: 20);
-            var fretamentos = mGen.Where(m => m.SubId == "1.7.1").ToList();
+            var fretamentos = mGen.Where(m => m.SubId == "fretamento_executivo").ToList();
             foreach (var m in fretamentos)
             {
                 var dest = airports.First(a => a.ICAO == m.DestinationICAO);
@@ -168,14 +169,14 @@ namespace FlightCareer.Tests.Missions
         {
             var origin = new Airport { ICAO = "SBGR", Country = "Brazil", Tier = 1, Latitude = -23.4356, Longitude = -46.4731 };
             var dest = new Airport { ICAO = "SBDN", Country = "Brazil", Tier = 3, Latitude = -22.1969, Longitude = -49.9261 };
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "1.7").SubCategories.First(s => s.Id == "1.7.2");
+            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "carga_fragil");
 
             var rnd = new Random(101);
             var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
             var m = MissionGenerator.CreateMissionObjectSync(origin, dest, 200.0, sub, 0, 0, 450.0, rnd, now);
 
             Assert.NotNull(m);
-            Assert.Equal("1.7.2", m.SubId);
+            Assert.Equal("carga_fragil", m.SubId);
             Assert.Equal(0, m.PassengerCount);
             Assert.Equal(450.0, m.CargoWeightLbs);
             Assert.Equal(1.3, m.Urgency);
@@ -188,14 +189,14 @@ namespace FlightCareer.Tests.Missions
         {
             var origin = new Airport { ICAO = "SBGR", Country = "Brazil", Tier = 1, Latitude = -23.4356, Longitude = -46.4731 };
             var dest = new Airport { ICAO = "SWCA", Country = "Brazil", Tier = 4, Latitude = -22.1000, Longitude = -47.0000 };
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "1.7").SubCategories.First(s => s.Id == "1.7.3");
+            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "medevac_dinamico");
 
             var rnd = new Random(202);
             var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
             var m = MissionGenerator.CreateMissionObjectSync(origin, dest, 120.0, sub, 2, 30.0, 400.0, rnd, now);
 
             Assert.NotNull(m);
-            Assert.Equal("1.7.3", m.SubId);
+            Assert.Equal("medevac_dinamico", m.SubId);
             Assert.InRange(m.PassengerCount, 1, 2);
             Assert.InRange(m.CargoWeightLbs, 300, 600);
             Assert.Equal(1.5, m.Urgency);
@@ -216,7 +217,7 @@ namespace FlightCareer.Tests.Missions
             };
 
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(77), DateTime.UtcNow, countOverride: 30);
-            var vips = mGen.Where(m => m.SubId == "1.7.4").ToList();
+            var vips = mGen.Where(m => m.SubId == "vip_internacional_curto").ToList();
 
             foreach (var m in vips)
             {
@@ -243,7 +244,7 @@ namespace FlightCareer.Tests.Missions
             };
 
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(99), DateTime.UtcNow, countOverride: 30);
-            var pontes = mGen.Where(m => m.SubId == "1.7.5").ToList();
+            var pontes = mGen.Where(m => m.SubId == "ponte_aerea_troncal").ToList();
 
             foreach (var m in pontes)
             {
@@ -269,7 +270,7 @@ namespace FlightCareer.Tests.Missions
             };
 
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(105), DateTime.UtcNow, countOverride: 30);
-            var cargueiros = mGen.Where(m => m.SubId == "1.7.6").ToList();
+            var cargueiros = mGen.Where(m => m.SubId == "cargueiro_noturno").ToList();
 
             foreach (var m in cargueiros)
             {
@@ -296,7 +297,7 @@ namespace FlightCareer.Tests.Missions
             };
 
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(250), DateTime.UtcNow, countOverride: 30);
-            var longHauls = mGen.Where(m => m.SubId == "1.7.7").ToList();
+            var longHauls = mGen.Where(m => m.SubId == "long_haul_internacional").ToList();
 
             foreach (var m in longHauls)
             {
@@ -321,7 +322,7 @@ namespace FlightCareer.Tests.Missions
             };
 
             var mGen = MissionGenerator.GenerateMissionsInMemory(origin, airports, null, new Random(310), DateTime.UtcNow, countOverride: 30);
-            var fretamentosGlobais = mGen.Where(m => m.SubId == "1.7.8").ToList();
+            var fretamentosGlobais = mGen.Where(m => m.SubId == "fretamento_global_carga_alto_valor").ToList();
 
             foreach (var m in fretamentosGlobais)
             {
@@ -364,22 +365,22 @@ namespace FlightCareer.Tests.Missions
 
                 Assert.NotEmpty(missions);
 
-                // VIP Internacional (1.7.4) nunca deve ter como destino aeroporto do mesmo país
-                var vips = missions.Where(m => m.SubId == "1.7.4").ToList();
+                // VIP Internacional nunca deve ter como destino aeroporto do mesmo país
+                var vips = missions.Where(m => m.SubId == "vip_internacional_curto").ToList();
                 foreach (var v in vips)
                 {
                     Assert.Equal("SGAS", v.DestinationICAO);
                 }
 
-                // Ponte Aérea (1.7.5) sempre hub do mesmo país
-                var pontes = missions.Where(m => m.SubId == "1.7.5").ToList();
+                // Ponte Aérea sempre hub do mesmo país
+                var pontes = missions.Where(m => m.SubId == "ponte_aerea_troncal").ToList();
                 foreach (var p in pontes)
                 {
                     Assert.Equal("SBRJ", p.DestinationICAO);
                 }
 
-                // Long-Haul (1.7.7) sempre hub de outro país
-                var longHauls = missions.Where(m => m.SubId == "1.7.7").ToList();
+                // Long-Haul sempre hub de outro país
+                var longHauls = missions.Where(m => m.SubId == "long_haul_internacional").ToList();
                 foreach (var lh in longHauls)
                 {
                     Assert.Equal("KJFK", lh.DestinationICAO);

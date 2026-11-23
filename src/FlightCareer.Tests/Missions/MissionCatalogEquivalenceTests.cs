@@ -239,6 +239,33 @@ namespace FlightCareer.Tests.Missions
             string goldenJson = File.ReadAllText(goldenPath);
             var goldenRecords = JsonSerializer.Deserialize<List<GoldenMissionRecord>>(goldenJson, JsonOpts);
             Assert.NotNull(goldenRecords);
+
+            if (goldenRecords!.Count != currentRuns.Count)
+            {
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine($"Divergência na contagem: Golden={goldenRecords.Count}, Current={currentRuns.Count}");
+                sb.AppendLine("Missões de SBKP no Current:");
+                for (int i = 60; i < Math.Min(80, currentRuns.Count); i++)
+                {
+                    var c = currentRuns[i];
+                    sb.AppendLine($"[{i}] sub={c.Subtype} dest={c.DestinationIcao} pax={c.Pax} lbs={c.CargoLbs} rew={c.Reward}");
+                }
+                for (int i = 0; i < Math.Max(goldenRecords.Count, currentRuns.Count); i++)
+                {
+                    var g = i < goldenRecords.Count ? goldenRecords[i] : null;
+                    var c = i < currentRuns.Count ? currentRuns[i] : null;
+                    string expSub = g != null ? FlightCareer.Domain.Missions.MissionCatalog.Shared.Normalize(g.Subtype) : "";
+                    if (g?.OriginIcao != c?.OriginIcao || expSub != c?.Subtype || g?.DestinationIcao != c?.DestinationIcao)
+                    {
+                        sb.AppendLine($"DIVERGENCIA EM [{i}]:");
+                        sb.AppendLine($"  Golden:  {g?.OriginIcao} sub={g?.Subtype} ({expSub}) dest={g?.DestinationIcao} pax={g?.Pax} rew={g?.Reward}");
+                        sb.AppendLine($"  Current: {c?.OriginIcao} sub={c?.Subtype} dest={c?.DestinationIcao} pax={c?.Pax} rew={c?.Reward}");
+                        break;
+                    }
+                }
+                throw new Xunit.Sdk.XunitException(sb.ToString());
+            }
+
             Assert.Equal(goldenRecords!.Count, currentRuns.Count);
 
             for (int i = 0; i < goldenRecords.Count; i++)
@@ -268,20 +295,7 @@ namespace FlightCareer.Tests.Missions
 
         private static string NormalizeSubtypeForComparison(string goldenSubtype)
         {
-            // Na primeira execução antes da refatoração, devolve o próprio código.
-            // Quando MissionCatalog for implementado, chamará MissionCatalog.Normalize.
-            var catalogType = Type.GetType("FlightCareer.Domain.Missions.MissionCatalog, FlightCareer.Domain");
-            if (catalogType != null)
-            {
-                var method = catalogType.GetMethod("Normalize", new[] { typeof(string) });
-                if (method != null)
-                {
-                    var result = method.Invoke(null, new object[] { goldenSubtype });
-                    if (result is string s && !string.IsNullOrEmpty(s)) return s;
-                }
-            }
-
-            return goldenSubtype;
+            return FlightCareer.Domain.Missions.MissionCatalog.Shared.Normalize(goldenSubtype);
         }
     }
 }

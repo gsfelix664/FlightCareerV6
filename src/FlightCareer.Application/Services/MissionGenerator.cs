@@ -242,38 +242,35 @@ namespace FlightCareer.Application.Services
             }
 
             // Filtros específicos por contrato das Fases 3 a 7
-            if (sub.Id == "1.7.1" || sub.Id == "2.7.1")
+            switch (sub.Destination.Rule)
             {
-                // Fretamento Executivo: capital/hub ou regional -> interior (tier 3 ou 4) do mesmo país
-                query = query.Where(a => a.Country == origin.Country && (a.Tier == 3 || a.Tier == 4));
-            }
-            else if (sub.Id == "1.7.4" || sub.Id == "2.7.4")
-            {
-                // VIP Internacional Curto: país vizinho / diferente
-                query = query.Where(a => a.Country != origin.Country && a.Country != "");
-            }
-            else if (sub.Id == "1.7.5")
-            {
-                // Ponte Aérea / Troncal: hub ↔ hub do mesmo país
-                query = query.Where(a => a.Tier == 1 && a.Country == origin.Country);
-            }
-            else if (sub.Id == "1.7.6")
-            {
-                // Cargueiro Noturno: entre hubs
-                query = query.Where(a => a.Tier == 1);
-            }
-            else if (sub.Id == "1.7.7")
-            {
-                // Long-Haul Internacional: entre hubs de países diferentes
-                query = query.Where(a => a.Tier == 1 && a.Country != origin.Country && a.Country != "");
-            }
-            else if (sub.Id == "1.7.8")
-            {
-                // Fretamento Global / Carga de Alto Valor: aeroportos de grande porte
-                query = query.Where(a => a.Tier <= 2);
+                case "same_country_tier_3_4":
+                    // Fretamento Executivo: capital/hub ou regional -> interior (tier 3 ou 4) do mesmo país
+                    query = query.Where(a => a.Country == origin.Country && (a.Tier == 3 || a.Tier == 4));
+                    break;
+                case "other_country":
+                    // VIP Internacional Curto: país vizinho / diferente
+                    query = query.Where(a => a.Country != origin.Country && a.Country != "");
+                    break;
+                case "tier1_same_country":
+                    // Ponte Aérea / Troncal: hub ↔ hub do mesmo país
+                    query = query.Where(a => a.Tier == 1 && a.Country == origin.Country);
+                    break;
+                case "tier1":
+                    // Cargueiro Noturno: entre hubs
+                    query = query.Where(a => a.Tier == 1);
+                    break;
+                case "tier1_other_country":
+                    // Long-Haul Internacional: entre hubs de países diferentes
+                    query = query.Where(a => a.Tier == 1 && a.Country != origin.Country && a.Country != "");
+                    break;
+                case "tier_max_2":
+                    // Fretamento Global / Carga de Alto Valor: aeroportos de grande porte
+                    query = query.Where(a => a.Tier <= 2);
+                    break;
             }
 
-            if (sub.Id == "3.4.1") 
+            if (sub.Generator == "local_instruction") 
             {
                 var nearbyTierAirports = await query.Where(a => a.Tier <= 2).ToListAsync();
                 return CreateLocalInstructionMissionSync(
@@ -281,7 +278,7 @@ namespace FlightCareer.Application.Services
                     nearbyTierAirports, PayMultiplier, PayTable, _textCatalog);
             }
 
-            if (sub.Id == "3.4.3")
+            if (sub.Generator == "checkride")
             {
                 var nearbyTierAirports = await query.Where(a => a.Tier <= 2).ToListAsync();
                 return CreateCheckrideMissionSync(
@@ -289,7 +286,7 @@ namespace FlightCareer.Application.Services
                     nearbyTierAirports, PayMultiplier, PayTable, _textCatalog);
             }
 
-            if (sub.Id == "3.5.1")
+            if (sub.Generator == "scenic_tour")
             {
                 var tourMission = CreateScenicTourMissionSync(
                     origin, sub, _random, _currentReferenceTime ?? DateTime.Now,
@@ -340,7 +337,7 @@ namespace FlightCareer.Application.Services
                     requiredTouchAndGoes: 0, overflyWaypoints: wpString, titleOverride: title, descriptionOverride: desc);
             }
 
-            if (sub.Id == "3.5.2")
+            if (sub.Generator == "tgl_circuit")
             {
                 int tglCount = _random.Next(3, 7);
                 int tglPax = _random.Next(0, 2);
@@ -352,17 +349,17 @@ namespace FlightCareer.Application.Services
                     requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
             }
 
-            if (sub.Id == "3.6.1")
+            if (sub.Generator == "survey")
             {
                 return CreateSurveyMissionSync(origin, sub, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable, _placesService, _textCatalog);
             }
 
-            if (sub.Id == "3.6.2")
+            if (sub.Generator == "skydive")
             {
                 return CreateSkydiveMissionSync(origin, sub, _random, _currentReferenceTime ?? DateTime.Now, PayMultiplier, PayTable, _placesService, _textCatalog);
             }
 
-            if (sub.Id == "3.5.3")
+            if (sub.Generator == "basic_ferry")
             {
                 paxCount = 0;
                 luggageWeightLbs = 0;
@@ -383,7 +380,7 @@ namespace FlightCareer.Application.Services
                 .Where(x => x.Dist >= minRange && x.Dist <= maxRange)
                 .ToList();
 
-            if (sub.Id == "1.7.3" || sub.Id == "2.7.3" || sub.Id == "3.7.2")
+            if (sub.Destination.Rule == "short_or_unpaved")
             {
                 // MEDEVAC Dinâmico: destino com maior pista <= 4.000 ft ou não pavimentada
                 var candIcaos = validDestinations.Select(x => x.Airport.ICAO).ToList();
@@ -424,18 +421,12 @@ namespace FlightCareer.Application.Services
             var preferredCandidates = validDestinations.Where(x => preferredList.Contains(x.Airport.ICAO)).ToList();
             var selected = preferredCandidates.Any() ? preferredCandidates[_random.Next(preferredCandidates.Count)] : validDestinations[_random.Next(validDestinations.Count)];
 
-            string? titleOverride = sub.Id switch
-            {
-                "3.5.3" => $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}",
-                "1.7.6" => $"Cargueiro Noturno: {origin.ICAO} ➔ {selected.Airport.ICAO}",
-                _ => null
-            };
-            string? descOverride = sub.Id switch
-            {
-                "3.5.3" => $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial.",
-                "1.7.6" => $"Operação logística de carga pesada em voo noturno conectando grandes hubs ({origin.ICAO} ➔ {selected.Airport.ICAO}).",
-                _ => null
-            };
+            string? titleOverride = sub.FixedTexts != null
+                ? sub.FixedTexts.Title.Replace("{origin}", origin.ICAO).Replace("{dest}", selected.Airport.ICAO)
+                : null;
+            string? descOverride = sub.FixedTexts != null
+                ? sub.FixedTexts.Description.Replace("{origin}", origin.ICAO).Replace("{dest}", selected.Airport.ICAO)
+                : null;
             var destRunway = await GetDestinationRunwayAsync(selected.Airport.ICAO);
 
             return await CreateMissionObject(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight,
@@ -631,7 +622,7 @@ namespace FlightCareer.Application.Services
             string fallbackDesc = $"Voo de instrução no setor {dir} a {distToArea:F0} NM ({altBand}). Pratique {maneuvers}. Retorne para {tgl} TGL(s) e pouso completo em {origin.ICAO}.";
 
             var catalog = textCatalog ?? MissionTextCatalog.Default;
-            var rendered = catalog.Render("3.4.1", random, values, fallbackTitle, fallbackDesc);
+            var rendered = catalog.Render(sub.Id, random, values, fallbackTitle, fallbackDesc);
 
             return CreateMissionObjectSync(
                 origin, origin, totalDist, sub, 1, 0, 0,
@@ -719,7 +710,7 @@ namespace FlightCareer.Application.Services
             string fallbackDesc = $"Avaliação prática de voo com examinador a bordo em {origin.ICAO}. Área no setor {dir} a {distToArea:F0} NM ({altBand}). Pane simulada (falha de motor simulada pelo examinador, pouso de precisão) e 2 TGLs com pouso completo na origem.";
 
             var catalog = textCatalog ?? MissionTextCatalog.Default;
-            var rendered = catalog.Render("3.4.3", random, values, fallbackTitle, fallbackDesc);
+            var rendered = catalog.Render(sub.Id, random, values, fallbackTitle, fallbackDesc);
 
             return CreateMissionObjectSync(
                 origin, origin, totalDist, sub, 1, 0, 0,
@@ -839,7 +830,7 @@ namespace FlightCareer.Application.Services
 
                 // Variantes com {scenic_name}/{scenic_note} só nos aeródromos turísticos (em outros o título ficaria cortado).
                 var catalog = textCatalog ?? MissionTextCatalog.Default;
-                var rendered = catalog.Render("3.5.1-turistico", random, values, fallbackTitle, fallbackDesc);
+                var rendered = catalog.Render("voo_panoramico-turistico", random, values, fallbackTitle, fallbackDesc);
 
                 return CreateMissionObjectSync(
                     origin, origin, totalTourDist, sub, tourPax, Math.Min(tourPax * 15.0, 30.0), 0,
@@ -922,7 +913,7 @@ namespace FlightCareer.Application.Services
             string fallbackDescLegacy = $"Voo panorâmico sobrevoando {poiListStrLegacy}. Retorno para pouso em {origin.ICAO} (sobrevoo a ≤ 1,5 NM e abaixo de 3.000 ft AGL).";
 
             var catalogLegacy = textCatalog ?? MissionTextCatalog.Default;
-            var renderedLegacy = catalogLegacy.Render("3.5.1", random, valuesLegacy, fallbackTitleLegacy, fallbackDescLegacy);
+            var renderedLegacy = catalogLegacy.Render(sub.Id, random, valuesLegacy, fallbackTitleLegacy, fallbackDescLegacy);
 
             return CreateMissionObjectSync(
                 origin, origin, totalTourDistLegacy, sub, tourPaxLegacy, Math.Min(tourPaxLegacy * 15.0, 30.0), 0,
@@ -1019,7 +1010,7 @@ namespace FlightCareer.Application.Services
             string fallbackDesc = $"Levantamento fotográfico para {clientName} sobre {targetName}. Exige {requiredLegs} pernas a {targetAltitudeFt:F0} ft e {targetSpeedKt:F0} kt, rumo {(int)orientationDeg:D3}°. Retorno para pouso em {origin.ICAO}.";
 
             var catalog = textCatalog ?? MissionTextCatalog.Default;
-            var rendered = catalog.Render("3.6.1", random, values, fallbackTitle, fallbackDesc);
+            var rendered = catalog.Render(sub.Id, random, values, fallbackTitle, fallbackDesc);
 
             return CreateMissionObjectSync(
                 origin, origin, estimatedDist, sub, 0, 0, 80.0,
@@ -1085,7 +1076,7 @@ namespace FlightCareer.Application.Services
             string fallbackDesc = $"Lançamento de {paxCount} paraquedistas sobre {dzName}. Subida para salto a {targetAglFt:N0} ft AGL sobre a zona (≤ 2 NM), estabilização a velocidade segura (≤ {maxDropSpeedKt:F0} kt) por ≥ 30 s e descida sem choque térmico. Retorno para pouso em {origin.ICAO}.";
 
             var catalog = textCatalog ?? MissionTextCatalog.Default;
-            var rendered = catalog.Render("3.6.2", random, values, fallbackTitle, fallbackDesc);
+            var rendered = catalog.Render(sub.Id, random, values, fallbackTitle, fallbackDesc);
 
             return CreateMissionObjectSync(
                 origin, origin, estimatedDist, sub, paxCount, paxCount * 25.0, 0.0,
@@ -1180,61 +1171,32 @@ namespace FlightCareer.Application.Services
 
         public static IReadOnlyList<string> ResolveG20Hubs(string subId, DestinationProfile profile)
         {
+            subId = FlightCareer.Domain.Missions.MissionCatalog.Shared.Normalize(subId);
             return subId switch
             {
-                "1.1.1" => profile.DomesticHubs ?? new List<string>(),
-                "1.1.2" => profile.RegionalIntl ?? new List<string>(),
-                "1.1.3" => profile.LongHaul ?? new List<string>(),
+                "linha_domestica_hub" or "logistica_apoio_crew_parts" or "diplomatico_militar" or "malotes_documentos" => profile.DomesticHubs ?? new List<string>(),
+                "linha_regional_internacional" or "carga_heavy_internacional" => profile.RegionalIntl ?? new List<string>(),
+                "linha_long_haul" or "carga_heavy_long_haul" => profile.LongHaul ?? new List<string>(),
 
-                "1.2.1" => profile.CargoHubs ?? new List<string>(),
-                "1.2.2" => profile.RegionalIntl ?? new List<string>(),
-                "1.2.3" => profile.LongHaul ?? new List<string>(),
+                "carga_heavy_nacional" => profile.CargoHubs ?? new List<string>(),
+                "executiva_business" => profile.ExecutiveHubs ?? new List<string>(),
+                "translado_posicionamento_ferry" or "manutencao_regional" => profile.MaintenanceHubs ?? new List<string>(),
 
-                "1.3.1" => profile.ExecutiveHubs ?? new List<string>(),
-                "1.3.2" => profile.DomesticHubs ?? new List<string>(),
-                "1.3.3" => profile.MaintenanceHubs ?? new List<string>(),
-                "1.3.4" => profile.DomesticHubs ?? new List<string>(),
+                "alimentacao_hub" => profile.FeederHubs ?? new List<string>(),
+                "regional_direto" or "executivo_regional" or "equipes_urgentes" or "navegacao_cross_country" or "transporte_patrao" => profile.RegionalPoints ?? new List<string>(),
 
-                "2.1.1" => profile.FeederHubs ?? new List<string>(),
-                "2.1.2" => profile.RegionalPoints ?? new List<string>(),
+                "agro_legacy" or "aog_agro_suporte" or "agro_suprimento_campanha" or "abastecimento_rancho" or "troca_equipe" or "apoio_batedor" or "translado_piloto_agricola" or "insumos_urgentes_agro" or "aog_maquina_campo" => profile.AgroPoints ?? new List<string>(),
+                "agro_tech" or "agro_insumos_biotecnologia" => profile.AgroTechPoints ?? new List<string>(),
+                "agro_investidores" => profile.InvestPoints ?? new List<string>(),
 
-                "2.2.1" => profile.AgroPoints ?? new List<string>(),
-                "2.2.2" => profile.AgroTechPoints ?? new List<string>(),
-                "2.2.3" => profile.InvestPoints ?? new List<string>(),
+                "ecommerce_varejo" => profile.EcommercePoints ?? new List<string>(),
+                "agro_pecas_insumos" => profile.AgroPartsPoints ?? new List<string>(),
+                "governo_local_estadual" => profile.GovPoints ?? new List<string>(),
+                "familia_alto_padrao" => profile.LeisurePoints ?? new List<string>(),
 
-                "2.3.1" => profile.EcommercePoints ?? new List<string>(),
-                "2.3.2" => profile.AgroPartsPoints ?? new List<string>(),
-                "2.3.3" => profile.DomesticHubs ?? new List<string>(),
+                "remocao_urgencia" or "transferencia_eletiva" or "transporte_orgaos" or "medivac_bush" => profile.HealthHubs ?? new List<string>(),
+                "instrucao_local" or "voo_de_cheque" => profile.InstructionHubs ?? new List<string>(),
 
-                "2.4.1" => profile.MaintenanceHubs ?? new List<string>(),
-                "2.4.2" => profile.GovPoints ?? new List<string>(),
-
-                "3.1.1" => profile.RegionalPoints ?? new List<string>(),
-                "3.1.2" => profile.LeisurePoints ?? new List<string>(),
-                "3.1.3" => profile.RegionalPoints ?? new List<string>(),
-
-                "3.2.1" => profile.AgroPoints ?? new List<string>(),
-                "3.2.2" => profile.AgroTechPoints ?? new List<string>(),
-                "3.2.3" => profile.AgroPoints ?? new List<string>(),
-
-                "3.3.1" => profile.HealthHubs ?? new List<string>(),
-                "3.3.2" => profile.HealthHubs ?? new List<string>(),
-                "3.3.3" => profile.HealthHubs ?? new List<string>(),
-
-                "3.4.1" => profile.InstructionHubs ?? new List<string>(),
-                "3.4.2" => profile.RegionalPoints ?? new List<string>(),
-                "3.4.3" => profile.InstructionHubs ?? new List<string>(),
-
-                "4.1.1" => profile.AgroPoints ?? new List<string>(),
-                "4.1.2" => profile.RegionalPoints ?? new List<string>(),
-                "4.1.3" => profile.AgroPoints ?? new List<string>(),
-
-                "4.2.1" => profile.AgroPoints ?? new List<string>(),
-                "4.2.2" => profile.AgroPoints ?? new List<string>(),
-                "4.2.3" => profile.AgroPoints ?? new List<string>(),
-
-                "4.3.1" => profile.HealthHubs ?? new List<string>(),
-                "4.3.2" => profile.AgroPoints ?? new List<string>(),
                 _ => Array.Empty<string>()
             };
         }
@@ -1242,21 +1204,22 @@ namespace FlightCareer.Application.Services
         public static IReadOnlyList<string> ResolveDynamicHubs(string subId, string country, IHubDataService hubService)
         {
             if (hubService == null) return Array.Empty<string>();
+            subId = FlightCareer.Domain.Missions.MissionCatalog.Shared.Normalize(subId);
             return subId switch
             {
-                "1.1.1" => hubService.GetHubs(HubType.CommercialPax, country),
-                "1.1.2" => hubService.GetHubs(HubType.CommercialPax, "GLOBAL"),
-                "1.2.1" => hubService.GetHubs(HubType.Cargo, country),
-                "1.2.2" => hubService.GetHubs(HubType.Cargo, "GLOBAL"),
-                "1.3.1" => hubService.GetHubs(HubType.Executive, country),
-                "1.3.3" or "2.4.1" => hubService.GetHubs(HubType.Maintenance, country),
-                "2.1.1" => hubService.GetHubs(HubType.Feeder, country).Concat(hubService.GetHubs(HubType.CommercialPax, country)).ToList(),
-                "2.1.2" => hubService.GetHubs(HubType.Feeder, country),
-                "2.2.1" or "3.2.1" or "4.1.1" or "4.2.1" or "4.2.2" or "4.2.3" => hubService.GetHubs(HubType.Agro, country),
-                "2.3.1" or "2.3.2" => hubService.GetHubs(HubType.Cargo, country),
-                "3.1.1" or "3.1.2" => hubService.GetHubs(HubType.Executive, country),
-                "3.3.1" or "3.3.2" or "3.3.3" or "4.3.1" => hubService.GetHubs(HubType.Health, country),
-                "3.4.1" or "3.4.2" or "3.4.3" => hubService.GetHubs(HubType.Instruction, country),
+                "linha_domestica_hub" => hubService.GetHubs(HubType.CommercialPax, country),
+                "linha_regional_internacional" => hubService.GetHubs(HubType.CommercialPax, "GLOBAL"),
+                "carga_heavy_nacional" => hubService.GetHubs(HubType.Cargo, country),
+                "carga_heavy_internacional" => hubService.GetHubs(HubType.Cargo, "GLOBAL"),
+                "executiva_business" => hubService.GetHubs(HubType.Executive, country),
+                "translado_posicionamento_ferry" or "manutencao_regional" => hubService.GetHubs(HubType.Maintenance, country),
+                "alimentacao_hub" => hubService.GetHubs(HubType.Feeder, country).Concat(hubService.GetHubs(HubType.CommercialPax, country)).ToList(),
+                "regional_direto" => hubService.GetHubs(HubType.Feeder, country),
+                "agro_legacy" or "aog_agro_suporte" or "abastecimento_rancho" or "apoio_batedor" or "translado_piloto_agricola" or "insumos_urgentes_agro" => hubService.GetHubs(HubType.Agro, country),
+                "ecommerce_varejo" or "agro_pecas_insumos" => hubService.GetHubs(HubType.Cargo, country),
+                "executivo_regional" or "familia_alto_padrao" => hubService.GetHubs(HubType.Executive, country),
+                "remocao_urgencia" or "transferencia_eletiva" or "transporte_orgaos" or "medivac_bush" => hubService.GetHubs(HubType.Health, country),
+                "instrucao_local" or "navegacao_cross_country" or "voo_de_cheque" => hubService.GetHubs(HubType.Instruction, country),
                 _ => (IReadOnlyList<string>)Array.Empty<string>()
             };
         }
@@ -1352,21 +1315,21 @@ namespace FlightCareer.Application.Services
 
             var nearbyTierAirports = allAirports.Where(a => a.Tier <= 2).ToList();
 
-            if (sub.Id == "3.4.1")
+            if (sub.Generator == "local_instruction")
             {
                 return CreateLocalInstructionMissionSync(
                     origin, sub, random, referenceTime,
                     nearbyTierAirports, payMultiplier, payTable, textCatalog);
             }
 
-            if (sub.Id == "3.4.3")
+            if (sub.Generator == "checkride")
             {
                 return CreateCheckrideMissionSync(
                     origin, sub, random, referenceTime,
                     nearbyTierAirports, payMultiplier, payTable, textCatalog);
             }
 
-            if (sub.Id == "3.5.1")
+            if (sub.Generator == "scenic_tour")
             {
                 var tourMission = CreateScenicTourMissionSync(
                     origin, sub, random, referenceTime,
@@ -1424,7 +1387,7 @@ namespace FlightCareer.Application.Services
                     requiredTouchAndGoes: 0, overflyWaypoints: wpString, titleOverride: title, descriptionOverride: desc);
             }
 
-            if (sub.Id == "3.5.2")
+            if (sub.Generator == "tgl_circuit")
             {
                 int tglCount = random.Next(3, 7);
                 int tglPax = random.Next(0, 2);
@@ -1437,17 +1400,17 @@ namespace FlightCareer.Application.Services
                     requiredTouchAndGoes: tglCount, overflyWaypoints: null, titleOverride: title, descriptionOverride: desc);
             }
 
-            if (sub.Id == "3.6.1")
+            if (sub.Generator == "survey")
             {
                 return CreateSurveyMissionSync(origin, sub, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
             }
 
-            if (sub.Id == "3.6.2")
+            if (sub.Generator == "skydive")
             {
                 return CreateSkydiveMissionSync(origin, sub, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
             }
 
-            if (sub.Id == "3.5.3")
+            if (sub.Generator == "basic_ferry")
             {
                 paxCount = 0;
                 luggageWeightLbs = 0;
@@ -1468,31 +1431,29 @@ namespace FlightCareer.Application.Services
                 else if (sub.MinRunwayDest >= 2500 && a.Tier > 3) continue;
 
                 // Filtros específicos por contrato das Fases 3 a 7
-                if (sub.Id == "1.7.1" || sub.Id == "2.7.1")
+                switch (sub.Destination.Rule)
                 {
-                    if (!string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase) || (a.Tier != 3 && a.Tier != 4)) continue;
+                    case "same_country_tier_3_4":
+                        if (!string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase) || (a.Tier != 3 && a.Tier != 4)) continue;
+                        break;
+                    case "other_country":
+                        if (string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                        break;
+                    case "tier1_same_country":
+                        if (a.Tier != 1 || !string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                        break;
+                    case "tier1":
+                        if (a.Tier != 1) continue;
+                        break;
+                    case "tier1_other_country":
+                        if (a.Tier != 1 || string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
+                        break;
+                    case "tier_max_2":
+                        if (a.Tier > 2) continue;
+                        break;
                 }
-                else if (sub.Id == "1.7.4" || sub.Id == "2.7.4")
-                {
-                    if (string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
-                }
-                else if (sub.Id == "1.7.5")
-                {
-                    if (a.Tier != 1 || !string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
-                }
-                else if (sub.Id == "1.7.6")
-                {
-                    if (a.Tier != 1) continue;
-                }
-                else if (sub.Id == "1.7.7")
-                {
-                    if (a.Tier != 1 || string.IsNullOrEmpty(a.Country) || string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase)) continue;
-                }
-                else if (sub.Id == "1.7.8")
-                {
-                    if (a.Tier > 2) continue;
-                }
-                else if (sub.Id == "1.7.3" || sub.Id == "2.7.3" || sub.Id == "3.7.2")
+
+                if (sub.Destination.Rule == "short_or_unpaved")
                 {
                     if (allRunways != null)
                     {
@@ -1537,18 +1498,12 @@ namespace FlightCareer.Application.Services
                 ? preferredCandidates[random.Next(preferredCandidates.Count)]
                 : candidates[random.Next(candidates.Count)];
 
-            string? titleOverride = sub.Id switch
-            {
-                "3.5.3" => $"Translado Básico: {origin.ICAO} ➔ {selected.Airport.ICAO}",
-                "1.7.6" => $"Cargueiro Noturno: {origin.ICAO} ➔ {selected.Airport.ICAO}",
-                _ => null
-            };
-            string? descOverride = sub.Id switch
-            {
-                "3.5.3" => $"Translado de aeronave vazia para oficina ou manutenção em {selected.Airport.ICAO}. Apenas piloto a bordo e bagagem essencial.",
-                "1.7.6" => $"Operação logística de carga pesada em voo noturno conectando grandes hubs ({origin.ICAO} ➔ {selected.Airport.ICAO}).",
-                _ => null
-            };
+            string? titleOverride = sub.FixedTexts != null
+                ? sub.FixedTexts.Title.Replace("{origin}", origin.ICAO).Replace("{dest}", selected.Airport.ICAO)
+                : null;
+            string? descOverride = sub.FixedTexts != null
+                ? sub.FixedTexts.Description.Replace("{origin}", origin.ICAO).Replace("{dest}", selected.Airport.ICAO)
+                : null;
 
             return CreateMissionObjectSync(origin, selected.Airport, selected.Dist, sub, paxCount, luggageWeightLbs, cargoWeight, random, referenceTime, payMultiplier, payTable,
                 requiredTouchAndGoes: 0, overflyWaypoints: null, titleOverride: titleOverride, descriptionOverride: descOverride);
@@ -1585,248 +1540,94 @@ namespace FlightCareer.Application.Services
                     Urgency = s.Urgency,
                     PaxRules = new List<ProbRange>(s.PaxRules),
                     LbsRules = new List<ProbRange>(s.LbsRules),
-                    RangeRules = new List<ProbRange>(s.RangeRules)
+                    RangeRules = new List<ProbRange>(s.RangeRules),
+                    Definition = s.Definition
                 }).ToList()
             }).ToList();
 
             var hubTypes = hubService?.GetHubTypesForAirport(airport.ICAO) ?? (IReadOnlyList<HubType>)Array.Empty<HubType>();
             bool isInstruction = hubTypes.Contains(HubType.Instruction) || (placesService != null && placesService.IsTrainingAerodrome(airport.ICAO));
-
-            // Se for Hub de Instrução e o Tier não possui nativamente a Categoria 3.4 (ex: Tier 1),
-            // importamos a definição de Categoria 3.4
-            if (isInstruction && !categories.Any(c => c.Id == "3.4"))
-            {
-                foreach (var t in MissionRules.Rules.Values)
-                {
-                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.4");
-                    if (found != null)
-                    {
-                        categories.Add(new CategoryConfig
-                        {
-                            Id = found.Id,
-                            Name = found.Name,
-                            Weight = 10,
-                            SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
-                            {
-                                Id = s.Id,
-                                Name = s.Name,
-                                Description = s.Description,
-                                Weight = s.Weight,
-                                MinExpHours = s.MinExpHours,
-                                MaxExpHours = s.MaxExpHours,
-                                RequiresHardSurface = s.RequiresHardSurface,
-                                MinRunwayDest = s.MinRunwayDest,
-                                LuggageWeightKg = s.LuggageWeightKg,
-                                Urgency = s.Urgency,
-                                PaxRules = new List<ProbRange>(s.PaxRules),
-                                LbsRules = new List<ProbRange>(s.LbsRules),
-                                RangeRules = new List<ProbRange>(s.RangeRules)
-                            }).ToList()
-                        });
-                        break;
-                    }
-                }
-            }
-
-            // Se for aeródromo com zona de salto e não tem Categoria 3.6, importa 3.6
             var dropZone = placesService?.GetDropZone(airport.ICAO);
-            if (dropZone != null && !categories.Any(c => c.Id == "3.6"))
-            {
-                foreach (var t in MissionRules.Rules.Values)
-                {
-                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.6");
-                    if (found != null)
-                    {
-                        categories.Add(new CategoryConfig
-                        {
-                            Id = found.Id,
-                            Name = found.Name,
-                            Weight = 5,
-                            SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
-                            {
-                                Id = s.Id,
-                                Name = s.Name,
-                                Description = s.Description,
-                                Weight = s.Weight,
-                                MinExpHours = s.MinExpHours,
-                                MaxExpHours = s.MaxExpHours,
-                                RequiresHardSurface = s.RequiresHardSurface,
-                                MinRunwayDest = s.MinRunwayDest,
-                                LuggageWeightKg = s.LuggageWeightKg,
-                                Urgency = s.Urgency,
-                                PaxRules = new List<ProbRange>(s.PaxRules),
-                                LbsRules = new List<ProbRange>(s.LbsRules),
-                                RangeRules = new List<ProbRange>(s.RangeRules)
-                            }).ToList()
-                        });
-                        break;
-                    }
-                }
-            }
-
-            // Se for aeródromo turístico curado e não tem Categoria 3.5 (ex: Tier 1), importa 3.5
-            // Só bases de voo panorâmico puxam a categoria; destinos turísticos só fornecem os pontos.
             var scenicAerodrome = placesService?.GetScenicAerodrome(airport.ICAO);
             if (scenicAerodrome != null && !scenicAerodrome.IsScenicBase) scenicAerodrome = null;
-            if (scenicAerodrome != null && !categories.Any(c => c.Id == "3.5"))
+
+            foreach (var adj in FlightCareer.Domain.Missions.MissionCatalog.Shared.AirportAdjustments)
             {
-                foreach (var t in MissionRules.Rules.Values)
+                bool matched = adj.Condition switch
                 {
-                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.5");
-                    if (found != null)
+                    "instruction_hub" => isInstruction,
+                    "dropzone" => dropZone != null,
+                    "scenic_base" => scenicAerodrome != null,
+                    var cond when cond.StartsWith("hub_type:") => Enum.TryParse<HubType>(cond["hub_type:".Length..], out var ht) && hubTypes.Contains(ht),
+                    _ => false
+                };
+
+                if (matched)
+                {
+                    if (!string.IsNullOrEmpty(adj.ImportGroupIfMissing) && !categories.Any(c => c.Id == adj.ImportGroupIfMissing))
                     {
-                        categories.Add(new CategoryConfig
+                        foreach (var t in MissionRules.Rules.Values)
                         {
-                            Id = found.Id,
-                            Name = found.Name,
-                            Weight = 5,
-                            SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
+                            var found = t.Categories.FirstOrDefault(c => c.Id == adj.ImportGroupIfMissing);
+                            if (found != null)
                             {
-                                Id = s.Id,
-                                Name = s.Name,
-                                Description = s.Description,
-                                Weight = s.Weight,
-                                MinExpHours = s.MinExpHours,
-                                MaxExpHours = s.MaxExpHours,
-                                RequiresHardSurface = s.RequiresHardSurface,
-                                MinRunwayDest = s.MinRunwayDest,
-                                LuggageWeightKg = s.LuggageWeightKg,
-                                Urgency = s.Urgency,
-                                PaxRules = new List<ProbRange>(s.PaxRules),
-                                LbsRules = new List<ProbRange>(s.LbsRules),
-                                RangeRules = new List<ProbRange>(s.RangeRules)
-                            }).ToList()
-                        });
-                        break;
+                                categories.Add(new CategoryConfig
+                                {
+                                    Id = found.Id,
+                                    Name = found.Name,
+                                    Weight = adj.ImportWeight,
+                                    SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
+                                    {
+                                        Id = s.Id,
+                                        Name = s.Name,
+                                        Description = s.Description,
+                                        Weight = s.Weight,
+                                        MinExpHours = s.MinExpHours,
+                                        MaxExpHours = s.MaxExpHours,
+                                        RequiresHardSurface = s.RequiresHardSurface,
+                                        MinRunwayDest = s.MinRunwayDest,
+                                        LuggageWeightKg = s.LuggageWeightKg,
+                                        Urgency = s.Urgency,
+                                        PaxRules = new List<ProbRange>(s.PaxRules),
+                                        LbsRules = new List<ProbRange>(s.LbsRules),
+                                        RangeRules = new List<ProbRange>(s.RangeRules),
+                                        Definition = s.Definition
+                                    }).ToList()
+                                });
+                                break;
+                            }
+                        }
+                    }
+
+                    if (adj.AddGroupWeights != null)
+                    {
+                        foreach (var gw in adj.AddGroupWeights)
+                        {
+                            AddCategoryWeight(categories, gw.GroupId, gw.Weight);
+                        }
+                    }
+
+                    if (adj.SetMissionWeights != null)
+                    {
+                        foreach (var mw in adj.SetMissionWeights)
+                        {
+                            var cat = categories.FirstOrDefault(c => c.Id == mw.GroupId);
+                            var sub = cat?.SubCategories.FirstOrDefault(s => s.Id == mw.MissionId);
+                            if (sub != null) sub.Weight = mw.Weight;
+                        }
                     }
                 }
-            }
-
-            // Se for Hub de Saúde / Aeromédico e o Tier não possui nativamente a Categoria 3.3 (ex: Tier 1/2),
-            // importamos a definição de Categoria 3.3 (Saúde / Remoção UTI Aérea)
-            if (hubTypes.Contains(HubType.Health) && !categories.Any(c => c.Id == "3.3"))
-            {
-                foreach (var t in MissionRules.Rules.Values)
+                else
                 {
-                    var found = t.Categories.FirstOrDefault(c => c.Id == "3.3");
-                    if (found != null)
+                    if (adj.SetMissionWeightsIfFalse != null)
                     {
-                        categories.Add(new CategoryConfig
+                        foreach (var mw in adj.SetMissionWeightsIfFalse)
                         {
-                            Id = found.Id,
-                            Name = found.Name,
-                            Weight = 5,
-                            SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
-                            {
-                                Id = s.Id,
-                                Name = s.Name,
-                                Description = s.Description,
-                                Weight = s.Weight,
-                                MinExpHours = s.MinExpHours,
-                                MaxExpHours = s.MaxExpHours,
-                                RequiresHardSurface = s.RequiresHardSurface,
-                                MinRunwayDest = s.MinRunwayDest,
-                                LuggageWeightKg = s.LuggageWeightKg,
-                                Urgency = s.Urgency,
-                                PaxRules = new List<ProbRange>(s.PaxRules),
-                                LbsRules = new List<ProbRange>(s.LbsRules),
-                                RangeRules = new List<ProbRange>(s.RangeRules)
-                            }).ToList()
-                        });
-                        break;
+                            var cat = categories.FirstOrDefault(c => c.Id == mw.GroupId);
+                            var sub = cat?.SubCategories.FirstOrDefault(s => s.Id == mw.MissionId);
+                            if (sub != null) sub.Weight = mw.Weight;
+                        }
                     }
-                }
-            }
-
-            // Ajuste de pesos por DropZone:
-            var cat36 = categories.FirstOrDefault(c => c.Id == "3.6");
-            if (dropZone != null)
-            {
-                AddCategoryWeight(categories, "3.6", 40);
-                if (cat36 != null)
-                {
-                    var s361 = cat36.SubCategories.FirstOrDefault(s => s.Id == "3.6.1");
-                    var s362 = cat36.SubCategories.FirstOrDefault(s => s.Id == "3.6.2");
-                    if (s361 != null) s361.Weight = 20;
-                    if (s362 != null) s362.Weight = 80;
-                }
-            }
-            else if (cat36 != null)
-            {
-                var s361 = cat36.SubCategories.FirstOrDefault(s => s.Id == "3.6.1");
-                var s362 = cat36.SubCategories.FirstOrDefault(s => s.Id == "3.6.2");
-                if (s361 != null) s361.Weight = 85;
-                if (s362 != null) s362.Weight = 15;
-            }
-
-            // Ajuste de pesos por Aeródromo Turístico (voo panorâmico 3.5.1):
-            if (scenicAerodrome != null)
-            {
-                AddCategoryWeight(categories, "3.5", 40);
-                var cat35 = categories.FirstOrDefault(c => c.Id == "3.5");
-                if (cat35 != null)
-                {
-                    var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.1");
-                    var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.2");
-                    var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.3");
-                    if (s351 != null) s351.Weight = 70;
-                    if (s352 != null) s352.Weight = 15;
-                    if (s353 != null) s353.Weight = 15;
-                }
-            }
-
-            // Bônus para aeródromos de instrução:
-            if (isInstruction)
-            {
-                AddCategoryWeight(categories, "3.4", 45);
-                AddCategoryWeight(categories, "3.5", 15);
-            }
-
-            foreach (var hubType in hubTypes)
-            {
-                switch (hubType)
-                {
-                    case HubType.Instruction:
-                        // Já tratado em isInstruction acima
-                        break;
-
-                    case HubType.Cargo:
-                        AddCategoryWeight(categories, "1.2", 35);
-                        AddCategoryWeight(categories, "2.3", 30);
-                        break;
-
-                    case HubType.CommercialPax:
-                        AddCategoryWeight(categories, "1.1", 40);
-                        AddCategoryWeight(categories, "2.1", 35);
-                        break;
-
-                    case HubType.Executive:
-                        AddCategoryWeight(categories, "1.3", 30);
-                        AddCategoryWeight(categories, "2.2", 25);
-                        AddCategoryWeight(categories, "3.1", 35);
-                        break;
-
-                    case HubType.Maintenance:
-                        AddCategoryWeight(categories, "1.3", 20);
-                        AddCategoryWeight(categories, "2.4", 25);
-                        break;
-
-                    case HubType.Feeder:
-                        AddCategoryWeight(categories, "2.1", 30);
-                        AddCategoryWeight(categories, "4.1", 20);
-                        break;
-
-                    case HubType.Agro:
-                        AddCategoryWeight(categories, "2.2", 25);
-                        AddCategoryWeight(categories, "3.2", 35);
-                        AddCategoryWeight(categories, "4.1", 25);
-                        AddCategoryWeight(categories, "4.2", 30);
-                        break;
-
-                    case HubType.Health:
-                        AddCategoryWeight(categories, "3.3", 35);
-                        AddCategoryWeight(categories, "4.3", 25);
-                        break;
                 }
             }
 

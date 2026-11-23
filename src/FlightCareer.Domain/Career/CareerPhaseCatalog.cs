@@ -83,6 +83,17 @@ namespace FlightCareer.Domain.Career
                     }
                 }
             }
+            foreach (var m in Missions.MissionCatalog.Shared.Missions.Values)
+            {
+                if (Enum.IsDefined(typeof(CareerPhase), m.Phase))
+                {
+                    _subIdToPhase[m.Id] = (CareerPhase)m.Phase;
+                    foreach (var legacy in m.LegacyCodes)
+                    {
+                        _subIdToPhase[legacy] = (CareerPhase)m.Phase;
+                    }
+                }
+            }
         }
 
         public PhaseDefinition GetPhase(CareerPhase phase)
@@ -99,6 +110,12 @@ namespace FlightCareer.Domain.Career
         {
             if (string.IsNullOrWhiteSpace(subId))
                 return fallback;
+
+            var def = Missions.MissionCatalog.Shared.Get(subId);
+            if (def != null && Enum.IsDefined(typeof(CareerPhase), def.Phase))
+            {
+                return (CareerPhase)def.Phase;
+            }
 
             if (_subIdToPhase.TryGetValue(subId, out var phase))
                 return phase;
@@ -176,21 +193,7 @@ namespace FlightCareer.Domain.Career
                 GetDefaultPhaseDefinition(CareerPhase.Phase7_InternationalAirline)
             };
 
-            var map = new Dictionary<string, int>
-            {
-                ["3.4.1"] = 1, ["3.4.2"] = 1, ["3.4.3"] = 1,
-                ["4.1.1"] = 2, ["4.1.2"] = 2, ["4.1.3"] = 2, ["4.2.1"] = 2, ["4.2.2"] = 2, ["4.2.3"] = 2, ["3.2.3"] = 2,
-                ["3.1.1"] = 3, ["3.1.2"] = 3, ["3.1.3"] = 3, ["2.2.1"] = 3, ["2.2.2"] = 3, ["2.2.3"] = 3,
-                ["2.3.1"] = 3, ["2.3.2"] = 3, ["2.3.3"] = 3, ["3.2.1"] = 3, ["3.2.2"] = 3, ["4.3.2"] = 3,
-                ["2.4.1"] = 3, ["2.4.2"] = 3, ["1.7.1"] = 3, ["2.7.1"] = 3, ["1.7.2"] = 3, ["2.7.2"] = 3, ["3.7.1"] = 3,
-                ["3.3.1"] = 4, ["3.3.2"] = 4, ["3.3.3"] = 4, ["4.3.1"] = 4, ["1.3.1"] = 4, ["1.3.4"] = 4,
-                ["1.7.3"] = 4, ["2.7.3"] = 4, ["3.7.2"] = 4, ["1.7.4"] = 4, ["2.7.4"] = 4,
-                ["2.1.1"] = 5, ["2.1.2"] = 5, ["1.3.2"] = 5,
-                ["1.1.1"] = 6, ["1.2.1"] = 6, ["1.3.3"] = 6, ["1.7.5"] = 6, ["1.7.6"] = 6,
-                ["1.1.2"] = 7, ["1.1.3"] = 7, ["1.2.2"] = 7, ["1.2.3"] = 7, ["1.7.7"] = 7, ["1.7.8"] = 7
-            };
-
-            return new CareerPhaseCatalog(phases, map);
+            return new CareerPhaseCatalog(phases, new Dictionary<string, int>());
         }
 
         private static PhaseDefinition GetDefaultPhaseDefinition(CareerPhase phase)

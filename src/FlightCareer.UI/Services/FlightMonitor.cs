@@ -671,7 +671,8 @@ namespace FlightCareer.UI.Services
             _skydiveTracker.Reset();
             foreach (var m in missions)
             {
-                if (m.SubId == "3.6.1" && !string.IsNullOrWhiteSpace(m.ContractData))
+                var def = MissionCatalog.Shared.Get(m.SubId);
+                if (def?.Generator == "survey" && !string.IsNullOrWhiteSpace(m.ContractData))
                 {
                     try
                     {
@@ -680,7 +681,7 @@ namespace FlightCareer.UI.Services
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de levantamento inválido ({m.Id}): {ex.Message}"); }
                 }
-                else if (m.SubId == "3.6.2" && !string.IsNullOrWhiteSpace(m.ContractData))
+                else if (def?.Generator == "skydive" && !string.IsNullOrWhiteSpace(m.ContractData))
                 {
                     try
                     {
@@ -1762,7 +1763,7 @@ namespace FlightCareer.UI.Services
             var firstMission = _activeMissions.FirstOrDefault();
             string? missionFamilyId = firstMission != null ? MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id : null;
             bool isFerry = _activeMissions.Count == 0;
-            bool isUrgent = _activeMissions.Any(m => m.Urgency > 1.0 || (m.SubId != null && (m.SubId.StartsWith("3.3") || m.SubId.StartsWith("4.3.1"))));
+            bool isUrgent = _activeMissions.Any(m => m.Urgency > 1.0 || (m.SubId != null && MissionCatalog.Shared.Get(m.SubId)?.Board == MissionBoardKind.Medica));
 
             int gPaxViolations = (_qualityService.IsPaxFlight && (_qualityService.MaxGForce > 2.2 || _qualityService.MinGForce < -0.5)) ? 1 : 0;
             double airborneMin = _airborneSeconds > 0 ? _airborneSeconds / 60.0 : flightDurationMinutes;

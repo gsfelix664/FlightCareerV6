@@ -312,7 +312,7 @@ namespace FlightCareer.Application.Services
                         totalRevenue += missionReward;
                         missionsDone++;
                         // Paraquedistas não contam como passageiros no pouso (taxa de embarque) depois do salto
-                        if (mission.SubId != "3.6.2")
+                        if (Domain.Missions.MissionCatalog.Shared.Get(mission.SubId)?.Generator != "skydive")
                         {
                             passengersCompleted += mission.PassengerCount;
                         }

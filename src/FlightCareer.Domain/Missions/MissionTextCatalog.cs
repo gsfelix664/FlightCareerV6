@@ -81,7 +81,15 @@ namespace FlightCareer.Domain.Missions
         {
             if (!_templates.TryGetValue(subId, out var variants) || variants == null || variants.Count == 0)
             {
-                return (fallbackTitle ?? string.Empty, fallbackDescription ?? string.Empty);
+                string normalized = MissionCatalog.Shared.Normalize(subId);
+                if (normalized != subId && _templates.TryGetValue(normalized, out variants) && variants != null && variants.Count > 0)
+                {
+                    // Encontrado via id normalizado
+                }
+                else
+                {
+                    return (fallbackTitle ?? string.Empty, fallbackDescription ?? string.Empty);
+                }
             }
 
             var rng = random ?? new Random();

@@ -1,0 +1,3899 @@
+{
+  "version": 1,
+  "missions": [
+    {
+      "id": "linha_domestica_hub",
+      "legacyCodes": [
+        "1.1.1"
+      ],
+      "name": "Doméstico / Hub Link",
+      "description": "Analise este briefing com cuidado. Este voo matinal é vital para a integridade da nossa rede. O manifesto indica uma cabine lotada de executivos e famílias exaustas, recém-chegadas das conexões internacionais da madrugada. A janela de operação é estreita: a pontualidade no calço é inegociável, pois qualquer atraso causará um efeito dominó desastroso na malha do Hub. Execute os procedimentos com agilidade e solicite o pushback no minuto exato.",
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "linha_domestica_hub"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "luggageWeightKg": 20.0,
+      "rangeRules": [
+        [
+          35,
+          200,
+          450
+        ],
+        [
+          40,
+          451,
+          900
+        ],
+        [
+          25,
+          901,
+          1600
+        ]
+      ],
+      "paxRules": [
+        [
+          10,
+          110,
+          130
+        ],
+        [
+          60,
+          131,
+          180
+        ],
+        [
+          30,
+          181,
+          230
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "linha_regional_internacional",
+      "legacyCodes": [
+        "1.1.2"
+      ],
+      "name": "Regional Internacional",
+      "description": "Revise os dados de performance para esta etapa internacional. Hoje transportamos um perfil misto de executivos de multinacionais e turistas de alto padrão cruzando fronteiras. O fator crítico da operação será o peso: espere os porões operando na capacidade máxima devido ao volume excessivo de bagagens. Monitore rigorosamente o carregamento e os cálculos de Peso e Balanceamento (W&B). A aeronave estará pesada na decolagem, exigindo precisão total na configuração dos flaps e velocidades. Coordene com o solo para evitar atrasos no despacho de carga.",
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "linha_regional_internacional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 36,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "luggageWeightKg": 30.0,
+      "rangeRules": [
+        [
+          45,
+          500,
+          1000
+        ],
+        [
+          35,
+          1001,
+          1600
+        ],
+        [
+          20,
+          1601,
+          2600
+        ]
+      ],
+      "paxRules": [
+        [
+          45,
+          130,
+          175
+        ],
+        [
+          35,
+          176,
+          230
+        ],
+        [
+          20,
+          231,
+          320
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "linha_long_haul",
+      "legacyCodes": [
+        "1.1.3"
+      ],
+      "name": "Intercontinental (Long Haul)",
+      "description": "Prepare-se para uma longa travessia. O manifesto de hoje lista um público de elite: turistas globais e expatriados ocupando as cabines Premium com expectativas altíssimas. Sua prioridade é garantir uma navegação suave; desvios de turbulência são essenciais para manter o conforto. Simultaneamente, a gestão de combustível será crítica. Monitore o Fuel on Board e otimize os step climbs para garantir a eficiência máxima durante as horas sobre o oceano ou continentes. A satisfação a bordo depende da sua precisão.",
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "linha_long_haul"
+      },
+      "fixedTexts": null,
+      "minExpHours": 48,
+      "maxExpHours": 72,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 8000,
+      "luggageWeightKg": 50.0,
+      "rangeRules": [
+        [
+          40,
+          3000,
+          4100
+        ],
+        [
+          50,
+          4200,
+          5500
+        ],
+        [
+          10,
+          5501,
+          7500
+        ]
+      ],
+      "paxRules": [
+        [
+          40,
+          210,
+          290
+        ],
+        [
+          50,
+          291,
+          380
+        ],
+        [
+          10,
+          381,
+          440
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "carga_heavy_nacional",
+      "legacyCodes": [
+        "1.2.1"
+      ],
+      "name": "Carga Heavy Nacional",
+      "description": "O manifesto de hoje exige precisão cirúrgica. Estamos transportando carga de altíssimo valor agregado: componentes eletrônicos e suprimentos industriais críticos. Esta operação é a espinha dorsal do varejo e os estoques em terra dependem de uma entrega Just-in-Time. Atenção redobrada na operação de solo e evite impactos bruscos no pouso. Com a fuselagem cheia, o cálculo do MTOW está no limite. Cumpra o horário rigorosamente para não paralisar a cadeia logística.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_heavy_nacional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          25,
+          200,
+          600
+        ],
+        [
+          25,
+          601,
+          1350
+        ],
+        [
+          50,
+          1351,
+          1600
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          30,
+          33000,
+          55000
+        ],
+        [
+          50,
+          56000,
+          100000
+        ],
+        [
+          20,
+          100001,
+          120000
+        ]
+      ]
+    },
+    {
+      "id": "carga_heavy_internacional",
+      "legacyCodes": [
+        "1.2.2"
+      ],
+      "name": "Carga Regional Internacional",
+      "description": "Atenção redobrada ao plano de carregamento. O manifesto de hoje é um desafio técnico: transportamos maquinário industrial de alta densidade e produtos que exigem protocolos rigorosos de segurança. Essa combinação concentra muito peso em áreas específicas do porão, deixando o Centro de Gravidade (CG) crítico. Verifique seus dados de trimagem; a aeronave responderá de forma diferente na decolagem. Cumpra a rota com precisão para garantir a logística internacional de itens sensíveis. Estabilidade é a palavra de ordem.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_heavy_internacional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          40,
+          600,
+          1000
+        ],
+        [
+          40,
+          1001,
+          1800
+        ],
+        [
+          20,
+          1801,
+          2600
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          30,
+          30000,
+          50000
+        ],
+        [
+          50,
+          50001,
+          95000
+        ],
+        [
+          20,
+          95001,
+          118000
+        ]
+      ]
+    },
+    {
+      "id": "carga_heavy_long_haul",
+      "legacyCodes": [
+        "1.2.3"
+      ],
+      "name": "Carga Intercontinental (Heavy)",
+      "description": "Comandante, a operação hoje é de 'peso pesado'. O manifesto inclui componentes críticos em regime AOG (Aircraft on Ground); a prioridade é absoluta. O carregamento de itens indivisíveis no Main Deck altera significativamente o momento de inércia da aeronave. Espere respostas mais lentas nos comandos. O planejamento de descida deve ser antecipado: com essa massa, a gestão de energia cinética é vital para garantir uma aproximação estabilizada no Hub de destino. Entregue essa carga com precisão.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_heavy_long_haul"
+      },
+      "fixedTexts": null,
+      "minExpHours": 48,
+      "maxExpHours": 72,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 8000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          40,
+          3500,
+          4100
+        ],
+        [
+          50,
+          4200,
+          5500
+        ],
+        [
+          10,
+          5501,
+          7500
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          40,
+          120000,
+          170000
+        ],
+        [
+          45,
+          171000,
+          240000
+        ],
+        [
+          15,
+          241000,
+          300000
+        ]
+      ]
+    },
+    {
+      "id": "executiva_business",
+      "legacyCodes": [
+        "1.3.1"
+      ],
+      "name": "Aviação Executiva / Executive Business",
+      "description": "Transporte de elite, celebridades e autoridades. Exige discrição, pontualidade e tratamento VIP desde o acionamento até o corte dos motores.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "executiva_business"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          60,
+          150,
+          450
+        ],
+        [
+          30,
+          500,
+          1200
+        ],
+        [
+          10,
+          1201,
+          2500
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          1,
+          12
+        ],
+        [
+          25,
+          2,
+          14
+        ],
+        [
+          15,
+          3,
+          25
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "logistica_apoio_crew_parts",
+      "legacyCodes": [
+        "1.3.2"
+      ],
+      "name": "Logística de Apoio / Crew & Parts",
+      "description": "Suporte operacional para companhias aéreas. Transporte urgente de tripulações para assumir voos ou peças críticas (AOG) para manutenção imediata.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "logistica_apoio_crew_parts"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 12,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          50,
+          10,
+          60
+        ],
+        [
+          40,
+          61,
+          250
+        ],
+        [
+          10,
+          251,
+          500
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          4,
+          18
+        ],
+        [
+          40,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "translado_posicionamento_ferry",
+      "legacyCodes": [
+        "1.3.3"
+      ],
+      "name": "Voos de Translado / Ferry",
+      "description": "Reposicionamento técnico de aeronave ou envio para base de manutenção. Voo realizado sem passageiros ou carga comercial.",
+      "board": "Geral",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "translado_posicionamento_ferry"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          65,
+          30,
+          60
+        ],
+        [
+          30,
+          180,
+          250
+        ],
+        [
+          5,
+          300,
+          500
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "diplomatico_militar",
+      "legacyCodes": [
+        "1.3.4"
+      ],
+      "name": "Diplomático e Militar",
+      "description": "Missões especiais de estado. Transporte de comitivas presidenciais, corpo diplomático ou logística militar estratégica.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "diplomatico_militar"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          50,
+          100,
+          500
+        ],
+        [
+          40,
+          501,
+          1500
+        ],
+        [
+          10,
+          1501,
+          3000
+        ]
+      ],
+      "paxRules": [
+        [
+          30,
+          15,
+          40
+        ],
+        [
+          50,
+          5,
+          15
+        ],
+        [
+          20,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "alimentacao_hub",
+      "legacyCodes": [
+        "2.1.1"
+      ],
+      "name": "Alimentação de Hub",
+      "description": "Assuma esta etapa essencial de alimentação (feeder). Sua missão é conectar o interior à malha global, transportando passageiros com conexões apertadas nos grandes Hubs. A operação em aeroportos regionais exige atenção total a pistas curtas e infraestrutura de solo limitada. No cruzeiro em níveis de voo inferiores, a gestão meteorológica deve ser constante para minimizar o desconforto da turbulência em aeronaves menores. Realize um turnaround expresso no solo; a pontualidade deste voo dita o sucesso das conexões de toda a rede.",
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "alimentacao_hub"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "luggageWeightKg": 20.0,
+      "rangeRules": [
+        [
+          60,
+          80,
+          180
+        ],
+        [
+          30,
+          181,
+          350
+        ],
+        [
+          10,
+          351,
+          550
+        ]
+      ],
+      "paxRules": [
+        [
+          30,
+          45,
+          60
+        ],
+        [
+          50,
+          61,
+          110
+        ],
+        [
+          20,
+          111,
+          160
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "regional_direto",
+      "legacyCodes": [
+        "2.1.2"
+      ],
+      "name": "Regional Direto",
+      "description": "Operação entre polos regionais de grande relevância econômica. Diferente da alimentação de hub, este voo conecta diretamente cidades de médio porte, atendendo a uma demanda corporativa e de lazer ponto-a-ponto. Exige eficiência no solo e atenção à diversidade de pistas encontradas no interior.",
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "regional_direto"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "luggageWeightKg": 20.0,
+      "rangeRules": [
+        [
+          50,
+          150,
+          300
+        ],
+        [
+          40,
+          301,
+          600
+        ],
+        [
+          10,
+          601,
+          850
+        ]
+      ],
+      "paxRules": [
+        [
+          40,
+          35,
+          50
+        ],
+        [
+          50,
+          51,
+          85
+        ],
+        [
+          10,
+          86,
+          110
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "agro_legacy",
+      "legacyCodes": [
+        "2.2.1"
+      ],
+      "name": "Agro Legacy",
+      "description": "Prepare-se para a operação rural. O proprietário precisa chegar à sede para supervisionar o pico da safra. O bagageiro está no limite com peças urgentes de maquinário parado e insumos agrícolas. O destino é uma pista não pavimentada, curta e sem apoio de solo. Exige-se máxima perícia em performance de campo curto e aproximação visual, pois a superfície pode estar irregular. A continuidade da colheita depende inteiramente da sua habilidade de colocar esta aeronave no chão com segurança e entregar a peça.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_legacy"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1800,
+      "luggageWeightKg": 18.0,
+      "rangeRules": [
+        [
+          70,
+          30,
+          120
+        ],
+        [
+          25,
+          121,
+          450
+        ],
+        [
+          5,
+          451,
+          700
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          1,
+          2
+        ],
+        [
+          30,
+          3,
+          5
+        ],
+        [
+          10,
+          6,
+          9
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          150,
+          400
+        ]
+      ]
+    },
+    {
+      "id": "agro_tech",
+      "legacyCodes": [
+        "2.2.2"
+      ],
+      "name": "Técnicos e Consultores (Agro Tech)",
+      "description": "Transporte de equipe técnica especializada. Missão de assistência em campo. Atenção ao manifesto: passageiros transportam ferramentas de precisão e equipamentos de diagnóstico sensíveis.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_tech"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1800,
+      "luggageWeightKg": 13.6,
+      "rangeRules": [
+        [
+          40,
+          60,
+          180
+        ],
+        [
+          50,
+          181,
+          500
+        ],
+        [
+          10,
+          501,
+          900
+        ]
+      ],
+      "paxRules": [
+        [
+          50,
+          1,
+          2
+        ],
+        [
+          40,
+          3,
+          5
+        ],
+        [
+          10,
+          6,
+          9
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          300
+        ]
+      ]
+    },
+    {
+      "id": "agro_investidores",
+      "legacyCodes": [
+        "2.2.3"
+      ],
+      "name": "Investidores e Compradores",
+      "description": "Transporte de investidores e grupos de negociação de safras. Exige aeronave impecável e pontualidade. Preferência por aeroportos com estrutura de asfalto.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_investidores"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 20.4,
+      "rangeRules": [
+        [
+          10,
+          100,
+          240
+        ],
+        [
+          70,
+          250,
+          450
+        ],
+        [
+          20,
+          451,
+          800
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          2,
+          4
+        ],
+        [
+          30,
+          5,
+          8
+        ],
+        [
+          10,
+          9,
+          12
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          100
+        ]
+      ]
+    },
+    {
+      "id": "ecommerce_varejo",
+      "legacyCodes": [
+        "2.3.1"
+      ],
+      "name": "E-commerce & Varejo",
+      "description": "Distribuição de compras online (Mercado Livre, Amazon, Magalu) que chegam do Hub para serem entregues no interior.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "ecommerce_varejo"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 2000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          50,
+          40,
+          120
+        ],
+        [
+          35,
+          121,
+          280
+        ],
+        [
+          15,
+          281,
+          500
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          45,
+          800,
+          1800
+        ],
+        [
+          40,
+          1801,
+          4500
+        ],
+        [
+          15,
+          4501,
+          12000
+        ]
+      ]
+    },
+    {
+      "id": "agro_pecas_insumos",
+      "legacyCodes": [
+        "2.3.2"
+      ],
+      "name": "Peças & Insumos Agro",
+      "description": "Urgência técnica: correias de colheitadeira, sensores de drones ou componentes de irrigação.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_pecas_insumos"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 18,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          35,
+          30,
+          100
+        ],
+        [
+          50,
+          101,
+          350
+        ],
+        [
+          15,
+          351,
+          700
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          40,
+          50,
+          400
+        ],
+        [
+          45,
+          401,
+          1500
+        ],
+        [
+          15,
+          1501,
+          3500
+        ]
+      ]
+    },
+    {
+      "id": "malotes_documentos",
+      "legacyCodes": [
+        "2.3.3"
+      ],
+      "name": "Malotes & Documentos",
+      "description": "Malotes bancários, documentos notariais e exames laboratoriais que precisam de processamento rápido.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "malotes_documentos"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.5,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          45,
+          50,
+          150
+        ],
+        [
+          45,
+          151,
+          300
+        ],
+        [
+          10,
+          301,
+          600
+        ]
+      ],
+      "paxRules": [],
+      "lbsRules": [
+        [
+          50,
+          50,
+          200
+        ],
+        [
+          35,
+          201,
+          500
+        ],
+        [
+          15,
+          501,
+          1000
+        ]
+      ]
+    },
+    {
+      "id": "manutencao_regional",
+      "legacyCodes": [
+        "2.4.1"
+      ],
+      "name": "Manutenção Regional (Maint)",
+      "description": "Aeronaves que precisam de reparos em oficinas especializadas ou envio de mecânicos para socorro (AOG).",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "fallback",
+      "xpType": "fallback",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "manutencao_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          65,
+          20,
+          70
+        ],
+        [
+          30,
+          71,
+          250
+        ],
+        [
+          5,
+          251,
+          500
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          0,
+          0
+        ],
+        [
+          30,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          60,
+          100,
+          300
+        ],
+        [
+          40,
+          301,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "governo_local_estadual",
+      "legacyCodes": [
+        "2.4.2"
+      ],
+      "name": "Governo Local / Estadual (Gov)",
+      "description": "Deslocamento de autoridades e comitivas técnicas entre a capital e os polos regionais.",
+      "board": "Geral",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "fallback",
+      "xpType": "fallback",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "governo_local_estadual"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          40,
+          100,
+          250
+        ],
+        [
+          50,
+          251,
+          450
+        ],
+        [
+          10,
+          451,
+          700
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          2,
+          4
+        ],
+        [
+          35,
+          5,
+          9
+        ],
+        [
+          5,
+          10,
+          15
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "instrucao_local",
+      "legacyCodes": [
+        "3.4.1"
+      ],
+      "name": "Voo de Instrução Local",
+      "description": "Prática de manobras e pousos (TGL) na vizinhança do aeroporto.",
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao_basica",
+      "xpType": "instrucao_basica",
+      "generator": "local_instruction",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "instrucao_local"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          5,
+          15
+        ]
+      ],
+      "paxRules": [
+        [
+          90,
+          1,
+          1
+        ],
+        [
+          10,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "navegacao_cross_country",
+      "legacyCodes": [
+        "3.4.2"
+      ],
+      "name": "Navegação (Cross-Country)",
+      "description": "Aluno em treinamento de rota entre duas ou três cidades.",
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "navegacao_cross_country"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1200,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          60,
+          50,
+          100
+        ],
+        [
+          30,
+          101,
+          180
+        ],
+        [
+          10,
+          181,
+          300
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          1,
+          1
+        ],
+        [
+          40,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "voo_de_cheque",
+      "legacyCodes": [
+        "3.4.3"
+      ],
+      "name": "Voo de Cheque (Exame)",
+      "description": "Avaliação prática com examinador da ANAC a bordo.",
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "checkride",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "voo_de_cheque"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 4,
+      "urgency": 1.2,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1200,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          20,
+          40
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          1,
+          1
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "executivo_regional",
+      "legacyCodes": [
+        "3.1.1"
+      ],
+      "name": "Executivo Regional",
+      "description": "Donos de empresas locais ou diretores que precisam ir à capital para uma reunião e voltar no mesmo dia.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "executivo_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "luggageWeightKg": 15.8,
+      "rangeRules": [
+        [
+          45,
+          80,
+          150
+        ],
+        [
+          45,
+          151,
+          350
+        ],
+        [
+          10,
+          351,
+          600
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          1,
+          1
+        ],
+        [
+          30,
+          2,
+          3
+        ],
+        [
+          10,
+          4,
+          6
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "familia_alto_padrao",
+      "legacyCodes": [
+        "3.1.2"
+      ],
+      "name": "Família de Alto Padrão",
+      "description": "Moradores da cidade polo indo para o litoral ou para o Hub internacional para iniciar férias.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "familia_alto_padrao"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 22.6,
+      "rangeRules": [
+        [
+          30,
+          100,
+          200
+        ],
+        [
+          55,
+          201,
+          450
+        ],
+        [
+          15,
+          451,
+          800
+        ]
+      ],
+      "paxRules": [
+        [
+          30,
+          2,
+          2
+        ],
+        [
+          55,
+          3,
+          5
+        ],
+        [
+          15,
+          6,
+          8
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "equipes_urgentes",
+      "legacyCodes": [
+        "3.1.3"
+      ],
+      "name": "Equipes Urgentes",
+      "description": "Advogados para audiências de última hora ou engenheiros para assinar liberações técnicas.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "equipes_urgentes"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.3,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          40,
+          50,
+          150
+        ],
+        [
+          50,
+          151,
+          400
+        ],
+        [
+          10,
+          401,
+          700
+        ]
+      ],
+      "paxRules": [
+        [
+          65,
+          1,
+          2
+        ],
+        [
+          30,
+          3,
+          5
+        ],
+        [
+          5,
+          6,
+          8
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "aog_agro_suporte",
+      "legacyCodes": [
+        "3.2.1"
+      ],
+      "name": "Peças de Reposição Críticas (AOG Agro)",
+      "description": "Urgência técnica no campo. Envio de peças para reparo imediato de maquinário parado.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "aog",
+      "xpType": "aog",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "aog_agro_suporte"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.4,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1200,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          35,
+          40,
+          120
+        ],
+        [
+          55,
+          121,
+          300
+        ],
+        [
+          10,
+          301,
+          500
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          0,
+          0
+        ],
+        [
+          40,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          200,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "agro_insumos_biotecnologia",
+      "legacyCodes": [
+        "3.2.2"
+      ],
+      "name": "Insumos de Alta Tecnologia & Genética",
+      "description": "Transporte de material sensível, biológico ou eletrônico de alta precisão para fazendas.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "agro_municipal",
+      "xpType": "agro_municipal",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_insumos_biotecnologia"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          60,
+          100,
+          250
+        ],
+        [
+          30,
+          251,
+          450
+        ],
+        [
+          10,
+          50,
+          99
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          1,
+          1
+        ],
+        [
+          20,
+          0,
+          0
+        ],
+        [
+          10,
+          2,
+          3
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          400
+        ]
+      ]
+    },
+    {
+      "id": "agro_suprimento_campanha",
+      "legacyCodes": [
+        "3.2.3"
+      ],
+      "name": "Suprimento de Campanha (Volume)",
+      "description": "Cabine configurada para carga. Abastecimento de insumos para períodos de safra/plantio.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_municipal",
+      "xpType": "agro_municipal",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "agro_suprimento_campanha"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 72,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1800,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          50,
+          100,
+          300
+        ],
+        [
+          50,
+          301,
+          600
+        ]
+      ],
+      "paxRules": [
+        [
+          75,
+          0,
+          0
+        ],
+        [
+          25,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          500,
+          3000
+        ]
+      ]
+    },
+    {
+      "id": "remocao_urgencia",
+      "legacyCodes": [
+        "3.3.1"
+      ],
+      "name": "Remoção de Urgência",
+      "description": "Paciente em estado crítico sendo levado do hospital municipal para um centro de trauma.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "remocao_urgencia"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 2.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          55,
+          80,
+          160
+        ],
+        [
+          40,
+          161,
+          320
+        ],
+        [
+          5,
+          321,
+          550
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          3,
+          3
+        ],
+        [
+          30,
+          4,
+          4
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "transferencia_eletiva",
+      "legacyCodes": [
+        "3.3.2"
+      ],
+      "name": "Transferência Eletiva",
+      "description": "Paciente estável que precisa de exames ou cirurgias em grandes centros. Exige conforto.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "transferencia_eletiva"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          50,
+          150,
+          300
+        ],
+        [
+          40,
+          301,
+          500
+        ],
+        [
+          10,
+          501,
+          800
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          4,
+          4
+        ],
+        [
+          40,
+          5,
+          6
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "transporte_orgaos",
+      "legacyCodes": [
+        "3.3.3"
+      ],
+      "name": "Transporte de Órgãos",
+      "description": "Missão de altíssima prioridade (Mayday/Medevac). Apenas a equipe médica e o órgão.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "transporte_orgaos"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 4,
+      "urgency": 3.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          100,
+          600
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          2,
+          2
+        ],
+        [
+          30,
+          3,
+          4
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "abastecimento_rancho",
+      "legacyCodes": [
+        "4.1.1"
+      ],
+      "name": "Abastecimento e Rancho",
+      "description": "Levar o essencial para a sobrevivência da sede: comida, galões de óleo/diesel e água.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "abastecimento_rancho"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          80,
+          15,
+          40
+        ],
+        [
+          15,
+          41,
+          80
+        ],
+        [
+          5,
+          81,
+          150
+        ]
+      ],
+      "paxRules": [
+        [
+          65,
+          0,
+          0
+        ],
+        [
+          30,
+          1,
+          1
+        ],
+        [
+          5,
+          2,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          35,
+          50,
+          100
+        ],
+        [
+          65,
+          100,
+          1500
+        ]
+      ]
+    },
+    {
+      "id": "transporte_patrao",
+      "legacyCodes": [
+        "4.1.2"
+      ],
+      "name": "Transporte do Patrão",
+      "description": "O dono da fazenda ou investidores indo para a sede para reuniões ou fiscalização.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "transporte_patrao"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          60,
+          30,
+          80
+        ],
+        [
+          30,
+          81,
+          200
+        ],
+        [
+          10,
+          201,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          50,
+          2,
+          2
+        ],
+        [
+          30,
+          1,
+          1
+        ],
+        [
+          20,
+          3,
+          5
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "troca_equipe",
+      "legacyCodes": [
+        "4.1.3"
+      ],
+      "name": "Troca de Equipe",
+      "description": "Levar funcionários, gerentes ou cozinheiros para o início da escala de trabalho na fazenda.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "troca_equipe"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1200,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          80,
+          20,
+          60
+        ],
+        [
+          20,
+          61,
+          120
+        ]
+      ],
+      "paxRules": [
+        [
+          65,
+          3,
+          5
+        ],
+        [
+          20,
+          2,
+          2
+        ],
+        [
+          15,
+          6,
+          9
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "apoio_batedor",
+      "legacyCodes": [
+        "4.2.1"
+      ],
+      "name": "Apoio ao Batedor",
+      "description": "Levar o batedor (técnico de área), ferramentas e óleo para a pista de operação agrícola.",
+      "board": "Geral",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "apoio_batedor"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          75,
+          15,
+          45
+        ],
+        [
+          20,
+          46,
+          90
+        ],
+        [
+          5,
+          91,
+          150
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          2,
+          2
+        ],
+        [
+          25,
+          1,
+          1
+        ],
+        [
+          5,
+          3,
+          4
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          0,
+          100
+        ]
+      ]
+    },
+    {
+      "id": "translado_piloto_agricola",
+      "legacyCodes": [
+        "4.2.2"
+      ],
+      "name": "Translado de Piloto (Ferry)",
+      "description": "Levar o piloto agrícola de volta para a base ou para outra aeronave de trabalho.",
+      "board": "Geral",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "translado_piloto_agricola"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 8,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          75,
+          30,
+          80
+        ],
+        [
+          25,
+          81,
+          180
+        ]
+      ],
+      "paxRules": [
+        [
+          85,
+          1,
+          1
+        ],
+        [
+          15,
+          2,
+          2
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "insumos_urgentes_agro",
+      "legacyCodes": [
+        "4.2.3"
+      ],
+      "name": "Insumos Urgentes",
+      "description": "Peças específicas para pulverização ou defensivos químicos que acabaram no meio do serviço.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "insumos_urgentes_agro"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          65,
+          20,
+          60
+        ],
+        [
+          35,
+          61,
+          150
+        ]
+      ],
+      "paxRules": [
+        [
+          70,
+          0,
+          0
+        ],
+        [
+          30,
+          1,
+          1
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          300,
+          1200
+        ]
+      ]
+    },
+    {
+      "id": "medivac_bush",
+      "legacyCodes": [
+        "4.3.1"
+      ],
+      "name": "Resgate Médico (Medivac Bush)",
+      "description": "Extração de paciente da fazenda para o hospital regional mais próximo. Urgência total.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "medivac_bush"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 4,
+      "urgency": 2.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          65,
+          30,
+          80
+        ],
+        [
+          30,
+          81,
+          180
+        ],
+        [
+          5,
+          181,
+          300
+        ]
+      ],
+      "paxRules": [
+        [
+          75,
+          3,
+          3
+        ],
+        [
+          20,
+          2,
+          2
+        ],
+        [
+          5,
+          4,
+          4
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          0,
+          200
+        ]
+      ]
+    },
+    {
+      "id": "aog_maquina_campo",
+      "legacyCodes": [
+        "4.3.2"
+      ],
+      "name": "AOG Máquina (Peça Bruta)",
+      "description": "Colheitadeira ou trator quebrado no auge da colheita. Transporte de peça pesada e mecânico.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "aog",
+      "xpType": "aog",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "aog_maquina_campo"
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.6,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          70,
+          30,
+          90
+        ],
+        [
+          30,
+          91,
+          200
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          0,
+          0
+        ],
+        [
+          40,
+          1,
+          1
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          300,
+          1200
+        ]
+      ]
+    },
+    {
+      "id": "aerolevantamento",
+      "legacyCodes": [
+        "3.6.1"
+      ],
+      "name": "Levantamento / Fotografia Aérea",
+      "description": "Levantamento fotográfico aéreo executando pernas paralelas em altitude e velocidade constantes sobre área demarcada.",
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "survey",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "aerolevantamento"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          15,
+          60
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          50,
+          100
+        ]
+      ]
+    },
+    {
+      "id": "paraquedismo",
+      "legacyCodes": [
+        "3.6.2"
+      ],
+      "name": "Lançamento de Paraquedistas",
+      "description": "Subida para lançamento de paraquedistas na vertical do aeródromo, estabilização na altitude de salto e descida sem choque térmico.",
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "paraquedismo",
+      "xpType": "paraquedismo",
+      "generator": "skydive",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "paraquedismo"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          15,
+          35
+        ]
+      ],
+      "paxRules": [
+        [
+          50,
+          4,
+          6
+        ],
+        [
+          50,
+          7,
+          10
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          80,
+          200
+        ]
+      ]
+    },
+    {
+      "id": "voo_panoramico",
+      "legacyCodes": [
+        "3.5.1"
+      ],
+      "name": "Voo Panorâmico",
+      "description": "Voo panorâmico sobrevoando pontos turísticos e aeródromos da região e retornando à origem.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "panoramico",
+      "xpType": "panoramico",
+      "generator": "scenic_tour",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "voo_panoramico"
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          20,
+          80
+        ]
+      ],
+      "paxRules": [
+        [
+          60,
+          1,
+          2
+        ],
+        [
+          40,
+          3,
+          3
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "circuito_tgl",
+      "legacyCodes": [
+        "3.5.2"
+      ],
+      "name": "Circuito de Tráfego (TGL)",
+      "description": "Sessão de treinamento de circuito de tráfego com toques e arremetidas no aeródromo de origem.",
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao_basica",
+      "xpType": "instrucao_basica",
+      "generator": "tgl_circuit",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "circuito_tgl"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          10,
+          25
+        ]
+      ],
+      "paxRules": [
+        [
+          50,
+          0,
+          0
+        ],
+        [
+          50,
+          1,
+          1
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "translado_basico",
+      "legacyCodes": [
+        "3.5.3"
+      ],
+      "name": "Translado Básico",
+      "description": "Translado de aeronave vazia para oficina ou manutenção em aeródromo vizinho (< 80 NM).",
+      "board": "Geral",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "translado",
+      "xpType": "translado",
+      "generator": "basic_ferry",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "translado_basico"
+      },
+      "fixedTexts": {
+        "title": "Translado Básico: {origin} ➔ {dest}",
+        "description": "Translado de aeronave vazia para oficina ou manutenção em {dest}. Apenas piloto a bordo e bagagem essencial."
+      },
+      "minExpHours": 2,
+      "maxExpHours": 8,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          10,
+          80
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          10,
+          50
+        ]
+      ]
+    },
+    {
+      "id": "fretamento_executivo",
+      "legacyCodes": [
+        "1.7.1"
+      ],
+      "name": "Fretamento Executivo",
+      "description": "Fretamento executivo conectando grandes centros e capitais ao interior. Transporte de passageiros corporativos para aeródromos sem linha aérea regular.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "same_country_tier_3_4",
+        "preferredHubs": "fretamento_executivo"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1800,
+      "luggageWeightKg": 18.0,
+      "rangeRules": [
+        [
+          100,
+          100,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          2,
+          6
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "carga_fragil",
+      "legacyCodes": [
+        "1.7.2"
+      ],
+      "name": "Carga Frágil / Expressa",
+      "description": "Transporte de carga expressa e frágil com tolerância zero a impactos e janela de expiração extremamente curta.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_fragil",
+      "xpType": "carga_fragil",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_fragil"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.3,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          80,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "medevac_dinamico",
+      "legacyCodes": [
+        "1.7.3"
+      ],
+      "name": "MEDEVAC Dinâmico",
+      "description": "Remoção médica aeromédica de emergência (UTI aérea) com destino crítico em pista curta ou não pavimentada. A bordo paciente, acompanhante e equipamentos de suporte à vida.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "short_or_unpaved",
+        "preferredHubs": "medevac_dinamico"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 2,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          50,
+          350
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          300,
+          600
+        ]
+      ]
+    },
+    {
+      "id": "vip_internacional_curto",
+      "legacyCodes": [
+        "1.7.4"
+      ],
+      "name": "VIP Internacional Curto",
+      "description": "Transporte executivo VIP para países vizinhos com controle alfandegário e exigências de alto padrão de atendimento.",
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "other_country",
+        "preferredHubs": "vip_internacional_curto"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 25.0,
+      "rangeRules": [
+        [
+          100,
+          300,
+          900
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          2,
+          8
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "ponte_aerea_troncal",
+      "legacyCodes": [
+        "1.7.5"
+      ],
+      "name": "Ponte Aérea / Troncal",
+      "description": "Ponte aérea de altíssima densidade conectando grandes hubs metropolitanos do mesmo país. Exige máxima pontualidade e precisão de despacho.",
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "tier1_same_country",
+        "preferredHubs": "ponte_aerea_troncal"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.1,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "luggageWeightKg": 20.0,
+      "rangeRules": [
+        [
+          100,
+          150,
+          700
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          150,
+          220
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "cargueiro_noturno",
+      "legacyCodes": [
+        "1.7.6"
+      ],
+      "name": "Cargueiro Noturno",
+      "description": "Operação logística de carga pesada em voo noturno conectando hubs de distribuição primária da rede.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "cargueiro_noturno",
+      "generator": "standard",
+      "destination": {
+        "rule": "tier1",
+        "preferredHubs": "cargueiro_noturno"
+      },
+      "fixedTexts": {
+        "title": "Cargueiro Noturno: {origin} ➔ {dest}",
+        "description": "Operação logística de carga pesada em voo noturno conectando grandes hubs ({origin} ➔ {dest})."
+      },
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          300,
+          1500
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          20000,
+          60000
+        ]
+      ]
+    },
+    {
+      "id": "long_haul_internacional",
+      "legacyCodes": [
+        "1.7.7"
+      ],
+      "name": "Long-Haul Internacional",
+      "description": "Travessia intercontinental regular conectando grandes hubs globais em países distintos com distâncias superiores a 2.500 NM.",
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "destination": {
+        "rule": "tier1_other_country",
+        "preferredHubs": "long_haul_internacional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 36,
+      "maxExpHours": 72,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 7000,
+      "luggageWeightKg": 40.0,
+      "rangeRules": [
+        [
+          100,
+          2501,
+          6000
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          200,
+          400
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "fretamento_global_carga_alto_valor",
+      "legacyCodes": [
+        "1.7.8"
+      ],
+      "name": "Fretamento Global / Carga de Alto Valor",
+      "description": "Fretamento intercontinental especializado para transporte de carga pesada e de altíssimo valor agregado em rotas superiores a 2.000 NM.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "carga_global",
+      "xpType": "carga_global",
+      "generator": "standard",
+      "destination": {
+        "rule": "tier_max_2",
+        "preferredHubs": "fretamento_global_carga_alto_valor"
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 6000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          2001,
+          5500
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          30000,
+          100000
+        ]
+      ]
+    },
+    {
+      "id": "fretamento_executivo_regional",
+      "legacyCodes": [
+        "2.7.1"
+      ],
+      "name": "Fretamento Executivo",
+      "description": "Fretamento executivo conectando polos regionais ao interior. Transporte corporativo para aeródromos sem linha aérea regular.",
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "same_country_tier_3_4",
+        "preferredHubs": "fretamento_executivo_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1800,
+      "luggageWeightKg": 18.0,
+      "rangeRules": [
+        [
+          100,
+          100,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          2,
+          6
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "carga_fragil_regional",
+      "legacyCodes": [
+        "2.7.2"
+      ],
+      "name": "Carga Frágil / Expressa",
+      "description": "Transporte de carga expressa e frágil com tolerância zero a impactos e janela de expiração extremamente curta.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_fragil",
+      "xpType": "carga_fragil",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_fragil_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.3,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          80,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "medevac_regional",
+      "legacyCodes": [
+        "2.7.3"
+      ],
+      "name": "MEDEVAC Dinâmico",
+      "description": "Remoção médica aeromédica de emergência (UTI aérea) com destino crítico em pista curta ou não pavimentada. A bordo paciente, acompanhante e equipamentos de suporte à vida.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "short_or_unpaved",
+        "preferredHubs": "medevac_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 2,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          50,
+          350
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          300,
+          600
+        ]
+      ]
+    },
+    {
+      "id": "vip_internacional_regional",
+      "legacyCodes": [
+        "2.7.4"
+      ],
+      "name": "VIP Internacional Curto",
+      "description": "Transporte executivo VIP a partir de polo regional para países vizinhos.",
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "destination": {
+        "rule": "other_country",
+        "preferredHubs": "vip_internacional_regional"
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "luggageWeightKg": 25.0,
+      "rangeRules": [
+        [
+          100,
+          300,
+          900
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          2,
+          8
+        ]
+      ],
+      "lbsRules": []
+    },
+    {
+      "id": "carga_fragil_municipal",
+      "legacyCodes": [
+        "3.7.1"
+      ],
+      "name": "Carga Frágil / Expressa",
+      "description": "Transporte de carga expressa e frágil a partir de aeródromo municipal com janela de expiração extremamente curta.",
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_fragil",
+      "xpType": "carga_fragil",
+      "generator": "standard",
+      "destination": {
+        "rule": "standard",
+        "preferredHubs": "carga_fragil_municipal"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.3,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1500,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          80,
+          400
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          0,
+          0
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          100,
+          800
+        ]
+      ]
+    },
+    {
+      "id": "medevac_municipal",
+      "legacyCodes": [
+        "3.7.2"
+      ],
+      "name": "MEDEVAC Dinâmico",
+      "description": "Remoção médica de urgência com base em polo municipal atendendo destinos com pista curta ou não pavimentada.",
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "destination": {
+        "rule": "short_or_unpaved",
+        "preferredHubs": "medevac_municipal"
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 2,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 1000,
+      "luggageWeightKg": 15.0,
+      "rangeRules": [
+        [
+          100,
+          50,
+          350
+        ]
+      ],
+      "paxRules": [
+        [
+          100,
+          1,
+          2
+        ]
+      ],
+      "lbsRules": [
+        [
+          100,
+          300,
+          600
+        ]
+      ]
+    }
+  ],
+  "tiers": {
+    "1": {
+      "allowedDestinationTiers": [
+        1,
+        2,
+        3
+      ],
+      "groups": [
+        {
+          "id": "linha_aerea_pax",
+          "name": "Linha Aérea PAX",
+          "weight": 60,
+          "missions": [
+            {
+              "id": "linha_domestica_hub",
+              "weight": 60
+            },
+            {
+              "id": "linha_regional_internacional",
+              "weight": 25
+            },
+            {
+              "id": "linha_long_haul",
+              "weight": 15
+            }
+          ]
+        },
+        {
+          "id": "carga_heavy",
+          "name": "Carga Heavy",
+          "weight": 20,
+          "missions": [
+            {
+              "id": "carga_heavy_nacional",
+              "weight": 50
+            },
+            {
+              "id": "carga_heavy_internacional",
+              "weight": 20
+            },
+            {
+              "id": "carga_heavy_long_haul",
+              "weight": 30
+            }
+          ]
+        },
+        {
+          "id": "operacoes_auxiliares",
+          "name": "Operações Auxiliares",
+          "weight": 20,
+          "missions": [
+            {
+              "id": "executiva_business",
+              "weight": 50
+            },
+            {
+              "id": "logistica_apoio_crew_parts",
+              "weight": 30
+            },
+            {
+              "id": "translado_posicionamento_ferry",
+              "weight": 15
+            },
+            {
+              "id": "diplomatico_militar",
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "id": "contratos_carreira_t1",
+          "name": "Contratos de Carreira (Fases 3 a 7)",
+          "weight": 15,
+          "missions": [
+            {
+              "id": "fretamento_executivo",
+              "weight": 15
+            },
+            {
+              "id": "carga_fragil",
+              "weight": 15
+            },
+            {
+              "id": "medevac_dinamico",
+              "weight": 40
+            },
+            {
+              "id": "vip_internacional_curto",
+              "weight": 15
+            },
+            {
+              "id": "ponte_aerea_troncal",
+              "weight": 20
+            },
+            {
+              "id": "cargueiro_noturno",
+              "weight": 15
+            },
+            {
+              "id": "long_haul_internacional",
+              "weight": 15
+            },
+            {
+              "id": "fretamento_global_carga_alto_valor",
+              "weight": 15
+            }
+          ]
+        }
+      ]
+    },
+    "2": {
+      "allowedDestinationTiers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "groups": [
+        {
+          "id": "linha_aerea_regional",
+          "name": "Linha Aérea Regional",
+          "weight": 45,
+          "missions": [
+            {
+              "id": "alimentacao_hub",
+              "weight": 80
+            },
+            {
+              "id": "regional_direto",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "executiva_agro_biz",
+          "name": "Executiva (Agro/Biz)",
+          "weight": 30,
+          "missions": [
+            {
+              "id": "agro_legacy",
+              "weight": 50
+            },
+            {
+              "id": "agro_tech",
+              "weight": 30
+            },
+            {
+              "id": "agro_investidores",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "carga_expressa",
+          "name": "Carga Expressa (Cargo)",
+          "weight": 15,
+          "missions": [
+            {
+              "id": "ecommerce_varejo",
+              "weight": 50
+            },
+            {
+              "id": "agro_pecas_insumos",
+              "weight": 30
+            },
+            {
+              "id": "malotes_documentos",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "apoio_outros",
+          "name": "Apoio / Outros",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "manutencao_regional",
+              "weight": 60
+            },
+            {
+              "id": "governo_local_estadual",
+              "weight": 40
+            }
+          ]
+        },
+        {
+          "id": "treinamento",
+          "name": "Treinamento",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "instrucao_local",
+              "weight": 60
+            },
+            {
+              "id": "navegacao_cross_country",
+              "weight": 30
+            },
+            {
+              "id": "voo_de_cheque",
+              "weight": 10
+            }
+          ]
+        },
+        {
+          "id": "aeroclube",
+          "name": "Aeroclube",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "voo_panoramico",
+              "weight": 35
+            },
+            {
+              "id": "circuito_tgl",
+              "weight": 35
+            },
+            {
+              "id": "translado_basico",
+              "weight": 30
+            }
+          ]
+        },
+        {
+          "id": "sae",
+          "name": "Serviços Aéreos Especializados (SAE)",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "aerolevantamento",
+              "weight": 50
+            },
+            {
+              "id": "paraquedismo",
+              "weight": 50
+            }
+          ]
+        },
+        {
+          "id": "contratos_carreira_t2",
+          "name": "Contratos de Carreira (Fases 3 e 4)",
+          "weight": 15,
+          "missions": [
+            {
+              "id": "fretamento_executivo_regional",
+              "weight": 25
+            },
+            {
+              "id": "carga_fragil_regional",
+              "weight": 20
+            },
+            {
+              "id": "medevac_regional",
+              "weight": 40
+            },
+            {
+              "id": "vip_internacional_regional",
+              "weight": 15
+            }
+          ]
+        }
+      ]
+    },
+    "3": {
+      "allowedDestinationTiers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "groups": [
+        {
+          "id": "taxi_aereo_charter",
+          "name": "Táxi Aéreo / Charter",
+          "weight": 45,
+          "missions": [
+            {
+              "id": "executivo_regional",
+              "weight": 50
+            },
+            {
+              "id": "familia_alto_padrao",
+              "weight": 30
+            },
+            {
+              "id": "equipes_urgentes",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "agro_suporte",
+          "name": "Agro Suporte",
+          "weight": 40,
+          "missions": [
+            {
+              "id": "aog_agro_suporte",
+              "weight": 50
+            },
+            {
+              "id": "agro_insumos_biotecnologia",
+              "weight": 30
+            },
+            {
+              "id": "agro_suprimento_campanha",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "saude_remocao",
+          "name": "Saúde / Remoção",
+          "weight": 10,
+          "missions": [
+            {
+              "id": "remocao_urgencia",
+              "weight": 60
+            },
+            {
+              "id": "transferencia_eletiva",
+              "weight": 30
+            },
+            {
+              "id": "transporte_orgaos",
+              "weight": 10
+            }
+          ]
+        },
+        {
+          "id": "treinamento",
+          "name": "Treinamento",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "instrucao_local",
+              "weight": 60
+            },
+            {
+              "id": "navegacao_cross_country",
+              "weight": 30
+            },
+            {
+              "id": "voo_de_cheque",
+              "weight": 10
+            }
+          ]
+        },
+        {
+          "id": "aeroclube",
+          "name": "Aeroclube",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "voo_panoramico",
+              "weight": 35
+            },
+            {
+              "id": "circuito_tgl",
+              "weight": 35
+            },
+            {
+              "id": "translado_basico",
+              "weight": 30
+            }
+          ]
+        },
+        {
+          "id": "sae",
+          "name": "Serviços Aéreos Especializados (SAE)",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "aerolevantamento",
+              "weight": 50
+            },
+            {
+              "id": "paraquedismo",
+              "weight": 50
+            }
+          ]
+        },
+        {
+          "id": "contratos_carreira_t3",
+          "name": "Contratos de Carreira (Fases 3 e 4)",
+          "weight": 15,
+          "missions": [
+            {
+              "id": "carga_fragil_municipal",
+              "weight": 30
+            },
+            {
+              "id": "medevac_municipal",
+              "weight": 50
+            }
+          ]
+        }
+      ]
+    },
+    "4": {
+      "allowedDestinationTiers": [
+        2,
+        3,
+        4
+      ],
+      "groups": [
+        {
+          "id": "logistica_sede",
+          "name": "Logística de Sede",
+          "weight": 55,
+          "missions": [
+            {
+              "id": "abastecimento_rancho",
+              "weight": 50
+            },
+            {
+              "id": "transporte_patrao",
+              "weight": 30
+            },
+            {
+              "id": "troca_equipe",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "aviacao_agricola_ferry",
+          "name": "Aviação Agrícola (Ferry)",
+          "weight": 30,
+          "missions": [
+            {
+              "id": "apoio_batedor",
+              "weight": 50
+            },
+            {
+              "id": "translado_piloto_agricola",
+              "weight": 30
+            },
+            {
+              "id": "insumos_urgentes_agro",
+              "weight": 20
+            }
+          ]
+        },
+        {
+          "id": "emergencia_campo",
+          "name": "Emergência de Campo",
+          "weight": 10,
+          "missions": [
+            {
+              "id": "medivac_bush",
+              "weight": 60
+            },
+            {
+              "id": "aog_maquina_campo",
+              "weight": 40
+            }
+          ]
+        },
+        {
+          "id": "treinamento",
+          "name": "Treinamento",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "instrucao_local",
+              "weight": 60
+            },
+            {
+              "id": "navegacao_cross_country",
+              "weight": 30
+            },
+            {
+              "id": "voo_de_cheque",
+              "weight": 10
+            }
+          ]
+        },
+        {
+          "id": "aeroclube",
+          "name": "Aeroclube",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "voo_panoramico",
+              "weight": 35
+            },
+            {
+              "id": "circuito_tgl",
+              "weight": 35
+            },
+            {
+              "id": "translado_basico",
+              "weight": 30
+            }
+          ]
+        },
+        {
+          "id": "sae",
+          "name": "Serviços Aéreos Especializados (SAE)",
+          "weight": 5,
+          "missions": [
+            {
+              "id": "aerolevantamento",
+              "weight": 50
+            },
+            {
+              "id": "paraquedismo",
+              "weight": 50
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "airportAdjustments": [
+    {
+      "condition": "instruction_hub",
+      "importGroupIfMissing": "treinamento",
+      "importWeight": 10,
+      "addGroupWeights": [
+        {
+          "groupId": "treinamento",
+          "weight": 45
+        },
+        {
+          "groupId": "aeroclube",
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "condition": "dropzone",
+      "importGroupIfMissing": "sae",
+      "importWeight": 5,
+      "addGroupWeights": [
+        {
+          "groupId": "sae",
+          "weight": 40
+        }
+      ],
+      "setMissionWeights": [
+        {
+          "groupId": "sae",
+          "missionId": "aerolevantamento",
+          "weight": 20
+        },
+        {
+          "groupId": "sae",
+          "missionId": "paraquedismo",
+          "weight": 80
+        }
+      ],
+      "setMissionWeightsIfFalse": [
+        {
+          "groupId": "sae",
+          "missionId": "aerolevantamento",
+          "weight": 85
+        },
+        {
+          "groupId": "sae",
+          "missionId": "paraquedismo",
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "condition": "scenic_base",
+      "importGroupIfMissing": "aeroclube",
+      "importWeight": 5,
+      "addGroupWeights": [
+        {
+          "groupId": "aeroclube",
+          "weight": 40
+        }
+      ],
+      "setMissionWeights": [
+        {
+          "groupId": "aeroclube",
+          "missionId": "voo_panoramico",
+          "weight": 70
+        },
+        {
+          "groupId": "aeroclube",
+          "missionId": "circuito_tgl",
+          "weight": 15
+        },
+        {
+          "groupId": "aeroclube",
+          "missionId": "translado_basico",
+          "weight": 15
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Health",
+      "importGroupIfMissing": "saude_remocao",
+      "importWeight": 5,
+      "addGroupWeights": [
+        {
+          "groupId": "saude_remocao",
+          "weight": 35
+        },
+        {
+          "groupId": "emergencia_campo",
+          "weight": 25
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Cargo",
+      "addGroupWeights": [
+        {
+          "groupId": "carga_heavy",
+          "weight": 35
+        },
+        {
+          "groupId": "carga_expressa",
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:CommercialPax",
+      "addGroupWeights": [
+        {
+          "groupId": "linha_aerea_pax",
+          "weight": 40
+        },
+        {
+          "groupId": "linha_aerea_regional",
+          "weight": 35
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Executive",
+      "addGroupWeights": [
+        {
+          "groupId": "operacoes_auxiliares",
+          "weight": 30
+        },
+        {
+          "groupId": "executiva_agro_biz",
+          "weight": 25
+        },
+        {
+          "groupId": "taxi_aereo_charter",
+          "weight": 35
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Maintenance",
+      "addGroupWeights": [
+        {
+          "groupId": "operacoes_auxiliares",
+          "weight": 20
+        },
+        {
+          "groupId": "apoio_outros",
+          "weight": 25
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Feeder",
+      "addGroupWeights": [
+        {
+          "groupId": "linha_aerea_regional",
+          "weight": 30
+        },
+        {
+          "groupId": "logistica_sede",
+          "weight": 20
+        }
+      ]
+    },
+    {
+      "condition": "hub_type:Agro",
+      "addGroupWeights": [
+        {
+          "groupId": "executiva_agro_biz",
+          "weight": 25
+        },
+        {
+          "groupId": "agro_suporte",
+          "weight": 35
+        },
+        {
+          "groupId": "logistica_sede",
+          "weight": 25
+        },
+        {
+          "groupId": "aviacao_agricola_ferry",
+          "weight": 30
+        }
+      ]
+    }
+  ]
+}

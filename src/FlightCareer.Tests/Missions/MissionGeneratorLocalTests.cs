@@ -35,7 +35,7 @@ namespace FlightCareer.Tests.Missions
             {
                 foreach (var c in t.Categories)
                 {
-                    var s = c.SubCategories.FirstOrDefault(x => x.Id == id);
+                    var s = c.SubCategories.FirstOrDefault(x => x.Id == id || x.Definition?.LegacyCodes.Contains(id) == true);
                     if (s != null) return s;
                 }
             }
@@ -46,13 +46,13 @@ namespace FlightCareer.Tests.Missions
         public void Subtype341_LocalInstruction_GeneratesProperAreaAndTgl()
         {
             var origin = CreateOriginAirport();
-            var sub = GetSubConfig("3.4.1");
+            var sub = GetSubConfig("instrucao_local");
             var rng = new Random(42);
 
             var mission = MissionGenerator.CreateLocalInstructionMissionSync(
                 origin, sub, rng, DateTime.UtcNow);
 
-            Assert.Equal("3.4.1", mission.SubId);
+            Assert.Equal("instrucao_local", mission.SubId);
             Assert.Equal(origin.ICAO, mission.OriginICAO);
             Assert.Equal(origin.ICAO, mission.DestinationICAO);
             Assert.InRange(mission.RequiredTouchAndGoes, 1, 3);
@@ -68,13 +68,13 @@ namespace FlightCareer.Tests.Missions
         public void Subtype343_Checkride_RequiresExaminerAndSimulatedFailure()
         {
             var origin = CreateOriginAirport();
-            var sub = GetSubConfig("3.4.3");
+            var sub = GetSubConfig("voo_de_cheque");
             var rng = new Random(100);
 
             var mission = MissionGenerator.CreateCheckrideMissionSync(
                 origin, sub, rng, DateTime.UtcNow);
 
-            Assert.Equal("3.4.3", mission.SubId);
+            Assert.Equal("voo_de_cheque", mission.SubId);
             Assert.Equal(origin.ICAO, mission.OriginICAO);
             Assert.Equal(origin.ICAO, mission.DestinationICAO);
             Assert.Equal(1, mission.PassengerCount);
@@ -90,7 +90,7 @@ namespace FlightCareer.Tests.Missions
         public void Subtype351_ScenicTour_WithPois_UsesPois_WithoutPois_ReturnsNull()
         {
             var origin = CreateOriginAirport();
-            var sub = GetSubConfig("3.5.1");
+            var sub = GetSubConfig("voo_panoramico");
             var rng = new Random(200);
 
             // Mock com 3 POIs a ~10, ~15 e ~20 NM da origem (-23.18, -46.94)
@@ -121,7 +121,7 @@ namespace FlightCareer.Tests.Missions
         public void Subtype361_Survey_WithInfrastructurePoi_CentersOnPoi()
         {
             var origin = CreateOriginAirport();
-            var sub = GetSubConfig("3.6.1");
+            var sub = GetSubConfig("aerolevantamento");
             var rng = new Random(300);
 
             var mockPois = new List<TouristPoiInfo>
@@ -135,7 +135,7 @@ namespace FlightCareer.Tests.Missions
             var mission = MissionGenerator.CreateSurveyMissionSync(
                 originNearDam, sub, rng, DateTime.UtcNow, placesService: places);
 
-            Assert.Equal("3.6.1", mission.SubId);
+            Assert.Equal("aerolevantamento", mission.SubId);
             Assert.NotNull(mission.ContractData);
 
             var contract = JsonSerializer.Deserialize<SurveyContractData>(mission.ContractData);
@@ -150,7 +150,7 @@ namespace FlightCareer.Tests.Missions
         public void Subtype362_Skydive_WithDropZone_UsesDzCoordinatesAndName()
         {
             var origin = CreateOriginAirport("SDTI", -23.28, -47.67); // Boituva
-            var sub = GetSubConfig("3.6.2");
+            var sub = GetSubConfig("paraquedismo");
             var rng = new Random(400);
 
             var mockDzs = new List<DropZoneInfo>
@@ -162,7 +162,7 @@ namespace FlightCareer.Tests.Missions
             var mission = MissionGenerator.CreateSkydiveMissionSync(
                 origin, sub, rng, DateTime.UtcNow, placesService: places, engineClass: "turboprop");
 
-            Assert.Equal("3.6.2", mission.SubId);
+            Assert.Equal("paraquedismo", mission.SubId);
             Assert.NotNull(mission.ContractData);
 
             var contract = JsonSerializer.Deserialize<SkydiveContractData>(mission.ContractData);
@@ -202,8 +202,8 @@ namespace FlightCareer.Tests.Missions
 
                 foreach (var m in missions)
                 {
-                    if (m.SubId == "3.6.2") skydiveCount++;
-                    else if (m.SubId == "3.6.1") surveyCount++;
+                    if (m.SubId == "paraquedismo") skydiveCount++;
+                    else if (m.SubId == "aerolevantamento") surveyCount++;
                 }
             }
 
@@ -242,7 +242,7 @@ namespace FlightCareer.Tests.Missions
                 origin, sub, rng, DateTime.UtcNow, placesService: places);
 
             Assert.NotNull(mission);
-            Assert.Equal("3.5.1", mission!.SubId);
+            Assert.Equal("voo_panoramico", mission!.SubId);
             Assert.Equal(origin.ICAO, mission.OriginICAO);
             Assert.Equal(origin.ICAO, mission.DestinationICAO);
 
@@ -265,7 +265,7 @@ namespace FlightCareer.Tests.Missions
         public void Subtype351_ScenicTour_NonCuratedAerodrome_UsesTouristPois()
         {
             var origin = CreateOriginAirport("SBJD", -23.18, -46.94);
-            var sub = GetSubConfig("3.5.1");
+            var sub = GetSubConfig("voo_panoramico");
             var rng = new Random(666);
 
             var mockPois = new List<TouristPoiInfo>
@@ -326,8 +326,8 @@ namespace FlightCareer.Tests.Missions
 
                 foreach (var m in missions)
                 {
-                    if (m.SubId == "3.5.1") scenicTourCount++;
-                    else if (m.SubId == "3.5.2" || m.SubId == "3.5.3") otherClubCount++;
+                    if (m.SubId == "voo_panoramico") scenicTourCount++;
+                    else if (m.SubId == "circuito_tgl" || m.SubId == "translado_basico") otherClubCount++;
                 }
             }
 
@@ -366,13 +366,13 @@ namespace FlightCareer.Tests.Missions
 
             var categories = MissionGenerator.GetCalibratedCategories(origin, tierConfig, null!, places);
 
-            var cat35 = categories.FirstOrDefault(c => c.Id == "3.5");
+            var cat35 = categories.FirstOrDefault(c => c.Id == "aeroclube");
             Assert.NotNull(cat35);
-            Assert.True(cat35!.Weight >= 40, $"Peso de 3.5 deve ter recebido o bônus de 40, encontrado {cat35.Weight}");
+            Assert.True(cat35!.Weight >= 40, $"Peso de aeroclube deve ter recebido o bônus de 40, encontrado {cat35.Weight}");
 
-            var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.1");
-            var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.2");
-            var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "3.5.3");
+            var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "voo_panoramico");
+            var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "circuito_tgl");
+            var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "translado_basico");
 
             Assert.NotNull(s351);
             Assert.NotNull(s352);
