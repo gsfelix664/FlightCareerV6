@@ -29,7 +29,15 @@ sim = None
 if lnm and os.path.exists(lnm):
     con = sqlite3.connect(f"file:{lnm}?mode=ro", uri=True)
     sim = {row[0].upper() for row in con.execute("select ident from airport where ident is not null")}
+    # nome, posição, elevação e pista do MSFS: códigos reaproveitados (ex.: SBOK = fazenda no MT no
+    # airports.csv antigo, Amontada/CE no MSFS 2024) precisam dos dados do simulador nas heurísticas
+    sim_data = {row[0].upper(): row[1:] for row in con.execute(
+        "select ident, name, laty, lonx, altitude, longest_runway_length, longest_runway_surface, num_runway_light "
+        "from airport where ident is not null")}
     con.close()
+else:
+    sim_data = {}
+LNM_HARD = ("A", "C", "B", "T")  # Little Navmap: A asfalto, C concreto, B betume, T macadame/tratado
 
 # --- aeroportos (mesmo filtro do DataSeeder) ---------------------------------
 aps = []
@@ -51,6 +59,18 @@ for r in csv.DictReader(open(os.path.join(infra, 'CSV', 'airports.csv'), encodin
         elev = int(float(r['elevation_ft'])) if r['elevation_ft'] else 0
     except ValueError:
         elev = 0
+    # se o mesmo código no MSFS está a > 10 NM, é outro aeródromo: usa os dados do simulador
+    sd = sim_data.get(icao.upper())
+    if sd is not None:
+        s_name, s_lat, s_lon, s_alt, s_len, s_surf, s_light = sd
+        dnm = (((lat - s_lat) ** 2 + ((lon - s_lon) * np.cos(np.radians(lat))) ** 2) ** 0.5) * 60
+        if dnm > 10:
+            r = dict(r); r['name'] = s_name or r['name']; r['municipality'] = ''
+            lat, lon, elev = float(s_lat), float(s_lon), int(s_alt or 0)
+            s_hard = (s_surf or '') in LNM_HARD
+            runs = [(('ASPH' if s_hard else (s_surf or '')), int(s_len or 0), bool(s_light))]
+            hard = s_hard
+            tier = 3 if hard else 4
     in_sim = None
     if sim is not None:
         cands = {c.strip().upper() for c in (r['icao_code'], r['gps_code'], r['ident'], r['local_code']) if c and c.strip()}

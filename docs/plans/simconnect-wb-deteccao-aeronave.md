@@ -229,3 +229,37 @@ Ao implementar este plano, o agente executor deve:
 3. Conferir: `TOTAL WEIGHT` × MTOW e `CG PERCENT` × `CG FWD/AFT LIMIT` (página de modelo de voo) antes de liberar a decolagem; fora do envelope = NO-GO com motivo no briefing.
 4. Com o combustível também gravado pela COMBUSTIVEL-REAL, peso e CG do sim passam a ser exatamente os da missão (o "BUG CRÍTICO #2" de cálculo de payload deixa de depender do piloto).
 Só no solo, motores desligados; testar a escrita por avião no MSFS (nomes e quantidade de estações mudam por aeronave). Implementação: spec para o Gemini quando este plano for retomado.
+
+## Atualização 2026-11-24 (Claude) — variante de cabine do simulador × configuração do Hangar (pedido do usuário)
+**Objetivo:** o piloto converte a aeronave no Hangar (passageiros ↔ carga, mediante taxa e parada; já existe: `Domain/Economy/CabinConversion`, aviões com `convertibleCabin`). Pode ter dois exemplares do mesmo modelo, um em cada configuração. No simulador ele precisa carregar **o mesmo avião e a mesma variante**; o briefing só libera o voo com o par certo.
+
+**Como o MSFS 2024 faz (SDK conferido, 2026-11-24):**
+- Variante de carga = **preset** do SimObject modular, feito pelo desenvolvedor (troca peças do modelo, estações de peso `station_load.N` do tipo baggage, `navigation_graph_cargo.cfg` e cargas visuais). O jogador escolhe a variante na seleção de aeronave; não há troca de cabine pelo jogador nem pelo SimConnect.
+- Cada preset tem o próprio `title` em `[FLTSIM.N]` do `aircraft.cfg` (página "CFG Files General Information"). Mas, desde a mudança das pinturas do 2024, a SimVar `TITLE` devolve o nome do avião "pai", sem a pintura; para a pintura foram criadas `LIVERY NAME` e `LIVERY FOLDER` (SDK 1.1.2). **Não está confirmado** se `TITLE` muda entre presets de passageiros e de carga do mesmo avião.
+- Fontes: docs.flightsimulator.com › Careers › Cargo Transport; General Career Information › Aircraft Loads; CFG Files General Information; Release Notes 1.1.2.
+
+**Hoje no código:** o briefing já bloqueia avião diferente do Hangar (`BriefingViewModel.IsAircraftMatching(simTitle, hangarModel)`, l. 566; motivo "Voo bloqueado: A aeronave carregada no MSFS (…) não coincide com o modelo ativo").
+
+**Proposta:**
+1. **Teste no PC com o MSFS (usuário):** carregar cada avião com `convertibleCabin` nas variantes de passageiros e de carga (quando existirem) e gravar `TITLE`, `ATC MODEL`, `LIVERY NAME`, `LIVERY FOLDER` (REC do `SensorRecorder` / `-context.json`). Resultado vira uma tabela neste plano: avião × variante × strings lidas.
+2. **Catálogo:** em `Data/aircraft/<modelo>.json`, campo novo `cabinVariants: { "passenger": [padrões], "cargo": [padrões] }` com os padrões de texto achados no passo 1 (nada inventado).
+3. **Domínio (puro, testável):** `CabinVariantMatcher.Match(simStrings, cabinVariants) → Passenger | Cargo | Unknown`.
+4. **Briefing:** se o avião tem `cabinVariants`, a variante lida precisa ser a da configuração do exemplar no Hangar (`PilotAircraft.Configuration`); senão bloqueia com motivo claro ("No Hangar esta aeronave está em CARGA; carregue a variante de carga no MSFS"). Conferir também no `StartMonitoring`.
+5. **Decisão do usuário (2026-11-24): só converte se existir.** A conversão no Hangar só é oferecida para aviões que têm variante de carga **e** de passageiros no simulador distinguível pelas SimVars (`cabinVariants` preenchido com os dois lados). Avião `convertibleCabin` sem isso perde a opção de conversão (card oculto, como os não conversíveis) até o teste do passo 1 confirmar a variante. A lista `convertibleCabin` do catálogo passa a ser conferida contra o resultado do teste.
+
+## Plano futuro (usuário, 2026-11-24) — variantes do avião como requisito de missão
+No MSFS 2024 as variantes (presets) não são só passageiros/carga: o C152 tem padrão e publicidade; o C172 tem paraquedismo, carga, publicidade, esquis e anfíbio. Isso vira mecânica de carreira:
+- **Generalizar a conversão:** `PilotAircraft.Configuration` deixa de ser só Passageiro/Carga e passa a ser a **variante** do exemplar (padrão, carga, paraquedismo, publicidade, esquis, flutuadores/anfíbio…). Cada modelo lista no catálogo (`Data/aircraft/<modelo>.json`) as variantes que existem no simulador, com os padrões de SimVar que as identificam (mesmo teste do passo 1 acima) e custo/parada da conversão por porte. Só aparece no Hangar a variante que existe no sim (mesma decisão de 2026-11-24).
+- **Missão com requisito de variante** (campo no catálogo de missões, ex.: `requiresVariant`): pouso na neve → esquis; aeródromo na água → flutuadores/anfíbio; `publicidade_aerea` → publicidade; (`paraquedismo` → variante de paraquedismo, quando existir: a decidir se é exigida ou só recomendada).
+- **Quadro de missões:** a missão aparece mesmo que o avião ativo esteja em outra variante, marcada "requer conversão: <variante> — $X, N min de oficina"; ao aceitar, o piloto pode pagar a conversão no Hangar para liberar.
+- **Briefing / início do voo:** só libera se a variante do exemplar no Hangar for a exigida pela missão **e** a variante carregada no sim for a mesma.
+- **Dados a levantar (não inventar):** quais aeródromos são na água (tipo `seaplane_base` no `airports.csv`; conferir) e quais pistas exigem esquis (superfície neve/gelo no `runways.csv`; conferir cobertura); quais variantes cada avião do csv tem no MSFS 2024.
+- **⚠SDK:** confirmar as SimVars de tipo de trem (ex.: `IS GEAR FLOATS`, `IS GEAR SKIS`, `IS GEAR WHEELS`) e se servem para conferir a variante carregada, além de `TITLE`/`LIVERY NAME`.
+
+### Observação do usuário (2026-11-24): cada variante muda a tela de carga e passageiros
+- Na variante de paraquedismo do C172 a aba de carga some do EFB. Bate com o SDK: cada preset define as próprias estações de peso (`station_load.N` no `flight_model.cfg`, com nome de até 15 caracteres) e a carga visual (`navigation_graph_cargo.cfg`).
+- **Consequências para o addon:**
+  1. **Detecção da variante:** o conjunto de estações (quantidade e nomes) pode identificar a variante carregada junto com `TITLE`/`LIVERY NAME`. Hipótese: SimVars `PAYLOAD STATION COUNT`, `PAYLOAD STATION NAME:n` e `PAYLOAD STATION WEIGHT:n`. Relatos de desenvolvedores divergem (um diz que pelo SimConnect só o peso é acessível; o nome volta o texto literal do cfg; mudar o peso por SimVar não atualiza o EFB). **Conferir com o `FlightCareer.SimVarProbe`** em cada variante antes de usar.
+  2. **Loadsheet / W&B:** a distribuição de passageiros, bagagem e carga da missão tem de caber nas estações que a variante tem (ex.: paraquedismo sem compartimento de carga → missão com carga não cabe). Entra junto com a ETAPA 3 deste plano.
+  3. **Quadro de missões:** a capacidade efetiva passa a depender da variante do exemplar (o `CabinConversion` atual só trata passageiros/carga).
+- Teste no PC: ao gravar as variantes (passo 1 da trava de variante), rodar também o `SimVarProbe --filter "PAYLOAD STATION"` em cada uma.
