@@ -1,0 +1,40 @@
+{
+  "Version": 2,
+  "Tags": {
+    "MegaHub": 120,
+    "HubLinha": 70,
+    "CargaPesada": 60,
+    "Linha": 50,
+    "Alimentador": 35,
+    "ExecutivoSaudeMroCarga": 25,
+    "InstrucaoAgroOutros": 10
+  },
+  "Structure": {
+    "IlsPerEnd": 8,
+    "MaxIls": 32,
+    "ApproachEach": 1,
+    "MaxApproaches": 20,
+    "GateJetwayEach": 1,
+    "MaxGateJetways": 40,
+    "CargoParkingEach": 2,
+    "MaxCargoParking": 20,
+    "Tower": 8,
+    "RunwayPavedTier1MinFt": 8000,
+    "RunwayPavedTier1Points": 15,
+    "RunwayPavedTier2MinFt": 5000,
+    "RunwayPavedTier2Points": 8,
+    "RunwayPavedAnyPoints": 3,
+    "MaxTotal": 60
+  },
+  "OurAirports": {
+    "LargeAirport": 30,
+    "MediumAirport": 15,
+    "ScheduledService": 15
+  },
+  "Thresholds": {
+    "Tier1": 120,
+    "Tier2": 45,
+    "Tier3": 15,
+    "MilitaryBestTierWithoutLinha": 2
+  }
+}

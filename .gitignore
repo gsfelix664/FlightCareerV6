@@ -54,3 +54,8 @@ $RECYCLE.BIN/
 
 ## Scratch / Temporary scripts
 scratch/
+
+# saídas dos relatórios do Replay quando rodados na raiz
+/tier-report.*
+/board-report.*
+/board_*.csv

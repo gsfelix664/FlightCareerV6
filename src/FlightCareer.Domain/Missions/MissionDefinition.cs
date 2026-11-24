@@ -12,6 +12,7 @@ namespace FlightCareer.Domain.Missions
         public string Runway { get; set; } = "any";  // any | paved | short_or_unpaved | lighted
         public double? MaxNm { get; set; }
         public Dictionary<string, double> Profiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public List<string>? RequireAnyTag { get; set; }
 
         // Compatibilidade legada
         public string? PreferredHubs { get; set; }
@@ -24,6 +25,9 @@ namespace FlightCareer.Domain.Missions
         public int[] Pax { get; set; } = Array.Empty<int>();
         public double[] CargoLbs { get; set; } = Array.Empty<double>();
         public bool BigAirport { get; set; }
+        public int MinRunwayFt { get; set; }
+        public bool Paved { get; set; }
+        public List<string>? RequireAnyTag { get; set; }
     }
 
     public sealed class MissionCrewDefinition
@@ -63,6 +67,7 @@ namespace FlightCareer.Domain.Missions
         public double Urgency { get; set; } = 1.0;
         public bool RequiresHardSurface { get; set; }
         public int MinRunwayDest { get; set; }
+        public List<string>? RequireAnyTag { get; set; }
         public List<string> LegacyIds { get; set; } = new();
 
         // Compatibilidade com APIs e testes existentes
