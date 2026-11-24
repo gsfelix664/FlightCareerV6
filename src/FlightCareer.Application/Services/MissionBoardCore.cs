@@ -57,18 +57,17 @@ namespace FlightCareer.Application.Services
                 System.Diagnostics.Debug.WriteLine($"[MissionBoardCore] Origem {origin.ICAO} sem pista conhecida: não filtra perfis pela pista da origem.");
             }
 
-            // 1. Filtrar missões habilitadas com peso de origem > 0 e que caibam na pista da origem
+            // 1. Filtrar missões habilitadas com peso de origem > 0 e que caibam na pista e etiquetas da origem
             var eligibleMissions = new List<(MissionDefinition Mission, double Weight)>();
             foreach (var m in catalog.Missions.Values)
             {
                 if (!m.Enabled) continue;
 
-                if (originRunway != null)
-                {
-                    bool anyProfileFits = m.Profiles.Any(p =>
-                        originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface)));
-                    if (!anyProfileFits) continue;
-                }
+                bool anyProfileFits = m.Profiles.Any(p =>
+                    (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
+                    && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
+                );
+                if (!anyProfileFits) continue;
 
                 double w = MissionWeighting.OriginWeight(m, origin.Tier, originTags);
                 if (w > 0.0)
@@ -253,9 +252,10 @@ namespace FlightCareer.Application.Services
         {
             if (def.Profiles == null || def.Profiles.Count == 0) return null;
 
-            var availableProfiles = originRunway != null
-                ? def.Profiles.Where(p => originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))).ToList()
-                : def.Profiles;
+            var availableProfiles = def.Profiles.Where(p =>
+                (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
+                && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
+            ).ToList();
 
             if (availableProfiles.Count == 0) return null;
             if (availableProfiles.Count == 1) return availableProfiles[0];
@@ -385,6 +385,28 @@ namespace FlightCareer.Application.Services
                 if (otherCountry && (string.Equals(a.Country, origin.Country, StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(a.Country)))
                 {
                     continue;
+                }
+
+                // Etiquetas exigidas pelo destino (nível da missão ou do perfil sorteado)
+                if ((dest?.RequireAnyTag != null && dest.RequireAnyTag.Count > 0) ||
+                    (profile.RequireAnyTag != null && profile.RequireAnyTag.Count > 0))
+                {
+                    var destTags = getAirportTags(a.ICAO);
+                    if (dest?.RequireAnyTag != null && dest.RequireAnyTag.Count > 0)
+                    {
+                        if (destTags == null || destTags.Count == 0 || !dest.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, destTags)))
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (profile.RequireAnyTag != null && profile.RequireAnyTag.Count > 0)
+                    {
+                        if (destTags == null || destTags.Count == 0 || !profile.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, destTags)))
+                        {
+                            continue;
+                        }
+                    }
                 }
 
                 // Pista exigida pelo perfil sorteado

@@ -42,6 +42,138 @@ namespace FlightCareer.Infrastructure.Services
             return _context.Airports.Any();
         }
 
+        /// <summary>
+        /// Recalcula o Tier de todos os aeroportos a partir dos sinais estruturais gravados e etiquetas
+        /// quando a versão do catálogo de regras (AirportTierRules.Default.Version) divergir da versão gravada.
+        /// Retorna o número de aeroportos que tiveram o Tier alterado.
+        /// </summary>
+        public async Task<int> EnsureTiersUpToDateAsync(Action<string, double>? progressCallback = null)
+        {
+            var rules = AirportTierRules.Default;
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            bool hasOutdated = false;
+            using (var checkCmd = connection.CreateCommand())
+            {
+                checkCmd.CommandText = "SELECT 1 FROM Airports WHERE TierRulesVersion != @currentVersion LIMIT 1;";
+                var pVer = checkCmd.CreateParameter();
+                pVer.ParameterName = "@currentVersion";
+                pVer.Value = rules.Version;
+                checkCmd.Parameters.Add(pVer);
+
+                try
+                {
+                    var res = await checkCmd.ExecuteScalarAsync();
+                    hasOutdated = res != null;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[DataSeeder] Tabela Airports ainda não pronta ou sem coluna TierRulesVersion: {ex.Message}");
+                    return 0;
+                }
+            }
+
+            if (!hasOutdated)
+            {
+                return 0;
+            }
+
+            progressCallback?.Invoke($"Atualizando classificação de Tiers para versão {rules.Version}...", 0.1);
+
+            var catalog = AirportProfileCatalog.Shared;
+            var updates = new List<(string Id, int OldTier, int NewTier, int NewScore)>();
+
+            using (var selectCmd = connection.CreateCommand())
+            {
+                selectCmd.CommandText = @"
+                    SELECT 
+                        Id, ICAO, IlsEnds, Approaches, Gates, CargoParking, HasTower, 
+                        LongestRunwayFt, LongestRunwayPaved, CsvType, ScheduledService, IsMilitary,
+                        Tier, TierScore
+                    FROM Airports;
+                ";
+
+                using var reader = await selectCmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var id = reader.GetString(0);
+                    var icao = reader.GetString(1);
+                    var ils = reader.GetInt32(2);
+                    var app = reader.GetInt32(3);
+                    var gates = reader.GetInt32(4);
+                    var cargo = reader.GetInt32(5);
+                    var tower = reader.GetInt32(6) != 0;
+                    var rwFt = reader.GetInt32(7);
+                    var rwPaved = reader.GetInt32(8) != 0;
+                    var csvType = reader.IsDBNull(9) ? null : reader.GetString(9);
+                    var sched = !reader.IsDBNull(10) && reader.GetInt32(10) != 0;
+                    var isMil = !reader.IsDBNull(11) && reader.GetInt32(11) != 0;
+                    var oldTier = reader.GetInt32(12);
+
+                    var tags = catalog.TagsFor(icao);
+                    var input = new AirportTierInput(
+                        tags,
+                        IlsEnds: ils,
+                        Approaches: app,
+                        Gates: gates,
+                        Jetways: 0,
+                        CargoParking: cargo,
+                        HasTower: tower,
+                        LongestRunwayFt: rwFt,
+                        LongestRunwayPaved: rwPaved,
+                        CsvType: csvType,
+                        ScheduledService: sched,
+                        IsMilitary: isMil
+                    );
+
+                    var score = AirportTierClassifier.Score(input, rules);
+                    updates.Add((id, oldTier, score.Tier, score.TotalScore));
+                }
+            }
+
+            int changedCount = 0;
+            if (updates.Count > 0)
+            {
+                using var tx = connection.BeginTransaction();
+                using var updateCmd = connection.CreateCommand();
+                updateCmd.Transaction = tx;
+                updateCmd.CommandText = @"
+                    UPDATE Airports 
+                    SET Tier = @tier, TierScore = @tierScore, TierRulesVersion = @version 
+                    WHERE Id = @id;
+                ";
+
+                var pTier = updateCmd.CreateParameter(); pTier.ParameterName = "@tier"; updateCmd.Parameters.Add(pTier);
+                var pScore = updateCmd.CreateParameter(); pScore.ParameterName = "@tierScore"; updateCmd.Parameters.Add(pScore);
+                var pVer = updateCmd.CreateParameter(); pVer.ParameterName = "@version"; updateCmd.Parameters.Add(pVer);
+                var pId = updateCmd.CreateParameter(); pId.ParameterName = "@id"; updateCmd.Parameters.Add(pId);
+
+                pVer.Value = rules.Version;
+
+                foreach (var (id, oldTier, newTier, newScore) in updates)
+                {
+                    if (newTier != oldTier)
+                    {
+                        changedCount++;
+                    }
+
+                    pTier.Value = newTier;
+                    pScore.Value = newScore;
+                    pId.Value = id;
+                    await updateCmd.ExecuteNonQueryAsync();
+                }
+
+                await tx.CommitAsync();
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DataSeeder] Recálculo de Tiers concluído (v{rules.Version}): {updates.Count} aeroportos processados, {changedCount} com mudança de Tier.");
+            return changedCount;
+        }
+
         public static string? LocateLittleNavmapDatabase()
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -81,6 +213,8 @@ namespace FlightCareer.Infrastructure.Services
 
         public async Task SeedAsync(Action<string, double>? progressCallback = null)
         {
+            await EnsureTiersUpToDateAsync(progressCallback);
+
             await SeedAircraftsAsync(progressCallback);
 
             var lnmPath = LocateLittleNavmapDatabase();
@@ -255,7 +389,10 @@ namespace FlightCareer.Infrastructure.Services
                             LongestRunwayFt = longestRunway,
                             LongestRunwayPaved = isPaved,
                             TierScore = tierScore.TotalScore,
-                            IsMilitary = isMilitary
+                            IsMilitary = isMilitary,
+                            CsvType = null,
+                            ScheduledService = false,
+                            TierRulesVersion = rules.Version
                         });
                     }
                 }
@@ -269,11 +406,13 @@ namespace FlightCareer.Infrastructure.Services
                         INSERT OR IGNORE INTO Airports (
                             Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, 
                             Tier, IsInSimulator, MsfsIdent, IlsEnds, Approaches, Gates, 
-                            CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore, IsMilitary
+                            CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore, IsMilitary,
+                            CsvType, ScheduledService, TierRulesVersion
                         ) VALUES (
                             @Id, @ICAO, @Name, @City, @Country, @Latitude, @Longitude, @ElevationFt,
                             @Tier, @IsInSimulator, @MsfsIdent, @IlsEnds, @Approaches, @Gates,
-                            @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore, @IsMilitary
+                            @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore, @IsMilitary,
+                            @CsvType, @ScheduledService, @TierRulesVersion
                         );";
 
                     var pId = insertAirportCmd.CreateParameter(); pId.ParameterName = "@Id"; insertAirportCmd.Parameters.Add(pId);
@@ -296,6 +435,9 @@ namespace FlightCareer.Infrastructure.Services
                     var pRwPvd = insertAirportCmd.CreateParameter(); pRwPvd.ParameterName = "@LongestRunwayPaved"; insertAirportCmd.Parameters.Add(pRwPvd);
                     var pScore = insertAirportCmd.CreateParameter(); pScore.ParameterName = "@TierScore"; insertAirportCmd.Parameters.Add(pScore);
                     var pMil = insertAirportCmd.CreateParameter(); pMil.ParameterName = "@IsMilitary"; insertAirportCmd.Parameters.Add(pMil);
+                    var pCsvType = insertAirportCmd.CreateParameter(); pCsvType.ParameterName = "@CsvType"; insertAirportCmd.Parameters.Add(pCsvType);
+                    var pSched = insertAirportCmd.CreateParameter(); pSched.ParameterName = "@ScheduledService"; insertAirportCmd.Parameters.Add(pSched);
+                    var pVer = insertAirportCmd.CreateParameter(); pVer.ParameterName = "@TierRulesVersion"; insertAirportCmd.Parameters.Add(pVer);
 
                     foreach (var a in airportsToInsert)
                     {
@@ -319,6 +461,9 @@ namespace FlightCareer.Infrastructure.Services
                         pRwPvd.Value = a.LongestRunwayPaved ? 1 : 0;
                         pScore.Value = a.TierScore;
                         pMil.Value = a.IsMilitary ? 1 : 0;
+                        pCsvType.Value = (object?)a.CsvType ?? DBNull.Value;
+                        pSched.Value = a.ScheduledService ? 1 : 0;
+                        pVer.Value = a.TierRulesVersion;
 
                         await insertAirportCmd.ExecuteNonQueryAsync();
                     }
@@ -484,13 +629,10 @@ namespace FlightCareer.Infrastructure.Services
                 UPDATE Airports
                 SET 
                     City = CASE WHEN City IS NULL OR City = '' THEN (SELECT municipality FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE City END,
-                    Country = CASE 
-                        WHEN ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%' THEN 'BR'
-                        WHEN Country IS NULL OR length(Country) > 2 OR Country = '' OR Country IN ('SB','SS','SW','SJ','SD','SI','SN') 
-                            THEN COALESCE((SELECT iso_country FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO), Country) 
-                        ELSE Country 
-                    END,
-                    ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END
+                    Country = COALESCE(NULLIF((SELECT iso_country FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO), ''), Country),
+                    ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END,
+                    CsvType = (SELECT type FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO),
+                    ScheduledService = CASE WHEN (SELECT scheduled_service FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) = 'yes' THEN 1 ELSE 0 END
                 WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO " + positionMatch + @");
             ";
             await updateCmd.ExecuteNonQueryAsync();
@@ -515,10 +657,10 @@ namespace FlightCareer.Infrastructure.Services
                 JOIN CsvAirports ON CsvAirports.ident = Airports.ICAO
                 WHERE 1=1 " + positionMatch + ";";
 
+            var rules = AirportTierRules.Default;
             var tierUpdates = new List<(string Icao, int Tier, int TierScore)>();
             using (var recalculateReader = await recalculateCmd.ExecuteReaderAsync())
             {
-                var rules = AirportTierRules.Default;
                 var catalog = AirportProfileCatalog.Shared;
 
                 while (await recalculateReader.ReadAsync())
@@ -562,10 +704,11 @@ namespace FlightCareer.Infrastructure.Services
                 using var updateTx = connection.BeginTransaction();
                 using var updateTierCmd = connection.CreateCommand();
                 updateTierCmd.Transaction = updateTx;
-                updateTierCmd.CommandText = "UPDATE Airports SET Tier = @tier, TierScore = @tierScore WHERE ICAO = @icao;";
+                updateTierCmd.CommandText = "UPDATE Airports SET Tier = @tier, TierScore = @tierScore, TierRulesVersion = @version WHERE ICAO = @icao;";
 
                 var pUptTier = updateTierCmd.CreateParameter(); pUptTier.ParameterName = "@tier"; updateTierCmd.Parameters.Add(pUptTier);
                 var pUptScore = updateTierCmd.CreateParameter(); pUptScore.ParameterName = "@tierScore"; updateTierCmd.Parameters.Add(pUptScore);
+                var pUptVer = updateTierCmd.CreateParameter(); pUptVer.ParameterName = "@version"; pUptVer.Value = rules.Version; updateTierCmd.Parameters.Add(pUptVer);
                 var pUptIcao = updateTierCmd.CreateParameter(); pUptIcao.ParameterName = "@icao"; updateTierCmd.Parameters.Add(pUptIcao);
 
                 foreach (var (icao, tier, tierScore) in tierUpdates)
@@ -809,7 +952,10 @@ namespace FlightCareer.Infrastructure.Services
                     MsfsIdent = icao,
                     LongestRunwayFt = longestRunwayFt,
                     LongestRunwayPaved = longestPaved,
-                    TierScore = score.TotalScore
+                    TierScore = score.TotalScore,
+                    CsvType = type,
+                    ScheduledService = scheduled,
+                    TierRulesVersion = rules.Version
                 };
                 AviationDataNormalizer.NormalizeAirport(airport);
                 airports.Add(airport);

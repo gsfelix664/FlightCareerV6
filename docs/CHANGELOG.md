@@ -3075,3 +3075,20 @@
 - **Testes e Snapshot:**
   - Suíte completa de testes unitários para o classificador (`AirportTierClassifierTests`) e regras de pista por perfil (`MissionRunwayProfileTests`).
   - Snapshot `missions_golden.json` regravado e validado. 997/997 testes aprovados. Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - País pelo CSV, linha aérea entre aeroportos de linha e recálculo do tier (TIER-A rodada 2) (Gemini)
+- **Correção de País pelo CSV (`iso_country`):**
+  - Em `DataSeeder.EnrichFromCsvAsync` e `FlightCareer.Replay/TierReporter.cs`, sempre que a posição geográfica confere com o CSV OurAirports (`IsSameAirportPosition` / `fc_same_place`), o campo `Country` recebe o `iso_country` do CSV sempre, corrigindo regiões ICAO (ZS, UI, UW...) para códigos ISO oficiais (CN, RU...). Se a posição for divergente (> 10 NM), mantém a resolução inicial.
+- **Linha aérea entre aeroportos de linha (`RequireAnyTag`):**
+  - Implementado suporte ao campo `requireAnyTag` em `MissionDefinition` (origem), `MissionDestinationRule` (destino) e `MissionProfileDefinition` (origem e destino daquele perfil).
+  - Em `MissionWeighting.OriginWeight` e `MissionBoardCore.GenerateBoard`, missões sem etiquetas correspondentes na origem têm peso 0 e são descartadas. Perfis sem compatibilidade de tag na origem não são sorteados em `PickProfile`.
+  - Em `MissionBoardCore.FilterCandidates`, destinos sem etiquetas correspondentes são descartados.
+  - No `mission_catalog.json`: `ponte_aerea`, `troncal_domestico`, `regional_internacional`, `longo_curso`, `feeder_inbound` (destino) e `feeder_outbound` (origem) configurados com `["linha", "linha_auto"]`. Perfis com `minRunwayFt >= 4300` de `carga_paletizada`, `carga_overnight`, `ecommerce` e `cadeia_fria` configurados com `["linha", "linha_auto", "carga:cargueiros", "carga_auto"]`.
+  - Resultado no `board-report`: SBMT gera 0,0% de `ponte_aerea`, `troncal_domestico` e `carga_paletizada`, enquanto SBRJ gera 27,4% de ponte aérea e 13,5% de troncal.
+- **Recálculo do Tier por versão das regras (`TierRulesVersion`):**
+  - Adicionadas colunas `CsvType`, `ScheduledService` e `TierRulesVersion` em `Airport` e `AppDbContext.EnsureSchemaUpdatedAsync`.
+  - `DataSeeder.EnsureTiersUpToDateAsync` chamado no início de `SeedAsync` (antes de qualquer `return`), detectando aeroportos com `TierRulesVersion != AirportTierRules.Default.Version` e recalculando todos em lote a partir dos sinais estruturais gravados e etiquetas curadas numa transação única, com log informativo. Semeaduras novas gravam a versão atual.
+- **Testes e Snapshot:**
+  - Testes unitários dedicados em `AirportTierRecalculationAndCountryTests.cs` (país corrigido pelo CSV e recálculo em SQLite em memória) e `MissionRunwayProfileTests.cs` (restrições de etiquetas de linha e perfis).
+  - Snapshot `missions_golden.json` regravado: apenas SBMT teve alterações nas missões sorteadas (deixando de sortear tipos de linha). Todos os outros 13 aeródromos permaneceram idênticos.
+  - Total de 1.004/1.004 testes aprovados (100%). Não testado no MSFS / não visto na tela.

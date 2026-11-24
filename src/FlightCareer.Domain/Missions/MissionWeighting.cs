@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FlightCareer.Domain.Missions
 {
@@ -8,6 +9,14 @@ namespace FlightCareer.Domain.Missions
         public static double OriginWeight(MissionDefinition m, int tier, IReadOnlySet<string> tags)
         {
             if (!m.Enabled) return 0.0;
+
+            if (m.RequireAnyTag != null && m.RequireAnyTag.Count > 0)
+            {
+                if (tags == null || tags.Count == 0 || !m.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, tags)))
+                {
+                    return 0.0;
+                }
+            }
 
             string tierKey = tier.ToString();
             if (!m.BaseByTier.TryGetValue(tierKey, out double baseWeight) || baseWeight <= 0.0)

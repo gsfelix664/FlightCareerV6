@@ -274,11 +274,12 @@ namespace FlightCareer.Tests.Missions
             };
 
             var rng = new Random(1234);
+            var cargoTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "linha", "carga_auto" };
 
             for (int i = 0; i < 500; i++)
             {
                 var mission = MissionBoardCore.CreateSingleMission(
-                    origin, paletizada, candidates, new HashSet<string>(), _ => new HashSet<string>(),
+                    origin, paletizada, candidates, cargoTags, _ => cargoTags,
                     rng, DateTime.UtcNow);
 
                 Assert.NotNull(mission);

@@ -308,8 +308,11 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - Lógica pura `Domain/Airports/AirportTierClassifier` e regras em `Domain/Airports/AirportTierRules` + `Infrastructure/Data/airport_tier_rules.json`.
   - Entradas: etiquetas curadas do `AirportProfileCatalog` (exclui heurísticas `isolado`, `interior_distante`, `fazenda`, `altitude`, `turistico_poi`), estrutura do MSFS/Little Navmap (ILS, procedimentos, gates, pontes, pátio de carga, torre, pista e pavimentação) e OurAirports (`type` e `scheduled_service` do CSV validados por posição).
   - Cortes: Tier 1 $\ge 90$; Tier 2 $\ge 45$; Tier 3 $\ge 15$ ou qualquer pista pavimentada; senão Tier 4. Pistas não pavimentadas limitadas ao teto de Tier 3 (e exigem $\ge 45$).
-  - `Airport` e `AppDbContext`: persistência dos sinais estruturais (`IlsEnds`, `Approaches`, `Gates`, `CargoParking`, `HasTower`, `LongestRunwayFt`, `LongestRunwayPaved`, `TierScore`) com `ALTER TABLE` idempotente.
+  - `Airport` e `AppDbContext`: persistência dos sinais estruturais (`IlsEnds`, `Approaches`, `Gates`, `CargoParking`, `HasTower`, `LongestRunwayFt`, `LongestRunwayPaved`, `TierScore`, `CsvType`, `ScheduledService`, `TierRulesVersion`) com `ALTER TABLE` idempotente.
   - `DataSeeder`: inserção com leitura de estrutura do Little Navmap e classificação em C#, seguida de recálculo com OurAirports no enriquecimento CSV (`EnrichFromCsvAsync`). Caminho só-CSV classificado com o que houver.
+  - Recálculo de Tier por versão (`TierRulesVersion`): `DataSeeder.EnsureTiersUpToDateAsync` recalcula todos os aeroportos em lote em transação única quando `TierRulesVersion != AirportTierRules.Default.Version`.
+  - País pelo CSV (`iso_country`): `EnrichFromCsvAsync` e `TierReporter` atribuem o código ISO do CSV sempre que a posição geográfica bater até 10 NM.
+  - Linha aérea entre aeroportos de linha (`RequireAnyTag`): `MissionDefinition`, `MissionDestinationRule` e `MissionProfileDefinition` suportam `RequireAnyTag`. Missões de linha exigem `["linha", "linha_auto"]` e perfis de carga $\ge 4.300$ ft exigem `["linha", "linha_auto", "carga:cargueiros", "carga_auto"]`.
   - Subcomando CLI `tier-report` no `FlightCareer.Replay` (`tier-report.md` e `tier-report.csv`). Não testado no MSFS / não visto na tela.
 
 ## 8. Definição de pronto

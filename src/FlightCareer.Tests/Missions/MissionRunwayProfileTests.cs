@@ -34,7 +34,7 @@ namespace FlightCareer.Tests.Missions
 
             var paletizadaDef = MissionCatalog.Shared.Missions["carga_paletizada"];
             var ponteAereaDef = MissionCatalog.Shared.Missions["ponte_aerea"];
-            var originTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "executivo", "mro" };
+            var originTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "executivo", "mro", "carga_auto" };
 
             var rng = new Random(42);
 
@@ -209,6 +209,130 @@ namespace FlightCareer.Tests.Missions
                     {
                         Assert.True(profile.MinRunwayFt >= 1000, $"Missão '{mission.Id}' perfil #{i + 1} possui MinRunwayFt = {profile.MinRunwayFt}, que é inválido (< 1000 ft).");
                     }
+                }
+            }
+        }
+
+        [Fact]
+        public void MissionBoardCore_LinhaAerea_ExigeEtiquetaLinhaNaOrigemEDestino()
+        {
+            var originSbmt = new Airport
+            {
+                ICAO = "SBMT",
+                Name = "Campo de Marte",
+                Country = "Brazil",
+                Tier = 2,
+                Latitude = -23.5092,
+                Longitude = -46.6378,
+                ElevationFt = 2369
+            };
+            var sbmtRunway = new Runway
+            {
+                AirportIdent = "SBMT",
+                LengthFt = 5120,
+                Surface = "Asphalt",
+                IsLighted = true
+            };
+
+            var destSbrj = new Airport
+            {
+                ICAO = "SBRJ",
+                Name = "Santos Dumont",
+                Country = "Brazil",
+                Tier = 1,
+                Latitude = -22.9105,
+                Longitude = -43.1631,
+                ElevationFt = 9
+            };
+            var sbrjRunway = new Runway { AirportIdent = "SBRJ", LengthFt = 4338, Surface = "Asphalt", IsLighted = true };
+
+            var destSbco = new Airport
+            {
+                ICAO = "SDCO",
+                Name = "Sorocaba",
+                Country = "Brazil",
+                Tier = 3,
+                Latitude = -23.4808,
+                Longitude = -47.4897,
+                ElevationFt = 2077
+            };
+            var sbcoRunway = new Runway { AirportIdent = "SDCO", LengthFt = 4800, Surface = "Asphalt", IsLighted = true };
+
+            var candidates = new List<AirportCandidate>
+            {
+                new(destSbrj, sbrjRunway),
+                new(destSbco, sbcoRunway)
+            };
+
+            var sbmtTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "executivo", "mro" };
+            Func<string, IReadOnlySet<string>> getAirportTags = icao =>
+            {
+                if (icao == "SBRJ") return new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "linha", "linha:ponte_aerea" };
+                if (icao == "SBMT") return new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "executivo", "mro" };
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "executivo" };
+            };
+
+            var rng = new Random(42);
+            bool generatedSubRegional = false;
+
+            // 1. SBMT (sem linha/linha_auto) NUNCA gera ponte_aerea nem troncal_domestico em 2.000 sorteios
+            for (int i = 0; i < 2000; i++)
+            {
+                var board = MissionBoardCore.GenerateBoard(
+                    originSbmt,
+                    candidates,
+                    sbmtTags,
+                    getAirportTags,
+                    MissionCatalog.Shared,
+                    rng,
+                    DateTime.UtcNow,
+                    targetCount: 15,
+                    originRunway: sbmtRunway
+                );
+
+                Assert.DoesNotContain(board, m => m.SubId is "ponte_aerea" or "troncal_domestico");
+
+                if (board.Any(m => m.SubId == "sub_regional"))
+                {
+                    generatedSubRegional = true;
+                }
+            }
+
+            // 2. sub_regional continua saindo de aeroporto sem etiqueta
+            Assert.True(generatedSubRegional, "Esperava que sub_regional fosse gerado saindo de SBMT (sem etiqueta de linha).");
+
+            // 3. Origem com linha (SBGR) gerando ponte_aerea/troncal nunca escolhe destino sem etiqueta (SDCO)
+            var originSbgr = new Airport
+            {
+                ICAO = "SBGR",
+                Name = "Guarulhos",
+                Country = "Brazil",
+                Tier = 1,
+                Latitude = -23.4356,
+                Longitude = -46.4731,
+                ElevationFt = 2461
+            };
+            var sbgrRunway = new Runway { AirportIdent = "SBGR", LengthFt = 12000, Surface = "Asphalt", IsLighted = true };
+            var sbgrTags = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "linha", "linha:mega_hub" };
+
+            for (int i = 0; i < 500; i++)
+            {
+                var board = MissionBoardCore.GenerateBoard(
+                    originSbgr,
+                    candidates,
+                    sbgrTags,
+                    getAirportTags,
+                    MissionCatalog.Shared,
+                    rng,
+                    DateTime.UtcNow,
+                    targetCount: 15,
+                    originRunway: sbgrRunway
+                );
+
+                foreach (var m in board.Where(m => m.SubId is "ponte_aerea" or "troncal_domestico"))
+                {
+                    // Destino SEMPRE SBRJ (que tem etiqueta 'linha'), nunca SDCO (que não tem)
+                    Assert.Equal("SBRJ", m.DestinationICAO);
                 }
             }
         }

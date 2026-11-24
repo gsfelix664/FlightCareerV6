@@ -21,7 +21,7 @@ namespace FlightCareer.Replay
 
     public static class TierReporter
     {
-        public sealed record CsvItem(string Ident, string Type, bool Scheduled, double? Lat, double? Lon);
+        public sealed record CsvItem(string Ident, string Type, bool Scheduled, double? Lat, double? Lon, string? IsoCountry);
 
         public sealed record AirportClassified(
             string ICAO,
@@ -145,8 +145,9 @@ namespace FlightCareer.Replay
                 bool sched = string.Equals(csv.GetField<string>("scheduled_service"), "yes", StringComparison.OrdinalIgnoreCase);
                 double? lat = double.TryParse(csv.GetField<string>("latitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var la) ? la : null;
                 double? lon = double.TryParse(csv.GetField<string>("longitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var lo) ? lo : null;
+                var isoCountry = csv.GetField<string>("iso_country")?.Trim().ToUpperInvariant();
 
-                dict[ident] = new CsvItem(ident, type, sched, lat, lon);
+                dict[ident] = new CsvItem(ident, type, sched, lat, lon, isoCountry);
             }
             return dict;
         }
@@ -227,6 +228,10 @@ namespace FlightCareer.Replay
                     {
                         csvType = csvItem.Type;
                         scheduled = csvItem.Scheduled;
+                        if (!string.IsNullOrWhiteSpace(csvItem.IsoCountry))
+                        {
+                            country = csvItem.IsoCountry;
+                        }
                     }
                 }
 

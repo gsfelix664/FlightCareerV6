@@ -577,7 +577,11 @@
         "profiles": {
           "linha:ponte_aerea": 8,
           "linha:alta_frequencia": 4
-        }
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ]
       },
       "profiles": [
         {
@@ -619,6 +623,10 @@
       "legacyIds": [
         "ponte_aerea_troncal",
         "1.7.5"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
       ]
     },
     {
@@ -654,7 +662,11 @@
         "maxNm": null,
         "profiles": {
           "linha": 4
-        }
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ]
       },
       "profiles": [
         {
@@ -734,6 +746,10 @@
         "regional_direto",
         "1.1.1",
         "2.1.2"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
       ]
     },
     {
@@ -768,7 +784,11 @@
         "maxNm": null,
         "profiles": {
           "linha": 3
-        }
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ]
       },
       "profiles": [
         {
@@ -846,6 +866,10 @@
       "legacyIds": [
         "linha_regional_internacional",
         "1.1.2"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
       ]
     },
     {
@@ -880,7 +904,11 @@
         "maxNm": null,
         "profiles": {
           "linha:mega_hub": 5
-        }
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ]
       },
       "profiles": [
         {
@@ -960,6 +988,10 @@
         "long_haul_internacional",
         "1.1.3",
         "1.7.7"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
       ]
     },
     {
@@ -994,7 +1026,11 @@
         "maxNm": 500,
         "profiles": {
           "linha": 5
-        }
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ]
       },
       "profiles": [
         {
@@ -1182,7 +1218,11 @@
       "urgency": 1.0,
       "requiresHardSurface": true,
       "minRunwayDest": 3500,
-      "legacyIds": []
+      "legacyIds": [],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
+      ]
     },
     {
       "id": "sub_regional",
@@ -2453,7 +2493,13 @@
           ],
           "bigAirport": false,
           "minRunwayFt": 4300,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         },
         {
           "weight": 40,
@@ -2471,7 +2517,13 @@
           ],
           "bigAirport": false,
           "minRunwayFt": 8000,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         },
         {
           "weight": 20,
@@ -2489,7 +2541,13 @@
           ],
           "bigAirport": true,
           "minRunwayFt": 8000,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         }
       ],
       "luggagePerPersonKg": null,
@@ -2609,7 +2667,13 @@
           ],
           "bigAirport": true,
           "minRunwayFt": 4300,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         }
       ],
       "luggagePerPersonKg": null,
@@ -2868,7 +2932,13 @@
           ],
           "bigAirport": true,
           "minRunwayFt": 4300,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         }
       ],
       "luggagePerPersonKg": null,
@@ -3082,7 +3152,13 @@
           ],
           "bigAirport": true,
           "minRunwayFt": 4300,
-          "paved": true
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
         }
       ],
       "luggagePerPersonKg": null,

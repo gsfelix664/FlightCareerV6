@@ -31,6 +31,11 @@ namespace FlightCareer.Domain.Entities
         /// <summary>Base militar segundo o simulador (limita o tier sem etiqueta de linha).</summary>
         public bool IsMilitary { get; set; }
 
+        // Sinais do CSV (OurAirports) e versão das regras aplicadas
+        public string? CsvType { get; set; }
+        public bool ScheduledService { get; set; }
+        public int TierRulesVersion { get; set; }
+
         // Integração de Cenário do Simulador (MSFS 2024 via Little Navmap)
         public bool IsInSimulator { get; set; } = false;
         public string? MsfsIdent { get; set; }
