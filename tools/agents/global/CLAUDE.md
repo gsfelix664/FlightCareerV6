@@ -2,6 +2,15 @@
 
 Responda em português. As instruções do projeto (CLAUDE.md / AGENTS.md do repositório) têm prioridade sobre este arquivo.
 
+## Economia de quota (decisões do usuário, 2026-11-24)
+
+Cada resposta relê a conversa inteira e as instruções; sessão longa custa caro.
+- **Uma tarefa por sessão.** Comece lendo a passagem de sessão do projeto (ex.: `docs/agents/HANDOFF.md`). Ao terminar: build/testes, reescreva a passagem (estado atual, pendências, próximo passo, decisões abertas), commit e push, e peça uma sessão nova para a próxima tarefa.
+- **Modelo:** spec, arquitetura e revisão delicada → Opus; rotina (pull, status, relatórios, perguntas rápidas, commit) → Sonnet. Você não troca o próprio modelo: se a sessão estiver no modelo errado para a tarefa, diga em uma linha para o usuário trocar no seletor.
+- **Saída filtrada:** build em modo silencioso só com erros; testes só com o resumo e as falhas; `git diff --stat` antes do diff; `grep`/`sed -n` em arquivos grandes; nunca leia inteiros changelogs, snapshots, catálogos ou logs.
+- **Decisões vão para os planos** do projeto (seção de decisões, com data), não só para a conversa ou a passagem.
+- Instruções do projeto enxutas: estado detalhado em documentos lidos sob demanda, não no `AGENTS.md`/`CLAUDE.md` que é relido a cada chamada.
+
 ## Divisão de trabalho com o Gemini (Antigravity CLI `agy`)
 
 Objetivo: **economizar tokens do Claude e do Gemini** e manter qualidade. O Claude especifica, revisa, aprova e faz merge.

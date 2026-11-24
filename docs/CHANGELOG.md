@@ -3169,3 +3169,9 @@
   - Redução do tamanho da seção de 62.053 bytes para 20.669 bytes (~20,2 KB, limite <= 22 KB), eliminando números de calibração que já constam nos JSONs, repetições de IDs de tarefas e algoritmos passo a passo.
   - Reorganização em 13 sistemas coesos: Desgaste e falhas, Peças, Manutenção e Hangar, Panes persistentes, Voo e integridade, Combustível, Economia e dificuldade, XP e fases, Missões e quadro, Aeroportos e tiers, Limites por aeronave, Sensores, HUD.
   - Preservação integral das seções 1 a 6 e 8 byte a byte.
+
+## 2026-11-24 - Regras de economia de quota (Claude)
+- `AGENTS.md` › 4.9 (uma tarefa por sessão, passagem reescrita a cada sessão, nunca ler o CHANGELOG inteiro) e › 4.10 (modelo por tipo de sessão, saída filtrada para Claude e Gemini, decisões sempre nos planos, mensagens agrupadas). `CLAUDE.md` aponta para a regra.
+- `docs/agents/MODELO-SPEC.md` reescrito com fatos levantados, fora do escopo, snapshot esperado e o que não rodar; `tools/agents/prompt-executor.md` com saída filtrada e sem ler arquivos grandes inteiros.
+- `tools/agents/global/CLAUDE.md` ganhou a seção "Economia de quota" (vale para todos os projetos; instalar com `tools/agents/install-global.sh` em cada PC).
+- `docs/agents/HANDOFF.md` reduzido ao estado atual, com os passos para configurar o PC de casa.
