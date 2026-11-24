@@ -173,7 +173,7 @@ namespace FlightCareer.Domain.Missions
                             requiredLandings = stolData.RequiredLandings;
                         }
                     }
-                    catch { }
+                    catch (JsonException ex) { System.Diagnostics.Debug.WriteLine($"[MissionCompletion] Contrato STOL inválido ({mission.Id}): {ex.Message}"); }
                 }
 
                 int validLandings = trackers?.Stol?.ValidLandingsCount ?? 0;

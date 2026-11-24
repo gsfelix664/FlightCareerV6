@@ -47,7 +47,6 @@ namespace FlightCareer.UI.Services
         private readonly StolLandingTracker _stolTracker = new();
         private readonly CheckFlightTracker _checkFlightTracker = new();
         private readonly FerryRestrictionMonitor _ferryMonitor = new();
-        private DateTime _lastSimDataTick = DateTime.MinValue;
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -678,7 +677,6 @@ namespace FlightCareer.UI.Services
             _stolTracker.Reset(_simConnect.CurrentData.IsOnGround);
             _checkFlightTracker.Reset();
             _ferryMonitor.Reset(_simConnect.CurrentData.IsOnGround);
-            _lastSimDataTick = DateTime.MinValue;
             foreach (var m in missions)
             {
                 var def = MissionCatalog.Shared.Get(m.SubId);
@@ -1096,29 +1094,6 @@ namespace FlightCareer.UI.Services
                 _overflyTracker.Update(data.Latitude, data.Longitude, data.Altitude);
             }
 
-            DateTime nowSimData = DateTime.Now;
-            double dtSimData = _lastSimDataTick == DateTime.MinValue ? 1.0 : (nowSimData - _lastSimDataTick).TotalSeconds;
-            if (dtSimData <= 0 || dtSimData > 5.0) dtSimData = 1.0;
-            _lastSimDataTick = nowSimData;
-            double packetSimDt = SimTimeStep.ToSimSeconds(dtSimData, data.SimulationRate);
-
-            if (_multiStopTracker.HasActiveContract)
-            {
-                _multiStopTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.GroundSpeed, data.FuelTotalGallons, packetSimDt);
-            }
-            if (_stolTracker.HasActiveContract)
-            {
-                _stolTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.Altitude, data.GroundSpeed, data.VerticalSpeed, data.CrosswindComponentKnots, packetSimDt);
-            }
-            if (_checkFlightTracker.HasActiveContract)
-            {
-                _checkFlightTracker.Update(data.IsOnGround, data.Altitude, data.PlaneHeading, data.EngineRPM, data.MaxRPM, data.EngineN1, data.EngineType, packetSimDt);
-            }
-            if (_ferryMonitor.HasActiveContract)
-            {
-                _ferryMonitor.Update(data.IsOnGround, data.Altitude, data.FlapsPercent, packetSimDt);
-            }
-
             // --- MONITORAMENTO DE INTEGRIDADE: SLEW E CONGELAMENTOS ---
             var integrityState = _simConnect.CurrentIntegrityState;
             bool slewActive = integrityState.IsSlewActive > 0.5;
@@ -1246,6 +1221,23 @@ namespace FlightCareer.UI.Services
             {
                 double chtCooling = _parts.LatestChtCoolingRate;
                 _skydiveTracker.Update(data.Latitude, data.Longitude, data.Altitude, data.Airspeed, chtCooling, simDt);
+            }
+            // Rastreadores da E2C-1: mesmo simDt do tempo de voo (respeita a pausa e o sim rate)
+            if (_multiStopTracker.HasActiveContract)
+            {
+                _multiStopTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.GroundSpeed, data.FuelTotalGallons, simDt);
+            }
+            if (_stolTracker.HasActiveContract)
+            {
+                _stolTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.Altitude, data.GroundSpeed, data.VerticalSpeed, data.CrosswindComponentKnots, simDt);
+            }
+            if (_checkFlightTracker.HasActiveContract)
+            {
+                _checkFlightTracker.Update(data.IsOnGround, data.Altitude, data.PlaneHeading, data.EngineRPM, data.MaxRPM, data.EngineN1, data.EngineType, simDt);
+            }
+            if (_ferryMonitor.HasActiveContract)
+            {
+                _ferryMonitor.Update(data.IsOnGround, data.Altitude, data.FlapsPercent, simDt);
             }
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
