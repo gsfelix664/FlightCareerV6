@@ -1,6 +1,7 @@
 {
+  "Version": 2,
   "Tags": {
-    "MegaHub": 100,
+    "MegaHub": 120,
     "HubLinha": 70,
     "CargaPesada": 60,
     "Linha": 50,
@@ -22,7 +23,8 @@
     "RunwayPavedTier1Points": 15,
     "RunwayPavedTier2MinFt": 5000,
     "RunwayPavedTier2Points": 8,
-    "RunwayPavedAnyPoints": 3
+    "RunwayPavedAnyPoints": 3,
+    "MaxTotal": 60
   },
   "OurAirports": {
     "LargeAirport": 30,
@@ -30,8 +32,9 @@
     "ScheduledService": 15
   },
   "Thresholds": {
-    "Tier1": 90,
+    "Tier1": 120,
     "Tier2": 45,
-    "Tier3": 15
+    "Tier3": 15,
+    "MilitaryBestTierWithoutLinha": 2
   }
 }

@@ -176,6 +176,7 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE Airports ADD COLUMN LongestRunwayFt INTEGER DEFAULT 0;",
                 "ALTER TABLE Airports ADD COLUMN LongestRunwayPaved INTEGER DEFAULT 0;",
                 "ALTER TABLE Airports ADD COLUMN TierScore INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN IsMilitary INTEGER DEFAULT 0;",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN SubId TEXT DEFAULT NULL;",

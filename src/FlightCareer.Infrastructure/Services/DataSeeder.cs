@@ -173,7 +173,8 @@ namespace FlightCareer.Infrastructure.Services
                         num_jetway,
                         num_parking_cargo,
                         has_tower_object,
-                        tower_frequency
+                        tower_frequency,
+                        is_military
                     FROM lnm.airport
                     WHERE is_closed = 0 
                       AND ident IS NOT NULL 
@@ -208,6 +209,7 @@ namespace FlightCareer.Infrastructure.Services
                         var cargoParking = reader.IsDBNull(15) ? 0 : Convert.ToInt32(reader.GetValue(15));
                         var hasTowerObj = reader.IsDBNull(16) ? 0 : Convert.ToInt32(reader.GetValue(16));
                         var towerFreq = reader.IsDBNull(17) ? 0.0 : Convert.ToDouble(reader.GetValue(17));
+                        var isMilitary = !reader.IsDBNull(18) && Convert.ToInt32(reader.GetValue(18)) != 0;
 
                         bool hasTower = hasTowerObj > 0 || towerFreq > 0;
                         bool isPaved = rwSurface is "A" or "C" or "B" or "T" ||
@@ -226,7 +228,8 @@ namespace FlightCareer.Infrastructure.Services
                             LongestRunwayFt: longestRunway,
                             LongestRunwayPaved: isPaved,
                             CsvType: null,
-                            ScheduledService: null
+                            ScheduledService: null,
+                            IsMilitary: isMilitary
                         );
 
                         var tierScore = AirportTierClassifier.Score(input, rules);
@@ -251,7 +254,8 @@ namespace FlightCareer.Infrastructure.Services
                             HasTower = hasTower,
                             LongestRunwayFt = longestRunway,
                             LongestRunwayPaved = isPaved,
-                            TierScore = tierScore.TotalScore
+                            TierScore = tierScore.TotalScore,
+                            IsMilitary = isMilitary
                         });
                     }
                 }
@@ -265,11 +269,11 @@ namespace FlightCareer.Infrastructure.Services
                         INSERT OR IGNORE INTO Airports (
                             Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, 
                             Tier, IsInSimulator, MsfsIdent, IlsEnds, Approaches, Gates, 
-                            CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore
+                            CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore, IsMilitary
                         ) VALUES (
                             @Id, @ICAO, @Name, @City, @Country, @Latitude, @Longitude, @ElevationFt,
                             @Tier, @IsInSimulator, @MsfsIdent, @IlsEnds, @Approaches, @Gates,
-                            @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore
+                            @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore, @IsMilitary
                         );";
 
                     var pId = insertAirportCmd.CreateParameter(); pId.ParameterName = "@Id"; insertAirportCmd.Parameters.Add(pId);
@@ -291,6 +295,7 @@ namespace FlightCareer.Infrastructure.Services
                     var pRwFt = insertAirportCmd.CreateParameter(); pRwFt.ParameterName = "@LongestRunwayFt"; insertAirportCmd.Parameters.Add(pRwFt);
                     var pRwPvd = insertAirportCmd.CreateParameter(); pRwPvd.ParameterName = "@LongestRunwayPaved"; insertAirportCmd.Parameters.Add(pRwPvd);
                     var pScore = insertAirportCmd.CreateParameter(); pScore.ParameterName = "@TierScore"; insertAirportCmd.Parameters.Add(pScore);
+                    var pMil = insertAirportCmd.CreateParameter(); pMil.ParameterName = "@IsMilitary"; insertAirportCmd.Parameters.Add(pMil);
 
                     foreach (var a in airportsToInsert)
                     {
@@ -313,6 +318,7 @@ namespace FlightCareer.Infrastructure.Services
                         pRwFt.Value = a.LongestRunwayFt;
                         pRwPvd.Value = a.LongestRunwayPaved ? 1 : 0;
                         pScore.Value = a.TierScore;
+                        pMil.Value = a.IsMilitary ? 1 : 0;
 
                         await insertAirportCmd.ExecuteNonQueryAsync();
                     }
@@ -503,7 +509,8 @@ namespace FlightCareer.Infrastructure.Services
                     Airports.LongestRunwayFt, 
                     Airports.LongestRunwayPaved, 
                     CsvAirports.type, 
-                    CsvAirports.scheduled_service
+                    CsvAirports.scheduled_service,
+                    Airports.IsMilitary
                 FROM Airports
                 JOIN CsvAirports ON CsvAirports.ident = Airports.ICAO
                 WHERE 1=1 " + positionMatch + ";";
@@ -527,6 +534,7 @@ namespace FlightCareer.Infrastructure.Services
                     var csvType = recalculateReader.IsDBNull(8) ? null : recalculateReader.GetString(8);
                     var schedStr = recalculateReader.IsDBNull(9) ? null : recalculateReader.GetString(9);
                     bool sched = string.Equals(schedStr, "yes", StringComparison.OrdinalIgnoreCase);
+                    bool isMil = !recalculateReader.IsDBNull(10) && recalculateReader.GetInt32(10) != 0;
 
                     var tags = catalog.TagsFor(icao);
                     var input = new AirportTierInput(
@@ -540,7 +548,8 @@ namespace FlightCareer.Infrastructure.Services
                         LongestRunwayFt: rwFt,
                         LongestRunwayPaved: rwPaved,
                         CsvType: csvType,
-                        ScheduledService: sched
+                        ScheduledService: sched,
+                        IsMilitary: isMil
                     );
 
                     var score = AirportTierClassifier.Score(input, rules);

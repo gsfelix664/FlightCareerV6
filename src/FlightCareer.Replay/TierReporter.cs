@@ -179,7 +179,8 @@ namespace FlightCareer.Replay
                     num_jetway,
                     num_parking_cargo,
                     has_tower_object,
-                    tower_frequency
+                    tower_frequency,
+                    is_military
                 FROM airport
                 WHERE is_closed = 0
                   AND ident IS NOT NULL
@@ -208,6 +209,7 @@ namespace FlightCareer.Replay
                 var cargoParking = reader.IsDBNull(14) ? 0 : Convert.ToInt32(reader.GetValue(14));
                 var hasTowerObj = reader.IsDBNull(15) ? 0 : Convert.ToInt32(reader.GetValue(15));
                 var towerFreq = reader.IsDBNull(16) ? 0.0 : Convert.ToDouble(reader.GetValue(16));
+                var isMilitary = !reader.IsDBNull(17) && Convert.ToInt32(reader.GetValue(17)) != 0;
 
                 bool hasTower = hasTowerObj > 0 || towerFreq > 0;
                 bool isPaved = rwSurface is "A" or "C" or "B" or "T" ||
@@ -240,7 +242,8 @@ namespace FlightCareer.Replay
                     LongestRunwayFt: longestRunway,
                     LongestRunwayPaved: isPaved,
                     CsvType: csvType,
-                    ScheduledService: scheduled
+                    ScheduledService: scheduled,
+                    IsMilitary: isMilitary
                 );
 
                 var scoreDetails = AirportTierClassifier.Score(input, rules);

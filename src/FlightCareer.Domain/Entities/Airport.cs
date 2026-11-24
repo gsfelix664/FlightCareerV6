@@ -28,6 +28,8 @@ namespace FlightCareer.Domain.Entities
         public int LongestRunwayFt { get; set; }
         public bool LongestRunwayPaved { get; set; }
         public int TierScore { get; set; }
+        /// <summary>Base militar segundo o simulador (limita o tier sem etiqueta de linha).</summary>
+        public bool IsMilitary { get; set; }
 
         // Integração de Cenário do Simulador (MSFS 2024 via Little Navmap)
         public bool IsInSimulator { get; set; } = false;

@@ -14,7 +14,8 @@ namespace FlightCareer.Domain.Airports
         int LongestRunwayFt,
         bool LongestRunwayPaved,
         string? CsvType,
-        bool? ScheduledService);
+        bool? ScheduledService,
+        bool IsMilitary = false);
 
     public sealed record AirportTierScore(
         int TotalScore,
@@ -95,7 +96,9 @@ namespace FlightCareer.Domain.Airports
                 }
             }
 
-            int structureTotal = ilsScore + approachScore + gateJetwayScore + cargoScore + towerScore + runwayScore;
+            // Teto da estrutura: sem ele, bases militares e aeroportos regionais com muito ILS/gates viravam tier 1 sem
+            // nenhum sinal de movimento (revisão TIER-A: 1.013 tier 1 no mundo com teto livre, 457 com teto 60)
+            int structureTotal = Math.Min(ilsScore + approachScore + gateJetwayScore + cargoScore + towerScore + runwayScore, structRules.MaxTotal);
 
             // 3. OurAirports
             var oaRules = rules.OurAirports;
@@ -144,6 +147,12 @@ namespace FlightCareer.Domain.Airports
                 {
                     tier = 4;
                 }
+            }
+
+            // Base militar sem sinal de linha aérea (etiqueta < Linha): no máximo o tier configurado
+            if (input.IsMilitary && bestTagScore < rules.Tags.Linha && tier < rules.Thresholds.MilitaryBestTierWithoutLinha)
+            {
+                tier = rules.Thresholds.MilitaryBestTierWithoutLinha;
             }
 
             return new AirportTierScore(
