@@ -229,3 +229,20 @@ Ao implementar este plano, o agente executor deve:
 3. Conferir: `TOTAL WEIGHT` × MTOW e `CG PERCENT` × `CG FWD/AFT LIMIT` (página de modelo de voo) antes de liberar a decolagem; fora do envelope = NO-GO com motivo no briefing.
 4. Com o combustível também gravado pela COMBUSTIVEL-REAL, peso e CG do sim passam a ser exatamente os da missão (o "BUG CRÍTICO #2" de cálculo de payload deixa de depender do piloto).
 Só no solo, motores desligados; testar a escrita por avião no MSFS (nomes e quantidade de estações mudam por aeronave). Implementação: spec para o Gemini quando este plano for retomado.
+
+## Atualização 2026-11-24 (Claude) — variante de cabine do simulador × configuração do Hangar (pedido do usuário)
+**Objetivo:** o piloto converte a aeronave no Hangar (passageiros ↔ carga, mediante taxa e parada; já existe: `Domain/Economy/CabinConversion`, aviões com `convertibleCabin`). Pode ter dois exemplares do mesmo modelo, um em cada configuração. No simulador ele precisa carregar **o mesmo avião e a mesma variante**; o briefing só libera o voo com o par certo.
+
+**Como o MSFS 2024 faz (SDK conferido, 2026-11-24):**
+- Variante de carga = **preset** do SimObject modular, feito pelo desenvolvedor (troca peças do modelo, estações de peso `station_load.N` do tipo baggage, `navigation_graph_cargo.cfg` e cargas visuais). O jogador escolhe a variante na seleção de aeronave; não há troca de cabine pelo jogador nem pelo SimConnect.
+- Cada preset tem o próprio `title` em `[FLTSIM.N]` do `aircraft.cfg` (página "CFG Files General Information"). Mas, desde a mudança das pinturas do 2024, a SimVar `TITLE` devolve o nome do avião "pai", sem a pintura; para a pintura foram criadas `LIVERY NAME` e `LIVERY FOLDER` (SDK 1.1.2). **Não está confirmado** se `TITLE` muda entre presets de passageiros e de carga do mesmo avião.
+- Fontes: docs.flightsimulator.com › Careers › Cargo Transport; General Career Information › Aircraft Loads; CFG Files General Information; Release Notes 1.1.2.
+
+**Hoje no código:** o briefing já bloqueia avião diferente do Hangar (`BriefingViewModel.IsAircraftMatching(simTitle, hangarModel)`, l. 566; motivo "Voo bloqueado: A aeronave carregada no MSFS (…) não coincide com o modelo ativo").
+
+**Proposta:**
+1. **Teste no PC com o MSFS (usuário):** carregar cada avião com `convertibleCabin` nas variantes de passageiros e de carga (quando existirem) e gravar `TITLE`, `ATC MODEL`, `LIVERY NAME`, `LIVERY FOLDER` (REC do `SensorRecorder` / `-context.json`). Resultado vira uma tabela neste plano: avião × variante × strings lidas.
+2. **Catálogo:** em `Data/aircraft/<modelo>.json`, campo novo `cabinVariants: { "passenger": [padrões], "cargo": [padrões] }` com os padrões de texto achados no passo 1 (nada inventado).
+3. **Domínio (puro, testável):** `CabinVariantMatcher.Match(simStrings, cabinVariants) → Passenger | Cargo | Unknown`.
+4. **Briefing:** se o avião tem `cabinVariants`, a variante lida precisa ser a da configuração do exemplar no Hangar (`PilotAircraft.Configuration`); senão bloqueia com motivo claro ("No Hangar esta aeronave está em CARGA; carregue a variante de carga no MSFS"). Conferir também no `StartMonitoring`.
+5. **Pendente de decisão do usuário:** o que fazer com avião `convertibleCabin` que **não tem** variante de carga no simulador (ou que não dá para distinguir pelas SimVars): (a) só permitir a conversão no Hangar quando existir a variante no sim; (b) permitir a conversão sem trava de variante.
