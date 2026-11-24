@@ -18,20 +18,42 @@
 - Detalhe por aeroporto: `SimConnect_AddToFacilityDefinition` (montar a definição: aeroporto com `OPEN AIRPORT` … `OPEN RUNWAY` … campos) + `SimConnect_RequestFacilityData(defineId, requestId, icao, region)`; respostas `SIMCONNECT_RECV_FACILITY_DATA` (várias) e `SIMCONNECT_RECV_FACILITY_DATA_END`.
 - **A conferir no SDK antes da spec (nomes exatos dos campos, não inventar):** campos do aeroporto (latitude, longitude, altitude, nome, região, código), da pista (comprimento, largura, superfície, rumo, iluminação, cabeceiras/limiares), disponibilidade de cidade/país (provavelmente não há: cidade vem do csv quando a posição bate), limite de pedidos simultâneos e se o 2020 aceita os mesmos campos.
 
-## 4. Proposta
-1. **`AirportImporter` (Infrastructure, interface `IAirportSource`)** com três fontes, nesta ordem:
-   1. **Simulador aberto (SimConnect)** — caminho principal: lista mundial + `RequestFacilityData` em lotes (fila com N pedidos em voo, reenvio em falha, barra de progresso e cancelamento). Grava `Airports` e `Runways` com o mesmo critério de tier de hoje (`DataSeeder`).
-   2. **Banco do Little Navmap** (como hoje), se o sim estiver fechado e o LNM instalado.
-   3. **`airports.csv`/`runways.csv`** como último recurso, com aviso na tela ("dados podem estar desatualizados; abra o simulador e clique em Reconstruir base").
-2. **Enriquecimento:** cidade, país e elevação faltantes vêm do csv **só com posição a até 10 NM** (`DataSeeder.IsSameAirportPosition`, já existe).
-3. **Primeira inicialização:** tela de preparo ("Abra o MSFS e espere o menu principal" → progresso); o jogador pode pular e usar a fonte 2 ou 3.
-4. **Botão "Reconstruir base de aeroportos"** (Configurações) para depois de atualizações do sim ou de cenário novo; a reconstrução **não apaga** missões, frota nem carreira (aeroportos têm chave pelo código; revisar o que referencia `Airport.Id`).
-5. **Mesmo código para 2020 e 2024** pelo SimConnect (a lista muda de função conforme a versão detectada). Leitura de BGL do 2020 **fora do escopo** (decisão do usuário: foco no MSFS 2024; o 2020 só como reserva).
-6. **Depois:** regerar `airport_profiles.json` a partir da base importada (o script `tools/places/airport_profiles.py` passa a ler essa base ou o banco do jogo), para etiquetas e posições virem da mesma fonte.
+## 4. Proposta (revista com o usuário em 2026-11-24: tudo automático, sem botão)
+**Objetivo final:** toda origem e destino de missão existe no simulador do jogador, com o código ICAO que o simulador usa.
+
+### 4.1 Fontes, em camadas
+1. **Simulador aberto (SimConnect)** — fonte da verdade: lista mundial de aeroportos + detalhes (pistas, elevação) por `RequestFacilityData`.
+2. **Banco do Little Navmap** — complemento: preenche o que o SimConnect não trouxe (ex.: aeroporto cujo detalhe falhou) e serve de base inteira se o simulador nunca foi aberto com o app.
+3. **`airports.csv` / `runways.csv`** — só o que faltar: cidade e país (o simulador não dá cidade), sempre com a posição batendo até 10 NM (`DataSeeder.IsSameAirportPosition`); base inteira só se não houver nenhuma das anteriores (com aviso na tela).
+
+Cada aeroporto guarda a origem de cada dado (`Source`: Sim / LittleNavmap / Csv) e a data da última conferência no simulador.
+
+### 4.2 Primeira inicialização
+- Se o simulador estiver aberto: importa o mundo (lista + detalhes em lotes) **em segundo plano**, com progresso discreto; o jogo pode ser usado durante a importação com a base de reserva (LNM ou csv) e cada aeroporto vai sendo substituído pelo dado do sim.
+- Se não estiver aberto: monta pela reserva e marca a base como "não sincronizada"; a sincronização roda sozinha na primeira vez que o app conectar ao simulador.
+
+### 4.3 Atualização automática e incremental (a cada abertura com o simulador conectado)
+1. **Checagem rápida:** pedir só a **lista** de aeroportos (barata: código, região, latitude, longitude, altitude por item) e calcular uma impressão digital por aeroporto (código + região + posição/altitude arredondadas) e um resumo da lista inteira. Guardar também a versão do simulador (⚠SDK: conferir se `SIMCONNECT_RECV_OPEN` traz a versão do aplicativo e do build).
+2. **Se o resumo e a versão forem iguais aos da última vez:** nada a fazer (custo: alguns segundos, em segundo plano).
+3. **Se mudou:** comparar item a item com o banco:
+   - **novo** (código que não existia) → pedir detalhes e inserir;
+   - **mudou** (posição/altitude diferente) → pedir detalhes e atualizar;
+   - **sumiu** do simulador → marcar `IsInSimulator = false` (**não apagar**: frota, missões aceitas e logbook podem apontar para ele); o gerador deixa de usá-lo.
+4. **Pistas sem mudança de posição** (o resumo da lista não as vê): quando a **versão do simulador mudar**, reconferir os detalhes de todos em segundo plano, aos poucos (fila com prioridade para os aeroportos perto do piloto e os da frota/missões); sem mudança de versão, reconferir uma parte pequena por sessão (rodízio), para pegar cenário novo instalado.
+5. **Desempenho:** tudo fora da thread da interface; pedidos de detalhe em fila com N simultâneos (limite a conferir no SDK) e reenvio em falha; gravação em lote numa transação; índices por código e por latitude/longitude; nunca bloquear o início do voo.
+
+### 4.4 Garantia nas missões
+- O gerador (os dois caminhos: jogo e bots) só usa aeroportos com `IsInSimulator = true` quando a base está sincronizada (hoje o caminho do jogo já filtra por `HasSimSceneryAsync`; o dos bots usa a lista inteira: alinhar).
+- Missão no quadro (não aceita) com origem ou destino que sumiu do simulador → removida na próxima geração do quadro; missão já **aceita** → aviso ao piloto e opção de devolver sem multa.
+- Teste/relatório: `board-report --coverage` passa a contar quantas missões saíram para aeroportos fora do simulador (tem de ser 0).
+
+### 4.5 Escopo
+- O mesmo código para 2020 e 2024 pelo SimConnect (a função da lista muda conforme a versão detectada). Leitura de BGL do 2020 fora do escopo (foco no MSFS 2024).
+- Depois: regerar `airport_profiles.json` a partir da base sincronizada, para etiquetas e posições virem da mesma fonte.
 
 ## 5. Testes
 - Lógica pura (montagem do registro de aeroporto/pista a partir dos campos recebidos, tier, enriquecimento por posição, fila de pedidos com reenvio) testável sem o simulador, com respostas gravadas.
-- **Teste no PC com o MSFS (usuário):** importar o mundo no 2024 (tempo total, quantidade de aeroportos, SBOK = Amontada, pistas de 10 aeroportos conferidas contra o Little Navmap); repetir no 2020 se disponível. Não dá para testar no PC do escritório (sem simulador).
+- **Teste no PC com o MSFS (usuário):** (1) primeira importação no 2024: tempo total, quantidade de aeroportos, SBOK = Amontada, pistas de 10 aeroportos conferidas contra o Little Navmap; (2) segunda abertura sem mudança: checagem rápida em poucos segundos, sem pedir detalhes; (3) instalar ou remover um cenário de aeroporto: só ele é atualizado; repetir no 2020 se disponível. Não dá para testar no PC do escritório (sem simulador).
 
 ## 6. Limitações aceitas
 - Aeroportos de cenário de terceiros podem não aparecer no 2024 (igual ao Little Navmap).
