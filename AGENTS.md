@@ -316,6 +316,23 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - Linha aérea entre aeroportos de linha (`RequireAnyTag`): `MissionDefinition`, `MissionDestinationRule` e `MissionProfileDefinition` suportam `RequireAnyTag`. Os 4 jatos de linha (`ponte_aerea`, `troncal_domestico`, `regional_internacional`, `longo_curso`, todos com 120+ pax) exigem na origem e no destino `["linha", "linha_auto:hub"]`: a etiqueta derivada `linha_auto:hub` (`MissionBoardCore.WithDerivedTags`, aplicada em `AugmentOriginTags` e no filtro de destinos) só existe em aeroporto com `linha_auto` e tier ≤ `LinhaAutoHubMaxTier` (2); os alimentadores seguem com `["linha", "linha_auto"]`. Missões de saúde (`orgaos`, `uti_longa_distancia`, `medevac_remoto`) têm peso 150 no hospital de referência com teto próprio `destination.maxMultiplier` = 150 (padrão ×12); `medevac_remoto` leva da pista remota para cidade tier 2–3 (qualquer pista). Perfis de carga $\ge 4.300$ ft exigem `["linha", "linha_auto", "carga:cargueiros", "carga_auto"]`.
   - Subcomando CLI `tier-report` no `FlightCareer.Replay` (`tier-report.md` e `tier-report.csv`). Não testado no MSFS / não visto na tela.
 
+### Primeiro lote de missões com regra própria e paraquedismo por perfis (E2C-1)
+- **Rastreadores puros em `Domain/Missions/`**:
+  - `MultiStopTracker`: paradas completas sequenciais (`GroundSpeed < 3 kt` por $\ge 5$ s simulados a $\le 1,5$ NM da coordenada) em cada escala intermediária, exigindo nova decolagem entre escalas e conferindo integridade de combustível (`RequireNoRefuel`: subida máxima de $\max(1\text{ gal}, 2\%)$).
+  - `StolLandingTracker`: toques em pista curta com aproximação íngreme ($\ge 4^\circ$ calculada por $\text{atan}(|\text{VS}|/\text{GS})$ nos últimos 300 ft AGL) e parada completa $\le \text{clamp}(0,6 \times \text{RunwayLength}, 300, 1.000)$ ft; aviso positivo de través $\ge 8$ kt.
+  - `CheckFlightTracker`: validação sequencial de voo de teste (altitude de teste $\pm 300$ ft, potência máxima por 10 s simulados, rumos N, E, S, W por 15 s cada na altitude, pouso na origem).
+  - `FerryRestrictionMonitor`: restrição de altitude (tolerância 10 s acumulados acima de $MaxAlt + 200$) e flaps fixos ($\pm 5\%$). Trem travado excluído por ausência de SimVar no struct.
+  - `MissionTrackerResults`: record agregando os resultados operacionais para repasse opcional em `MissionCompletion.Evaluate`.
+- **Geradores e despacho em `MissionGenerator.cs` e `MissionBoardCore.cs`**:
+  - `pinga_pinga`: 3–4 etapas de 25–120 NM, total 100–400 NM, escalas tier 2–4 em sequência sem repetir aeródromo, destino = última escala.
+  - `navegacao_vfr`: triângulo origem → A → B → origem (etapas 25–90 NM, total 80–250 NM, A e B tier 3) com ponto de reportagem `P:` no meio da primeira perna com desvio lateral de 3–8 NM.
+  - `instrucao_stol`: pista curta tier 4 a 10–40 NM da origem, 3 pousos curtos requeridos e pouso final na origem.
+  - `check_flight`: voo local de teste técnico retornando à origem.
+  - `ferry_permit`: translado restrito com preferência de destino MRO ($\times 6$).
+  - `paraquedismo`: sorteio pelo perfil do catálogo (35% 3–6 pax, 50% 8–14 pax, 15% 15–20 pax) e bagagem por saltador calculada individualmente (12–16 kg em lb).
+- **Textos e catálogo**: `mission_catalog.json` com os 5 tipos habilitados (`enabled: true`, restando 13 desabilitados); $\ge 3$ variantes com marcadores em `mission_texts.json`.
+- **Integração no `FlightMonitor`**: rastreadores atualizados a cada 1 s com `packetSimDt` e repasse no `ProcessFlightFinishAsync`. HUD para próxima tarefa. Não testado no MSFS / não visto na tela.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

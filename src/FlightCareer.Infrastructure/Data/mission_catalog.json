@@ -183,7 +183,7 @@
       "phase": 1,
       "payFamily": "instrucao",
       "xpType": "instrucao",
-      "generator": "standard",
+      "generator": "vfr_triangle",
       "baseByTier": {
         "1": 0,
         "2": 3,
@@ -196,7 +196,7 @@
       },
       "civilAtMilitaryBase": true,
       "destination": {
-        "rule": "standard",
+        "rule": "return_to_origin",
         "tiers": [
           3
         ],
@@ -209,8 +209,8 @@
         {
           "weight": 100,
           "rangeNm": [
-            30,
-            90
+            80,
+            250
           ],
           "pax": [
             1,
@@ -475,13 +475,13 @@
       "id": "instrucao_stol",
       "name": "Instrução STOL / Bush",
       "description": "Treinamento avançado de pousos curtos e operação em pistas desfavoráveis.",
-      "enabled": false,
+      "enabled": true,
       "board": "Instrucao",
       "vip": false,
       "phase": 2,
       "payFamily": "instrucao",
       "xpType": "instrucao",
-      "generator": "standard",
+      "generator": "stol_training",
       "baseByTier": {
         "1": 0,
         "2": 1,
@@ -495,7 +495,7 @@
       },
       "civilAtMilitaryBase": true,
       "destination": {
-        "rule": "standard",
+        "rule": "return_to_origin",
         "tiers": [
           4
         ],
@@ -1320,13 +1320,13 @@
       "id": "pinga_pinga",
       "name": "Pinga-Pinga Regional",
       "description": "Voo regular de múltiplas escalas curtas para atendimento de passageiros e encomendas.",
-      "enabled": false,
+      "enabled": true,
       "board": "LinhaRegional",
       "vip": false,
       "phase": 3,
       "payFamily": "regional",
       "xpType": "regional",
-      "generator": "standard",
+      "generator": "multi_stop",
       "baseByTier": {
         "1": 0,
         "2": 6,
@@ -5039,13 +5039,13 @@
       "id": "ferry_permit",
       "name": "Translado com Restrição Técnica (Special Permit)",
       "description": "Voo com autorização especial de translado cumprindo limitações operacionais estritas.",
-      "enabled": false,
+      "enabled": true,
       "board": "Geral",
       "vip": false,
       "phase": 2,
       "payFamily": "translado",
       "xpType": "translado",
-      "generator": "standard",
+      "generator": "ferry_permit",
       "baseByTier": {
         "1": 1,
         "2": 3,
@@ -5108,13 +5108,13 @@
       "id": "check_flight",
       "name": "Voo de Teste Pós-Manutenção",
       "description": "Verificação funcional em voo de sistemas, bússola e aviônicos após intervenção de manutenção.",
-      "enabled": false,
+      "enabled": true,
       "board": "Geral",
       "vip": false,
       "phase": 2,
       "payFamily": "translado",
       "xpType": "translado",
-      "generator": "standard",
+      "generator": "check_flight",
       "baseByTier": {
         "1": 1,
         "2": 3,

@@ -9,8 +9,15 @@ namespace FlightCareer.Domain.Missions
     public sealed record MissionCompletionResult(bool IsCompleted, string? Reason, string? Warning = null);
 
     /// <summary>
-    /// Avalia a conclusão operacional de missões normais, circuitos de TGL, voos panorâmicos com sobrevoos,
-    /// levantamento fotográfico aéreo (3.6.1) e lançamento de paraquedistas (3.6.2).
+    /// Avalia a conclusão operacional de missões:
+    /// - Padrão e circuitos TGL;
+    /// - Sobrevoos panorâmicos e aerofotogrametria (survey);
+    /// - Paraquedismo (skydive) e choque térmico;
+    /// - Pinga-pinga regional (multi_stop) e proibição de reabastecimento;
+    /// - Navegação VFR em triângulo com reporte e escalas;
+    /// - Treinamento bush / STOL com rampa e parada curta;
+    /// - Voo de teste pós-manutenção (check_flight) por etapas;
+    /// - Translado com restrição técnica (ferry_permit).
     /// </summary>
     public static class MissionCompletion
     {
@@ -22,11 +29,23 @@ namespace FlightCareer.Domain.Missions
             int surveyLegsCompleted = 0,
             bool skydiveDropCompleted = false,
             bool skydiveThermalShock = false,
-            double skydiveMaxCoolingRate = 0.0)
+            double skydiveMaxCoolingRate = 0.0,
+            MissionTrackerResults? trackers = null)
         {
             if (mission == null)
             {
                 return new MissionCompletionResult(false, "Missão inválida (nula).");
+            }
+
+            // Integração dos resultados agregados de trackers
+            if (trackers != null)
+            {
+                visitedWaypoints = trackers.VisitedWaypoints ?? visitedWaypoints;
+                if (trackers.TouchAndGoCount > 0) touchAndGoCount = trackers.TouchAndGoCount;
+                if (trackers.SurveyLegsCompleted > 0) surveyLegsCompleted = trackers.SurveyLegsCompleted;
+                if (trackers.SkydiveDropCompleted) skydiveDropCompleted = true;
+                if (trackers.SkydiveThermalShock) skydiveThermalShock = true;
+                if (trackers.SkydiveMaxCoolingRate > 0) skydiveMaxCoolingRate = trackers.SkydiveMaxCoolingRate;
             }
 
             if (!string.Equals(mission.DestinationICAO, landedIcao, StringComparison.OrdinalIgnoreCase))
@@ -65,9 +84,10 @@ namespace FlightCareer.Domain.Missions
             }
 
             var def = MissionCatalog.Shared.Get(mission.SubId);
+            string generator = def?.Generator ?? string.Empty;
 
             // Levantamento / Fotografia Aérea (3.6.1)
-            if (def?.Generator == "survey")
+            if (generator == "survey")
             {
                 int requiredLegs = 3;
                 if (!string.IsNullOrWhiteSpace(mission.ContractData))
@@ -92,7 +112,7 @@ namespace FlightCareer.Domain.Missions
             }
 
             // Lançamento de Paraquedistas (3.6.2)
-            if (def?.Generator == "skydive")
+            if (generator == "skydive")
             {
                 if (!skydiveDropCompleted)
                 {
@@ -108,6 +128,91 @@ namespace FlightCareer.Domain.Missions
                 }
 
                 return new MissionCompletionResult(true, null, warning);
+            }
+
+            // Pinga-Pinga Regional (multi_stop)
+            if (generator == "multi_stop")
+            {
+                if (trackers?.MultiStop != null)
+                {
+                    if (trackers.MultiStop.RefuelViolationDetected)
+                    {
+                        return new MissionCompletionResult(false, trackers.MultiStop.FailureReason ?? "Reabasteceu entre escalas.");
+                    }
+
+                    if (!trackers.MultiStop.AllStopsCompleted)
+                    {
+                        return new MissionCompletionResult(false, trackers.MultiStop.FailureReason ?? $"Escala {trackers.MultiStop.NextStopIcao} não visitada.");
+                    }
+                }
+            }
+
+            // Navegação VFR em Triângulo (vfr_triangle)
+            if (generator == "vfr_triangle")
+            {
+                if (trackers?.MultiStop != null)
+                {
+                    if (!trackers.MultiStop.AllStopsCompleted)
+                    {
+                        return new MissionCompletionResult(false, trackers.MultiStop.FailureReason ?? $"Escala {trackers.MultiStop.NextStopIcao} não visitada.");
+                    }
+                }
+            }
+
+            // Treinamento STOL / Bush (stol_training)
+            if (generator == "stol_training")
+            {
+                int requiredLandings = 3;
+                if (!string.IsNullOrWhiteSpace(mission.ContractData))
+                {
+                    try
+                    {
+                        var stolData = JsonSerializer.Deserialize<StolContractData>(mission.ContractData);
+                        if (stolData != null && stolData.RequiredLandings > 0)
+                        {
+                            requiredLandings = stolData.RequiredLandings;
+                        }
+                    }
+                    catch (JsonException ex) { System.Diagnostics.Debug.WriteLine($"[MissionCompletion] Contrato STOL inválido ({mission.Id}): {ex.Message}"); }
+                }
+
+                int validLandings = trackers?.Stol?.ValidLandingsCount ?? 0;
+                if (validLandings < requiredLandings)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        $"Treinamento STOL incompleto: {validLandings} de {requiredLandings} pouso(s) curto(s) válido(s).");
+                }
+
+                string? stolWarning = null;
+                if (trackers?.Stol?.HadCrosswindBonus == true)
+                {
+                    stolWarning = "Pouso curto executado com vento de través relevante (+bônus operacional).";
+                }
+
+                return new MissionCompletionResult(true, null, stolWarning);
+            }
+
+            // Voo de Teste Pós-Manutenção (check_flight)
+            if (generator == "check_flight")
+            {
+                if (trackers?.CheckFlight != null && !trackers.CheckFlight.IsCompleted)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        trackers.CheckFlight.GetFailureReason() ?? "Voo de teste pós-manutenção incompleto.");
+                }
+            }
+
+            // Translado com Restrição Técnica (ferry_permit)
+            if (generator == "ferry_permit")
+            {
+                if (trackers?.Ferry != null && trackers.Ferry.HasViolation)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        trackers.Ferry.FailureReason ?? "Restrição técnica do translado violada.");
+                }
             }
 
             return new MissionCompletionResult(true, null);
