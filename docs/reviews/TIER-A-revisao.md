@@ -16,3 +16,9 @@
 1. **País errado:** `ResolveInitialCountry` devolve a região ICAO (ZS, UI, OM…) quando não conhece o prefixo; o enriquecimento pelo csv não corrige porque o valor tem 2 letras. Isso quebra as regras de destino "mesmo país" / "outro país". Com a posição batendo, o `iso_country` do csv deve sempre prevalecer.
 2. **Linha aérea só entre aeroportos de linha:** origem e destino com etiqueta `linha` ou `linha_auto` nos tipos de linha (e `carga:cargueiros`/`linha`/`linha_auto`/`carga_auto` nos perfis de carga a jato).
 3. **Recalcular o tier quando a versão das regras mudar**, a partir dos sinais gravados, sem reimportar.
+
+## Rodada 2 (Gemini) — APROVADO (Claude, 2026-11-24)
+- País pelo `iso_country` do csv com a posição batendo (`EnrichFromCsvAsync`, `TierReporter`); `requireAnyTag` na origem (missão), no destino e por perfil, com `linha`/`linha_auto` nos tipos de linha e `linha`/`linha_auto`/`carga:cargueiros`/`carga_auto` nos perfis de carga a jato; `DataSeeder.EnsureTiersUpToDateAsync` recalcula o tier pelos sinais gravados quando `AirportTierRules.Version` muda (chamado no início de `SeedAsync`).
+- Build 0 erros; 1.004 testes passam (rodado pelo revisor).
+- `board-report --boards 30` (revisor): SBMT 0 % de ponte aérea/troncal/regional internacional/longo curso/carga paletizada; SBRJ ponte aérea 27 %, troncal 14 %; SBGR carga paletizada 21 %, longo curso 16 %; PABE alimentador 15 %, regional essencial e medevac remoto ~4 % cada.
+- Tiers aprovados pelo usuário (`tier-report`: tier 1 = 457 no mundo, 23 no Brasil).
