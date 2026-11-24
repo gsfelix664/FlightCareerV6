@@ -144,7 +144,6 @@ Regras: o que o addon confere pela telemetria para dar o contrato como cumprido 
 | check_flight | Voo de teste pós-manutenção e de aviônicos/bússola (swing check) | N | roteiro local: subida a N ft, potência/rotação, curvas pelos rumos cardinais, pouso na origem | "Passo x/N do teste" |
 | crew_parts | Logística de apoio a aeronaves (tripulação e peças; **field AOG rescue**: mecânico, ferramentas, bateria ou hélice até a pista de terra onde outro avião ficou preso) | E (1.3.2) | — | — |
 | translado_piloto_agricola | Transporte de piloto agrícola | E (4.2.2) | — | — |
-| pessoas_remotas | Transporte de pessoas para locais remotos: farm shuttle (patrão/gerente), equipe e batedor da fazenda, rodízio de turno de 15/30 dias (canteiros de barragem, ponte, linha de transmissão, mineração), brigadistas florestais com equipamento para pista avançada | E (4.1.2, 4.1.3, 4.2.1) | — | — |
 
 ### H. Governo, defesa e humanitário
 | id | Missão | St. | Regras / restrições | HUD |
@@ -161,6 +160,7 @@ Regras: o que o addon confere pela telemetria para dar o contrato como cumprido 
 | apoio_acampamento | Apoio a acampamentos e expedições: suprimento de prospecção/mineração (sondagem, amostras, peças de bomba, alimentação), expedições científicas e documentários (biólogos, arqueólogos, cinegrafistas com câmeras, drones e baterias), reabastecimento de cache (suprimentos e combustível numa pista isolada para missões futuras) | N | equipamento delicado: pouso suave (G); cache: destino = pista remota sem estrutura | G no pouso |
 | instrucao_stol | Instrução bush / STOL (pouso curto, vento de través em terra, aproximação em rampa acentuada sobre obstáculos) | N | N pousos com parada em ≤ N ft após o toque; ângulo de aproximação ≥ N° nos últimos N ft; ao menos 1 pouso com vento de través ≥ N kt (quando houver) | "Pouso curto x/N: parou em N ft"; ângulo ao vivo |
 | evacuacao_por_do_sol | Evacuação pré-tempestade / limite de pôr do sol (decolar de pista sem luzes e chegar a aeródromo com balizamento antes do pôr do sol + 30 min) | N | prazo = pôr do sol + 30 min (⚠SDK hora/sol): **só perda de XP**, como órgãos; destino com pista iluminada (`runways.csv` tem `lighted`) | contagem regressiva até o limite |
+| pessoas_remotas | Transporte de pessoas para locais remotos: farm shuttle (patrão/gerente), equipe e batedor da fazenda, rodízio de turno de 15/30 dias (canteiros de barragem, ponte, linha de transmissão, mineração), brigadistas florestais com equipamento para pista avançada | E (4.1.2, 4.1.3, 4.2.1) | — | — |
 
 Resumo v3: 69 tipos — 27 existem, 13 parciais, 29 novos.
 
@@ -493,4 +493,27 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 | navegacao_solo | Navegação VFR solo | diferente da `navegacao_vfr` com instrutor: cumprir os pontos de rota e os estimados de tempo sem desvio significativo de rota ou altitude para validar a missão | "Próximo ponto X: estimado hh:mm"; desvio de rota/altitude ao vivo |
 
 ### B. Linha aérea e regular
-(a completar pelo usuário)
+| id | Missão | Regras / avaliação (ideia) | HUD |
+|---|---|---|---|
+| bate_volta | Rotação ida e volta (turnaround): perna encadeada A → B → A no mesmo contrato | pouso em B e retorno a A; bônus (XP) se o tempo em solo em B ficar dentro do turnaround alvo do avião (ex.: 25–45 min em narrowbody) | "Perna x/2"; tempo de solo × alvo |
+
+### C. Executiva, charter e turismo
+| id | Missão | Regras / avaliação (ideia) | HUD |
+|---|---|---|---|
+| empty_leg | Oportunidade empty leg: trecho de retorno de jato/turboélice executivo vendido com desconto | prazo curto para aceitar (expira em poucas horas) e pagamento menor que o executivo normal; origem e destino executivos | prazo de aceitação |
+
+### D. Carga
+| id | Missão | Regras / avaliação (ideia) | HUD |
+|---|---|---|---|
+| carga_intercontinental | Cargueiro pesado internacional / long-haul cargo (transoceânico) | só entre mega-hubs de carga (ex.: Viracopos, Miami, Anchorage, Frankfurt: etiquetas `carga:cargueiros`/`carga:internacional`); exige planejamento de peso: peso de decolagem ≤ MTOW do avião com o combustível colocado (⚠SDK `TOTAL WEIGHT` / `MAX GROSS WEIGHT`) | peso de decolagem × MTOW |
+- Obs.: não há cargueiro no `aircrafts.csv` (decisão de usar só aviões do csv); até entrar um 747F/777F/MD-11F, a missão usaria os widebodies de passageiros (747-400, 747-8i, 787-10, A330) pela carga paga do csv.
+
+### F. Trabalho aéreo, agro e vigilância
+| id | Missão | Regras / avaliação (ideia) | HUD |
+|---|---|---|---|
+| combate_incendio | Combate a incêndio florestal (water bomber): a missão ativa depois da `patrulha_vigilancia`, que acha o foco | N lançamentos sobre a coordenada do incêndio (raio, altura máxima AGL e velocidade); reabastecer em pista próxima ou por water scoop entre lançamentos (⚠SDK: SimVars de lançamento/tanque de água e scoop nos aviões que têm; sem isso, passagem baixa sobre o alvo e pouso para reabastecer) | "Lançamento x/N"; altura e velocidade ao vivo; "Reabasteça em X" |
+- Obs.: no csv há o 747-400 Global Supertanker; Air Tractor Fire Boss, CL-415 e C-130 MAFFS não estão no csv.
+
+### Reorganização sugerida pelo usuário (2026-11-24)
+- `pessoas_remotas` passou do grupo G para o grupo I no § 6, deixando o G só com aeronave e tripulação técnica (só documentação: o grupo não é campo do catálogo).
+- Contagem certa por grupo: A 6, B 9, C 11, D 13, E 5, F 10, G 6, H 4, I 5 = 69.
