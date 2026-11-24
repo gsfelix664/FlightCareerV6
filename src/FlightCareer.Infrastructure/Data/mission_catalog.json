@@ -207,10 +207,49 @@
       },
       "profiles": [
         {
-          "weight": 100,
+          "variant": "triangle",
+          "weight": 50,
           "rangeNm": [
             80,
             250
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "out_and_back",
+          "weight": 25,
+          "rangeNm": [
+            80,
+            240
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "triangle_tgl",
+          "weight": 25,
+          "rangeNm": [
+            75,
+            200
           ],
           "pax": [
             1,

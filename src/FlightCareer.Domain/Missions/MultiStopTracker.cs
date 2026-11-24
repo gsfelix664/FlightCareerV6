@@ -20,6 +20,11 @@ namespace FlightCareer.Domain.Missions
         private bool _refuelViolation;
         private bool _orderViolation;
         private string? _failureReason;
+        private double _rollDurationSeconds;
+        private double _maxGsDuringRoll;
+        private bool _fullStopOccurredDuringRoll;
+        private double _minDistTargetDuringRoll = double.MaxValue;
+        private string? _futureStopVisitedDuringRoll;
 
         public bool HasActiveContract => _data != null && _data.Stops.Count > 0;
         public int CompletedStopsCount => _currentStopIndex;
@@ -53,6 +58,11 @@ namespace FlightCareer.Domain.Missions
             _refuelViolation = false;
             _orderViolation = false;
             _failureReason = null;
+            _rollDurationSeconds = 0.0;
+            _maxGsDuringRoll = 0.0;
+            _fullStopOccurredDuringRoll = false;
+            _minDistTargetDuringRoll = double.MaxValue;
+            _futureStopVisitedDuringRoll = null;
         }
 
         public void Update(bool isOnGround, double lat, double lon, double groundSpeedKt, double fuelTotalGallons, double simDtSeconds)
@@ -63,14 +73,98 @@ namespace FlightCareer.Domain.Missions
                 return;
             }
 
-            // 1. Detecção da primeira decolagem para início da conferência de reabastecimento
-            if (_wasOnGround && !isOnGround)
+            // 1. Rastreio de toque, rolagem e decolagem
+            double distTarget = double.MaxValue;
+            if (_currentStopIndex < _data.Stops.Count)
             {
-                _hasTakenOffOnce = true;
-                if (_minFuelSinceTakeoff < 0 && fuelTotalGallons > 0)
+                var target = _data.Stops[_currentStopIndex];
+                distTarget = OverflyTracker.CalculateDistanceNM(lat, lon, target.Lat, target.Lon);
+            }
+
+            if (!_wasOnGround && isOnGround)
+            {
+                // Transição AR -> SOLO (toque na pista)
+                _rollDurationSeconds = simDtSeconds;
+                _maxGsDuringRoll = groundSpeedKt;
+                _fullStopOccurredDuringRoll = groundSpeedKt < TouchAndGoCounter.FullStopSpeedThresholdKt;
+                _minDistTargetDuringRoll = distTarget;
+                _futureStopVisitedDuringRoll = null;
+
+                for (int f = _currentStopIndex + 1; f < _data.Stops.Count; f++)
                 {
-                    _minFuelSinceTakeoff = fuelTotalGallons;
+                    var fStop = _data.Stops[f];
+                    if (OverflyTracker.CalculateDistanceNM(lat, lon, fStop.Lat, fStop.Lon) <= 1.5)
+                    {
+                        _futureStopVisitedDuringRoll = fStop.Icao;
+                        break;
+                    }
                 }
+            }
+            else if (_wasOnGround && isOnGround)
+            {
+                // Durante a corrida no solo
+                _rollDurationSeconds += simDtSeconds;
+                if (groundSpeedKt > _maxGsDuringRoll)
+                {
+                    _maxGsDuringRoll = groundSpeedKt;
+                }
+                if (groundSpeedKt < TouchAndGoCounter.FullStopSpeedThresholdKt)
+                {
+                    _fullStopOccurredDuringRoll = true;
+                }
+                if (distTarget < _minDistTargetDuringRoll)
+                {
+                    _minDistTargetDuringRoll = distTarget;
+                }
+                for (int f = _currentStopIndex + 1; f < _data.Stops.Count; f++)
+                {
+                    var fStop = _data.Stops[f];
+                    if (OverflyTracker.CalculateDistanceNM(lat, lon, fStop.Lat, fStop.Lon) <= 1.5)
+                    {
+                        _futureStopVisitedDuringRoll ??= fStop.Icao;
+                    }
+                }
+            }
+            else if (_wasOnGround && !isOnGround)
+            {
+                // Transição SOLO -> AR (decolagem)
+                if (!_hasTakenOffOnce)
+                {
+                    _hasTakenOffOnce = true;
+                    if (_minFuelSinceTakeoff < 0 && fuelTotalGallons > 0)
+                    {
+                        _minFuelSinceTakeoff = fuelTotalGallons;
+                    }
+                }
+                else
+                {
+                    bool isTglMode = string.Equals(_data.StopMode, "touch_and_go", StringComparison.OrdinalIgnoreCase);
+                    if (isTglMode && !_waitingAirborne && _currentStopIndex < _data.Stops.Count)
+                    {
+                        bool validTgl = TouchAndGoCounter.IsValidTouchAndGo(_rollDurationSeconds, _maxGsDuringRoll, _fullStopOccurredDuringRoll);
+                        if (validTgl)
+                        {
+                            if (_futureStopVisitedDuringRoll != null)
+                            {
+                                _orderViolation = true;
+                                _failureReason ??= $"Escala {_futureStopVisitedDuringRoll} visitada antes de {_data.Stops[_currentStopIndex].Icao}.";
+                            }
+                            else if (_minDistTargetDuringRoll <= 1.5)
+                            {
+                                _currentStopIndex++;
+                                _groundStopSeconds = 0.0;
+                                _waitingAirborne = true;
+                                _airborneSeconds = 0.0;
+                            }
+                        }
+                    }
+                }
+
+                _rollDurationSeconds = 0.0;
+                _maxGsDuringRoll = 0.0;
+                _fullStopOccurredDuringRoll = false;
+                _minDistTargetDuringRoll = double.MaxValue;
+                _futureStopVisitedDuringRoll = null;
             }
 
             // 2. Monitoramento de combustível (RequireNoRefuel)
@@ -120,7 +214,7 @@ namespace FlightCareer.Domain.Missions
             if (_currentStopIndex < _data.Stops.Count)
             {
                 var targetStop = _data.Stops[_currentStopIndex];
-                double distTarget = OverflyTracker.CalculateDistanceNM(lat, lon, targetStop.Lat, targetStop.Lon);
+                distTarget = OverflyTracker.CalculateDistanceNM(lat, lon, targetStop.Lat, targetStop.Lon);
 
                 // Checagem de escala fora de ordem: se o piloto parou em uma escala posterior
                 for (int futureIdx = _currentStopIndex + 1; futureIdx < _data.Stops.Count; futureIdx++)

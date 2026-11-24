@@ -41,6 +41,40 @@
       "description": "Exercício de navegação em triângulo ligando {origin} a {stop_a} e {stop_b} com ponto de reporte mandatório. Requer paradas completas em cada aeródromo na ordem e pouso final em {origin}."
     }
   ],
+  "navegacao_vfr:triangle": [
+    {
+      "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reportagem obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR triangular ({distance_nm} NM total). Cumprir reporte visual na primeira perna, escala completa em {stop_a}, prosseguimento para escala em {stop_b} e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Triângulo VFR de Aeroclube ({origin})",
+      "description": "Exercício de navegação em triângulo ligando {origin} a {stop_a} e {stop_b} com ponto de reporte mandatório. Requer paradas completas em cada aeródromo na ordem e pouso final em {origin}."
+    }
+  ],
+  "navegacao_vfr:out_and_back": [
+    {
+      "title": "Navegação VFR de Ida e Volta ({stop_a})",
+      "description": "Navegação estimada ida e volta: decolagem de {origin}, sobrevoo do ponto de reportagem na ida, pouso completo em {stop_a} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {origin}",
+      "description": "Treinamento de navegação VFR ({distance_nm} NM total). Cumprir ponto de reporte na primeira perna, pouso completo em {stop_a} e regresso para pouso final em {origin}."
+    }
+  ],
+  "navegacao_vfr:triangle_tgl": [
+    {
+      "title": "Triângulo VFR com Toque e Arremetida ({stop_a} e {stop_b})",
+      "description": "Navegação estimada triangular: {origin} -> {stop_a} -> {stop_b} -> {origin}. Sobrevoe o ponto de reportagem na primeira etapa e realize toque e arremetida em {stop_a} e {stop_b} antes do pouso final na base."
+    },
+    {
+      "title": "Navegação Visual com Toques e Arremetidas: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR ({distance_nm} NM total). Reporte mandatório na primeira perna, toque e arremetida em {stop_a} e {stop_b} e retorno para pouso em {origin}."
+    }
+  ],
   "instrucao_ifr": [
     {
       "title": "Instrução IFR ({dest})",

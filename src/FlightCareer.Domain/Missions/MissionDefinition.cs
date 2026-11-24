@@ -30,6 +30,7 @@ namespace FlightCareer.Domain.Missions
         public int MinRunwayFt { get; set; }
         public bool Paved { get; set; }
         public List<string>? RequireAnyTag { get; set; }
+        public string? Variant { get; set; }
     }
 
     public sealed class MissionCrewDefinition
