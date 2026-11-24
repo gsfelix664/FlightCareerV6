@@ -16,9 +16,32 @@ namespace FlightCareer.Application.Services
         /// Etiquetas da origem com os dados de lugares carregados no jogo: zona de salto e base de
         /// voo panorâmico (só aeródromo turístico com papel "panoramico", não os de papel "destino").
         /// </summary>
+        /// <summary>Etiqueta derivada: aeroporto com <c>linha_auto</c> e tier até <see cref="LinhaAutoHubMaxTier"/>.</summary>
+        public const string LinhaAutoHubTag = "linha_auto:hub";
+        /// <summary>
+        /// Maior tier em que a <c>linha_auto</c> (voo regular do OurAirports ou gates do simulador) conta como hub de
+        /// linha aérea para jatos de 120+ lugares (decisão do usuário, 2026-11-24): aeroportos pequenos com voo
+        /// regular (ex.: Sorocaba, Bethel) deixam de gerar ponte aérea/troncal; hubs sem curadoria (ex.: Ufa) mantêm.
+        /// </summary>
+        public const int LinhaAutoHubMaxTier = 2;
+
+        /// <summary>Acrescenta as etiquetas que dependem do aeroporto (hoje só <see cref="LinhaAutoHubTag"/>).</summary>
+        public static IReadOnlySet<string> WithDerivedTags(Airport airport, IReadOnlySet<string> tags)
+        {
+            if (airport == null || tags == null) return tags!;
+            if (airport.Tier >= 1 && airport.Tier <= LinhaAutoHubMaxTier
+                && tags.Contains("linha_auto") && !tags.Contains(LinhaAutoHubTag))
+            {
+                return new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { LinhaAutoHubTag };
+            }
+            return tags;
+        }
+
         public static IReadOnlySet<string> AugmentOriginTags(Airport origin, IReadOnlySet<string> tags, IPlacesDataService? placesService)
         {
-            if (placesService == null || origin == null) return tags;
+            if (origin == null) return tags;
+            tags = WithDerivedTags(origin, tags);
+            if (placesService == null) return tags;
             HashSet<string>? augmented = null;
             if (placesService.GetDropZone(origin.ICAO) != null && !tags.Contains("zona_salto"))
             {
@@ -383,7 +406,7 @@ namespace FlightCareer.Application.Services
                 if ((dest?.RequireAnyTag != null && dest.RequireAnyTag.Count > 0) ||
                     (profile.RequireAnyTag != null && profile.RequireAnyTag.Count > 0))
                 {
-                    var destTags = getAirportTags(a.ICAO);
+                    var destTags = WithDerivedTags(a, getAirportTags(a.ICAO));
                     if (dest?.RequireAnyTag != null && dest.RequireAnyTag.Count > 0)
                     {
                         if (destTags == null || destTags.Count == 0 || !dest.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, destTags)))
