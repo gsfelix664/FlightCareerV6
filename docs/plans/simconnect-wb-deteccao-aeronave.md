@@ -255,3 +255,11 @@ No MSFS 2024 as variantes (presets) não são só passageiros/carga: o C152 tem 
 - **Briefing / início do voo:** só libera se a variante do exemplar no Hangar for a exigida pela missão **e** a variante carregada no sim for a mesma.
 - **Dados a levantar (não inventar):** quais aeródromos são na água (tipo `seaplane_base` no `airports.csv`; conferir) e quais pistas exigem esquis (superfície neve/gelo no `runways.csv`; conferir cobertura); quais variantes cada avião do csv tem no MSFS 2024.
 - **⚠SDK:** confirmar as SimVars de tipo de trem (ex.: `IS GEAR FLOATS`, `IS GEAR SKIS`, `IS GEAR WHEELS`) e se servem para conferir a variante carregada, além de `TITLE`/`LIVERY NAME`.
+
+### Observação do usuário (2026-11-24): cada variante muda a tela de carga e passageiros
+- Na variante de paraquedismo do C172 a aba de carga some do EFB. Bate com o SDK: cada preset define as próprias estações de peso (`station_load.N` no `flight_model.cfg`, com nome de até 15 caracteres) e a carga visual (`navigation_graph_cargo.cfg`).
+- **Consequências para o addon:**
+  1. **Detecção da variante:** o conjunto de estações (quantidade e nomes) pode identificar a variante carregada junto com `TITLE`/`LIVERY NAME`. Hipótese: SimVars `PAYLOAD STATION COUNT`, `PAYLOAD STATION NAME:n` e `PAYLOAD STATION WEIGHT:n`. Relatos de desenvolvedores divergem (um diz que pelo SimConnect só o peso é acessível; o nome volta o texto literal do cfg; mudar o peso por SimVar não atualiza o EFB). **Conferir com o `FlightCareer.SimVarProbe`** em cada variante antes de usar.
+  2. **Loadsheet / W&B:** a distribuição de passageiros, bagagem e carga da missão tem de caber nas estações que a variante tem (ex.: paraquedismo sem compartimento de carga → missão com carga não cabe). Entra junto com a ETAPA 3 deste plano.
+  3. **Quadro de missões:** a capacidade efetiva passa a depender da variante do exemplar (o `CabinConversion` atual só trata passageiros/carga).
+- Teste no PC: ao gravar as variantes (passo 1 da trava de variante), rodar também o `SimVarProbe --filter "PAYLOAD STATION"` em cada uma.
