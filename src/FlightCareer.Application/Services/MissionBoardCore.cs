@@ -46,16 +46,30 @@ namespace FlightCareer.Application.Services
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null,
             MissionTextCatalog? textCatalog = null,
-            IPlacesDataService? placesService = null)
+            IPlacesDataService? placesService = null,
+            Runway? originRunway = null)
         {
             var missions = new List<Mission>();
             if (origin == null || candidates == null || catalog == null) return missions;
 
-            // 1. Filtrar missões habilitadas com peso de origem > 0
+            if (originRunway == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MissionBoardCore] Origem {origin.ICAO} sem pista conhecida: não filtra perfis pela pista da origem.");
+            }
+
+            // 1. Filtrar missões habilitadas com peso de origem > 0 e que caibam na pista da origem
             var eligibleMissions = new List<(MissionDefinition Mission, double Weight)>();
             foreach (var m in catalog.Missions.Values)
             {
                 if (!m.Enabled) continue;
+
+                if (originRunway != null)
+                {
+                    bool anyProfileFits = m.Profiles.Any(p =>
+                        originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface)));
+                    if (!anyProfileFits) continue;
+                }
+
                 double w = MissionWeighting.OriginWeight(m, origin.Tier, originTags);
                 if (w > 0.0)
                 {
@@ -99,7 +113,8 @@ namespace FlightCareer.Application.Services
                     payTable,
                     textCatalog,
                     placesService,
-                    distances);
+                    distances,
+                    originRunway);
 
                 if (mission != null)
                 {
@@ -122,12 +137,13 @@ namespace FlightCareer.Application.Services
             MissionPayTable? payTable = null,
             MissionTextCatalog? textCatalog = null,
             IPlacesDataService? placesService = null,
-            IReadOnlyList<double>? candidateDistances = null)
+            IReadOnlyList<double>? candidateDistances = null,
+            Runway? originRunway = null)
         {
             if (def == null || def.Profiles == null || def.Profiles.Count == 0) return null;
 
-            // 1. Sortear perfil correlacionado com ajuste de bigAirport
-            var profile = PickProfile(def, origin, originTags, random);
+            // 1. Sortear perfil correlacionado com ajuste de bigAirport e compatível com a origem
+            var profile = PickProfile(def, origin, originTags, random, originRunway);
             if (profile == null) return null;
 
             // 2. Sortear dentro do perfil: distância, pax e carga uniformes inteiros
@@ -232,17 +248,24 @@ namespace FlightCareer.Application.Services
             MissionDefinition def,
             Airport origin,
             IReadOnlySet<string> originTags,
-            Random random)
+            Random random,
+            Runway? originRunway = null)
         {
             if (def.Profiles == null || def.Profiles.Count == 0) return null;
-            if (def.Profiles.Count == 1) return def.Profiles[0];
+
+            var availableProfiles = originRunway != null
+                ? def.Profiles.Where(p => originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))).ToList()
+                : def.Profiles;
+
+            if (availableProfiles.Count == 0) return null;
+            if (availableProfiles.Count == 1) return availableProfiles[0];
 
             bool isBigAirport = origin.Tier <= 2 || (def.OriginProfiles != null && def.OriginProfiles.Keys.Any(k => AirportProfileCatalog.MatchesAny(k, originTags)));
 
             var weightedProfiles = new List<(MissionProfileDefinition Profile, double Weight)>();
             double totalWeight = 0.0;
 
-            foreach (var p in def.Profiles)
+            foreach (var p in availableProfiles)
             {
                 double w = p.Weight;
                 if (p.BigAirport)
@@ -253,7 +276,7 @@ namespace FlightCareer.Application.Services
                 totalWeight += w;
             }
 
-            if (totalWeight <= 0.0) return def.Profiles[0];
+            if (totalWeight <= 0.0) return availableProfiles[0];
 
             double roll = random.NextDouble() * totalWeight;
             double acc = 0.0;
@@ -364,7 +387,24 @@ namespace FlightCareer.Application.Services
                     continue;
                 }
 
-                // Pista
+                // Pista exigida pelo perfil sorteado
+                if (profile.MinRunwayFt > 0)
+                {
+                    if (c.BestRunway == null)
+                    {
+                        continue;
+                    }
+                    if (c.BestRunway.LengthFt < profile.MinRunwayFt)
+                    {
+                        continue;
+                    }
+                    if (profile.Paved && RunwaySurface.IsUnpaved(c.BestRunway.Surface))
+                    {
+                        continue;
+                    }
+                }
+
+                // Pista (regras adicionais da definição)
                 if (requirePaved)
                 {
                     bool isPaved = c.BestRunway != null ? !RunwaySurface.IsUnpaved(c.BestRunway.Surface) : a.Tier <= 3;

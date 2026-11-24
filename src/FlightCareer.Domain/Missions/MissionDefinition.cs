@@ -24,6 +24,8 @@ namespace FlightCareer.Domain.Missions
         public int[] Pax { get; set; } = Array.Empty<int>();
         public double[] CargoLbs { get; set; } = Array.Empty<double>();
         public bool BigAirport { get; set; }
+        public int MinRunwayFt { get; set; }
+        public bool Paved { get; set; }
     }
 
     public sealed class MissionCrewDefinition

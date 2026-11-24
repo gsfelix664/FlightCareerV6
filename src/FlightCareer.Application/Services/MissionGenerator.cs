@@ -193,6 +193,7 @@ namespace FlightCareer.Application.Services
                 candidateAirports = LimitCandidates(currentAirport, candidateAirports, _random);
 
                 var candidateIcaos = candidateAirports.Select(a => a.ICAO).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                candidateIcaos.Add(currentAirport.ICAO);
                 var candidateRunways = await _context.Runways
                     .Where(r => candidateIcaos.Contains(r.AirportIdent))
                     .ToListAsync();
@@ -203,6 +204,8 @@ namespace FlightCareer.Application.Services
                         g => g.Key,
                         g => g.OrderByDescending(r => !RunwaySurface.IsUnpaved(r.Surface)).ThenByDescending(r => r.LengthFt).FirstOrDefault(),
                         StringComparer.OrdinalIgnoreCase);
+
+                var originRunway = runwaysByIcao.GetValueOrDefault(currentAirport.ICAO);
 
                 var candidates = candidateAirports
                     .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
@@ -220,7 +223,8 @@ namespace FlightCareer.Application.Services
                     PayMultiplier,
                     PayTable,
                     _textCatalog,
-                    _placesService);
+                    _placesService,
+                    originRunway);
 
                 if (newMissions.Count > 0)
                 {
@@ -1343,6 +1347,8 @@ namespace FlightCareer.Application.Services
                 runwaysByIcao = new Dictionary<string, Runway?>(StringComparer.OrdinalIgnoreCase);
             }
 
+            var originRunway = runwaysByIcao.GetValueOrDefault(currentAirport.ICAO);
+
             var candidates = allAirports
                 .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
                 .ToList();
@@ -1361,7 +1367,8 @@ namespace FlightCareer.Application.Services
                 payMultiplier,
                 payTable,
                 textCatalog,
-                placesService);
+                placesService,
+                originRunway);
         }
 
         private static Mission? CreateMissionFromSubCategoryInMemory(

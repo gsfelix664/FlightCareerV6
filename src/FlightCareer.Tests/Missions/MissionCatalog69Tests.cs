@@ -343,11 +343,19 @@ namespace FlightCareer.Tests.Missions
 
             var refTime = new DateTime(2026, 11, 24, 12, 0, 0, DateTimeKind.Utc);
 
+            var runways = allAirports.Select(a => new Runway
+            {
+                AirportIdent = a.ICAO,
+                LengthFt = 10000,
+                Surface = "Asphalt",
+                IsLighted = true
+            }).ToList();
+
             var run1 = MissionGenerator.GenerateMissionsInMemory(
-                origin, allAirports, null, new Random(555), refTime, countOverride: 10);
+                origin, allAirports, null, new Random(555), refTime, countOverride: 10, allRunways: runways);
 
             var run2 = MissionGenerator.GenerateMissionsInMemory(
-                origin, allAirports, null, new Random(555), refTime, countOverride: 10);
+                origin, allAirports, null, new Random(555), refTime, countOverride: 10, allRunways: runways);
 
             Assert.Equal(run1.Count, run2.Count);
             for (int i = 0; i < run1.Count; i++)
@@ -380,6 +388,14 @@ namespace FlightCareer.Tests.Missions
             var rng = new Random(777);
             var refTime = DateTime.UtcNow;
 
+            var runways = allAirports.Select(a => new Runway
+            {
+                AirportIdent = a.ICAO,
+                LengthFt = 10000,
+                Surface = "Asphalt",
+                IsLighted = true
+            }).ToList();
+
             int countLinhaCarga = 0;
             int totalMissions = 0;
 
@@ -396,7 +412,7 @@ namespace FlightCareer.Tests.Missions
             for (int i = 0; i < 100; i++)
             {
                 var missions = MissionGenerator.GenerateMissionsInMemory(
-                    origin, allAirports, null, rng, refTime, countOverride: 20);
+                    origin, allAirports, null, rng, refTime, countOverride: 20, allRunways: runways);
 
                 foreach (var m in missions)
                 {
