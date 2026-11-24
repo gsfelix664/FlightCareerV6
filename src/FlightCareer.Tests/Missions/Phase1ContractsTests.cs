@@ -225,13 +225,9 @@ namespace FlightCareer.Tests.Missions
                 new() { ICAO = "SBLS", Name = "Aeroporto Lins", City = "Lins", Country = "BR", Tier = 3, Latitude = -21.660, Longitude = -49.730, ElevationFt = 1550 }
             };
 
-            var cat = MissionRules.Rules[2].Categories.FirstOrDefault(c => c.Id == "aeroclube");
-            Assert.NotNull(cat);
-            Assert.Equal("Aeroclube", cat.Name);
-
-            var subPanoramico = cat.SubCategories.First(s => s.Id == "voo_panoramico");
-            var subTgl = cat.SubCategories.First(s => s.Id == "circuito_tgl");
-            var subTranslado = cat.SubCategories.First(s => s.Id == "translado_basico");
+            Assert.NotNull(MissionCatalog.Shared.Get("panoramico"));
+            Assert.NotNull(MissionCatalog.Shared.Get("circuito_tgl"));
+            Assert.NotNull(MissionCatalog.Shared.Get("ferry_posicionamento"));
 
             var rng = new Random(42);
             var now = DateTime.UtcNow;

@@ -208,9 +208,9 @@ namespace FlightCareer.Tests.Economy
             var origin = new Airport { ICAO = "SBRP", Tier = 2, Latitude = -21.13, Longitude = -47.77 };
             var dest = new Airport { ICAO = "SBAU", Tier = 2, Latitude = -21.80, Longitude = -48.14 };
 
-            var subCat1 = new SubCategoryConfig { Id = "3.4.1", Name = "Instrução Pousos", Urgency = 1.0, RangeRules = new List<ProbRange> { new(10, 5, 20) } };
-            var subCat2 = new SubCategoryConfig { Id = "3.2.1", Name = "SAE Agrícola", Urgency = 1.2, RangeRules = new List<ProbRange> { new(10, 30, 100) } };
-            var subCat5 = new SubCategoryConfig { Id = "1.1.1", Name = "Linha Regular Comercial", Urgency = 1.5, RangeRules = new List<ProbRange> { new(10, 200, 500) } };
+            var subCat1 = new MissionDefinition { Id = "3.4.1", Name = "Instrução Pousos", Urgency = 1.0, Profiles = new List<MissionProfileDefinition> { new() { RangeNm = new[] { 5, 20 } } } };
+            var subCat2 = new MissionDefinition { Id = "3.2.1", Name = "SAE Agrícola", Urgency = 1.2, Profiles = new List<MissionProfileDefinition> { new() { RangeNm = new[] { 30, 100 } } } };
+            var subCat5 = new MissionDefinition { Id = "1.1.1", Name = "Linha Regular Comercial", Urgency = 1.5, Profiles = new List<MissionProfileDefinition> { new() { RangeNm = new[] { 200, 500 } } } };
 
             var rnd = new Random(123);
             var date = new DateTime(2024, 1, 1);

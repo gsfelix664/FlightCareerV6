@@ -276,8 +276,8 @@ namespace FlightCareer.Tests.Missions
                 Country = "BR"
             };
 
-            var subSurvey = new SubCategoryConfig { Id = "3.6.1", Name = "Levantamento", MinExpHours = 2, MaxExpHours = 6, Urgency = 1.0 };
-            var subSkydive = new SubCategoryConfig { Id = "3.6.2", Name = "Paraquedismo", MinExpHours = 2, MaxExpHours = 6, Urgency = 1.0 };
+            var subSurvey = new MissionDefinition { Id = "3.6.1", Name = "Levantamento", MinExpHours = 2, MaxExpHours = 6, Urgency = 1.0 };
+            var subSkydive = new MissionDefinition { Id = "3.6.2", Name = "Paraquedismo", MinExpHours = 2, MaxExpHours = 6, Urgency = 1.0 };
 
             var rng = new Random(42);
             var survey = MissionGenerator.CreateSurveyMissionSync(origin, subSurvey, rng, DateTime.UtcNow);

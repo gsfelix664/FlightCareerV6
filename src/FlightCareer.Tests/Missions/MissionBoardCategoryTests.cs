@@ -9,7 +9,10 @@ namespace FlightCareer.Tests.Missions
     public class MissionBoardCategoryTests
     {
         private static IEnumerable<string> AllSubIds() =>
-            MissionRules.Rules.Values.SelectMany(t => t.Categories).SelectMany(c => c.SubCategories).Select(s => s.Id).Distinct();
+            MissionCatalog.Shared.Missions.Values
+                .Where(m => m.Enabled)
+                .SelectMany(m => new[] { m.Id }.Concat(m.LegacyCodes))
+                .Distinct();
 
         [Theory]
         [InlineData("instrucao_local", MissionBoardKind.Instrucao)]
