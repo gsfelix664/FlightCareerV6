@@ -3092,3 +3092,16 @@
   - Testes unitários dedicados em `AirportTierRecalculationAndCountryTests.cs` (país corrigido pelo CSV e recálculo em SQLite em memória) e `MissionRunwayProfileTests.cs` (restrições de etiquetas de linha e perfis).
   - Snapshot `missions_golden.json` regravado: apenas SBMT teve alterações nas missões sorteadas (deixando de sortear tipos de linha). Todos os outros 13 aeródromos permaneceram idênticos.
   - Total de 1.004/1.004 testes aprovados (100%). Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - País pela coordenada com os contornos do Natural Earth (PAIS-A) (Gemini)
+- **Localizador de Países por Contorno (`CountryLocator`):**
+  - Implementado `FlightCareer.Domain.Geo.CountryLocator` puro, carregando polígonos simplificados e bounding boxes de 249 países do Natural Earth (`Data/places/country_borders.json`), com singleton `CountryLocator.Shared` e método `Locate(lat, lon)` (filtro rápido por bbox e algoritmo Ray Casting even-odd no anel externo respeitando exclusão de buracos/enclaves como Lesoto em ZA).
+  - Suporte a anéis planos de alta performance e conjunto imutável de códigos oficiais conhecidos (`KnownIsoCodes`).
+- **Indexador Espacial e Vizinho Mais Próximo (`AirportSpatialGrid`):**
+  - Implementado `FlightCareer.Domain.Geo.AirportSpatialGrid` para busca de vizinho mais próximo em grade esférica de 1° com distância náutica Haversine (`DistanceNm`), resolvendo aeródromos costeiros e insulares a até 50 NM de um aeroporto válido sem busca quadrática.
+- **Integração no `DataSeeder` e `TierReporter`:**
+  - `DataSeeder.ResolveMissingCountriesAsync`: novo passo executado após o enriquecimento CSV e normalização nos dois caminhos de semeadura (Little Navmap e só-CSV). Aeródromos com país não ISO (vazio, região ICAO do sim ou numérico) recebem o país pelo contorno, pelo vizinho até 50 NM ou vazio se isolados, gravados em lote numa transação SQLite com log informativo de progresso.
+  - `TierReporter` (`FlightCareer.Replay`): resolução idêntica aplicada à coluna País com seção dedicada no relatório Markdown e console (6.928 resolvidos por contorno, 89 por vizinho, apenas 13 sem país em ~5,5 s totais).
+- **Testes Unitários:**
+  - 4 novos testes em `CountryLocatorTests.cs` cobrindo pontos conhecidos (SP, Ufa, Bethel, Lisboa, Atlântico), buracos/enclaves (Maseru -> LS), países sem ISO_A2 padrão (Paris -> FR, Oslo -> NO) e teste SQLite em memória do `DataSeeder` (Ohio -> US, água a 10 NM -> BR, oceano -> vazio).
+  - Total de 1.008/1.008 testes aprovados (100%). Não testado no MSFS / não visto na tela.

@@ -3,6 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using FlightCareer.Domain.Airports;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Geo;
 using FlightCareer.Domain.Limits;
 using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Parts;
@@ -228,6 +229,8 @@ namespace FlightCareer.Infrastructure.Services
                     await EnrichFromCsvAsync(progressCallback);
                     progressCallback?.Invoke("Normalizando dados aeronáuticos e higienizando municípios...", 0.90);
                     await NormalizeAirportsInDatabaseAsync(progressCallback);
+                    progressCallback?.Invoke("Resolvendo países por coordenadas e contornos...", 0.95);
+                    await ResolveMissingCountriesAsync(progressCallback);
                     progressCallback?.Invoke("Base de dados global do simulador pronta!", 1.0);
                     return;
                 }
@@ -238,6 +241,7 @@ namespace FlightCareer.Infrastructure.Services
             await SeedAirportsAsync(progressCallback, runwayInfo);
             await SeedRunwaysAsync(progressCallback);
             await NormalizeAirportsInDatabaseAsync(progressCallback);
+            await ResolveMissingCountriesAsync(progressCallback);
         }
 
         private static string ResolveInitialCountry(string ident, string? country, string? region)
@@ -795,6 +799,121 @@ namespace FlightCareer.Infrastructure.Services
 
                 await transaction.CommitAsync();
             }
+        }
+
+        public async Task<(int ByBorder, int ByNeighbor, int RemainedEmpty)> ResolveMissingCountriesAsync(Action<string, double>? progressCallback = null)
+        {
+            var connection = _context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+            {
+                await connection.OpenAsync();
+            }
+
+            var locator = CountryLocator.Shared;
+            var validAirports = new List<(double Lat, double Lon, string Country)>();
+            var missingAirports = new List<(string Id, double Lat, double Lon, string CurrentCountry)>();
+
+            using (var selectCmd = connection.CreateCommand())
+            {
+                selectCmd.CommandText = "SELECT Id, Country, Latitude, Longitude, CsvType FROM Airports;";
+                using var reader = await selectCmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    var id = reader.GetString(0);
+                    var country = reader.IsDBNull(1) ? "" : reader.GetString(1).Trim();
+                    var lat = reader.GetDouble(2);
+                    var lon = reader.GetDouble(3);
+                    bool fromCsv = !reader.IsDBNull(4) && !string.IsNullOrEmpty(reader.GetString(4));
+
+                    // País confiável = o que veio do OurAirports com a posição batendo (inclui territórios como
+                    // GF, GP e RE, que o Natural Earth junta com a França). Sem csv, o país é a região do simulador,
+                    // que às vezes coincide com um ISO de outro país (SK = Colômbia no ICAO, Eslováquia no ISO):
+                    // esses vão sempre pelo contorno.
+                    bool trusted = fromCsv && country.Length == 2 && country.All(char.IsLetter);
+                    if (trusted)
+                    {
+                        validAirports.Add((lat, lon, country));
+                    }
+                    else
+                    {
+                        missingAirports.Add((id, lat, lon, country));
+                    }
+                }
+            }
+
+            if (missingAirports.Count == 0)
+            {
+                return (0, 0, 0);
+            }
+
+            var grid = new AirportSpatialGrid();
+            for (int i = 0; i < validAirports.Count; i++)
+            {
+                grid.Add(validAirports[i].Lat, validAirports[i].Lon, validAirports[i].Country);
+            }
+
+            int resolvedByBorder = 0;
+            int resolvedByNeighbor = 0;
+            int remainedEmpty = 0;
+            var updates = new List<(string Id, string Country)>();
+
+            for (int i = 0; i < missingAirports.Count; i++)
+            {
+                var (id, lat, lon, currentCountry) = missingAirports[i];
+                string? country = locator.Locate(lat, lon);
+                if (country != null)
+                {
+                    resolvedByBorder++;
+                    updates.Add((id, country));
+                    grid.Add(lat, lon, country);
+                }
+                else
+                {
+                    string? neighborCountry = grid.FindNearestCountry(lat, lon, 50.0);
+                    if (neighborCountry != null)
+                    {
+                        resolvedByNeighbor++;
+                        updates.Add((id, neighborCountry));
+                        grid.Add(lat, lon, neighborCountry);
+                    }
+                    else
+                    {
+                        remainedEmpty++;
+                        if (!string.IsNullOrEmpty(currentCountry))
+                        {
+                            updates.Add((id, ""));
+                        }
+                    }
+                }
+            }
+
+            if (updates.Count > 0)
+            {
+                using var transaction = connection.BeginTransaction();
+                using var updateCmd = connection.CreateCommand();
+                updateCmd.Transaction = transaction;
+                updateCmd.CommandText = "UPDATE Airports SET Country = @country WHERE Id = @id;";
+
+                var pCountry = updateCmd.CreateParameter();
+                pCountry.ParameterName = "@country";
+                updateCmd.Parameters.Add(pCountry);
+
+                var pId = updateCmd.CreateParameter();
+                pId.ParameterName = "@id";
+                updateCmd.Parameters.Add(pId);
+
+                for (int i = 0; i < updates.Count; i++)
+                {
+                    pCountry.Value = updates[i].Country;
+                    pId.Value = updates[i].Id;
+                    await updateCmd.ExecuteNonQueryAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+
+            System.Diagnostics.Debug.WriteLine($"[DataSeeder] Resolução de países: {resolvedByBorder} por contorno, {resolvedByNeighbor} por vizinho e {remainedEmpty} ficaram vazios.");
+            return (resolvedByBorder, resolvedByNeighbor, remainedEmpty);
         }
 
         private async Task<Dictionary<string, (int LongestLengthFt, bool IsPaved)>> GetRunwayInfoFromCsvAsync(Action<string, double>? progressCallback)
