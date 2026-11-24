@@ -80,7 +80,7 @@ namespace FlightCareer.Tests.Missions
                 }
             }
 
-            Assert.Equal(17, disabledCount);
+            Assert.Equal(13, disabledCount);
         }
 
         [Fact]

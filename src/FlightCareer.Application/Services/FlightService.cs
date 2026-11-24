@@ -59,7 +59,8 @@ namespace FlightCareer.Application.Services
             int surveyLegsCompleted = 0,
             bool skydiveDropCompleted = false,
             bool skydiveThermalShock = false,
-            double skydiveMaxCoolingRate = 0.0)
+            double skydiveMaxCoolingRate = 0.0,
+            MissionTrackerResults? trackers = null)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -303,7 +304,8 @@ namespace FlightCareer.Application.Services
                 {
                     var completion = MissionCompletion.Evaluate(
                         mission, destinationIcao, visitedWaypoints, touchAndGoCount,
-                        surveyLegsCompleted, skydiveDropCompleted, skydiveThermalShock, skydiveMaxCoolingRate);
+                        surveyLegsCompleted, skydiveDropCompleted, skydiveThermalShock, skydiveMaxCoolingRate,
+                        trackers: trackers);
 
                     if (!isFlightInvalidated && completion.IsCompleted)
                     {

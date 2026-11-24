@@ -43,6 +43,11 @@ namespace FlightCareer.UI.Services
         private readonly OverflyTracker _overflyTracker = new();
         private readonly SurveyLegTracker _surveyTracker = new();
         private readonly SkydiveDropTracker _skydiveTracker = new();
+        private readonly MultiStopTracker _multiStopTracker = new();
+        private readonly StolLandingTracker _stolTracker = new();
+        private readonly CheckFlightTracker _checkFlightTracker = new();
+        private readonly FerryRestrictionMonitor _ferryMonitor = new();
+        private DateTime _lastSimDataTick = DateTime.MinValue;
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -669,6 +674,11 @@ namespace FlightCareer.UI.Services
             _overflyTracker.Reset();
             _surveyTracker.Reset();
             _skydiveTracker.Reset();
+            _multiStopTracker.Reset(_simConnect.CurrentData.IsOnGround);
+            _stolTracker.Reset(_simConnect.CurrentData.IsOnGround);
+            _checkFlightTracker.Reset();
+            _ferryMonitor.Reset(_simConnect.CurrentData.IsOnGround);
+            _lastSimDataTick = DateTime.MinValue;
             foreach (var m in missions)
             {
                 var def = MissionCatalog.Shared.Get(m.SubId);
@@ -689,6 +699,42 @@ namespace FlightCareer.UI.Services
                         if (skydive != null) _skydiveTracker.Configure(skydive);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de paraquedismo inválido ({m.Id}): {ex.Message}"); }
+                }
+                else if ((def?.Generator == "multi_stop" || def?.Generator == "vfr_triangle") && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var multi = System.Text.Json.JsonSerializer.Deserialize<MultiStopContractData>(m.ContractData);
+                        if (multi != null) _multiStopTracker.Configure(multi, _simConnect.CurrentData.IsOnGround);
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato multi-stop inválido ({m.Id}): {ex.Message}"); }
+                }
+                else if (def?.Generator == "stol_training" && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var stol = System.Text.Json.JsonSerializer.Deserialize<StolContractData>(m.ContractData);
+                        if (stol != null) _stolTracker.Configure(stol, _simConnect.CurrentData.IsOnGround);
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato STOL inválido ({m.Id}): {ex.Message}"); }
+                }
+                else if (def?.Generator == "check_flight" && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var check = System.Text.Json.JsonSerializer.Deserialize<CheckFlightContractData>(m.ContractData);
+                        if (check != null) _checkFlightTracker.Configure(check);
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato voo de teste inválido ({m.Id}): {ex.Message}"); }
+                }
+                else if (def?.Generator == "ferry_permit" && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var ferry = System.Text.Json.JsonSerializer.Deserialize<FerryPermitContractData>(m.ContractData);
+                        if (ferry != null) _ferryMonitor.Configure(ferry, _simConnect.CurrentData.IsOnGround);
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato ferry permit inválido ({m.Id}): {ex.Message}"); }
                 }
             }
             if (missions.Any(m => !string.IsNullOrWhiteSpace(m.OverflyWaypoints)))
@@ -1048,6 +1094,29 @@ namespace FlightCareer.UI.Services
             if (_overflyTracker.HasWaypoints)
             {
                 _overflyTracker.Update(data.Latitude, data.Longitude, data.Altitude);
+            }
+
+            DateTime nowSimData = DateTime.Now;
+            double dtSimData = _lastSimDataTick == DateTime.MinValue ? 1.0 : (nowSimData - _lastSimDataTick).TotalSeconds;
+            if (dtSimData <= 0 || dtSimData > 5.0) dtSimData = 1.0;
+            _lastSimDataTick = nowSimData;
+            double packetSimDt = SimTimeStep.ToSimSeconds(dtSimData, data.SimulationRate);
+
+            if (_multiStopTracker.HasActiveContract)
+            {
+                _multiStopTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.GroundSpeed, data.FuelTotalGallons, packetSimDt);
+            }
+            if (_stolTracker.HasActiveContract)
+            {
+                _stolTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.Altitude, data.GroundSpeed, data.VerticalSpeed, data.CrosswindComponentKnots, packetSimDt);
+            }
+            if (_checkFlightTracker.HasActiveContract)
+            {
+                _checkFlightTracker.Update(data.IsOnGround, data.Altitude, data.PlaneHeading, data.EngineRPM, data.MaxRPM, data.EngineN1, data.EngineType, packetSimDt);
+            }
+            if (_ferryMonitor.HasActiveContract)
+            {
+                _ferryMonitor.Update(data.IsOnGround, data.Altitude, data.FlapsPercent, packetSimDt);
             }
 
             // --- MONITORAMENTO DE INTEGRIDADE: SLEW E CONGELAMENTOS ---
@@ -1825,7 +1894,19 @@ namespace FlightCareer.UI.Services
                 surveyLegsCompleted: _surveyTracker.CompletedLegs,
                 skydiveDropCompleted: _skydiveTracker.DropCompleted,
                 skydiveThermalShock: _skydiveTracker.ThermalShockDetected,
-                skydiveMaxCoolingRate: _skydiveTracker.MaxCoolingRateObserved
+                skydiveMaxCoolingRate: _skydiveTracker.MaxCoolingRateObserved,
+                trackers: new MissionTrackerResults(
+                    VisitedWaypoints: _overflyTracker.VisitedWaypoints,
+                    TouchAndGoCount: _touchAndGoCounter.Count,
+                    SurveyLegsCompleted: _surveyTracker.CompletedLegs,
+                    SkydiveDropCompleted: _skydiveTracker.DropCompleted,
+                    SkydiveThermalShock: _skydiveTracker.ThermalShockDetected,
+                    SkydiveMaxCoolingRate: _skydiveTracker.MaxCoolingRateObserved,
+                    MultiStop: _multiStopTracker,
+                    Stol: _stolTracker,
+                    CheckFlight: _checkFlightTracker,
+                    Ferry: _ferryMonitor
+                )
             );
 
             OnFlightFinished?.Invoke(outcome);

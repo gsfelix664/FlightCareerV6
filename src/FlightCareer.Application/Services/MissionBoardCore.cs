@@ -218,7 +218,48 @@ namespace FlightCareer.Application.Services
             if (def.Generator == "skydive")
             {
                 return WithPersonLuggage(MissionGenerator.CreateSkydiveMissionSync(
-                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog, paxOverride: paxCount), def, random);
+            }
+
+            if (def.Generator == "multi_stop")
+            {
+                var multi = MissionGenerator.CreateMultiStopMissionSync(
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, paxCount, cargoLbs);
+                return multi != null ? WithPersonLuggage(multi, def, random) : null;
+            }
+
+            if (def.Generator == "vfr_triangle")
+            {
+                var triangle = MissionGenerator.CreateVfrTriangleMissionSync(
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog);
+                return triangle != null ? WithPersonLuggage(triangle, def, random) : null;
+            }
+
+            if (def.Generator == "stol_training")
+            {
+                var stol = MissionGenerator.CreateStolTrainingMissionSync(
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog);
+                return stol != null ? WithPersonLuggage(stol, def, random) : null;
+            }
+
+            if (def.Generator == "check_flight")
+            {
+                var check = MissionGenerator.CreateCheckFlightMissionSync(
+                    origin, def, random, referenceTime, payMultiplier, payTable, textCatalog, paxCount);
+                return WithPersonLuggage(check, def, random);
+            }
+
+            if (def.Generator == "ferry_permit")
+            {
+                var validCandidatesFerry = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
+                if (validCandidatesFerry.Count == 0) return null;
+                var destCand = PickDestination(def, validCandidatesFerry, getAirportTags, random);
+                if (destCand == null) return null;
+                double actualDistFerry = MissionGenerator.CalculateDistance(
+                    origin.Latitude, origin.Longitude, destCand.Airport.Latitude, destCand.Airport.Longitude);
+                return MissionGenerator.CreateFerryPermitMissionSync(
+                    origin, destCand.Airport, actualDistFerry, def, random, referenceTime,
+                    payMultiplier, payTable, textCatalog, destCand.BestRunway);
             }
 
             if (def.Generator == "tgl_circuit")

@@ -3126,3 +3126,22 @@
 - (2) Peso do destino preferido nas missões de saúde de 5–6 para 150 (`orgaos`, `uti_longa_distancia`, `medevac_remoto`), com teto novo por missão `destination.maxMultiplier` = 150 (`MissionDestinationRule.MaxMultiplier`; padrão continua ×12 em `MissionWeighting.DefaultDestinationMaxMultiplier`). Voos ao destino preferido no `board-report` só-CSV: órgãos 47 % → 84 %, UTI longa distância 18 % → 86 %, medevac remoto 8 % → 20 % (poucas cidades tier 2–3 com hospital etiquetado ao alcance das pistas remotas; sem nova curadoria, por decisão do usuário). `medevac_remoto` corrigido para o sentido do plano (pista remota → cidade com hospital): destino tier 2–3, qualquer pista (antes exigia pista curta/terra e aceitava tier 1), preferência `saude:hospital_referencia` ×150 e `saude` ×30.
 - Snapshot `missions_golden.json` regravado: 4 registros mudaram, todos de saúde (2 de órgãos e 2 de medevac remoto, que deixou de mandar paciente de SWCA para o SBGR). 1.022/1.022 testes. Testes `MissionLineHubAndHealthTests`.
 - Medido só com o `airports.csv` (sem Little Navmap); conferir o `board-report` no PC de casa, porque o efeito depende do tier real. Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - Primeiro lote de missões com regra própria (E2C-1) (Gemini)
+- **Rastreadores puros de regras operacionais (`Domain/Missions/`):**
+  - `MultiStopTracker`: paradas completas sequenciais (`GroundSpeed < 3 kt` por $\ge 5$ s simulados a $\le 1,5$ NM) em cada escala intermediária com nova decolagem exigida entre elas e verificação de reabastecimento indevido (`max(1 gal, 2%)`).
+  - `StolLandingTracker`: monitoramento de pousos curtos com aproximação íngreme (ângulo médio $\ge 4^\circ$ nos últimos 300 ft AGL) e distância de parada $\le \text{clamp}(0,6 \times \text{RunwayLength}, 300, 1.000)$ ft, com detecção de vento de través $\ge 8$ kt para bônus/aviso positivo.
+  - `CheckFlightTracker`: validação sequencial por passos de voo de teste técnico (atingir altitude $\pm 300$ ft, potência máxima por 10 s, manutenção dos 4 rumos cardeais por 15 s na altitude e pouso na origem).
+  - `FerryRestrictionMonitor`: restrição técnica de translado com verificação de teto de voo (máximo 10 s simulados acumulados acima de $MaxAlt + 200$) ou travamento de superfícies de flaps ($\pm 5\%$).
+  - `MissionTrackerResults`: agregação desacoplada dos resultados dos rastreadores para avaliação em `MissionCompletion.Evaluate`.
+- **Contratos e Geradores Especiais (`ContractData.cs`, `MissionGenerator.cs`, `MissionBoardCore.cs`):**
+  - Classes de dados tipadas em JSON: `MultiStopContractData`, `StopPoint`, `StolContractData`, `CheckFlightContractData`, `FerryPermitContractData`.
+  - Habilitados e configurados no `mission_catalog.json` e `MissionBoardCore.cs`: `pinga_pinga` (multi_stop), `navegacao_vfr` (vfr_triangle com ponto de reportagem), `instrucao_stol` (stol_training), `check_flight` (check_flight) e `ferry_permit` (ferry_permit com preferência por destinos de manutenção MRO).
+  - Paraquedismo (`skydive`): atualizado para respeitar os perfis de ocupação do catálogo (35% 3–6 pax, 50% 8–14 pax, 15% 15–20 pax com `bigAirport`) e cálculo de bagagem proporcional individual por saltador (12–16 kg em lb).
+- **Textos de RP (`mission_texts.json`):**
+  - $\ge 3$ variantes imersivas de títulos e descrições para cada um dos 5 novos tipos operacionais com interpolação de marcadores.
+- **Integração no `FlightMonitor` e `FlightService`:**
+  - Instanciação, reset operacional e atualização contínua dos rastreadores por telemetria de 1 s em `OnSimDataReceived` usando tempo simulado; repasse de `MissionTrackerResults` na conclusão do voo para o `MissionCompletion.Evaluate`.
+- **Suíte de Testes e Snapshot:**
+  - Suíte xUnit dedicada com 29 novos testes cobrindo todas as máquinas de estado e geradores (`MultiStopTrackerTests`, `VfrTriangleTests`, `StolLandingTrackerTests`, `CheckFlightTrackerTests`, `FerryRestrictionMonitorTests`, `PhaseE2C1GeneratorsTests`).
+  - Total de 1.051/1.051 testes aprovados (100%). Snapshot `missions_golden.json` regravado refletindo a ativação dos 6 tipos. Não testado no MSFS / não visto na tela.

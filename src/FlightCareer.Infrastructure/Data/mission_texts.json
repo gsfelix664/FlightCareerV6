@@ -29,8 +29,16 @@
   ],
   "navegacao_vfr": [
     {
-      "title": "Navegação VFR ({dest})",
-      "description": "Navegação VFR: voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reportagem obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR triangular ({distance_nm} NM total). Cumprir reporte visual na primeira perna, escala completa em {stop_a}, prosseguimento para escala em {stop_b} e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Triângulo VFR de Aeroclube ({origin})",
+      "description": "Exercício de navegação em triângulo ligando {origin} a {stop_a} e {stop_b} com ponto de reporte mandatório. Requer paradas completas em cada aeródromo na ordem e pouso final em {origin}."
     }
   ],
   "instrucao_ifr": [
@@ -53,8 +61,16 @@
   ],
   "instrucao_stol": [
     {
-      "title": "Instrução STOL / Bush ({dest})",
-      "description": "Instrução STOL / Bush: voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Instrução STOL / Pouso Curto em {strip}",
+      "description": "Treinamento de técnicas bush em pista desfavorável em {strip} ({rwy_len} ft). Exige aproximação íngreme (rampa ≥ 4°) e {landings} pousos com parada completa em até {max_stop} ft. Retorno para pouso em {origin}."
+    },
+    {
+      "title": "Aperfeiçoamento Bush / Pista Curta ({strip})",
+      "description": "Sessão de instrução avançada de pousos de precisão em pista curta em {strip}. Executar {landings} toques com rampa acentuada e parada curta (≤ {max_stop} ft). Retorno e pouso completo na base {origin}."
+    },
+    {
+      "title": "Treinamento STOL Operacional: {strip}",
+      "description": "Instrução em campo não pavimentado ({strip}) com {pax} instrutor. Rampa de aproximação íngreme sobre obstáculos e imobilização em ≤ {max_stop} ft por {landings} vezes com retorno a {origin}."
     }
   ],
   "ponte_aerea": [
@@ -101,8 +117,16 @@
   ],
   "pinga_pinga": [
     {
-      "title": "Pinga-Pinga Regional ({dest})",
-      "description": "Pinga-Pinga Regional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Pinga-Pinga Regional: Linha Postal e Encomendas ({stops_count} escalas)",
+      "description": "Voo regular de interior ligando {origin} a {dest} com escalas intermediárias em {stops_list}. Transporte de {pax} passageiros e {cargo_lbs} lbs de malotes e encomendas. Proibido reabastecer entre as etapas."
+    },
+    {
+      "title": "Pinga-Pinga do Interior: {origin} a {dest}",
+      "description": "Atendimento regional com paradas completas em {stops_list} e destino final em {dest}. {pax} passageiros e {cargo_lbs} lbs de carga distribuídos pela rota sem reabastecimento."
+    },
+    {
+      "title": "Rota Multi-Escalas Regional ({dest})",
+      "description": "Circuito regional conectando {origin} ao destino {dest} via {stops_list}. Exige pouso completo em cada escala intermediária mantendo autonomia original com {pax} pax e {cargo_lbs} lbs."
     }
   ],
   "regional_essencial": [
@@ -391,14 +415,30 @@
   ],
   "ferry_permit": [
     {
-      "title": "Translado com Restrição Técnica (Special Permit) ({dest})",
-      "description": "Translado com Restrição Técnica (Special Permit): voo de {origin} para {dest}."
+      "title": "Translado com Restrição Técnica para {dest}",
+      "description": "Voo com Special Flight Permit de {origin} para {dest}. Limitação operacional mandatória: {restriction_desc}. Desvio ou violação invalida a autorização de translado."
+    },
+    {
+      "title": "Voo de Translado sob Autorização Especial ({dest})",
+      "description": "Translado vazio para homologação ou reparos estruturais em {dest}. Restrição técnica ativa: {restriction_desc}. Condução estrita dentro dos limites operacionais de segurança."
+    },
+    {
+      "title": "Special Flight Permit: {origin} a {dest}",
+      "description": "Reposicionamento técnico até a base de manutenção em {dest} sob restrição ({restriction_desc}). Aeronave em translado sem passageiros ou carga."
     }
   ],
   "check_flight": [
     {
-      "title": "Voo de Teste Pós-Manutenção ({dest})",
-      "description": "Voo de Teste Pós-Manutenção: voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Voo de Teste Pós-Manutenção ({origin})",
+      "description": "Voo de cheque e calibração de sistemas após intervenção mecânica em {origin}. Subida para {alt} ft MSL, verificação de potência máxima contínua e manutenção dos 4 rumos cardinais (N, E, S, W) nivelado. Pouso na origem com {pax} mecânico."
+    },
+    {
+      "title": "Cheque Funcional em Voo (Swing Check & Potência)",
+      "description": "Avaliação operacional de aviônicos e grupo motopropulsor após serviço de oficina em {origin}. Roteiro: atingir {alt} ft, 10 s de potência máxima, 15 s em cada rumo cardinal na tolerância e retorno à origem."
+    },
+    {
+      "title": "Voo de Verificação de Oficina em {origin}",
+      "description": "Voo técnico local de homologação pós-revisão. Exige nivelamento a {alt} ft MSL, teste de rotação plena do motor e estabilização de bússola nos 4 pontos cardinais antes do pouso em {origin}."
     }
   ],
   "crew_parts": [
