@@ -154,16 +154,16 @@ namespace FlightCareer.Application.Services
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
                 var subAdapter = ToSubCategoryConfig(def);
-                return MissionGenerator.CreateLocalInstructionMissionSync(
-                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog);
+                return WithPersonLuggage(MissionGenerator.CreateLocalInstructionMissionSync(
+                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
             }
 
             if (def.Generator == "checkride")
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
                 var subAdapter = ToSubCategoryConfig(def);
-                return MissionGenerator.CreateCheckrideMissionSync(
-                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog);
+                return WithPersonLuggage(MissionGenerator.CreateCheckrideMissionSync(
+                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
             }
 
             if (def.Generator == "scenic_tour")
@@ -171,21 +171,21 @@ namespace FlightCareer.Application.Services
                 var subAdapter = ToSubCategoryConfig(def);
                 var tour = MissionGenerator.CreateScenicTourMissionSync(
                     origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
-                if (tour != null) return tour;
+                if (tour != null) return WithPersonLuggage(tour, def, random);
             }
 
             if (def.Generator == "survey")
             {
                 var subAdapter = ToSubCategoryConfig(def);
-                return MissionGenerator.CreateSurveyMissionSync(
-                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
+                return WithPersonLuggage(MissionGenerator.CreateSurveyMissionSync(
+                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
             }
 
             if (def.Generator == "skydive")
             {
                 var subAdapter = ToSubCategoryConfig(def);
-                return MissionGenerator.CreateSkydiveMissionSync(
-                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
+                return WithPersonLuggage(MissionGenerator.CreateSkydiveMissionSync(
+                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
             }
 
             if (def.Generator == "tgl_circuit")
@@ -264,6 +264,20 @@ namespace FlightCareer.Application.Services
             }
 
             return weightedProfiles[^1].Profile;
+        }
+
+        /// <summary>
+        /// Os geradores especiais (instrução, cheque, panorâmico, levantamento, paraquedismo) escolhem os
+        /// próprios passageiros e não sabiam da bagagem por pessoa: aplica a bagagem do catálogo pelo
+        /// número de pessoas da missão gerada e corrige o peso total.
+        /// </summary>
+        public static Mission? WithPersonLuggage(Mission? mission, MissionDefinition def, Random random)
+        {
+            if (mission == null) return null;
+            double luggage = CalculateLuggageLbs(def, mission.PassengerCount, random);
+            mission.PayloadLbs = Math.Round(mission.PayloadLbs - mission.LuggageWeightLbs + luggage, 0);
+            mission.LuggageWeightLbs = luggage;
+            return mission;
         }
 
         public static double CalculateLuggageLbs(MissionDefinition def, int paxCount, Random random)

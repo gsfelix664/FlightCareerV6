@@ -3049,3 +3049,9 @@
 - `DataSeeder.EnrichFromCsvAsync`: com o banco do Little Navmap, a cidade, o país e a elevação faltantes vinham do `airports.csv` casando só o código; nos códigos reaproveitados (433 de 7.822 a mais de 10 NM do MSFS) entrava a cidade de outro aeródromo (ex.: SBOK, Amontada/CE no MSFS, recebia "Lucas do Rio Verde"). Agora só completa quando a posição do csv bate até 10 NM (`DataSeeder.IsSameAirportPosition`, função SQLite `fc_same_place`). Testes `AirportCsvEnrichmentTests`.
 - Plano novo `docs/plans/importador-aeroportos-simconnect.md`: base de aeroportos e pistas lida do simulador aberto pelo SimConnect (como o Little Navmap faz no MSFS 2024), com o Little Navmap e o csv como reserva.
 - Não conferido num banco gerado de verdade nem no MSFS.
+
+## 2026-11-24 - Quadro de SBMT conferido: peso militar, navegação VFR e bagagem (Claude)
+- Conferência das 120 missões geradas em SBMT (banco do usuário): `militar_can` saía em 18 % porque a etiqueta `militar` casava os subtipos militares de aeroporto de uso misto. Novo casamento exato `etiqueta!` (`AirportProfileCatalog.MatchTag`); `militar_can` passa a usar `militar!` ×6 e `militar_misto` ×2.
+- `navegacao_vfr` nunca saía (faixa 80–250 NM com limite de 80 NM = nenhum destino): faixa de uma etapa 30–90 NM até a E2C (triângulo).
+- Bagagem por pessoa também nos geradores especiais (instrução, cheque, panorâmico, levantamento, paraquedismo): `MissionBoardCore.WithPersonLuggage`.
+- Snapshot regravado. Pendente: o gerador de paraquedismo ainda sorteia 4–10 saltadores fixos em vez dos perfis do catálogo.
