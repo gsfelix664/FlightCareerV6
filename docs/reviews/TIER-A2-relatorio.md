@@ -1,6 +1,6 @@
 # TIER-A2 — país certo, linha aérea entre aeroportos de linha e recálculo do tier
 
-**Branch:** feat/tier-movimento · **Commit:** pendente · **Data:** 2026-11-24
+**Branch:** feat/tier-movimento · **Commit:** 846640b · **Data:** 2026-11-24
 
 ## Plano (antes de codar)
 - Item 1 (País): no `DataSeeder.EnrichFromCsvAsync` e no `TierReporter.cs`, sempre que a posição bater com o CSV (`fc_same_place` / `IsSameAirportPosition`), atribuir `Country = iso_country` do CSV.
