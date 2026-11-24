@@ -482,3 +482,15 @@ Vários jatos tinham em `CargaMax(lbs)` um valor próximo da carga útil (carga 
 | A310 | 70.000 | mantido | MZFW 113–114 t (Airbus); 31,8 t coerente | média |
 | A330 BelugaXL, 747 Supertanker | 113.000 / 150.000 | mantidos | BelugaXL 51 t de carga (Airbus); Supertanker = carga de água/retardante | — |
 - SkyCourier tem cabine conversível: na configuração carga o app permite até min(CargaMax + 19 × 170, 1,3 × CargaMax) = 7.150 lb, acima dos 6.000 do cargueiro real. Ajustar a regra de conversão fica para depois (não bloqueia).
+
+## 10. Tipos de missão para um plano futuro (ideias do usuário, 2026-11-24)
+Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterior, com regras a detalhar e SimVars a conferir no SDK.
+
+### A. Instrução e formação
+| id | Missão | Regras / avaliação (ideia) | HUD |
+|---|---|---|---|
+| voo_solo | Primeiro voo solo / solo local: igual ao circuito ou à área local, mas sem o instrutor a bordo (peso zero no assento dele) | critérios mais rígidos que no voo com instrutor: pouso (razão e G), aproximação estabilizada na final e controle de eixo da pista (desvio da linha central); dá a sensação de conquista na carreira (marco no logbook) | "Solo: TGL x/N"; estabilização e eixo ao vivo |
+| navegacao_solo | Navegação VFR solo | diferente da `navegacao_vfr` com instrutor: cumprir os pontos de rota e os estimados de tempo sem desvio significativo de rota ou altitude para validar a missão | "Próximo ponto X: estimado hh:mm"; desvio de rota/altitude ao vivo |
+
+### B. Linha aérea e regular
+(a completar pelo usuário)
