@@ -3028,3 +3028,7 @@
 - `airport_profiles.json` regerado: 402 aeroportos com a etiqueta `turistico_curado` (antes 16).
 - Snapshot do gerador (`missions_golden.json`) regravado: só mudaram as missões de SBJR, SBFI e SDUB (bases panorâmicas com atrações novas); os outros 11 aeroportos ficaram idênticos. `PlacesDataServiceTests` não fixa mais a contagem em 16.
 - Não testado no MSFS / não visto na tela.
+
+## 2026-11-23 - Carga paga do 747-400 e faixas de missão aprovadas (Claude)
+- `aircrafts.csv`: `CargaMax(lbs)` do Boeing 747-400 (passageiros) corrigido de 475.000 (carga útil) para 148.412 lb (MZFW − OEW). Outros jatos com o mesmo tipo de erro listados no plano `catalogo-missoes.md` › 9.7.2, aguardando aprovação.
+- Plano: tabela de faixas (§ 9.7.1) aprovada pelo usuário, limitada aos aviões do `aircrafts.csv`.
