@@ -13,6 +13,8 @@ namespace FlightCareer.Domain.Missions
         public double? MaxNm { get; set; }
         public Dictionary<string, double> Profiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public List<string>? RequireAnyTag { get; set; }
+        /// <summary>Teto do produto dos multiplicadores de destino (padrão 12; missões de saúde usam mais).</summary>
+        public double MaxMultiplier { get; set; } = MissionWeighting.DefaultDestinationMaxMultiplier;
 
         // Compatibilidade legada
         public string? PreferredHubs { get; set; }

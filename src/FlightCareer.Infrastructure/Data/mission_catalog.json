@@ -580,7 +580,7 @@
         },
         "requireAnyTag": [
           "linha",
-          "linha_auto"
+          "linha_auto:hub"
         ]
       },
       "profiles": [
@@ -626,7 +626,7 @@
       ],
       "requireAnyTag": [
         "linha",
-        "linha_auto"
+        "linha_auto:hub"
       ]
     },
     {
@@ -665,7 +665,7 @@
         },
         "requireAnyTag": [
           "linha",
-          "linha_auto"
+          "linha_auto:hub"
         ]
       },
       "profiles": [
@@ -749,7 +749,7 @@
       ],
       "requireAnyTag": [
         "linha",
-        "linha_auto"
+        "linha_auto:hub"
       ]
     },
     {
@@ -787,7 +787,7 @@
         },
         "requireAnyTag": [
           "linha",
-          "linha_auto"
+          "linha_auto:hub"
         ]
       },
       "profiles": [
@@ -869,7 +869,7 @@
       ],
       "requireAnyTag": [
         "linha",
-        "linha_auto"
+        "linha_auto:hub"
       ]
     },
     {
@@ -907,7 +907,7 @@
         },
         "requireAnyTag": [
           "linha",
-          "linha_auto"
+          "linha_auto:hub"
         ]
       },
       "profiles": [
@@ -991,7 +991,7 @@
       ],
       "requireAnyTag": [
         "linha",
-        "linha_auto"
+        "linha_auto:hub"
       ]
     },
     {
@@ -3732,9 +3732,10 @@
         "country": "same",
         "runway": "paved",
         "maxNm": null,
+        "maxMultiplier": 150,
         "profiles": {
-          "saude:orgaos": 6,
-          "saude:hospital_referencia": 6
+          "saude:orgaos": 150,
+          "saude:hospital_referencia": 150
         }
       },
       "profiles": [
@@ -3883,15 +3884,16 @@
       "destination": {
         "rule": "standard",
         "tiers": [
-          1,
           2,
           3
         ],
         "country": "same",
-        "runway": "short_or_unpaved",
+        "runway": "any",
         "maxNm": null,
+        "maxMultiplier": 150,
         "profiles": {
-          "saude": 3
+          "saude:hospital_referencia": 150,
+          "saude": 30
         }
       },
       "profiles": [
@@ -3973,8 +3975,9 @@
         "country": "other",
         "runway": "paved",
         "maxNm": null,
+        "maxMultiplier": 150,
         "profiles": {
-          "saude:hospital_referencia": 5
+          "saude:hospital_referencia": 150
         }
       },
       "profiles": [

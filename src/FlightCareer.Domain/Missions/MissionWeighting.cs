@@ -48,6 +48,9 @@ namespace FlightCareer.Domain.Missions
             return weight;
         }
 
+        /// <summary>Teto padrão do produto dos multiplicadores de destino.</summary>
+        public const double DefaultDestinationMaxMultiplier = 12.0;
+
         public static double DestinationWeight(MissionDefinition m, IReadOnlySet<string> destTags)
         {
             double multProduct = 1.0;
@@ -62,7 +65,8 @@ namespace FlightCareer.Domain.Missions
                 }
             }
 
-            multProduct = Math.Min(12.0, multProduct);
+            double cap = m.Destination?.MaxMultiplier > 0 ? m.Destination.MaxMultiplier : DefaultDestinationMaxMultiplier;
+            multProduct = Math.Min(cap, multProduct);
             return Math.Max(1.0, multProduct);
         }
     }
