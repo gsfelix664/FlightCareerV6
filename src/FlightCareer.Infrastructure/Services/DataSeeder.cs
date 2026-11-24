@@ -815,7 +815,7 @@ namespace FlightCareer.Infrastructure.Services
 
             using (var selectCmd = connection.CreateCommand())
             {
-                selectCmd.CommandText = "SELECT Id, Country, Latitude, Longitude FROM Airports;";
+                selectCmd.CommandText = "SELECT Id, Country, Latitude, Longitude, CsvType FROM Airports;";
                 using var reader = await selectCmd.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
@@ -823,8 +823,14 @@ namespace FlightCareer.Infrastructure.Services
                     var country = reader.IsDBNull(1) ? "" : reader.GetString(1).Trim();
                     var lat = reader.GetDouble(2);
                     var lon = reader.GetDouble(3);
+                    bool fromCsv = !reader.IsDBNull(4) && !string.IsNullOrEmpty(reader.GetString(4));
 
-                    if (!string.IsNullOrEmpty(country) && locator.KnownIsoCodes.Contains(country))
+                    // País confiável = o que veio do OurAirports com a posição batendo (inclui territórios como
+                    // GF, GP e RE, que o Natural Earth junta com a França). Sem csv, o país é a região do simulador,
+                    // que às vezes coincide com um ISO de outro país (SK = Colômbia no ICAO, Eslováquia no ISO):
+                    // esses vão sempre pelo contorno.
+                    bool trusted = fromCsv && country.Length == 2 && country.All(char.IsLetter);
+                    if (trusted)
                     {
                         validAirports.Add((lat, lon, country));
                     }

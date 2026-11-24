@@ -244,6 +244,12 @@ namespace FlightCareer.Replay
                         }
                     }
                 }
+                // Mesma regra do DataSeeder.ResolveMissingCountriesAsync: sem csv batendo, o país do simulador é a
+                // região ICAO (pode coincidir com o ISO de outro país): fica vazio e vai pelo contorno
+                if (csvType == null)
+                {
+                    country = "";
+                }
 
                 var tags = catalog.TagsFor(ident);
                 var input = new AirportTierInput(
@@ -288,7 +294,7 @@ namespace FlightCareer.Replay
             for (int i = 0; i < list.Count; i++)
             {
                 var a = list[i];
-                if (!string.IsNullOrEmpty(a.Country) && locator.KnownIsoCodes.Contains(a.Country))
+                if (!string.IsNullOrEmpty(a.Country))
                 {
                     grid.Add(a.Lat, a.Lon, a.Country);
                 }
@@ -303,7 +309,7 @@ namespace FlightCareer.Replay
             for (int i = 0; i < list.Count; i++)
             {
                 var a = list[i];
-                if (string.IsNullOrEmpty(a.Country) || !locator.KnownIsoCodes.Contains(a.Country))
+                if (string.IsNullOrEmpty(a.Country))
                 {
                     totalInvalid++;
                     string? byBorder = locator.Locate(a.Lat, a.Lon);

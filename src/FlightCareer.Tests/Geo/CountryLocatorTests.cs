@@ -71,6 +71,7 @@ namespace FlightCareer.Tests.Geo
             Guid idBrValido = Guid.NewGuid();
             Guid idAgua = Guid.NewGuid();
             Guid idOceano = Guid.NewGuid();
+            Guid idCaiena = Guid.NewGuid();
 
             // 1. Aeroporto com Country = "K4" em Ohio -> US (resolvido por contorno)
             // 2. Aeroporto válido no Brasil (SBRJ: -22.9104, -43.1631, BR)
@@ -98,6 +99,7 @@ namespace FlightCareer.Tests.Geo
                         ICAO = "SBRJ",
                         Name = "Santos Dumont",
                         Country = "BR",
+                        CsvType = "medium_airport",
                         Latitude = -22.9104,
                         Longitude = -43.1631,
                         ElevationFt = 9,
@@ -127,6 +129,18 @@ namespace FlightCareer.Tests.Geo
                         ElevationFt = 0,
                         Tier = 4,
                         IsInSimulator = true
+                    },
+                    new Airport
+                    {
+                        Id = idCaiena,
+                        ICAO = "SOCA",
+                        Name = "Caiena (país do OurAirports: GF)",
+                        Country = "GF",
+                        CsvType = "medium_airport",
+                        Latitude = 4.8198,
+                        Longitude = -52.3604,
+                        Tier = 2,
+                        IsInSimulator = true
                     }
                 );
                 await db.SaveChangesAsync();
@@ -155,6 +169,10 @@ namespace FlightCareer.Tests.Geo
                 var oceano = await db.Airports.FindAsync(idOceano);
                 Assert.NotNull(oceano);
                 Assert.Equal("", oceano!.Country);
+
+                // país do csv com a posição batendo não é trocado pelo contorno (Natural Earth junta GF com FR)
+                var caiena = await db.Airports.FindAsync(idCaiena);
+                Assert.Equal("GF", caiena!.Country);
             }
         }
     }
