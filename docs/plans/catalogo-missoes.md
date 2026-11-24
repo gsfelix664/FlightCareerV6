@@ -462,18 +462,23 @@ Formato dos perfis: `peso% · distância NM · pax · carga lb`.
 **Achados na faixa atual (corrigidos na tabela):** executiva até 25 pax; feeder até 160 pax (A320); cargueiro noturno sem perfil leve (Caravan nunca recebia); UTI sem a carga do equipamento médico; medevac bush com 300–600 lb (pesado para C207); `ferry` com buraco de 61–179 NM; carga e distância sorteadas separadas (cargueiro de 120.000 lb a 200 NM).
 **Correção de dados (2026-11-23):** o `CargaMax(lbs)` do 747-400 (versão passageiros) estava em 475.000 lb, que é a carga útil (MTOW − peso vazio, carga + combustível), não a carga paga. Corrigido para **148.412 lb** (MZFW 542.500 − OEW ~394.088, dados do usuário). Outros jatos do csv têm o mesmo tipo de erro e estão em conferência com fonte (ver § 9.7.2).
 
-#### 9.7.2 Carga paga máxima dos jatos no `aircrafts.csv` (conferência, 2026-11-23)
-Vários jatos têm em `CargaMax(lbs)` um valor próximo da carga útil (carga + combustível), não da carga paga máxima estrutural (MZFW − OEW). Com o valor errado, o quadro e os bots aceitam missões que não decolam com combustível. Proposta (aguarda aprovação; nada alterado além do 747-400):
-| Avião | csv hoje | Proposta | Fonte | Confiança |
+#### 9.7.2 Carga paga máxima dos jatos no `aircrafts.csv` (corrigida em 2026-11-24, aprovada pelo usuário)
+Vários jatos tinham em `CargaMax(lbs)` um valor próximo da carga útil (carga + combustível), não da carga paga máxima estrutural (MZFW − OEW). Com o valor errado, o quadro e os bots aceitavam missões que não decolam com combustível. Valores aplicados:
+| Avião | Antes | Agora (lb) | Fonte | Confiança |
 |---|---|---|---|---|
-| Boeing 747-400 | 475.000 | **148.412** (aplicado) | usuário: MZFW 542.500 − OEW ~394.088 | alta |
+| Boeing 747-400 | 475.000 | 148.412 | usuário: MZFW 542.500 − OEW ~394.088 | alta |
 | 747-8i | 502.000 | 157.500 | Boeing (StartupBoeing 747-8I): MZFW 651.000 − OEW 493.500 | alta |
-| A400M | 120.000 | 81.600 | Airbus/OCCAR: carga máxima 37 t | alta |
-| 787-10 | 260.000 | 126.300 | MZFW 425.000 − OEW 298.700 (Aerocorner); conferir no 787 ACAP Rev Q da Boeing | média |
-| 737 MAX 8 | 80.000 | ~46.000 | Aerocorner (~20,9 t); MZFW 145.400 da Boeing; OEW oficial não encontrado | média |
-| A320neo | 76.400 | ~44.000 | ~20 t (aircraftinvestigation); MZFW 65,3 t da Airbus | média |
-| A330-300 | 263.000 | ~115.000 | 46,7 t (Aerospaceweb, 2012) + até 5,8 t da versão de 242 t | baixa |
-| A330-200 | 269.000 | ~89.000 | 36,4 t (Aerospaceweb, 2012) + até 4 t da versão de 242 t | baixa |
-| A321 / A321LR | 90.000 / 107.000 | a levantar | MZFW 75,6 t (Airbus); OEW não encontrado | — |
-| A310 | 70.000 | manter | MZFW 113–114 t (Airbus); 70.000 lb ≈ 31,8 t coerente | média |
-| Citation Longitude, PC-24, SkyCourier | 16.000 / 6.800 / 8.000 | a levantar | parecem altos para jatos/turbo-hélices desse porte | — |
+| A400M | 120.000 | 81.600 | Airbus/OCCAR: 37 t | alta |
+| Citation Longitude | 16.000 | 3.200 | Textron (página atual do Longitude) | alta |
+| PC-24 | 6.800 | 3.100 | Pilatus (ficha do PC-24, versão 2023) | alta |
+| SkyCourier | 8.000 | 5.500 | Textron (cartão 2025, versão passageiros; cargueiro 6.000) | alta |
+| 787-10 | 260.000 | 126.300 | MZFW 425.000 − OEW 298.700 (Aerocorner) | média |
+| A321 (neo) | 90.000 | 56.200 | 25,5 t (Aerocorner/aircraftinvestigation); soma bate com o MZFW 75,6 t da Airbus | média |
+| A321LR | 107.000 | 51.800 | MZFW 75,6 t − OEW ~52,1 t (tanques extras) = 23,5 t | média |
+| A320neo | 76.400 | 46.300 | MZFW 65,3 t (Airbus) − OEW 44,3 t (aircraftinvestigation) = 21 t | média |
+| 737 MAX 8 | 80.000 | 46.000 | ~20,9 t (Aerocorner); MZFW 145.400 da Boeing | média |
+| A330-300 | 263.000 | 114.000 | MZFW 175 t (Airbus) − OEW ~123,3 t = 51,7 t | média |
+| A330-200 | 269.000 | 109.100 | MZFW 170 t − OEW 120,5 t = 49,5 t | média |
+| A310 | 70.000 | mantido | MZFW 113–114 t (Airbus); 31,8 t coerente | média |
+| A330 BelugaXL, 747 Supertanker | 113.000 / 150.000 | mantidos | BelugaXL 51 t de carga (Airbus); Supertanker = carga de água/retardante | — |
+- SkyCourier tem cabine conversível: na configuração carga o app permite até min(CargaMax + 19 × 170, 1,3 × CargaMax) = 7.150 lb, acima dos 6.000 do cargueiro real. Ajustar a regra de conversão fica para depois (não bloqueia).

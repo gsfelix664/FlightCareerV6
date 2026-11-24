@@ -3032,3 +3032,7 @@
 ## 2026-11-23 - Carga paga do 747-400 e faixas de missão aprovadas (Claude)
 - `aircrafts.csv`: `CargaMax(lbs)` do Boeing 747-400 (passageiros) corrigido de 475.000 (carga útil) para 148.412 lb (MZFW − OEW). Outros jatos com o mesmo tipo de erro listados no plano `catalogo-missoes.md` › 9.7.2, aguardando aprovação.
 - Plano: tabela de faixas (§ 9.7.1) aprovada pelo usuário, limitada aos aviões do `aircrafts.csv`.
+
+## 2026-11-24 - Carga paga máxima dos jatos no aircrafts.csv (Claude)
+- `CargaMax(lbs)` de 12 aviões trocado da carga útil para a carga paga máxima estrutural (MZFW − OEW), com fonte no plano `catalogo-missoes.md` › 9.7.2: 747-8i 157.500, A400M 81.600, 787-10 126.300, A330-300 114.000, A330-200 109.100, A321 56.200, A321LR 51.800, A320neo 46.300, 737 MAX 8 46.000, Longitude 3.200, PC-24 3.100, SkyCourier 5.500.
+- Efeito: o quadro e os bots deixam de aceitar nesses aviões missões acima da carga paga real. Bancos existentes guardam o valor antigo em `AircraftTypes`; o banco de teste será apagado na etapa 2. Não testado no MSFS / não visto na tela.
