@@ -312,6 +312,7 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - `DataSeeder`: inserção com leitura de estrutura do Little Navmap e classificação em C#, seguida de recálculo com OurAirports no enriquecimento CSV (`EnrichFromCsvAsync`). Caminho só-CSV classificado com o que houver.
   - Recálculo de Tier por versão (`TierRulesVersion`): `DataSeeder.EnsureTiersUpToDateAsync` recalcula todos os aeroportos em lote em transação única quando `TierRulesVersion != AirportTierRules.Default.Version`.
   - País pelo CSV (`iso_country`): `EnrichFromCsvAsync` e `TierReporter` atribuem o código ISO do CSV sempre que a posição geográfica bater até 10 NM.
+  - País por contorno e vizinho (PAIS-A): `Domain/Geo/CountryLocator` resolve o país pela coordenada contra os contornos do Natural Earth (`country_borders.json`, bbox + anel exterior sem buracos); se cair fora de todos (litoral/ilhas), recebe o país do aeroporto válido mais próximo até 50 NM via grade espacial de 1° (`AirportSpatialGrid`), ou vazio se isolado. Integrado no `DataSeeder` (`ResolveMissingCountriesAsync`) e no `TierReporter`.
   - Linha aérea entre aeroportos de linha (`RequireAnyTag`): `MissionDefinition`, `MissionDestinationRule` e `MissionProfileDefinition` suportam `RequireAnyTag`. Missões de linha exigem `["linha", "linha_auto"]` e perfis de carga $\ge 4.300$ ft exigem `["linha", "linha_auto", "carga:cargueiros", "carga_auto"]`.
   - Subcomando CLI `tier-report` no `FlightCareer.Replay` (`tier-report.md` e `tier-report.csv`). Não testado no MSFS / não visto na tela.
 

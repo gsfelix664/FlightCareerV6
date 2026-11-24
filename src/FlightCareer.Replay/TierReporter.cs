@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using CsvHelper;
 using FlightCareer.Domain.Airports;
+using FlightCareer.Domain.Geo;
 using FlightCareer.Domain.Missions;
 using FlightCareer.Infrastructure.Services;
 using Microsoft.Data.Sqlite;
@@ -22,6 +23,14 @@ namespace FlightCareer.Replay
     public static class TierReporter
     {
         public sealed record CsvItem(string Ident, string Type, bool Scheduled, double? Lat, double? Lon, string? IsoCountry);
+
+        public sealed record CountryResolutionStats(
+            int TotalInvalid,
+            int ResolvedByBorder,
+            int ResolvedByNeighbor,
+            int RemainedEmpty,
+            List<AirportClassified> ExamplesByBorder
+        );
 
         public sealed record AirportClassified(
             string ICAO,
@@ -93,8 +102,9 @@ namespace FlightCareer.Replay
 
             // 2. Conectar e ler Little Navmap
             Console.WriteLine("Consultando aeródromos e pistas do Little Navmap...");
-            var classifiedAirports = LoadAndClassifyLnm(options.LnmPath, csvLookup);
+            var (classifiedAirports, countryStats) = LoadAndClassifyLnm(options.LnmPath, csvLookup);
             Console.WriteLine($"  {classifiedAirports.Count} aeródromos classificados.");
+            Console.WriteLine($"  Resolução de países: {countryStats.ResolvedByBorder} por contorno, {countryStats.ResolvedByNeighbor} por vizinho, {countryStats.RemainedEmpty} sem país.");
 
             // 3. Gerar arquivos do relatório
             Directory.CreateDirectory(options.OutputDirectory);
@@ -102,7 +112,7 @@ namespace FlightCareer.Replay
             string csvOutPath = Path.Combine(options.OutputDirectory, "tier-report.csv");
 
             Console.WriteLine($"Gravando {mdPath} e {csvOutPath}...");
-            WriteMarkdownReport(mdPath, classifiedAirports);
+            WriteMarkdownReport(mdPath, classifiedAirports, countryStats);
             WriteCsvReport(csvOutPath, classifiedAirports);
 
             Console.ForegroundColor = ConsoleColor.Green;
@@ -152,7 +162,7 @@ namespace FlightCareer.Replay
             return dict;
         }
 
-        private static List<AirportClassified> LoadAndClassifyLnm(string lnmPath, Dictionary<string, CsvItem> csvLookup)
+        private static (List<AirportClassified> Airports, CountryResolutionStats Stats) LoadAndClassifyLnm(string lnmPath, Dictionary<string, CsvItem> csvLookup)
         {
             var list = new List<AirportClassified>();
             var rules = AirportTierRules.Default;
@@ -272,7 +282,66 @@ namespace FlightCareer.Replay
                 ));
             }
 
-            return list;
+            // 3. Resolução de países faltantes por contorno e vizinho
+            var locator = CountryLocator.Shared;
+            var grid = new AirportSpatialGrid();
+            for (int i = 0; i < list.Count; i++)
+            {
+                var a = list[i];
+                if (!string.IsNullOrEmpty(a.Country) && locator.KnownIsoCodes.Contains(a.Country))
+                {
+                    grid.Add(a.Lat, a.Lon, a.Country);
+                }
+            }
+
+            int totalInvalid = 0;
+            int resolvedByBorder = 0;
+            int resolvedByNeighbor = 0;
+            int remainedEmpty = 0;
+            var examplesByBorder = new List<AirportClassified>();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var a = list[i];
+                if (string.IsNullOrEmpty(a.Country) || !locator.KnownIsoCodes.Contains(a.Country))
+                {
+                    totalInvalid++;
+                    string? byBorder = locator.Locate(a.Lat, a.Lon);
+                    if (byBorder != null)
+                    {
+                        resolvedByBorder++;
+                        var updated = a with { Country = byBorder };
+                        list[i] = updated;
+                        grid.Add(a.Lat, a.Lon, byBorder);
+                        if (examplesByBorder.Count < 10)
+                        {
+                            examplesByBorder.Add(updated);
+                        }
+                    }
+                    else
+                    {
+                        string? byNeighbor = grid.FindNearestCountry(a.Lat, a.Lon, 50.0);
+                        if (byNeighbor != null)
+                        {
+                            resolvedByNeighbor++;
+                            var updated = a with { Country = byNeighbor };
+                            list[i] = updated;
+                            grid.Add(a.Lat, a.Lon, byNeighbor);
+                        }
+                        else
+                        {
+                            remainedEmpty++;
+                            if (!string.IsNullOrEmpty(a.Country))
+                            {
+                                list[i] = a with { Country = "" };
+                            }
+                        }
+                    }
+                }
+            }
+
+            var stats = new CountryResolutionStats(totalInvalid, resolvedByBorder, resolvedByNeighbor, remainedEmpty, examplesByBorder);
+            return (list, stats);
         }
 
         private static string ResolveCountry(string ident, string? country, string? region)
@@ -304,7 +373,7 @@ namespace FlightCareer.Replay
             return !string.IsNullOrEmpty(country) ? country : (!string.IsNullOrEmpty(region) ? region : "");
         }
 
-        private static void WriteMarkdownReport(string mdPath, List<AirportClassified> airports)
+        private static void WriteMarkdownReport(string mdPath, List<AirportClassified> airports, CountryResolutionStats stats)
         {
             var sb = new StringBuilder();
             sb.AppendLine("# Relatório de Classificação de Tiers por Movimento");
@@ -411,6 +480,26 @@ namespace FlightCareer.Replay
 
                 string sign = a.DeltaTier > 0 ? $"+{a.DeltaTier}" : $"{a.DeltaTier}";
                 sb.AppendLine($"| **{a.ICAO}** | {a.Name} | {a.Country} | {a.OldTier} → **{a.NewTier}** | {sign} | {a.ScoreDetails.TotalScore} | {a.LongestRunwayFt:N0} ft ({pvd}) | {motivo} |");
+            }
+
+            sb.AppendLine();
+
+            // 5. Resolução de Países
+            sb.AppendLine("## 5. Resolução de Países (Natural Earth e Vizinhos)");
+            sb.AppendLine();
+            sb.AppendLine($"- Total de aeródromos analisados com país inicial inválido: {stats.TotalInvalid:N0}");
+            sb.AppendLine($"- Resolvidos por contorno do Natural Earth: {stats.ResolvedByBorder:N0}");
+            sb.AppendLine($"- Resolvidos por vizinho válido mais próximo (<= 50 NM): {stats.ResolvedByNeighbor:N0}");
+            sb.AppendLine($"- Aeródromos que ficaram sem país: {stats.RemainedEmpty:N0} (alvo <= 30)");
+            sb.AppendLine();
+            sb.AppendLine("### 10 Exemplos Resolvidos por Contorno");
+            sb.AppendLine();
+            sb.AppendLine("| ICAO | Nome | País Atribuído | Lat | Lon |");
+            sb.AppendLine("|---|---|---|---|---|");
+
+            foreach (var ex in stats.ExamplesByBorder)
+            {
+                sb.AppendLine($"| **{ex.ICAO}** | {ex.Name} | **{ex.Country}** | {ex.Lat.ToString("F4", CultureInfo.InvariantCulture)} | {ex.Lon.ToString("F4", CultureInfo.InvariantCulture)} |");
             }
 
             File.WriteAllText(mdPath, sb.ToString(), Encoding.UTF8);
