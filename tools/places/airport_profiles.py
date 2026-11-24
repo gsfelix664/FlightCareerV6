@@ -70,6 +70,8 @@ places = os.path.join(infra, 'Data', 'places')
 dz = ids(os.path.join(places, 'dropzones.json'), 'dropzones')
 tr = ids(os.path.join(places, 'training_aerodromes.json'), 'aerodromes')
 sc = ids(os.path.join(places, 'scenic_aerodromes.json'), 'aerodromes')
+# bases de voo panorâmico (role != destino) ganham o subtipo turistico_curado:base
+sc_base = {x['icao'].upper() for x in json.load(open(os.path.join(places, 'scenic_aerodromes.json'), encoding='utf-8'))['aerodromes'] if (x.get('role') or 'panoramico') != 'destino'}
 hubs = json.load(open(os.path.join(infra, 'Data', 'hubs_data.json'), encoding='utf-8'))['HubProfiles']
 hubmap = collections.defaultdict(set)
 for cc, prof in hubs.items():
@@ -96,6 +98,7 @@ for a in aps:
     if i in dz: a['tags'].add('zona_salto')
     if i in tr: a['tags'].add('aeroclube')
     if i in sc: a['tags'].add('turistico_curado')
+    if i in sc_base: a['tags'].add('turistico_curado:base')
     for h in hubmap.get(i, ()): a['tags'].add('hub_' + h.lower())
     if FARM.search(a['name']) and not NOT_FARM.search(a['name']) and a['tier'] >= 3: a['tags'].add('fazenda')
     if MIL.search(a['name']):
