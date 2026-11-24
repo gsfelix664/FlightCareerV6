@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using CsvHelper;
 using CsvHelper.Configuration;
 using FlightCareer.Domain.Entities;
@@ -231,6 +232,20 @@ namespace FlightCareer.Infrastructure.Services
             }
         }
 
+        /// <summary>Distância máxima (NM) para considerar que o código do csv é o mesmo aeródromo do simulador.</summary>
+        public const double SameAirportMaxNm = 10.0;
+
+        /// <summary>True quando as duas posições estão a até <see cref="SameAirportMaxNm"/> NM.</summary>
+        public static bool IsSameAirportPosition(double lat1, double lon1, double lat2, double lon2)
+        {
+            double dLat = (lat2 - lat1) * Math.PI / 180.0;
+            double dLon = (lon2 - lon1) * Math.PI / 180.0;
+            double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                       Math.Cos(lat1 * Math.PI / 180.0) * Math.Cos(lat2 * Math.PI / 180.0) * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+            double nm = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)) * 3440.065;
+            return nm <= SameAirportMaxNm;
+        }
+
         private async Task EnrichFromCsvAsync(Action<string, double>? progressCallback)
         {
             var filePath = Path.Combine(_csvPath, "airports.csv");
@@ -249,7 +264,9 @@ namespace FlightCareer.Infrastructure.Services
                     municipality TEXT,
                     iso_country TEXT,
                     csv_name TEXT,
-                    elevation_ft INTEGER
+                    elevation_ft INTEGER,
+                    lat REAL,
+                    lon REAL
                 );
                 DELETE FROM CsvAirports;
             ";
@@ -263,13 +280,15 @@ namespace FlightCareer.Infrastructure.Services
             using var transaction = connection.BeginTransaction();
             using var insertCmd = connection.CreateCommand();
             insertCmd.Transaction = transaction;
-            insertCmd.CommandText = "INSERT OR IGNORE INTO CsvAirports (ident, municipality, iso_country, csv_name, elevation_ft) VALUES (@ident, @municipality, @iso_country, @csv_name, @elevation_ft);";
+            insertCmd.CommandText = "INSERT OR IGNORE INTO CsvAirports (ident, municipality, iso_country, csv_name, elevation_ft, lat, lon) VALUES (@ident, @municipality, @iso_country, @csv_name, @elevation_ft, @lat, @lon);";
             
             var pIdent = insertCmd.CreateParameter(); pIdent.ParameterName = "@ident"; insertCmd.Parameters.Add(pIdent);
             var pMuni = insertCmd.CreateParameter(); pMuni.ParameterName = "@municipality"; insertCmd.Parameters.Add(pMuni);
             var pCountry = insertCmd.CreateParameter(); pCountry.ParameterName = "@iso_country"; insertCmd.Parameters.Add(pCountry);
             var pName = insertCmd.CreateParameter(); pName.ParameterName = "@csv_name"; insertCmd.Parameters.Add(pName);
             var pElev = insertCmd.CreateParameter(); pElev.ParameterName = "@elevation_ft"; insertCmd.Parameters.Add(pElev);
+            var pLat = insertCmd.CreateParameter(); pLat.ParameterName = "@lat"; insertCmd.Parameters.Add(pLat);
+            var pLon = insertCmd.CreateParameter(); pLon.ParameterName = "@lon"; insertCmd.Parameters.Add(pLon);
 
             while (await csv.ReadAsync())
             {
@@ -281,12 +300,30 @@ namespace FlightCareer.Infrastructure.Services
                 pCountry.Value = csv.GetField<string>("iso_country") ?? "";
                 pName.Value = csv.GetField<string>("name") ?? "";
                 pElev.Value = int.TryParse(csv.GetField<string>("elevation_ft"), out var el) ? el : 0;
+                pLat.Value = double.TryParse(csv.GetField<string>("latitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var la) ? la : (object)DBNull.Value;
+                pLon.Value = double.TryParse(csv.GetField<string>("longitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var lo) ? lo : (object)DBNull.Value;
 
                 await insertCmd.ExecuteNonQueryAsync();
             }
             await transaction.CommitAsync();
 
             progressCallback?.Invoke("Aplicando municípios e países aos aeroportos...", 0.85);
+
+            // Códigos reaproveitados: o mesmo código no airports.csv antigo pode ser outro aeródromo no
+            // simulador (ex.: SBOK = fazenda no MT no csv, Amontada/CE no MSFS 2024). Só completa cidade,
+            // país e elevação quando a posição do csv bate com a do simulador.
+            if (connection is SqliteConnection sqlite)
+            {
+                sqlite.CreateFunction("fc_same_place", (double? csvLat, double? csvLon, double simLat, double simLon) =>
+                    csvLat.HasValue && csvLon.HasValue && IsSameAirportPosition(csvLat.Value, csvLon.Value, simLat, simLon));
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("[DataSeeder] Conexão não é SQLite: enriquecimento pelo CSV sem conferência de posição.");
+            }
+            string positionMatch = connection is SqliteConnection
+                ? "AND fc_same_place(CsvAirports.lat, CsvAirports.lon, Airports.Latitude, Airports.Longitude)"
+                : "";
 
             using var updateCmd = connection.CreateCommand();
             updateCmd.CommandText = @"
@@ -300,7 +337,7 @@ namespace FlightCareer.Infrastructure.Services
                         ELSE Country 
                     END,
                     ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END
-                WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO);
+                WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO " + positionMatch + @");
                 
                 DROP TABLE IF EXISTS CsvAirports;
             ";

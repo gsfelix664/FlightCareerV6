@@ -3044,3 +3044,8 @@
 - `FlightCareer.Replay board-report` (tipos por aeroporto, destinos preferenciais, faixas de pax/carga/bagagem/distância, cobertura).
 - Removida a tradução de `SubId` antigos no banco (banco de teste apagado pelo usuário).
 - Revisão: `docs/reviews/E2A-revisao.md`. Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - Cidade errada em códigos reaproveitados e plano do importador de aeroportos (Claude)
+- `DataSeeder.EnrichFromCsvAsync`: com o banco do Little Navmap, a cidade, o país e a elevação faltantes vinham do `airports.csv` casando só o código; nos códigos reaproveitados (433 de 7.822 a mais de 10 NM do MSFS) entrava a cidade de outro aeródromo (ex.: SBOK, Amontada/CE no MSFS, recebia "Lucas do Rio Verde"). Agora só completa quando a posição do csv bate até 10 NM (`DataSeeder.IsSameAirportPosition`, função SQLite `fc_same_place`). Testes `AirportCsvEnrichmentTests`.
+- Plano novo `docs/plans/importador-aeroportos-simconnect.md`: base de aeroportos e pistas lida do simulador aberto pelo SimConnect (como o Little Navmap faz no MSFS 2024), com o Little Navmap e o csv como reserva.
+- Não conferido num banco gerado de verdade nem no MSFS.
