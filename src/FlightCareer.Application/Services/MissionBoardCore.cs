@@ -168,39 +168,34 @@ namespace FlightCareer.Application.Services
             if (def.Generator == "local_instruction")
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
-                var subAdapter = ToSubCategoryConfig(def);
                 return WithPersonLuggage(MissionGenerator.CreateLocalInstructionMissionSync(
-                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
+                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
             }
 
             if (def.Generator == "checkride")
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
-                var subAdapter = ToSubCategoryConfig(def);
                 return WithPersonLuggage(MissionGenerator.CreateCheckrideMissionSync(
-                    origin, subAdapter, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
+                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
             }
 
             if (def.Generator == "scenic_tour")
             {
-                var subAdapter = ToSubCategoryConfig(def);
                 var tour = MissionGenerator.CreateScenicTourMissionSync(
-                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog);
                 if (tour != null) return WithPersonLuggage(tour, def, random);
             }
 
             if (def.Generator == "survey")
             {
-                var subAdapter = ToSubCategoryConfig(def);
                 return WithPersonLuggage(MissionGenerator.CreateSurveyMissionSync(
-                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
             }
 
             if (def.Generator == "skydive")
             {
-                var subAdapter = ToSubCategoryConfig(def);
                 return WithPersonLuggage(MissionGenerator.CreateSkydiveMissionSync(
-                    origin, subAdapter, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog), def, random);
             }
 
             if (def.Generator == "tgl_circuit")
@@ -210,9 +205,8 @@ namespace FlightCareer.Application.Services
                 string title = $"Circuito de Tráfego ({tglCount} TGLs)";
                 string desc = $"Treinamento em circuito de tráfego padrão em {origin.ICAO}. Exige {tglCount} toques e arremetidas (TGL) seguidos de pouso final completo.";
 
-                var subAdapter = ToSubCategoryConfig(def);
                 return MissionGenerator.CreateMissionObjectSync(
-                    origin, origin, tglDist, subAdapter, paxCount, luggageLbs, cargoLbs,
+                    origin, origin, tglDist, def, paxCount, luggageLbs, cargoLbs,
                     random, referenceTime, payMultiplier, payTable,
                     requiredTouchAndGoes: tglCount, overflyWaypoints: null,
                     titleOverride: title, descriptionOverride: desc, textCatalog: textCatalog);
@@ -220,9 +214,8 @@ namespace FlightCareer.Application.Services
 
             if (returnsToOrigin)
             {
-                var subAdapter = ToSubCategoryConfig(def);
                 return MissionGenerator.CreateMissionObjectSync(
-                    origin, origin, distanceNm, subAdapter, paxCount, luggageLbs, cargoLbs,
+                    origin, origin, distanceNm, def, paxCount, luggageLbs, cargoLbs,
                     random, referenceTime, payMultiplier, payTable, textCatalog: textCatalog);
             }
 
@@ -236,9 +229,8 @@ namespace FlightCareer.Application.Services
             double actualDist = MissionGenerator.CalculateDistance(
                 origin.Latitude, origin.Longitude, selectedCandidate.Airport.Latitude, selectedCandidate.Airport.Longitude);
 
-            var subCfg = ToSubCategoryConfig(def);
             return MissionGenerator.CreateMissionObjectSync(
-                origin, selectedCandidate.Airport, actualDist, subCfg, paxCount, luggageLbs, cargoLbs,
+                origin, selectedCandidate.Airport, actualDist, def, paxCount, luggageLbs, cargoLbs,
                 random, referenceTime, payMultiplier, payTable,
                 destRunway: selectedCandidate.BestRunway, textCatalog: textCatalog);
         }
@@ -503,23 +495,6 @@ namespace FlightCareer.Application.Services
                 if (roll <= acc) return items[i].Mission;
             }
             return items.Count > 0 ? items[^1].Mission : null;
-        }
-
-        private static SubCategoryConfig ToSubCategoryConfig(MissionDefinition def)
-        {
-            return new SubCategoryConfig
-            {
-                Id = def.Id,
-                Name = def.Name,
-                Description = def.Description,
-                MinExpHours = def.MinExpHours,
-                MaxExpHours = def.MaxExpHours,
-                Urgency = def.Urgency,
-                RequiresHardSurface = def.RequiresHardSurface,
-                MinRunwayDest = def.MinRunwayDest,
-                LuggageWeightKg = def.LuggageWeightKg,
-                Definition = def
-            };
         }
     }
 }

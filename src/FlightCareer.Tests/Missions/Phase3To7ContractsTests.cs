@@ -6,6 +6,7 @@ using FlightCareer.Application.Services;
 using FlightCareer.Domain.Career;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Xp;
 using FlightCareer.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
@@ -17,30 +18,26 @@ namespace FlightCareer.Tests.Missions
     public class Phase3To7ContractsTests
     {
         [Fact]
-        public void CareerPhases_TodosSubtiposDeMissionRulesPossuemFaseDefinida()
+        public void CareerPhases_TodosSubtiposDoCatalogoPossuemFaseDefinida()
         {
             var catalog = CareerPhaseCatalog.Instance;
             var subIdMap = catalog.SubIdToPhase;
 
             var missing = new List<string>();
 
-            foreach (var kvp in MissionRules.Rules)
+            foreach (var m in MissionCatalog.Shared.Missions.Values)
             {
-                int tier = kvp.Key;
-                var tierConfig = kvp.Value;
-                foreach (var cat in tierConfig.Categories)
+                var allIds = new[] { m.Id }.Concat(m.LegacyCodes);
+                foreach (var id in allIds)
                 {
-                    foreach (var sub in cat.SubCategories)
+                    if (!subIdMap.ContainsKey(id))
                     {
-                        if (!subIdMap.ContainsKey(sub.Id))
-                        {
-                            missing.Add($"Tier {tier} › Categoria {cat.Id} › Subtipo {sub.Id} ({sub.Name})");
-                        }
-                        else
-                        {
-                            var phase = catalog.ResolvePhase(sub.Id);
-                            Assert.True((int)phase >= 1 && (int)phase <= 7, $"Fase inválida para subtipo {sub.Id}: {phase}");
-                        }
+                        missing.Add($"Missão {m.Id} (id testado: {id})");
+                    }
+                    else
+                    {
+                        var phase = catalog.ResolvePhase(id);
+                        Assert.True((int)phase >= 1 && (int)phase <= 7, $"Fase inválida para subtipo {id}: {phase}");
                     }
                 }
             }
@@ -128,7 +125,7 @@ namespace FlightCareer.Tests.Missions
                 new Airport { ICAO = "SAEZ", Country = "Argentina", Tier = 3, Latitude = -34.8222, Longitude = -58.5358 } // Outro país (não deve escolher)
             };
 
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "fretamento_executivo");
+            var sub = MissionCatalog.Shared.Get("fretamento_executivo")!;
 
             for (int seed = 1; seed <= 20; seed++)
             {
@@ -169,14 +166,14 @@ namespace FlightCareer.Tests.Missions
         {
             var origin = new Airport { ICAO = "SBGR", Country = "Brazil", Tier = 1, Latitude = -23.4356, Longitude = -46.4731 };
             var dest = new Airport { ICAO = "SBDN", Country = "Brazil", Tier = 3, Latitude = -22.1969, Longitude = -49.9261 };
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "carga_fragil");
+            var sub = MissionCatalog.Shared.Get("carga_fragil")!;
 
             var rnd = new Random(101);
             var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
             var m = MissionGenerator.CreateMissionObjectSync(origin, dest, 200.0, sub, 0, 0, 450.0, rnd, now);
 
             Assert.NotNull(m);
-            Assert.Equal("carga_fragil", m.SubId);
+            Assert.Equal("carga_dgr", m.SubId);
             Assert.Equal(0, m.PassengerCount);
             Assert.Equal(450.0, m.CargoWeightLbs);
             Assert.Equal(1.3, m.Urgency);
@@ -189,14 +186,14 @@ namespace FlightCareer.Tests.Missions
         {
             var origin = new Airport { ICAO = "SBGR", Country = "Brazil", Tier = 1, Latitude = -23.4356, Longitude = -46.4731 };
             var dest = new Airport { ICAO = "SWCA", Country = "Brazil", Tier = 4, Latitude = -22.1000, Longitude = -47.0000 };
-            var sub = MissionRules.Rules[1].Categories.First(c => c.Id == "contratos_carreira_t1").SubCategories.First(s => s.Id == "medevac_dinamico");
+            var sub = MissionCatalog.Shared.Get("medevac_dinamico")!;
 
             var rnd = new Random(202);
             var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
             var m = MissionGenerator.CreateMissionObjectSync(origin, dest, 120.0, sub, 2, 30.0, 400.0, rnd, now);
 
             Assert.NotNull(m);
-            Assert.Equal("medevac_dinamico", m.SubId);
+            Assert.Equal("medevac_remoto", m.SubId);
             Assert.InRange(m.PassengerCount, 1, 2);
             Assert.InRange(m.CargoWeightLbs, 300, 600);
             Assert.Equal(1.5, m.Urgency);

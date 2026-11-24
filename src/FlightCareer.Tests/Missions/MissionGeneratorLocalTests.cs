@@ -29,17 +29,11 @@ namespace FlightCareer.Tests.Missions
             };
         }
 
-        private static SubCategoryConfig GetSubConfig(string id)
+        private static MissionDefinition GetSubConfig(string id)
         {
-            foreach (var t in MissionRules.Rules.Values)
-            {
-                foreach (var c in t.Categories)
-                {
-                    var s = c.SubCategories.FirstOrDefault(x => x.Id == id || x.Definition?.LegacyCodes.Contains(id) == true);
-                    if (s != null) return s;
-                }
-            }
-            return new SubCategoryConfig { Id = id, Name = "Test Sub" };
+            return MissionCatalog.Shared.Get(id)
+                ?? MissionCatalog.Shared.Missions.Values.FirstOrDefault(m => m.LegacyCodes.Contains(id, StringComparer.OrdinalIgnoreCase))
+                ?? new MissionDefinition { Id = id, Name = "Test Sub" };
         }
 
         [Fact]
@@ -340,13 +334,13 @@ namespace FlightCareer.Tests.Missions
         }
 
         [Fact]
-        public void GetCalibratedCategories_CuratedScenicAerodrome_ImportsCategory35AndSkewsWeights()
+        public void CuratedScenicAerodrome_RecebeTagTuristicoCuradoBase_EAumentaPesoDePanoramico()
         {
-            // Aeródromo Tier 1 (que não possui nativamente a Categoria 3.5)
+            // Aeródromo Tier 1 sem etiquetas de turismo nativas
             var origin = new Airport
             {
-                ICAO = "SBFI",
-                Name = "Foz do Iguaçu",
+                ICAO = "TEST_SCENIC",
+                Name = "Aeroporto Teste",
                 Tier = 1,
                 Latitude = -25.59,
                 Longitude = -54.58
@@ -354,33 +348,27 @@ namespace FlightCareer.Tests.Missions
 
             var mockScenic = new List<ScenicAerodromeInfo>
             {
-                new("SBFI", "Foz Panorâmica", "BR", "Tríplice fronteira", new List<ScenicPoint>
+                new("TEST_SCENIC", "Panorâmica Teste", "BR", "Ponto turístico", new List<ScenicPoint>
                 {
-                    new("Cataratas", -25.69, -54.43),
-                    new("Itaipu", -25.04, -54.45)
-                })
+                    new("Ponto 1", -25.69, -54.43),
+                    new("Ponto 2", -25.04, -54.45)
+                }, Role: "panoramico")
             };
 
             var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
-            var tierConfig = MissionRules.Rules[1]; // Tier 1
+            var baseTags = AirportProfileCatalog.Shared.TagsFor(origin.ICAO);
+            var augmentedTags = MissionBoardCore.AugmentOriginTags(origin, baseTags, places);
 
-            var categories = MissionGenerator.GetCalibratedCategories(origin, tierConfig, null!, places);
+            Assert.Contains("turistico_curado:base", augmentedTags);
 
-            var cat35 = categories.FirstOrDefault(c => c.Id == "aeroclube");
-            Assert.NotNull(cat35);
-            Assert.True(cat35!.Weight >= 40, $"Peso de aeroclube deve ter recebido o bônus de 40, encontrado {cat35.Weight}");
+            var defPanoramico = MissionCatalog.Shared.Get("panoramico");
+            Assert.NotNull(defPanoramico);
 
-            var s351 = cat35.SubCategories.FirstOrDefault(s => s.Id == "voo_panoramico");
-            var s352 = cat35.SubCategories.FirstOrDefault(s => s.Id == "circuito_tgl");
-            var s353 = cat35.SubCategories.FirstOrDefault(s => s.Id == "translado_basico");
+            double weightSemCurado = MissionWeighting.OriginWeight(defPanoramico!, origin.Tier, baseTags);
+            double weightComCurado = MissionWeighting.OriginWeight(defPanoramico!, origin.Tier, augmentedTags);
 
-            Assert.NotNull(s351);
-            Assert.NotNull(s352);
-            Assert.NotNull(s353);
-
-            Assert.Equal(70, s351!.Weight);
-            Assert.Equal(15, s352!.Weight);
-            Assert.Equal(15, s353!.Weight);
+            Assert.True(weightComCurado > weightSemCurado, $"Peso com curado ({weightComCurado}) deve ser maior que sem curado ({weightSemCurado})");
+            Assert.Equal(weightSemCurado * 8.0, weightComCurado);
         }
     }
 }

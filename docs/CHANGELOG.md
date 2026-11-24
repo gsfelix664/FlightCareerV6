@@ -3105,3 +3105,18 @@
 - **Testes Unitários:**
   - 4 novos testes em `CountryLocatorTests.cs` cobrindo pontos conhecidos (SP, Ufa, Bethel, Lisboa, Atlântico), buracos/enclaves (Maseru -> LS), países sem ISO_A2 padrão (Paris -> FR, Oslo -> NO) e teste SQLite em memória do `DataSeeder` (Ohio -> US, água a 10 NM -> BR, oceano -> vazio).
   - Total de 1.008/1.008 testes aprovados (100%). Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - Remoção da camada antiga de missões (E2A-L) (Gemini)
+- **Remoção de Código Morto da Geração Antiga (`MissionGenerator.cs` e `MissionRules.cs`):**
+  - Removido arquivo `src/FlightCareer.Application/Services/MissionRules.cs` (183 linhas: `TierConfig`, `CategoryConfig`, `SubCategoryConfig` e `MissionRules`).
+  - Removidos de `MissionGenerator.cs`: `CreateMissionFromSubCategory`, `CreateMissionFromSubCategoryInMemory`, `ResolveG20Hubs`, `ResolveDynamicHubs`, as três sobrecargas de `GetCalibratedCategories`, `AddCategoryWeight`, `PickWeighted`, `_runwayCache`, `GetDestinationRunwayAsync` e o método assíncrono privado `CreateMissionObject`.
+  - Substituídas as guardas de tier em `GenerateMissionsAsync` e `GenerateMissionsInMemory` por verificação explícita `currentAirport.Tier < 1 || currentAirport.Tier > 4`.
+  - Geradores síncronos de `MissionGenerator` (`CreateMissionObjectSync`, `CreateLocalInstructionMissionSync`, `CreateCheckrideMissionSync`, `CreateScenicTourMissionSync`, `CreateSurveyMissionSync`, `CreateSkydiveMissionSync`) atualizados para receber `MissionDefinition` diretamente.
+  - Adaptador transitório `ToSubCategoryConfig` e chamadas intermediárias removidos de `MissionBoardCore.cs`.
+  - Removida pasta `tools/missions/` contendo scripts descartáveis de migração (`generate_catalog_and_texts.py` e `patch_catalog_v2.py`).
+- **Reescrita e Preservação de Testes:**
+  - `MissionBoardCategoryTests.cs`: `AllSubIds()` atualizado para iterar `MissionCatalog.Shared.Missions.Values` habilitadas com seus códigos legados.
+  - `MissionGeneratorLocalTests.cs`: `GetSubConfig(id)` migrado para `MissionCatalog.Shared` retornando `MissionDefinition`; teste de aeródromo turístico curado reescrito validando `turistico_curado:base` e aumento de peso de `panoramico` via `MissionBoardCore.AugmentOriginTags` e `MissionWeighting.OriginWeight`.
+  - `Phase1ContractsTests.cs`, `Phase2ContractTests.cs`, `Phase3To7ContractsTests.cs` e `CareerProgressionTests.cs`: migrados para `MissionCatalog.Shared` e `MissionDefinition` mantendo asserções de fases, regras e faixas operacionais.
+- **Validação e Determinismo:**
+  - 1.008/1.008 testes aprovados (100%), incluindo `MissionCatalogEquivalenceTests` com snapshot `missions_golden.json` intacto (0 alterações nas missões geradas). Não testado no MSFS.
