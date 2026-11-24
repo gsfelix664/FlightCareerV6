@@ -53,6 +53,45 @@ namespace FlightCareer.Tests.Missions
         }
 
         [Fact]
+        public void MatchTag_Exclamacao_CasaSoAEtiquetaExata()
+        {
+            Assert.True(FlightCareer.Domain.Missions.AirportProfileCatalog.MatchTag("militar!", "militar"));
+            Assert.False(FlightCareer.Domain.Missions.AirportProfileCatalog.MatchTag("militar!", "militar:manutencao"));
+            Assert.True(FlightCareer.Domain.Missions.AirportProfileCatalog.MatchTag("militar", "militar:manutencao"));
+        }
+
+        [Fact]
+        public void MilitarCan_AeroportoMisto_PesaMenosQueBasePura()
+        {
+            var def = FlightCareer.Domain.Missions.MissionCatalog.Shared.Get("militar_can")!;
+            var misto = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "militar_misto", "militar:manutencao", "militar:medico" };
+            var pura = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "militar", "militar:caca" };
+            double wMisto = FlightCareer.Domain.Missions.MissionWeighting.OriginWeight(def, 2, misto);
+            double wPura = FlightCareer.Domain.Missions.MissionWeighting.OriginWeight(def, 2, pura);
+            Assert.Equal(def.BaseByTier["2"] * 2, wMisto);
+            Assert.Equal(def.BaseByTier["2"] * 6, wPura);
+        }
+
+        [Fact]
+        public void NavegacaoVfr_TemDestinosNaFaixa()
+        {
+            var def = FlightCareer.Domain.Missions.MissionCatalog.Shared.Get("navegacao_vfr")!;
+            var p = def.Profiles[0];
+            double max = Math.Min(p.RangeNm[1], def.Destination?.MaxNm ?? double.MaxValue);
+            Assert.True(max - p.RangeNm[0] >= 30, $"faixa útil de distância muito curta: {p.RangeNm[0]}–{max} NM");
+        }
+
+        [Fact]
+        public void WithPersonLuggage_InstrucaoGanhaMochilaDoAlunoEInstrutor()
+        {
+            var def = FlightCareer.Domain.Missions.MissionCatalog.Shared.Get("instrucao_local")!;
+            var m = new Mission { PassengerCount = 1, LuggageWeightLbs = 0, PayloadLbs = 170 };
+            MissionBoardCore.WithPersonLuggage(m, def, new Random(3));
+            Assert.InRange(m.LuggageWeightLbs, Math.Round(4 * 2.20462), Math.Round(12 * 2.20462));
+            Assert.Equal(170 + m.LuggageWeightLbs, m.PayloadLbs);
+        }
+
+        [Fact]
         public void LimitCandidates_AbaixoDoLimite_DevolveTodos()
         {
             var origin = new Airport { ICAO = "ORIG" };

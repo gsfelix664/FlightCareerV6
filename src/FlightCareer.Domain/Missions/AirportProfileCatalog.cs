@@ -36,6 +36,13 @@ namespace FlightCareer.Domain.Missions
         {
             if (string.IsNullOrWhiteSpace(pattern) || string.IsNullOrWhiteSpace(tag)) return false;
 
+            // "militar!" = só a etiqueta exata (não casa os subtipos "militar:xxx", que também aparecem
+            // em aeroportos de uso misto)
+            if (pattern.EndsWith('!'))
+            {
+                return string.Equals(pattern[..^1], tag, StringComparison.OrdinalIgnoreCase);
+            }
+
             if (pattern.Contains(':'))
             {
                 return string.Equals(pattern, tag, StringComparison.OrdinalIgnoreCase);

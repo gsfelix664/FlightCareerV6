@@ -196,15 +196,15 @@
         ],
         "country": "same",
         "runway": "any",
-        "maxNm": 80,
+        "maxNm": null,
         "profiles": {}
       },
       "profiles": [
         {
           "weight": 100,
           "rangeNm": [
-            80,
-            250
+            30,
+            90
           ],
           "pax": [
             1,
@@ -5355,9 +5355,10 @@
         "4": 3
       },
       "originProfiles": {
-        "militar": 6,
-        "militar_misto": 3,
-        "militar:fronteira": 4
+        "militar!": 6,
+        "militar_misto": 2,
+        "militar:fronteira": 4,
+        "militar:transporte": 3
       },
       "civilAtMilitaryBase": false,
       "destination": {
