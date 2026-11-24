@@ -514,6 +514,12 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 | combate_incendio | Combate a incêndio florestal (water bomber): a missão ativa depois da `patrulha_vigilancia`, que acha o foco | N lançamentos sobre a coordenada do incêndio (raio, altura máxima AGL e velocidade); reabastecer em pista próxima ou por water scoop entre lançamentos (⚠SDK: SimVars de lançamento/tanque de água e scoop nos aviões que têm; sem isso, passagem baixa sobre o alvo e pouso para reabastecer) | "Lançamento x/N"; altura e velocidade ao vivo; "Reabasteça em X" |
 - Obs.: no csv há o 747-400 Global Supertanker; Air Tractor Fire Boss, CL-415 e C-130 MAFFS não estão no csv.
 
+### F. Paraquedismo com o paraquedista do simulador (usuário, 2026-11-24)
+- Observado no MSFS 2024: o C172 na variante de paraquedismo leva um paraquedista a bordo além do piloto. O sim tem animação de salto (a doc do SDK cita um nó `JUMPMASTER` no `navigation_graph.cfg`, ligado às atividades de carreira de paraquedismo).
+- Ideia: na missão `paraquedismo`, ao chegar à altitude e à janela estável sobre a zona de salto, o HUD mostra um botão **"Liberar paraquedistas"**; ao apertar, o addon dispara o salto no sim (animação) e conta o lançamento. Se o avião carrega vários saltadores, liberar um a um ou em grupo.
+- ⚠SDK: descobrir se existe SimVar/evento/InputEvent que dispara o salto (ou se é só da atividade de carreira do MSFS e inacessível pelo SimConnect). Sem isso, o botão só registra o lançamento no addon (como hoje, pelo `SkydiveDropTracker`).
+- Liga com o plano de variantes (plano W&B, "variantes do avião como requisito de missão"): a variante de paraquedismo pode ser exigida ou recomendada nesta missão.
+
 ### Reorganização sugerida pelo usuário (2026-11-24)
 - `pessoas_remotas` passou do grupo G para o grupo I no § 6, deixando o G só com aeronave e tripulação técnica (só documentação: o grupo não é campo do catálogo).
 - Contagem certa por grupo: A 6, B 9, C 11, D 13, E 5, F 10, G 6, H 4, I 5 = 69.
