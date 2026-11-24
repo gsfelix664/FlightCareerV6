@@ -1,6 +1,6 @@
 # PAIS-A — País do aeródromo pelos contornos dos países
 
-**Branch:** feat/pais-contorno · **Commit:** pendente (neste commit) · **Data:** 2026-11-24
+**Branch:** feat/pais-contorno · **Commit:** 3e5f229 · **Data:** 2026-11-24
 
 ## Plano (antes de codar)
 - Criar `FlightCareer.Domain.Geo.CountryLocator` com carregamento do `country_borders.json` (construtor texto/stream e `Shared` singleton com fallback de caminhos sem catch silencioso), `KnownIsoCodes`, e método `Locate(lat, lon)` via bounding box e ray casting (anel externo menos buracos). Criar `AirportSpatialGrid` para busca de vizinho válido mais próximo a até 50 NM em grade de 1°.
