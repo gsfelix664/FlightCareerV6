@@ -166,6 +166,16 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE Airports ADD COLUMN ElevationFt INTEGER DEFAULT 0;",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_IsInSimulator ON Airports(IsInSimulator);",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
+
+                // Sinais de Estrutura e Tier por Movimento (TIER-A)
+                "ALTER TABLE Airports ADD COLUMN IlsEnds INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN Approaches INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN Gates INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN CargoParking INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN HasTower INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN LongestRunwayFt INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN LongestRunwayPaved INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN TierScore INTEGER DEFAULT 0;",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN SubId TEXT DEFAULT NULL;",

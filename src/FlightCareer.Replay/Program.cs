@@ -67,6 +67,12 @@ namespace FlightCareer.Replay
                 return BoardReporter.Run(args.Skip(1).ToArray());
             }
 
+            if (args[0].Equals("tier-report", StringComparison.OrdinalIgnoreCase))
+            {
+                System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+                return TierReporter.Run(args.Skip(1).ToArray());
+            }
+
             string? csvPath = null;
             string? aircraftArg = null;
             string? blackboxPath = null;
@@ -222,6 +228,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("     FlightCareer.Replay career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]");
             Console.WriteLine("     FlightCareer.Replay coverage [--out <caminho>]");
             Console.WriteLine("     FlightCareer.Replay board-report [--boards <n>] [--seed <n>] [--airports <lista>] [--coverage] [--out <pasta>]");
+            Console.WriteLine("     FlightCareer.Replay tier-report [--lnm <caminho>] [--csv <caminho>] [--out <pasta>]");
             Console.WriteLine();
             Console.WriteLine("Opções de Replay:");
             Console.WriteLine("  --aircraft <modelo>      Modelo ou Id da aeronave (ex.: 'Cessna C152', 'C172SP G1000')");

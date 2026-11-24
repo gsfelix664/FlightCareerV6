@@ -3055,3 +3055,23 @@
 - `navegacao_vfr` nunca saía (faixa 80–250 NM com limite de 80 NM = nenhum destino): faixa de uma etapa 30–90 NM até a E2C (triângulo).
 - Bagagem por pessoa também nos geradores especiais (instrução, cheque, panorâmico, levantamento, paraquedismo): `MissionBoardCore.WithPersonLuggage`.
 - Snapshot regravado. Pendente: o gerador de paraquedismo ainda sorteia 4–10 saltadores fixos em vez dos perfis do catálogo.
+
+## 2026-11-24 - Pista mínima por perfil de missão e tier por movimento (TIER-A) (Gemini)
+- **Parte A — Pista mínima por perfil de missão (capacidade física):**
+  - Adicionados `MinRunwayFt` e `Paved` a `MissionProfileDefinition` (`Domain/Missions/MissionDefinition.cs`).
+  - Preenchidos todos os 110 perfis das 69 missões em `mission_catalog.json` pelas classes de aeronave de referência (§ 9.7.1 de `catalogo-missoes.md` e § 2 de `tiers-por-movimento.md`): widebody 8.000 ft/sim, narrowbody 4.300 ft/sim, jato executivo longo alcance 4.900 ft/sim, jato executivo médio 3.400 ft/sim, turboélice regional 3.600 ft/sim, turboélice leve 2.500 ft/não, utilitário bush 1.200 ft/não e instrução/local 0 ft.
+  - `MissionBoardCore.GenerateBoard` recebe a melhor pista da origem (`originRunway`). `PickProfile` filtra apenas os perfis que a pista da origem comporta; se nenhum perfil couber, o tipo de missão tem peso 0 na origem e sai do sorteio prévio em `GenerateBoard`.
+  - `FilterCandidates` exige que os candidatos a destino tenham pista $\ge$ `MinRunwayFt` do perfil e pavimentada se `Paved` (candidatos sem pista conhecida são excluídos quando `MinRunwayFt > 0`).
+  - Chamadores `GenerateMissionsAsync` e `GenerateMissionsInMemory` em `MissionGenerator.cs` atualizados para obter e repassar a melhor pista da origem.
+- **Parte B — Tier por movimento e sinais estruturais:**
+  - Classificador puro `AirportTierClassifier` e regras configuráveis em `AirportTierRules` (`Domain/Airports/`) com arquivo de calibração `airport_tier_rules.json` (`Infrastructure/Data/`).
+  - Pontuação combinada: etiquetas curadas do `AirportProfileCatalog` (excluindo heurísticas `isolado`, `interior_distante`, `fazenda`, `altitude`, `turistico_poi`), estrutura do simulador via Little Navmap (ILS, procedimentos, gates, pontes, pátio de carga, torre, pista e pavimentação) e OurAirports (`type` e `scheduled_service` do CSV validados por proximidade geográfica).
+  - Regra de corte: Tier 1 $\ge 90$; Tier 2 $\ge 45$; Tier 3 $\ge 15$ ou qualquer pista pavimentada; senão Tier 4. Pistas não pavimentadas com teto em Tier 3 (e exigem $\ge 45$).
+  - `Airport` e `AppDbContext`: persistência dos sinais estruturais (`IlsEnds`, `Approaches`, `Gates`, `CargoParking`, `HasTower`, `LongestRunwayFt`, `LongestRunwayPaved`, `TierScore`) com `ALTER TABLE` idempotente.
+  - `DataSeeder`: `SeedFromLittleNavmapAsync` lê estrutura do banco do simulador e classifica os aeroportos em C#, gravando em lote via transação SQLite; `EnrichFromCsvAsync` valida posições geográficas com `fc_same_place` e recalcula os tiers com dados do OurAirports. Caminho só-CSV classificado com o que houver.
+- **Ferramentas CLI e Relatórios:**
+  - Subcomando CLI `FlightCareer.Replay tier-report` implementado (`TierReporter.cs`), gerando `tier-report.md` e `tier-report.csv` sobre a base completa do Little Navmap e OurAirports.
+  - Execução de `board-report` demonstrando a eliminação de `longo_curso` (0,0%) e perfis pesados de widebody de `carga_paletizada` (1,0%, restrito a narrowbody) e `ponte_aerea` (1,3%) em SBMT.
+- **Testes e Snapshot:**
+  - Suíte completa de testes unitários para o classificador (`AirportTierClassifierTests`) e regras de pista por perfil (`MissionRunwayProfileTests`).
+  - Snapshot `missions_golden.json` regravado e validado. 997/997 testes aprovados. Não testado no MSFS / não visto na tela.

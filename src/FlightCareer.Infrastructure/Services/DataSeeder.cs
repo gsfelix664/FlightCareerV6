@@ -1,8 +1,10 @@
 using Microsoft.Data.Sqlite;
 using CsvHelper;
 using CsvHelper.Configuration;
+using FlightCareer.Domain.Airports;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Limits;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Application.Interfaces;
 using FlightCareer.Infrastructure.Persistence;
@@ -98,10 +100,39 @@ namespace FlightCareer.Infrastructure.Services
             }
 
             // Fallback para os arquivos CSV tradicionais
-            var runwaySurfaces = await GetRunwaySurfacesAsync(progressCallback);
-            await SeedAirportsAsync(progressCallback, runwaySurfaces);
+            var runwayInfo = await GetRunwayInfoFromCsvAsync(progressCallback);
+            await SeedAirportsAsync(progressCallback, runwayInfo);
             await SeedRunwaysAsync(progressCallback);
             await NormalizeAirportsInDatabaseAsync(progressCallback);
+        }
+
+        private static string ResolveInitialCountry(string ident, string? country, string? region)
+        {
+            if (ident.StartsWith("SB") || ident.StartsWith("SS") || ident.StartsWith("SW") || ident.StartsWith("SD") || ident.StartsWith("SJ") || ident.StartsWith("SN") || ident.StartsWith("SI")) return "BR";
+            if (ident.StartsWith("K") && ident.Length == 4) return "US";
+            if ((ident.StartsWith("C") || ident.StartsWith("CY") || ident.StartsWith("CZ")) && ident.Length == 4) return "CA";
+            if (ident.StartsWith("MM")) return "MX";
+            if (ident.StartsWith("SA")) return "AR";
+            if (ident.StartsWith("SC")) return "CL";
+            if (ident.StartsWith("SK")) return "CO";
+            if (ident.StartsWith("SP")) return "PE";
+            if (ident.StartsWith("SU")) return "UY";
+            if (ident.StartsWith("SV")) return "VE";
+            if (ident.StartsWith("SG")) return "PY";
+            if (ident.StartsWith("SL")) return "BO";
+            if (ident.StartsWith("EG")) return "GB";
+            if (ident.StartsWith("LF")) return "FR";
+            if (ident.StartsWith("ED") || ident.StartsWith("ET")) return "DE";
+            if (ident.StartsWith("LE")) return "ES";
+            if (ident.StartsWith("LP")) return "PT";
+            if (ident.StartsWith("LI")) return "IT";
+            if (ident.StartsWith("EH")) return "NL";
+            if (ident.StartsWith("EB")) return "BE";
+            if (ident.StartsWith("RJ") || ident.StartsWith("RO")) return "JP";
+            if (ident.StartsWith("Y") && ident.Length == 4) return "AU";
+            if (ident.StartsWith("NZ")) return "NZ";
+            if (!string.IsNullOrEmpty(country) && country.Length == 2 && country != "SB" && country != "SS" && country != "SW" && country != "SD" && country != "SI" && country != "SN") return country;
+            return !string.IsNullOrEmpty(country) ? country : (!string.IsNullOrEmpty(region) ? region : "");
         }
 
         private async Task<bool> SeedFromLittleNavmapAsync(string lnmPath, Action<string, double>? progressCallback)
@@ -122,53 +153,27 @@ namespace FlightCareer.Infrastructure.Services
 
                 progressCallback?.Invoke("Gravando aeródromos e pistas de aviões nativos do MSFS...", 0.35);
 
-                // 2. Inserir Aeródromos com ICAO oficial do simulador e elevação real
-                // FILTRO ESTRITO: Apenas aeródromos com pistas terrestres para aviões (exclui 42k helipontos e bases de água)
+                // 2. Ler aeródromos e estrutura do Little Navmap e classificar Tier via AirportTierClassifier
                 cmd.CommandText = @"
-                    INSERT OR IGNORE INTO Airports (Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, Tier, IsInSimulator, MsfsIdent)
                     SELECT 
-                        hex(randomblob(16)),
                         COALESCE(ident, icao),
                         COALESCE(name, 'Aeródromo MSFS'),
                         COALESCE(city, ''),
-                        CASE 
-                            WHEN ident LIKE 'SB%' OR ident LIKE 'SS%' OR ident LIKE 'SW%' OR ident LIKE 'SD%' OR ident LIKE 'SJ%' OR ident LIKE 'SN%' OR ident LIKE 'SI%' THEN 'BR'
-                            WHEN ident LIKE 'K%' AND length(ident) = 4 THEN 'US'
-                            WHEN (ident LIKE 'C%' OR ident LIKE 'CY%' OR ident LIKE 'CZ%') AND length(ident) = 4 THEN 'CA'
-                            WHEN ident LIKE 'MM%' THEN 'MX'
-                            WHEN ident LIKE 'SA%' THEN 'AR'
-                            WHEN ident LIKE 'SC%' THEN 'CL'
-                            WHEN ident LIKE 'SK%' THEN 'CO'
-                            WHEN ident LIKE 'SP%' THEN 'PE'
-                            WHEN ident LIKE 'SU%' THEN 'UY'
-                            WHEN ident LIKE 'SV%' THEN 'VE'
-                            WHEN ident LIKE 'SG%' THEN 'PY'
-                            WHEN ident LIKE 'SL%' THEN 'BO'
-                            WHEN ident LIKE 'EG%' THEN 'GB'
-                            WHEN ident LIKE 'LF%' THEN 'FR'
-                            WHEN ident LIKE 'ED%' OR ident LIKE 'ET%' THEN 'DE'
-                            WHEN ident LIKE 'LE%' THEN 'ES'
-                            WHEN ident LIKE 'LP%' THEN 'PT'
-                            WHEN ident LIKE 'LI%' THEN 'IT'
-                            WHEN ident LIKE 'EH%' THEN 'NL'
-                            WHEN ident LIKE 'EB%' THEN 'BE'
-                            WHEN ident LIKE 'RJ%' OR ident LIKE 'RO%' THEN 'JP'
-                            WHEN ident LIKE 'Y%' AND length(ident) = 4 THEN 'AU'
-                            WHEN ident LIKE 'NZ%' THEN 'NZ'
-                            WHEN country IS NOT NULL AND length(country) = 2 AND country NOT IN ('SB','SS','SW','SJ','SD','SI','SN') THEN country
-                            ELSE COALESCE(country, region, '')
-                        END,
+                        country,
+                        region,
                         laty,
                         lonx,
                         CAST(altitude AS INTEGER),
-                        CASE 
-                            WHEN longest_runway_length >= 7500 AND num_runway_hard > 0 THEN 1
-                            WHEN longest_runway_length >= 4500 AND num_runway_hard > 0 THEN 2
-                            WHEN num_runway_hard > 0 OR longest_runway_length >= 2500 THEN 3
-                            ELSE 4
-                        END,
-                        1,
-                        ident
+                        longest_runway_length,
+                        longest_runway_surface,
+                        num_runway_hard,
+                        num_runway_end_ils,
+                        num_approach,
+                        num_parking_gate,
+                        num_jetway,
+                        num_parking_cargo,
+                        has_tower_object,
+                        tower_frequency
                     FROM lnm.airport
                     WHERE is_closed = 0 
                       AND ident IS NOT NULL 
@@ -176,7 +181,144 @@ namespace FlightCareer.Infrastructure.Services
                       AND (num_runway_hard > 0 OR num_runway_soft > 0)
                       AND longest_runway_length >= 1000;
                 ";
-                await cmd.ExecuteNonQueryAsync();
+
+                var rules = AirportTierRules.Default;
+                var profileCatalog = AirportProfileCatalog.Shared;
+
+                var airportsToInsert = new List<Airport>();
+                using (var reader = await cmd.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var ident = reader.GetString(0);
+                        var name = reader.GetString(1);
+                        var city = reader.GetString(2);
+                        var rawCountry = reader.IsDBNull(3) ? "" : reader.GetString(3);
+                        var rawRegion = reader.IsDBNull(4) ? "" : reader.GetString(4);
+                        var lat = reader.GetDouble(5);
+                        var lon = reader.GetDouble(6);
+                        var alt = reader.IsDBNull(7) ? 0 : Convert.ToInt32(reader.GetValue(7));
+                        var longestRunway = reader.IsDBNull(8) ? 0 : Convert.ToInt32(reader.GetValue(8));
+                        var rwSurface = reader.IsDBNull(9) ? "" : reader.GetString(9);
+                        var numHard = reader.IsDBNull(10) ? 0 : Convert.ToInt32(reader.GetValue(10));
+                        var ilsEnds = reader.IsDBNull(11) ? 0 : Convert.ToInt32(reader.GetValue(11));
+                        var approaches = reader.IsDBNull(12) ? 0 : Convert.ToInt32(reader.GetValue(12));
+                        var gates = reader.IsDBNull(13) ? 0 : Convert.ToInt32(reader.GetValue(13));
+                        var jetways = reader.IsDBNull(14) ? 0 : Convert.ToInt32(reader.GetValue(14));
+                        var cargoParking = reader.IsDBNull(15) ? 0 : Convert.ToInt32(reader.GetValue(15));
+                        var hasTowerObj = reader.IsDBNull(16) ? 0 : Convert.ToInt32(reader.GetValue(16));
+                        var towerFreq = reader.IsDBNull(17) ? 0.0 : Convert.ToDouble(reader.GetValue(17));
+
+                        bool hasTower = hasTowerObj > 0 || towerFreq > 0;
+                        bool isPaved = rwSurface is "A" or "C" or "B" or "T" ||
+                                       (numHard > 0 && rwSurface is not ("G" or "D" or "GR" or "S" or "SN" or "CR" or "W" or "Grass" or "Dirt" or "Gravel" or "Sand" or "Snow"));
+                        var country = ResolveInitialCountry(ident, rawCountry, rawRegion);
+
+                        var tags = profileCatalog.TagsFor(ident);
+                        var input = new AirportTierInput(
+                            tags,
+                            IlsEnds: ilsEnds,
+                            Approaches: approaches,
+                            Gates: gates,
+                            Jetways: jetways,
+                            CargoParking: cargoParking,
+                            HasTower: hasTower,
+                            LongestRunwayFt: longestRunway,
+                            LongestRunwayPaved: isPaved,
+                            CsvType: null,
+                            ScheduledService: null
+                        );
+
+                        var tierScore = AirportTierClassifier.Score(input, rules);
+
+                        airportsToInsert.Add(new Airport
+                        {
+                            Id = Guid.NewGuid(),
+                            ICAO = ident,
+                            Name = name,
+                            City = city,
+                            Country = country,
+                            Latitude = lat,
+                            Longitude = lon,
+                            ElevationFt = alt,
+                            Tier = tierScore.Tier,
+                            IsInSimulator = true,
+                            MsfsIdent = ident,
+                            IlsEnds = ilsEnds,
+                            Approaches = approaches,
+                            Gates = gates + jetways,
+                            CargoParking = cargoParking,
+                            HasTower = hasTower,
+                            LongestRunwayFt = longestRunway,
+                            LongestRunwayPaved = isPaved,
+                            TierScore = tierScore.TotalScore
+                        });
+                    }
+                }
+
+                // Inserir aeroportos em lote no SQLite
+                using (var transaction = connection.BeginTransaction())
+                {
+                    using var insertAirportCmd = connection.CreateCommand();
+                    insertAirportCmd.Transaction = transaction;
+                    insertAirportCmd.CommandText = @"
+                        INSERT OR IGNORE INTO Airports (
+                            Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, 
+                            Tier, IsInSimulator, MsfsIdent, IlsEnds, Approaches, Gates, 
+                            CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore
+                        ) VALUES (
+                            @Id, @ICAO, @Name, @City, @Country, @Latitude, @Longitude, @ElevationFt,
+                            @Tier, @IsInSimulator, @MsfsIdent, @IlsEnds, @Approaches, @Gates,
+                            @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore
+                        );";
+
+                    var pId = insertAirportCmd.CreateParameter(); pId.ParameterName = "@Id"; insertAirportCmd.Parameters.Add(pId);
+                    var pIcao = insertAirportCmd.CreateParameter(); pIcao.ParameterName = "@ICAO"; insertAirportCmd.Parameters.Add(pIcao);
+                    var pName = insertAirportCmd.CreateParameter(); pName.ParameterName = "@Name"; insertAirportCmd.Parameters.Add(pName);
+                    var pCity = insertAirportCmd.CreateParameter(); pCity.ParameterName = "@City"; insertAirportCmd.Parameters.Add(pCity);
+                    var pCountry = insertAirportCmd.CreateParameter(); pCountry.ParameterName = "@Country"; insertAirportCmd.Parameters.Add(pCountry);
+                    var pLat = insertAirportCmd.CreateParameter(); pLat.ParameterName = "@Latitude"; insertAirportCmd.Parameters.Add(pLat);
+                    var pLon = insertAirportCmd.CreateParameter(); pLon.ParameterName = "@Longitude"; insertAirportCmd.Parameters.Add(pLon);
+                    var pElev = insertAirportCmd.CreateParameter(); pElev.ParameterName = "@ElevationFt"; insertAirportCmd.Parameters.Add(pElev);
+                    var pTier = insertAirportCmd.CreateParameter(); pTier.ParameterName = "@Tier"; insertAirportCmd.Parameters.Add(pTier);
+                    var pInSim = insertAirportCmd.CreateParameter(); pInSim.ParameterName = "@IsInSimulator"; insertAirportCmd.Parameters.Add(pInSim);
+                    var pMsfs = insertAirportCmd.CreateParameter(); pMsfs.ParameterName = "@MsfsIdent"; insertAirportCmd.Parameters.Add(pMsfs);
+                    var pIls = insertAirportCmd.CreateParameter(); pIls.ParameterName = "@IlsEnds"; insertAirportCmd.Parameters.Add(pIls);
+                    var pApp = insertAirportCmd.CreateParameter(); pApp.ParameterName = "@Approaches"; insertAirportCmd.Parameters.Add(pApp);
+                    var pGates = insertAirportCmd.CreateParameter(); pGates.ParameterName = "@Gates"; insertAirportCmd.Parameters.Add(pGates);
+                    var pCargo = insertAirportCmd.CreateParameter(); pCargo.ParameterName = "@CargoParking"; insertAirportCmd.Parameters.Add(pCargo);
+                    var pTower = insertAirportCmd.CreateParameter(); pTower.ParameterName = "@HasTower"; insertAirportCmd.Parameters.Add(pTower);
+                    var pRwFt = insertAirportCmd.CreateParameter(); pRwFt.ParameterName = "@LongestRunwayFt"; insertAirportCmd.Parameters.Add(pRwFt);
+                    var pRwPvd = insertAirportCmd.CreateParameter(); pRwPvd.ParameterName = "@LongestRunwayPaved"; insertAirportCmd.Parameters.Add(pRwPvd);
+                    var pScore = insertAirportCmd.CreateParameter(); pScore.ParameterName = "@TierScore"; insertAirportCmd.Parameters.Add(pScore);
+
+                    foreach (var a in airportsToInsert)
+                    {
+                        pId.Value = a.Id.ToString("N");
+                        pIcao.Value = a.ICAO;
+                        pName.Value = a.Name;
+                        pCity.Value = a.City;
+                        pCountry.Value = a.Country;
+                        pLat.Value = a.Latitude;
+                        pLon.Value = a.Longitude;
+                        pElev.Value = a.ElevationFt;
+                        pTier.Value = a.Tier;
+                        pInSim.Value = a.IsInSimulator ? 1 : 0;
+                        pMsfs.Value = a.MsfsIdent ?? "";
+                        pIls.Value = a.IlsEnds;
+                        pApp.Value = a.Approaches;
+                        pGates.Value = a.Gates;
+                        pCargo.Value = a.CargoParking;
+                        pTower.Value = a.HasTower ? 1 : 0;
+                        pRwFt.Value = a.LongestRunwayFt;
+                        pRwPvd.Value = a.LongestRunwayPaved ? 1 : 0;
+                        pScore.Value = a.TierScore;
+
+                        await insertAirportCmd.ExecuteNonQueryAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                }
 
                 progressCallback?.Invoke("Gravando pistas operacionais para aviões...", 0.55);
 
@@ -266,7 +408,9 @@ namespace FlightCareer.Infrastructure.Services
                     csv_name TEXT,
                     elevation_ft INTEGER,
                     lat REAL,
-                    lon REAL
+                    lon REAL,
+                    type TEXT,
+                    scheduled_service TEXT
                 );
                 DELETE FROM CsvAirports;
             ";
@@ -280,7 +424,7 @@ namespace FlightCareer.Infrastructure.Services
             using var transaction = connection.BeginTransaction();
             using var insertCmd = connection.CreateCommand();
             insertCmd.Transaction = transaction;
-            insertCmd.CommandText = "INSERT OR IGNORE INTO CsvAirports (ident, municipality, iso_country, csv_name, elevation_ft, lat, lon) VALUES (@ident, @municipality, @iso_country, @csv_name, @elevation_ft, @lat, @lon);";
+            insertCmd.CommandText = "INSERT OR IGNORE INTO CsvAirports (ident, municipality, iso_country, csv_name, elevation_ft, lat, lon, type, scheduled_service) VALUES (@ident, @municipality, @iso_country, @csv_name, @elevation_ft, @lat, @lon, @type, @scheduled_service);";
             
             var pIdent = insertCmd.CreateParameter(); pIdent.ParameterName = "@ident"; insertCmd.Parameters.Add(pIdent);
             var pMuni = insertCmd.CreateParameter(); pMuni.ParameterName = "@municipality"; insertCmd.Parameters.Add(pMuni);
@@ -289,6 +433,8 @@ namespace FlightCareer.Infrastructure.Services
             var pElev = insertCmd.CreateParameter(); pElev.ParameterName = "@elevation_ft"; insertCmd.Parameters.Add(pElev);
             var pLat = insertCmd.CreateParameter(); pLat.ParameterName = "@lat"; insertCmd.Parameters.Add(pLat);
             var pLon = insertCmd.CreateParameter(); pLon.ParameterName = "@lon"; insertCmd.Parameters.Add(pLon);
+            var pType = insertCmd.CreateParameter(); pType.ParameterName = "@type"; insertCmd.Parameters.Add(pType);
+            var pSched = insertCmd.CreateParameter(); pSched.ParameterName = "@scheduled_service"; insertCmd.Parameters.Add(pSched);
 
             while (await csv.ReadAsync())
             {
@@ -302,6 +448,8 @@ namespace FlightCareer.Infrastructure.Services
                 pElev.Value = int.TryParse(csv.GetField<string>("elevation_ft"), out var el) ? el : 0;
                 pLat.Value = double.TryParse(csv.GetField<string>("latitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var la) ? la : (object)DBNull.Value;
                 pLon.Value = double.TryParse(csv.GetField<string>("longitude_deg"), NumberStyles.Float, CultureInfo.InvariantCulture, out var lo) ? lo : (object)DBNull.Value;
+                pType.Value = csv.GetField<string>("type") ?? "";
+                pSched.Value = csv.GetField<string>("scheduled_service") ?? "";
 
                 await insertCmd.ExecuteNonQueryAsync();
             }
@@ -338,10 +486,93 @@ namespace FlightCareer.Infrastructure.Services
                     END,
                     ElevationFt = CASE WHEN ElevationFt IS NULL OR ElevationFt = 0 THEN (SELECT elevation_ft FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO) ELSE ElevationFt END
                 WHERE EXISTS (SELECT 1 FROM CsvAirports WHERE CsvAirports.ident = Airports.ICAO " + positionMatch + @");
-                
-                DROP TABLE IF EXISTS CsvAirports;
             ";
             await updateCmd.ExecuteNonQueryAsync();
+
+            progressCallback?.Invoke("Recalculando Tiers por movimento com dados do CSV...", 0.88);
+
+            using var recalculateCmd = connection.CreateCommand();
+            recalculateCmd.CommandText = @"
+                SELECT 
+                    Airports.ICAO, 
+                    Airports.IlsEnds, 
+                    Airports.Approaches, 
+                    Airports.Gates, 
+                    Airports.CargoParking, 
+                    Airports.HasTower, 
+                    Airports.LongestRunwayFt, 
+                    Airports.LongestRunwayPaved, 
+                    CsvAirports.type, 
+                    CsvAirports.scheduled_service
+                FROM Airports
+                JOIN CsvAirports ON CsvAirports.ident = Airports.ICAO
+                WHERE 1=1 " + positionMatch + ";";
+
+            var tierUpdates = new List<(string Icao, int Tier, int TierScore)>();
+            using (var recalculateReader = await recalculateCmd.ExecuteReaderAsync())
+            {
+                var rules = AirportTierRules.Default;
+                var catalog = AirportProfileCatalog.Shared;
+
+                while (await recalculateReader.ReadAsync())
+                {
+                    var icao = recalculateReader.GetString(0);
+                    var ils = recalculateReader.GetInt32(1);
+                    var app = recalculateReader.GetInt32(2);
+                    var gates = recalculateReader.GetInt32(3);
+                    var cargo = recalculateReader.GetInt32(4);
+                    var tower = recalculateReader.GetInt32(5) != 0;
+                    var rwFt = recalculateReader.GetInt32(6);
+                    var rwPaved = recalculateReader.GetInt32(7) != 0;
+                    var csvType = recalculateReader.IsDBNull(8) ? null : recalculateReader.GetString(8);
+                    var schedStr = recalculateReader.IsDBNull(9) ? null : recalculateReader.GetString(9);
+                    bool sched = string.Equals(schedStr, "yes", StringComparison.OrdinalIgnoreCase);
+
+                    var tags = catalog.TagsFor(icao);
+                    var input = new AirportTierInput(
+                        tags,
+                        IlsEnds: ils,
+                        Approaches: app,
+                        Gates: gates,
+                        Jetways: 0,
+                        CargoParking: cargo,
+                        HasTower: tower,
+                        LongestRunwayFt: rwFt,
+                        LongestRunwayPaved: rwPaved,
+                        CsvType: csvType,
+                        ScheduledService: sched
+                    );
+
+                    var score = AirportTierClassifier.Score(input, rules);
+                    tierUpdates.Add((icao, score.Tier, score.TotalScore));
+                }
+            }
+
+            if (tierUpdates.Count > 0)
+            {
+                using var updateTx = connection.BeginTransaction();
+                using var updateTierCmd = connection.CreateCommand();
+                updateTierCmd.Transaction = updateTx;
+                updateTierCmd.CommandText = "UPDATE Airports SET Tier = @tier, TierScore = @tierScore WHERE ICAO = @icao;";
+
+                var pUptTier = updateTierCmd.CreateParameter(); pUptTier.ParameterName = "@tier"; updateTierCmd.Parameters.Add(pUptTier);
+                var pUptScore = updateTierCmd.CreateParameter(); pUptScore.ParameterName = "@tierScore"; updateTierCmd.Parameters.Add(pUptScore);
+                var pUptIcao = updateTierCmd.CreateParameter(); pUptIcao.ParameterName = "@icao"; updateTierCmd.Parameters.Add(pUptIcao);
+
+                foreach (var (icao, tier, tierScore) in tierUpdates)
+                {
+                    pUptTier.Value = tier;
+                    pUptScore.Value = tierScore;
+                    pUptIcao.Value = icao;
+                    await updateTierCmd.ExecuteNonQueryAsync();
+                }
+
+                await updateTx.CommitAsync();
+            }
+
+            using var dropCmd = connection.CreateCommand();
+            dropCmd.CommandText = "DROP TABLE IF EXISTS CsvAirports;";
+            await dropCmd.ExecuteNonQueryAsync();
         }
 
         private async Task NormalizeAirportsInDatabaseAsync(Action<string, double>? progressCallback)
@@ -414,11 +645,11 @@ namespace FlightCareer.Infrastructure.Services
             }
         }
 
-        private async Task<Dictionary<string, List<string>>> GetRunwaySurfacesAsync(Action<string, double>? progressCallback)
+        private async Task<Dictionary<string, (int LongestLengthFt, bool IsPaved)>> GetRunwayInfoFromCsvAsync(Action<string, double>? progressCallback)
         {
             progressCallback?.Invoke("Analisando superfícies das pistas...", 0.2);
             var filePath = Path.Combine(_csvPath, "runways.csv");
-            var dict = new Dictionary<string, List<string>>();
+            var dict = new Dictionary<string, (int LongestLengthFt, bool IsPaved)>(StringComparer.OrdinalIgnoreCase);
             if (!File.Exists(filePath)) return dict;
 
             using var reader = new StreamReader(filePath);
@@ -428,12 +659,23 @@ namespace FlightCareer.Infrastructure.Services
 
             while (await csv.ReadAsync())
             {
-                var ident = csv.GetField<string>("airport_ident");
-                var surface = csv.GetField<string>("surface")?.ToUpper() ?? "";
+                var ident = csv.GetField<string>("airport_ident")?.Trim();
+                var surface = csv.GetField<string>("surface") ?? "";
+                int length = int.TryParse(csv.GetField<string>("length_ft"), out var l) ? l : 0;
+                bool isHard = RunwaySurface.IsHard(surface);
+
                 if (!string.IsNullOrEmpty(ident))
                 {
-                    if (!dict.ContainsKey(ident)) dict[ident] = new List<string>();
-                    dict[ident].Add(surface);
+                    if (!dict.TryGetValue(ident, out var existing))
+                    {
+                        dict[ident] = (length, isHard);
+                    }
+                    else
+                    {
+                        int bestLen = Math.Max(existing.LongestLengthFt, length);
+                        bool bestPaved = existing.IsPaved || isHard;
+                        dict[ident] = (bestLen, bestPaved);
+                    }
                 }
             }
             return dict;
@@ -482,7 +724,7 @@ namespace FlightCareer.Infrastructure.Services
             await _context.SaveChangesAsync();
         }
 
-        private async Task SeedAirportsAsync(Action<string, double>? progressCallback, Dictionary<string, List<string>> runwaySurfaces)
+        private async Task SeedAirportsAsync(Action<string, double>? progressCallback, Dictionary<string, (int LongestLengthFt, bool IsPaved)> runwayInfo)
         {
             if (await _context.Airports.AnyAsync()) return;
 
@@ -498,9 +740,9 @@ namespace FlightCareer.Infrastructure.Services
 
             var airports = new List<Airport>();
             var processedIcaos = new HashSet<string>();
+            var rules = AirportTierRules.Default;
+            var catalog = AirportProfileCatalog.Shared;
             int count = 0;
-            
-
 
             while (await csv.ReadAsync())
             {
@@ -516,17 +758,32 @@ namespace FlightCareer.Infrastructure.Services
 
                 processedIcaos.Add(icao);
 
-                int tier = 4; // Default Small/Dirt
-                if (type == "large_airport") tier = 1;
-                else if (type == "medium_airport") tier = 2;
-                else if (type == "small_airport")
+                int longestRunwayFt = 0;
+                bool longestPaved = false;
+                if (runwayInfo.TryGetValue(icao, out var rinfo))
                 {
-                    if (runwaySurfaces.TryGetValue(icao, out var surfaces))
-                    {
-                        if (surfaces.Any(RunwaySurface.IsHard))
-                            tier = 3;
-                    }
+                    longestRunwayFt = rinfo.LongestLengthFt;
+                    longestPaved = rinfo.IsPaved;
                 }
+
+                var tags = catalog.TagsFor(icao);
+                bool scheduled = string.Equals(csv.GetField<string>("scheduled_service"), "yes", StringComparison.OrdinalIgnoreCase);
+
+                var input = new AirportTierInput(
+                    tags,
+                    IlsEnds: 0,
+                    Approaches: 0,
+                    Gates: 0,
+                    Jetways: 0,
+                    CargoParking: 0,
+                    HasTower: false,
+                    LongestRunwayFt: longestRunwayFt,
+                    LongestRunwayPaved: longestPaved,
+                    CsvType: type,
+                    ScheduledService: scheduled
+                );
+
+                var score = AirportTierClassifier.Score(input, rules);
 
                 var airport = new Airport
                 {
@@ -538,9 +795,12 @@ namespace FlightCareer.Infrastructure.Services
                     Latitude = double.TryParse(csv.GetField<string>("latitude_deg"), CultureInfo.InvariantCulture, out var lat) ? lat : 0,
                     Longitude = double.TryParse(csv.GetField<string>("longitude_deg"), CultureInfo.InvariantCulture, out var lon) ? lon : 0,
                     ElevationFt = int.TryParse(csv.GetField<string>("elevation_ft"), out var elev) ? elev : 0,
-                    Tier = tier,
+                    Tier = score.Tier,
                     IsInSimulator = true,
-                    MsfsIdent = icao
+                    MsfsIdent = icao,
+                    LongestRunwayFt = longestRunwayFt,
+                    LongestRunwayPaved = longestPaved,
+                    TierScore = score.TotalScore
                 };
                 AviationDataNormalizer.NormalizeAirport(airport);
                 airports.Add(airport);
@@ -548,7 +808,7 @@ namespace FlightCareer.Infrastructure.Services
 
                 if (count % 5000 == 0)
                 {
-                    progressCallback?.Invoke($"Processando {count} aeroportos (Tier {tier})...", 0.4 + (count / 150000.0));
+                    progressCallback?.Invoke($"Processando {count} aeroportos (Tier {score.Tier})...", 0.4 + (count / 150000.0));
                     await _context.Airports.AddRangeAsync(airports);
                     await _context.SaveChangesAsync();
                     airports.Clear();

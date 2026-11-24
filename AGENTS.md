@@ -299,6 +299,19 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - Geração: `Application/Services/MissionBoardCore` (único para jogo e bots); `MissionGenerator` só carrega candidatos (jogo: `LimitCandidates`, todos até 600 NM + amostra dos distantes) e chama o núcleo. Conferência: `FlightCareer.Replay board-report`.
 - Pendente (E2A-L): remover a camada antiga (`MissionRules` com ids antigos, `GetCalibratedCategories`, `CreateMissionFromSubCategory*`, `ResolveG20Hubs`/`ResolveDynamicHubs`) e reescrever os testes que dependem dela. Não testado no MSFS.
 
+### Pista mínima por perfil e tier por movimento (TIER-A)
+- **Pista mínima por perfil (capacidade física)**:
+  - `MissionProfileDefinition`: campos `MinRunwayFt` e `Paved` preenchidos em todos os 110 perfis das 69 missões do `mission_catalog.json` conforme a aeronave de referência e classe física (widebody 8.000 ft/sim, narrowbody 4.300 ft/sim, jato executivo longo alcance 4.900 ft/sim, jato executivo médio 3.400 ft/sim, turboélice regional 3.600 ft/sim, turboélice leve 2.500 ft/não, utilitário bush 1.200 ft/não, instrução/local 0 ft).
+  - `MissionBoardCore`: recebe `Runway? originRunway`. `PickProfile` filtra apenas os perfis que a pista da origem comporta. Se nenhum perfil couber, o tipo de missão tem peso 0 na origem e sai do sorteio em `GenerateBoard`. `FilterCandidates` exige que destinos tenham pista $\ge$ `MinRunwayFt` do perfil e pavimentada se `Paved` (candidatos sem pista conhecida são excluídos quando `MinRunwayFt > 0`).
+  - Chamadores atualizados em `MissionGenerator` (`GenerateMissionsAsync` e `GenerateMissionsInMemory`) resolvendo a melhor pista da origem pela mesma regra dos candidatos.
+- **Tier por movimento (pontuação combinada)**:
+  - Lógica pura `Domain/Airports/AirportTierClassifier` e regras em `Domain/Airports/AirportTierRules` + `Infrastructure/Data/airport_tier_rules.json`.
+  - Entradas: etiquetas curadas do `AirportProfileCatalog` (exclui heurísticas `isolado`, `interior_distante`, `fazenda`, `altitude`, `turistico_poi`), estrutura do MSFS/Little Navmap (ILS, procedimentos, gates, pontes, pátio de carga, torre, pista e pavimentação) e OurAirports (`type` e `scheduled_service` do CSV validados por posição).
+  - Cortes: Tier 1 $\ge 90$; Tier 2 $\ge 45$; Tier 3 $\ge 15$ ou qualquer pista pavimentada; senão Tier 4. Pistas não pavimentadas limitadas ao teto de Tier 3 (e exigem $\ge 45$).
+  - `Airport` e `AppDbContext`: persistência dos sinais estruturais (`IlsEnds`, `Approaches`, `Gates`, `CargoParking`, `HasTower`, `LongestRunwayFt`, `LongestRunwayPaved`, `TierScore`) com `ALTER TABLE` idempotente.
+  - `DataSeeder`: inserção com leitura de estrutura do Little Navmap e classificação em C#, seguida de recálculo com OurAirports no enriquecimento CSV (`EnrichFromCsvAsync`). Caminho só-CSV classificado com o que houver.
+  - Subcomando CLI `tier-report` no `FlightCareer.Replay` (`tier-report.md` e `tier-report.csv`). Não testado no MSFS / não visto na tela.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:
