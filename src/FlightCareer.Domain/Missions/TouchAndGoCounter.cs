@@ -10,6 +10,10 @@ namespace FlightCareer.Domain.Missions
     /// </summary>
     public sealed class TouchAndGoCounter
     {
+        public const double MinRollDurationSeconds = 1.0;
+        public const double MinGroundSpeedForRollKt = 20.0;
+        public const double FullStopSpeedThresholdKt = 5.0;
+
         private int _count;
         private bool _wasOnGround;
         private bool _hasTakenOffOnce;
@@ -18,6 +22,13 @@ namespace FlightCareer.Domain.Missions
         private bool _fullStopOccurred;
 
         public int Count => _count;
+
+        public static bool IsValidTouchAndGo(double rollDurationSeconds, double maxGroundSpeedKt, bool fullStopOccurred)
+        {
+            bool isBounce = rollDurationSeconds < MinRollDurationSeconds;
+            bool reachedSpeed = maxGroundSpeedKt > MinGroundSpeedForRollKt;
+            return !isBounce && !fullStopOccurred && reachedSpeed;
+        }
 
         public void Reset(bool initialIsOnGround)
         {
@@ -63,11 +74,7 @@ namespace FlightCareer.Domain.Missions
                 else
                 {
                     double rollDuration = simSeconds - _touchdownSimTime;
-                    bool isBounce = rollDuration < 1.0;
-                    bool isFullStop = _fullStopOccurred;
-                    bool reachedSpeed = _maxGsDuringRoll > 20.0;
-
-                    if (!isBounce && !isFullStop && reachedSpeed)
+                    if (IsValidTouchAndGo(rollDuration, _maxGsDuringRoll, _fullStopOccurred))
                     {
                         _count++;
                     }

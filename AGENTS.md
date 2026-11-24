@@ -318,14 +318,14 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ### Primeiro lote de missões com regra própria e paraquedismo por perfis (E2C-1)
 - **Rastreadores puros em `Domain/Missions/`**:
-  - `MultiStopTracker`: paradas completas sequenciais (`GroundSpeed < 3 kt` por $\ge 5$ s simulados a $\le 1,5$ NM da coordenada) em cada escala intermediária, exigindo nova decolagem entre escalas e conferindo integridade de combustível (`RequireNoRefuel`: subida máxima de $\max(1\text{ gal}, 2\%)$).
+  - `MultiStopTracker`: paradas completas sequenciais (`GroundSpeed < 3 kt` por $\ge 5$ s simulados a $\le 1,5$ NM da coordenada) em cada escala intermediária, exigindo nova decolagem entre escalas e conferindo integridade de combustível (`RequireNoRefuel`: subida máxima de $\max(1\text{ gal}, 2\%)$). Suporta modo `StopMode = touch_and_go` (E2C-1b), aceitando TGL válido ($\ge 1$ s de rolagem, GS máxima $> 20$ kt, sem parada e decolagem a $\le 1,5$ NM) ou parada completa.
   - `StolLandingTracker`: toques em pista curta com aproximação íngreme ($\ge 4^\circ$ calculada por $\text{atan}(|\text{VS}|/\text{GS})$ nos últimos 300 ft AGL) e parada completa $\le \text{clamp}(0,6 \times \text{RunwayLength}, 300, 1.000)$ ft; aviso positivo de través $\ge 8$ kt.
   - `CheckFlightTracker`: validação sequencial de voo de teste (altitude de teste $\pm 300$ ft, potência máxima por 10 s simulados, rumos N, E, S, W por 15 s cada na altitude, pouso na origem).
   - `FerryRestrictionMonitor`: restrição de altitude (tolerância 10 s acumulados acima de $MaxAlt + 200$) e flaps fixos ($\pm 5\%$). Trem travado excluído por ausência de SimVar no struct.
   - `MissionTrackerResults`: record agregando os resultados operacionais para repasse opcional em `MissionCompletion.Evaluate`.
 - **Geradores e despacho em `MissionGenerator.cs` e `MissionBoardCore.cs`**:
   - `pinga_pinga`: 3–4 etapas de 25–120 NM, total 100–400 NM, escalas tier 2–4 em sequência sem repetir aeródromo, destino = última escala.
-  - `navegacao_vfr`: triângulo origem → A → B → origem (etapas 25–90 NM, total 80–250 NM, A e B tier 3) com ponto de reportagem `P:` no meio da primeira perna com desvio lateral de 3–8 NM.
+  - `navegacao_vfr`: três variantes de instrução VFR com ponto de reportagem `P:` na primeira perna (desvio 3–8 NM) e retorno à origem (E2C-1b): triângulo com paradas completas (`triangle`, 50% de peso, etapas 25–90 NM, total 80–250 NM), ida e volta com pouso completo na escala intermediária (`out_and_back`, 25% de peso, etapa 40–120 NM, total 80–240 NM) e triângulo com toque e arremetida (`triangle_tgl`, 25% de peso, etapas 25–70 NM, total 75–200 NM, `StopMode = touch_and_go`). Escalas intermediárias tier 3.
   - `instrucao_stol`: pista curta tier 4 a 10–40 NM da origem, 3 pousos curtos requeridos e pouso final na origem.
   - `check_flight`: voo local de teste técnico retornando à origem.
   - `ferry_permit`: translado restrito com preferência de destino MRO ($\times 6$).

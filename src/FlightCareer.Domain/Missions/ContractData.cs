@@ -27,6 +27,7 @@ namespace FlightCareer.Domain.Missions
     {
         public List<StopPoint> Stops { get; set; } = new();
         public bool RequireNoRefuel { get; set; } = true;
+        public string StopMode { get; set; } = "full_stop"; // "full_stop" | "touch_and_go"
     }
 
     public sealed class StopPoint

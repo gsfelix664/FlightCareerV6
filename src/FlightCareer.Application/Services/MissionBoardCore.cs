@@ -231,7 +231,7 @@ namespace FlightCareer.Application.Services
             if (def.Generator == "vfr_triangle")
             {
                 var triangle = MissionGenerator.CreateVfrTriangleMissionSync(
-                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog);
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, profile);
                 return triangle != null ? WithPersonLuggage(triangle, def, random) : null;
             }
 

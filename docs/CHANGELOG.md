@@ -3145,3 +3145,21 @@
 - **Suíte de Testes e Snapshot:**
   - Suíte xUnit dedicada com 29 novos testes cobrindo todas as máquinas de estado e geradores (`MultiStopTrackerTests`, `VfrTriangleTests`, `StolLandingTrackerTests`, `CheckFlightTrackerTests`, `FerryRestrictionMonitorTests`, `PhaseE2C1GeneratorsTests`).
   - Total de 1.051/1.051 testes aprovados (100%). Snapshot `missions_golden.json` regravado refletindo a ativação dos 6 tipos. Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - Variantes da navegação VFR (E2C-1b) (Gemini)
+- **Variantes de instrução VFR (`navegacao_vfr`):**
+  - Três perfis e variantes configurados no catálogo (`mission_catalog.json`) e despachados pelo gerador `CreateVfrTriangleMissionSync`:
+    - `triangle` (peso 50): triângulo clássico origem → A → B → origem, etapas 25–90 NM, total 80–250 NM, paradas completas em A e B.
+    - `out_and_back` (peso 25): ida e volta origem → A → origem, etapa única de 40–120 NM, total 80–240 NM, parada completa em A.
+    - `triangle_tgl` (peso 25): triângulo origem → A → B → origem, etapas 25–70 NM, total 75–200 NM, toque e arremetida em A e B (`StopMode = touch_and_go`).
+  - Todas as variantes mantêm ponto de reportagem `P:` na primeira perna (desvio lateral 3–8 NM), retorno para pouso na base de origem e 1 passageiro (instrutor).
+- **Rastreamento de toques e arremetidas (`MultiStopTracker`):**
+  - Propriedade `StopMode` em `MultiStopContractData` (`full_stop` padrão, `touch_and_go`).
+  - Reutilização da regra de TGL do `TouchAndGoCounter` (`IsValidTouchAndGo`): toque $\ge 1,0$ s sem quique, GS máxima no solo $> 20$ kt, sem parada completa ($< 5$ kt) e decolagem a $\le 1,5$ NM da escala intermediária.
+  - Parada completa continua aceita no modo TGL como alternativa segura de cumprimento da escala.
+- **Textos por variante (`mission_texts.json`):**
+  - Variantes textuais dedicadas para `navegacao_vfr:out_and_back` (citando `{stop_a}` e pouso completo), `navegacao_vfr:triangle_tgl` (citando `{stop_a}`, `{stop_b}` e toque e arremetida) e `navegacao_vfr:triangle` com fallback transparente no gerador.
+- **Testes e Snapshot:**
+  - 6 novos testes de unidade cobrindo modos TGL, quiques, distâncias, gerador procedural N quadros com as 3 variantes e avaliação em `MissionCompletion`.
+  - Snapshot `missions_golden.json` regravado e validado.
+  - Total de 1.057/1.057 testes aprovados (100%). Não testado no MSFS.
