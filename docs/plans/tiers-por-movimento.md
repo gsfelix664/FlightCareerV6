@@ -46,3 +46,12 @@ Pontuação inicial (ajustável no JSON):
 
 ## 5. Não testado
 Nada disso depende do MSFS para testar a lógica; o resultado real depende do banco do Little Navmap da máquina do usuário. Não testado no MSFS nem visto na tela.
+
+## 6. Etiquetas automáticas e destino de linha aérea (usuário, 2026-11-24)
+- **Cobertura medida:** dos 38.598 aeroportos com pista no MSFS, só 2.199 (5,7 %) têm etiqueta curada; dos 3.772 com voo regular no OurAirports (posição batendo), 3.340 (89 %) não têm etiqueta de linha nem de alimentador (ex.: Ufa, Samara, Dar es Salaam, Bobo-Dioulasso); 531 têm ≥ 4 gates/pontes no simulador sem etiqueta de linha.
+- **Feito (base, `tools/places/airport_profiles.py`):** etiquetas automáticas, com nome próprio para **não** entrar na pontuação do tier nem casar com `linha`/`carga`:
+  - `linha_auto`: voo regular no OurAirports (posição batendo) **ou** ≥ 2 gates/pontes no simulador com pista pavimentada ≥ 4.300 ft → 3.801 aeroportos (SBMT fica fora; Ufa, Dar es Salaam, Bethel entram).
+  - `carga_auto`: pátio de carga no simulador e pista pavimentada → só 64 (o MSFS quase não marca pátio de carga; sinal fraco).
+- **A fazer na revisão do TIER-A:** missões de linha (`board` LinhaRegular e LinhaRegional, e `carga_paletizada`/`carga_overnight` nos perfis de jato) exigem no destino a etiqueta `linha` **ou** `linha_auto` (novo campo do destino, ex.: `requireAnyTag`), além do tier e da pista mínima. As listas curadas continuam como preferência forte (multiplicadores).
+- **A fazer na revisão do TIER-A:** recalcular o tier na abertura quando a versão do `airport_tier_rules.json` mudar, a partir dos sinais gravados (sem reimportar).
+- **Sem fonte automática ainda:** executivo/FBO, saúde/hospital, manutenção/oficina, instrução: continuam só pelas listas curadas (5,7 % dos aeroportos); para os demais vale só o peso base do tier. Ampliar as listas é trabalho de dados (curadoria).
