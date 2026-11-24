@@ -32,7 +32,8 @@ if lnm and os.path.exists(lnm):
     # nome, posição, elevação e pista do MSFS: códigos reaproveitados (ex.: SBOK = fazenda no MT no
     # airports.csv antigo, Amontada/CE no MSFS 2024) precisam dos dados do simulador nas heurísticas
     sim_data = {row[0].upper(): row[1:] for row in con.execute(
-        "select ident, name, laty, lonx, altitude, longest_runway_length, longest_runway_surface, num_runway_light "
+        "select ident, name, laty, lonx, altitude, longest_runway_length, longest_runway_surface, num_runway_light, "
+        "coalesce(num_parking_gate, 0) + coalesce(num_jetway, 0), coalesce(num_parking_cargo, 0) "
         "from airport where ident is not null")}
     con.close()
 else:
@@ -62,10 +63,10 @@ for r in csv.DictReader(open(os.path.join(infra, 'CSV', 'airports.csv'), encodin
     # se o mesmo código no MSFS está a > 10 NM, é outro aeródromo: usa os dados do simulador
     sd = sim_data.get(icao.upper())
     if sd is not None:
-        s_name, s_lat, s_lon, s_alt, s_len, s_surf, s_light = sd
+        s_name, s_lat, s_lon, s_alt, s_len, s_surf, s_light, _g, _c = sd
         dnm = (((lat - s_lat) ** 2 + ((lon - s_lon) * np.cos(np.radians(lat))) ** 2) ** 0.5) * 60
         if dnm > 10:
-            r = dict(r); r['name'] = s_name or r['name']; r['municipality'] = ''
+            r = dict(r); r['name'] = s_name or r['name']; r['municipality'] = ''; r['scheduled_service'] = 'no'
             lat, lon, elev = float(s_lat), float(s_lon), int(s_alt or 0)
             s_hard = (s_surf or '') in LNM_HARD
             runs = [(('ASPH' if s_hard else (s_surf or '')), int(s_len or 0), bool(s_light))]
@@ -79,7 +80,8 @@ for r in csv.DictReader(open(os.path.join(infra, 'CSV', 'airports.csv'), encodin
                     region=r['iso_region'], lat=lat, lon=lon, elev=elev, tier=tier, type=t,
                     sched=r['scheduled_service'] == 'yes',
                     maxlen=max((ln for _, ln, _ in runs), default=0), hard=hard,
-                    lighted=any(l for _, _, l in runs), in_sim=in_sim, tags=set()))
+                    lighted=any(l for _, _, l in runs), in_sim=in_sim, tags=set(),
+                    gates=int(sd[7] or 0) if sd is not None else 0, cargo_park=int(sd[8] or 0) if sd is not None else 0))
 
 # --- perfis vindos de dados existentes ----------------------------------------
 def ids(path, key):
@@ -121,6 +123,10 @@ for a in aps:
     if i in sc_base: a['tags'].add('turistico_curado:base')
     for h in hubmap.get(i, ()): a['tags'].add('hub_' + h.lower())
     if FARM.search(a['name']) and not NOT_FARM.search(a['name']) and a['tier'] >= 3: a['tags'].add('fazenda')
+    # etiquetas automáticas (não curadas; não entram na pontuação do tier): servem para dizer se o
+    # aeroporto pode receber voo de linha / carga mesmo fora das listas curadas
+    if a['sched'] or (a['gates'] >= 2 and a['hard'] and a['maxlen'] >= 4300): a['tags'].add('linha_auto')
+    if a['cargo_park'] >= 1 and a['hard']: a['tags'].add('carga_auto')
     if MIL.search(a['name']):
         a['tags'].add('militar_misto' if (a['sched'] or re.search(r'international|internacional|regional|municipal', a['name'], re.I)) else 'militar')
     if a['elev'] >= 5000: a['tags'].add('altitude')
