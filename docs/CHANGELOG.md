@@ -3163,3 +3163,9 @@
   - 6 novos testes de unidade cobrindo modos TGL, quiques, distâncias, gerador procedural N quadros com as 3 variantes e avaliação em `MissionCompletion`.
   - Snapshot `missions_golden.json` regravado e validado.
   - Total de 1.057/1.057 testes aprovados (100%). Não testado no MSFS.
+
+## 2026-11-24 - AGENTS.md › 7 enxuto (AGENTS-ENXUTO) (Gemini)
+- **Enxugamento da seção 7 do AGENTS.md ('Estado atual dos sistemas'):**
+  - Redução do tamanho da seção de 62.053 bytes para 20.669 bytes (~20,2 KB, limite <= 22 KB), eliminando números de calibração que já constam nos JSONs, repetições de IDs de tarefas e algoritmos passo a passo.
+  - Reorganização em 13 sistemas coesos: Desgaste e falhas, Peças, Manutenção e Hangar, Panes persistentes, Voo e integridade, Combustível, Economia e dificuldade, XP e fases, Missões e quadro, Aeroportos e tiers, Limites por aeronave, Sensores, HUD.
+  - Preservação integral das seções 1 a 6 e 8 byte a byte.
