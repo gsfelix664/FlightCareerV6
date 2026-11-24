@@ -3036,3 +3036,11 @@
 ## 2026-11-24 - Carga paga máxima dos jatos no aircrafts.csv (Claude)
 - `CargaMax(lbs)` de 12 aviões trocado da carga útil para a carga paga máxima estrutural (MZFW − OEW), com fonte no plano `catalogo-missoes.md` › 9.7.2: 747-8i 157.500, A400M 81.600, 787-10 126.300, A330-300 114.000, A330-200 109.100, A321 56.200, A321LR 51.800, A320neo 46.300, 737 MAX 8 46.000, Longitude 3.200, PC-24 3.100, SkyCourier 5.500.
 - Efeito: o quadro e os bots deixam de aceitar nesses aviões missões acima da carga paga real. Bancos existentes guardam o valor antigo em `AircraftTypes`; o banco de teste será apagado na etapa 2. Não testado no MSFS / não visto na tela.
+
+## 2026-11-24 - Catálogo de 69 tipos de missão com pesos por perfil de aeroporto (E2A, Gemini + Claude)
+- `mission_catalog.json` v2 com os 69 tipos da lista geral (`docs/plans/catalogo-missoes.md` › 6): 52 sorteados, 17 desligados até terem regras/HUD próprios (E2C). Os 59 ids antigos foram fundidos (`legacyIds`) e os textos de RP somados por id novo.
+- Peso de cada missão = base do porte do aeroporto × etiquetas do `airport_profiles.json` (teto ×12; base militar pura ×0,2 nas civis), em `Domain/Missions/MissionWeighting` e `AirportProfileCatalog`.
+- Núcleo único `Application/Services/MissionBoardCore` para o jogo e os bots: perfis correlacionados (distância, pax e carga juntos), bagagem sorteada por pessoa com tripulação de apoio, destino preferencial por peso (nunca exclusivo). Caminho do jogo: candidatos por área real (sem o corte alfabético), mantendo todos até 600 NM.
+- `FlightCareer.Replay board-report` (tipos por aeroporto, destinos preferenciais, faixas de pax/carga/bagagem/distância, cobertura).
+- Removida a tradução de `SubId` antigos no banco (banco de teste apagado pelo usuário).
+- Revisão: `docs/reviews/E2A-revisao.md`. Não testado no MSFS / não visto na tela.

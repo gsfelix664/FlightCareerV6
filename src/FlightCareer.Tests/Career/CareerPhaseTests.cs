@@ -105,24 +105,24 @@ namespace FlightCareer.Tests.Career
             // Fase 4: Executiva de Alta Performance e MEDEVAC
             Assert.Equal(CareerPhase.Phase4_HighPerformanceAndMedevac, catalog.ResolvePhase("3.3.1"));
             Assert.Equal(CareerPhase.Phase4_HighPerformanceAndMedevac, catalog.ResolvePhase("4.3.1"));
-            Assert.Equal(CareerPhase.Phase4_HighPerformanceAndMedevac, catalog.ResolvePhase("1.3.1"));
+            Assert.Equal(CareerPhase.Phase3_AirTaxi, catalog.ResolvePhase("1.3.1")); // executivo_corporativo (Fase 3 conforme spec E2A)
             Assert.Equal(CareerPhase.Phase4_HighPerformanceAndMedevac, catalog.ResolvePhase("1.3.4"));
 
             // Fase 5: Regional Commuter
-            Assert.Equal(CareerPhase.Phase5_Commuter, catalog.ResolvePhase("2.1.1"));
-            Assert.Equal(CareerPhase.Phase5_Commuter, catalog.ResolvePhase("2.1.2"));
-            Assert.Equal(CareerPhase.Phase5_Commuter, catalog.ResolvePhase("1.3.2"));
+            Assert.Equal(CareerPhase.Phase5_Commuter, catalog.ResolvePhase("2.1.1")); // feeder_inbound
 
             // Fase 6: Linha Aérea Doméstica
-            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.1.1"));
-            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.2.1"));
-            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.3.3"));
+            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.1.1")); // troncal_domestico
+            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("2.1.2")); // regional_direto -> troncal_domestico
+            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.2.1")); // carga_paletizada
+            Assert.Equal(CareerPhase.Phase6_DomesticAirline, catalog.ResolvePhase("1.1.2")); // regional_internacional
 
             // Fase 7: Linha Aérea Internacional
-            Assert.Equal(CareerPhase.Phase7_InternationalAirline, catalog.ResolvePhase("1.1.2"));
-            Assert.Equal(CareerPhase.Phase7_InternationalAirline, catalog.ResolvePhase("1.1.3"));
-            Assert.Equal(CareerPhase.Phase7_InternationalAirline, catalog.ResolvePhase("1.2.2"));
-            Assert.Equal(CareerPhase.Phase7_InternationalAirline, catalog.ResolvePhase("1.2.3"));
+            Assert.Equal(CareerPhase.Phase7_InternationalAirline, catalog.ResolvePhase("1.1.3")); // longo_curso
+
+            // Outras fases migradas
+            Assert.Equal(CareerPhase.Phase3_AirTaxi, catalog.ResolvePhase("1.3.2")); // crew_parts
+            Assert.Equal(CareerPhase.Phase1_FlightSchool, catalog.ResolvePhase("1.3.3")); // ferry_posicionamento
         }
 
         [Fact]

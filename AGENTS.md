@@ -293,6 +293,12 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
   - Consumidores migrados: `MissionPayTable` (sem `prefixes`), `CareerPhaseCatalog` (sem `subIdToPhase`), `XpRules` (usando `xpType`), `mission_texts.json` (re-chaveado para os IDs novos), `MissionCompletion`, `FlightService`, `FlightMonitor`, `CareerProgressionSimulator`, `MissionBoardCategory`, `MissionDisplayItem`.
   - Migração de banco idempotente em `AppDbContext.EnsureSchemaUpdatedAsync` atualizando `SubId` na tabela `Missions`. Determinismo 100% idêntico comprovado em suíte golden e simulação de 90 dias do `career-stab`. Não testado no MSFS.
 
+### Catálogo de 69 tipos e pesos por perfil de aeroporto (E2A)
+- `mission_catalog.json` v2: 69 tipos (52 habilitados; 17 com `enabled: false` até a E2C), cada um com `baseByTier`, `originProfiles`, `destination` (tiers, país, pista, `maxNm`, `profiles`), `profiles` correlacionados (peso, distância, pax, carga, `bigAirport`), `luggagePerPersonKg`, `crew` e `legacyIds`.
+- Etiquetas dos aeroportos em `Data/places/airport_profiles.json` (gerado por `tools/places/airport_profiles.py`, com nome e posição do MSFS nos códigos reaproveitados), lidas por `Domain/Missions/AirportProfileCatalog`.
+- Geração: `Application/Services/MissionBoardCore` (único para jogo e bots); `MissionGenerator` só carrega candidatos (jogo: `LimitCandidates`, todos até 600 NM + amostra dos distantes) e chama o núcleo. Conferência: `FlightCareer.Replay board-report`.
+- Pendente (E2A-L): remover a camada antiga (`MissionRules` com ids antigos, `GetCalibratedCategories`, `CreateMissionFromSubCategory*`, `ResolveG20Hubs`/`ResolveDynamicHubs`) e reescrever os testes que dependem dela. Não testado no MSFS.
+
 ## 8. Definição de pronto
 
 Uma tarefa só está concluída quando:

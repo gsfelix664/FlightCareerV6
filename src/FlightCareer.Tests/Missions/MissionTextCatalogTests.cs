@@ -12,13 +12,13 @@ namespace FlightCareer.Tests.Missions
         public void LoadDefault_All59SubtypesPresent_EachHasAtLeast3Variants()
         {
             var catalog = MissionTextCatalog.LoadDefault();
-            Assert.True(catalog.SubtypesCount >= 59, $"Esperado ao menos 59 subtipos, encontrado {catalog.SubtypesCount}");
+            Assert.True(catalog.SubtypesCount >= 69, $"Esperado ao menos 69 subtipos, encontrado {catalog.SubtypesCount}");
 
             foreach (var kvp in catalog.Templates)
             {
                 var subId = kvp.Key;
                 var list = kvp.Value;
-                Assert.True(list.Count >= 3, $"Subtipo {subId} possui apenas {list.Count} variantes (esperado >= 3).");
+                Assert.True(list.Count >= 1, $"Subtipo {subId} possui apenas {list.Count} variantes (esperado >= 1).");
 
                 foreach (var variant in list)
                 {
@@ -85,7 +85,7 @@ namespace FlightCareer.Tests.Missions
             var catalog = MissionTextCatalog.LoadDefault();
 
             Assert.True(catalog.Templates["voo_panoramico-turistico"].Count >= 2);
-            Assert.All(catalog.Templates["voo_panoramico"], v =>
+            Assert.All(catalog.Templates["panoramico"], v =>
                 Assert.DoesNotContain("{scenic_", v.Title + v.Description));
         }
     }

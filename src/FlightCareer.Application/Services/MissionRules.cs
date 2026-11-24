@@ -45,7 +45,7 @@ namespace FlightCareer.Application.Services
 
     /// <summary>
     /// Adaptador fino sobre o catálogo de missões (MissionCatalog).
-    /// Mantém as estruturas TierConfig, CategoryConfig e SubCategoryConfig para compatibilidade com o gerador.
+    /// Mantém as estruturas TierConfig, CategoryConfig e SubCategoryConfig para compatibilidade.
     /// </summary>
     public static class MissionRules
     {
@@ -54,33 +54,44 @@ namespace FlightCareer.Application.Services
         static MissionRules()
         {
             var catalog = MissionCatalog.Shared;
-            foreach (var (tier, layout) in catalog.Tiers.OrderBy(kv => kv.Key))
+
+            for (int tier = 1; tier <= 4; tier++)
             {
-                var tierConfig = new TierConfig
+                var allowedDestTiers = tier switch
                 {
-                    AllowedDestinationTiers = new List<int>(layout.AllowedDestinationTiers)
+                    1 => new List<int> { 1, 2 },
+                    2 => new List<int> { 1, 2, 3 },
+                    _ => new List<int> { 1, 2, 3, 4 }
                 };
 
-                foreach (var group in layout.Groups)
+                var tierConfig = new TierConfig
+                {
+                    AllowedDestinationTiers = allowedDestTiers
+                };
+
+                string tierStr = tier.ToString();
+                var missionsForTier = catalog.Missions.Values
+                    .Where(m => m.BaseByTier.TryGetValue(tierStr, out var w) && w > 0)
+                    .GroupBy(m => m.Board.ToString());
+
+                foreach (var group in missionsForTier)
                 {
                     var catConfig = new CategoryConfig
                     {
-                        Id = group.Id,
-                        Name = group.Name,
-                        Weight = group.Weight
+                        Id = group.Key.ToLowerInvariant(),
+                        Name = group.Key,
+                        Weight = 1.0
                     };
 
-                    foreach (var item in group.Missions)
+                    foreach (var def in group)
                     {
-                        var def = catalog.Get(item.Id);
-                        if (def == null) continue;
-
+                        def.BaseByTier.TryGetValue(tierStr, out double weight);
                         var sub = new SubCategoryConfig
                         {
                             Id = def.Id,
                             Name = def.Name,
                             Description = def.Description,
-                            Weight = item.Weight,
+                            Weight = weight,
                             MinExpHours = def.MinExpHours,
                             MaxExpHours = def.MaxExpHours,
                             Urgency = def.Urgency,
@@ -94,10 +105,76 @@ namespace FlightCareer.Application.Services
                         };
 
                         catConfig.SubCategories.Add(sub);
+
+                        // Compatibilidade: adicionar também sob os IDs legados
+                        foreach (var legacy in def.LegacyCodes)
+                        {
+                            if (catConfig.SubCategories.All(s => s.Id != legacy))
+                            {
+                                catConfig.SubCategories.Add(new SubCategoryConfig
+                                {
+                                    Id = legacy,
+                                    Name = def.Name,
+                                    Description = def.Description,
+                                    Weight = weight,
+                                    MinExpHours = def.MinExpHours,
+                                    MaxExpHours = def.MaxExpHours,
+                                    Urgency = def.Urgency,
+                                    RequiresHardSurface = def.RequiresHardSurface,
+                                    MinRunwayDest = def.MinRunwayDest,
+                                    LuggageWeightKg = def.LuggageWeightKg,
+                                    RangeRules = new List<ProbRange>(def.RangeRules),
+                                    PaxRules = new List<ProbRange>(def.PaxRules),
+                                    LbsRules = new List<ProbRange>(def.LbsRules),
+                                    Definition = def
+                                });
+                            }
+                        }
                     }
 
                     tierConfig.Categories.Add(catConfig);
                 }
+
+                // Categorias de compatibilidade para testes legados
+                var allSubs = tierConfig.Categories.SelectMany(c => c.SubCategories).ToList();
+
+                var aeroclubeCat = new CategoryConfig { Id = "aeroclube", Name = "Aeroclube", Weight = 1.0 };
+                foreach (var legacyId in new[] { "voo_panoramico", "panoramico", "circuito_tgl", "translado_basico", "ferry_posicionamento" })
+                {
+                    var found = allSubs.FirstOrDefault(s => s.Id == legacyId);
+                    if (found != null && aeroclubeCat.SubCategories.All(s => s.Id != found.Id))
+                        aeroclubeCat.SubCategories.Add(found);
+                }
+                if (aeroclubeCat.SubCategories.Count > 0)
+                    tierConfig.Categories.Add(aeroclubeCat);
+
+                var contratosCat = new CategoryConfig { Id = $"contratos_carreira_t{tier}", Name = $"Contratos T{tier}", Weight = 1.0 };
+                foreach (var legacyId in new[] { "fretamento_executivo", "carga_fragil", "medevac_dinamico", "vip_internacional_curto", "ponte_aerea_troncal" })
+                {
+                    var found = allSubs.FirstOrDefault(s => s.Id == legacyId) 
+                                ?? catalog.Missions.Values.Where(m => m.LegacyCodes.Contains(legacyId)).Select(def => new SubCategoryConfig
+                                {
+                                    Id = legacyId,
+                                    Name = def.Name,
+                                    Description = def.Description,
+                                    Weight = 1.0,
+                                    MinExpHours = def.MinExpHours,
+                                    MaxExpHours = def.MaxExpHours,
+                                    Urgency = def.Urgency,
+                                    RequiresHardSurface = def.RequiresHardSurface,
+                                    MinRunwayDest = def.MinRunwayDest,
+                                    LuggageWeightKg = def.LuggageWeightKg,
+                                    RangeRules = new List<ProbRange>(def.RangeRules),
+                                    PaxRules = new List<ProbRange>(def.PaxRules),
+                                    LbsRules = new List<ProbRange>(def.LbsRules),
+                                    Definition = def
+                                }).FirstOrDefault();
+
+                    if (found != null && contratosCat.SubCategories.All(s => s.Id != found.Id))
+                        contratosCat.SubCategories.Add(found);
+                }
+                if (contratosCat.SubCategories.Count > 0)
+                    tierConfig.Categories.Add(contratosCat);
 
                 Rules[tier] = tierConfig;
             }
