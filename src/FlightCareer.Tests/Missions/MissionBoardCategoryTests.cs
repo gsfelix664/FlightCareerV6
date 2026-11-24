@@ -39,7 +39,11 @@ namespace FlightCareer.Tests.Missions
         [Fact]
         public void Todo_subtipo_do_gerador_tem_categoria_ou_esta_na_lista_de_geral()
         {
-            var geralIntencional = new HashSet<string> { "translado_posicionamento_ferry", "governo_local_estadual", "translado_basico", "apoio_batedor", "translado_piloto_agricola" };
+            var geralIntencional = MissionCatalog.Shared.Missions.Values
+                .Where(m => m.Board == MissionBoardKind.Geral)
+                .SelectMany(m => new[] { m.Id }.Concat(m.LegacyCodes))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
             var semCategoria = AllSubIds()
                 .Where(id => MissionBoardCategory.Classify(id) == MissionBoardKind.Geral && !geralIntencional.Contains(id))
                 .ToList();

@@ -151,37 +151,78 @@ namespace FlightCareer.Application.Services
             if (currentMktMissions.Count < targetCount)
             {
                 int needed = targetCount - currentMktMissions.Count;
-                var newMissions = new List<Mission>();
+                var originTags = MissionBoardCore.AugmentOriginTags(currentAirport, AirportProfileCatalog.Shared.TagsFor(currentAirport.ICAO), _placesService);
 
-                // Algumas subcategorias podem não encontrar destino válido na faixa sorteada.
-                // Permite tentativas extras para garantir que a cota seja atingida.
-                int maxAttempts = needed * 4;
-                int attempts = 0;
-
-                var calibratedCategories = GetCalibratedCategories(currentAirport, tierConfig);
-
-                while (newMissions.Count < needed && attempts < maxAttempts)
+                // Calcular maior alcance entre missões elegíveis na origem
+                double maxRangeNm = 500.0;
+                foreach (var m in MissionCatalog.Shared.Missions.Values)
                 {
-                    attempts++;
-
-                    var category = PickWeighted(calibratedCategories);
-                    if (category == null) continue;
-
-                    var subCategory = PickWeighted(category.SubCategories);
-                    if (subCategory == null) continue;
-
-                    try
+                    if (m.Enabled && MissionWeighting.OriginWeight(m, currentAirport.Tier, originTags) > 0.0)
                     {
-                        var mission = await CreateMissionFromSubCategory(currentAirport, subCategory, tierConfig.AllowedDestinationTiers);
-                        if (mission != null) newMissions.Add(mission);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[MissionGenerator] Falha ao gerar missão ({subCategory.Id}): {ex.Message}");
+                        foreach (var p in m.Profiles)
+                        {
+                            if (p.RangeNm.Length > 1 && p.RangeNm[1] > maxRangeNm)
+                            {
+                                maxRangeNm = p.RangeNm[1];
+                            }
+                        }
                     }
                 }
 
-                if (newMissions.Any())
+                double latDelta = maxRangeNm / 60.0;
+                double minLat = currentAirport.Latitude - latDelta;
+                double maxLat = currentAirport.Latitude + latDelta;
+                double cosLat = Math.Max(0.01, Math.Cos(currentAirport.Latitude * Math.PI / 180.0));
+                double lonDelta = maxRangeNm / (60.0 * cosLat);
+                double minLon = currentAirport.Longitude - lonDelta;
+                double maxLon = currentAirport.Longitude + lonDelta;
+
+                var query = _context.Airports.AsQueryable();
+                if (await HasSimSceneryAsync())
+                {
+                    query = query.Where(a => a.IsInSimulator);
+                }
+                if (minLat > -90.0) query = query.Where(a => a.Latitude >= minLat);
+                if (maxLat < 90.0) query = query.Where(a => a.Latitude <= maxLat);
+                if (lonDelta < 180.0)
+                {
+                    query = query.Where(a => a.Longitude >= minLon && a.Longitude <= maxLon);
+                }
+
+                var candidateAirports = await query.ToListAsync();
+                candidateAirports = LimitCandidates(currentAirport, candidateAirports, _random);
+
+                var candidateIcaos = candidateAirports.Select(a => a.ICAO).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var candidateRunways = await _context.Runways
+                    .Where(r => candidateIcaos.Contains(r.AirportIdent))
+                    .ToListAsync();
+
+                var runwaysByIcao = candidateRunways
+                    .GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderByDescending(r => !RunwaySurface.IsUnpaved(r.Surface)).ThenByDescending(r => r.LengthFt).FirstOrDefault(),
+                        StringComparer.OrdinalIgnoreCase);
+
+                var candidates = candidateAirports
+                    .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
+                    .ToList();
+
+                var newMissions = MissionBoardCore.GenerateBoard(
+                    currentAirport,
+                    candidates,
+                    originTags,
+                    icao => AirportProfileCatalog.Shared.TagsFor(icao),
+                    MissionCatalog.Shared,
+                    _random,
+                    now,
+                    needed,
+                    PayMultiplier,
+                    PayTable,
+                    _textCatalog,
+                    _placesService);
+
+                if (newMissions.Count > 0)
                 {
                     await _context.Missions.AddRangeAsync(newMissions);
                     await _context.SaveChangesAsync();
@@ -194,6 +235,42 @@ namespace FlightCareer.Application.Services
             }
 
             return currentMktMissions;
+        }
+
+        /// <summary>Raio em que todos os candidatos são mantidos (missões curtas e regionais).</summary>
+        public const double NearCandidateRadiusNm = 600.0;
+        /// <summary>Máximo de candidatos carregados do banco por quadro.</summary>
+        public const int MaxCandidates = 3000;
+
+        /// <summary>
+        /// Limita os candidatos sem prejudicar as missões curtas: mantém todos os aeroportos até
+        /// <see cref="NearCandidateRadiusNm"/> (amostra aleatória só se passarem de 5/6 do limite) e completa
+        /// com uma amostra aleatória dos distantes (longo curso). Ordena por ICAO antes de sortear para que a
+        /// mesma semente dê o mesmo resultado independentemente da ordem do banco.
+        /// </summary>
+        public static List<Airport> LimitCandidates(Airport origin, List<Airport> airports, Random random)
+        {
+            if (airports.Count <= MaxCandidates) return airports;
+
+            var ordered = airports.OrderBy(a => a.ICAO, StringComparer.Ordinal).ToList();
+            var near = new List<Airport>();
+            var far = new List<Airport>();
+            foreach (var a in ordered)
+            {
+                double d = CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude);
+                (d <= NearCandidateRadiusNm ? near : far).Add(a);
+            }
+
+            int nearQuota = Math.Min(near.Count, MaxCandidates * 5 / 6);
+            var result = near.Count > nearQuota
+                ? near.OrderBy(_ => random.Next()).Take(nearQuota).ToList()
+                : near;
+            int farQuota = MaxCandidates - result.Count;
+            if (farQuota > 0 && far.Count > 0)
+            {
+                result.AddRange(far.Count > farQuota ? far.OrderBy(_ => random.Next()).Take(farQuota) : far);
+            }
+            return result;
         }
 
         private async Task<Mission?> CreateMissionFromSubCategory(Airport origin, SubCategoryConfig sub, List<int> allowedTiers)
@@ -1251,40 +1328,40 @@ namespace FlightCareer.Application.Services
                 _ => 25
             };
 
-            var calibratedCategories = GetCalibratedCategories(currentAirport, tierConfig, hubService, placesService);
-            var newMissions = new List<Mission>();
-            int maxAttempts = targetCount * 4;
-            int attempts = 0;
-
-            while (newMissions.Count < targetCount && attempts < maxAttempts)
+            Dictionary<string, Runway?> runwaysByIcao;
+            if (allRunways != null && allRunways.Count > 0)
             {
-                attempts++;
-                var category = PickWeighted(calibratedCategories, random);
-                if (category == null) continue;
-                var subCategory = PickWeighted(category.SubCategories, random);
-                if (subCategory == null) continue;
-
-                var mission = CreateMissionFromSubCategoryInMemory(
-                    currentAirport,
-                    subCategory,
-                    tierConfig.AllowedDestinationTiers,
-                    allAirports,
-                    hubService,
-                    random,
-                    referenceTime,
-                    payMultiplier,
-                    payTable,
-                    allRunways,
-                    placesService,
-                    textCatalog);
-
-                if (mission != null)
-                {
-                    newMissions.Add(mission);
-                }
+                runwaysByIcao = allRunways
+                    .GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.OrderByDescending(r => !RunwaySurface.IsUnpaved(r.Surface)).ThenByDescending(r => r.LengthFt).FirstOrDefault(),
+                        StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                runwaysByIcao = new Dictionary<string, Runway?>(StringComparer.OrdinalIgnoreCase);
             }
 
-            return newMissions;
+            var candidates = allAirports
+                .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
+                .ToList();
+
+            var originTags = MissionBoardCore.AugmentOriginTags(currentAirport, AirportProfileCatalog.Shared.TagsFor(currentAirport.ICAO), placesService);
+
+            return MissionBoardCore.GenerateBoard(
+                currentAirport,
+                candidates,
+                originTags,
+                icao => AirportProfileCatalog.Shared.TagsFor(icao),
+                MissionCatalog.Shared,
+                random,
+                referenceTime,
+                targetCount,
+                payMultiplier,
+                payTable,
+                textCatalog,
+                placesService);
         }
 
         private static Mission? CreateMissionFromSubCategoryInMemory(
@@ -1521,117 +1598,49 @@ namespace FlightCareer.Application.Services
 
         public static List<CategoryConfig> GetCalibratedCategories(Airport airport, TierConfig tierConfig, IHubDataService hubService, IPlacesDataService? placesService)
         {
-            var categories = tierConfig.Categories.Select(c => new CategoryConfig
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Weight = c.Weight,
-                SubCategories = c.SubCategories.Select(s => new SubCategoryConfig
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Description = s.Description,
-                    Weight = s.Weight,
-                    MinExpHours = s.MinExpHours,
-                    MaxExpHours = s.MaxExpHours,
-                    RequiresHardSurface = s.RequiresHardSurface,
-                    MinRunwayDest = s.MinRunwayDest,
-                    LuggageWeightKg = s.LuggageWeightKg,
-                    Urgency = s.Urgency,
-                    PaxRules = new List<ProbRange>(s.PaxRules),
-                    LbsRules = new List<ProbRange>(s.LbsRules),
-                    RangeRules = new List<ProbRange>(s.RangeRules),
-                    Definition = s.Definition
-                }).ToList()
-            }).ToList();
+            var baseCats = tierConfig?.Categories ?? (MissionRules.Rules.TryGetValue(airport.Tier, out var tc) ? tc.Categories : new List<CategoryConfig>());
+            var result = new List<CategoryConfig>();
+            bool isScenic = placesService?.GetScenicAerodrome(airport.ICAO) != null;
 
-            var hubTypes = hubService?.GetHubTypesForAirport(airport.ICAO) ?? (IReadOnlyList<HubType>)Array.Empty<HubType>();
-            bool isInstruction = hubTypes.Contains(HubType.Instruction) || (placesService != null && placesService.IsTrainingAerodrome(airport.ICAO));
-            var dropZone = placesService?.GetDropZone(airport.ICAO);
-            var scenicAerodrome = placesService?.GetScenicAerodrome(airport.ICAO);
-            if (scenicAerodrome != null && !scenicAerodrome.IsScenicBase) scenicAerodrome = null;
-
-            foreach (var adj in FlightCareer.Domain.Missions.MissionCatalog.Shared.AirportAdjustments)
+            foreach (var c in baseCats)
             {
-                bool matched = adj.Condition switch
+                var clone = new CategoryConfig
                 {
-                    "instruction_hub" => isInstruction,
-                    "dropzone" => dropZone != null,
-                    "scenic_base" => scenicAerodrome != null,
-                    var cond when cond.StartsWith("hub_type:") => Enum.TryParse<HubType>(cond["hub_type:".Length..], out var ht) && hubTypes.Contains(ht),
-                    _ => false
+                    Id = c.Id,
+                    Name = c.Name,
+                    Weight = c.Weight,
+                    SubCategories = c.SubCategories.Select(s => new SubCategoryConfig
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Description = s.Description,
+                        Weight = s.Weight,
+                        MinExpHours = s.MinExpHours,
+                        MaxExpHours = s.MaxExpHours,
+                        Urgency = s.Urgency,
+                        RequiresHardSurface = s.RequiresHardSurface,
+                        MinRunwayDest = s.MinRunwayDest,
+                        LuggageWeightKg = s.LuggageWeightKg,
+                        RangeRules = s.RangeRules,
+                        PaxRules = s.PaxRules,
+                        LbsRules = s.LbsRules,
+                        Definition = s.Definition
+                    }).ToList()
                 };
 
-                if (matched)
+                if (c.Id == "aeroclube" && isScenic)
                 {
-                    if (!string.IsNullOrEmpty(adj.ImportGroupIfMissing) && !categories.Any(c => c.Id == adj.ImportGroupIfMissing))
+                    clone.Weight = 40.0;
+                    foreach (var s in clone.SubCategories)
                     {
-                        foreach (var t in MissionRules.Rules.Values)
-                        {
-                            var found = t.Categories.FirstOrDefault(c => c.Id == adj.ImportGroupIfMissing);
-                            if (found != null)
-                            {
-                                categories.Add(new CategoryConfig
-                                {
-                                    Id = found.Id,
-                                    Name = found.Name,
-                                    Weight = adj.ImportWeight,
-                                    SubCategories = found.SubCategories.Select(s => new SubCategoryConfig
-                                    {
-                                        Id = s.Id,
-                                        Name = s.Name,
-                                        Description = s.Description,
-                                        Weight = s.Weight,
-                                        MinExpHours = s.MinExpHours,
-                                        MaxExpHours = s.MaxExpHours,
-                                        RequiresHardSurface = s.RequiresHardSurface,
-                                        MinRunwayDest = s.MinRunwayDest,
-                                        LuggageWeightKg = s.LuggageWeightKg,
-                                        Urgency = s.Urgency,
-                                        PaxRules = new List<ProbRange>(s.PaxRules),
-                                        LbsRules = new List<ProbRange>(s.LbsRules),
-                                        RangeRules = new List<ProbRange>(s.RangeRules),
-                                        Definition = s.Definition
-                                    }).ToList()
-                                });
-                                break;
-                            }
-                        }
-                    }
-
-                    if (adj.AddGroupWeights != null)
-                    {
-                        foreach (var gw in adj.AddGroupWeights)
-                        {
-                            AddCategoryWeight(categories, gw.GroupId, gw.Weight);
-                        }
-                    }
-
-                    if (adj.SetMissionWeights != null)
-                    {
-                        foreach (var mw in adj.SetMissionWeights)
-                        {
-                            var cat = categories.FirstOrDefault(c => c.Id == mw.GroupId);
-                            var sub = cat?.SubCategories.FirstOrDefault(s => s.Id == mw.MissionId);
-                            if (sub != null) sub.Weight = mw.Weight;
-                        }
+                        if (s.Id == "voo_panoramico" || s.Id == "panoramico") s.Weight = 70.0;
+                        else if (s.Id == "circuito_tgl") s.Weight = 15.0;
+                        else if (s.Id == "translado_basico" || s.Id == "ferry_posicionamento") s.Weight = 15.0;
                     }
                 }
-                else
-                {
-                    if (adj.SetMissionWeightsIfFalse != null)
-                    {
-                        foreach (var mw in adj.SetMissionWeightsIfFalse)
-                        {
-                            var cat = categories.FirstOrDefault(c => c.Id == mw.GroupId);
-                            var sub = cat?.SubCategories.FirstOrDefault(s => s.Id == mw.MissionId);
-                            if (sub != null) sub.Weight = mw.Weight;
-                        }
-                    }
-                }
+                result.Add(clone);
             }
-
-            return categories;
+            return result;
         }
 
         private static void AddCategoryWeight(List<CategoryConfig> categories, string categoryId, double bonus)

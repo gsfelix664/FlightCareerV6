@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.Json;
 
 namespace FlightCareer.Domain.Missions
@@ -33,7 +32,7 @@ namespace FlightCareer.Domain.Missions
 
         public MissionCatalog(
             IEnumerable<MissionDefinition> missions,
-            IDictionary<int, TierLayoutDefinition> tiers,
+            IDictionary<int, TierLayoutDefinition>? tiers = null,
             IEnumerable<AirportAdjustmentDefinition>? airportAdjustments = null)
         {
             _missionsById = new Dictionary<string, MissionDefinition>(StringComparer.OrdinalIgnoreCase);
@@ -42,9 +41,11 @@ namespace FlightCareer.Domain.Missions
             foreach (var m in missions)
             {
                 _missionsById[m.Id] = m;
-                if (m.LegacyCodes != null)
+                _legacyCodeToId[m.Id] = m.Id;
+
+                if (m.LegacyIds != null)
                 {
-                    foreach (var code in m.LegacyCodes)
+                    foreach (var code in m.LegacyIds)
                     {
                         if (!string.IsNullOrWhiteSpace(code))
                         {
@@ -54,7 +55,7 @@ namespace FlightCareer.Domain.Missions
                 }
             }
 
-            _tiers = new Dictionary<int, TierLayoutDefinition>(tiers);
+            _tiers = tiers != null ? new Dictionary<int, TierLayoutDefinition>(tiers) : new Dictionary<int, TierLayoutDefinition>();
             _airportAdjustments = airportAdjustments?.ToList() ?? new List<AirportAdjustmentDefinition>();
         }
 
@@ -101,7 +102,7 @@ namespace FlightCareer.Domain.Missions
             {
                 foreach (var el in missionsEl.EnumerateArray())
                 {
-                    var m = ParseMissionDefinition(el);
+                    var m = JsonSerializer.Deserialize<MissionDefinition>(el.GetRawText(), JsonOpts);
                     if (m != null) missions.Add(m);
                 }
             }
@@ -129,11 +130,6 @@ namespace FlightCareer.Domain.Missions
             return new MissionCatalog(missions, tiers, adjustments);
         }
 
-        private static MissionDefinition? ParseMissionDefinition(JsonElement el)
-        {
-            return JsonSerializer.Deserialize<MissionDefinition>(el.GetRawText(), JsonOpts);
-        }
-
         public static MissionCatalog LoadDefault(string? directory = null)
         {
             string[] candidates =
@@ -141,6 +137,7 @@ namespace FlightCareer.Domain.Missions
                 Path.Combine(AppContext.BaseDirectory, "Data", "mission_catalog.json"),
                 Path.Combine(Directory.GetCurrentDirectory(), "Data", "mission_catalog.json"),
                 Path.Combine(Directory.GetCurrentDirectory(), "src", "FlightCareer.Infrastructure", "Data", "mission_catalog.json"),
+                Path.Combine(AppContext.BaseDirectory, "..", "FlightCareer.Infrastructure", "Data", "mission_catalog.json"),
                 Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "FlightCareer.Infrastructure", "Data", "mission_catalog.json")
             };
 
@@ -167,7 +164,6 @@ namespace FlightCareer.Domain.Missions
                 }
             }
 
-            // Fallback para recurso embutido
             var asm = typeof(MissionCatalog).Assembly;
             string[] resNames = asm.GetManifestResourceNames();
             var targetRes = resNames.FirstOrDefault(r => r.EndsWith("mission_catalog.json", StringComparison.OrdinalIgnoreCase));

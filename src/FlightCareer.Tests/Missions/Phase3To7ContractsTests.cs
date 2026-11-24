@@ -72,7 +72,7 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal("linha", famLinha.Id);
             Assert.True(famLinha.Scale > 0);
 
-            var famGlobal = payTable.Resolve("1.7.8");
+            var famGlobal = payTable.Resolve("carga_global");
             Assert.Equal("carga_global", famGlobal.Id);
             Assert.Equal(famLinha.Scale, famGlobal.Scale);
 
@@ -87,7 +87,7 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal("medevac", payTable.Resolve("3.7.2").Id);
 
             Assert.Equal("linha", payTable.Resolve("1.7.5").Id);
-            Assert.Equal("linha", payTable.Resolve("1.7.6").Id);
+            Assert.Equal("carga_expressa", payTable.Resolve("1.7.6").Id);
             Assert.Equal("linha", payTable.Resolve("1.7.7").Id);
         }
 
@@ -106,7 +106,7 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal(1.00, XpCalculator.ResolveTypeMultiplier("cargueiro_noturno", xpRules));
             Assert.Equal(1.00, XpCalculator.ResolveTypeMultiplier("1.7.6", xpRules));
             Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("1.7.2", xpRules)); // Carga frágil
-            Assert.Equal(1.35, XpCalculator.ResolveTypeMultiplier("1.7.8", xpRules)); // Carga global
+            Assert.Equal(1.25, XpCalculator.ResolveTypeMultiplier("1.7.8", xpRules)); // Carga global fundida em carga_paletizada (linha)
             Assert.Equal(1.25, XpCalculator.ResolveTypeMultiplier("1.7.1", xpRules)); // Fretamento executivo -> taxi_aereo
             Assert.Equal(1.50, XpCalculator.ResolveTypeMultiplier("1.7.3", xpRules)); // MEDEVAC dinâmico -> medevac
             Assert.Equal(1.25, XpCalculator.ResolveTypeMultiplier("1.7.4", xpRules)); // VIP internacional -> taxi_aereo
