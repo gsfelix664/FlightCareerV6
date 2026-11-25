@@ -2271,7 +2271,8 @@ namespace FlightCareer.Application.Services
             MissionPayTable? payTable = null,
             IReadOnlyList<Runway>? allRunways = null,
             IPlacesDataService? placesService = null,
-            MissionTextCatalog? textCatalog = null)
+            MissionTextCatalog? textCatalog = null,
+            BoardCache? cache = null)
         {
             if (currentAirport == null) return new List<Mission>();
             if (currentAirport.Tier < 1 || currentAirport.Tier > 4)
@@ -2287,28 +2288,41 @@ namespace FlightCareer.Application.Services
                 _ => 25
             };
 
-            Dictionary<string, Runway?> runwaysByIcao;
-            if (allRunways != null && allRunways.Count > 0)
+            IReadOnlyList<AirportCandidate> candidates;
+            Runway? originRunway;
+            IReadOnlySet<string> originTags;
+
+            if (cache != null)
             {
-                runwaysByIcao = allRunways
-                    .GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
-                    .ToDictionary(
-                        g => g.Key,
-                        g => g.OrderByDescending(r => !RunwaySurface.IsUnpaved(r.Surface)).ThenByDescending(r => r.LengthFt).FirstOrDefault(),
-                        StringComparer.OrdinalIgnoreCase);
+                candidates = cache.GetOrCreateCandidates(allAirports, allRunways);
+                originRunway = cache.GetRunway(currentAirport.ICAO);
+                originTags = cache.GetOrComputeOriginTags(currentAirport, placesService);
             }
             else
             {
-                runwaysByIcao = new Dictionary<string, Runway?>(StringComparer.OrdinalIgnoreCase);
+                Dictionary<string, Runway?> runwaysByIcao;
+                if (allRunways != null && allRunways.Count > 0)
+                {
+                    runwaysByIcao = allRunways
+                        .GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.OrderByDescending(r => !RunwaySurface.IsUnpaved(r.Surface)).ThenByDescending(r => r.LengthFt).FirstOrDefault(),
+                            StringComparer.OrdinalIgnoreCase);
+                }
+                else
+                {
+                    runwaysByIcao = new Dictionary<string, Runway?>(StringComparer.OrdinalIgnoreCase);
+                }
+
+                originRunway = runwaysByIcao.GetValueOrDefault(currentAirport.ICAO);
+
+                candidates = allAirports
+                    .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
+                    .ToList();
+
+                originTags = MissionBoardCore.AugmentOriginTags(currentAirport, AirportProfileCatalog.Shared.TagsFor(currentAirport.ICAO), placesService);
             }
-
-            var originRunway = runwaysByIcao.GetValueOrDefault(currentAirport.ICAO);
-
-            var candidates = allAirports
-                .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
-                .ToList();
-
-            var originTags = MissionBoardCore.AugmentOriginTags(currentAirport, AirportProfileCatalog.Shared.TagsFor(currentAirport.ICAO), placesService);
 
             return MissionBoardCore.GenerateBoard(
                 currentAirport,
@@ -2323,7 +2337,8 @@ namespace FlightCareer.Application.Services
                 payTable,
                 textCatalog,
                 placesService,
-                originRunway);
+                originRunway,
+                cache);
         }
 
         public static bool IsDifficultRunway(Runway? runway)
