@@ -110,43 +110,43 @@
   "ponte_aerea": [
     {
       "title": "Ponte Aérea de Alta Frequência ({dest})",
-      "description": "Ponte Aérea de Alta Frequência: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Ponte Aérea de Alta Frequência: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "troncal_domestico": [
     {
       "title": "Troncal Doméstico ({dest})",
-      "description": "Troncal Doméstico: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Troncal Doméstico: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "regional_internacional": [
     {
       "title": "Regional Internacional ({dest})",
-      "description": "Regional Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Regional Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "longo_curso": [
     {
       "title": "Longo Curso Internacional ({dest})",
-      "description": "Longo Curso Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Longo Curso Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "feeder_inbound": [
     {
       "title": "Alimentador de Hub (Inbound) ({dest})",
-      "description": "Alimentador de Hub (Inbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Alimentador de Hub (Inbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "feeder_outbound": [
     {
       "title": "Distribuidor de Hub (Outbound) ({dest})",
-      "description": "Distribuidor de Hub (Outbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Distribuidor de Hub (Outbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "sub_regional": [
     {
       "title": "Sub-Regional Leve ({dest})",
-      "description": "Sub-Regional Leve: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Sub-Regional Leve: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "pinga_pinga": [
@@ -166,7 +166,7 @@
   "regional_essencial": [
     {
       "title": "Regional Essencial / Táxi Social ({dest})",
-      "description": "Regional Essencial / Táxi Social: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Regional Essencial / Táxi Social: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
     }
   ],
   "executivo_corporativo": [

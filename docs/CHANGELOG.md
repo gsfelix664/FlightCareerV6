@@ -3301,3 +3301,13 @@
 ## 2026-11-25 - Cabeçalhos de estado dos planos atualizados (Claude)
 - Linha de estado de 15 planos de `docs/plans/` atualizada ou acrescentada, conferida contra o CHANGELOG, `docs/sistemas/` e buscas no código. Só cabeçalhos; o corpo dos planos não mudou.
 - Build 0 erros; testes 1.154/1.154. Nada a testar no MSFS.
+
+## 2026-11-25 - Linha aérea prefere rotas reais (ROTAS-REAIS) (Gemini)
+- `tools/places/build_routes.py`: script de extração e mapeamento de rotas regulares a partir do OpenFlights `routes.dat` (2014-06) e `airports.csv` gerando `airline_routes.json` (17.223 pares únicos, 330 KB).
+- `Domain/Missions/AirlineRouteCatalog.cs`: catálogo em memória de pares de rotas comerciais, busca insensível a maiúsculas e contagem de companhias.
+- `MissionDefinition` e `MissionDestinationRule`: propriedade `RealRouteMultiplier` configurada para 6 em missões troncais, internacionais e ponte aérea, e 4 em regionais e alimentadores (`mission_catalog.json`).
+- `MissionWeighting.RealRouteMultiplier`: multiplicador aplicado aos destinos elegíveis que possuem rota real consolidada a partir da origem, fora do teto padrão de destino.
+- `BoardCache` e `MissionBoardCore`: repasse de `AirlineRouteCatalog` na seleção e cálculo de pesos do `DestinationChoiceGroup` e acionamento da nota contextual.
+- `mission_texts.json`: marcador `{route_note}` adicionado às descrições das 8 missões de linha aérea regular.
+- `places/ATTRIBUTION.md`: atribuição formal dos dados do OpenFlights sob a licença ODbL.
+- Testes unitários novos em `AirlineRouteCatalogTests`.

@@ -73,7 +73,8 @@ namespace FlightCareer.Application.Services
             IPlacesDataService? placesService = null,
             Runway? originRunway = null,
             BoardCache? cache = null,
-            DateTime? seasonDate = null)
+            DateTime? seasonDate = null,
+            AirlineRouteCatalog? routes = null)
         {
             var missions = new List<Mission>();
             if (origin == null || candidates == null || catalog == null) return missions;
@@ -122,7 +123,8 @@ namespace FlightCareer.Application.Services
                     placesService,
                     distances,
                     originRunway,
-                    boardCache);
+                    boardCache,
+                    routes);
 
                 if (mission != null)
                 {
@@ -147,7 +149,8 @@ namespace FlightCareer.Application.Services
             IPlacesDataService? placesService = null,
             IReadOnlyList<double>? candidateDistances = null,
             Runway? originRunway = null,
-            BoardCache? cache = null)
+            BoardCache? cache = null,
+            AirlineRouteCatalog? routes = null)
         {
             if (def == null || def.Profiles == null || def.Profiles.Count == 0) return null;
 
@@ -309,17 +312,20 @@ namespace FlightCareer.Application.Services
             }
 
             // Destino padrão: filtrar candidatos e sortear ponderado por DestinationWeight
-            var selectedCandidate = SelectDestination(origin, def, profile, candidates, getAirportTags, random, candidateDistances, cache);
+            var selectedCandidate = SelectDestination(origin, def, profile, candidates, getAirportTags, random, candidateDistances, cache, routes);
             if (selectedCandidate == null) return null;
 
             double actualDist = MissionGenerator.CalculateDistance(
                 origin.Latitude, origin.Longitude, selectedCandidate.Airport.Latitude, selectedCandidate.Airport.Longitude);
 
+            bool isRealRoute = MissionWeighting.RealRouteMultiplier(def, routes ?? AirlineRouteCatalog.Default, origin.ICAO, selectedCandidate.Airport.ICAO) > 1.0;
+
             return MissionGenerator.CreateMissionObjectSync(
                 origin, selectedCandidate.Airport, actualDist, def, paxCount, luggageLbs, cargoLbs,
                 random, referenceTime, payMultiplier, payTable,
                 destRunway: selectedCandidate.BestRunway, textCatalog: textCatalog,
-                originTags: originTags, destTags: DestinationTags(selectedCandidate, getAirportTags));
+                originTags: originTags, destTags: DestinationTags(selectedCandidate, getAirportTags),
+                realRoute: isRealRoute);
         }
 
         internal static (List<(MissionDefinition Mission, double Weight)> Missions, double TotalWeight) ComputeEligibleMissions(
@@ -357,15 +363,16 @@ namespace FlightCareer.Application.Services
             Func<string, IReadOnlySet<string>> getAirportTags,
             Random random,
             IReadOnlyList<double>? candidateDistances,
-            BoardCache? cache)
+            BoardCache? cache,
+            AirlineRouteCatalog? routes = null)
         {
             if (cache != null)
             {
-                return cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances).Pick(random);
+                return cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances, routes).Pick(random);
             }
 
             var valid = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-            return PickDestination(def, valid, getAirportTags, random);
+            return PickDestination(def, valid, getAirportTags, random, origin.ICAO, routes);
         }
 
         /// <summary>Etiquetas do candidato, com a etiqueta virtual "pista_curta" para casamento de destino.</summary>
@@ -591,8 +598,15 @@ namespace FlightCareer.Application.Services
             MissionDefinition def,
             IReadOnlyList<AirportCandidate> candidates,
             Func<string, IReadOnlySet<string>> getAirportTags,
-            Random random)
-            => new DestinationChoiceGroup(def, candidates, c => DestinationTags(c, getAirportTags)).Pick(random);
+            Random random,
+            string? originIcao = null,
+            AirlineRouteCatalog? routes = null)
+            => new DestinationChoiceGroup(
+                def,
+                candidates,
+                c => DestinationTags(c, getAirportTags),
+                originIcao != null ? c => MissionWeighting.RealRouteMultiplier(def, routes ?? AirlineRouteCatalog.Default, originIcao, c.Airport.ICAO) : null
+            ).Pick(random);
 
         private static MissionDefinition? PickWeighted(List<(MissionDefinition Mission, double Weight)> items, double totalWeight, Random random)
         {
