@@ -2,13 +2,14 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (12ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.154/1.154.
+**Última atualização:** 2026-11-25 (13ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.165/1.165.
 
 ## Feito nesta sessão
-- Cabeçalhos de estado de 15 planos de `docs/plans/` atualizados (só documentação). Cada plano agora diz no topo o que foi implementado, o que falta e qual `docs/sistemas/` vale. Conferência por CHANGELOG, sistemas e buscas no código, não item a item.
-- Pendências que apareceram (sem tarefa aberta): taxas F2–F4, panes por disjuntor, pesos de XP por tipo de missão (`xp-proficiencia.md` › 5.2), `AircraftMatcher` em camadas e carga gravada em `PAYLOAD STATION WEIGHT` (`simconnect-wb-deteccao-aeronave.md`).
+- ROTAS-REAIS (spec do Claude, implementação do Gemini, revisão APROVADO em `docs/reviews/ROTAS-REAIS-revisao.md`, merge feito): as 8 missões de linha aérea dão multiplicador de peso (6 nas regulares, 4 nas regionais) ao destino que é rota real no OpenFlights `routes.dat` (2014, ODbL). Dados em `places/airline_routes.json` (`tools/places/build_routes.py`, gerado **sem** `--lnm`) e nota "Rota regular com demanda consolidada." no texto.
+- Decisões do usuário (2026-11-25, no plano `missoes-locais-rp.md` › 4): OpenFlights aceito; horários de banco adiados.
 
 ## Conferir no próximo voo (PC de casa)
+- Quadro de linha aérea (hub tier 1–2): destinos que são rota real aparecem com mais frequência e trazem a nota "Rota regular com demanda consolidada.". Se tiver a base do Little Navmap, regerar com `python tools/places/build_routes.py --cache <pasta> --lnm <base>`.
 - Quadro de origem agro/fazenda: nota "Época de plantio/colheita da safra." ou "Entressafra: ..." na descrição de `insumos_agro`, coerente com a data do relógio de carreira (sul: set–dez plantio, jan–abr colheita, mai–ago entressafra).
 - Quadro: linha "Prazo: ..." acima da carga (vermelha em missão médica/urgente; some em voo local) e se o limite bate com o bônus no fim do voo. Linha "Carga: ..." no pré-despacho (âmbar se perigosa), títulos longos de carga, mensagem "Carga Perigosa" ao aceitar `carga_dgr`/`combustivel_tambor` junto com contrato de passageiros.
 - Instrução local saindo de SDCO/SBKP/SBMT com a área real do DECEA (nome no texto, ponto e faixa); coluna `nav-heading-true` e vento no CSV do REC; contrato de instrução local cumprido passando na faixa; linha "CONTRATO" do HUD (texto, quebra de linha, atualização); distâncias sorteadas do cheque e do paraquedismo.
@@ -19,7 +20,7 @@
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
-1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`).
+1. Importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`). As melhorias da § 3 de `missoes-locais-rp.md` estão todas feitas; horários de banco da linha aérea ficaram adiados (pedem spec **Opus** se o usuário quiser).
 2. HUD em modo tablet: spec (**Opus**), quando o usuário quiser começar.
 - Os 8 tipos da E2C que sobraram precisam de SimVar a conferir no MSFS ou de dados: `adaptacao_noturna`, `evacuacao_por_do_sol` e o pôr do sol da `saude_familia` (hora/sol e luzes), `pulverizacao` (AGL real), `demo_flight` (rolagem de decolagem de referência), `instrucao_ifr`, `calibracao_auxilios` (geometria de aproximação, auxílio sintonizado), `reboque_planador`, `publicidade_aerea` (reboque nativo). Um lote que acrescente `PLANE ALT ABOVE GROUND` e as SimVars de hora/sol pode ser especificado no escritório, mas só fecha com o teste no sim.
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".
@@ -32,7 +33,6 @@ Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
 - **Decisões abertas do usuário:** corte final de `isolado` (depois da medição em casa). Resolvidas em 2026-11-25 e mergeadas: CAN só em origem militar, peso de saúde 100, `saude_familia` abastece no destino, falência dos agressivos aceita, patrimônio e classe G encerradas.
-- **Autorizado, falta spec (Opus), uma por sessão:** melhoria 3 de `docs/plans/missoes-locais-rp.md` › 3.1 (a 5, cliente recorrente, foi descartada pelo usuário em 2026-11-25).
 
 ## Notas de trabalho
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.

@@ -1,6 +1,6 @@
 # Plano — Missões com locais reais e textos de RP (2026-11-22)
 
-**Estado (conferido em 2026-11-25):** bancos de locais e contratos (§§ 1–2) implementados (MISSOES-LOCAIS, AREAS-INSTRUCAO); das melhorias da § 3 falta só a linha aérea com rotas reais (3), sem spec; o cliente recorrente (5) foi descartado pelo usuário em 2026-11-25.
+**Estado (conferido em 2026-11-25):** bancos de locais e contratos (§§ 1–2) implementados (MISSOES-LOCAIS, AREAS-INSTRUCAO); as 7 melhorias da § 3 estão feitas (linha aérea com rotas reais em 2026-11-25, sem os horários de banco, adiados); o cliente recorrente (5) foi descartado pelo usuário em 2026-11-25.
 
 Pedido do usuário: instrução local, cheque, panorâmico, aerofoto e paraquedismo com locais reais (bancos globais), ida e volta ao mesmo aeródromo, texto de RP rico (mais de uma variante) e o mapa do briefing mostrando onde ir; avaliar melhorias nos outros tipos.
 
@@ -40,11 +40,12 @@ Os perfis de aeroporto (`places/airport_profiles.json`, feitos depois desta list
 - **4 Agro: feito (2026-11-25, SAFRA-ESTACAO).** Destinos `fazenda`/`agro` e safra por estação do ano via relógio de carreira e latitude da origem (`AgroSeason`), influenciando peso de contratos, tipos de carga e notas no texto.
 - **5 Executiva:** destinos `executivo:lazer`/turísticos feitos; o **cliente recorrente** (fidelidade) foi **descartado pelo usuário em 2026-11-25** (não fazer).
 - **6 Carga: feito (2026-11-25, `CARGA-COERENTE`).** `Data/cargo_kinds.json` sorteia o tipo de carga pelos perfis da origem/destino (marcadores `{cargo}`/`{cargo_note}`, colunas `CargoKind`/`CargoName`); classes ONU de carga perigosa, e as "somente cargueiro" (1.1D, 3, 9 UN3480) bloqueiam aceite e início de voo com passageiros no manifesto. Falta conferir no app (painel e mensagens).
-- **3 Linha aérea:** nada feito; maior das sete (dados OpenFlights, licença ODbL com atribuição e compartilhamento pelo mesmo termo).
+- **3 Linha aérea:** **feito (2026-11-25, ROTAS-REAIS).** `places/airline_routes.json` (OpenFlights 2014, ODbL, `tools/places/build_routes.py`) dá multiplicador `realRouteMultiplier` ao destino que é rota real e a nota `{route_note}` no texto. Falta: horários de banco (adiado) e conferir o quadro no app.
 
 ## 4. Decisões do usuário (2026-11-25)
 - Instrução local pede 1 ou 2 TGL (3 era demais). `circuito_tgl` não mudou.
 - A faixa de altitude da área de instrução é cobrada, sem muita precisão: folga de 500 ft, medida acima da elevação da origem; vale também para o cheque prático.
+- **Linha aérea (2026-11-25):** OpenFlights `routes.dat` (ODbL, dados de 2014) aceito, com atribuição no `places/ATTRIBUTION.md`; rota real vira multiplicador de peso do destino (6 nas linhas regulares, 4 nas regionais), não filtro. **Horários de banco ficam para depois** (exigem partida marcada na missão, coluna no banco, quadro e HUD).
 - Áreas de instrução do simulador na inicialização do banco: verificado que o SimConnect não expõe espaço aéreo nem área de treinamento (tipos de facility: aeroportos, waypoints, NDB, VOR e filhos; conferido na DLL do projeto e na documentação do SDK). Continua a decisão do híbrido (fonte externa com licença compatível, ex. openAIP, quando houver; procedural no resto).
 
 ## 5. Áreas de instrução reais — pesquisa e proposta (2026-11-25, Claude)
