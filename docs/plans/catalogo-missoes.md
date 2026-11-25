@@ -536,3 +536,5 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 - Destino preferido das missões de saúde (`orgaos`, `uti_longa_distancia`, `medevac_remoto`): peso 150 → 100, para repetir menos. Feito.
 - `saude_familia` continua permitindo abastecer no destino (`RequireNoRefuel = false`).
 - As 7 melhorias de `missoes-locais-rp.md` › 3 estão autorizadas.
+- Falência dos bots agressivos do Médio (40 % em 1095 dias, 20 bots): aceita.
+- Regra de `isolado`: apertar e medir de novo, no PC de casa (a regeração dos perfis pede o banco do Little Navmap e o `tier-report`). Medir `ISOLADO_NM=200` e `250` contra o 150 atual com `board-report` em SBMQ, SBHT, SBUG, SNVD, SWEK e YBDV. Referência (200 quadros, semente 1, só CSV), missões remotas antes → depois dos aeroportos novos: 17→33, 23→43, 17→35, 25→55, 40→70, 26→53 %. Corte final: decisão do usuário.
