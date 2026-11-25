@@ -58,5 +58,8 @@ namespace FlightCareer.Domain.Entities
 
         /// <summary>Parâmetros específicos do contrato serializados em JSON (geometria de pernas de levantamento ou zona/altitude de salto). Nulo em missões padrão.</summary>
         public string? ContractData { get; set; }
+
+        public string? CargoKind { get; set; }
+        public string? CargoName { get; set; }
     }
 }

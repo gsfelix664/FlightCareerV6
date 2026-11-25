@@ -6,6 +6,7 @@ using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -293,7 +294,10 @@ namespace FlightCareer.Application.Services
             string? descriptionOverride = null,
             Runway? destRunway = null,
             string? contractData = null,
-            MissionTextCatalog? textCatalog = null)
+            MissionTextCatalog? textCatalog = null,
+            IReadOnlySet<string>? originTags = null,
+            IReadOnlySet<string>? destTags = null,
+            CargoKindCatalog? cargoCatalog = null)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -305,8 +309,29 @@ namespace FlightCareer.Application.Services
             string title = titleOverride ?? sub.Name;
             string desc = descriptionOverride ?? sub.Description;
 
+            var pick = (cargoCatalog ?? CargoKindCatalog.Default).Pick(
+                sub.Id,
+                originTags,
+                destTags,
+                CargoKindCatalog.StableSeed(
+                    origin.ICAO,
+                    dest.ICAO,
+                    sub.Id,
+                    Math.Round(cargoWeight, 0).ToString(CultureInfo.InvariantCulture),
+                    referenceTime.ToString("O", CultureInfo.InvariantCulture)
+                )
+            );
+
             if (titleOverride == null && descriptionOverride == null)
             {
+                string cargoNote = "";
+                if (pick?.Dg != null)
+                {
+                    cargoNote = pick.Dg.CargoAircraftOnly
+                        ? $"Carga perigosa classe {pick.Dg.Code} ({pick.Dg.Label}): somente aeronave cargueira, sem passageiros a bordo."
+                        : $"Carga perigosa classe {pick.Dg.Code} ({pick.Dg.Label}): documentação e embalagem conforme a norma.";
+                }
+
                 var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
                     ["origin"] = origin.ICAO,
@@ -314,7 +339,9 @@ namespace FlightCareer.Application.Services
                     ["pax"] = paxCount.ToString(),
                     ["cargo_lbs"] = Math.Round(cargoWeight, 0).ToString(),
                     ["distance_nm"] = Math.Round(dist, 0).ToString(),
-                    ["deadline"] = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)).ToString("dd/MM HH:mm")
+                    ["deadline"] = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)).ToString("dd/MM HH:mm"),
+                    ["cargo"] = pick?.Name ?? "carga geral",
+                    ["cargo_note"] = cargoNote
                 };
                 var rendered = (textCatalog ?? MissionTextCatalog.Default).Render(sub.Id, random, values, sub.Name, sub.Description);
                 title = rendered.Title;
@@ -346,7 +373,9 @@ namespace FlightCareer.Application.Services
                 MissionCategoryType = categoryType,
                 RequiredTouchAndGoes = requiredTouchAndGoes,
                 OverflyWaypoints = overflyWaypoints,
-                ContractData = contractData
+                ContractData = contractData,
+                CargoKind = pick?.KindId,
+                CargoName = pick?.Name
             };
         }
 

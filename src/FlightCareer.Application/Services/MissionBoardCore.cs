@@ -315,7 +315,8 @@ namespace FlightCareer.Application.Services
             return MissionGenerator.CreateMissionObjectSync(
                 origin, selectedCandidate.Airport, actualDist, def, paxCount, luggageLbs, cargoLbs,
                 random, referenceTime, payMultiplier, payTable,
-                destRunway: selectedCandidate.BestRunway, textCatalog: textCatalog);
+                destRunway: selectedCandidate.BestRunway, textCatalog: textCatalog,
+                originTags: originTags, destTags: DestinationTags(selectedCandidate, getAirportTags));
         }
 
         internal static (List<(MissionDefinition Mission, double Weight)> Missions, double TotalWeight) ComputeEligibleMissions(

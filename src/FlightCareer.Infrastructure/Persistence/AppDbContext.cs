@@ -186,6 +186,8 @@ namespace FlightCareer.Infrastructure.Persistence
                 "ALTER TABLE Missions ADD COLUMN RequiredTouchAndGoes INTEGER DEFAULT 0;",
                 "ALTER TABLE Missions ADD COLUMN OverflyWaypoints TEXT DEFAULT NULL;",
                 "ALTER TABLE Missions ADD COLUMN ContractData TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN CargoKind TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN CargoName TEXT DEFAULT NULL;",
 
                 // Normalização de Dados Aeronáuticos e Correção de Bases Existentes
                 "UPDATE Airports SET Country = 'BR' WHERE (ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%') AND (Country IN ('SB','SS','SW','SJ','SD','SI','SN') OR Country = '' OR Country IS NULL);",

@@ -17,6 +17,10 @@ namespace FlightCareer.UI.ViewModels
         public string OriginICAO => Mission.OriginICAO;
         public string DestinationICAO => Mission.DestinationICAO;
 
+        public string CargoSummary { get; }
+        public bool IsDangerousGoods { get; }
+        public bool HasCargoSummary => !string.IsNullOrEmpty(CargoSummary);
+
         // Dicionário de Códigos ICAO que divergiram entre a base DECEA/AISWEB e a base do MSFS (Asobo/NavBlue)
         public static readonly System.Collections.Generic.Dictionary<string, string> MsfsIcaoAliases = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -376,6 +380,27 @@ namespace FlightCareer.UI.ViewModels
                 origin: null,
                 destination: null,
                 legs: legs);
+
+            if (!string.IsNullOrEmpty(mission.CargoName))
+            {
+                var dg = DangerousGoodsRules.Resolve(mission);
+                if (dg != null)
+                {
+                    IsDangerousGoods = true;
+                    string dgSuffix = $" · perigosa classe {dg.Code} ({dg.Label})" + (dg.CargoAircraftOnly ? " · somente cargueiro" : "");
+                    CargoSummary = $"Carga: {mission.CargoName}{dgSuffix}";
+                }
+                else
+                {
+                    IsDangerousGoods = false;
+                    CargoSummary = $"Carga: {mission.CargoName}";
+                }
+            }
+            else
+            {
+                CargoSummary = string.Empty;
+                IsDangerousGoods = false;
+            }
         }
 
         [Obsolete("Utilize o construtor com CareerPhase")]
