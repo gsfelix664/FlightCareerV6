@@ -159,6 +159,8 @@ namespace FlightCareer.Infrastructure.Services
                     if (missingSet.Contains(ident))
                     {
                         a.IsInSimulator = false;
+                        // Sem impressão, o aeroporto volta como "mudou" se reaparecer no simulador
+                        a.SimFingerprint = null;
                         markedMissing++;
                     }
                 }
@@ -286,24 +288,44 @@ namespace FlightCareer.Infrastructure.Services
             int failed = 0;
             int dropped = 0;
 
+            // Uma consulta por lote (não por aeroporto): a importação do mundo tem dezenas de milhares
+            var batchIdents = batch
+                .SelectMany(b => new[] { b.Item.Ident, b.Detail?.Ident })
+                .Where(i => !string.IsNullOrWhiteSpace(i))
+                .Select(i => i!.Trim().ToUpperInvariant())
+                .Distinct()
+                .ToList();
+            var queueByIdent = (await db.SimAirportQueue.Where(q => batchIdents.Contains(q.Ident.ToUpper())).ToListAsync())
+                .GroupBy(q => q.Ident, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+            var candidates = await db.Airports
+                .Where(a => batchIdents.Contains(a.ICAO.ToUpper()) || (a.MsfsIdent != null && batchIdents.Contains(a.MsfsIdent.ToUpper())))
+                .ToListAsync();
+            var byMsfs = candidates.Where(a => !string.IsNullOrWhiteSpace(a.MsfsIdent))
+                .GroupBy(a => a.MsfsIdent!, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+            var byIcao = candidates
+                .GroupBy(a => a.ICAO, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+            var candidateIcaos = candidates.Select(a => a.ICAO).ToList();
+            var runwaysByAirport = (await db.Runways.Where(r => candidateIcaos.Contains(r.AirportIdent)).ToListAsync())
+                .GroupBy(r => r.AirportIdent, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
             foreach (var (item, detail) in batch)
             {
-                var qItem = await db.SimAirportQueue.FirstOrDefaultAsync(q => q.Ident == item.Ident);
+                queueByIdent.TryGetValue(item.Ident, out var qItem);
 
                 if (detail != null)
                 {
                     // Existente: MsfsIdent igual (case insensitive), senão ICAO igual
-                    var existing = await db.Airports
-                        .FirstOrDefaultAsync(a => a.MsfsIdent != null && a.MsfsIdent.ToUpper() == detail.Ident.ToUpper());
-
-                    if (existing == null)
+                    if (!byMsfs.TryGetValue(detail.Ident, out var existing))
                     {
-                        existing = await db.Airports
-                            .FirstOrDefaultAsync(a => a.ICAO.ToUpper() == detail.Ident.ToUpper());
+                        byIcao.TryGetValue(detail.Ident, out existing);
                     }
 
-                    var existingRunways = existing != null
-                        ? await db.Runways.Where(r => r.AirportIdent == existing.ICAO).ToListAsync()
+                    var existingRunways = existing != null && runwaysByAirport.TryGetValue(existing.ICAO, out var rw)
+                        ? rw
                         : new List<Runway>();
 
                     var buildResult = SimAirportRecordBuilder.Build(
@@ -327,11 +349,14 @@ namespace FlightCareer.Infrastructure.Services
                             updated++;
                         }
 
-                        var oldRunways = await db.Runways
-                            .Where(r => r.AirportIdent == buildResult.Airport.ICAO)
-                            .ToListAsync();
-                        db.Runways.RemoveRange(oldRunways);
+                        db.Runways.RemoveRange(existingRunways);
                         db.Runways.AddRange(buildResult.Runways);
+                        if (existing == null)
+                        {
+                            byMsfs[detail.Ident] = buildResult.Airport;
+                            byIcao[buildResult.Airport.ICAO] = buildResult.Airport;
+                        }
+                        runwaysByAirport[buildResult.Airport.ICAO] = buildResult.Runways.ToList();
 
                         if (qItem != null)
                         {

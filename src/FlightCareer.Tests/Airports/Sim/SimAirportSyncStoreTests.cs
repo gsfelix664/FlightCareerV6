@@ -414,5 +414,36 @@ namespace FlightCareer.Tests.Airports.Sim
             Assert.Equal("SB02", batch[0].Ident);
             Assert.Equal("SB03", batch[1].Ident);
         }
+
+        [Fact]
+        public async Task ApplyList_AusenteQueVolta_Reenfileira()
+        {
+            var sbspItem = new SimAirportListItem("SBSP", "SB", -23.6261, -46.6564, 802.0);
+            await using (var db = new AppDbContext(_options))
+            {
+                db.Airports.Add(new Airport
+                {
+                    Id = Guid.NewGuid(),
+                    ICAO = "SBSP",
+                    MsfsIdent = "SBSP",
+                    Name = "Congonhas",
+                    IsInSimulator = true,
+                    SimFingerprint = SimAirportFingerprint.Of(sbspItem)
+                });
+                await db.SaveChangesAsync();
+            }
+
+            var store = new SimAirportSyncStore(_factory);
+            var now = new DateTime(2026, 11, 25, 12, 0, 0, DateTimeKind.Utc);
+            var sbgr = new SimAirportListItem("SBGR", "SB", -23.4356, -46.4731, 750.0);
+
+            var sumiu = await store.ApplyListAsync(new List<SimAirportListItem> { sbgr }, "1.0", now);
+            Assert.Equal(1, sumiu.MarkedMissing);
+
+            var voltou = await store.ApplyListAsync(new List<SimAirportListItem> { sbgr, sbspItem }, "1.0", now.AddDays(1));
+            Assert.False(voltou.NoChange);
+            var fila = await store.TakeBatchAsync(10);
+            Assert.Contains(fila, q => q.Ident == "SBSP");
+        }
     }
 }
