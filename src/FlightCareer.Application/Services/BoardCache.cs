@@ -37,7 +37,8 @@ namespace FlightCareer.Application.Services
         public DestinationChoiceGroup(
             MissionDefinition def,
             IReadOnlyList<AirportCandidate> validCandidates,
-            Func<AirportCandidate, IReadOnlySet<string>> getCandidateTags)
+            Func<AirportCandidate, IReadOnlySet<string>> getCandidateTags,
+            Func<AirportCandidate, double>? extraMultiplier = null)
         {
             int count = validCandidates.Count;
             _candidates = new AirportCandidate[count];
@@ -57,7 +58,12 @@ namespace FlightCareer.Application.Services
             double total = 0.0;
             for (int i = 0; i < count; i++)
             {
-                total += MissionWeighting.DestinationWeight(def, getCandidateTags(_candidates[i]));
+                double weight = MissionWeighting.DestinationWeight(def, getCandidateTags(_candidates[i]));
+                if (extraMultiplier != null)
+                {
+                    weight *= extraMultiplier(_candidates[i]);
+                }
+                total += weight;
                 _cumulativeWeights[i] = total;
             }
             _totalWeight = total;
@@ -239,7 +245,8 @@ namespace FlightCareer.Application.Services
             MissionProfileDefinition profile,
             IReadOnlyList<AirportCandidate> candidates,
             Func<string, IReadOnlySet<string>> getAirportTags,
-            IReadOnlyList<double>? candidateDistances)
+            IReadOnlyList<double>? candidateDistances,
+            AirlineRouteCatalog? routes = null)
         {
             EnsureOrigin(origin);
             var key = new ProfileCacheKey(def.Id, profile);
@@ -249,7 +256,12 @@ namespace FlightCareer.Application.Services
             }
 
             var filtered = MissionBoardCore.FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-            group = new DestinationChoiceGroup(def, filtered, c => GetCandidateTagsWithPistaCurta(c, getAirportTags));
+            var catalog = routes ?? AirlineRouteCatalog.Default;
+            group = new DestinationChoiceGroup(
+                def,
+                filtered,
+                c => GetCandidateTagsWithPistaCurta(c, getAirportTags),
+                c => MissionWeighting.RealRouteMultiplier(def, catalog, origin.ICAO, c.Airport.ICAO));
             _destinationGroups[key] = group;
             return group;
         }

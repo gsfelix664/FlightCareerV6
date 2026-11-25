@@ -620,7 +620,8 @@
         "requireAnyTag": [
           "linha",
           "linha_auto:hub"
-        ]
+        ],
+        "realRouteMultiplier": 6
       },
       "profiles": [
         {
@@ -705,7 +706,8 @@
         "requireAnyTag": [
           "linha",
           "linha_auto:hub"
-        ]
+        ],
+        "realRouteMultiplier": 6
       },
       "profiles": [
         {
@@ -827,7 +829,8 @@
         "requireAnyTag": [
           "linha",
           "linha_auto:hub"
-        ]
+        ],
+        "realRouteMultiplier": 6
       },
       "profiles": [
         {
@@ -947,7 +950,8 @@
         "requireAnyTag": [
           "linha",
           "linha_auto:hub"
-        ]
+        ],
+        "realRouteMultiplier": 6
       },
       "profiles": [
         {
@@ -1069,7 +1073,8 @@
         "requireAnyTag": [
           "linha",
           "linha_auto"
-        ]
+        ],
+        "realRouteMultiplier": 4
       },
       "profiles": [
         {
@@ -1182,7 +1187,8 @@
         "maxNm": 500,
         "profiles": {
           "alimentador": 5
-        }
+        },
+        "realRouteMultiplier": 4
       },
       "profiles": [
         {
@@ -1296,7 +1302,8 @@
         "maxNm": null,
         "profiles": {
           "alimentador": 4
-        }
+        },
+        "realRouteMultiplier": 4
       },
       "profiles": [
         {
@@ -1463,7 +1470,8 @@
         "profiles": {
           "linha": 4,
           "alimentador": 4
-        }
+        },
+        "realRouteMultiplier": 4
       },
       "profiles": [
         {

@@ -80,5 +80,14 @@ namespace FlightCareer.Domain.Missions
             multProduct = Math.Min(cap, multProduct);
             return Math.Max(1.0, multProduct);
         }
+
+        public static double RealRouteMultiplier(MissionDefinition m, AirlineRouteCatalog? routes, string originIcao, string destIcao)
+        {
+            if (m?.Destination != null && m.Destination.RealRouteMultiplier > 1.0 && routes != null && routes.HasRoute(originIcao, destIcao))
+            {
+                return m.Destination.RealRouteMultiplier;
+            }
+            return 1.0;
+        }
     }
 }

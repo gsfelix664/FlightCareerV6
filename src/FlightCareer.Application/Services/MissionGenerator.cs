@@ -300,7 +300,8 @@ namespace FlightCareer.Application.Services
             MissionTextCatalog? textCatalog = null,
             IReadOnlySet<string>? originTags = null,
             IReadOnlySet<string>? destTags = null,
-            CargoKindCatalog? cargoCatalog = null)
+            CargoKindCatalog? cargoCatalog = null,
+            bool realRoute = false)
         {
             double totalPayload = (paxCount * 170) + luggageWeightLbs + cargoWeight;
 
@@ -345,7 +346,8 @@ namespace FlightCareer.Application.Services
                     ["deadline"] = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)).ToString("dd/MM HH:mm"),
                     ["cargo"] = pick?.Name ?? "carga geral",
                     ["cargo_note"] = cargoNote,
-                    ["safra"] = AgroSeason.Note(originTags)
+                    ["safra"] = AgroSeason.Note(originTags),
+                    ["route_note"] = realRoute ? " Rota regular com demanda consolidada." : ""
                 };
                 var rendered = (textCatalog ?? MissionTextCatalog.Default).Render(sub.Id, random, values, sub.Name, sub.Description);
                 title = rendered.Title;
