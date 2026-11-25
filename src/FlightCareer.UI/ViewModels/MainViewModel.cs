@@ -757,6 +757,17 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
+            var dgReason = DangerousGoodsRules.CheckManifest(ActiveMissions.Concat(itemsToAccept.Select(i => i.Mission)));
+            if (dgReason != null)
+            {
+                System.Windows.MessageBox.Show(
+                    dgReason,
+                    "Carga Perigosa",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
             // Checagem de Compatibilidade da Aeronave Ativa (Prevenir absurdos operacionais: Cessna 152 com 50 pax ou Boeing 737 em fazenda)
             var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
             if (activeAircraft?.AircraftType != null)
@@ -923,6 +934,17 @@ namespace FlightCareer.UI.ViewModels
                     System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está em configuração PASSAGEIRO e possui contrato de carga que excede o bagageiro ({effectiveFlightCap.MaxCargoLbs:N0} LBS).\n\nConverta a cabine para Carga no Hangar para transportar este volume.", "Carga Excede Capacidade de Bagagem", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                     return;
                 }
+            }
+
+            var dgFlightReason = DangerousGoodsRules.CheckManifest(ActiveMissions);
+            if (dgFlightReason != null)
+            {
+                System.Windows.MessageBox.Show(
+                    dgFlightReason,
+                    "Carga Perigosa (NO-GO)",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return;
             }
 
             var groundingDefects = _flightMonitor.GetGroundingDefects(aircraft.Id);

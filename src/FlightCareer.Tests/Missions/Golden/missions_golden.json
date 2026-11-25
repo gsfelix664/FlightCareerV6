@@ -22,7 +22,7 @@
     "CargoLbs": 85719,
     "Reward": 8994.35,
     "DistanceNm": 1413,
-    "Title": "Carga Geral Paletizada (SCEL)",
+    "Title": "Logística Paletizada (SCEL)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -134,7 +134,7 @@
     "CargoLbs": 12531,
     "Reward": 3585.15,
     "DistanceNm": 156,
-    "Title": "Cadeia Fria e Perecíveis (SBRP)",
+    "Title": "Transporte Frigorificado de anticorpos monoclonais em caixas térmicas certificadas (SBRP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -190,7 +190,7 @@
     "CargoLbs": 24157,
     "Reward": 9399.76,
     "DistanceNm": 1135,
-    "Title": "E-Commerce e Carga Fracionada (SBRF)",
+    "Title": "Remessa de E-Commerce (SBRF)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -204,7 +204,7 @@
     "CargoLbs": 120932,
     "Reward": 17567.91,
     "DistanceNm": 3553,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Carga Paletizada (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -218,7 +218,7 @@
     "CargoLbs": 41313,
     "Reward": 6747.91,
     "DistanceNm": 931,
-    "Title": "Carga Geral Paletizada (SAEZ)",
+    "Title": "Frete de fardos de caixas e embalagens diversas (SAEZ)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -260,7 +260,7 @@
     "CargoLbs": 1097,
     "Reward": 4107.27,
     "DistanceNm": 268,
-    "Title": "Carga Perigosa / Farmacêutica (SBCF)",
+    "Title": "Remessa Regulamentada de cilindros térmicos com gelo seco para transporte biológico (SBCF)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -358,7 +358,7 @@
     "CargoLbs": 145229,
     "Reward": 19541.62,
     "DistanceNm": 4963,
-    "Title": "Carga Geral Paletizada (LFPG)",
+    "Title": "Logística Paletizada (LFPG)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -414,7 +414,7 @@
     "CargoLbs": 31899,
     "Reward": 4875.84,
     "DistanceNm": 658,
-    "Title": "Carga Geral Paletizada (SBSV)",
+    "Title": "Carga Paletizada (SBSV)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -456,7 +456,7 @@
     "CargoLbs": 25053,
     "Reward": 12014.2,
     "DistanceNm": 1323,
-    "Title": "Carga Expressa Overnight (SBBE)",
+    "Title": "Conexão Expressa Noturna (SBBE)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -582,7 +582,7 @@
     "CargoLbs": 30147,
     "Reward": 6308.81,
     "DistanceNm": 949,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Frete de lotes de mercadorias mistas embaladas (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -666,7 +666,7 @@
     "CargoLbs": 21511,
     "Reward": 5410.9,
     "DistanceNm": 949,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Logística Paletizada (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -792,7 +792,7 @@
     "CargoLbs": 129592,
     "Reward": 19325.71,
     "DistanceNm": 4142,
-    "Title": "Carga Geral Paletizada (SBGR)",
+    "Title": "Carga Paletizada (SBGR)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -806,7 +806,7 @@
     "CargoLbs": 91732,
     "Reward": 8421.41,
     "DistanceNm": 949,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Carga Paletizada (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -820,7 +820,7 @@
     "CargoLbs": 72184,
     "Reward": 7041.69,
     "DistanceNm": 949,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Logística Paletizada (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -834,7 +834,7 @@
     "CargoLbs": 66454,
     "Reward": 7764.06,
     "DistanceNm": 949,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Frete de lotes de mercadorias mistas embaladas (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -932,7 +932,7 @@
     "CargoLbs": 634,
     "Reward": 603.76,
     "DistanceNm": 41,
-    "Title": "E-Commerce e Carga Fracionada (SBMT)",
+    "Title": "Remessa de E-Commerce (SBMT)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -960,7 +960,7 @@
     "CargoLbs": 1597,
     "Reward": 2831.89,
     "DistanceNm": 216,
-    "Title": "Carga Perigosa / Farmacêutica (SBGL)",
+    "Title": "Remessa Regulamentada de amostras clínicas de agentes patogênicos categoria b (SBGL)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -988,7 +988,7 @@
     "CargoLbs": 563,
     "Reward": 2156.05,
     "DistanceNm": 270,
-    "Title": "Malotes Bancários e Documentos (SBCF)",
+    "Title": "Malotes Corporativos (SBCF)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1002,7 +1002,7 @@
     "CargoLbs": 125888,
     "Reward": 19927.04,
     "DistanceNm": 5106,
-    "Title": "Carga Geral Paletizada (EGLL)",
+    "Title": "Frete de fardos de caixas e embalagens diversas (EGLL)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1016,7 +1016,7 @@
     "CargoLbs": 132000,
     "Reward": 14279.19,
     "DistanceNm": 3510,
-    "Title": "Carga Geral Paletizada (KMIA)",
+    "Title": "Frete de lotes de mercadorias mistas embaladas (KMIA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1044,7 +1044,7 @@
     "CargoLbs": 812,
     "Reward": 812.35,
     "DistanceNm": 118,
-    "Title": "E-Commerce e Carga Fracionada (SBRP)",
+    "Title": "Distribuição de dermocosméticos e produtos de autocuidado para entrega (SBRP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1100,7 +1100,7 @@
     "CargoLbs": 3173,
     "Reward": 1405.36,
     "DistanceNm": 118,
-    "Title": "Cadeia Fria e Perecíveis (SBRP)",
+    "Title": "Logística Refrigerada (SBRP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1156,7 +1156,7 @@
     "CargoLbs": 1916,
     "Reward": 6202.26,
     "DistanceNm": 563,
-    "Title": "Carga Perigosa / Farmacêutica (SBPA)",
+    "Title": "Remessa Regulamentada de frascos com culturas bacterianas para laboratório de referência (SBPA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1268,7 +1268,7 @@
     "CargoLbs": 389,
     "Reward": 4939.97,
     "DistanceNm": 563,
-    "Title": "Carga Industrial Just-In-Time / AOG (SBPA)",
+    "Title": "Suprimento Industrial de atuadores hidráulicos e servo-válvulas para aeronave aog (SBPA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1394,7 +1394,7 @@
     "CargoLbs": 404,
     "Reward": 1124.43,
     "DistanceNm": 131,
-    "Title": "Malotes Bancários e Documentos (SBJD)",
+    "Title": "Malotes Corporativos (SBJD)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1464,7 +1464,7 @@
     "CargoLbs": 291,
     "Reward": 1822.14,
     "DistanceNm": 278,
-    "Title": "Insumos e Peças Agrícolas (SNAA)",
+    "Title": "Suprimento de Insumos Rurais (SNAA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1478,7 +1478,7 @@
     "CargoLbs": 381,
     "Reward": 3420.88,
     "DistanceNm": 278,
-    "Title": "Carga Sensível e Viva (SNAA)",
+    "Title": "Carga Sensível e Especial (SNAA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1688,7 +1688,7 @@
     "CargoLbs": 414,
     "Reward": 2611.36,
     "DistanceNm": 183,
-    "Title": "Carga Perigosa / Farmacêutica (SBJR)",
+    "Title": "Carga Perigosa (SBJR)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1702,7 +1702,7 @@
     "CargoLbs": 1695,
     "Reward": 927.93,
     "DistanceNm": 87,
-    "Title": "Transporte de Combustível em Tambores (SWCA)",
+    "Title": "Abastecimento Aéreo de combustível jet a-1 em tambores homologados da defesa civil (SWCA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1926,7 +1926,7 @@
     "CargoLbs": 409,
     "Reward": 2152.79,
     "DistanceNm": 198,
-    "Title": "Carga Sensível e Viva (SBDN)",
+    "Title": "Transporte Especial de amostras de sangue e tecidos para tipagem genética (SBDN)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -1996,7 +1996,7 @@
     "CargoLbs": 292,
     "Reward": 1945.7,
     "DistanceNm": 133,
-    "Title": "Carga Industrial Just-In-Time / AOG (SDUB)",
+    "Title": "Despacho AOG / Crítico (SDUB)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2108,7 +2108,7 @@
     "CargoLbs": 2525,
     "Reward": 931.52,
     "DistanceNm": 91,
-    "Title": "Insumos e Peças Agrícolas (SBSJ)",
+    "Title": "Suprimento de Insumos Rurais (SBSJ)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2290,7 +2290,7 @@
     "CargoLbs": 2288,
     "Reward": 1540.42,
     "DistanceNm": 234,
-    "Title": "Insumos e Peças Agrícolas (SBSJ)",
+    "Title": "Apoio Agrícola: embalagens de sementes de hortaliças de alto vigor (SBSJ)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2346,7 +2346,7 @@
     "CargoLbs": 1135,
     "Reward": 1907.26,
     "DistanceNm": 136,
-    "Title": "Carga Industrial Just-In-Time / AOG (SBRP)",
+    "Title": "Despacho AOG / Crítico (SBRP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2388,7 +2388,7 @@
     "CargoLbs": 340,
     "Reward": 2847.12,
     "DistanceNm": 367,
-    "Title": "Carga Sensível e Viva (SBJR)",
+    "Title": "Manifesto Especial de Carga Sensível (SBJR)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2416,7 +2416,7 @@
     "CargoLbs": 614,
     "Reward": 1415.83,
     "DistanceNm": 322,
-    "Title": "Insumos e Peças Agrícolas (SBNP)",
+    "Title": "Suprimento de Insumos Rurais (SBNP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2444,7 +2444,7 @@
     "CargoLbs": 1983,
     "Reward": 1519.82,
     "DistanceNm": 234,
-    "Title": "Insumos e Peças Agrícolas (SBSJ)",
+    "Title": "Suprimento de Insumos Rurais (SBSJ)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2500,7 +2500,7 @@
     "CargoLbs": 841,
     "Reward": 975.48,
     "DistanceNm": 112,
-    "Title": "Insumos e Peças Agrícolas (SNBB)",
+    "Title": "Apoio Agrícola: sementes fiscalizadas de algodão para plantio imediato (SNBB)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2598,7 +2598,7 @@
     "CargoLbs": 1153,
     "Reward": 1145.59,
     "DistanceNm": 156,
-    "Title": "Insumos e Peças Agrícolas (SNAA)",
+    "Title": "Apoio Agrícola: embalagens de sementes de hortaliças de alto vigor (SNAA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -2906,7 +2906,7 @@
     "CargoLbs": 590,
     "Reward": 2303.84,
     "DistanceNm": 318,
-    "Title": "Malotes Bancários e Documentos (SBPA)",
+    "Title": "Malotes e Documentos (SBPA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3116,7 +3116,7 @@
     "CargoLbs": 488,
     "Reward": 1224.5,
     "DistanceNm": 199,
-    "Title": "Apoio a Acampamentos e Expedições (SNAA)",
+    "Title": "Logística de Expedição: mantimentos frescos e congelados em caixas térmicas reforçadas (SNAA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3172,7 +3172,7 @@
     "CargoLbs": 854,
     "Reward": 3981.44,
     "DistanceNm": 483,
-    "Title": "Carga Industrial Just-In-Time / AOG (SBBR)",
+    "Title": "Suprimento Industrial de válvulas pneumáticas de pressurização para hangar (SBBR)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3284,7 +3284,7 @@
     "CargoLbs": 195,
     "Reward": 1806.42,
     "DistanceNm": 204,
-    "Title": "Carga Sensível e Viva (SBRP)",
+    "Title": "Manifesto Especial de Carga Sensível (SBRP)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3312,7 +3312,7 @@
     "CargoLbs": 998,
     "Reward": 773.88,
     "DistanceNm": 143,
-    "Title": "Suprimentos para Comunidades Remotas (SDOI)",
+    "Title": "Logística Comunitária Remota (SDOI)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3326,7 +3326,7 @@
     "CargoLbs": 3001,
     "Reward": 1365.07,
     "DistanceNm": 199,
-    "Title": "Suprimentos para Comunidades Remotas (SNAA)",
+    "Title": "Abastecimento Remoto de caixas de antibióticos e analgésicos para postos de saúde de selva (SNAA)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3382,7 +3382,7 @@
     "CargoLbs": 266,
     "Reward": 1230.62,
     "DistanceNm": 80,
-    "Title": "Carga Sensível e Viva (SDOI)",
+    "Title": "Carga Sensível e Especial (SDOI)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3424,7 +3424,7 @@
     "CargoLbs": 571,
     "Reward": 821.28,
     "DistanceNm": 142,
-    "Title": "Suprimentos para Comunidades Remotas (SDRS)",
+    "Title": "Abastecimento Remoto de placas solares e baterias estacionárias para postos remotos (SDRS)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3452,7 +3452,7 @@
     "CargoLbs": 1081,
     "Reward": 1068.72,
     "DistanceNm": 152,
-    "Title": "Apoio a Acampamentos e Expedições (SNBB)",
+    "Title": "Logística de Expedição: lonas de cobertura pesada e estacas de aço para tendas (SNBB)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3466,7 +3466,7 @@
     "CargoLbs": 548,
     "Reward": 738.47,
     "DistanceNm": 80,
-    "Title": "Apoio a Acampamentos e Expedições (SDOI)",
+    "Title": "Logística de Expedição: fogareiros portáteis e panelas industriais para o rancho do acampamento (SDOI)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3480,7 +3480,7 @@
     "CargoLbs": 258,
     "Reward": 1096.89,
     "DistanceNm": 152,
-    "Title": "Apoio a Acampamentos e Expedições (SNBB)",
+    "Title": "Logística de Expedição: mantimentos frescos e congelados em caixas térmicas reforçadas (SNBB)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3690,7 +3690,7 @@
     "CargoLbs": 392,
     "Reward": 1789.12,
     "DistanceNm": 181,
-    "Title": "Carga Sensível e Viva (SBBW)",
+    "Title": "Carga Sensível e Especial (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3704,7 +3704,7 @@
     "CargoLbs": 240,
     "Reward": 902.63,
     "DistanceNm": 181,
-    "Title": "Insumos e Peças Agrícolas (SBBW)",
+    "Title": "Suprimento de Insumos Rurais (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3718,7 +3718,7 @@
     "CargoLbs": 390,
     "Reward": 998.42,
     "DistanceNm": 181,
-    "Title": "Insumos e Peças Agrícolas (SBBW)",
+    "Title": "Suprimento de Insumos Rurais (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3746,7 +3746,7 @@
     "CargoLbs": 3435,
     "Reward": 1525.56,
     "DistanceNm": 181,
-    "Title": "Apoio Humanitário e Defesa Civil (SBBW)",
+    "Title": "Operação de Defesa Civil (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3774,7 +3774,7 @@
     "CargoLbs": 107,
     "Reward": 1765.87,
     "DistanceNm": 181,
-    "Title": "Carga Sensível e Viva (SBBW)",
+    "Title": "Transporte Especial de palhetas de material genético equino para inseminação (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3788,7 +3788,7 @@
     "CargoLbs": 2627,
     "Reward": 1182.04,
     "DistanceNm": 181,
-    "Title": "Suprimentos para Comunidades Remotas (SBBW)",
+    "Title": "Logística Comunitária Remota (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3830,7 +3830,7 @@
     "CargoLbs": 2810,
     "Reward": 1255.16,
     "DistanceNm": 181,
-    "Title": "Suprimentos para Comunidades Remotas (SBBW)",
+    "Title": "Logística Comunitária Remota (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3844,7 +3844,7 @@
     "CargoLbs": 1740,
     "Reward": 1092.07,
     "DistanceNm": 181,
-    "Title": "Insumos e Peças Agrícolas (SBBW)",
+    "Title": "Apoio Agrícola: fungicidas sistêmicos para controle de ferrugem em grãos (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null
@@ -3858,7 +3858,7 @@
     "CargoLbs": 2599,
     "Reward": 1287.59,
     "DistanceNm": 181,
-    "Title": "Apoio Humanitário e Defesa Civil (SBBW)",
+    "Title": "Ajuda Humanitária: kits de sabonete, escovas e desinfetantes para abrigos (SBBW)",
     "RequiredTouchAndGoes": 0,
     "OverflyWaypoints": null,
     "ContractData": null

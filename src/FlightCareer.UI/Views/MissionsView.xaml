@@ -507,6 +507,25 @@
                             </Border>
                         </UniformGrid>
 
+                        <!-- Linha de Carga Operacional / Carga Perigosa -->
+                        <TextBlock Text="{Binding SelectedMissionItem.CargoSummary}"
+                                   Visibility="{Binding SelectedMissionItem.HasCargoSummary, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   FontSize="11.5"
+                                   FontWeight="SemiBold"
+                                   FontFamily="Inter, Segoe UI, sans-serif"
+                                   Margin="0,0,0,10">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#8B9BAE"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedMissionItem.IsDangerousGoods}" Value="True">
+                                            <Setter Property="Foreground" Value="#FFB300"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
                         <!-- Card de Situação Operacional / Roleplay (Logo acima do METAR) -->
                         <Border Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                             <StackPanel>

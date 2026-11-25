@@ -253,56 +253,128 @@
   ],
   "carga_paletizada": [
     {
-      "title": "Carga Geral Paletizada ({dest})",
-      "description": "Carga Geral Paletizada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "title": "Carga Paletizada ({dest})",
+      "description": "Carga Geral Paletizada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Frete de {cargo} ({dest})",
+      "description": "Transporte de {cargo}: voo cargueiro de {origin} para {dest} com {cargo_lbs} lbs de carga paletizada."
+    },
+    {
+      "title": "Logística Paletizada ({dest})",
+      "description": "Operação de logística paletizada ligando {origin} a {dest}: entrega de {cargo_lbs} lbs de {cargo}."
     }
   ],
   "carga_overnight": [
     {
       "title": "Carga Expressa Overnight ({dest})",
-      "description": "Carga Expressa Overnight: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "description": "Carga Expressa Overnight: voo noturno de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} com prioridade máxima."
+    },
+    {
+      "title": "Envio Noturno de {cargo} ({dest})",
+      "description": "Despacho noturno prioritário de {cargo}: voo de {origin} para {dest} transportando {cargo_lbs} lbs para entrega matutina."
+    },
+    {
+      "title": "Conexão Expressa Noturna ({dest})",
+      "description": "Operação overnight de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} com prazo crítico."
     }
   ],
   "malotes": [
     {
-      "title": "Malotes Bancários e Documentos ({dest})",
-      "description": "Malotes Bancários e Documentos: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Malotes e Documentos ({dest})",
+      "description": "Malotes Bancários e Documentos: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Transporte Seguro de {cargo} ({dest})",
+      "description": "Remessa prioritária de {cargo}: voo seguro de {origin} para {dest} transportando {cargo_lbs} lbs sob custódia."
+    },
+    {
+      "title": "Malotes Corporativos ({dest})",
+      "description": "Despacho lacrado de {origin} para {dest}: {cargo_lbs} lbs de {cargo} com protocolo prioritário."
     }
   ],
   "carga_valores": [
     {
       "title": "Transporte de Valores ({dest})",
-      "description": "Transporte de Valores: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Transporte de Valores: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} sob escolta."
+    },
+    {
+      "title": "Remessa de Valores ({dest})",
+      "description": "Remessa de custódia especial de {origin} para {dest}: transporte blindado de {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Valores sob Custódia ({dest})",
+      "description": "Operação de segurança especial de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} de alto valor."
     }
   ],
   "ecommerce": [
     {
       "title": "E-Commerce e Carga Fracionada ({dest})",
-      "description": "E-Commerce e Carga Fracionada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "description": "E-Commerce e Carga Fracionada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para distribuição."
+    },
+    {
+      "title": "Distribuição de {cargo} ({dest})",
+      "description": "Distribuição expressa de e-commerce de {origin} para {dest}: {cargo_lbs} lbs de {cargo} para entrega ao consumidor."
+    },
+    {
+      "title": "Remessa de E-Commerce ({dest})",
+      "description": "Conexão logística de {origin} para {dest}: carga fracionada de {cargo_lbs} lbs de {cargo} para triagem rápida."
     }
   ],
   "carga_jit": [
     {
-      "title": "Carga Industrial Just-In-Time / AOG ({dest})",
-      "description": "Carga Industrial Just-In-Time / AOG: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Carga Industrial Just-In-Time ({dest})",
+      "description": "Carga Industrial Just-In-Time / AOG: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Suprimento Industrial de {cargo} ({dest})",
+      "description": "Fornecimento just-in-time urgente de {origin} para {dest}: {cargo_lbs} lbs de {cargo} para manter linha ativa. {cargo_note}"
+    },
+    {
+      "title": "Despacho AOG / Crítico ({dest})",
+      "description": "Remessa de emergência industrial de {origin} para {dest}: {cargo_lbs} lbs de {cargo} com entrega imediata. {cargo_note}"
     }
   ],
   "cadeia_fria": [
     {
       "title": "Cadeia Fria e Perecíveis ({dest})",
-      "description": "Cadeia Fria e Perecíveis: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "description": "Cadeia Fria e Perecíveis: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} sob controle rigoroso de temperatura. {cargo_note}"
+    },
+    {
+      "title": "Transporte Frigorificado de {cargo} ({dest})",
+      "description": "Remessa climatizada de {cargo}: voo de {origin} para {dest} com {cargo_lbs} lbs sob temperatura controlada. {cargo_note}"
+    },
+    {
+      "title": "Logística Refrigerada ({dest})",
+      "description": "Carga térmica refrigerada de {origin} para {dest}: manifesto de {cargo_lbs} lbs de {cargo}. {cargo_note}"
     }
   ],
   "carga_dgr": [
     {
-      "title": "Carga Perigosa / Farmacêutica ({dest})",
-      "description": "Carga Perigosa / Farmacêutica: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "title": "Carga Perigosa ({dest})",
+      "description": "Transporte de carga perigosa regulamentada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Remessa Regulamentada de {cargo} ({dest})",
+      "description": "Carga perigosa DGR de {origin} para {dest}: transporte especializado de {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Voo Técnico DGR ({dest})",
+      "description": "Operação de materiais perigosos de {origin} para {dest}: manifesto técnico com {cargo_lbs} lbs de {cargo}. {cargo_note}"
     }
   ],
   "carga_sensivel": [
     {
-      "title": "Carga Sensível e Viva ({dest})",
-      "description": "Carga Sensível e Viva: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Carga Sensível e Especial ({dest})",
+      "description": "Carga Sensível e Viva: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} com cuidados especiais. {cargo_note}"
+    },
+    {
+      "title": "Transporte Especial de {cargo} ({dest})",
+      "description": "Remessa de carga frágil e especial: voo cuidadoso de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Manifesto Especial de Carga Sensível ({dest})",
+      "description": "Operação com manuseio diferenciado de {origin} para {dest}: {cargo_lbs} lbs de {cargo}. {cargo_note}"
     }
   ],
   "carga_combi": [
@@ -314,19 +386,43 @@
   "insumos_agro": [
     {
       "title": "Insumos e Peças Agrícolas ({dest})",
-      "description": "Insumos e Peças Agrícolas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Insumos e Peças Agrícolas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para lavoura."
+    },
+    {
+      "title": "Apoio Agrícola: {cargo} ({dest})",
+      "description": "Remessa urgente para safra: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para apoio ao campo."
+    },
+    {
+      "title": "Suprimento de Insumos Rurais ({dest})",
+      "description": "Logística agropecuária de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} para produtores locais."
     }
   ],
   "suprimentos_remotos": [
     {
       "title": "Suprimentos para Comunidades Remotas ({dest})",
-      "description": "Suprimentos para Comunidades Remotas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Suprimentos para Comunidades Remotas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} essencial."
+    },
+    {
+      "title": "Abastecimento Remoto de {cargo} ({dest})",
+      "description": "Voo de abastecimento regional de {origin} para {dest}: entrega vital de {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Logística Comunitária Remota ({dest})",
+      "description": "Apoio logístico a pistas isoladas: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} para atendimento local."
     }
   ],
   "conexao_pista_curta": [
     {
       "title": "Conexão de Pista Curta ({dest})",
-      "description": "Conexão de Pista Curta: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Conexão de Pista Curta: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} em pista desafiadora."
+    },
+    {
+      "title": "Frete para Pista Desafiadora ({dest})",
+      "description": "Operação de pouso curto de {origin} para {dest}: transporte de {cargo_lbs} lbs de {cargo} para pista rústica."
+    },
+    {
+      "title": "Apoio a Pista Não Pavimentada ({dest})",
+      "description": "Acesso aéreo a pista remota: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} para entrega direta."
     }
   ],
   "orgaos": [
@@ -570,19 +666,43 @@
   "humanitario": [
     {
       "title": "Apoio Humanitário e Defesa Civil ({dest})",
-      "description": "Apoio Humanitário e Defesa Civil: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Apoio Humanitário e Defesa Civil: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} de socorro."
+    },
+    {
+      "title": "Ajuda Humanitária: {cargo} ({dest})",
+      "description": "Missão de socorro emergencial de {origin} para {dest}: entrega imediata de {cargo_lbs} lbs de {cargo} para auxílio à população."
+    },
+    {
+      "title": "Operação de Defesa Civil ({dest})",
+      "description": "Transporte de emergência comunitária de {origin} para {dest}: manifesto humanitário de {cargo_lbs} lbs de {cargo}."
     }
   ],
   "combustivel_tambor": [
     {
       "title": "Transporte de Combustível em Tambores ({dest})",
-      "description": "Transporte de Combustível em Tambores: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+      "description": "Transporte de Combustível em Tambores: voo cargueiro de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Abastecimento Aéreo de {cargo} ({dest})",
+      "description": "Remessa de combustível inflamável: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} em tambores homologados. {cargo_note}"
+    },
+    {
+      "title": "Logística de Combustível em Tambores ({dest})",
+      "description": "Voo especial de combustível de {origin} para {dest}: {cargo_lbs} lbs de {cargo} sob rigorosas normas de segurança. {cargo_note}"
     }
   ],
   "apoio_acampamento": [
     {
       "title": "Apoio a Acampamentos e Expedições ({dest})",
-      "description": "Apoio a Acampamentos e Expedições: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "description": "Apoio a Acampamentos e Expedições: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para base de campo."
+    },
+    {
+      "title": "Logística de Expedição: {cargo} ({dest})",
+      "description": "Suprimento de campo para acampamento: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para pesquisadores."
+    },
+    {
+      "title": "Suprimentos de Acampamento Remoto ({dest})",
+      "description": "Conexão logística para base temporária: transporte de {origin} para {dest} com {cargo_lbs} lbs de {cargo}."
     }
   ],
   "evacuacao_por_do_sol": [

@@ -3272,3 +3272,12 @@
 
 ## 2026-11-25 - Corte de isolado configurável (Claude)
 - `airport_profiles.py` aceita `ISOLADO_NM` (padrão 150, sem mudar o JSON) e imprime a contagem. Medição de 200 e 250 NM pendente no PC de casa. Script só conferido na sintaxe.
+
+## 2026-11-25 - Tipo de carga coerente e carga perigosa (CARGA-COERENTE) (Gemini)
+- `cargo_kinds.json` adicionado com catálogo de tipos de carga e classes de artigos perigosos (DGR) para 15 missões de carga.
+- `CargoKindCatalog` e `DangerousGoodsRules` implementados no Domain com sorteio determinístico por `StableSeed` (FNV-1a 32-bit) e ponderação por tags de origem e destino.
+- Bloqueio de manifesto operacional (`CheckManifest`) para cargas "somente cargueiro" (Cargo Aircraft Only) com passageiros a bordo integrado no `MainViewModel` (ao aceitar e ao iniciar voo).
+- `Mission` expandida com `CargoKind` e `CargoName` e migração de schema idempotente em `AppDbContext`.
+- `MissionDisplayItem` e `MissionsView.xaml` exibem resumo e sinalização de carga perigosa no pré-despacho.
+- `mission_texts.json` expandido com variantes dinâmicas usando marcadores `{cargo}` e `{cargo_note}`.
+- Testes unitários dedicados em `CargoKindCatalogTests` e snapshot golden atualizado exclusivamente nos títulos de missões de carga (59 registros, 0 divergências em demais campos).
