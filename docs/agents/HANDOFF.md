@@ -2,12 +2,13 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (10ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.141/1.141.
+**Última atualização:** 2026-11-25 (11ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.154/1.154.
 
 ## Feito nesta sessão
-- **Prazo do bônus de XP no quadro** (melhoria 2, saúde, fechada): `Domain/Xp/XpDeadline.cs` + linha "Prazo: +N XP com voo até …" no pré-despacho (vermelha em urgente/`Medica`, oculta em voo local). Testes `XpDeadlineTests`.
+- **Safra por estação** (melhoria 4, agro, fechada; `SAFRA-ESTACAO`, implementada pelo Gemini, revisão em `docs/reviews/SAFRA-ESTACAO-revisao.md`): `Domain/Missions/AgroSeason.cs` gera etiquetas `safra:plantio|colheita|entressafra` e `safra:mes:N` pelo relógio de carreira do piloto e pela latitude (hemisfério norte deslocado 6 meses); campo `season` no `mission_catalog.json` (aplicado depois do teto de 12); cargas de `insumos_agro` por fase e tipo novo `revisao_entressafra`; marcador `{safra}` nos textos de `insumos_agro`.
 
 ## Conferir no próximo voo (PC de casa)
+- Quadro de origem agro/fazenda: nota "Época de plantio/colheita da safra." ou "Entressafra: ..." na descrição de `insumos_agro`, coerente com a data do relógio de carreira (sul: set–dez plantio, jan–abr colheita, mai–ago entressafra).
 - Quadro: linha "Prazo: ..." acima da carga (vermelha em missão médica/urgente; some em voo local) e se o limite bate com o bônus no fim do voo. Linha "Carga: ..." no pré-despacho (âmbar se perigosa), títulos longos de carga, mensagem "Carga Perigosa" ao aceitar `carga_dgr`/`combustivel_tambor` junto com contrato de passageiros.
 - Instrução local saindo de SDCO/SBKP/SBMT com a área real do DECEA (nome no texto, ponto e faixa); coluna `nav-heading-true` e vento no CSV do REC; contrato de instrução local cumprido passando na faixa; linha "CONTRATO" do HUD (texto, quebra de linha, atualização); distâncias sorteadas do cheque e do paraquedismo.
 - Tipos novos da E2C-2: linha do HUD de cada modo, marcadores no mapa (SAR sem o alvo), conclusão e motivo de falha. Atenção ao teto "acima do solo" em terreno mais alto que a origem (é relativo à elevação da origem).
@@ -17,7 +18,7 @@
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
-1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): safra por estação (4), cliente recorrente (5), linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`); limpar cabeçalhos desatualizados dos planos (**Sonnet**).
+1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): cliente recorrente (5), linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`); limpar cabeçalhos desatualizados dos planos (**Sonnet**).
 2. HUD em modo tablet: spec (**Opus**), quando o usuário quiser começar.
 - Os 8 tipos da E2C que sobraram precisam de SimVar a conferir no MSFS ou de dados: `adaptacao_noturna`, `evacuacao_por_do_sol` e o pôr do sol da `saude_familia` (hora/sol e luzes), `pulverizacao` (AGL real), `demo_flight` (rolagem de decolagem de referência), `instrucao_ifr`, `calibracao_auxilios` (geometria de aproximação, auxílio sintonizado), `reboque_planador`, `publicidade_aerea` (reboque nativo). Um lote que acrescente `PLANE ALT ABOVE GROUND` e as SimVars de hora/sol pode ser especificado no escritório, mas só fecha com o teste no sim.
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".
@@ -30,7 +31,7 @@ Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
 - **Decisões abertas do usuário:** corte final de `isolado` (depois da medição em casa). Resolvidas em 2026-11-25 e mergeadas: CAN só em origem militar, peso de saúde 100, `saude_familia` abastece no destino, falência dos agressivos aceita, patrimônio e classe G encerradas.
-- **Autorizado, falta spec (Opus), uma por sessão:** melhorias 3, 4 e 5 de `docs/plans/missoes-locais-rp.md` › 3.1.
+- **Autorizado, falta spec (Opus), uma por sessão:** melhorias 3 e 5 de `docs/plans/missoes-locais-rp.md` › 3.1.
 
 ## Notas de trabalho
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.
