@@ -210,10 +210,13 @@ for s in range(0, len(aps), 2000):
         a['nm_other_big'] = float(near_other[k])
         a['poi_score'] = float(score[k])
 
+# ISOLADO_NM no ambiente permite medir um corte mais exigente sem editar o script
+ISOLADO_NM = float(os.environ.get('ISOLADO_NM', '150'))
 for a in aps:
-    if a['tier'] >= 3 and a['nm_big'] >= 150: a['tags'].add('isolado')
+    if a['tier'] >= 3 and a['nm_big'] >= ISOLADO_NM: a['tags'].add('isolado')
     elif a['tier'] >= 3 and a['nm_big'] >= 75: a['tags'].add('interior_distante')
-    if a['tier'] == 2 and a['nm_other_big'] >= 150: a['tags'].add('isolado')
+    if a['tier'] == 2 and a['nm_other_big'] >= ISOLADO_NM: a['tags'].add('isolado')
+print(f"isolado (>= {ISOLADO_NM:g} NM): {sum('isolado' in a['tags'] for a in aps)}")
 
 # limiar turístico global: top 3 % de pontuação de POIs entre os tier 2–4
 sc_vals = sorted(a['poi_score'] for a in aps if a['tier'] >= 2)
