@@ -182,5 +182,50 @@ namespace FlightCareer.Tests.Components
             var d = new TouchdownDetector(new LandingSettings { CrashFpm = 800 });
             Assert.Equal(TouchdownKind.Crash, Assert.Single(Approach(d, vs: -900)).Kind);
         }
+
+        /// <summary>Corrida no solo, <paramref name="airborneSec"/> no ar e contato a <paramref name="vs"/>.</summary>
+        private static TouchdownEvent TakeoffThenContact(double airborneSec, double vs)
+        {
+            var d = New();
+            var events = new List<TouchdownEvent>();
+            double t = 0;
+            for (; t < 5.0; t += Dt) if (d.Update(S(t, true)) is { } e) events.Add(e);
+            double liftoff = t;
+            for (; t < liftoff + airborneSec; t += Dt) if (d.Update(S(t, false, vs)) is { } e) events.Add(e);
+            for (int i = 0; i < 20; i++, t += Dt) if (d.Update(S(t, true)) is { } e) events.Add(e);
+            return Assert.Single(events);
+        }
+
+        [Fact]
+        public void TakeoffBounce_ShortHopAfterLiftoff_IsNotLanding()
+        {
+            // Voo de 2026-11-25 em SBJS: 1,5 s no ar depois de sair do chão e toque numa roda
+            var ev = TakeoffThenContact(1.5, vs: -158);
+            Assert.InRange(ev.AirborneSec, 1.4, 1.6);
+            Assert.True(TouchdownDetector.IsTakeoffBounce(ev, landedSinceTakeoff: false, new LandingSettings()));
+        }
+
+        [Fact]
+        public void TakeoffBounce_AfterLandingSinceTakeoff_IsRegularBounce()
+        {
+            // Quique depois de um pouso continua sendo quique de pouso (regra antiga)
+            var ev = TakeoffThenContact(1.5, vs: -158);
+            Assert.False(TouchdownDetector.IsTakeoffBounce(ev, landedSinceTakeoff: true, new LandingSettings()));
+        }
+
+        [Fact]
+        public void TakeoffBounce_LongFlight_IsLanding()
+        {
+            var ev = TakeoffThenContact(20.0, vs: -300);
+            Assert.False(TouchdownDetector.IsTakeoffBounce(ev, landedSinceTakeoff: false, new LandingSettings()));
+        }
+
+        [Fact]
+        public void TakeoffBounce_WindowComesFromSettings()
+        {
+            var ev = TakeoffThenContact(5.0, vs: -200);
+            Assert.True(TouchdownDetector.IsTakeoffBounce(ev, false, new LandingSettings()));
+            Assert.False(TouchdownDetector.IsTakeoffBounce(ev, false, new LandingSettings { TakeoffBounceMaxAirborneSec = 4.0 }));
+        }
     }
 }

@@ -20,10 +20,14 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private string _initialBaseICAO = string.Empty;
         [ObservableProperty] private DifficultyMode _selectedDifficulty = DifficultyMode.Easy;
 
-        public CreatePilotViewModel(IPilotRepository pilotRepository, Infrastructure.Persistence.AppDbContext context)
+        private readonly Infrastructure.Services.PartMigrationService _partProvisioner;
+
+        public CreatePilotViewModel(IPilotRepository pilotRepository, Infrastructure.Persistence.AppDbContext context,
+            Infrastructure.Services.PartMigrationService partProvisioner)
         {
             _pilotRepository = pilotRepository;
             _context = context;
+            _partProvisioner = partProvisioner;
             CreateCommand = new AsyncRelayCommand(CreatePilotAsync);
         }
 
@@ -101,6 +105,8 @@ namespace FlightCareer.UI.ViewModels
                     InterdictionReason = string.Empty,
                     Configuration = "Passageiro"
                 };
+                // Peças já na criação (como na compra): sem elas o 1º voo usa o desgaste antigo e o Hangar mostra %
+                await ProvisionStartingPartsAsync(startingAircraft, c152.Model);
                 pilot.Hangar.Add(startingAircraft);
                 pilot.ActiveAircraftId = startingAircraft.Id;
             }
@@ -109,6 +115,31 @@ namespace FlightCareer.UI.ViewModels
             await _pilotRepository.SaveChangesAsync();
 
             RequestClose?.Invoke();
+        }
+
+        private async Task ProvisionStartingPartsAsync(PilotAircraft aircraft, string model)
+        {
+            var profile = await _context.AircraftLimitProfiles
+                .FirstOrDefaultAsync(p => p.AircraftTypeModel.ToLower() == model.ToLower());
+            if (profile == null)
+            {
+                // A abertura do app (AircraftPartProvisioner) ainda cria as peças depois
+                System.Diagnostics.Debug.WriteLine($"[Peças] Sem perfil de limites para '{model}': avião inicial criado sem peças.");
+                return;
+            }
+
+            var features = new System.Collections.Generic.List<string>();
+            try
+            {
+                features = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<string>>(profile.FeaturesJson) ?? new();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao ler FeaturesJson de '{model}': {ex.Message}");
+            }
+
+            _partProvisioner.ProvisionPurchasedAircraft(aircraft, features, profile.EngineCount,
+                aircraft.EngineCondition, aircraft.TiresCondition, aircraft.AirframeCondition, aircraft.AvionicsCondition);
         }
 
         private string GeneratePrefixByCountry(string countryCode)

@@ -53,7 +53,9 @@
     "contactWindowBeforeSec": 1.0,
     "contactWindowAfterSec": 0.5,
     "minAirborneSec": 0.5,
-    "traceBeforeSec": 2.0
+    "traceBeforeSec": 2.0,
+    // Contato até 8 s depois de sair do chão, sem pouso antes: quique na decolagem (não é pouso; dano só se duro)
+    "takeoffBounceMaxAirborneSec": 8.0
   },
 
   // Limites padrão por classe de motor (sobrescritos por modelo em "aircraftOverrides")

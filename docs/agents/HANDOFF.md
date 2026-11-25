@@ -2,7 +2,7 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25, Claude, PC de casa (com MSFS e Little Navmap). Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.059/1.059. Correções do voo de teste commitadas em `fix/aviso-fim-de-voo` e mergeadas na base.
+**Última atualização:** 2026-11-25, Claude, PC de casa (com MSFS e Little Navmap). Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.063/1.063. Correções commitadas e mergeadas na base.
 
 ## Voo de teste (instrução local SBJS, C152 PR-NRI, 07:36–07:56)
 | Item | Resultado |
@@ -16,19 +16,23 @@
 
 Fora da lista:
 - **$0 com qualidade 100 %:** correto pela regra; 0 de 3 TGL (no ar de 07:42:41 até o pouso final às 07:56:30). Qualidade não entra no pagamento. A posição passou a 2,0 NM do centro da área (raio 3 NM). A tela não dizia o motivo: corrigido.
-- **Decolagem difícil:** sem pane (nenhuma falha no log, `AircraftDefects` vazio, magnetos/RPM normais, desgaste inicial ~100 %). Causa provável: vento. Estimado por rumo × trajetória × TAS (o vento não é gravado): ~065° verdadeiro, ~20 kt a 10–300 ft; través ~20 kt (C152 demonstrado: 12 kt). 1ª tentativa (pista 13, través da esquerda, proa ~7–9 kt): roda esquerda levantou, decolagem abortada. 2ª (pista 31, través da direita, cauda ~6–9 kt): manche puxado a ~26 KIAS, sem aileron para o vento.
+- **Decolagem difícil:** sem pane. Vento real, reestimado sem usar a proa (GS gravada × trilha verdadeira, resíduo 4–6 kt): ~20 kt de ~070° verdadeiro de 0 a 1.500 ft, ~30 kt acima. Saída do chão (proa ~349° mag.) e pouso com cauda de ~6–15 kt e través forte. O usuário viu 9 kt / "sem vento" na tela do sim: a blackbox agora grava `WindDirDeg;WindKt` (`AMBIENT WIND *`) para comparar no próximo voo.
 - **Área de instrução no HUD, texto do contrato no briefing, textos cortados de célula/motor/pneus:** corrigidos; **não conferidos na tela** (o app estava aberto; recompilar e abrir).
 
-## Bugs achados, não corrigidos
-1. **Quique na decolagem vira pouso:** 1,5 s no ar + 0,36 s numa roda foi registrado como toque (158 fpm, 33 fps lateral) e levou trem 100 → 66,5 % e pneus 100 → 57,9 %. O FPM da qualidade também saiu dele. Envolve `TouchdownDetector`/`FlightMonitor` (arquivo quente). Decisão do usuário: regra (ex.: ignorar toque nos primeiros segundos após a decolagem × manter o dano lateral) e se restaura a saúde do PR-NRI (editar o banco, app fechado, com cópia).
-2. **Vento de través errado:** `SimTelemetry.CrosswindComponentKnots`/`TailwindComponentKnots` subtraem proa **magnética** de direção do vento **verdadeira** (conferir no SDK); em SBJS o erro é de ~22°. Afeta o bônus STOL e outros usos.
-3. A blackbox e o REC não gravam vento (acrescentar ajudaria o diagnóstico).
+## Corrigido em 2026-11-25 (não testado no MSFS)
+- Quique na decolagem não é pouso: contato até 8 s depois de sair do chão, sem pouso antes; dano só se duro (≥ 400 fpm). Evento `QUIQUE_DECOLAGEM` na blackbox.
+- Avião inicial nasce com peças (Hangar com ícones desde o início).
+- Banco apagado a pedido do usuário (carreira de testes recomeça; cópia em `db-backup/flightcareer.db.bak-20261125` (com -shm e -wal), na pasta de saída do UI).
+
+## Bugs em aberto
+1. **Vento de través errado:** `SimTelemetry.CrosswindComponentKnots`/`TailwindComponentKnots` subtraem proa **magnética** (`PLANE HEADING DEGREES MAGNETIC`) de direção do vento **verdadeira** (`AMBIENT WIND DIRECTION`); em SBJS o erro é de ~22°. Correção: acrescentar `PLANE HEADING DEGREES TRUE` no fim do `SimTelemetry` e do `AddToDef` (arquivos quentes). Afeta bônus STOL e XP de vento cruzado.
+2. O REC (sensor-logs) não grava vento nem proa.
 
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa (sessão nova, PC de casa)
-1. Continuar o voo de teste: triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
+1. Criar a carreira nova (base SBJS, C152) e conferir o Hangar com ícones. Continuar o voo de teste: triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`; no REC de hoje a SimVar ficou em ~99–100 sem pane); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.

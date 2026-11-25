@@ -64,6 +64,7 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         private bool _isAirborne;
         private bool _hasTouchedDown;
+        private DateTime _liftoffTime = DateTime.MinValue;
         private double _simulatedFlightTimeSeconds = 0;
         private DateTime _lastTick = DateTime.MinValue;
         private DateTime? _startConditionTime;
@@ -1353,6 +1354,7 @@ namespace FlightCareer.UI.Services
             {
                 _isAirborne = true;
                 _hasTouchedDown = false;
+                _liftoffTime = DateTime.Now;
                 _infractionTracker.OnTakeoff(data.IsLandingLightOn, data.IsTaxiLightOn);
                 _currentStatus = data.IsEngineRunning ? "VOANDO" : "VOANDO (PLANANDO / MOTOR CORTADO)";
                 OnStatusChanged?.Invoke(_currentStatus);
@@ -1366,7 +1368,13 @@ namespace FlightCareer.UI.Services
                 double touchdownRate = fpmBody > 10 ? fpmBody : fpmVs;
 
                 // Com a leitura rápida ativa, o toque e o bounce são registrados em OnFastFlight (medidos no contato)
-                if (!_hasTouchedDown && !FastStreamAlive)
+                // Sem leitura rápida não há tempo de contato: logo depois de sair do chão é quique na decolagem, não pouso
+                bool inTakeoffBounceWindow = (DateTime.Now - _liftoffTime).TotalSeconds < _catalog.Landing.TakeoffBounceMaxAirborneSec;
+                if (!_hasTouchedDown && !FastStreamAlive && inTakeoffBounceWindow)
+                {
+                    // espera: se continuar no solo depois da janela, conta como pouso
+                }
+                else if (!_hasTouchedDown && !FastStreamAlive)
                 {
                     _hasTouchedDown = true;
                     _qualityService.RecordTouchdownFpm(touchdownRate);
@@ -1491,6 +1499,15 @@ namespace FlightCareer.UI.Services
                 return;
             }
 
+            // Quique logo depois de sair do chão: não é pouso (contagem, ciclo, qualidade, XP); só o impacto duro causa dano
+            if (_isAirborne && TouchdownDetector.IsTakeoffBounce(ev, _hasTouchedDown, _catalog.Landing))
+            {
+                _telemetryLogger.LogEvent("QUIQUE_DECOLAGEM", string.Format(inv, "{0}, {1:F1} s no ar: não conta como pouso", summary, ev.AirborneSec));
+                _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
+                if (_lastData is { } bounceData) RegisterTakeoffBounceImpact(ev, bounceData);
+                return;
+            }
+
             _telemetryLogger.LogEvent("TOQUE", summary);
             _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
             _flightTouchdowns++;
@@ -1517,6 +1534,22 @@ namespace FlightCareer.UI.Services
                 _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
+        }
+
+        /// <summary>
+        /// Quique na decolagem: sem pouso, ciclo, luzes de pouso ou qualidade. Só a razão de descida entra no dano
+        /// (as regras de pouso duro só atuam acima do limite); deriva lateral e atitude ficam de fora.
+        /// </summary>
+        private void RegisterTakeoffBounceImpact(TouchdownEvent ev, SimTelemetry data)
+        {
+            if (_aircraft == null) return;
+            _failures.ProcessLanding(ev.TouchdownFpm, 0.0, data.IsWetOrContaminatedSurface);
+            if (_parts.IsActive)
+            {
+                _parts.ProcessTouchdown(ev.TouchdownFpm, null, null, null, isBounce: true);
+                _parts.SyncComponents(_aircraft, _failures.Components);
+            }
+            SyncLegacyConditions();
         }
 
         private void UpdateLandingEnvironmentSnapshot()

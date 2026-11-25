@@ -32,7 +32,8 @@ namespace FlightCareer.Domain.Components
         double GroundSpeedKnots,
         double ContactTimeSec,
         string Reason,
-        IReadOnlyList<FastFlightSample> Trace);
+        IReadOnlyList<FastFlightSample> Trace,
+        double AirborneSec = double.NaN);
 
     /// <summary>
     /// Detecta cada contato com o solo (ar → solo) e classifica Normal ou Crash pelos limites do catálogo
@@ -48,6 +49,7 @@ namespace FlightCareer.Domain.Components
         private readonly LandingSettings _settings;
         private readonly List<FastFlightSample> _buffer = new();
         private double? _contactTime;
+        private double _contactAirborneSec = double.NaN;
         private double _airborneSince = double.NaN;
         private bool _wasOnGround = true;
         private bool _hasSample;
@@ -61,9 +63,21 @@ namespace FlightCareer.Domain.Components
         {
             _buffer.Clear();
             _contactTime = null;
+            _contactAirborneSec = double.NaN;
             _airborneSince = double.NaN;
             _wasOnGround = true;
             _hasSample = false;
+        }
+
+        /// <summary>
+        /// Quique na decolagem: contato pouco depois de sair do chão, sem pouso desde a decolagem.
+        /// Não conta como pouso (nem ciclo, qualidade ou TGL); só a razão de descida pode causar dano.
+        /// Sem o tempo no ar medido, não é quique.
+        /// </summary>
+        public static bool IsTakeoffBounce(TouchdownEvent ev, bool landedSinceTakeoff, LandingSettings settings)
+        {
+            if (ev == null || settings == null || landedSinceTakeoff) return false;
+            return !double.IsNaN(ev.AirborneSec) && ev.AirborneSec < settings.TakeoffBounceMaxAirborneSec;
         }
 
         /// <summary>Recebe uma amostra; devolve o evento quando a janela depois do contato fecha.</summary>
@@ -90,6 +104,7 @@ namespace FlightCareer.Domain.Components
                      && !double.IsNaN(_airborneSince) && s.TimeSec - _airborneSince >= _settings.MinAirborneSec)
             {
                 _contactTime = s.TimeSec;
+                _contactAirborneSec = s.TimeSec - _airborneSince;
             }
             _wasOnGround = s.OnGround;
 
@@ -155,7 +170,8 @@ namespace FlightCareer.Domain.Components
             var trace = _buffer.Where(x => x.TimeSec >= contact - _settings.TraceBeforeSec && x.TimeSec <= contact + _settings.ContactWindowAfterSec).ToList();
 
             return new TouchdownEvent(kind, Math.Round(fpm, 0), Math.Round(peakG, 2), Math.Round(signedNose, 1), Math.Round(bank, 1),
-                Math.Round(atContact.GroundSpeedKnots, 1), contact, string.Join("; ", reasons), trace);
+                Math.Round(atContact.GroundSpeedKnots, 1), contact, string.Join("; ", reasons), trace,
+                Math.Round(_contactAirborneSec, 2));
         }
     }
 }
