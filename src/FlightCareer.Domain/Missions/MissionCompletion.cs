@@ -71,7 +71,14 @@ namespace FlightCareer.Domain.Missions
                 {
                     if (visitedWaypoints == null || !visitedWaypoints.Contains(wp.Ident))
                     {
-                        missing.Add(wp.Ident);
+                        if (wp.MinAglFt > 0)
+                        {
+                            missing.Add($"{wp.Ident} (voe entre {wp.MinAglFt:N0} e {wp.MaxAglFt:N0} ft acima da origem)");
+                        }
+                        else
+                        {
+                            missing.Add(wp.Ident);
+                        }
                     }
                 }
 

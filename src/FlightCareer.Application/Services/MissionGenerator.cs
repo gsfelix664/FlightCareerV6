@@ -406,9 +406,9 @@ namespace FlightCareer.Application.Services
             string altBand = $"{altBase:N0} a {altTop:N0} ft AGL";
 
             string areaIdent = $"Área de instrução {dir}";
-            string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, 6000.0);
+            string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, altTop, altBase);
 
-            int tgl = random.Next(1, 4);
+            int tgl = random.Next(1, 3);
             double totalDist = Math.Round((2.0 * distToArea) + 10.0, 0);
             string maneuvers = PickManeuvers(random);
 
@@ -495,7 +495,7 @@ namespace FlightCareer.Application.Services
             string altBand = $"{altBase:N0} a {altTop:N0} ft AGL";
 
             string areaIdent = $"Área de instrução {dir}";
-            string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, 6000.0);
+            string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, altTop, altBase);
 
             int tgl = 2;
             double totalDist = Math.Round((2.0 * distToArea) + 10.0, 0);

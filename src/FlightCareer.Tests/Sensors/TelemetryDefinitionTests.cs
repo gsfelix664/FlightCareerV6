@@ -108,6 +108,36 @@ namespace FlightCareer.Tests.Sensors
             }
         }
 
+        [Fact]
+        public void SimTelemetry_Vento_UsaProaVerdadeira()
+        {
+            var telemetry = new SimTelemetry
+            {
+                AmbientWindDirection = 90.0,
+                AmbientWindVelocity = 10.0,
+                PlaneHeadingTrue = 90.0,
+                PlaneHeading = 112.0 // Magnética com declinação
+            };
+
+            Assert.True(Math.Abs(telemetry.CrosswindComponentKnots) < 0.001);
+            Assert.True(Math.Abs(telemetry.TailwindComponentKnots - (-10.0)) < 0.001);
+        }
+
+        [Fact]
+        public void SimTelemetry_Vento_Traves90Graus()
+        {
+            var telemetry = new SimTelemetry
+            {
+                AmbientWindDirection = 180.0,
+                AmbientWindVelocity = 10.0,
+                PlaneHeadingTrue = 90.0,
+                PlaneHeading = 70.0
+            };
+
+            Assert.True(Math.Abs(telemetry.CrosswindComponentKnots - 10.0) < 0.001);
+            Assert.True(Math.Abs(telemetry.TailwindComponentKnots) < 0.001);
+        }
+
         private static string[] ReadAircraftDataDatums()
         {
             string source = File.ReadAllText(FindSimConnectService());

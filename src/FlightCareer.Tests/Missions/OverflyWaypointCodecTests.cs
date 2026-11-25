@@ -115,5 +115,31 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal(-22.5, items[0].Lat);
             Assert.Equal(1.5, items[0].RadiusNm);
         }
+
+        [Fact]
+        public void Codec_MinAgl_IdaEVolta()
+        {
+            string wpCoord = OverflyWaypointCodec.FormatCoordinatePoint("Área Norte", -23.1, -46.5, 3.0, 4500.0, 2500.0);
+            var parsedCoord = OverflyWaypointCodec.Parse(wpCoord);
+            Assert.Single(parsedCoord);
+            Assert.Equal("Área Norte", parsedCoord[0].Ident);
+            Assert.Equal(3.0, parsedCoord[0].RadiusNm);
+            Assert.Equal(4500.0, parsedCoord[0].MaxAglFt);
+            Assert.Equal(2500.0, parsedCoord[0].MinAglFt);
+
+            var item = new OverflyWaypointItem("Área Sul", false, -23.5, -46.8, 3.5, 5000.0, 3000.0);
+            string formatted = OverflyWaypointCodec.Format(new[] { item });
+            var parsedFormat = OverflyWaypointCodec.Parse(formatted);
+            Assert.Single(parsedFormat);
+            Assert.Equal("Área Sul", parsedFormat[0].Ident);
+            Assert.Equal(3.5, parsedFormat[0].RadiusNm);
+            Assert.Equal(5000.0, parsedFormat[0].MaxAglFt);
+            Assert.Equal(3000.0, parsedFormat[0].MinAglFt);
+
+            string wpOld = "P:Ponto Antigo@-23.0,-46.0,2.5,4000";
+            var parsedOld = OverflyWaypointCodec.Parse(wpOld);
+            Assert.Single(parsedOld);
+            Assert.Equal(0.0, parsedOld[0].MinAglFt);
+        }
     }
 }

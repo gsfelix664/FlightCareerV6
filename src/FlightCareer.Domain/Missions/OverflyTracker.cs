@@ -9,6 +9,8 @@ namespace FlightCareer.Domain.Missions
     /// </summary>
     public sealed class OverflyTracker
     {
+        public const double AltitudeToleranceFt = 500.0;
+
         private readonly List<OverflyPoint> _targets = new();
         private readonly HashSet<string> _visited = new(StringComparer.OrdinalIgnoreCase);
 
@@ -47,11 +49,25 @@ namespace FlightCareer.Domain.Missions
                 if (_visited.Contains(point.Ident)) continue;
 
                 double distNM = CalculateDistanceNM(currentLat, currentLon, point.Latitude, point.Longitude);
-                double maxAllowedAltitudeFt = point.ElevationFt + point.MaxAglFt;
-
-                if (distNM <= point.RadiusNm && currentAltitudeFt <= maxAllowedAltitudeFt)
+                if (distNM <= point.RadiusNm)
                 {
-                    _visited.Add(point.Ident);
+                    if (point.MinAglFt > 0.0)
+                    {
+                        double minAllowedAlt = point.ElevationFt + point.MinAglFt - AltitudeToleranceFt;
+                        double maxAllowedAlt = point.ElevationFt + point.MaxAglFt + AltitudeToleranceFt;
+                        if (currentAltitudeFt >= minAllowedAlt && currentAltitudeFt <= maxAllowedAlt)
+                        {
+                            _visited.Add(point.Ident);
+                        }
+                    }
+                    else
+                    {
+                        double maxAllowedAltitudeFt = point.ElevationFt + point.MaxAglFt;
+                        if (currentAltitudeFt <= maxAllowedAltitudeFt)
+                        {
+                            _visited.Add(point.Ident);
+                        }
+                    }
                 }
             }
         }

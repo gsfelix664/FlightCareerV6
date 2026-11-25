@@ -29,3 +29,8 @@ Limites honestos: não existe base aberta global de escolas de voo nem de zonas 
 5. **Executiva / VIP:** destinos com resort, centro de negócios ou evento (pontos turísticos do banco novo) e nome de cliente fictício recorrente (fidelidade).
 6. **Carga:** tipo de carga coerente com o destino (porto, mina, polo industrial) e restrição de carga perigosa.
 7. **Translado (3.5.3, 1.3.3):** destino em aeródromo com oficina (`MaintenanceHubs`).
+
+## 4. Decisões do usuário (2026-11-25)
+- Instrução local pede 1 ou 2 TGL (3 era demais). `circuito_tgl` não mudou.
+- A faixa de altitude da área de instrução é cobrada, sem muita precisão: folga de 500 ft, medida acima da elevação da origem; vale também para o cheque prático.
+- Áreas de instrução do simulador na inicialização do banco: verificado que o SimConnect não expõe espaço aéreo nem área de treinamento (tipos de facility: aeroportos, waypoints, NDB, VOR e filhos; conferido na DLL do projeto e na documentação do SDK). Continua a decisão do híbrido (fonte externa com licença compatível, ex. openAIP, quando houver; procedural no resto).

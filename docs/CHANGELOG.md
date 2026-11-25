@@ -3206,3 +3206,12 @@
 - Blackbox grava `WindDirDeg;WindKt` (`AMBIENT WIND *`) no fim da linha.
 - Vento do voo de SBJS reestimado sem usar a proa (GS gravada × trilha verdadeira): ~20 kt de ~070° verdadeiro de 0 a 1.500 ft (resíduo 4–6 kt), consistente por faixa de altura. Decolagem (proa ~349° mag.) e pouso com cauda de ~6–15 kt (GS − IAS; o IAS do C152 lê baixo em baixa velocidade). O vento existiu; o cálculo de través do app (proa magnética × vento verdadeiro) continua errado.
 - Build 0 erros; testes 1.063/1.063. Não testado no MSFS.
+
+## 2026-11-25 - Vento de través, vento no REC e faixa de altitude da instrução (VOO-VENTO-INSTRUCAO) (Gemini)
+- `SimTelemetry`: adicionado `PlaneHeadingTrue` no final do struct (espelhado com `PLANE HEADING DEGREES TRUE` no `SimConnectService.cs`); `CrosswindComponentKnots` e `TailwindComponentKnots` passam a usar a proa verdadeira, eliminando distorção por declinação magnética.
+- `sensor_registry.json`: adicionadas variáveis `amb-wind-velocity`, `amb-wind-direction`, `nav-heading-true` e `nav-heading-magnetic` (grupo `airframe`) para gravação no REC.
+- `OverflyWaypointCodec` e `OverflyPoint`: adicionado parâmetro opcional `MinAglFt` (codec aceita 5º campo `minAglFt`).
+- `OverflyTracker`: introduzida tolerância `AltitudeToleranceFt = 500.0`. Quando `MinAglFt > 0`, valida faixa `[Elev + MinAglFt - 500, Elev + MaxAglFt + 500]`.
+- `MissionGenerator`: instrução local ajustada para 1 a 2 TGL (`random.Next(1, 3)`) e waypoint com `altTop`/`altBase`; cheque prático com waypoint na faixa de altitude.
+- `MissionCompletion`: detalhamento do motivo de não cumprimento de ponto quando houver `MinAglFt > 0`.
+- Documentação atualizada em `docs/plans/missoes-locais-rp.md`, `docs/sistemas/missoes-quadro.md` e `docs/sistemas/sensores.md`.

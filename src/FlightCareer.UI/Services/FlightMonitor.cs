@@ -759,14 +759,14 @@ namespace FlightCareer.UI.Services
                                 var airp = wpContext.Airports.AsNoTracking().FirstOrDefault(a => a.ICAO == item.Ident);
                                 if (airp != null && !wpList.Any(p => p.Ident.Equals(airp.ICAO, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    wpList.Add(new OverflyPoint(airp.ICAO, airp.Latitude, airp.Longitude, airp.ElevationFt, item.RadiusNm, item.MaxAglFt));
+                                    wpList.Add(new OverflyPoint(airp.ICAO, airp.Latitude, airp.Longitude, airp.ElevationFt, item.RadiusNm, item.MaxAglFt, item.MinAglFt));
                                 }
                             }
                             else if (item.Lat.HasValue && item.Lon.HasValue)
                             {
                                 if (!wpList.Any(p => p.Ident.Equals(item.Ident, StringComparison.OrdinalIgnoreCase)))
                                 {
-                                    wpList.Add(new OverflyPoint(item.Ident, item.Lat.Value, item.Lon.Value, originElev, item.RadiusNm, item.MaxAglFt));
+                                    wpList.Add(new OverflyPoint(item.Ident, item.Lat.Value, item.Lon.Value, originElev, item.RadiusNm, item.MaxAglFt, item.MinAglFt));
                                 }
                             }
                         }

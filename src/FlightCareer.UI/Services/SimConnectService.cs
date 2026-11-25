@@ -314,6 +314,7 @@ namespace FlightCareer.UI.Services
                 AddToDef("STALL WARNING", "Bool");
                 AddToDef("LIGHT LANDING", "Bool");
                 AddToDef("LIGHT TAXI", "Bool");
+                AddToDef("PLANE HEADING DEGREES TRUE", "degrees");
 
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 

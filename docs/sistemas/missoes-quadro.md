@@ -11,7 +11,7 @@
   - Bases de dados geográficos em `Data/places/` (`tourist_pois.json`, `training_aerodromes.json`, `dropzones.json`, `scenic_aerodromes.json`) integradas via `PlacesDataService`.
   - Tipos com regras e rastreadores dedicados (`Domain/Missions/`):
     - Voo panorâmico e translado básico: sobrevoo de waypoints (`OverflyTracker`) usando formato de coordenadas `P:<nome>@<lat>,<lon>` (`OverflyWaypointCodec`) e POIs reais.
-    - Circuitos de instrução: máquina de estados de toques e arremetidas (`TouchAndGoCounter`).
+    - Circuitos de instrução: máquina de estados de toques e arremetidas (`TouchAndGoCounter`). Instrução local pede 1 ou 2 TGL e cheque prático pede 2 TGL, ambos cobrando faixa de altitude da área de instrução (`OverflyTracker` com folga de ±500 ft).
     - SAE e aerofotogrametria (`SurveyLegTracker`): varredura em pernas paralelas sobre área orientada dentro de tolerâncias de rumo, velocidade e altitude.
     - Lançamento de paraquedistas (`SkydiveDropTracker`): subida e estabilização de 30 s sobre a zona de salto (`dropzones.json`) e monitoramento de choque térmico na descida.
     - Multi-etapas (`MultiStopTracker`): escalas intermediárias com pouso completo ou toque e arremetida (`pinga_pinga`, `navegacao_vfr`), sem reabastecimento não autorizado.
