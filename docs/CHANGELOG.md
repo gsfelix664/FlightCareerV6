@@ -3286,3 +3286,14 @@
 - `Domain/Xp/XpDeadline.cs`: limites do bônus de prazo antes do voo, com a mesma regra do `XpCalculator` › 5.3 (ETE = distância ÷ cruzeiro + `EteFixedBufferMinutes`; ≤ 90 % → +30/+60 XP; ≤ 115 % → +15 XP). Nulo em voo local.
 - Pré-despacho (`MissionDisplayItem.DeadlineSummary`, `MissionsView.xaml`): linha "Prazo: +N XP com voo até …", vermelha em missão urgente ou do quadro `Medica`. Melhoria 2 (saúde) do `missoes-locais-rp.md` fechada.
 - Testes `XpDeadlineTests`. 1.141/1.141. Não conferido no app (só build).
+
+## 2026-11-25 - Safra por estação nas missões agro (SAFRA-ESTACAO) (Gemini)
+- `Domain/Missions/AgroSeason.cs`: cálculo das fases da safra (Plantio, Colheita, Entressafra) baseado no mês equivalente austral (invertido por 6 meses para latitude >= 0) e relógio de carreira do piloto.
+- Geração de etiquetas dinâmicas `safra:<fase>` e `safra:mes:<m>` e nota textual contextual para briefings.
+- `MissionDefinition` e `MissionWeighting.OriginWeight`: campo `Season` desserializado do catálogo (`mission_catalog.json`) e aplicado aos pesos de origem após o teto de 12 e ajuste de bases militares.
+- `mission_catalog.json`: pesos de safra calibrados para `insumos_agro`, `agro_executivo`, `translado_piloto_agricola` e `pulverizacao`.
+- `cargo_kinds.json`: tags de safra adicionadas às cargas de `insumos_agro` e novo tipo `revisao_entressafra` (peso base 0, favorecido na entressafra).
+- `mission_texts.json`: marcador `{safra}` adicionado nas descrições de `insumos_agro`.
+- `MissionBoardCore.GenerateBoard`: aceita parâmetro opcional `seasonDate`, mescla tags dinâmicas sem poluir o cache e injeta `{safra}` nos textos.
+- Integração de `seasonDate` em `MissionGenerator.GenerateMissionsAsync` (lendo `CareerClockUtc` do piloto), `GenerateMissionsInMemory` e `CareerProgressionSimulator`.
+- Testes unitários dedicados em `AgroSeasonTests` (11 testes) e teste `CargoKindCatalogTests.LoadDefault_EtiquetasExistemNosPerfis` atualizado para aceitar etiquetas dinâmicas de safra.

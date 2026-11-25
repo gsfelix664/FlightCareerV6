@@ -386,15 +386,15 @@
   "insumos_agro": [
     {
       "title": "Insumos e Peças Agrícolas ({dest})",
-      "description": "Insumos e Peças Agrícolas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para lavoura."
+      "description": "Insumos e Peças Agrícolas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para lavoura.{safra}"
     },
     {
       "title": "Apoio Agrícola: {cargo} ({dest})",
-      "description": "Remessa urgente para safra: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para apoio ao campo."
+      "description": "Remessa urgente para safra: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para apoio ao campo.{safra}"
     },
     {
       "title": "Suprimento de Insumos Rurais ({dest})",
-      "description": "Logística agropecuária de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} para produtores locais."
+      "description": "Logística agropecuária de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} para produtores locais.{safra}"
     }
   ],
   "suprimentos_remotos": [

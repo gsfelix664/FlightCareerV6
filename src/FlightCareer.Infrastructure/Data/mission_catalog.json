@@ -1815,6 +1815,10 @@
         "agro": 3,
         "fazenda": 3
       },
+      "season": {
+        "safra:colheita": 1.4,
+        "safra:entressafra": 0.8
+      },
       "civilAtMilitaryBase": true,
       "destination": {
         "rule": "standard",
@@ -3506,6 +3510,11 @@
         "agro": 4,
         "fazenda": 4
       },
+      "season": {
+        "safra:plantio": 1.6,
+        "safra:colheita": 1.2,
+        "safra:entressafra": 0.6
+      },
       "civilAtMilitaryBase": true,
       "destination": {
         "rule": "standard",
@@ -4339,6 +4348,10 @@
         "agro:pulverizacao": 6,
         "fazenda": 4,
         "agro": 3
+      },
+      "season": {
+        "safra:plantio": 1.4,
+        "safra:entressafra": 0.4
       },
       "civilAtMilitaryBase": true,
       "destination": {
@@ -5352,6 +5365,11 @@
       "originProfiles": {
         "agro:pulverizacao": 4,
         "fazenda": 3
+      },
+      "season": {
+        "safra:plantio": 1.5,
+        "safra:colheita": 1.2,
+        "safra:entressafra": 0.5
       },
       "civilAtMilitaryBase": true,
       "destination": {

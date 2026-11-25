@@ -35,7 +35,7 @@ Os perfis de aeroporto (`places/airport_profiles.json`, feitos depois desta list
 - **1 Navegação: feito.** `navegacao_vfr` usa `vfr_triangle` (triângulo, ida e volta, triângulo com TGL; `MultiStopTracker`).
 - **7 Translado: feito.** `translado_manutencao` e `ferry_permit` preferem destino com perfil `mro` (peso 6).
 - **2 Saúde: feito (2026-11-25, prazo no quadro com `XpDeadline`).** Destinos com `saude:hospital_referencia`/`saude:orgaos` (peso 100); o XP já tem bônus de prazo (≤ 90 % do ETE + 15 min, maior em missão urgente ou do quadro `Medica`, `XpCalculator` › 5.3). Falta só **mostrar o prazo no quadro** (o quadro mostra o ETE puro, sem a folga de 15 min nem o bônus).
-- **4 Agro:** destinos `fazenda`/`agro` feitos; falta **safra por estação** (`CareerClock` existe).
+- **4 Agro: feito (2026-11-25, SAFRA-ESTACAO).** Destinos `fazenda`/`agro` e safra por estação do ano via relógio de carreira e latitude da origem (`AgroSeason`), influenciando peso de contratos, tipos de carga e notas no texto.
 - **5 Executiva:** destinos `executivo:lazer`/turísticos feitos; falta o **cliente recorrente** (fidelidade).
 - **6 Carga: feito (2026-11-25, `CARGA-COERENTE`).** `Data/cargo_kinds.json` sorteia o tipo de carga pelos perfis da origem/destino (marcadores `{cargo}`/`{cargo_note}`, colunas `CargoKind`/`CargoName`); classes ONU de carga perigosa, e as "somente cargueiro" (1.1D, 3, 9 UN3480) bloqueiam aceite e início de voo com passageiros no manifesto. Falta conferir no app (painel e mensagens).
 - **3 Linha aérea:** nada feito; maior das sete (dados OpenFlights, licença ODbL com atribuição e compartilhamento pelo mesmo termo).

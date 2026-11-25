@@ -314,7 +314,8 @@ namespace FlightCareer.Application.Simulation
                                             apRnd,
                                             simulatedDate,
                                             countOverride: 80,
-                                            payMultiplier: diffEcon.PayMultiplier);
+                                            payMultiplier: diffEcon.PayMultiplier,
+                                            seasonDate: simulatedDate);
                                         missionCache[cacheKey] = availableMissions;
                                     }
 
@@ -339,7 +340,7 @@ namespace FlightCareer.Application.Simulation
                                         if (!missionCache.TryGetValue(key, out var list))
                                         {
                                             int seedAp = unchecked((StableHash(ap.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
-                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier);
+                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier, seasonDate: simulatedDate);
                                             missionCache[key] = list;
                                         }
                                         return list;
