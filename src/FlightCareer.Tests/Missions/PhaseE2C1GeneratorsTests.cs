@@ -128,7 +128,7 @@ namespace FlightCareer.Tests.Missions
 
             var rnd = new Random(77);
             var mission = MissionGenerator.CreateCheckFlightMissionSync(
-                origin, def, rnd, DateTime.Now, paxCount: 1);
+                origin, def, rnd, DateTime.Now, 30.0, paxCount: 1);
 
             Assert.NotNull(mission);
             Assert.Equal(origin.ICAO, mission.DestinationICAO);
@@ -174,7 +174,7 @@ namespace FlightCareer.Tests.Missions
             // Testando com perfil de 18 pax (salto em grupo grande)
             var rnd = new Random(55);
             var mission = MissionGenerator.CreateSkydiveMissionSync(
-                origin, def, rnd, DateTime.Now, paxOverride: 18);
+                origin, def, rnd, DateTime.Now, 25.0, paxOverride: 18);
 
             Assert.Equal(18, mission.PassengerCount);
             // 18 pax * ~30.8 lbs = ~555 lbs
@@ -199,6 +199,168 @@ namespace FlightCareer.Tests.Missions
             var wrongDest = MissionCompletion.Evaluate(mission, "SBKP");
             Assert.False(wrongDest.IsCompleted);
             Assert.Contains("SBRJ", wrongDest.Reason);
+        }
+
+        [Fact]
+        public void CheckFlight_Gerador_UsaDistanciaRecebida()
+        {
+            var (origin, _) = CreateSampleAirports();
+            var def = MissionCatalog.Shared.Get("check_flight")!;
+            Assert.NotNull(def);
+
+            var rnd = new Random(42);
+            var mission = MissionGenerator.CreateCheckFlightMissionSync(
+                origin, def, rnd, DateTime.Now, 45.0, paxCount: 1);
+
+            Assert.NotNull(mission);
+            Assert.Equal(45.0, mission.DistanceNM);
+        }
+
+        [Fact]
+        public void Paraquedismo_Gerador_UsaDistanciaRecebida()
+        {
+            var (origin, _) = CreateSampleAirports();
+            var def = MissionCatalog.Shared.Get("paraquedismo")!;
+            Assert.NotNull(def);
+
+            var rnd = new Random(42);
+            var mission = MissionGenerator.CreateSkydiveMissionSync(
+                origin, def, rnd, DateTime.Now, 12.0);
+
+            Assert.NotNull(mission);
+            Assert.Equal(12.0, mission.DistanceNM);
+        }
+
+        [Fact]
+        public void CreateSingleMission_CheckFlightEParaquedismo_DistanciaDentroDoPerfil()
+        {
+            var (origin, candidates) = CreateSampleAirports();
+            var defCheck = MissionCatalog.Shared.Get("check_flight")!;
+            var defSkydive = MissionCatalog.Shared.Get("paraquedismo")!;
+            Assert.NotNull(defCheck);
+            Assert.NotNull(defSkydive);
+
+            int minCheck = defCheck.Profiles[0].RangeNm[0];
+            int maxCheck = defCheck.Profiles[0].RangeNm[1];
+            int minSkydive = defSkydive.Profiles[0].RangeNm[0];
+            int maxSkydive = defSkydive.Profiles[0].RangeNm[1];
+
+            var emptyTags = new HashSet<string>();
+            var checkDistances = new HashSet<double>();
+
+            for (int seed = 1; seed <= 50; seed++)
+            {
+                var rnd = new Random(seed);
+                var mCheck = MissionBoardCore.CreateSingleMission(
+                    origin, defCheck, candidates, emptyTags, _ => emptyTags, rnd, DateTime.Now);
+                Assert.NotNull(mCheck);
+                Assert.InRange(mCheck!.DistanceNM, minCheck, maxCheck);
+                checkDistances.Add(mCheck.DistanceNM);
+
+                var mSkydive = MissionBoardCore.CreateSingleMission(
+                    origin, defSkydive, candidates, emptyTags, _ => emptyTags, rnd, DateTime.Now);
+                Assert.NotNull(mSkydive);
+                Assert.InRange(mSkydive!.DistanceNM, minSkydive, maxSkydive);
+            }
+
+            Assert.True(checkDistances.Count > 1, "Check flight deve gerar mais de uma distância distinta.");
+        }
+
+        [Fact]
+        public void PingaPinga_Gerador_TotalDentroDoPerfil()
+        {
+            var (origin, candidates) = CreateSampleAirports();
+            // Adiciona aeroportos em linha espaçados em ~105 NM (1.75 graus de latitude)
+            for (int i = 1; i <= 6; i++)
+            {
+                var apt = new Airport
+                {
+                    ICAO = $"LIN{i}",
+                    Name = $"Linha {i}",
+                    Country = "Brazil",
+                    Tier = 3,
+                    Latitude = origin.Latitude + (i * 1.75),
+                    Longitude = origin.Longitude,
+                    ElevationFt = 2000
+                };
+                candidates.Add(new AirportCandidate(apt, new Runway { AirportIdent = apt.ICAO, LengthFt = 4000, Surface = "ASPH" }));
+            }
+
+            var def = MissionCatalog.Shared.Get("pinga_pinga")!;
+            Assert.NotNull(def);
+
+            int nonNullCount = 0;
+            for (int seed = 1; seed <= 200; seed++)
+            {
+                var rnd = new Random(seed);
+                var mission = MissionGenerator.CreateMultiStopMissionSync(
+                    origin, def, rnd, DateTime.Now, candidates);
+
+                if (mission == null) continue;
+                nonNullCount++;
+
+                Assert.InRange(mission.DistanceNM, 100.0, 400.0);
+                var contract = JsonSerializer.Deserialize<MultiStopContractData>(mission.ContractData!);
+                Assert.NotNull(contract);
+                Assert.True(contract!.Stops.Count >= 2);
+            }
+
+            Assert.True(nonNullCount > 0);
+        }
+
+        [Fact]
+        public void PingaPinga_Gerador_RotaCurtaDemais_RetornaNulo()
+        {
+            var origin = new Airport
+            {
+                ICAO = "SBO1",
+                Name = "Origem",
+                Country = "Brazil",
+                Tier = 2,
+                Latitude = 0.0,
+                Longitude = 0.0,
+                ElevationFt = 1000
+            };
+            // 3 candidatos separados em passos de ~30 NM (0.5 grau de latitude cada)
+            var candidates = new List<AirportCandidate>
+            {
+                new(new Airport { ICAO = "SBC1", Name = "Cand 1", Country = "Brazil", Tier = 3, Latitude = 0.5, Longitude = 0.0, ElevationFt = 1000 }, new Runway { AirportIdent = "SBC1", LengthFt = 3000, Surface = "ASPH" }),
+                new(new Airport { ICAO = "SBC2", Name = "Cand 2", Country = "Brazil", Tier = 3, Latitude = 1.0, Longitude = 0.0, ElevationFt = 1000 }, new Runway { AirportIdent = "SBC2", LengthFt = 3000, Surface = "ASPH" }),
+                new(new Airport { ICAO = "SBC3", Name = "Cand 3", Country = "Brazil", Tier = 3, Latitude = 1.5, Longitude = 0.0, ElevationFt = 1000 }, new Runway { AirportIdent = "SBC3", LengthFt = 3000, Surface = "ASPH" })
+            };
+
+            var def = MissionCatalog.Shared.Get("pinga_pinga")!;
+            Assert.NotNull(def);
+
+            var profile = new MissionProfileDefinition
+            {
+                RangeNm = new[] { 300, 400 }
+            };
+
+            var rnd = new Random(42);
+            var mission = MissionGenerator.CreateMultiStopMissionSync(
+                origin, def, rnd, DateTime.Now, candidates, profile: profile);
+
+            Assert.Null(mission);
+        }
+
+        [Fact]
+        public void PingaPinga_Gerador_TetoApertado_RetornaNulo()
+        {
+            var (origin, candidates) = CreateSampleAirports();
+            var def = MissionCatalog.Shared.Get("pinga_pinga")!;
+            Assert.NotNull(def);
+
+            var profile = new MissionProfileDefinition
+            {
+                RangeNm = new[] { 10, 60 }
+            };
+
+            var rnd = new Random(42);
+            var mission = MissionGenerator.CreateMultiStopMissionSync(
+                origin, def, rnd, DateTime.Now, candidates, profile: profile);
+
+            Assert.Null(mission);
         }
     }
 }

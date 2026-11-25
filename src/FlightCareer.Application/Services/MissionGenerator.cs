@@ -834,6 +834,7 @@ namespace FlightCareer.Application.Services
             MissionDefinition sub,
             Random random,
             DateTime referenceTime,
+            double distanceNm,
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null,
             IPlacesDataService? placesService = null,
@@ -857,7 +858,6 @@ namespace FlightCareer.Application.Services
                 ? paxOverride.Value
                 : random.Next(3, 15);
             double maxDropSpeedKt = 90.0;
-            double estimatedDist = 25.0;
 
             var skydiveData = new SkydiveContractData
             {
@@ -878,7 +878,7 @@ namespace FlightCareer.Application.Services
                 ["alt"] = targetAglFt.ToString("N0"),
                 ["speed"] = maxDropSpeedKt.ToString("F0"),
                 ["pax"] = paxCount.ToString(),
-                ["distance_nm"] = estimatedDist.ToString("F0")
+                ["distance_nm"] = distanceNm.ToString("F0")
             };
 
             string fallbackTitle = $"Lançamento de Paraquedistas ({paxCount} saltadores)";
@@ -890,7 +890,7 @@ namespace FlightCareer.Application.Services
             double luggageLbs = paxCount * 14.0 * 2.20462;
 
             return CreateMissionObjectSync(
-                origin, origin, estimatedDist, sub, paxCount, luggageLbs, 0.0,
+                origin, origin, distanceNm, sub, paxCount, luggageLbs, 0.0,
                 random, referenceTime, payMultiplier, payTable,
                 requiredTouchAndGoes: 0,
                 overflyWaypoints: null,
@@ -910,14 +910,24 @@ namespace FlightCareer.Application.Services
             MissionPayTable? payTable = null,
             MissionTextCatalog? textCatalog = null,
             int paxCount = 4,
-            double cargoLbs = 500.0)
+            double cargoLbs = 500.0,
+            MissionProfileDefinition? profile = null)
         {
             if (candidates == null || candidates.Count == 0) return null;
+
+            const double MinLegDistanceNm = 25.0;
+            const double MaxLegDistanceNm = 120.0;
+            const double MaxLegFallbackDistanceNm = 160.0;
+
+            var prof = profile ?? sub.Profiles?.FirstOrDefault();
+            int minTotal = (prof?.RangeNm != null && prof.RangeNm.Length > 0) ? prof.RangeNm[0] : 100;
+            int maxTotal = (prof?.RangeNm != null && prof.RangeNm.Length > 1) ? prof.RangeNm[1] : 400;
 
             int targetLegs = random.Next(3, 5); // 3 ou 4 etapas
             var route = new List<AirportCandidate>();
             var visitedIcaos = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { origin.ICAO };
             var current = origin;
+            double currentDist = 0.0;
 
             for (int step = 0; step < targetLegs; step++)
             {
@@ -928,10 +938,12 @@ namespace FlightCareer.Application.Services
                 var sameCountry = eligible.Where(c => string.Equals(c.Airport.Country, origin.Country, StringComparison.OrdinalIgnoreCase)).ToList();
                 if (sameCountry.Count > 0) eligible = sameCountry;
 
+                double reserva = MinLegDistanceNm * Math.Max(0, 3 - (step + 1));
+
                 var inRange = eligible.Where(c =>
                 {
                     double d = CalculateDistance(current.Latitude, current.Longitude, c.Airport.Latitude, c.Airport.Longitude);
-                    return d >= 25.0 && d <= 120.0;
+                    return d >= MinLegDistanceNm && d <= MaxLegDistanceNm && (currentDist + d + reserva <= maxTotal);
                 }).ToList();
 
                 if (inRange.Count == 0)
@@ -940,7 +952,7 @@ namespace FlightCareer.Application.Services
                     inRange = eligible.Where(c =>
                     {
                         double d = CalculateDistance(current.Latitude, current.Longitude, c.Airport.Latitude, c.Airport.Longitude);
-                        return d >= 25.0 && d <= 160.0;
+                        return d >= MinLegDistanceNm && d <= MaxLegFallbackDistanceNm && (currentDist + d + reserva <= maxTotal);
                     }).ToList();
                 }
 
@@ -949,6 +961,7 @@ namespace FlightCareer.Application.Services
                 var picked = inRange[random.Next(inRange.Count)];
                 route.Add(picked);
                 visitedIcaos.Add(picked.Airport.ICAO);
+                currentDist += CalculateDistance(current.Latitude, current.Longitude, picked.Airport.Latitude, picked.Airport.Longitude);
                 current = picked.Airport;
             }
 
@@ -964,6 +977,8 @@ namespace FlightCareer.Application.Services
                 totalDist += CalculateDistance(route[i].Airport.Latitude, route[i].Airport.Longitude, route[i + 1].Airport.Latitude, route[i + 1].Airport.Longitude);
             }
             totalDist = Math.Round(totalDist, 0);
+
+            if (totalDist < minTotal) return null;
 
             var contract = new MultiStopContractData
             {
@@ -1306,13 +1321,13 @@ namespace FlightCareer.Application.Services
             MissionDefinition sub,
             Random random,
             DateTime referenceTime,
+            double distanceNm,
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null,
             MissionTextCatalog? textCatalog = null,
             int paxCount = 1)
         {
             double testAlt = Math.Round((origin.ElevationFt + 3000.0) / 500.0) * 500.0;
-            double dist = 30.0;
 
             var contract = new CheckFlightContractData
             {
@@ -1330,7 +1345,7 @@ namespace FlightCareer.Application.Services
                 ["dest"] = origin.ICAO,
                 ["alt"] = testAlt.ToString("N0"),
                 ["pax"] = paxCount.ToString(),
-                ["distance_nm"] = dist.ToString("F0")
+                ["distance_nm"] = distanceNm.ToString("F0")
             };
 
             string fallbackTitle = $"Voo de Teste Pós-Manutenção ({origin.ICAO})";
@@ -1340,7 +1355,7 @@ namespace FlightCareer.Application.Services
             var rendered = catalog.Render(sub.Id, random, values, fallbackTitle, fallbackDesc);
 
             return CreateMissionObjectSync(
-                origin, origin, dist, sub, paxCount, paxCount * 15.0, 0.0,
+                origin, origin, distanceNm, sub, paxCount, paxCount * 15.0, 0.0,
                 random, referenceTime, payMultiplier, payTable,
                 requiredTouchAndGoes: 0,
                 overflyWaypoints: null,

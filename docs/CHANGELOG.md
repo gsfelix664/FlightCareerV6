@@ -3222,3 +3222,11 @@
 - `OverflyTracker`: `EvaluateAltitude` (mesma regra de antes), `Targets` e última posição.
 - `FlightMonitor.ContractProgressText` calculado a cada pacote na thread dos rastreadores; HUD mostra linha "CONTRATO" nos modos compacto e expandido.
 - Não testado no MSFS.
+
+
+## 2026-11-25 - Distâncias de check_flight, paraquedismo e pinga_pinga (MISSOES-DIST) (Gemini)
+- `MissionGenerator`: assinaturas de `CreateCheckFlightMissionSync` e `CreateSkydiveMissionSync` recebem `double distanceNm` obrigatório após `referenceTime`, eliminando valores fixos (30 e 25 NM) e aplicando nos textos e no objeto de missão; `CreateMultiStopMissionSync` recebe `profile` opcional, respeita `minTotal` e `maxTotal` com reserva dinâmica de 25 NM por etapa faltante para atingir o mínimo de 3 etapas.
+- `MissionBoardCore`: `CreateSingleMission` repassa `distanceNm` sorteado dentro de `profile.RangeNm` aos geradores `skydive` e `check_flight`, e repassa `profile` ao gerador `multi_stop`.
+- `MissionCatalogEquivalenceTests`: snapshot golden regravado refletindo distâncias/recompensas calibradas por perfil em `check_flight` (6 registros) e `paraquedismo` (5 registros).
+- Testes: novos testes de unidade em `PhaseE2C1GeneratorsTests` validando distâncias nos limites dos perfis, geração de valores variados e rejeição de rotas fora da faixa.
+- Documentação atualizada em `docs/sistemas/missoes-quadro.md`.

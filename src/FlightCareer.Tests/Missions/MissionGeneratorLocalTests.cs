@@ -189,7 +189,7 @@ namespace FlightCareer.Tests.Missions
             var places = new PlacesDataService(dropZones: mockDzs, trainingAerodromes: null, pois: null);
 
             var mission = MissionGenerator.CreateSkydiveMissionSync(
-                origin, sub, rng, DateTime.UtcNow, placesService: places, engineClass: "turboprop");
+                origin, sub, rng, DateTime.UtcNow, 25.0, placesService: places, engineClass: "turboprop");
 
             Assert.Equal("paraquedismo", mission.SubId);
             Assert.NotNull(mission.ContractData);

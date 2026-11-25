@@ -219,13 +219,13 @@ namespace FlightCareer.Application.Services
             if (def.Generator == "skydive")
             {
                 return WithPersonLuggage(MissionGenerator.CreateSkydiveMissionSync(
-                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog, paxOverride: paxCount), def, random);
+                    origin, def, random, referenceTime, distanceNm, payMultiplier, payTable, placesService, textCatalog, paxOverride: paxCount), def, random);
             }
 
             if (def.Generator == "multi_stop")
             {
                 var multi = MissionGenerator.CreateMultiStopMissionSync(
-                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, paxCount, cargoLbs);
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, paxCount, cargoLbs, profile);
                 return multi != null ? WithPersonLuggage(multi, def, random) : null;
             }
 
@@ -246,7 +246,7 @@ namespace FlightCareer.Application.Services
             if (def.Generator == "check_flight")
             {
                 var check = MissionGenerator.CreateCheckFlightMissionSync(
-                    origin, def, random, referenceTime, payMultiplier, payTable, textCatalog, paxCount);
+                    origin, def, random, referenceTime, distanceNm, payMultiplier, payTable, textCatalog, paxCount);
                 return WithPersonLuggage(check, def, random);
             }
 
