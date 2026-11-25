@@ -3771,10 +3771,10 @@
         "country": "same",
         "runway": "paved",
         "maxNm": null,
-        "maxMultiplier": 150,
+        "maxMultiplier": 100,
         "profiles": {
-          "saude:orgaos": 150,
-          "saude:hospital_referencia": 150
+          "saude:orgaos": 100,
+          "saude:hospital_referencia": 100
         }
       },
       "profiles": [
@@ -3929,9 +3929,9 @@
         "country": "same",
         "runway": "any",
         "maxNm": null,
-        "maxMultiplier": 150,
+        "maxMultiplier": 100,
         "profiles": {
-          "saude:hospital_referencia": 150,
+          "saude:hospital_referencia": 100,
           "saude": 30
         }
       },
@@ -4014,9 +4014,9 @@
         "country": "other",
         "runway": "paved",
         "maxNm": null,
-        "maxMultiplier": 150,
+        "maxMultiplier": 100,
         "profiles": {
-          "saude:hospital_referencia": 150
+          "saude:hospital_referencia": 100
         }
       },
       "profiles": [
@@ -5696,6 +5696,10 @@
         "3": 6,
         "4": 3
       },
+      "requireAnyTag": [
+        "militar",
+        "militar_misto"
+      ],
       "originProfiles": {
         "militar!": 6,
         "militar_misto": 2,

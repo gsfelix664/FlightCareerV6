@@ -530,3 +530,9 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 - "Baixa altura" é medida contra a elevação da origem (o `SimTelemetry` não tem AGL; `PLANE ALT ABOVE GROUND` fica para quando der para conferir no simulador). Tetos: patrulha e SAR 1.500 ft, inspeção 1.000 ft, órbita 1.000–2.500 ft.
 - Traçados de linha, áreas de patrulha e padrões de SAR são procedurais (sem base de dados de linhas de transmissão); POIs do `tourist_pois.json` dão nome ao alvo quando houver.
 - Ficam para depois: regra do pôr do sol na ronda de saúde, `adaptacao_noturna` e `evacuacao_por_do_sol` (precisam de SimVar de hora/sol e luzes, conferir no MSFS); `pulverizacao` (precisa de AGL real a 10–30 ft); `demo_flight` (não há rolagem de decolagem de referência por avião); `instrucao_ifr` e `calibracao_auxilios` (geometria de aproximação e auxílio sintonizado); `reboque_planador` e `publicidade_aerea` (reboque nativo do SDK).
+
+## 12. Decisões do usuário (2026-11-25)
+- `militar_can` sorteia só em origem militar ou de uso misto (`requireAnyTag`). Feito.
+- Destino preferido das missões de saúde (`orgaos`, `uti_longa_distancia`, `medevac_remoto`): peso 150 → 100, para repetir menos. Feito.
+- `saude_familia` continua permitindo abastecer no destino (`RequireNoRefuel = false`).
+- As 7 melhorias de `missoes-locais-rp.md` › 3 estão autorizadas.

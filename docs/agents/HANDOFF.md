@@ -26,7 +26,8 @@ Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo 
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
-- **Decisões abertas do usuário:** restringir missão militar (CAN) a origens militares (saiu uma de SBJS, pista civil de terra); bots agressivos do Médio falem 100 % no dia 1095 após os aeroportos novos (era 67 %; só 3 bots); isolamento maior nos perfis (muda o sorteio de missões remotas); peso dos destinos de saúde (84–86 % ao preferido; baixar para ~100 se rígido); 7 melhorias de `docs/plans/missoes-locais-rp.md` › 3; patrimônio do Médio no 3º ano (~16 mi) × meta ≤ 20×; bots do Médio parados na classe G do dia 540 ao 1095; `saude_familia` pode abastecer no destino (`RequireNoRefuel = false`).
+- **Decisões abertas do usuário:** bots agressivos do Médio (20 bots, 1095 dias, seed 1: 40 % falidos, 25 % no dia 365; os 100 % eram amostra de 3 bots; sem rodada de 20 bots na versão anterior aos aeroportos; falta o usuário decidir se aceita); regra de `isolado` nos perfis (nos quadros conferidos as missões remotas quase dobraram; falta o usuário decidir). Resolvidas em 2026-11-25: CAN e peso de saúde (feitos na branch `fix/missoes-decisoes`, **sem merge nem push**), abastecimento da `saude_familia` (mantido), patrimônio e classe G (encerradas).
+- **Autorizado, falta spec (Opus), uma por sessão:** as 7 melhorias de `docs/plans/missoes-locais-rp.md` › 3.
 
 ## Notas de trabalho
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.
