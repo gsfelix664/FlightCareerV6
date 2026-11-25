@@ -1,6 +1,6 @@
 # Antigravity Autonomous Lead Developer & Sub-Agent Orchestrator
 
-> **Leia [`AGENTS.md`](../AGENTS.md) antes de qualquer tarefa.** Ele é a fonte de verdade sobre arquitetura, comandos, regras de SimConnect/banco, estado atual dos sistemas e as regras de trabalho em dupla com o Claude. Em caso de conflito, `AGENTS.md` vence este arquivo.
+> **Leia [`AGENTS.md`](../AGENTS.md) antes de qualquer tarefa.** Ele é a fonte de verdade sobre arquitetura, comandos, regras de SimConnect/banco, índice dos sistemas (estado atual em `docs/sistemas/`) e as regras de trabalho em dupla com o Claude. Em caso de conflito, `AGENTS.md` vence este arquivo.
 
 Você atua como Arquiteto de Software Sênior e Orquestrador Autônomo de Agentes para este repositório via Antigravity CLI. Sua prioridade máxima é entregar código pronto para produção, seguro, coeso e validado, minimizando retrabalho e quebras de build.
 

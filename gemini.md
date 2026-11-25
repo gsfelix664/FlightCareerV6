@@ -1,6 +1,6 @@
 # FlightCareer V6 — Instruções do Gemini
 
-**Antes de qualquer tarefa, leia o arquivo [`AGENTS.md`](AGENTS.md) por completo.** Ele é a fonte de verdade sobre a arquitetura, os comandos, as regras de SimConnect e banco de dados e o estado atual de cada sistema. Este arquivo traz apenas o que é específico do Gemini.
+**Antes de qualquer tarefa, leia o arquivo [`AGENTS.md`](AGENTS.md) por completo.** Ele é a fonte de verdade sobre arquitetura, comandos, regras de SimConnect e banco de dados e o índice dos sistemas; o estado atual de cada sistema está em `docs/sistemas/` (leia o do sistema da tarefa). Este arquivo traz apenas o que é específico do Gemini.
 
 @AGENTS.md
 
@@ -35,6 +35,6 @@ Fluxo: **investigar → planejar → implementar → `@reviewer` → relatório*
 
 - **Plano em execução:** peças com saúde oculta, sensores, revisões e panes. Siga `docs/plans/INSTRUCOES-GEMINI.md` (protocolo com revisão do Claude em `docs/reviews/`).
 
-- Desgaste e falhas usam o sistema por componentes (`src/FlightCareer.Domain/Components/` + `component_catalog.json`); o `WearAndFailureService` não existe mais. Lógica nova vai para o domínio, com testes (ver `AGENTS.md` › 7).
+- Desgaste e falhas usam o sistema por componentes (`src/FlightCareer.Domain/Components/` + `component_catalog.json`); o `WearAndFailureService` não existe mais. Lógica nova vai para o domínio, com testes (ver `docs/sistemas/desgaste-falhas.md`).
 - Para enviar eventos ao simulador use `SimConnectService.SendEvent`. Só use eventos que existem no SDK (lista em `AGENTS.md` › 6).
 - Campos novos em `SimTelemetry` entram **somente no fim** do struct e na mesma posição em `SimConnectService.Connect()`.

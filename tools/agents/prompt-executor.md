@@ -4,7 +4,7 @@ Está rodando em modo não interativo: ninguém vai responder perguntas durante 
 Tarefa: {{ID}}
 Branch: {{BRANCH}} (já está ativa nesta pasta; não troque de branch)
 
-1. Leia por completo, nesta ordem: AGENTS.md, gemini.md, docs/plans/INSTRUCOES-GEMINI.md, docs/agents/LICOES.md.
+1. Leia por completo, nesta ordem: AGENTS.md, gemini.md, docs/plans/INSTRUCOES-GEMINI.md, docs/agents/LICOES.md e o `docs/sistemas/<sistema>.md` do sistema da tarefa (a spec indica).
 2. Leia o plano e a tarefa {{ID}}. Se existir docs/reviews/{{ID}}-revisao.md com CORRIGIR, faça SOMENTE as correções pedidas.
 3. Siga o ciclo da seção 3 de INSTRUCOES-GEMINI.md: investigar, planejar no relatório, implementar só a tarefa, build e testes.
 4. Escreva docs/reviews/{{ID}}-relatorio.md no modelo da seção 4. Commit(s) na branch {{BRANCH}}. NÃO faça push.
