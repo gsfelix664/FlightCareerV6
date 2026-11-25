@@ -66,4 +66,30 @@ namespace FlightCareer.Domain.Missions
         public double MaxAltitudeFt { get; set; }
         public double FlapTolerancePct { get; set; } = 5.0;
     }
+
+    public sealed class AerialWorkContractData
+    {
+        public string Mode { get; set; } = "sectors"; // "sectors" | "route" | "orbit" | "search"
+        public List<WorkPoint> Points { get; set; } = new();
+        public double PointRadiusNm { get; set; } = 1.0;
+        public double RefElevationFt { get; set; }      // elevação da origem
+        public double MinAglFt { get; set; }            // 0 = sem piso
+        public double MaxAglFt { get; set; }            // teto acima de RefElevationFt
+        public double MaxIasKt { get; set; }            // 0 = sem limite
+        public double OrbitCenterLat { get; set; }
+        public double OrbitCenterLon { get; set; }
+        public double OrbitRadiusNm { get; set; }
+        public double OrbitMinutes { get; set; }
+        public double TargetLat { get; set; }           // SAR: alvo escondido (não vai para o mapa)
+        public double TargetLon { get; set; }
+        public double TargetRadiusNm { get; set; } = 0.3;
+        public string TargetName { get; set; } = string.Empty;
+    }
+
+    public sealed class WorkPoint
+    {
+        public string Ident { get; set; } = "";
+        public double Lat { get; set; }
+        public double Lon { get; set; }
+    }
 }

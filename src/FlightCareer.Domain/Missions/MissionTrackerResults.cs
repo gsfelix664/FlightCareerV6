@@ -16,6 +16,7 @@ namespace FlightCareer.Domain.Missions
         MultiStopTracker? MultiStop = null,
         StolLandingTracker? Stol = null,
         CheckFlightTracker? CheckFlight = null,
-        FerryRestrictionMonitor? Ferry = null
+        FerryRestrictionMonitor? Ferry = null,
+        AerialWorkTracker? AerialWork = null
     );
 }

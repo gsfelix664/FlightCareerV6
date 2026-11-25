@@ -14,7 +14,8 @@ namespace FlightCareer.Domain.Missions
         MultiStopTracker? MultiStop = null,
         StolLandingTracker? Stol = null,
         CheckFlightTracker? CheckFlight = null,
-        FerryRestrictionMonitor? Ferry = null);
+        FerryRestrictionMonitor? Ferry = null,
+        AerialWorkTracker? AerialWork = null);
 
     public static class ContractProgressFormatter
     {
@@ -184,6 +185,96 @@ namespace FlightCareer.Domain.Missions
                 else if (ferry.ContractData?.Restriction == "flaps_fixed")
                 {
                     lines.Add("Restrição: flaps fixos");
+                }
+            }
+
+            // 9. Trabalho Aéreo (se inputs.AerialWork?.HasActiveContract)
+            if (inputs.AerialWork != null && inputs.AerialWork.HasActiveContract)
+            {
+                var aw = inputs.AerialWork;
+                string mode = aw.Mode.ToLowerInvariant();
+                string line = string.Empty;
+
+                if (mode == "sectors")
+                {
+                    if (aw.IsCompleted)
+                    {
+                        line = $"Setores {aw.TotalPoints}/{aw.TotalPoints} ✓";
+                    }
+                    else
+                    {
+                        line = $"Setores {aw.CompletedPoints}/{aw.TotalPoints}";
+                        if (!string.IsNullOrEmpty(aw.NextPointIdent))
+                        {
+                            line += $" · {aw.NextPointIdent} {aw.DistanceToNextNm.ToString("N1", PtBr)} NM";
+                            if (aw.ContractData != null)
+                            {
+                                double refElev = aw.ContractData.RefElevationFt;
+                                double minAgl = aw.ContractData.MinAglFt;
+                                double maxAgl = aw.ContractData.MaxAglFt;
+                                if (minAgl > 0.0)
+                                {
+                                    string estado = aw.AltitudeState switch
+                                    {
+                                        AerialWorkAltitudeState.Below => "abaixo",
+                                        AerialWorkAltitudeState.Above => "acima",
+                                        _ => "na faixa"
+                                    };
+                                    line += $" · faixa {(refElev + minAgl).ToString("N0", PtBr)}–{(refElev + maxAgl).ToString("N0", PtBr)} ft: {estado}";
+                                }
+                                else
+                                {
+                                    string estado = aw.AltitudeState == AerialWorkAltitudeState.Above ? "acima" : "ok";
+                                    line += $" · máx. {(refElev + maxAgl).ToString("N0", PtBr)} ft: {estado}";
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (mode == "route")
+                {
+                    if (aw.IsCompleted)
+                    {
+                        line = $"Traçado {aw.TotalPoints}/{aw.TotalPoints} ✓";
+                    }
+                    else
+                    {
+                        line = $"Traçado {aw.CompletedPoints}/{aw.TotalPoints} · {aw.NextPointIdent} {aw.DistanceToNextNm.ToString("N1", PtBr)} NM · desvio {aw.LateralDeviationNm.ToString("N1", PtBr)} NM";
+                    }
+                }
+                else if (mode == "orbit")
+                {
+                    int totalMin = (int)(aw.ContractData?.OrbitMinutes ?? 0);
+                    int accumMin = (int)Math.Floor(aw.OrbitSecondsAccumulated / 60.0);
+                    if (aw.IsCompleted)
+                    {
+                        line = $"Órbita {totalMin}/{totalMin} min ✓";
+                    }
+                    else
+                    {
+                        line = $"Órbita {accumMin}/{totalMin} min · {aw.DistanceToNextNm.ToString("N1", PtBr)} NM";
+                    }
+                }
+                else if (mode == "search")
+                {
+                    if (aw.TargetFound)
+                    {
+                        line = "Alvo encontrado ✓";
+                    }
+                    else
+                    {
+                        int leg = Math.Min(aw.CompletedPoints + 1, aw.TotalPoints);
+                        line = $"Busca: perna {leg}/{aw.TotalPoints} · alvo não achado";
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(line))
+                {
+                    if (!aw.IsCompleted && aw.IsIasExceeded && aw.ContractData?.MaxIasKt > 0)
+                    {
+                        line += $" · reduza para {aw.ContractData.MaxIasKt.ToString("N0", PtBr)} kt";
+                    }
+                    lines.Add(line);
                 }
             }
 

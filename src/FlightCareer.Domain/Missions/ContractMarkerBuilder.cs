@@ -73,6 +73,67 @@ namespace FlightCareer.Domain.Missions
                                 visuals.SurveyArea = ComputeSurveyArea(survey);
                             }
                         }
+                        else if (root.TryGetProperty("Mode", out _) && root.TryGetProperty("Points", out _))
+                        {
+                            var aerial = JsonSerializer.Deserialize<AerialWorkContractData>(mission.ContractData);
+                            if (aerial != null)
+                            {
+                                string mode = aerial.Mode?.ToLowerInvariant() ?? string.Empty;
+                                if (mode == "orbit")
+                                {
+                                    if (aerial.OrbitCenterLat != 0 || aerial.OrbitCenterLon != 0)
+                                    {
+                                        visuals.Markers.Add(new MapContractMarker(
+                                            "Área de Órbita",
+                                            aerial.OrbitCenterLat,
+                                            aerial.OrbitCenterLon,
+                                            aerial.OrbitRadiusNm > 0 ? aerial.OrbitRadiusNm : 1.5,
+                                            ContractMarkerKind.Area));
+                                    }
+                                }
+                                else if (mode == "search")
+                                {
+                                    // SAR: só o datum e os pontos do padrão, NUNCA o alvo
+                                    if (aerial.OrbitCenterLat != 0 || aerial.OrbitCenterLon != 0)
+                                    {
+                                        visuals.Markers.Add(new MapContractMarker(
+                                            "Datum SAR",
+                                            aerial.OrbitCenterLat,
+                                            aerial.OrbitCenterLon,
+                                            aerial.PointRadiusNm > 0 ? aerial.PointRadiusNm : 0.5,
+                                            ContractMarkerKind.Point));
+                                    }
+                                    if (aerial.Points != null)
+                                    {
+                                        foreach (var pt in aerial.Points)
+                                        {
+                                            visuals.Markers.Add(new MapContractMarker(
+                                                pt.Ident,
+                                                pt.Lat,
+                                                pt.Lon,
+                                                aerial.PointRadiusNm > 0 ? aerial.PointRadiusNm : 0.5,
+                                                ContractMarkerKind.Point));
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // sectors e route
+                                    if (aerial.Points != null)
+                                    {
+                                        foreach (var pt in aerial.Points)
+                                        {
+                                            visuals.Markers.Add(new MapContractMarker(
+                                                pt.Ident,
+                                                pt.Lat,
+                                                pt.Lon,
+                                                aerial.PointRadiusNm > 0 ? aerial.PointRadiusNm : 1.0,
+                                                ContractMarkerKind.Point));
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {

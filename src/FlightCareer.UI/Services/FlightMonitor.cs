@@ -47,6 +47,7 @@ namespace FlightCareer.UI.Services
         private readonly StolLandingTracker _stolTracker = new();
         private readonly CheckFlightTracker _checkFlightTracker = new();
         private readonly FerryRestrictionMonitor _ferryMonitor = new();
+        private readonly AerialWorkTracker _aerialWorkTracker = new();
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
@@ -679,6 +680,7 @@ namespace FlightCareer.UI.Services
             _stolTracker.Reset(_simConnect.CurrentData.IsOnGround);
             _checkFlightTracker.Reset();
             _ferryMonitor.Reset(_simConnect.CurrentData.IsOnGround);
+            _aerialWorkTracker.Reset();
             ContractProgressText = string.Empty;
             foreach (var m in missions)
             {
@@ -701,7 +703,7 @@ namespace FlightCareer.UI.Services
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de paraquedismo inválido ({m.Id}): {ex.Message}"); }
                 }
-                else if ((def?.Generator == "multi_stop" || def?.Generator == "vfr_triangle") && !string.IsNullOrWhiteSpace(m.ContractData))
+                else if ((def?.Generator == "multi_stop" || def?.Generator == "vfr_triangle" || def?.Generator == "round_trip") && !string.IsNullOrWhiteSpace(m.ContractData))
                 {
                     try
                     {
@@ -736,6 +738,15 @@ namespace FlightCareer.UI.Services
                         if (ferry != null) _ferryMonitor.Configure(ferry, _simConnect.CurrentData.IsOnGround);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato ferry permit inválido ({m.Id}): {ex.Message}"); }
+                }
+                else if ((def?.Generator == "patrol" || def?.Generator == "line_inspection" || def?.Generator == "traffic_orbit" || def?.Generator == "sar_pattern") && !string.IsNullOrWhiteSpace(m.ContractData))
+                {
+                    try
+                    {
+                        var aerial = System.Text.Json.JsonSerializer.Deserialize<AerialWorkContractData>(m.ContractData);
+                        if (aerial != null) _aerialWorkTracker.Configure(aerial);
+                    }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Contrato de trabalho aéreo inválido ({m.Id}): {ex.Message}"); }
                 }
             }
             if (missions.Any(m => !string.IsNullOrWhiteSpace(m.OverflyWaypoints)))
@@ -1242,6 +1253,10 @@ namespace FlightCareer.UI.Services
             {
                 _ferryMonitor.Update(data.IsOnGround, data.Altitude, data.FlapsPercent, simDt);
             }
+            if (_aerialWorkTracker.HasActiveContract)
+            {
+                _aerialWorkTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.Altitude, data.Airspeed, simDt);
+            }
 
             ContractProgressText = ContractProgressFormatter.Build(
                 _activeMissions,
@@ -1253,7 +1268,8 @@ namespace FlightCareer.UI.Services
                     _multiStopTracker,
                     _stolTracker,
                     _checkFlightTracker,
-                    _ferryMonitor));
+                    _ferryMonitor,
+                    _aerialWorkTracker));
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
             if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
@@ -1944,7 +1960,8 @@ namespace FlightCareer.UI.Services
                     MultiStop: _multiStopTracker,
                     Stol: _stolTracker,
                     CheckFlight: _checkFlightTracker,
-                    Ferry: _ferryMonitor
+                    Ferry: _ferryMonitor,
+                    AerialWork: _aerialWorkTracker
                 )
             );
 

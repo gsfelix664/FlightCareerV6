@@ -3239,3 +3239,14 @@
 - `MissionBoardCore`: repasse de `placesService` aos geradores `local_instruction` e `checkride`.
 - Testes: novo conjunto `TrainingAreasTests` (8 testes aprovados) e atualização de snapshot `missions_golden.json`.
 - Documentação atualizada em `docs/sistemas/missoes-quadro.md`.
+
+
+## 2026-11-25 - Trabalho aéreo e ronda de saúde (E2C-2) (Gemini)
+- Ativados no catálogo (`mission_catalog.json`) os 5 tipos: `patrulha_vigilancia` (gerador `patrol`), `inspecao_linhas` (`line_inspection`), `monitoramento_trafego` (`traffic_orbit`), `sar` (`sar_pattern` com variantes `expanding_square` e `creeping_line`) e `saude_familia` (`round_trip`).
+- `AerialWorkTracker` (Domain/Missions): novo rastreador puro com quatro modos operacionais (`sectors`, `route`, `orbit`, `search`), controlando altitude relativa à elevação de referência da origem (`RefElevationFt`), limite de velocidade (`MaxIasKt`), raio de pontos/alvo e acúmulo de tempo simulado (`simDt`).
+- `saude_familia`: implementada como viagem de ida e volta (`round_trip`) com pouso completo na escala intermediária via `MultiStopTracker` e retorno à origem.
+- Geradores em `MissionGenerator` e despacho em `MissionBoardCore` com filtros geométricos, alvos procedurais/POIs e bagagem por passageiro.
+- `ContractProgressFormatter` e `ContractMarkerBuilder`: formatação de linha única no HUD para cada modo de trabalho aéreo e projeção no mapa tático (com alvo SAR mantido oculto).
+- `FlightMonitor`: integração completa dos rastreadores no ciclo de monitoramento e apuração de resultados de voo.
+- Adicionadas variantes textuais em `mission_texts.json` e testes unitários em `AerialWorkTrackerTests` e `PhaseE2C2MissionTests`.
+- Snapshot `missions_golden.json` regravado e relatório de quadros executado com sucesso.

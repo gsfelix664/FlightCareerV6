@@ -166,6 +166,23 @@ namespace FlightCareer.Domain.Missions
                 }
             }
 
+            // Ronda de Saúde e Viagens de Ida e Volta (round_trip)
+            if (generator == "round_trip")
+            {
+                if (trackers?.MultiStop != null)
+                {
+                    if (trackers.MultiStop.RefuelViolationDetected)
+                    {
+                        return new MissionCompletionResult(false, trackers.MultiStop.FailureReason ?? "Reabasteceu entre escalas.");
+                    }
+
+                    if (!trackers.MultiStop.AllStopsCompleted)
+                    {
+                        return new MissionCompletionResult(false, trackers.MultiStop.FailureReason ?? $"Escala {trackers.MultiStop.NextStopIcao} não visitada.");
+                    }
+                }
+            }
+
             // Treinamento STOL / Bush (stol_training)
             if (generator == "stol_training")
             {
@@ -219,6 +236,17 @@ namespace FlightCareer.Domain.Missions
                     return new MissionCompletionResult(
                         false,
                         trackers.Ferry.FailureReason ?? "Restrição técnica do translado violada.");
+                }
+            }
+
+            // Trabalho Aéreo (patrol, line_inspection, traffic_orbit, sar_pattern)
+            if (generator == "patrol" || generator == "line_inspection" || generator == "traffic_orbit" || generator == "sar_pattern")
+            {
+                if (trackers?.AerialWork != null && !trackers.AerialWork.IsCompleted)
+                {
+                    return new MissionCompletionResult(
+                        false,
+                        trackers.AerialWork.FailureReason ?? "Trabalho aéreo não concluído.");
                 }
             }
 
