@@ -3181,3 +3181,7 @@
 - Criação de `docs/sistemas/` com 13 arquivos temáticos (`desgaste-falhas.md`, `pecas.md`, `manutencao-hangar.md`, `panes-persistentes.md`, `voo-integridade.md`, `combustivel.md`, `economia-dificuldade.md`, `xp-fases.md`, `missoes-quadro.md`, `aeroportos-tiers.md`, `limites-aeronave.md`, `sensores.md`, `hud.md`) e `README.md` contendo os blocos literais da antiga seção 7 e decisões técnicas da seção 6.
 - Seção `Sessões e economia de quota` adicionada ao final de `docs/agents/ORQUESTRACAO.md` preservando integralmente o texto das seções 4.9 e 4.10 do AGENTS.
 - Atualização das referências cruzadas em `CLAUDE.md`, `gemini.md`, `.antigravity/rules.md`, `docs/agents/MODELO-SPEC.md`, `tools/agents/prompt-executor.md` e `docs/plans/INSTRUCOES-GEMINI.md`.
+
+## 2026-11-25 - Revisão e merge SISTEMAS (Claude)
+- Revisão (`docs/reviews/SISTEMAS-revisao.md`, APROVADO): cobertura linha a linha do AGENTS antigo conferida; restaurados detalhes perdidos ao encurtar a § 6 (Key Events: prioridade e roteamento `OnObservedEvent`/`OnMaskedEvent`; Banco: regra de copiar valores entre contextos e nomes/tipos do EF; SimVar inválida). Índice com 2 classes por sistema. `AGENTS.md` final: 14.951 bytes no git. Lição nova em `LICOES.md`.
+- Build 0 erros; testes 1.057/1.057.
