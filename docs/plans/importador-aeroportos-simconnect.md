@@ -1,5 +1,7 @@
 # Plano: base de aeroportos e pistas lida do próprio simulador (2026-11-24)
 
+**Estado (conferido em 2026-11-25):** não implementado.
+
 **Pedido do usuário:** na primeira inicialização, o FlightCareer lê o MSFS 2024 (e o 2020) e monta o próprio banco de aeroportos, pistas, elevação etc., como o Little Navmap faz hoje, para os dados baterem com o simulador.
 
 ## 1. Situação atual

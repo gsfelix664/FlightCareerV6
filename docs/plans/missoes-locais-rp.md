@@ -1,5 +1,7 @@
 # Plano — Missões com locais reais e textos de RP (2026-11-22)
 
+**Estado (conferido em 2026-11-25):** bancos de locais e contratos (§§ 1–2) implementados (MISSOES-LOCAIS, AREAS-INSTRUCAO); das melhorias da § 3 faltam só o cliente recorrente (5) e a linha aérea com rotas reais (3), ambas sem spec.
+
 Pedido do usuário: instrução local, cheque, panorâmico, aerofoto e paraquedismo com locais reais (bancos globais), ida e volta ao mesmo aeródromo, texto de RP rico (mais de uma variante) e o mapa do briefing mostrando onde ir; avaliar melhorias nos outros tipos.
 
 ## 1. Bancos de locais (feito — `Infrastructure/Data/places/`, script `tools/places/build_places.py`)
@@ -21,7 +23,7 @@ Limites honestos: não existe base aberta global de escolas de voo nem de zonas 
 - **Mapa do briefing:** marcadores do contrato (pontos, área de instrução, retângulo da aerofoto, zona de salto).
 - **Textos de RP:** `mission_texts.json` com ≥ 3 variantes de título/descrição para **todos** os subtipos, com marcadores (`{origin}`, `{dest}`, `{pax}`, `{poi_list}`, `{alt}` …), sorteio determinístico pelo `Random` do gerador e fallback na descrição atual.
 
-## 3. Melhorias nos outros tipos (as 7 autorizadas em 2026-11-25; ainda não implementadas, cada uma pede spec)
+## 3. Melhorias nos outros tipos (as 7 autorizadas em 2026-11-25; restam o cliente recorrente da 5 e a 3 — situação em § 3.1)
 1. **3.4.2 Navegação:** 2–3 pernas com pouso ou sobrevoo obrigatório em cada aeródromo (hoje é um destino só).
 2. **Saúde (3.3.x, 4.3.1, 1.7.3):** destinos perto de hospitais reais (Wikidata), prazo visível no quadro e tempo de resposta contando no XP.
 3. **Linha aérea (1.1.x, 2.1.x, 1.7.5):** preferir rotas reais (OpenFlights `routes.dat`, ODbL) e horários de banco.

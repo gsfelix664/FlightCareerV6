@@ -2,10 +2,11 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (11ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.154/1.154.
+**Última atualização:** 2026-11-25 (12ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.154/1.154.
 
 ## Feito nesta sessão
-- **Safra por estação** (melhoria 4, agro, fechada; `SAFRA-ESTACAO`, implementada pelo Gemini, revisão em `docs/reviews/SAFRA-ESTACAO-revisao.md`): `Domain/Missions/AgroSeason.cs` gera etiquetas `safra:plantio|colheita|entressafra` e `safra:mes:N` pelo relógio de carreira do piloto e pela latitude (hemisfério norte deslocado 6 meses); campo `season` no `mission_catalog.json` (aplicado depois do teto de 12); cargas de `insumos_agro` por fase e tipo novo `revisao_entressafra`; marcador `{safra}` nos textos de `insumos_agro`.
+- Cabeçalhos de estado de 15 planos de `docs/plans/` atualizados (só documentação). Cada plano agora diz no topo o que foi implementado, o que falta e qual `docs/sistemas/` vale. Conferência por CHANGELOG, sistemas e buscas no código, não item a item.
+- Pendências que apareceram (sem tarefa aberta): taxas F2–F4, panes por disjuntor, pesos de XP por tipo de missão (`xp-proficiencia.md` › 5.2), `AircraftMatcher` em camadas e carga gravada em `PAYLOAD STATION WEIGHT` (`simconnect-wb-deteccao-aeronave.md`).
 
 ## Conferir no próximo voo (PC de casa)
 - Quadro de origem agro/fazenda: nota "Época de plantio/colheita da safra." ou "Entressafra: ..." na descrição de `insumos_agro`, coerente com a data do relógio de carreira (sul: set–dez plantio, jan–abr colheita, mai–ago entressafra).
@@ -18,7 +19,7 @@
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
-1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): cliente recorrente (5), linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`); limpar cabeçalhos desatualizados dos planos (**Sonnet**).
+1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): cliente recorrente (5), linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`).
 2. HUD em modo tablet: spec (**Opus**), quando o usuário quiser começar.
 - Os 8 tipos da E2C que sobraram precisam de SimVar a conferir no MSFS ou de dados: `adaptacao_noturna`, `evacuacao_por_do_sol` e o pôr do sol da `saude_familia` (hora/sol e luzes), `pulverizacao` (AGL real), `demo_flight` (rolagem de decolagem de referência), `instrucao_ifr`, `calibracao_auxilios` (geometria de aproximação, auxílio sintonizado), `reboque_planador`, `publicidade_aerea` (reboque nativo). Um lote que acrescente `PLANE ALT ABOVE GROUND` e as SimVars de hora/sol pode ser especificado no escritório, mas só fecha com o teste no sim.
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".

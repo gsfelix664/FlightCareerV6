@@ -1,6 +1,6 @@
 # Catálogo de missões em JSON (plano)
 
-Estado: **aguardando a REORG-CATEGORIAS** (uma missão por código) e as decisões do usuário abaixo.
+**Estado (conferido em 2026-11-25):** implementado — catálogo JSON (CATALOGO-MISSOES), 69 tipos com pesos por perfil de aeroporto (E2A, E2A-L) e regras próprias (E2C-1, E2C-1b, E2C-2, CARGA-COERENTE, SAFRA-ESTACAO). Pendente: tipos que dependem de SimVar ou dados (§ 11), ideias do § 10 e o corte de `isolado` (§ 12, medir no PC de casa). A REORG-CATEGORIAS citada nas §§ 1–5 não bloqueia mais nada. Estado atual: `docs/sistemas/missoes-quadro.md`.
 
 ## 1. Objetivo técnico
 Cada missão passa a ser um item de catálogo em JSON com id de texto estável (`medevac`, `carga_fragil`...) e declara: código exibido (ex.: 3.3.4), categoria, filtro do quadro, família de pagamento, fase, M_Tipo, regra de destino (`pista_curta`, `outro_pais`, `volta_a_origem`, `hub_de_saude`...), regras de conclusão e pesos por porte. O gerador aplica as regras pelas propriedades, não por `if (sub.Id == ...)`. Prova: `career-stab` com o mesmo resultado de antes.

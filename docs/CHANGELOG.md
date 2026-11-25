@@ -3297,3 +3297,7 @@
 - `MissionBoardCore.GenerateBoard`: aceita parâmetro opcional `seasonDate`, mescla tags dinâmicas sem poluir o cache e injeta `{safra}` nos textos.
 - Integração de `seasonDate` em `MissionGenerator.GenerateMissionsAsync` (lendo `CareerClockUtc` do piloto), `GenerateMissionsInMemory` e `CareerProgressionSimulator`.
 - Testes unitários dedicados em `AgroSeasonTests` (11 testes) e teste `CargoKindCatalogTests.LoadDefault_EtiquetasExistemNosPerfis` atualizado para aceitar etiquetas dinâmicas de safra.
+
+## 2026-11-25 - Cabeçalhos de estado dos planos atualizados (Claude)
+- Linha de estado de 15 planos de `docs/plans/` atualizada ou acrescentada, conferida contra o CHANGELOG, `docs/sistemas/` e buscas no código. Só cabeçalhos; o corpo dos planos não mudou.
+- Build 0 erros; testes 1.154/1.154. Nada a testar no MSFS.

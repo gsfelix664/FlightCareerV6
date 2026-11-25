@@ -1,6 +1,6 @@
 # Plano — As 7 fases da carreira (substituem as 5 categorias)
 
-**Estado:** desenho do usuário (2026-11-22), registrado para implementar junto com o XP novo (`xp-proficiencia.md` › 6) e depois da calibração do pagamento. Nada implementado.
+**Estado (conferido em 2026-11-25):** implementado (FASES-1, FASES-2A, 2B e 2C; XP-NOVO). Desenho original do usuário de 2026-11-22; as §§ 4 e 5 descrevem a situação de antes da implementação. Estado atual: `docs/sistemas/xp-fases.md`.
 
 ## 1. Decisões do usuário (2026-11-22)
 1. As **7 fases substituem** as 5 categorias (`PilotCategory`).

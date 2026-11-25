@@ -1,5 +1,7 @@
 # Plano: SimConnect, W&B, Combustível, Localização e Detecção de Aeronave
 
+**Estado (conferido em 2026-11-25):** o `AircraftMatcher` em camadas e o `SyncFuelAndWeightsToSimCommand` não existem (`IsAircraftMatching` segue só pelo título; `ATC MODEL` é usado nos limites por aeronave). A injeção de combustível ficou superada pelo abastecimento manual (2026-11-21, `docs/sistemas/combustivel.md`).
+
 > **Status: pendente / não verificado.** Este plano foi escrito em 2026-11-07 e o checklist original foi marcado como concluído, mas em 2026-11-12 o código ainda não tinha o `AircraftMatcher` em camadas (`IsAircraftMatching` continua recebendo só o `Title`), nem `AtcModel`/`AtcType` na telemetria, nem o `SyncFuelAndWeightsToSimCommand`. Confirme no código antes de tratar qualquer etapa como feita. Parte do W&B foi alterada depois (ver CHANGELOG, 2026-11-12 "Limpeza Visual da Tela de Briefing").
 
 ## 📋 PLANO MESTRE DE REFATORAÇÃO (PRÓXIMA SESSÃO): COMUNICAÇÃO SIMCONNECT, PESOS & BALANCEAMENTO (W&B), COMBUSTÍVEL, LOCALIZAÇÃO E DETECÇÃO DE AERONAVE

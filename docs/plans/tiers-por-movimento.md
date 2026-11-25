@@ -1,5 +1,7 @@
 # Plano: pista mínima por perfil de missão e tier por movimento (2026-11-24)
 
+**Estado (conferido em 2026-11-25):** implementado (TIER-A e rodada 2, 2026-11-24: pista mínima, tier por movimento, destino de linha, recálculo pela versão das regras), com os ajustes das decisões de 2026-11-25 no fim. Os itens "A fazer" da § 6 são histórico. Pendente: corte de `isolado` (`catalogo-missoes.md` › 12) e o importador pelo SimConnect. Estado atual: `docs/sistemas/aeroportos-tiers.md`.
+
 **Pedido do usuário:** o quadro de SBMT (Campo de Marte, pista de 5.120 ft, sem linha aérea) gerou carga paletizada de 95.190 lb, ponte aérea com 182 pax e e-commerce de 35.704 lb. O usuário aprovou separar **o que a pista aguenta** de **o movimento do aeroporto**.
 
 ## 1. Diagnóstico

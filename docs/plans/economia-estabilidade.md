@@ -1,6 +1,6 @@
 # Plano — Estabilidade da economia da carreira (análise da ECON-STAB)
 
-Criado em 2026-11-19 (Claude). Status: **regras de manutenção aplicadas (§ 4.1) e medidas (§ 4.2); aguardando decisões 4 e 5 (pagamento e dificuldade)**.
+Criado em 2026-11-19 (Claude). **Estado (conferido em 2026-11-25):** concluído — manutenção por faixas (§ 4.1), decisões de pagamento e dificuldade (§ 4.3, ECON-DIFF) e calibrações (§§ 4.4–4.5); o usuário manteve as escalas e encerrou as pendências de patrimônio e classe G. Segue à parte a perda de desempenho no amarelo (`perda-desempenho-amarelo.md`). Estado atual: `docs/sistemas/economia-dificuldade.md`.
 Fonte: `FlightCareer.Replay career-stab --days 720 --bots 3 --difficulty all --policy all --fast` (27 carreiras, 45 min), com a calibração do usuário (real ÷ 4), preço por classe, reparo por troca de peça, calendário de carreira e cabine já na base. Bots começam como o jogador (saldo da dificuldade + C152), voam ~2,5 h/dia, compram o próximo avião da escada A→J e vendem o anterior.
 
 ## 1. Resultado (mediana de 3 bots por grupo)
