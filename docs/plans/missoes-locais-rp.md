@@ -30,6 +30,16 @@ Limites honestos: não existe base aberta global de escolas de voo nem de zonas 
 6. **Carga:** tipo de carga coerente com o destino (porto, mina, polo industrial) e restrição de carga perigosa.
 7. **Translado (3.5.3, 1.3.3):** destino em aeródromo com oficina (`MaintenanceHubs`).
 
+### 3.1 Reavaliação contra o código (2026-11-25, Claude)
+Os perfis de aeroporto (`places/airport_profiles.json`, feitos depois desta lista) já cobrem boa parte:
+- **1 Navegação: feito.** `navegacao_vfr` usa `vfr_triangle` (triângulo, ida e volta, triângulo com TGL; `MultiStopTracker`).
+- **7 Translado: feito.** `translado_manutencao` e `ferry_permit` preferem destino com perfil `mro` (peso 6).
+- **2 Saúde: quase feito.** Destinos com `saude:hospital_referencia`/`saude:orgaos` (peso 100); o XP já tem bônus de prazo (≤ 90 % do ETE + 15 min, maior em missão urgente ou do quadro `Medica`, `XpCalculator` › 5.3). Falta só **mostrar o prazo no quadro** (o quadro mostra o ETE puro, sem a folga de 15 min nem o bônus).
+- **4 Agro:** destinos `fazenda`/`agro` feitos; falta **safra por estação** (`CareerClock` existe).
+- **5 Executiva:** destinos `executivo:lazer`/turísticos feitos; falta o **cliente recorrente** (fidelidade).
+- **6 Carga: feito (2026-11-25, `CARGA-COERENTE`).** `Data/cargo_kinds.json` sorteia o tipo de carga pelos perfis da origem/destino (marcadores `{cargo}`/`{cargo_note}`, colunas `CargoKind`/`CargoName`); classes ONU de carga perigosa, e as "somente cargueiro" (1.1D, 3, 9 UN3480) bloqueiam aceite e início de voo com passageiros no manifesto. Falta conferir no app (painel e mensagens).
+- **3 Linha aérea:** nada feito; maior das sete (dados OpenFlights, licença ODbL com atribuição e compartilhamento pelo mesmo termo).
+
 ## 4. Decisões do usuário (2026-11-25)
 - Instrução local pede 1 ou 2 TGL (3 era demais). `circuito_tgl` não mudou.
 - A faixa de altitude da área de instrução é cobrada, sem muita precisão: folga de 500 ft, medida acima da elevação da origem; vale também para o cheque prático.
