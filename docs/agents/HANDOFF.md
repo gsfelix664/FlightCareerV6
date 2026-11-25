@@ -2,7 +2,14 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25, Claude, PC de casa (com MSFS e Little Navmap). Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.063/1.063. Correções commitadas e mergeadas na base.
+**Última atualização:** 2026-11-25 (2ª sessão), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.071/1.071. VOO-VENTO-INSTRUCAO mergeada (revisão em `docs/reviews/VOO-VENTO-INSTRUCAO-revisao.md`).
+
+## Feito nesta sessão (não testado no MSFS)
+- Vento de través/cauda com proa verdadeira (`PlaneHeadingTrue`, `PLANE HEADING DEGREES TRUE` no fim do `SimTelemetry`/`AddToDef`).
+- REC grava vento (velocidade, direção) e proas verdadeira e magnética (`sensor_registry.json`).
+- Instrução local pede 1 ou 2 TGL; faixa de altitude da área (instrução local e cheque prático) cobrada com folga de 500 ft acima da elevação da origem.
+- Áreas de instrução do simulador: o SimConnect não expõe espaço aéreo (só aeroporto, waypoint, NDB, VOR). Decisões em `docs/plans/missoes-locais-rp.md` › 4.
+- Conferido com o usuário: ícones do Hangar ok; vento do sim estava certo (METAR de São Luís: 20 kt, rajada 30), danos do 2º voo foram normais. O vento "sem vento" era o mapa da tela de voo livre.
 
 ## Voos de teste (C152, SBJS, instrução local)
 1º voo: PR-NRI, 07:36–07:56, carreira antiga. 2º voo: PT-WSQ, 08:38–08:47, carreira nova, sim rate de até ×16 (0,43 h de voo).
@@ -30,15 +37,13 @@ Outros achados do 2º voo:
 - Banco apagado a pedido do usuário (carreira de testes recomeça; cópia em `db-backup/flightcareer.db.bak-20261125` (com -shm e -wal), na pasta de saída do UI).
 
 ## Bugs em aberto
-1. **Vento de través errado:** `SimTelemetry.CrosswindComponentKnots`/`TailwindComponentKnots` subtraem proa **magnética** (`PLANE HEADING DEGREES MAGNETIC`) de direção do vento **verdadeira** (`AMBIENT WIND DIRECTION`); em SBJS o erro é de ~22°. Correção: acrescentar `PLANE HEADING DEGREES TRUE` no fim do `SimTelemetry` e do `AddToDef` (arquivos quentes). Afeta bônus STOL e XP de vento cruzado.
-2. O REC (sensor-logs) não grava vento nem proa.
-3. Faixa de altitude da instrução local só no texto (não cobrada).
+- Nenhum novo. Conferir no próximo voo: coluna `nav-heading-true` e vento no CSV do REC; contrato de instrução local cumprido passando na faixa.
 
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa (sessão nova, PC de casa)
-1. Corrigir o vento de través (bug 1, Opus, arquivos quentes). 2. Conferir com o usuário as telas e o Hangar com ícones. Continuar o voo de teste com 3 toques: triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
+Mais testes de missões no MSFS (Sonnet basta para ler logs): instrução local na faixa com 1–2 TGL; depois triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`; no REC de hoje a SimVar ficou em ~99–100 sem pane); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
