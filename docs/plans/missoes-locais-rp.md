@@ -62,5 +62,5 @@ Conclusão: **área real só no Brasil (DECEA)**; resto do mundo continua proced
 
 ### 5.4 Decisões abertas do usuário
 1. ~~Usar os dados do DECEA sem licença explícita?~~ **Decidido (2026-11-25): sim**, usar o DECEA citando a fonte (DECEA/AIP Brasil e data da extração no `ATTRIBUTION.md`).
-2. openAIP fica descartado pela cláusula não comercial (confirmar se o addon pode vir a ser vendido; mesmo gratuito, ele acrescenta pouco ao DECEA).
-3. As ~17 áreas de acrobacia entram no mesmo arquivo já agora (para um futuro contrato de acrobacia) ou ficam de fora?
+2. openAIP descartado (2026-11-25): licença não comercial e quase nada além do DECEA; o usuário não se opôs.
+3. **Decidido (2026-11-25): as áreas de acrobacia entram** no `training_areas.json` (`kind: "acrobacia"`), para um futuro contrato de acrobacia; a instrução local e o cheque leem só `kind == instrucao`.
