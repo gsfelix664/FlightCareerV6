@@ -16,12 +16,14 @@ namespace FlightCareer.Application.Services
         private static readonly Dictionary<string, ScenicAerodromeInfo> s_scenicAerodromes = new(StringComparer.OrdinalIgnoreCase);
         private static readonly Dictionary<(int LatCell, int LonCell), List<TouristPoiInfo>> s_poiGrid = new();
         private static readonly List<TouristPoiInfo> s_allPois = new();
+        private static readonly List<TrainingAreaInfo> s_trainingAreas = new();
 
         private readonly Dictionary<string, DropZoneInfo>? _customDropZones;
         private readonly HashSet<string>? _customTrainingAerodromes;
         private readonly Dictionary<string, ScenicAerodromeInfo>? _customScenicAerodromes;
         private readonly Dictionary<(int LatCell, int LonCell), List<TouristPoiInfo>>? _customPoiGrid;
         private readonly List<TouristPoiInfo>? _customAllPois;
+        private readonly List<TrainingAreaInfo>? _customTrainingAreas;
 
         public PlacesDataService()
         {
@@ -32,9 +34,10 @@ namespace FlightCareer.Application.Services
             IEnumerable<DropZoneInfo>? dropZones,
             IEnumerable<string>? trainingAerodromes,
             IEnumerable<TouristPoiInfo>? pois,
-            IEnumerable<ScenicAerodromeInfo>? scenicAerodromes = null)
+            IEnumerable<ScenicAerodromeInfo>? scenicAerodromes = null,
+            IEnumerable<TrainingAreaInfo>? trainingAreas = null)
         {
-            if (dropZones != null || trainingAerodromes != null || pois != null || scenicAerodromes != null)
+            if (dropZones != null || trainingAerodromes != null || pois != null || scenicAerodromes != null || trainingAreas != null)
             {
                 _customDropZones = new Dictionary<string, DropZoneInfo>(StringComparer.OrdinalIgnoreCase);
                 if (dropZones != null)
@@ -82,6 +85,11 @@ namespace FlightCareer.Application.Services
                         list.Add(poi);
                     }
                 }
+
+                if (trainingAreas != null)
+                {
+                    _customTrainingAreas = new List<TrainingAreaInfo>(trainingAreas);
+                }
             }
             else
             {
@@ -101,6 +109,7 @@ namespace FlightCareer.Application.Services
                 LoadTrainingAerodromes();
                 LoadScenicAerodromes();
                 LoadTouristPois();
+                LoadTrainingAreas();
 
                 s_loaded = true;
             }
@@ -295,6 +304,7 @@ namespace FlightCareer.Application.Services
         public int TrainingAerodromesCount => _customTrainingAerodromes != null ? _customTrainingAerodromes.Count : s_trainingAerodromes.Count;
         public int DropZonesCount => _customDropZones != null ? _customDropZones.Count : s_dropZones.Count;
         public int ScenicAerodromesCount => _customScenicAerodromes != null ? _customScenicAerodromes.Count : s_scenicAerodromes.Count;
+        public int TrainingAreasCount => _customTrainingAreas != null ? _customTrainingAreas.Count : s_trainingAreas.Count;
 
         public bool IsTrainingAerodrome(string icao)
         {
@@ -364,6 +374,73 @@ namespace FlightCareer.Application.Services
             }
 
             return results;
+        }
+
+        private static void LoadTrainingAreas()
+        {
+            try
+            {
+                var path = ResolvePlacesFilePath("training_areas.json");
+                if (path == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("[PlacesDataService] training_areas.json não encontrado.");
+                    return;
+                }
+
+                using var stream = File.OpenRead(path);
+                using var doc = JsonDocument.Parse(stream);
+                if (doc.RootElement.TryGetProperty("areas", out var arrayElem) && arrayElem.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var elem in arrayElem.EnumerateArray())
+                    {
+                        string id = elem.GetProperty("id").GetString()?.Trim().ToUpperInvariant() ?? "";
+                        string name = elem.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                        string kind = elem.TryGetProperty("kind", out var k) ? k.GetString() ?? "instrucao" : "instrucao";
+                        double lat = elem.GetProperty("lat").GetDouble();
+                        double lon = elem.GetProperty("lon").GetDouble();
+                        double radiusNm = elem.GetProperty("radiusNm").GetDouble();
+                        int floorFt = elem.GetProperty("floorFt").GetInt32();
+                        string floorRef = elem.TryGetProperty("floorRef", out var fr) ? fr.GetString() ?? "SFC" : "SFC";
+                        int ceilFt = elem.GetProperty("ceilFt").GetInt32();
+                        string ceilRef = elem.TryGetProperty("ceilRef", out var cr) ? cr.GetString() ?? "MSL" : "MSL";
+
+                        if (!string.IsNullOrEmpty(id))
+                        {
+                            s_trainingAreas.Add(new TrainingAreaInfo(id, name, kind, lat, lon, radiusNm, floorFt, floorRef, ceilFt, ceilRef));
+                        }
+                    }
+                }
+                System.Diagnostics.Debug.WriteLine($"[PlacesDataService] Carregadas {s_trainingAreas.Count} áreas de instrução/acrobacia.");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[PlacesDataService] Erro ao carregar training_areas.json: {ex.Message}");
+            }
+        }
+
+        public IReadOnlyList<TrainingAreaInfo> FindTrainingAreas(double lat, double lon, double maxNm = 25.0, string kind = "instrucao")
+        {
+            var source = _customTrainingAreas ?? s_trainingAreas;
+            var results = new List<(TrainingAreaInfo Area, double Distance)>();
+
+            for (int i = 0; i < source.Count; i++)
+            {
+                var area = source[i];
+                if (!string.Equals(area.Kind, kind, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                double dist = CalculateDistanceNM(lat, lon, area.Lat, area.Lon);
+                if (dist <= maxNm)
+                {
+                    results.Add((area, dist));
+                }
+            }
+
+            return results
+                .OrderBy(r => r.Distance)
+                .ThenBy(r => r.Area.Id, StringComparer.Ordinal)
+                .Select(r => r.Area)
+                .ToList();
         }
 
         public static double CalculateDistanceNM(double lat1, double lon1, double lat2, double lon2)

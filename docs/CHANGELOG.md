@@ -3230,3 +3230,12 @@
 - `MissionCatalogEquivalenceTests`: snapshot golden regravado refletindo distâncias/recompensas calibradas por perfil em `check_flight` (6 registros) e `paraquedismo` (5 registros).
 - Testes: novos testes de unidade em `PhaseE2C1GeneratorsTests` validando distâncias nos limites dos perfis, geração de valores variados e rejeição de rotas fora da faixa.
 - Documentação atualizada em `docs/sistemas/missoes-quadro.md`.
+
+## 2026-11-25 - Áreas de instrução reais do DECEA (AREAS-INSTRUCAO) (Gemini)
+- `tools/places/build_training_areas.py`: script de extração e conversão de áreas reais do DECEA GeoAISWEB (camada WFS `ICA:airspace`), filtrando 11 áreas de instrução e 16 de acrobacia com cálculo de centroide, raio e cotas de altitude.
+- `training_areas.json` e `ATTRIBUTION.md`: base publicada em `Infrastructure/Data/places/` e atribuição oficial do DECEA (AIP Brasil).
+- `IPlacesDataService` e `PlacesDataService`: adicionados `TrainingAreaInfo`, leitura de `training_areas.json` e consulta `FindTrainingAreas` ordenada por distância e ID.
+- `MissionGenerator`: adicionados `TryResolveRealAreaBand` (conversão de cotas SFC/MSL para AGL com elevação da origem e folga de 500 ft) e `CalculateInitialBearing`. `CreateLocalInstructionMissionSync` e `CreateCheckrideMissionSync` priorizam áreas reais a ≤ 25 NM, com fallback procedural determinístico em origens sem área real.
+- `MissionBoardCore`: repasse de `placesService` aos geradores `local_instruction` e `checkride`.
+- Testes: novo conjunto `TrainingAreasTests` (8 testes aprovados) e atualização de snapshot `missions_golden.json`.
+- Documentação atualizada em `docs/sistemas/missoes-quadro.md`.
