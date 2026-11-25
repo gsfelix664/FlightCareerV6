@@ -34,3 +34,33 @@ Limites honestos: não existe base aberta global de escolas de voo nem de zonas 
 - Instrução local pede 1 ou 2 TGL (3 era demais). `circuito_tgl` não mudou.
 - A faixa de altitude da área de instrução é cobrada, sem muita precisão: folga de 500 ft, medida acima da elevação da origem; vale também para o cheque prático.
 - Áreas de instrução do simulador na inicialização do banco: verificado que o SimConnect não expõe espaço aéreo nem área de treinamento (tipos de facility: aeroportos, waypoints, NDB, VOR e filhos; conferido na DLL do projeto e na documentação do SDK). Continua a decisão do híbrido (fonte externa com licença compatível, ex. openAIP, quando houver; procedural no resto).
+
+## 5. Áreas de instrução reais — pesquisa e proposta (2026-11-25, Claude)
+
+### 5.1 Fontes avaliadas
+| Fonte | Licença | O que tem | Veredito |
+|---|---|---|---|
+| **openAIP** (exportação por país `s3.openaip.net/openaip-system-exports/<cc>_asp.geojson`, sem chave; também `.json`, `.xml`, `.cup`, OpenAir) | **CC BY-NC 4.0** (rodapé de openaip.net: "OpenAIP data, unless otherwise stated, is licensed under CC BY-NC 4.0"). Proíbe uso comercial | Não tem tipo "área de treino": as de instrução aparecem como `type` 1 (restrita) e só se acha pelo nome. BR: 735 espaços, **4** de instrução (SBR458–460, SBR466). DE, GB: 0; FR: 2; US: 0 civis (só militares); AU: 1 (militar) | **Não usar**: quase nada a mais que o DECEA e a licença impede vender o addon |
+| **DECEA GeoAISWEB** (WFS público `geoaisweb.decea.mil.br/geoserver`, camada `ICA:airspace`, GeoJSON, sem chave) | Dado público oficial (AIP); **sem licença explícita** encontrada | 1.859 espaços; `typ` R/D/P, `nam`, `txtrmk` ("CIV ACFT training", "MIL ACFT training"), limites (`lowerlimi1`/`codedistv1` SFC/MSL, `upperlimit`/`uplimituni` FT/FL), polígono. Codificação mista (latin-1 em parte dos nomes) | **Usar para o Brasil** (decisão do usuário pendente, § 5.4) |
+| Little Navmap / Navigraph (1.375 áreas `TR`) | Navigraph não permite redistribuir | — | Descartado (já decidido) |
+| FAA (EUA) | Domínio público | Só SUA militar (MOA, R-xxxx); não há área de instrução civil publicada | Nada a importar |
+| Europa (eAIP de cada país) | Varia por país | Poucas áreas civis de instrução publicadas; no openAIP não aparecem | Fora do escopo agora |
+
+Conclusão: **área real só no Brasil (DECEA)**; resto do mundo continua procedural (comportamento atual).
+
+### 5.2 Áreas civis do DECEA (extração de 2026-11-25)
+- **Instrução (11):** SBR458 INSTRUÇÃO 1 (600 ft SFC–5.000 MSL, raio ~11 NM), SBR459 INSTRUÇÃO 2 (–6.000), SBR460 INSTRUÇÃO 3 (–7.000), SBR466 INSTRUÇÃO 4 (–5.000) (região de SP/Campinas/Bragança); SBR595 Capivari (500 SFC–4.000 MSL, PR); SBR560 Clube de Voo Itaipu (SFC–1.500); SBR561 Área Antônio Carlos (SFC–2.500, SC); SBR364 João Monteiro (SFC–2.500, ES); SBR704 Solimões (SFC–1.500, AM); SBR529 Aeroclube de Frederico Westphalen (SFC–5.000 SFC); SBR806 Aeroclube de Tatuí (SFC–FL200).
+- **Acrobacia (~17 "box"):** SBR231, 553, 557, 632, 821, 824, 831, 832, 847, 848, 851, 852, 855, 867, 878 etc., raio 0,4–3 NM. Úteis para um futuro contrato de acrobacia, não para a instrução local.
+- **Excluídas:** voo livre/parapente/ultraleve, paraquedismo (já em `dropzones.json`), "Campo de Instrução" (Exército), "MIL ACFT training", treinamento de linha aérea (SBR841/842, 4.000 ft–FL100).
+
+### 5.3 Proposta de implementação (spec `AREAS-INSTRUCAO`, para o Gemini)
+1. **Importação em tempo de desenvolvimento:** `tools/places/build_training_areas.py --cache <pasta>` baixa `ICA:airspace` do WFS, filtra `typ in (R, D)` e (`txtrmk` contém "CIV ACFT training" **ou** nome com INSTRU/AEROCLUBE/CLUBE DE VOO), exclui as listas do § 5.2, decodifica o nome (utf-8, senão latin-1) e grava `Infrastructure/Data/places/training_areas.json`: `{id, name, kind: "instrucao"|"acrobacia", lat, lon (centroide), radiusNm (maior distância centroide–vértice, mínimo 2), floorFt, floorRef: "SFC"|"MSL", ceilFt (FL×100), ceilRef, aerodromes: [ICAO a ≤ 25 NM do centroide, do OurAirports/`--lnm`, só os que existem no MSFS]}`. Polígono não entra (o contrato usa ponto + raio). Entrada no `ATTRIBUTION.md` (fonte DECEA/AIP Brasil, data da extração).
+2. **Leitura:** `IPlacesDataService.FindTrainingAreas(string icao, double maxNm = 25)` → `IReadOnlyList<TrainingAreaInfo>` (só `kind == instrucao`).
+3. **Gerador (`CreateLocalInstructionMissionSync` e `CreateCheckrideMissionSync`):** se houver área real para a origem, sorteia uma (com o `Random` do gerador) e usa centro, raio (limitado a 3–6 NM para o ponto do contrato) e faixa: base = max(piso, elevação + 1.500 ft), topo = min(teto, base + 1.500), convertendo SFC↔MSL pela elevação da origem; o texto cita o nome oficial ("Área SBR595 Capivari"). Sem área real, ou faixa resultante < 1.000 ft, cai no procedural atual. Peso de sorteio entre real × procedural: 100 % real quando existir (proposta).
+4. **Mapa do briefing:** o marcador da área já existe; só o nome muda.
+5. **Testes:** leitura do JSON; origem com área real → ponto no centroide com nome e faixa corretos; faixa inválida → procedural; origem sem área → procedural igual ao snapshot atual (o `missions_golden` só muda nas origens com área real, a conferir).
+
+### 5.4 Decisões abertas do usuário
+1. Usar os dados do DECEA sem licença explícita (dado público do AIP, citando a fonte)? Alternativa: perguntar ao DECEA pelo Fale Conosco antes.
+2. openAIP fica descartado pela cláusula não comercial (confirmar se o addon pode vir a ser vendido; mesmo gratuito, ele acrescenta pouco ao DECEA).
+3. As ~17 áreas de acrobacia entram no mesmo arquivo já agora (para um futuro contrato de acrobacia) ou ficam de fora?
