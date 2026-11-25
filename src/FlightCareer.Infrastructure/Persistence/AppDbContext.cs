@@ -21,6 +21,8 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<AircraftDefect> AircraftDefects { get; set; }
         public DbSet<AircraftLimitProfileEntity> AircraftLimitProfiles { get; set; }
         public DbSet<AircraftLimitEntity> AircraftLimits { get; set; }
+        public DbSet<SimSyncState> SimSyncStates { get; set; }
+        public DbSet<SimAirportQueueItem> SimAirportQueue { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -71,6 +73,14 @@ namespace FlightCareer.Infrastructure.Persistence
             modelBuilder.Entity<Airport>()
                 .HasIndex(a => a.ICAO)
                 .IsUnique();
+
+            modelBuilder.Entity<SimSyncState>()
+                .ToTable("SimSyncStates")
+                .HasKey(s => s.Id);
+
+            modelBuilder.Entity<SimAirportQueueItem>()
+                .ToTable("SimAirportQueue")
+                .HasKey(q => q.Ident);
 
             modelBuilder.Entity<Pilot>()
                 .Ignore(p => p.CompanyTier);
@@ -342,7 +352,31 @@ namespace FlightCareer.Infrastructure.Persistence
                 "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';",
 
                 // Cabine conversível por tipo de aeronave (CABINE)
-                "ALTER TABLE AircraftTypes ADD COLUMN HasConvertibleCabin INTEGER NOT NULL DEFAULT 0;"
+                "ALTER TABLE AircraftTypes ADD COLUMN HasConvertibleCabin INTEGER NOT NULL DEFAULT 0;",
+
+                // Sincronização de Aeroportos com o Simulador (AIRSIM-1)
+                "ALTER TABLE Airports ADD COLUMN Source TEXT DEFAULT '';",
+                "ALTER TABLE Airports ADD COLUMN SimRegion TEXT DEFAULT NULL;",
+                "ALTER TABLE Airports ADD COLUMN SimFingerprint TEXT DEFAULT NULL;",
+                "ALTER TABLE Airports ADD COLUMN SimCheckedUtc TEXT DEFAULT NULL;",
+                @"CREATE TABLE IF NOT EXISTS SimSyncStates (
+                    Id INTEGER PRIMARY KEY,
+                    SimVersion TEXT NOT NULL DEFAULT '',
+                    ListDigest TEXT NOT NULL DEFAULT '',
+                    LastListUtc TEXT NULL,
+                    ListCount INTEGER NOT NULL DEFAULT 0
+                );",
+                @"CREATE TABLE IF NOT EXISTS SimAirportQueue (
+                    Ident TEXT PRIMARY KEY,
+                    Region TEXT NOT NULL DEFAULT '',
+                    Latitude REAL NOT NULL DEFAULT 0,
+                    Longitude REAL NOT NULL DEFAULT 0,
+                    AltitudeM REAL NOT NULL DEFAULT 0,
+                    Fingerprint TEXT NOT NULL DEFAULT '',
+                    Priority INTEGER NOT NULL DEFAULT 0,
+                    Attempts INTEGER NOT NULL DEFAULT 0,
+                    EnqueuedUtc TEXT NOT NULL
+                );"
             };
 
             foreach (var stmt in migrationStatements)

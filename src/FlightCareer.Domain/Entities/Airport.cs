@@ -36,9 +36,13 @@ namespace FlightCareer.Domain.Entities
         public bool ScheduledService { get; set; }
         public int TierRulesVersion { get; set; }
 
-        // Integração de Cenário do Simulador (MSFS 2024 via Little Navmap)
+        // Integração de Cenário do Simulador (MSFS 2024 via Little Navmap e SimConnect AIRSIM)
         public bool IsInSimulator { get; set; } = false;
         public string? MsfsIdent { get; set; }
+        public string Source { get; set; } = string.Empty;
+        public string? SimRegion { get; set; }
+        public string? SimFingerprint { get; set; }
+        public DateTime? SimCheckedUtc { get; set; }
 
         public bool HasMsfsDivergence => IsInSimulator && !string.IsNullOrEmpty(MsfsIdent) && !string.Equals(ICAO, MsfsIdent, StringComparison.OrdinalIgnoreCase);
         public string DisplayIdent => HasMsfsDivergence ? $"{ICAO} (MSFS: {MsfsIdent})" : ICAO;
