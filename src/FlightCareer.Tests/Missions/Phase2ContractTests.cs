@@ -398,5 +398,58 @@ namespace FlightCareer.Tests.Missions
                 Assert.Null(paxFeeTx);
             }
         }
+
+        [Fact]
+        public async Task FlightService_ContratoNaoCumprido_DevolveMotivoNoResultado()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
+            var pilotId = Guid.NewGuid();
+            var aircraftId = Guid.NewGuid();
+
+            await using var db = new AppDbContext(options);
+            await db.Database.EnsureCreatedAsync();
+            var type = new AircraftType { Id = Guid.NewGuid(), Model = "C152", Type = "Geral", FuelType = "AvGas" };
+            db.Airports.Add(new Airport { ICAO = "SBJS", Latitude = -7.34, Longitude = -41.14, ElevationFt = 1036, Tier = 4, Country = "BR" });
+            db.Pilots.Add(new Pilot { Id = pilotId, Name = "Piloto TGL", Balance = 10000 });
+            db.AircraftTypes.Add(type);
+            db.PilotAircrafts.Add(new PilotAircraft { Id = aircraftId, PilotId = pilotId, AircraftTypeId = type.Id, Prefix = "PR-TGL", FuelAmount = 20.0 });
+            db.Missions.Add(new Mission
+            {
+                Id = Guid.NewGuid(),
+                PilotId = pilotId,
+                IsAccepted = true,
+                Title = "Instrução com TGL",
+                OriginICAO = "SBJS",
+                DestinationICAO = "SBJS",
+                RewardMoney = 1200,
+                SubId = "instrucao_local",
+                RequiredTouchAndGoes = 3
+            });
+            await db.SaveChangesAsync();
+
+            var service = new FlightService(db, null!, null!);
+            var outcome = await service.ProcessFlightFinishAsync(
+                pilotId: pilotId,
+                aircraftId: aircraftId,
+                originIcao: "SBJS",
+                destinationIcao: "SBJS",
+                startTime: DateTime.Now.AddMinutes(-20),
+                initialFuel: 20.0,
+                finalFuel: 15.0,
+                distanceNM: 15.0,
+                activeMissions: await db.Missions.ToListAsync(),
+                qualityService: new FlightQualityService(),
+                flightDurationMinutes: 20.0,
+                touchAndGoCount: 0);
+
+            Assert.True(outcome.Success);
+            Assert.Equal(0, outcome.CompletedMissions);
+            Assert.Equal(0, outcome.Revenue);
+            var reason = Assert.Single(outcome.IncompleteReasons);
+            Assert.Contains("0 de 3 TGL", reason);
+        }
     }
 }

@@ -1060,7 +1060,16 @@ namespace FlightCareer.UI.ViewModels
 
                 if (outcome.Success)
                 {
-                    ShowFlightMessage("VOO CONCLUÍDO", $"Recompensa: {outcome.Revenue:C2} · XP: {outcome.XP} · Missões: {outcome.CompletedMissions}", AlertKind.Info, sticky: true);
+                    string summary = $"Recompensa: {outcome.Revenue:C2} · XP: {outcome.XP} · Missões: {outcome.CompletedMissions}";
+                    if (outcome.IncompleteReasons.Count > 0)
+                    {
+                        // Sem o motivo, o piloto vê $0 com qualidade alta e não sabe por quê
+                        ShowFlightMessage("CONTRATO NÃO CUMPRIDO", $"{summary}\n{string.Join("\n", outcome.IncompleteReasons)}\nO contrato voltou ao mercado, sem multa.", AlertKind.Warning, sticky: true);
+                    }
+                    else
+                    {
+                        ShowFlightMessage("VOO CONCLUÍDO", summary, AlertKind.Info, sticky: true);
+                    }
                     
                     // Recarregar tudo do banco (isso vai atualizar as missões ativas restantes)
                     await InitializeForPilotAsync(PilotName);

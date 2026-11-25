@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Missions;
 using FlightCareer.Domain.Parts;
 using FlightCareer.Domain.Sensors;
 using FlightCareer.Infrastructure.Persistence;
@@ -9,6 +10,7 @@ using FlightCareer.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -150,6 +152,25 @@ namespace FlightCareer.UI.ViewModels
 
         public event Action? RequestClose;
 
+        /// <summary>Áreas, pontos e escalas dos contratos ativos, desenhados no mini-mapa.</summary>
+        public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
+        [ObservableProperty] private SurveyMapArea? _surveyArea;
+        private string _contractMarkersKey = string.Empty;
+
+        private void RefreshContractMarkers()
+        {
+            var missions = _flightMonitor.ActiveMissions;
+            string key = string.Join("|", missions.Select(m => m.Id));
+            if (key == _contractMarkersKey) return;
+            _contractMarkersKey = key;
+
+            var visuals = ContractMarkerBuilder.Build(missions);
+            // A área vem antes: o mapa a redesenha a cada mudança na coleção de marcadores
+            SurveyArea = visuals.SurveyArea;
+            ContractMarkers.Clear();
+            foreach (var marker in visuals.Markers) ContractMarkers.Add(marker);
+        }
+
         public DebugOverlayViewModel(
             SimConnectService simConnect,
             FlightMonitor flightMonitor,
@@ -269,6 +290,9 @@ namespace FlightCareer.UI.ViewModels
                     OriginLon = 0;
                     OriginIcao = string.Empty;
                 }
+
+                // Depois da origem e do destino, para o mapa enquadrar tudo
+                RefreshContractMarkers();
 
                 // Velocidades e Altitude
                 Altitude = Math.Round(data.Altitude, 0);

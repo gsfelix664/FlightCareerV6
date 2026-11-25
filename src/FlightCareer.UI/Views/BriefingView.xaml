@@ -154,10 +154,15 @@
 
                                                 <!-- Linha Intermediária: Contrato & Recompensa (visível se HasAssociatedMission == true) -->
                                                 <Border Visibility="{Binding HasAssociatedMission, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,0,5" Background="#141C24" CornerRadius="4" Padding="7,4">
+                                                    <StackPanel>
                                                     <Grid>
                                                         <TextBlock Text="{Binding MissionTitle}" FontSize="11.5" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,80,0"/>
                                                         <TextBlock Text="{Binding RewardMoney, StringFormat={}{0:C0}}" HorizontalAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
                                                     </Grid>
+                                                    <!-- Texto do contrato (objetivo da missão) -->
+                                                    <TextBlock Text="{Binding AssociatedMission.Description}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                               FontSize="11.5" Foreground="#CBD5E1" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                    </StackPanel>
                                                 </Border>
 
                                                 <!-- Linha Inferior: Carga & Ação na Escala -->
