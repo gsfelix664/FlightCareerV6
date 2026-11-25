@@ -263,6 +263,48 @@ namespace FlightCareer.Application.Services
                     payMultiplier, payTable, textCatalog, destCand.BestRunway);
             }
 
+            if (def.Generator == "patrol")
+            {
+                var patrol = MissionGenerator.CreatePatrolMissionSync(
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog, paxCount, cargoLbs, profile);
+                return patrol != null ? WithPersonLuggage(patrol, def, random) : null;
+            }
+
+            if (def.Generator == "line_inspection")
+            {
+                var line = MissionGenerator.CreateLineInspectionMissionSync(
+                    origin, def, random, referenceTime, payMultiplier, payTable, textCatalog, paxCount, cargoLbs, profile);
+                return line != null ? WithPersonLuggage(line, def, random) : null;
+            }
+
+            if (def.Generator == "traffic_orbit")
+            {
+                var orbit = MissionGenerator.CreateTrafficOrbitMissionSync(
+                    origin, def, random, referenceTime, payMultiplier, payTable, placesService, textCatalog, paxCount, cargoLbs, profile);
+                return orbit != null ? WithPersonLuggage(orbit, def, random) : null;
+            }
+
+            if (def.Generator == "sar_pattern")
+            {
+                var sar = MissionGenerator.CreateSarMissionSync(
+                    origin, def, random, referenceTime, payMultiplier, payTable, textCatalog, paxCount, cargoLbs, profile);
+                return sar != null ? WithPersonLuggage(sar, def, random) : null;
+            }
+
+            if (def.Generator == "round_trip")
+            {
+                var validCandidatesRoundTrip = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
+                if (validCandidatesRoundTrip.Count == 0) return null;
+                var destCand = PickDestination(def, validCandidatesRoundTrip, getAirportTags, random);
+                if (destCand == null) return null;
+                double actualIdaDist = MissionGenerator.CalculateDistance(
+                    origin.Latitude, origin.Longitude, destCand.Airport.Latitude, destCand.Airport.Longitude);
+                var roundTrip = MissionGenerator.CreateRoundTripMissionSync(
+                    origin, destCand.Airport, actualIdaDist, def, random, referenceTime,
+                    payMultiplier, payTable, textCatalog, paxCount, cargoLbs, destCand.BestRunway);
+                return roundTrip != null ? WithPersonLuggage(roundTrip, def, random) : null;
+            }
+
             if (def.Generator == "tgl_circuit")
             {
                 int tglCount = random.Next(3, 7);

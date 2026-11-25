@@ -355,8 +355,16 @@
   ],
   "saude_familia": [
     {
-      "title": "Ronda Médica e Vacinação ({dest})",
-      "description": "Ronda Médica e Vacinação: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Ronda Médica e Vacinação: {origin} a {dest}",
+      "description": "Transporte de equipe médica multidisciplinar ({pax} profissionais) e {cargo_lbs} lbs de insumos e caixas térmicas de vacinas de {origin} até {dest}. Parada completa no destino e retorno à base no mesmo dia."
+    },
+    {
+      "title": "Atendimento Médico Preventivo ({dest})",
+      "description": "Missão do programa de saúde da família. Deslocamento de {pax} especialistas e {cargo_lbs} lbs de suprimentos médicos para assistência em comunidade atendida por {dest}, com retorno completo para {origin}."
+    },
+    {
+      "title": "Ronda de Saúde e Imunização ({dest})",
+      "description": "Voo de apoio ao programa de saúde comunitária. Leve {pax} profissionais de saúde e {cargo_lbs} lbs de material odontológico e vacinas para atendimento em {dest}, retornando a {origin}."
     }
   ],
   "aerolevantamento": [
@@ -407,26 +415,58 @@
   ],
   "patrulha_vigilancia": [
     {
-      "title": "Patrulha e Vigilância de Área ({dest})",
-      "description": "Patrulha e Vigilância de Área: voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Patrulha e Vigilância de Área: {target}",
+      "description": "Voo de patrulha e vigilância ambiental cobrindo {sectors_count} setores sobre {target}. Voe a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Retorno para pouso em {origin}."
+    },
+    {
+      "title": "Monitoramento e Prevenção de Queimadas ({target})",
+      "description": "Vigilância aérea preventiva sobre {target}. Inspecione todos os {sectors_count} setores demarcados mantendo voo visual dentro dos limites operacionais com {pax} fiscal(is) a bordo antes do retorno a {origin}."
+    },
+    {
+      "title": "Patrulha Rural e Contagem de Rebanho: {target}",
+      "description": "Inspeção patrimonial e contagem de rebanho cobrindo {sectors_count} setores em {target} a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Decolagem e pouso em {origin}."
     }
   ],
   "inspecao_linhas": [
     {
-      "title": "Inspeção de Linhas e Dutos ({dest})",
-      "description": "Inspeção de Linhas e Dutos: voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Inspeção Aérea de {line_kind} ({points_count} pontos)",
+      "description": "Inspeção técnica e visual ao longo do traçado de {line_kind}. Siga os {points_count} marcos da rota a até {max_alt} ft com {pax} inspetor(es) e retorne para pouso em {origin}."
+    },
+    {
+      "title": "Monitoramento de {line_kind}: {origin} ({distance_nm} NM)",
+      "description": "Voo de monitoramento de infraestrutura seguindo o alinhamento de {line_kind} por {points_count} pontos de checagem a baixa altura com {pax} especialista(s). Retorno à base em {origin}."
+    },
+    {
+      "title": "Vistoria Técnica de {line_kind} ({points_count} pontos)",
+      "description": "Varredura aérea de segurança patrimonial sobre {line_kind}. Navegue estritamente ao longo dos {points_count} pontos do traçado abaixo de {max_alt} ft com {pax} tripulante(s) e retorne a {origin}."
     }
   ],
   "monitoramento_trafego": [
     {
-      "title": "Monitoramento de Tráfego e Eventos ({dest})",
-      "description": "Monitoramento de Tráfego e Eventos: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+      "title": "Monitoramento de Tráfego: {target} ({minutes} min)",
+      "description": "Apoio aéreo e observação de fluxo viário sobre {target}. Mantenha órbita por {minutes} minutos entre {min_alt} e {max_alt} ft com {pax} observador(es) e {cargo_lbs} lbs de equipamento de transmissão. Pouso em {origin}."
+    },
+    {
+      "title": "Cobertura Aérea de Evento: {target}",
+      "description": "Voo de suporte à segurança e transmissão sobre {target}. Permaneça em órbita de {minutes} minutos na faixa de {min_alt} a {max_alt} ft com {pax} passageiro(s) e {cargo_lbs} lbs de carga, retornando a {origin}."
+    },
+    {
+      "title": "Vigilância de Malha Viária: {target} ({minutes} min)",
+      "description": "Monitoramento de fluxo rodoviário na área de {target}. Execute órbita de {minutes} minutos sobre o local com {pax} tripulante(s) técnico(s) e {cargo_lbs} lbs de equipamentos, retornando para pouso em {origin}."
     }
   ],
   "sar": [
     {
-      "title": "Busca e Salvamento (SAR) ({dest})",
-      "description": "Busca e Salvamento (SAR): voo de {origin} para {dest} com {pax} passageiros."
+      "title": "Busca e Salvamento (SAR): {target_name}",
+      "description": "Operação de busca e salvamento visual ({pattern_kind}) visando localizar {target_name}. Cumpra as pernas do padrão a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Retorno a {origin}."
+    },
+    {
+      "title": "Missão SAR de Emergência ({target_name})",
+      "description": "Varredura de busca visual para resgate de {target_name}. Execute o padrão de busca a baixa altura com {pax} tripulante(s) de resgate e retorne para pouso em {origin}."
+    },
+    {
+      "title": "Varredura e Busca Visual: {target_name}",
+      "description": "Localização de emergência de {target_name} em operação de busca aérea com {pax} observador(es). Conduza o padrão {pattern_kind} a até {max_alt} ft e retorne a {origin}."
     }
   ],
   "calibracao_auxilios": [
@@ -583,6 +623,34 @@
     {
       "title": "Voo Panorâmico ({dest})",
       "description": "Voo Panorâmico: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "sar:expanding_square": [
+    {
+      "title": "Busca SAR em Quadrado Crescente: {target_name}",
+      "description": "Varredura visual em padrão de quadrado crescente (expanding square) para localizar {target_name}. Voe as pernas a até {max_alt} ft e {max_speed} kt com {pax} observador(es) e retorne a {origin}."
+    },
+    {
+      "title": "Varredura em Expanding Square: {target_name}",
+      "description": "Operação SAR com padrão de quadrado crescente sobre a área do datum visando encontrar {target_name}. Voo com {pax} observador(es) e pouso em {origin}."
+    },
+    {
+      "title": "Busca Concentrada em Quadrado: {target_name}",
+      "description": "Padrão de busca visual em expansão retangular a partir do datum para localização de {target_name}. Teto de {max_alt} ft com {pax} tripulante(s) e retorno a {origin}."
+    }
+  ],
+  "sar:creeping_line": [
+    {
+      "title": "Busca SAR em Rota Paralela: {target_name}",
+      "description": "Varredura visual em padrão de pernas paralelas (creeping line) para busca de {target_name}. Mantenha voo a até {max_alt} ft e {max_speed} kt com {pax} observador(es) e retorne a {origin}."
+    },
+    {
+      "title": "Varredura em Creeping Line: {target_name}",
+      "description": "Operação SAR em varredura transversal ao longo do eixo de avanço para localizar {target_name}. Condução com {pax} observador(es) e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Busca em Faixas Paralelas: {target_name}",
+      "description": "Padrão de busca aérea em linhas paralelas sucessivas para localização de {target_name}. Varredura com {pax} especialista(s) a até {max_alt} ft e pouso final em {origin}."
     }
   ]
 }
