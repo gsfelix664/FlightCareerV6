@@ -507,6 +507,26 @@
                             </Border>
                         </UniformGrid>
 
+                        <!-- Linha de Prazo do Bônus de XP (vermelha em missão urgente/médica) -->
+                        <TextBlock Text="{Binding SelectedMissionItem.DeadlineSummary}"
+                                   Visibility="{Binding SelectedMissionItem.HasDeadlineSummary, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   FontSize="11.5"
+                                   FontWeight="SemiBold"
+                                   FontFamily="Inter, Segoe UI, sans-serif"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,6">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#8B9BAE"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SelectedMissionItem.IsUrgentDeadline}" Value="True">
+                                            <Setter Property="Foreground" Value="#EF4444"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
                         <!-- Linha de Carga Operacional / Carga Perigosa -->
                         <TextBlock Text="{Binding SelectedMissionItem.CargoSummary}"
                                    Visibility="{Binding SelectedMissionItem.HasCargoSummary, Converter={StaticResource BooleanToVisibilityConverter}}"

@@ -3281,3 +3281,8 @@
 - `MissionDisplayItem` e `MissionsView.xaml` exibem resumo e sinalização de carga perigosa no pré-despacho.
 - `mission_texts.json` expandido com variantes dinâmicas usando marcadores `{cargo}` e `{cargo_note}`.
 - Testes unitários dedicados em `CargoKindCatalogTests` e snapshot golden atualizado exclusivamente nos títulos de missões de carga (59 registros, 0 divergências em demais campos).
+
+## 2026-11-25 - Prazo do bônus de XP no quadro (Claude)
+- `Domain/Xp/XpDeadline.cs`: limites do bônus de prazo antes do voo, com a mesma regra do `XpCalculator` › 5.3 (ETE = distância ÷ cruzeiro + `EteFixedBufferMinutes`; ≤ 90 % → +30/+60 XP; ≤ 115 % → +15 XP). Nulo em voo local.
+- Pré-despacho (`MissionDisplayItem.DeadlineSummary`, `MissionsView.xaml`): linha "Prazo: +N XP com voo até …", vermelha em missão urgente ou do quadro `Medica`. Melhoria 2 (saúde) do `missoes-locais-rp.md` fechada.
+- Testes `XpDeadlineTests`. 1.141/1.141. Não conferido no app (só build).

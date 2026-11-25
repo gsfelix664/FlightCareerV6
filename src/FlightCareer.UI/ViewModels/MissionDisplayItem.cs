@@ -21,6 +21,12 @@ namespace FlightCareer.UI.ViewModels
         public bool IsDangerousGoods { get; }
         public bool HasCargoSummary => !string.IsNullOrEmpty(CargoSummary);
 
+        /// <summary>Linha de prazo do bônus de XP no pré-despacho (vazia em voo local).</summary>
+        public string DeadlineSummary { get; } = string.Empty;
+        /// <summary>Missão urgente ou do quadro médico: bônus de prazo maior, linha em destaque.</summary>
+        public bool IsUrgentDeadline { get; }
+        public bool HasDeadlineSummary => !string.IsNullOrEmpty(DeadlineSummary);
+
         // Dicionário de Códigos ICAO que divergiram entre a base DECEA/AISWEB e a base do MSFS (Asobo/NavBlue)
         public static readonly System.Collections.Generic.Dictionary<string, string> MsfsIcaoAliases = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -380,6 +386,15 @@ namespace FlightCareer.UI.ViewModels
                 origin: null,
                 destination: null,
                 legs: legs);
+
+            // Prazo do bônus de XP (mesma regra do fim do voo, XpCalculator › 5.3)
+            IsUrgentDeadline = mission.Urgency > 1.0 || def?.Board == MissionBoardKind.Medica;
+            var deadline = FlightCareer.Domain.Xp.XpDeadline.Compute(
+                mission.DistanceNM, estSpeed, IsUrgentDeadline, isCircuitOrTgl);
+            DeadlineSummary = deadline == null
+                ? string.Empty
+                : $"Prazo{(IsUrgentDeadline ? " (urgente)" : "")}: +{deadline.OnTimeBonusXp:F0} XP com voo até {FlightCareer.Domain.Xp.XpDeadline.FormatMinutes(deadline.OnTimeLimitMinutes)}"
+                  + $" · +{deadline.AcceptableBonusXp:F0} XP até {FlightCareer.Domain.Xp.XpDeadline.FormatMinutes(deadline.AcceptableLimitMinutes)}";
 
             if (!string.IsNullOrEmpty(mission.CargoName))
             {
