@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace FlightCareer.Domain.Missions
 {
+    public enum OverflyAltitudeState { InBand, Below, Above }
+
     /// <summary>
     /// Rastreia o cumprimento de pontos de sobrevoo obrigatórios em missões panorâmicas.
     /// Condição: aeronave passar a <= 2.0 NM de distância horizontal e altitude <= elevação + 3000 ft.
@@ -16,11 +18,36 @@ namespace FlightCareer.Domain.Missions
 
         public bool HasWaypoints => _targets.Count > 0;
         public IReadOnlySet<string> VisitedWaypoints => _visited;
+        public IReadOnlyList<OverflyPoint> Targets => _targets;
+        public double? LastLatitude { get; private set; }
+        public double? LastLongitude { get; private set; }
+        public double? LastAltitudeFt { get; private set; }
+
+        public static OverflyAltitudeState EvaluateAltitude(OverflyPoint point, double altitudeFt)
+        {
+            if (point.MinAglFt > 0.0)
+            {
+                double minAllowedAlt = point.ElevationFt + point.MinAglFt - AltitudeToleranceFt;
+                double maxAllowedAlt = point.ElevationFt + point.MaxAglFt + AltitudeToleranceFt;
+                if (altitudeFt < minAllowedAlt) return OverflyAltitudeState.Below;
+                if (altitudeFt > maxAllowedAlt) return OverflyAltitudeState.Above;
+                return OverflyAltitudeState.InBand;
+            }
+            else
+            {
+                double maxAllowedAltitudeFt = point.ElevationFt + point.MaxAglFt;
+                if (altitudeFt > maxAllowedAltitudeFt) return OverflyAltitudeState.Above;
+                return OverflyAltitudeState.InBand;
+            }
+        }
 
         public void ConfigureWaypoints(IEnumerable<OverflyPoint> waypoints)
         {
             _targets.Clear();
             _visited.Clear();
+            LastLatitude = null;
+            LastLongitude = null;
+            LastAltitudeFt = null;
             if (waypoints != null)
             {
                 _targets.AddRange(waypoints);
@@ -31,6 +58,9 @@ namespace FlightCareer.Domain.Missions
         {
             _targets.Clear();
             _visited.Clear();
+            LastLatitude = null;
+            LastLongitude = null;
+            LastAltitudeFt = null;
         }
 
         public bool IsPointVisited(string ident)
@@ -41,6 +71,10 @@ namespace FlightCareer.Domain.Missions
 
         public void Update(double currentLat, double currentLon, double currentAltitudeFt)
         {
+            LastLatitude = currentLat;
+            LastLongitude = currentLon;
+            LastAltitudeFt = currentAltitudeFt;
+
             if (_targets.Count == 0) return;
 
             for (int i = 0; i < _targets.Count; i++)
@@ -51,22 +85,9 @@ namespace FlightCareer.Domain.Missions
                 double distNM = CalculateDistanceNM(currentLat, currentLon, point.Latitude, point.Longitude);
                 if (distNM <= point.RadiusNm)
                 {
-                    if (point.MinAglFt > 0.0)
+                    if (EvaluateAltitude(point, currentAltitudeFt) == OverflyAltitudeState.InBand)
                     {
-                        double minAllowedAlt = point.ElevationFt + point.MinAglFt - AltitudeToleranceFt;
-                        double maxAllowedAlt = point.ElevationFt + point.MaxAglFt + AltitudeToleranceFt;
-                        if (currentAltitudeFt >= minAllowedAlt && currentAltitudeFt <= maxAllowedAlt)
-                        {
-                            _visited.Add(point.Ident);
-                        }
-                    }
-                    else
-                    {
-                        double maxAllowedAltitudeFt = point.ElevationFt + point.MaxAglFt;
-                        if (currentAltitudeFt <= maxAllowedAltitudeFt)
-                        {
-                            _visited.Add(point.Ident);
-                        }
+                        _visited.Add(point.Ident);
                     }
                 }
             }

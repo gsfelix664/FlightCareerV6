@@ -62,6 +62,7 @@ namespace FlightCareer.UI.Services
         public PilotAircraft? CurrentAircraft => _aircraft;
         public Guid? WatchedAircraftId => _aircraft?.Id ?? _watchedAircraft?.Id;
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
+        public string ContractProgressText { get; private set; } = string.Empty;
         private bool _isAirborne;
         private bool _hasTouchedDown;
         private DateTime _liftoffTime = DateTime.MinValue;
@@ -678,6 +679,7 @@ namespace FlightCareer.UI.Services
             _stolTracker.Reset(_simConnect.CurrentData.IsOnGround);
             _checkFlightTracker.Reset();
             _ferryMonitor.Reset(_simConnect.CurrentData.IsOnGround);
+            ContractProgressText = string.Empty;
             foreach (var m in missions)
             {
                 var def = MissionCatalog.Shared.Get(m.SubId);
@@ -1240,6 +1242,18 @@ namespace FlightCareer.UI.Services
             {
                 _ferryMonitor.Update(data.IsOnGround, data.Altitude, data.FlapsPercent, simDt);
             }
+
+            ContractProgressText = ContractProgressFormatter.Build(
+                _activeMissions,
+                new ContractProgressInputs(
+                    _touchAndGoCounter.Count,
+                    _overflyTracker,
+                    _surveyTracker,
+                    _skydiveTracker,
+                    _multiStopTracker,
+                    _stolTracker,
+                    _checkFlightTracker,
+                    _ferryMonitor));
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
             if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
