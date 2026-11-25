@@ -3268,3 +3268,4 @@
 - `militar_can` ganhou `requireAnyTag` (`militar`, `militar_misto`): não sai mais de aeroporto civil.
 - Peso do destino preferido de saúde 150 → 100 em `orgaos`, `uti_longa_distancia` e `medevac_remoto`.
 - `missions_golden.json` regenerado; teste `MilitarCan_OrigemCivil_NaoSorteia`. 1.121/1.121 testes. Não testado no MSFS.
+- `career-stab --days 1095 --bots 20 --seed 1 --difficulty medium --policy agressivo --fast`: falidos 25 % no dia 365 e 40 % no dia 1095; patrimônio mediano no dia 1095 $3,9 mi (classe F). Sem comparação com a versão anterior aos aeroportos novos.
