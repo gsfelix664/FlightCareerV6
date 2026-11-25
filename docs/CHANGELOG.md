@@ -3185,3 +3185,11 @@
 ## 2026-11-25 - Revisão e merge SISTEMAS (Claude)
 - Revisão (`docs/reviews/SISTEMAS-revisao.md`, APROVADO): cobertura linha a linha do AGENTS antigo conferida; restaurados detalhes perdidos ao encurtar a § 6 (Key Events: prioridade e roteamento `OnObservedEvent`/`OnMaskedEvent`; Banco: regra de copiar valores entre contextos e nomes/tipos do EF; SimVar inválida). Índice com 2 classes por sistema. `AGENTS.md` final: 14.951 bytes no git. Lição nova em `LICOES.md`.
 - Build 0 erros; testes 1.057/1.057.
+
+## 2026-11-25 - Corte dos jatos de linha e 115 aeroportos com voo regular (Claude)
+- `tier-report`/`board-report` no PC de casa: SDCO (58), SBTF (79) e PABE (99) são tier 2 e geravam jatos de linha.
+- Decisão do usuário: aeroporto só com `linha_auto` vira `linha_auto:hub` se for tier 1, ou tier 2 com `TierScore` ≥ 100 (`LinhaAutoHubTier2MinScore`).
+- Lista de 300 ICAO do usuário: 115 novos em `pax_hubs_curated.csv` (`SBQV` → `SBVC`; `OKKK` sem efeito no MSFS, que usa `OKBK`).
+- `airport_profiles.py` aceita o `tier-report.csv` e usa o tier do jogo nas heurísticas; `airport_profiles.json` regenerado (10.974 → 12.385 aeroportos com perfil; bem mais `isolado`/`interior_distante`). Regras de tier na versão 3 (recalcula bancos existentes). Tier 1: 457 → 486.
+- Snapshot `missions_golden.json` regenerado. Build 0 erros; testes 1.058/1.058.
+- `career-stab` Médio, 1095 dias, 3 bots, base × branch: sem alertas; patrimônio de cauteloso e equilibrado no dia 1095 +1 a 2 %. Agressivo: falência 67 % → 100 % no dia 1095 (3 bots; já era frágil). Não testado no MSFS.
