@@ -42,7 +42,16 @@ Outros achados do 2º voo:
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
-## Próxima tarefa (sessão nova, PC de casa)
+## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
+1. **HUD com o `StatusText` dos rastreadores** ("Escala 2/4", "Passo 3/4", e a faixa da área de instrução atingida ou não). Recomendado primeiro: ajuda os próximos testes no MSFS. Modelo: **Opus** (spec + revisão de `FlightMonitor`/`DebugOverlayViewModel`), Gemini implementa.
+2. **Pacote de correções de missões:** `check_flight` paga sempre por 30 NM; `pinga_pinga` passa de 400 NM no total; paraquedismo com 25 NM fixos. Lógica pura com teste e snapshot `missions_golden.json`. Modelo: **Sonnet** para a spec curta, Gemini implementa.
+3. **Áreas de instrução reais (híbrido):** pesquisar licença e formato do openAIP (áreas tipo training/TRA no Brasil e no mundo), propor importação em tempo de desenvolvimento para `Data/places/` e fallback procedural. Modelo: **Opus** (pesquisa e plano em `docs/plans/missoes-locais-rp.md`).
+4. **Próximo lote da E2C** (13 tipos desligados, ex. `instrucao_ifr`, `demo_flight`, `pulverizacao`). Modelo: **Opus** para a spec do lote.
+5. `board-report --coverage` mais rápido (rotina, **Sonnet** + Gemini).
+- Antes de qualquer uma, o usuário pode resolver as decisões abertas abaixo (perguntas rápidas, **Sonnet**).
+- Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`, precisa conferir no sim) e os itens "Precisam do MSFS".
+
+## Próxima tarefa no PC de casa (com MSFS)
 Mais testes de missões no MSFS (Sonnet basta para ler logs): instrução local na faixa com 1–2 TGL; depois triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
 
 ## Pendências
