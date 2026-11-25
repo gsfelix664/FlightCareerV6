@@ -18,5 +18,6 @@
     - Pouso STOL (`StolLandingTracker`): aproximação íngreme e parada curta em pista remota (`instrucao_stol`).
     - Voo de cheque técnico (`CheckFlightTracker`): perfil de manobras e potência retornando à origem (`check_flight`).
     - Translado de manutenção restrito (`FerryRestrictionMonitor`): limites de teto e flaps (`ferry_permit`).
+  - Distâncias em geradores especiais (`check_flight`, `paraquedismo` e `pinga_pinga`) respeitam `profile.rangeNm` do catálogo; `pinga_pinga` controla teto acumulado com reserva por etapa restante e mínimo total (2026-11-25).
   - Conclusão avaliada puramente em `MissionCompletion.Evaluate` recebendo `MissionTrackerResults`. Contratos não cumpridos retornam ao mercado sem penalidade financeira.
   - Textos e briefing: `mission_texts.json` fornece variantes narrativas com marcadores dinâmicos. `ContractMarkerBuilder` projeta marcadores e polígonos no mapa tático do briefing (`FlightMapControl.xaml.cs`). Não testado visualmente no simulador.

@@ -289,7 +289,7 @@ namespace FlightCareer.Tests.Missions
             Assert.InRange(surveyData.RequiredLegs, 3, 5);
             Assert.InRange(surveyData.TargetAltitudeFt, 3100, 6000);
 
-            var skydive = MissionGenerator.CreateSkydiveMissionSync(origin, subSkydive, rng, DateTime.UtcNow);
+            var skydive = MissionGenerator.CreateSkydiveMissionSync(origin, subSkydive, rng, DateTime.UtcNow, 25.0);
             Assert.Equal("3.6.2", skydive.SubId);
             Assert.Equal(CareerPhase.Phase2_SAE, skydive.RequiredPhase);
             Assert.InRange(skydive.PassengerCount, 4, 10);
