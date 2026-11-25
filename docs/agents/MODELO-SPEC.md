@@ -8,6 +8,7 @@
 - `caminho/Arquivo.cs:linha` — o que existe ali (assinatura, campo, regra)
 - Padrão a seguir: classe/arquivo parecido que já resolve algo igual
 - Decisões do usuário que valem (link para `docs/plans/<plano>.md` › seção)
+- Sistema: `docs/sistemas/<sistema>.md` (o executor lê)
 - Armadilhas do `AGENTS.md` › 6 que se aplicam (e, se for arquivo quente, o passo a passo do que mudar)
 
 ## 3. Arquivos
@@ -25,5 +26,5 @@ Tipos, métodos, campos do JSON, valores (de preferência em dado, não em códi
 2. Snapshot `missions_golden.json`: **deve ficar igual** | pode mudar (dizer por quê e o que conferir).
 3. Medição (se houver): comando exato e o que colar no relatório. O que **não** rodar (ex.: `career-stab`, simulações longas: o revisor roda).
 4. Relatório declara o que não foi testado no MSFS.
-5. `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (<ID>) (Gemini)`) e `AGENTS.md` › 7 se o estado de um sistema mudou.
+5. `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (<ID>) (Gemini)`) e `docs/sistemas/<sistema>.md` se o estado de um sistema mudou.
 6. Um commit: `tipo(escopo): descrição (<ID>)`.

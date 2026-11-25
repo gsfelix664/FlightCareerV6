@@ -7,7 +7,7 @@ Siga este arquivo à risca.
 
 ## 1. Antes de começar (toda sessão)
 
-1. Leia por completo: `AGENTS.md`, `gemini.md`, `docs/agents/LICOES.md`, `docs/plans/pecas-desgaste-falhas.md`, `docs/plans/sensor-inventory.md`.
+1. Leia por completo: `AGENTS.md`, `gemini.md`, `docs/agents/LICOES.md`, `docs/plans/pecas-desgaste-falhas.md`, `docs/plans/sensor-inventory.md` e o `docs/sistemas/<sistema>.md` do sistema da tarefa (a spec indica).
 2. Rode `git status` e `git log --oneline -5`. Se houver alterações que não são suas, **pare**: em modo interativo pergunte ao usuário; em modo não interativo registre no relatório e encerre.
 3. Veja no "Diário de execução" do plano qual é a **próxima tarefa**. Leia em `docs/reviews/` a última revisão do Claude: se ela pediu correções, a próxima tarefa é **corrigir**, não avançar.
 

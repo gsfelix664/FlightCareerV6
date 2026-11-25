@@ -3175,3 +3175,9 @@
 - `docs/agents/MODELO-SPEC.md` reescrito com fatos levantados, fora do escopo, snapshot esperado e o que não rodar; `tools/agents/prompt-executor.md` com saída filtrada e sem ler arquivos grandes inteiros.
 - `tools/agents/global/CLAUDE.md` ganhou a seção "Economia de quota" (vale para todos os projetos; instalar com `tools/agents/install-global.sh` em cada PC).
 - `docs/agents/HANDOFF.md` reduzido ao estado atual, com os passos para configurar o PC de casa.
+
+## 2026-11-25 - Instruções sob demanda: estado dos sistemas em docs/sistemas (SISTEMAS) (Gemini)
+- `AGENTS.md` reduzido de 39.707 bytes para 14.937 bytes (limite <= 15.000 bytes): regras, comandos, armadilhas técnicas e índice tabular na seção 7.
+- Criação de `docs/sistemas/` com 13 arquivos temáticos (`desgaste-falhas.md`, `pecas.md`, `manutencao-hangar.md`, `panes-persistentes.md`, `voo-integridade.md`, `combustivel.md`, `economia-dificuldade.md`, `xp-fases.md`, `missoes-quadro.md`, `aeroportos-tiers.md`, `limites-aeronave.md`, `sensores.md`, `hud.md`) e `README.md` contendo os blocos literais da antiga seção 7 e decisões técnicas da seção 6.
+- Seção `Sessões e economia de quota` adicionada ao final de `docs/agents/ORQUESTRACAO.md` preservando integralmente o texto das seções 4.9 e 4.10 do AGENTS.
+- Atualização das referências cruzadas em `CLAUDE.md`, `gemini.md`, `.antigravity/rules.md`, `docs/agents/MODELO-SPEC.md`, `tools/agents/prompt-executor.md` e `docs/plans/INSTRUCOES-GEMINI.md`.
