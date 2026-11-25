@@ -155,6 +155,8 @@ namespace FlightCareer.UI.ViewModels
         /// <summary>Áreas, pontos e escalas dos contratos ativos, desenhados no mini-mapa.</summary>
         public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
         [ObservableProperty] private SurveyMapArea? _surveyArea;
+        [ObservableProperty] private string _contractProgressText = string.Empty;
+        [ObservableProperty] private bool _hasContractProgress;
         private string _contractMarkersKey = string.Empty;
 
         private void RefreshContractMarkers()
@@ -293,6 +295,9 @@ namespace FlightCareer.UI.ViewModels
 
                 // Depois da origem e do destino, para o mapa enquadrar tudo
                 RefreshContractMarkers();
+
+                ContractProgressText = _flightMonitor.IsMonitoring ? _flightMonitor.ContractProgressText : string.Empty;
+                HasContractProgress = ContractProgressText.Length > 0;
 
                 // Velocidades e Altitude
                 Altitude = Math.Round(data.Altitude, 0);
