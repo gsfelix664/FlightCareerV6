@@ -3263,3 +3263,8 @@
 - Um só caminho de sorteio: elegibilidade e pesos de destino deixaram de estar duplicados entre o relatório e o jogo; o jogo também usa o cache (vida de um quadro).
 - `board-report` lê aeroportos e pistas em ordem fixa: antes a mesma semente variava entre execuções (Ids novos a cada seed).
 - Medido contra o código antigo com a mesma ordem (10 aeroportos × 10 quadros, Release): CSVs e relatório idênticos; tempo total 64 s → 31 s (quadros ~16 s, cerca de 3×); pico de memória ~415 MB nos dois.
+
+## 2026-11-25 - Decisões abertas das missões: CAN militar e saúde (Claude)
+- `militar_can` ganhou `requireAnyTag` (`militar`, `militar_misto`): não sai mais de aeroporto civil.
+- Peso do destino preferido de saúde 150 → 100 em `orgaos`, `uti_longa_distancia` e `medevac_remoto`.
+- `missions_golden.json` regenerado; teste `MilitarCan_OrigemCivil_NaoSorteia`. 1.121/1.121 testes. Não testado no MSFS.
