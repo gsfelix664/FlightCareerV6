@@ -124,5 +124,27 @@ namespace FlightCareer.Tests.Missions
             var resOk = MissionCompletion.Evaluate(mission, "SBJD", visitedWaypoints: visited, touchAndGoCount: 2);
             Assert.True(resOk.IsCompleted);
         }
+
+        [Fact]
+        public void MissionCompletion_FaixaNaoCumprida_MensagemComAltitudes()
+        {
+            var mission = new Mission
+            {
+                SubId = "3.4.1",
+                OriginICAO = "SBJD",
+                DestinationICAO = "SBJD",
+                RequiredTouchAndGoes = 2,
+                OverflyWaypoints = "P:Área de instrução N@-23.05,-46.90,3.0,4000,2500"
+            };
+
+            var visited = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+            var result = MissionCompletion.Evaluate(mission, "SBJD", visitedWaypoints: visited, touchAndGoCount: 2);
+
+            Assert.False(result.IsCompleted);
+            Assert.Contains("Sobrevoo incompleto", result.Reason);
+            Assert.Contains("Área de instrução N", result.Reason);
+            Assert.Contains("voe entre", result.Reason);
+            Assert.Contains("acima da origem", result.Reason);
+        }
     }
 }

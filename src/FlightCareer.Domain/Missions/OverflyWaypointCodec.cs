@@ -11,7 +11,8 @@ namespace FlightCareer.Domain.Missions
         double? Lat = null,
         double? Lon = null,
         double RadiusNm = 2.0,
-        double MaxAglFt = 3000.0);
+        double MaxAglFt = 3000.0,
+        double MinAglFt = 0.0);
 
     public static class OverflyWaypointCodec
     {
@@ -57,7 +58,13 @@ namespace FlightCareer.Domain.Missions
                         maxAglFt = agl;
                     }
 
-                    result.Add(new OverflyWaypointItem(name, false, lat, lon, radiusNm, maxAglFt));
+                    double minAglFt = 0.0;
+                    if (parts.Length >= 5 && double.TryParse(parts[4], NumberStyles.Float, CultureInfo.InvariantCulture, out double minAgl))
+                    {
+                        minAglFt = minAgl;
+                    }
+
+                    result.Add(new OverflyWaypointItem(name, false, lat, lon, radiusNm, maxAglFt, minAglFt));
                 }
                 else
                 {
@@ -96,7 +103,16 @@ namespace FlightCareer.Domain.Missions
                     sb.Append((item.Lat ?? 0.0).ToString("F5", CultureInfo.InvariantCulture));
                     sb.Append(',');
                     sb.Append((item.Lon ?? 0.0).ToString("F5", CultureInfo.InvariantCulture));
-                    if (Math.Abs(item.RadiusNm - 2.0) > 0.001 || Math.Abs(item.MaxAglFt - 3000.0) > 0.001)
+                    if (item.MinAglFt > 0.001)
+                    {
+                        sb.Append(',');
+                        sb.Append(item.RadiusNm.ToString("F1", CultureInfo.InvariantCulture));
+                        sb.Append(',');
+                        sb.Append(item.MaxAglFt.ToString("F0", CultureInfo.InvariantCulture));
+                        sb.Append(',');
+                        sb.Append(item.MinAglFt.ToString("F0", CultureInfo.InvariantCulture));
+                    }
+                    else if (Math.Abs(item.RadiusNm - 2.0) > 0.001 || Math.Abs(item.MaxAglFt - 3000.0) > 0.001)
                     {
                         sb.Append(',');
                         sb.Append(item.RadiusNm.ToString("F1", CultureInfo.InvariantCulture));
@@ -111,7 +127,7 @@ namespace FlightCareer.Domain.Missions
             return sb.ToString();
         }
 
-        public static string FormatCoordinatePoint(string name, double lat, double lon, double? radiusNm = null, double? maxAglFt = null)
+        public static string FormatCoordinatePoint(string name, double lat, double lon, double? radiusNm = null, double? maxAglFt = null, double? minAglFt = null)
         {
             var sb = new StringBuilder();
             sb.Append("P:");
@@ -120,7 +136,18 @@ namespace FlightCareer.Domain.Missions
             sb.Append(lat.ToString("F5", CultureInfo.InvariantCulture));
             sb.Append(',');
             sb.Append(lon.ToString("F5", CultureInfo.InvariantCulture));
-            if (radiusNm.HasValue)
+            if (minAglFt.HasValue && minAglFt.Value > 0.001)
+            {
+                double r = radiusNm ?? 2.0;
+                double max = maxAglFt ?? 3000.0;
+                sb.Append(',');
+                sb.Append(r.ToString("F1", CultureInfo.InvariantCulture));
+                sb.Append(',');
+                sb.Append(max.ToString("F0", CultureInfo.InvariantCulture));
+                sb.Append(',');
+                sb.Append(minAglFt.Value.ToString("F0", CultureInfo.InvariantCulture));
+            }
+            else if (radiusNm.HasValue)
             {
                 sb.Append(',');
                 sb.Append(radiusNm.Value.ToString("F1", CultureInfo.InvariantCulture));

@@ -932,9 +932,9 @@
     "CargoLbs": 0,
     "Reward": 739.92,
     "DistanceNm": 20,
-    "Title": "Instrução Local: Manobras no Setor NE (3 TGL)",
-    "RequiredTouchAndGoes": 3,
-    "OverflyWaypoints": "P:Área de instrução NE@-22.93674,-47.08109,3.0,6000",
+    "Title": "Instrução Local: Manobras no Setor NE (2 TGL)",
+    "RequiredTouchAndGoes": 2,
+    "OverflyWaypoints": "P:Área de instrução NE@-22.93674,-47.08109,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -1199,8 +1199,8 @@
     "Reward": 1025.07,
     "DistanceNm": 38,
     "Title": "Treinamento em Voo: Setor NE e Toques em SBRP",
-    "RequiredTouchAndGoes": 3,
-    "OverflyWaypoints": "P:Área de instrução NE@-21.03904,-47.54847,3.0,6000",
+    "RequiredTouchAndGoes": 2,
+    "OverflyWaypoints": "P:Área de instrução NE@-21.03904,-47.54847,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -1410,7 +1410,7 @@
     "DistanceNm": 35,
     "Title": "Treinamento em Voo: Setor NW e Toques em SBJR",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução NW@-22.82082,-43.51338,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução NW@-22.82082,-43.51338,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -1436,9 +1436,9 @@
     "CargoLbs": 0,
     "Reward": 1008.4,
     "DistanceNm": 32,
-    "Title": "Instrução Local: Manobras no Setor SE (2 TGL)",
-    "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução SE@-23.10801,-43.22296,3.0,6000",
+    "Title": "Instrução Local: Manobras no Setor SE (1 TGL)",
+    "RequiredTouchAndGoes": 1,
+    "OverflyWaypoints": "P:Área de instrução SE@-23.10801,-43.22296,3.0,3500,2500",
     "ContractData": null
   },
   {
@@ -1466,7 +1466,7 @@
     "DistanceNm": 33,
     "Title": "Instrução Local: Manobras no Setor SE (2 TGL)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução SE@-23.16514,-43.28539,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução SE@-23.16514,-43.28539,3.0,4000,2500",
     "ContractData": null
   },
   {
@@ -1648,7 +1648,7 @@
     "DistanceNm": 31,
     "Title": "Voo de Cheque / Revalidação (SBJR)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução W@-22.92355,-43.54644,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução W@-22.92355,-43.54644,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -1730,9 +1730,9 @@
     "CargoLbs": 0,
     "Reward": 873.73,
     "DistanceNm": 26,
-    "Title": "Instrução Local: Manobras no Setor SW (3 TGL)",
-    "RequiredTouchAndGoes": 3,
-    "OverflyWaypoints": "P:Área de instrução SW@-23.56325,-46.77090,3.0,6000",
+    "Title": "Instrução Local: Manobras no Setor SW (2 TGL)",
+    "RequiredTouchAndGoes": 2,
+    "OverflyWaypoints": "P:Área de instrução SW@-23.56325,-46.77090,3.0,3500,2500",
     "ContractData": null
   },
   {
@@ -1760,7 +1760,7 @@
     "DistanceNm": 29,
     "Title": "Voo de Cheque / Revalidação (SBMT)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução N@-23.34714,-46.63167,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução N@-23.34714,-46.63167,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -1857,8 +1857,8 @@
     "Reward": 850.79,
     "DistanceNm": 25,
     "Title": "Treinamento em Voo: Setor SW e Toques em SBMT",
-    "RequiredTouchAndGoes": 3,
-    "OverflyWaypoints": "P:Área de instrução SW@-23.62390,-46.69187,3.0,6000",
+    "RequiredTouchAndGoes": 2,
+    "OverflyWaypoints": "P:Área de instrução SW@-23.62390,-46.69187,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2011,8 +2011,8 @@
     "Reward": 1059.18,
     "DistanceNm": 37,
     "Title": "Treinamento em Voo: Setor N e Toques em SDCO",
-    "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução N@-23.26536,-47.54525,3.0,6000",
+    "RequiredTouchAndGoes": 1,
+    "OverflyWaypoints": "P:Área de instrução N@-23.26536,-47.54525,3.0,4000,3000",
     "ContractData": null
   },
   {
@@ -2026,7 +2026,7 @@
     "DistanceNm": 30,
     "Title": "Instrução Local: Manobras no Setor S (1 TGL)",
     "RequiredTouchAndGoes": 1,
-    "OverflyWaypoints": "P:Área de instrução S@-23.64433,-47.44548,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução S@-23.64433,-47.44548,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2124,7 +2124,7 @@
     "DistanceNm": 37,
     "Title": "Instrução de Manobras: Área NW (13 NM)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução NW@-23.30303,-47.63385,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução NW@-23.30303,-47.63385,3.0,4500,3000",
     "ContractData": null
   },
   {
@@ -2164,9 +2164,9 @@
     "CargoLbs": 0,
     "Reward": 981.46,
     "DistanceNm": 37,
-    "Title": "Instrução Local: Manobras no Setor NW (2 TGL)",
-    "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução NW@-23.33241,-47.67477,3.0,6000",
+    "Title": "Instrução Local: Manobras no Setor NW (1 TGL)",
+    "RequiredTouchAndGoes": 1,
+    "OverflyWaypoints": "P:Área de instrução NW@-23.33241,-47.67477,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2194,7 +2194,7 @@
     "DistanceNm": 26,
     "Title": "Instrução Local: Manobras no Setor NW (1 TGL)",
     "RequiredTouchAndGoes": 1,
-    "OverflyWaypoints": "P:Área de instrução NW@-23.40084,-47.60079,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução NW@-23.40084,-47.60079,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2208,7 +2208,7 @@
     "DistanceNm": 38,
     "Title": "Instrução de Manobras: Área SE (14 NM)",
     "RequiredTouchAndGoes": 1,
-    "OverflyWaypoints": "P:Área de instrução SE@-23.67353,-47.35017,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução SE@-23.67353,-47.35017,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2222,7 +2222,7 @@
     "DistanceNm": 23,
     "Title": "Instrução de Manobras: Área N (6 NM)",
     "RequiredTouchAndGoes": 1,
-    "OverflyWaypoints": "P:Área de instrução N@-23.37986,-47.45607,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução N@-23.37986,-47.45607,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2361,8 +2361,8 @@
     "Reward": 836.87,
     "DistanceNm": 31,
     "Title": "Treinamento em Voo: Setor S e Toques em SBDN",
-    "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução S@-22.37440,-49.95099,3.0,6000",
+    "RequiredTouchAndGoes": 1,
+    "OverflyWaypoints": "P:Área de instrução S@-22.37440,-49.95099,3.0,4500,3000",
     "ContractData": null
   },
   {
@@ -2572,7 +2572,7 @@
     "DistanceNm": 23,
     "Title": "Voo de Cheque / Revalidação (SBSJ)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução NE@-23.18487,-45.75955,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução NE@-23.18487,-45.75955,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -2978,7 +2978,7 @@
     "DistanceNm": 40,
     "Title": "Voo de Cheque / Revalidação (SBFI)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução S@-25.83043,-54.58622,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução S@-25.83043,-54.58622,3.0,4500,3500",
     "ContractData": null
   },
   {
@@ -3076,7 +3076,7 @@
     "DistanceNm": 34,
     "Title": "Voo de Cheque / Revalidação (SBFI)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução W@-25.57003,-54.70864,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução W@-25.57003,-54.70864,3.0,4500,3000",
     "ContractData": null
   },
   {
@@ -3146,7 +3146,7 @@
     "DistanceNm": 28,
     "Title": "Instrução de Manobras: Área SE (9 NM)",
     "RequiredTouchAndGoes": 2,
-    "OverflyWaypoints": "P:Área de instrução SE@-23.50061,-44.92648,3.0,6000",
+    "OverflyWaypoints": "P:Área de instrução SE@-23.50061,-44.92648,3.0,4000,2500",
     "ContractData": null
   },
   {
@@ -3789,8 +3789,8 @@
     "Reward": 1159.99,
     "DistanceNm": 39,
     "Title": "Treinamento em Voo: Setor SE e Toques em SSKW",
-    "RequiredTouchAndGoes": 3,
-    "OverflyWaypoints": "P:Área de instrução SE@-15.62927,-55.29219,3.0,6000",
+    "RequiredTouchAndGoes": 2,
+    "OverflyWaypoints": "P:Área de instrução SE@-15.62927,-55.29219,3.0,4500,3500",
     "ContractData": null
   },
   {

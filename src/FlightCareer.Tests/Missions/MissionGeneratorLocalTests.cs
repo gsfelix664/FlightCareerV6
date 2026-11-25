@@ -49,13 +49,48 @@ namespace FlightCareer.Tests.Missions
             Assert.Equal("instrucao_local", mission.SubId);
             Assert.Equal(origin.ICAO, mission.OriginICAO);
             Assert.Equal(origin.ICAO, mission.DestinationICAO);
-            Assert.InRange(mission.RequiredTouchAndGoes, 1, 3);
+            Assert.InRange(mission.RequiredTouchAndGoes, 1, 2);
             Assert.False(string.IsNullOrWhiteSpace(mission.OverflyWaypoints));
             Assert.StartsWith("P:Área de instrução", mission.OverflyWaypoints);
 
             // Confere formatação sem marcadores soltos
             Assert.DoesNotMatch(@"\{[a-zA-Z0-9_]+\}", mission.Title);
             Assert.DoesNotMatch(@"\{[a-zA-Z0-9_]+\}", mission.Description);
+        }
+
+        [Fact]
+        public void LocalInstruction_Tgl_EntreUmEDois()
+        {
+            var origin = CreateOriginAirport();
+            var sub = GetSubConfig("instrucao_local");
+
+            for (int seed = 1; seed <= 50; seed++)
+            {
+                var rng = new Random(seed);
+                var mission = MissionGenerator.CreateLocalInstructionMissionSync(origin, sub, rng, DateTime.UtcNow);
+
+                Assert.InRange(mission.RequiredTouchAndGoes, 1, 2);
+
+                var waypoints = OverflyWaypointCodec.Parse(mission.OverflyWaypoints);
+                Assert.Single(waypoints);
+                var wp = waypoints[0];
+
+                Assert.True(wp.MinAglFt >= 2500 && wp.MinAglFt <= 3500);
+                Assert.True(wp.MaxAglFt >= 3500 && wp.MaxAglFt <= 4500);
+                Assert.True(wp.MinAglFt < wp.MaxAglFt);
+
+                string expectedMin = wp.MinAglFt.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+                string expectedMax = wp.MaxAglFt.ToString("N0", System.Globalization.CultureInfo.InvariantCulture);
+                string expectedMinPt = wp.MinAglFt.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+                string expectedMaxPt = wp.MaxAglFt.ToString("N0", new System.Globalization.CultureInfo("pt-BR"));
+
+                Assert.True(
+                    mission.Description.Contains(expectedMin) || mission.Description.Contains(expectedMinPt),
+                    $"Descrição deveria conter altBase ({wp.MinAglFt}). Desc: {mission.Description}");
+                Assert.True(
+                    mission.Description.Contains(expectedMax) || mission.Description.Contains(expectedMaxPt),
+                    $"Descrição deveria conter altTop ({wp.MaxAglFt}). Desc: {mission.Description}");
+            }
         }
 
         [Fact]

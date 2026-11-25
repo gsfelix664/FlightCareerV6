@@ -110,6 +110,9 @@ namespace FlightCareer.Domain.Entities
         public double LightLanding;           // LIGHT LANDING (Bool, 1=On)
         public double LightTaxi;              // LIGHT TAXI (Bool, 1=On)
 
+        // Navegação e Vento (VOO-VENTO-INSTRUCAO) (1 double)
+        public double PlaneHeadingTrue;       // PLANE HEADING DEGREES TRUE (degrees)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;
@@ -138,7 +141,7 @@ namespace FlightCareer.Domain.Entities
         {
             get
             {
-                double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
+                double angleDiff = (AmbientWindDirection - PlaneHeadingTrue) * (Math.PI / 180.0);
                 return Math.Abs(AmbientWindVelocity * Math.Sin(angleDiff));
             }
         }
@@ -146,7 +149,7 @@ namespace FlightCareer.Domain.Entities
         {
             get
             {
-                double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
+                double angleDiff = (AmbientWindDirection - PlaneHeadingTrue) * (Math.PI / 180.0);
                 return -AmbientWindVelocity * Math.Cos(angleDiff);
             }
         }

@@ -216,6 +216,7 @@ Convenções:
 | `PRESSURIZATION CABIN ALTITUDE`, `PRESSURIZATION PRESSURE DIFFERENTIAL` | feet / psf | **estrutura pressurizada (ciclos de pressurização)** |
 | `ELEVATOR POSITION`, `AILERON POSITION`, `RUDDER POSITION` | position | deflexão de comandos de voo (profundor, aileron, leme) |
 | `AUTOPILOT MASTER` | bool | engate do piloto automático |
+| `AMBIENT WIND VELOCITY`, `AMBIENT WIND DIRECTION`, `PLANE HEADING DEGREES TRUE`, `PLANE HEADING DEGREES MAGNETIC` | knots / degrees / degrees / degrees | vento e proas verdadeira/magnética (navegação e REC) |
 
 ## 11. Hidráulico e pneumático (aviões que tiverem)
 

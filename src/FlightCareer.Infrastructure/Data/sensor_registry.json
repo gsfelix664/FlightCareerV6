@@ -3092,6 +3092,34 @@
       "unit": "knots",
       "group": "airframe",
       "perEngine": false
+    },
+    {
+      "key": "amb-wind-velocity",
+      "simVar": "AMBIENT WIND VELOCITY",
+      "unit": "knots",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "amb-wind-direction",
+      "simVar": "AMBIENT WIND DIRECTION",
+      "unit": "degrees",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "nav-heading-true",
+      "simVar": "PLANE HEADING DEGREES TRUE",
+      "unit": "degrees",
+      "group": "airframe",
+      "perEngine": false
+    },
+    {
+      "key": "nav-heading-magnetic",
+      "simVar": "PLANE HEADING DEGREES MAGNETIC",
+      "unit": "degrees",
+      "group": "airframe",
+      "perEngine": false
     }
   ]
 }
