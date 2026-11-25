@@ -2,9 +2,12 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (3ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.081/1.081. HUD-PROGRESSO mergeada (revisão em `docs/reviews/HUD-PROGRESSO-revisao.md`).
+**Última atualização:** 2026-11-25 (4ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.087/1.087. MISSOES-DIST mergeada (revisão em `docs/reviews/MISSOES-DIST-revisao.md`).
 
 ## Feito nesta sessão (não testado no MSFS)
+- `check_flight` e paraquedismo usam a distância sorteada do perfil (20–60 e 5–15 NM; antes 30 e 25 fixos); `pinga_pinga` fica entre 100 e 400 NM no total, senão não é gerado. No snapshot mudaram só 11 registros (cheque e paraquedismo). Não medido: com que frequência o `pinga_pinga` some em dados reais pelo mínimo (`board-report`).
+
+## Feito na 3ª sessão de 2026-11-25 (não testado no MSFS)
 - HUD com linha "CONTRATO" (`ContractProgressFormatter`, `FlightMonitor.ContractProgressText`): "TGL 1/2", "Pontos 0/1 · AREA 2,0 NM · faixa 3.500–4.500 ft: abaixo", "Escala 2/4 · próxima X", "Passo 3/3 · rumos N✓ E· S· W·", pousos STOL, pernas, lançamento, restrição do translado. No modo compacto e no expandido.
 
 ## Feito na 2ª sessão de 2026-11-25 (não testado no MSFS)
@@ -47,7 +50,7 @@ Outros achados do 2º voo:
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
 1. ~~HUD com o progresso dos rastreadores~~ (feito: HUD-PROGRESSO).
-2. **Pacote de correções de missões:** `check_flight` paga sempre por 30 NM; `pinga_pinga` passa de 400 NM no total; paraquedismo com 25 NM fixos. Lógica pura com teste e snapshot `missions_golden.json`. Modelo: **Sonnet** para a spec curta, Gemini implementa.
+2. ~~Pacote de correções de missões (distâncias)~~ (feito: MISSOES-DIST).
 3. **Áreas de instrução reais (híbrido):** pesquisar licença e formato do openAIP (áreas tipo training/TRA no Brasil e no mundo), propor importação em tempo de desenvolvimento para `Data/places/` e fallback procedural. Modelo: **Opus** (pesquisa e plano em `docs/plans/missoes-locais-rp.md`).
 4. **Próximo lote da E2C** (13 tipos desligados, ex. `instrucao_ifr`, `demo_flight`, `pulverizacao`). Modelo: **Opus** para a spec do lote.
 5. `board-report --coverage` mais rápido (rotina, **Sonnet** + Gemini).
@@ -59,7 +62,7 @@ Mais testes de missões no MSFS (Sonnet basta para ler logs): instrução local 
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`; no REC de hoje a SimVar ficou em ~99–100 sem pane); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
-- **Missões (dá para fazer no escritório):** `check_flight` paga sempre por 30 NM; `pinga_pinga` passa de 400 NM no total; paraquedismo com 25 NM fixos; trem travado no `ferry_permit` (precisa de SimVar do trem no `SimTelemetry`); próximos lotes da E2C (13 tipos ainda desligados: `instrucao_ifr`, `adaptacao_noturna`, `demo_flight`, `saude_familia`, `pulverizacao`, `reboque_planador`, `publicidade_aerea`, `patrulha_vigilancia`, `inspecao_linhas`, `monitoramento_trafego`, `sar`, `calibracao_auxilios`, `evacuacao_por_do_sol`); `board-report --coverage` mais rápido.
+- **Missões (dá para fazer no escritório):** trem travado no `ferry_permit` (precisa de SimVar do trem no `SimTelemetry`); próximos lotes da E2C (13 tipos ainda desligados: `instrucao_ifr`, `adaptacao_noturna`, `demo_flight`, `saude_familia`, `pulverizacao`, `reboque_planador`, `publicidade_aerea`, `patrulha_vigilancia`, `inspecao_linhas`, `monitoramento_trafego`, `sar`, `calibracao_auxilios`, `evacuacao_por_do_sol`); `board-report --coverage` mais rápido.
 - **Decisões abertas do usuário:** restringir missão militar (CAN) a origens militares (saiu uma de SBJS, pista civil de terra); bots agressivos do Médio falem 100 % no dia 1095 após os aeroportos novos (era 67 %; só 3 bots); isolamento maior nos perfis (muda o sorteio de missões remotas); peso dos destinos de saúde (84–86 % ao preferido; baixar para ~100 se rígido); 7 melhorias de `docs/plans/missoes-locais-rp.md` › 3; patrimônio do Médio no 3º ano (~16 mi) × meta ≤ 20×; bots do Médio parados na classe G do dia 540 ao 1095.
 
 ## Notas de trabalho
