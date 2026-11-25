@@ -661,7 +661,8 @@
         "weight": 1.0,
         "tags": {
           "agro:sementes": 6.0,
-          "agro:graos": 5.0
+          "agro:graos": 5.0,
+          "safra:plantio": 6.0
         },
         "names": [
           "sacarias de sementes híbridas de milho tratadas",
@@ -676,7 +677,9 @@
         "weight": 1.0,
         "tags": {
           "agro:pulverizacao": 6.0,
-          "agro": 4.0
+          "agro": 4.0,
+          "safra:plantio": 3.0,
+          "safra:colheita": 3.0
         },
         "names": [
           "bombonas de bioinseticidas para lavoura",
@@ -691,7 +694,9 @@
         "weight": 1.0,
         "tags": {
           "agro:maquinas": 6.0,
-          "fazenda": 4.0
+          "fazenda": 4.0,
+          "safra:colheita": 4.0,
+          "safra:entressafra": 3.0
         },
         "names": [
           "bicos e barras de pulverização de trator agrícola",
@@ -706,13 +711,28 @@
         "weight": 0.0,
         "tags": {
           "agro:cafe": 5.0,
-          "agro:citros": 5.0
+          "agro:citros": 5.0,
+          "safra:plantio": 3.0
         },
         "names": [
           "micronutrientes quelatados para fertirrigação",
           "adubos foliares solúveis para cafezais e pomares",
           "complexos minerais para desenvolvimento radicular",
           "bioestimulantes e aminoácidos para nutrição de lavouras"
+        ],
+        "dg": null
+      },
+      {
+        "id": "revisao_entressafra",
+        "weight": 0.0,
+        "tags": {
+          "safra:entressafra": 6.0
+        },
+        "names": [
+          "kits de revisão de colheitadeiras para a entressafra",
+          "peças de reforma de plantadeiras na parada da entressafra",
+          "componentes de motor para revisão de tratores",
+          "correntes e rolamentos para manutenção de máquinas fora da safra"
         ],
         "dg": null
       }

@@ -59,6 +59,7 @@ namespace FlightCareer.Domain.Missions
         public string Generator { get; set; } = "standard";
         public Dictionary<string, double> BaseByTier { get; set; } = new(StringComparer.OrdinalIgnoreCase);
         public Dictionary<string, double> OriginProfiles { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, double>? Season { get; set; }
         public bool CivilAtMilitaryBase { get; set; } = true;
         public MissionDestinationRule Destination { get; set; } = new();
         public List<MissionProfileDefinition> Profiles { get; set; } = new();

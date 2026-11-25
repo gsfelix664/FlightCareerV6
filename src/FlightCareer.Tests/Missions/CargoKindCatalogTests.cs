@@ -112,6 +112,11 @@ namespace FlightCareer.Tests.Missions
                 {
                     foreach (var tag in kind.Tags.Keys)
                     {
+                        if (tag.StartsWith("safra:", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
                         Assert.Contains(tag, validTags);
                     }
                 }

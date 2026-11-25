@@ -45,6 +45,17 @@ namespace FlightCareer.Domain.Missions
                 weight *= 0.2;
             }
 
+            if (m.Season != null && m.Season.Count > 0 && tags != null && tags.Count > 0)
+            {
+                foreach (var (tag, mult) in m.Season)
+                {
+                    if (tags.Contains(tag))
+                    {
+                        weight *= mult;
+                    }
+                }
+            }
+
             return weight;
         }
 

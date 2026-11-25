@@ -210,6 +210,8 @@ namespace FlightCareer.Application.Services
                     .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
                     .ToList();
 
+                var seasonDate = await _context.Pilots.AsNoTracking().OrderBy(p => p.Id).Select(p => (DateTime?)p.CareerClockUtc).FirstOrDefaultAsync();
+
                 var newMissions = MissionBoardCore.GenerateBoard(
                     currentAirport,
                     candidates,
@@ -223,7 +225,8 @@ namespace FlightCareer.Application.Services
                     PayTable,
                     _textCatalog,
                     _placesService,
-                    originRunway);
+                    originRunway,
+                    seasonDate: seasonDate);
 
                 if (newMissions.Count > 0)
                 {
@@ -341,7 +344,8 @@ namespace FlightCareer.Application.Services
                     ["distance_nm"] = Math.Round(dist, 0).ToString(),
                     ["deadline"] = referenceTime.AddHours((random ?? new Random()).Next(sub.MinExpHours, sub.MaxExpHours + 1)).ToString("dd/MM HH:mm"),
                     ["cargo"] = pick?.Name ?? "carga geral",
-                    ["cargo_note"] = cargoNote
+                    ["cargo_note"] = cargoNote,
+                    ["safra"] = AgroSeason.Note(originTags)
                 };
                 var rendered = (textCatalog ?? MissionTextCatalog.Default).Render(sub.Id, random, values, sub.Name, sub.Description);
                 title = rendered.Title;
@@ -2301,7 +2305,8 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<Runway>? allRunways = null,
             IPlacesDataService? placesService = null,
             MissionTextCatalog? textCatalog = null,
-            BoardCache? cache = null)
+            BoardCache? cache = null,
+            DateTime? seasonDate = null)
         {
             if (currentAirport == null) return new List<Mission>();
             if (currentAirport.Tier < 1 || currentAirport.Tier > 4)
@@ -2367,7 +2372,8 @@ namespace FlightCareer.Application.Services
                 textCatalog,
                 placesService,
                 originRunway,
-                cache);
+                cache,
+                seasonDate: seasonDate);
         }
 
         public static bool IsDifficultRunway(Runway? runway)

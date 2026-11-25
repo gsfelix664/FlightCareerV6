@@ -72,10 +72,13 @@ namespace FlightCareer.Application.Services
             MissionTextCatalog? textCatalog = null,
             IPlacesDataService? placesService = null,
             Runway? originRunway = null,
-            BoardCache? cache = null)
+            BoardCache? cache = null,
+            DateTime? seasonDate = null)
         {
             var missions = new List<Mission>();
             if (origin == null || candidates == null || catalog == null) return missions;
+
+            var boardTags = AgroSeason.WithSeasonTags(originTags, seasonDate, origin.Latitude);
 
             if (originRunway == null)
             {
@@ -83,9 +86,9 @@ namespace FlightCareer.Application.Services
             }
 
             // 1. Filtrar missões habilitadas com peso de origem > 0 e que caibam na pista e etiquetas da origem
-            var (eligibleMissions, totalOriginWeight) = cache != null
-                ? cache.GetOrComputeEligibleMissions(origin, originRunway, originTags, catalog)
-                : ComputeEligibleMissions(origin, originRunway, originTags, catalog);
+            var (eligibleMissions, totalOriginWeight) = (ReferenceEquals(boardTags, originTags) && cache != null)
+                ? cache.GetOrComputeEligibleMissions(origin, originRunway, boardTags, catalog)
+                : ComputeEligibleMissions(origin, originRunway, boardTags, catalog);
 
             if (eligibleMissions.Count == 0) return missions;
             if (totalOriginWeight <= 0.0) return missions;
@@ -109,7 +112,7 @@ namespace FlightCareer.Application.Services
                     origin,
                     def,
                     candidates,
-                    originTags,
+                    boardTags,
                     getAirportTags,
                     random,
                     referenceTime,
