@@ -73,6 +73,16 @@ namespace FlightCareer.Tests.Missions
         }
 
         [Fact]
+        public void MilitarCan_OrigemCivil_NaoSorteia()
+        {
+            var def = FlightCareer.Domain.Missions.MissionCatalog.Shared.Get("militar_can")!;
+            var civil = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "fazenda", "isolado" };
+            var semEtiqueta = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Assert.Equal(0.0, FlightCareer.Domain.Missions.MissionWeighting.OriginWeight(def, 4, civil));
+            Assert.Equal(0.0, FlightCareer.Domain.Missions.MissionWeighting.OriginWeight(def, 3, semEtiqueta));
+        }
+
+        [Fact]
         public void NavegacaoVfr_TemDestinosNaFaixa()
         {
             var def = FlightCareer.Domain.Missions.MissionCatalog.Shared.Get("navegacao_vfr")!;
