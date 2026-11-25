@@ -88,20 +88,20 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 - **Eventos:** use `SimConnectService.SendEvent(nome, dado)`, que mapeia cada evento uma única vez. Não chame `MapClientEventToSimEvent` de novo com o mesmo ID.
 - **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos diretos de pane de alternador, pneu, trem, flap, magneto ou pressurização: alternador = `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` via `SendEventEx`; flaps = `WriteFlapSurfacePercent`; magnetos pela SimVar; demais `effect: None` (detalhes: `docs/sistemas/desgaste-falhas.md`).
 - **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
-- **Key Events observados sem mascarar:** use grupo próprio não mascarável (`GROUPS.ObservedPilotInputs = 3`, `maskable: false`, roteamento por `e.uGroupID` em `OnRecvEvent`). Observa `ENGINE_AUTO_START`, `ENGINE_AUTO_SHUTDOWN` e `REQUEST_FUEL_KEY`.
+- **Key Events observados sem mascarar:** use grupo próprio não mascarável (`GROUPS.ObservedPilotInputs = 3`, `maskable: false`, prioridade `SIMCONNECT_GROUP_PRIORITY_DEFAULT`). Evento mapeado com `GetOrMapEvent` pertence a um só grupo: roteie no `OnRecvEvent` por `e.uGroupID` (`OnObservedEvent` × `OnMaskedEvent`). Observa `ENGINE_AUTO_START`, `ENGINE_AUTO_SHUTDOWN` e `REQUEST_FUEL_KEY`.
 - **SimVars escritas pelo app:** `ENG ON FIRE:1` (`SetEngineFire`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`SetOilLeakedPercent`).
 - Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
 - **Escrita de `FUELSYSTEM TANK QUANTITY:n` define o total, a leitura devolve o utilizável:** grave `utilizável + (FUELSYSTEM TANK CAPACITY:n − FUELSYSTEM TANK USABLE CAPACITY:n)` (`FuelTank.ToSimWriteValue`, aplicado em `SimConnectService.SetFuelTanks`). Tanques legados `FUEL TANK * QUANTITY`: leitura e escrita usam o total (com não utilizável). Pendente: distribuição proporcional em `FuelTankWritePlan.Distribute` põe em todos os tanques com carga parcial (detalhes: `docs/sistemas/combustivel.md`).
-- **SimVar com nome inválido desloca o struct:** datum rejeitado (`NAME_UNRECOGNIZED`) encurta o pacote e corrompe campos seguintes (ex.: `PARTIAL PANEL STATIC` **não existe**). O log `[SimConnect EXCEPTION]` mostra nome rejeitado; `TelemetryDefinitionTests` confere contagem.
+- **SimVar com nome inválido desloca o struct:** datum rejeitado (`NAME_UNRECOGNIZED`) encurta o pacote e desloca os campos seguintes (o marshaling lê além do fim) (ex.: `PARTIAL PANEL STATIC` **não existe**). O log `[SimConnect EXCEPTION]` mostra nome rejeitado; `TelemetryDefinitionTests` confere contagem.
 
 ### Banco de dados
-- **Sem migrations EF:** banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (`ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes). Coluna nova = propriedade na entidade + `ALTER TABLE ... ADD COLUMN ... DEFAULT ...`. Tabela nova = `DbSet` + `CREATE TABLE IF NOT EXISTS` (teste: `ComponentPersistenceTests`).
-- **Contextos de longa duração (bug de cache/sobrescrita):** singletons (`MainViewModel`, `PilotRepository`, `FlightService`, `MissionGenerator`, `MarketViewModel`, `MarketSimulationService`, `FerryFlightViewModel`) com `AppDbContext` próprio guardam entidades em cache e um `SaveChanges` posterior sobrescreve dados de outros contextos. Código novo usa `IDbContextFactory<AppDbContext>` com contexto curto; nos contextos longos, chame `_context.ChangeTracker.Clear()` antes de ler para alterar; nunca salve em outro contexto entidade de outro. Teste: `FlightPersistenceTests`.
+- **Sem migrations EF:** banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (`ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes). Coluna nova = propriedade na entidade + `ALTER TABLE ... ADD COLUMN ... DEFAULT ...`. Tabela nova = `DbSet` + `CREATE TABLE IF NOT EXISTS` com os nomes e tipos que o EF geraria (teste de banco antigo: `ComponentPersistenceTests`).
+- **Contextos de longa duração (bug de cache/sobrescrita):** singletons (`MainViewModel`, `PilotRepository`, `FlightService`, `MissionGenerator`, `MarketViewModel`, `MarketSimulationService`, `FerryFlightViewModel`) com `AppDbContext` próprio guardam entidades em cache e um `SaveChanges` posterior sobrescreve dados de outros contextos. Código novo usa `IDbContextFactory<AppDbContext>` com contexto curto; nos contextos longos, chame `_context.ChangeTracker.Clear()` antes de ler para alterar; nunca altere entidade carregada por outro contexto esperando que o seu `SaveChanges` a grave (copie os valores para a entidade do seu contexto). Teste: `FlightPersistenceTests`.
 
 ### MSFS 2024 nativo
 - **Addon é a fonte da verdade:** wear and tear nativo fica ligado, mas a saúde é calculada e mantida pelo addon. O `WEAR AND TEAR LEVEL` nunca entra no Hangar. `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` é só sensor (faixa vermelha), nunca vira % de desgaste. Limites vêm de catálogo fixo por aeronave (`Data/aircraft/`).
 - **Panes nativas não ligam SimVars de falha de motor:** `IS FAILED:<id>` (0 → 1) indica pane, mas **não** liga `ENG FAILED:1` nem `GENERAL ENG DAMAGE PERCENT`. O `PersistentFailureService` lê `nw-is-failed-<id>` do `SensorFrameReader` e grava a pane via Tabela 2 (`Domain/Components/NativeWearFailures.cs`). SimVars `WEAR AND TEAR *` são somente leitura, ID 0–49 (`:39` = pistão) (detalhes: `docs/sistemas/desgaste-falhas.md`).
-- **Crash no 2024:** `CRASH FLAG` não aparece no 2024 (o sim reposiciona o avião no ar); impacto e crash são detectados pelo `TouchdownDetector` do addon.
+- **Crash no 2024:** `CRASH FLAG` não aparece no 2024; impacto e crash são detectados pelo `TouchdownDetector` do addon.
 - **SimVars gravadas pelo addon:** somente `TURB ENG N1 LOSS`, `FUEL EFFICIENCY LOSS`, `ITT COOLING EFFICIENCY LOSS` e `THRUST EFFICIENCY LOSS` por motor (`TurbineDegradationActuator`). Demais são somente leitura.
 - **Abastecimento manual (2026-11-21):** o addon **não grava** nos tanques. O piloto abastece no menu do sim a quantidade paga; briefing e `StartMonitoring` conferem a bordo × pago; reabastecimento em voo invalida a missão e cobra consumo real (`GENERAL ENG FUEL USED SINCE START:1..4`) (detalhes: `docs/sistemas/combustivel.md`).
 
@@ -111,19 +111,19 @@ Antes de mexer num sistema, leia o arquivo dele em `docs/sistemas/`; ao mudar o 
 
 | Sistema | Arquivo | Classes/pastas-chave |
 |---|---|---|
-| Desgaste e falhas | `desgaste-falhas.md` | `Domain/Components/`, `ComponentFlightSession`, `SimFailureActuator` |
-| Peças | `pecas.md` | `Domain/Parts/`, `PartFlightSession`, `PartStateWriter` |
-| Manutenção e Hangar | `manutencao-hangar.md` | `HangarViewModel`, `WorkshopDowntime`, `PartPricing` |
-| Panes persistentes | `panes-persistentes.md` | `AircraftDefect`, `DefectCatalog`, `PersistentFailureService` |
-| Voo e integridade | `voo-integridade.md` | `FlightMonitor`, `TouchdownDetector`, `SlewMonitor` |
-| Combustível | `combustivel.md` | `FuelUsageAccumulator`, `FuelIntegrityMonitor`, `FuelPriceService` |
-| Economia e dificuldade | `economia-dificuldade.md` | `Domain/Economy/`, `EconomyServices`, `MarketSimulationService` |
-| XP e fases | `xp-fases.md` | `XpCalculator`, `PilotLevel`, `CareerPhaseCatalog` |
-| Missões e quadro | `missoes-quadro.md` | `MissionBoardCore`, `Domain/Missions/`, `PlacesDataService` |
-| Aeroportos e tiers | `aeroportos-tiers.md` | `AirportTierClassifier`, `AirportProfileCatalog`, `CountryLocator` |
-| Limites por aeronave | `limites-aeronave.md` | `AircraftLimitResolver`, `Data/aircraft/`, `AircraftLimitSeeder` |
-| Sensores | `sensores.md` | `Domain/Sensors/`, `SensorFrameReader`, `FlightCareer.SimVarProbe` |
-| HUD | `hud.md` | `DebugOverlayViewModel`, `FlightMapControl`, `HudHealthSummary` |
+| Desgaste e falhas | `desgaste-falhas.md` | `Domain/Components/`, `ComponentFlightSession` |
+| Peças | `pecas.md` | `Domain/Parts/`, `PartFlightSession` |
+| Manutenção e Hangar | `manutencao-hangar.md` | `HangarViewModel`, `WorkshopDowntime` |
+| Panes persistentes | `panes-persistentes.md` | `AircraftDefect`, `DefectCatalog` |
+| Voo e integridade | `voo-integridade.md` | `FlightMonitor`, `TouchdownDetector` |
+| Combustível | `combustivel.md` | `FuelUsageAccumulator`, `FuelIntegrityMonitor` |
+| Economia e dificuldade | `economia-dificuldade.md` | `Domain/Economy/`, `EconomyServices` |
+| XP e fases | `xp-fases.md` | `XpCalculator`, `PilotLevel` |
+| Missões e quadro | `missoes-quadro.md` | `MissionBoardCore`, `Domain/Missions/` |
+| Aeroportos e tiers | `aeroportos-tiers.md` | `AirportTierClassifier`, `AirportProfileCatalog` |
+| Limites por aeronave | `limites-aeronave.md` | `AircraftLimitResolver`, `Data/aircraft/` |
+| Sensores | `sensores.md` | `Domain/Sensors/`, `SensorFrameReader` |
+| HUD | `hud.md` | `DebugOverlayViewModel`, `FlightMapControl` |
 
 Histórico detalhado de cada tarefa: `docs/CHANGELOG.md` (busque pelo ID entre parênteses).
 
