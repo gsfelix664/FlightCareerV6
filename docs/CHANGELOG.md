@@ -3215,3 +3215,10 @@
 - `MissionGenerator`: instrução local ajustada para 1 a 2 TGL (`random.Next(1, 3)`) e waypoint com `altTop`/`altBase`; cheque prático com waypoint na faixa de altitude.
 - `MissionCompletion`: detalhamento do motivo de não cumprimento de ponto quando houver `MinAglFt > 0`.
 - Documentação atualizada em `docs/plans/missoes-locais-rp.md`, `docs/sistemas/missoes-quadro.md` e `docs/sistemas/sensores.md`.
+
+## 2026-11-25 - Progresso do contrato no HUD (HUD-PROGRESSO) (Claude)
+- Spec e revisão do Claude; implementação do Gemini (`feat/hud-progresso`, revisão em `docs/reviews/HUD-PROGRESSO-revisao.md`).
+- `ContractProgressFormatter` (Domain/Missions): texto curto do andamento dos rastreadores (TGL, pontos com distância e faixa de altitude abaixo/na faixa/acima, escalas, passos do voo de teste, pousos STOL, pernas, lançamento, restrição do translado), até 3 linhas, cultura pt-BR.
+- `OverflyTracker`: `EvaluateAltitude` (mesma regra de antes), `Targets` e última posição.
+- `FlightMonitor.ContractProgressText` calculado a cada pacote na thread dos rastreadores; HUD mostra linha "CONTRATO" nos modos compacto e expandido.
+- Não testado no MSFS.
