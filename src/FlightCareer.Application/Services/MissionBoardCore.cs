@@ -16,21 +16,22 @@ namespace FlightCareer.Application.Services
         /// Etiquetas da origem com os dados de lugares carregados no jogo: zona de salto e base de
         /// voo panorâmico (só aeródromo turístico com papel "panoramico", não os de papel "destino").
         /// </summary>
-        /// <summary>Etiqueta derivada: aeroporto com <c>linha_auto</c> e tier até <see cref="LinhaAutoHubMaxTier"/>.</summary>
+        /// <summary>Etiqueta derivada: aeroporto com <c>linha_auto</c> de porte suficiente para jatos de linha.</summary>
         public const string LinhaAutoHubTag = "linha_auto:hub";
         /// <summary>
-        /// Maior tier em que a <c>linha_auto</c> (voo regular do OurAirports ou gates do simulador) conta como hub de
-        /// linha aérea para jatos de 120+ lugares (decisão do usuário, 2026-11-24): aeroportos pequenos com voo
-        /// regular (ex.: Sorocaba, Bethel) deixam de gerar ponte aérea/troncal; hubs sem curadoria (ex.: Ufa) mantêm.
+        /// Pontuação mínima (<see cref="Airport.TierScore"/>) para um tier 2 só com <c>linha_auto</c> (voo regular do
+        /// OurAirports ou gates do simulador) contar como hub de linha aérea para jatos de 120+ lugares; tier 1 sempre
+        /// conta (decisão do usuário, 2026-11-25): Sorocaba (58), Tefé (79) e Bethel (99) deixam de gerar ponte
+        /// aérea/troncal; hubs sem curadoria como Ufa (105) mantêm.
         /// </summary>
-        public const int LinhaAutoHubMaxTier = 2;
+        public const int LinhaAutoHubTier2MinScore = 100;
 
         /// <summary>Acrescenta as etiquetas que dependem do aeroporto (hoje só <see cref="LinhaAutoHubTag"/>).</summary>
         public static IReadOnlySet<string> WithDerivedTags(Airport airport, IReadOnlySet<string> tags)
         {
             if (airport == null || tags == null) return tags!;
-            if (airport.Tier >= 1 && airport.Tier <= LinhaAutoHubMaxTier
-                && tags.Contains("linha_auto") && !tags.Contains(LinhaAutoHubTag))
+            bool isHub = airport.Tier == 1 || (airport.Tier == 2 && airport.TierScore >= LinhaAutoHubTier2MinScore);
+            if (isHub && tags.Contains("linha_auto") && !tags.Contains(LinhaAutoHubTag))
             {
                 return new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { LinhaAutoHubTag };
             }

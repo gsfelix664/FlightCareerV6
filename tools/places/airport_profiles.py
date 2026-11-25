@@ -1,6 +1,10 @@
 """Classificação dos aeroportos do jogo em tier + perfis (análise, passo 1 do catálogo de missões).
 
-Uso: python -I airport_profiles.py <raiz do repo> <saida_dir> [<lnm_msfs24.sqlite> [<airport_profiles.json>]]
+Uso: python -I airport_profiles.py <raiz do repo> <saida_dir> [<lnm_msfs24.sqlite> [<airport_profiles.json> [<tier-report.csv>]]]
+
+Com o tier-report.csv (FlightCareer.Replay tier-report), as heurísticas que dependem do tier (fazenda, isolado,
+turistico_poi) usam o tier do jogo em vez do tipo do OurAirports. O tier do jogo depende das etiquetas curadas:
+depois de mudar uma lista, gere os perfis, rode o tier-report e gere os perfis de novo.
 """
 import csv, json, os, re, sqlite3, sys, collections
 import numpy as np
@@ -82,6 +86,12 @@ for r in csv.DictReader(open(os.path.join(infra, 'CSV', 'airports.csv'), encodin
                     maxlen=max((ln for _, ln, _ in runs), default=0), hard=hard,
                     lighted=any(l for _, _, l in runs), in_sim=in_sim, tags=set(),
                     gates=int(sd[7] or 0) if sd is not None else 0, cargo_park=int(sd[8] or 0) if sd is not None else 0))
+
+# --- tier do jogo (tier-report) ----------------------------------------------
+if len(sys.argv) > 5:
+    game_tier = {r['ICAO'].upper(): int(r['NewTier']) for r in csv.DictReader(open(sys.argv[5], encoding='utf-8-sig'))}
+    for a in aps:
+        a['tier'] = game_tier.get(a['icao'].upper(), game_tier.get(a['ident'].upper(), a['tier']))
 
 # --- perfis vindos de dados existentes ----------------------------------------
 def ids(path, key):

@@ -8,5 +8,6 @@
   - Classificação por pontuação combinada (`AirportTierClassifier`): cortes baseados em infraestrutura real (Little Navmap, OurAirports e etiquetas curadas). Pistas não pavimentadas têm teto de Tier 3.
   - Recálculo automático em lote no `DataSeeder.EnsureTiersUpToDateAsync` acionado por mudança de versão da regra (`TierRulesVersion`).
   - Etiquetas e vocações de aeroporto (`AirportProfileCatalog`): tags de malha aérea (`linha`, `linha_auto:hub`, `carga`, `hospital`, etc.) determinam a geração e os destinos de voos de linha regular e missões especiais. Jatos de linha exigem hubs conectados.
+  - Perfis (`airport_profiles.json`) gerados por `tools/places/airport_profiles.py <repo> <saida> <lnm> <json> <tier-report.csv>`: as heurísticas `isolado`/`interior_distante`/`fazenda`/`turistico_poi` usam o tier do jogo. Depois de mudar lista curada: gerar, rodar `tier-report`, gerar de novo e subir `Version` em `airport_tier_rules.json`. Regras na versão 3 (2026-11-25).
   - Resolução geográfica de países (`CountryLocator`): mapeia coordenadas geográficas contra fronteiras vetoriais (`country_borders.json`) com aproximação por aeroportos vizinhos (`AirportSpatialGrid`) para áreas costeiras e ilhas.
   - Relatório e auditoria via comando `tier-report` no CLI `FlightCareer.Replay`. Não testado no MSFS.

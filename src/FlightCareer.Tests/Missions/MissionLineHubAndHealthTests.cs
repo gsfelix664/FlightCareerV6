@@ -10,7 +10,7 @@ namespace FlightCareer.Tests.Missions
 {
     /// <summary>
     /// Decisões do usuário de 2026-11-24: jato de linha (120+ lugares) só sai de/para aeroporto com "linha"
-    /// curada ou "linha_auto" de tier 1–2; missões de saúde preferem fortemente o hospital de referência;
+    /// curada ou "linha_auto" de tier 1 (ou tier 2 com 100+ pontos, decisão de 2026-11-25); missões de saúde preferem fortemente o hospital de referência;
     /// medevac remoto leva o paciente da pista remota para a cidade (tier 2–3).
     /// </summary>
     public class MissionLineHubAndHealthTests
@@ -20,13 +20,14 @@ namespace FlightCareer.Tests.Missions
         private static IReadOnlySet<string> Tags(params string[] t) => new HashSet<string>(t, StringComparer.OrdinalIgnoreCase);
 
         [Theory]
-        [InlineData(1, true)]
-        [InlineData(2, true)]
-        [InlineData(3, false)]
-        [InlineData(4, false)]
-        public void WithDerivedTags_LinhaAuto_SoViraHubAteTier2(int tier, bool esperaHub)
+        [InlineData(1, 0, true)]
+        [InlineData(2, 99, false)]
+        [InlineData(2, 100, true)]
+        [InlineData(3, 110, false)]
+        [InlineData(4, 0, false)]
+        public void WithDerivedTags_LinhaAuto_ViraHubPorTierEPontuacao(int tier, int score, bool esperaHub)
         {
-            var airport = new Airport { ICAO = "TEST", Tier = tier };
+            var airport = new Airport { ICAO = "TEST", Tier = tier, TierScore = score };
             var tags = MissionBoardCore.WithDerivedTags(airport, Tags("linha_auto"));
             Assert.Equal(esperaHub, tags.Contains(MissionBoardCore.LinhaAutoHubTag));
         }
@@ -52,7 +53,7 @@ namespace FlightCareer.Tests.Missions
 
             double Weight(int tier, params string[] tags)
             {
-                var origin = new Airport { ICAO = "TEST", Tier = tier };
+                var origin = new Airport { ICAO = "TEST", Tier = tier, TierScore = MissionBoardCore.LinhaAutoHubTier2MinScore };
                 return MissionWeighting.OriginWeight(def, tier, MissionBoardCore.AugmentOriginTags(origin, Tags(tags), null));
             }
 

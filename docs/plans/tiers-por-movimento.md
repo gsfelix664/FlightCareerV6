@@ -56,3 +56,8 @@ Nada disso depende do MSFS para testar a lógica; o resultado real depende do ba
 - **A fazer na revisão do TIER-A:** recalcular o tier na abertura quando a versão do `airport_tier_rules.json` mudar, a partir dos sinais gravados (sem reimportar).
 - **Sem fonte automática ainda:** executivo/FBO, saúde/hospital, manutenção/oficina, instrução: continuam só pelas listas curadas (5,7 % dos aeroportos); para os demais vale só o peso base do tier. Ampliar as listas é trabalho de dados (curadoria).
 - **Decisão do usuário (2026-11-24):** manter só as listas curadas como estão, sem nova curadoria; aeroportos sem etiqueta seguem o peso base do tier (nunca ficam sem missões nem sem destinos).
+
+## Decisões de 2026-11-25 (usuário)
+
+- **Jatos em aeroporto só com `linha_auto`:** tier 1, ou tier 2 com `TierScore` ≥ 100 (`MissionBoardCore.LinhaAutoHubTier2MinScore`). Substitui o corte "tier ≤ 2" de 2026-11-24, que supunha Sorocaba e Bethel no tier 3 (são tier 2, com 58 e 99 pontos).
+- **Lista de voos regulares de jato:** o usuário enviou 300 ICAO; os 115 que faltavam entraram em `tools/places/pax_hubs_curated.csv` (só `linha`, sem subtipo; `SBQV` virou `SBVC`; `OKKK` não existe no banco do MSFS, que usa `OKBK`).

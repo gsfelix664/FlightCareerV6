@@ -63,7 +63,7 @@ namespace FlightCareer.Domain.Airports
         public static AirportTierRules Default => s_default.Value;
 
         /// <summary>Versão das regras: mudou → os tiers gravados são recalculados.</summary>
-        public int Version { get; set; } = 2;
+        public int Version { get; set; } = 3;
 
         public TagTierScores Tags { get; set; } = new();
         public StructureTierScores Structure { get; set; } = new();
