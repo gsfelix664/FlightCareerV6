@@ -1,6 +1,6 @@
 # Plano — Missões com locais reais e textos de RP (2026-11-22)
 
-**Estado (conferido em 2026-11-25):** bancos de locais e contratos (§§ 1–2) implementados (MISSOES-LOCAIS, AREAS-INSTRUCAO); das melhorias da § 3 faltam só o cliente recorrente (5) e a linha aérea com rotas reais (3), ambas sem spec.
+**Estado (conferido em 2026-11-25):** bancos de locais e contratos (§§ 1–2) implementados (MISSOES-LOCAIS, AREAS-INSTRUCAO); das melhorias da § 3 falta só a linha aérea com rotas reais (3), sem spec; o cliente recorrente (5) foi descartado pelo usuário em 2026-11-25.
 
 Pedido do usuário: instrução local, cheque, panorâmico, aerofoto e paraquedismo com locais reais (bancos globais), ida e volta ao mesmo aeródromo, texto de RP rico (mais de uma variante) e o mapa do briefing mostrando onde ir; avaliar melhorias nos outros tipos.
 
@@ -23,7 +23,7 @@ Limites honestos: não existe base aberta global de escolas de voo nem de zonas 
 - **Mapa do briefing:** marcadores do contrato (pontos, área de instrução, retângulo da aerofoto, zona de salto).
 - **Textos de RP:** `mission_texts.json` com ≥ 3 variantes de título/descrição para **todos** os subtipos, com marcadores (`{origin}`, `{dest}`, `{pax}`, `{poi_list}`, `{alt}` …), sorteio determinístico pelo `Random` do gerador e fallback na descrição atual.
 
-## 3. Melhorias nos outros tipos (as 7 autorizadas em 2026-11-25; restam o cliente recorrente da 5 e a 3 — situação em § 3.1)
+## 3. Melhorias nos outros tipos (as 7 autorizadas em 2026-11-25; resta a 3; cliente recorrente da 5 descartado — situação em § 3.1)
 1. **3.4.2 Navegação:** 2–3 pernas com pouso ou sobrevoo obrigatório em cada aeródromo (hoje é um destino só).
 2. **Saúde (3.3.x, 4.3.1, 1.7.3):** destinos perto de hospitais reais (Wikidata), prazo visível no quadro e tempo de resposta contando no XP.
 3. **Linha aérea (1.1.x, 2.1.x, 1.7.5):** preferir rotas reais (OpenFlights `routes.dat`, ODbL) e horários de banco.
@@ -38,7 +38,7 @@ Os perfis de aeroporto (`places/airport_profiles.json`, feitos depois desta list
 - **7 Translado: feito.** `translado_manutencao` e `ferry_permit` preferem destino com perfil `mro` (peso 6).
 - **2 Saúde: feito (2026-11-25, prazo no quadro com `XpDeadline`).** Destinos com `saude:hospital_referencia`/`saude:orgaos` (peso 100); o XP já tem bônus de prazo (≤ 90 % do ETE + 15 min, maior em missão urgente ou do quadro `Medica`, `XpCalculator` › 5.3). Falta só **mostrar o prazo no quadro** (o quadro mostra o ETE puro, sem a folga de 15 min nem o bônus).
 - **4 Agro: feito (2026-11-25, SAFRA-ESTACAO).** Destinos `fazenda`/`agro` e safra por estação do ano via relógio de carreira e latitude da origem (`AgroSeason`), influenciando peso de contratos, tipos de carga e notas no texto.
-- **5 Executiva:** destinos `executivo:lazer`/turísticos feitos; falta o **cliente recorrente** (fidelidade).
+- **5 Executiva:** destinos `executivo:lazer`/turísticos feitos; o **cliente recorrente** (fidelidade) foi **descartado pelo usuário em 2026-11-25** (não fazer).
 - **6 Carga: feito (2026-11-25, `CARGA-COERENTE`).** `Data/cargo_kinds.json` sorteia o tipo de carga pelos perfis da origem/destino (marcadores `{cargo}`/`{cargo_note}`, colunas `CargoKind`/`CargoName`); classes ONU de carga perigosa, e as "somente cargueiro" (1.1D, 3, 9 UN3480) bloqueiam aceite e início de voo com passageiros no manifesto. Falta conferir no app (painel e mensagens).
 - **3 Linha aérea:** nada feito; maior das sete (dados OpenFlights, licença ODbL com atribuição e compartilhamento pelo mesmo termo).
 

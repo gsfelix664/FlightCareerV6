@@ -19,7 +19,7 @@
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
-1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): cliente recorrente (5), linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`).
+1. Melhorias de missões que sobram, uma por sessão (`docs/plans/missoes-locais-rp.md` › 3.1): linha aérea com rotas reais (3, decidir licença ODbL) (**Opus** para spec); importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`).
 2. HUD em modo tablet: spec (**Opus**), quando o usuário quiser começar.
 - Os 8 tipos da E2C que sobraram precisam de SimVar a conferir no MSFS ou de dados: `adaptacao_noturna`, `evacuacao_por_do_sol` e o pôr do sol da `saude_familia` (hora/sol e luzes), `pulverizacao` (AGL real), `demo_flight` (rolagem de decolagem de referência), `instrucao_ifr`, `calibracao_auxilios` (geometria de aproximação, auxílio sintonizado), `reboque_planador`, `publicidade_aerea` (reboque nativo). Um lote que acrescente `PLANE ALT ABOVE GROUND` e as SimVars de hora/sol pode ser especificado no escritório, mas só fecha com o teste no sim.
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".
@@ -32,7 +32,7 @@ Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
 - **Decisões abertas do usuário:** corte final de `isolado` (depois da medição em casa). Resolvidas em 2026-11-25 e mergeadas: CAN só em origem militar, peso de saúde 100, `saude_familia` abastece no destino, falência dos agressivos aceita, patrimônio e classe G encerradas.
-- **Autorizado, falta spec (Opus), uma por sessão:** melhorias 3 e 5 de `docs/plans/missoes-locais-rp.md` › 3.1.
+- **Autorizado, falta spec (Opus), uma por sessão:** melhoria 3 de `docs/plans/missoes-locais-rp.md` › 3.1 (a 5, cliente recorrente, foi descartada pelo usuário em 2026-11-25).
 
 ## Notas de trabalho
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.
