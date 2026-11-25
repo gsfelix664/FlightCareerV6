@@ -2,10 +2,10 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (5ª sessão, escritório), Claude. Base `feat/component-health-system`. Sem mudança de código nesta sessão (build/testes como na 4ª: 0 erros, 1.087/1.087).
+**Última atualização:** 2026-11-25 (5ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.095/1.095. AREAS-INSTRUCAO mergeada (revisão em `docs/reviews/AREAS-INSTRUCAO-revisao.md`).
 
-## Feito nesta sessão (pesquisa, sem código)
-- Áreas de instrução reais: pesquisa em `docs/plans/missoes-locais-rp.md` › 5. openAIP é CC BY-NC 4.0 e tem só 4 áreas de instrução no Brasil (quase nenhuma no mundo). O WFS público do DECEA (`ICA:airspace`) tem 11 áreas civis de instrução e ~17 de acrobacia, com limites e polígono. Proposta: importar o DECEA em tempo de desenvolvimento para `Data/places/training_areas.json` e manter o procedural no resto (spec `AREAS-INSTRUCAO`, § 5.3). Decisões do § 5.4 fechadas: DECEA citando a fonte, openAIP descartado, áreas de acrobacia entram no arquivo (`kind: "acrobacia"`).
+## Feito nesta sessão (não testado no MSFS)
+- Áreas de instrução reais do DECEA (pesquisa em `docs/plans/missoes-locais-rp.md` › 5; openAIP descartado por ser não comercial). `tools/places/build_training_areas.py` gera `Data/places/training_areas.json` (11 de instrução, 16 de acrobacia) a partir do WFS público `ICA:airspace`. Instrução local e cheque usam a área real a ≤ 25 NM da origem (nome oficial no texto, faixa AGL pelo piso/teto e pela elevação), senão o procedural de antes. Na prática só entram SBR458–460, SBR466 (SP/Campinas), SBR595 Capivari, SBR529 Frederico Westphalen e SBR806 Tatuí; as de teto baixo caem no procedural. Acrobacia fica no arquivo para um futuro contrato.
 
 ## Feito na 4ª sessão de 2026-11-25 (não testado no MSFS)
 - `check_flight` e paraquedismo usam a distância sorteada do perfil (20–60 e 5–15 NM; antes 30 e 25 fixos); `pinga_pinga` fica entre 100 e 400 NM no total, senão não é gerado. No snapshot mudaram só 11 registros (cheque e paraquedismo). Não medido: com que frequência o `pinga_pinga` some em dados reais pelo mínimo (`board-report`).
@@ -46,7 +46,7 @@ Outros achados do 2º voo:
 - Banco apagado a pedido do usuário (carreira de testes recomeça; cópia em `db-backup/flightcareer.db.bak-20261125` (com -shm e -wal), na pasta de saída do UI).
 
 ## Bugs em aberto
-- Nenhum novo. Conferir no próximo voo: coluna `nav-heading-true` e vento no CSV do REC; contrato de instrução local cumprido passando na faixa; linha "CONTRATO" do HUD (texto, quebra de linha, atualização durante o voo).
+- Nenhum novo. Conferir no próximo voo: instrução local saindo de SDCO/SBKP/SBMT com a área real do DECEA (nome no texto, ponto e faixa); coluna `nav-heading-true` e vento no CSV do REC; contrato de instrução local cumprido passando na faixa; linha "CONTRATO" do HUD (texto, quebra de linha, atualização durante o voo).
 
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
@@ -54,7 +54,7 @@ Outros achados do 2º voo:
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
 1. ~~HUD com o progresso dos rastreadores~~ (feito: HUD-PROGRESSO).
 2. ~~Pacote de correções de missões (distâncias)~~ (feito: MISSOES-DIST).
-3. **Áreas de instrução reais (DECEA):** pesquisa feita (`missoes-locais-rp.md` › 5). Decisões fechadas (§ 5.4). Próximo passo: escrever a spec `AREAS-INSTRUCAO` a partir do § 5.3 e delegar ao Gemini (script de importação + leitura + gerador + testes). Modelo: **Opus** para a spec e a revisão.
+3. ~~Áreas de instrução reais (DECEA)~~ (feito: AREAS-INSTRUCAO).
 4. **Próximo lote da E2C** (13 tipos desligados, ex. `instrucao_ifr`, `demo_flight`, `pulverizacao`). Modelo: **Opus** para a spec do lote.
 5. `board-report --coverage` mais rápido (rotina, **Sonnet** + Gemini).
 - Antes de qualquer uma, o usuário pode resolver as decisões abertas abaixo (perguntas rápidas, **Sonnet**).
