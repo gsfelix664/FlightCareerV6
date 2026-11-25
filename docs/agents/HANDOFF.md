@@ -7,7 +7,7 @@
 ## Feito nesta sessão
 - Importador de aeroportos dividido em 3 fases (`docs/plans/importador-aeroportos-simconnect.md` › 7, com a API do SimConnect conferida na DLL do projeto e o estudo do código da atools/Little Navmap).
 - **AIRSIM-1** (spec do Claude, Gemini implementou, revisão APROVADO com 2 ajustes em `docs/reviews/AIRSIM-1-revisao.md`, merge feito): `Domain/Airports/Sim/` (superfícies, impressão digital, diferença, builder) e `Infrastructure/Services/SimAirportSyncStore` (estado, fila persistente, aplicação da lista e dos detalhes). Ainda **não ligado** ao SimConnect nem ao app.
-- Referência: clones de `atools` e `littlenavmap` em `C:\projetosef\` (fora do repositório; só consulta, código GPL, não copiar).
+- Referência: clones de `atools` e `littlenavmap` em `C:\projetos\ref\` (fora do repositório; só consulta, código GPL, não copiar).
 
 ## Conferir no próximo voo (PC de casa)
 - Quadro de linha aérea (hub tier 1–2): destinos que são rota real aparecem com mais frequência e trazem a nota "Rota regular com demanda consolidada.". Se tiver a base do Little Navmap, regerar com `python tools/places/build_routes.py --cache <pasta> --lnm <base>`.
