@@ -61,6 +61,6 @@ Conclusão: **área real só no Brasil (DECEA)**; resto do mundo continua proced
 5. **Testes:** leitura do JSON; origem com área real → ponto no centroide com nome e faixa corretos; faixa inválida → procedural; origem sem área → procedural igual ao snapshot atual (o `missions_golden` só muda nas origens com área real, a conferir).
 
 ### 5.4 Decisões abertas do usuário
-1. Usar os dados do DECEA sem licença explícita (dado público do AIP, citando a fonte)? Alternativa: perguntar ao DECEA pelo Fale Conosco antes.
+1. ~~Usar os dados do DECEA sem licença explícita?~~ **Decidido (2026-11-25): sim**, usar o DECEA citando a fonte (DECEA/AIP Brasil e data da extração no `ATTRIBUTION.md`).
 2. openAIP fica descartado pela cláusula não comercial (confirmar se o addon pode vir a ser vendido; mesmo gratuito, ele acrescenta pouco ao DECEA).
 3. As ~17 áreas de acrobacia entram no mesmo arquivo já agora (para um futuro contrato de acrobacia) ou ficam de fora?

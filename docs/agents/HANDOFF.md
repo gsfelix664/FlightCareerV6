@@ -5,7 +5,7 @@
 **Última atualização:** 2026-11-25 (5ª sessão, escritório), Claude. Base `feat/component-health-system`. Sem mudança de código nesta sessão (build/testes como na 4ª: 0 erros, 1.087/1.087).
 
 ## Feito nesta sessão (pesquisa, sem código)
-- Áreas de instrução reais: pesquisa em `docs/plans/missoes-locais-rp.md` › 5. openAIP é CC BY-NC 4.0 e tem só 4 áreas de instrução no Brasil (quase nenhuma no mundo). O WFS público do DECEA (`ICA:airspace`) tem 11 áreas civis de instrução e ~17 de acrobacia, com limites e polígono. Proposta: importar o DECEA em tempo de desenvolvimento para `Data/places/training_areas.json` e manter o procedural no resto (spec `AREAS-INSTRUCAO`, § 5.3). **Aguarda as decisões do § 5.4.**
+- Áreas de instrução reais: pesquisa em `docs/plans/missoes-locais-rp.md` › 5. openAIP é CC BY-NC 4.0 e tem só 4 áreas de instrução no Brasil (quase nenhuma no mundo). O WFS público do DECEA (`ICA:airspace`) tem 11 áreas civis de instrução e ~17 de acrobacia, com limites e polígono. Proposta: importar o DECEA em tempo de desenvolvimento para `Data/places/training_areas.json` e manter o procedural no resto (spec `AREAS-INSTRUCAO`, § 5.3). Usuário decidiu usar o DECEA (citando a fonte). **Ainda abertos no § 5.4:** descarte do openAIP e se as áreas de acrobacia entram no arquivo.
 
 ## Feito na 4ª sessão de 2026-11-25 (não testado no MSFS)
 - `check_flight` e paraquedismo usam a distância sorteada do perfil (20–60 e 5–15 NM; antes 30 e 25 fixos); `pinga_pinga` fica entre 100 e 400 NM no total, senão não é gerado. No snapshot mudaram só 11 registros (cheque e paraquedismo). Não medido: com que frequência o `pinga_pinga` some em dados reais pelo mínimo (`board-report`).
@@ -54,7 +54,7 @@ Outros achados do 2º voo:
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
 1. ~~HUD com o progresso dos rastreadores~~ (feito: HUD-PROGRESSO).
 2. ~~Pacote de correções de missões (distâncias)~~ (feito: MISSOES-DIST).
-3. **Áreas de instrução reais (DECEA):** pesquisa feita (`missoes-locais-rp.md` › 5). Depois das decisões do § 5.4, escrever a spec `AREAS-INSTRUCAO` a partir do § 5.3 e delegar ao Gemini (script de importação + leitura + gerador + testes). Modelo: **Opus** para a spec e a revisão.
+3. **Áreas de instrução reais (DECEA):** pesquisa feita (`missoes-locais-rp.md` › 5). Depois dos itens 2 e 3 do § 5.4 (o 1 está decidido: DECEA), escrever a spec `AREAS-INSTRUCAO` a partir do § 5.3 e delegar ao Gemini (script de importação + leitura + gerador + testes). Modelo: **Opus** para a spec e a revisão.
 4. **Próximo lote da E2C** (13 tipos desligados, ex. `instrucao_ifr`, `demo_flight`, `pulverizacao`). Modelo: **Opus** para a spec do lote.
 5. `board-report --coverage` mais rápido (rotina, **Sonnet** + Gemini).
 - Antes de qualquer uma, o usuário pode resolver as decisões abertas abaixo (perguntas rápidas, **Sonnet**).
