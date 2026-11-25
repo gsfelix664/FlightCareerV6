@@ -4,20 +4,25 @@
 
 **Última atualização:** 2026-11-25, Claude, PC de casa (com MSFS e Little Navmap). Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.063/1.063. Correções commitadas e mergeadas na base.
 
-## Voo de teste (instrução local SBJS, C152 PR-NRI, 07:36–07:56)
+## Voos de teste (C152, SBJS, instrução local)
+1º voo: PR-NRI, 07:36–07:56, carreira antiga. 2º voo: PT-WSQ, 08:38–08:47, carreira nova, sim rate de até ×16 (0,43 h de voo).
+
 | Item | Resultado |
 |---|---|
-| Escalas com motor ligado | não testado |
-| Toques no triângulo | não testado |
-| Pousos curtos STOL | não testado (fase 2) |
-| Rumos do voo de cheque | não testado (fase 2; não sai em tier 4) |
-| Teto do translado | não testado (fase 2; não sai em tier 4) |
+| Quique na decolagem não conta como pouso | **funcionou** (2º voo: `QUIQUE_DECOLAGEM`, 0,9 s no ar, 197 fpm; um só pouso contado, sem dano) |
+| Avião inicial com peças / Hangar com ícones | peças **funcionaram** (73 no banco); ícones no Hangar **não conferidos** com o usuário |
+| Vento na blackbox | **funcionou**: `AMBIENT WIND` 064° verdadeiro, 12–22 kt no solo, até 32 kt no ar (bate com a estimativa do 1º voo). O usuário via 9 kt / "sem vento" na tela do sim: falta saber qual tela |
+| Motivo do contrato não cumprido, texto no briefing, área no HUD, ícones do HUD | não conferido com o usuário |
+| Contrato de instrução local | não cumprido nos dois voos (0 de 3 TGL, só pouso final); passou a 2,0 NM do centro da área, a 2.650–2.800 ft MSL (~1.700 ft AGL) |
+| Escalas com motor ligado / toques no triângulo | não testado |
+| STOL, voo de cheque, translado | não testado (fase 2; cheque e translado não saem em tier 4) |
 | Quadro: SDCO/SBTF/PABE sem jatos de linha; SBFI/SBPS com | não testado |
 
-Fora da lista:
-- **$0 com qualidade 100 %:** correto pela regra; 0 de 3 TGL (no ar de 07:42:41 até o pouso final às 07:56:30). Qualidade não entra no pagamento. A posição passou a 2,0 NM do centro da área (raio 3 NM). A tela não dizia o motivo: corrigido.
-- **Decolagem difícil:** sem pane. Vento real, reestimado sem usar a proa (GS gravada × trilha verdadeira, resíduo 4–6 kt): ~20 kt de ~070° verdadeiro de 0 a 1.500 ft, ~30 kt acima. Saída do chão (proa ~349° mag.) e pouso com cauda de ~6–15 kt e través forte. O usuário viu 9 kt / "sem vento" na tela do sim: a blackbox agora grava `WindDirDeg;WindKt` (`AMBIENT WIND *`) para comparar no próximo voo.
-- **Área de instrução no HUD, texto do contrato no briefing, textos cortados de célula/motor/pneus:** corrigidos; **não conferidos na tela** (o app estava aberto; recompilar e abrir).
+Outros achados do 2º voo:
+- RPM acima da faixa vermelha (2.550) por boa parte do voo, pico 2.707: 4,6 % de dano espalhado por 12 peças do motor (regra funcionando; foi o piloto).
+- Pneus principais 100 → 96 % num voo, com pouso de 41 fpm: inspeções `CROSSWIND_LANDING_LOAD` (vento de través real) e `HIGH_ENERGY_BRAKING`. Conferir a calibração se repetir.
+- A faixa de altitude do texto da instrução ("3.500 a 4.500 ft AGL") não é cobrada: o ponto da área só pede raio de 3 NM e no máximo 6.000 ft.
+- Áreas de instrução são procedurais (`MissionGenerator`, 8–15 NM num setor, longe de outros aeródromos). Dados reais: o Little Navmap/Navigraph tem 1.375 áreas tipo `TR` (training) no mundo, ~800 na Europa e **nenhuma no Brasil**; a licença do Navigraph não permite redistribuir. Decisão do usuário: híbrido (área real quando houver, de fonte com licença compatível, ex. openAIP, e procedural no resto).
 
 ## Corrigido em 2026-11-25 (não testado no MSFS)
 - Quique na decolagem não é pouso: contato até 8 s depois de sair do chão, sem pouso antes; dano só se duro (≥ 400 fpm). Evento `QUIQUE_DECOLAGEM` na blackbox.
@@ -27,12 +32,13 @@ Fora da lista:
 ## Bugs em aberto
 1. **Vento de través errado:** `SimTelemetry.CrosswindComponentKnots`/`TailwindComponentKnots` subtraem proa **magnética** (`PLANE HEADING DEGREES MAGNETIC`) de direção do vento **verdadeira** (`AMBIENT WIND DIRECTION`); em SBJS o erro é de ~22°. Correção: acrescentar `PLANE HEADING DEGREES TRUE` no fim do `SimTelemetry` e do `AddToDef` (arquivos quentes). Afeta bônus STOL e XP de vento cruzado.
 2. O REC (sensor-logs) não grava vento nem proa.
+3. Faixa de altitude da instrução local só no texto (não cobrada).
 
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa (sessão nova, PC de casa)
-1. Criar a carreira nova (base SBJS, C152) e conferir o Hangar com ícones. Continuar o voo de teste: triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
+1. Corrigir o vento de través (bug 1, Opus, arquivos quentes). 2. Conferir com o usuário as telas e o Hangar com ícones. Continuar o voo de teste com 3 toques: triângulo VFR com toque e arremetida (SBJS → SNPC → SSFL → SBJS, fase 1, se ainda estiver no quadro). Para STOL, cheque e translado, o usuário decide se libera a fase 2 no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Conferir o quadro (SDCO/SBTF/PABE, SBFI/SBPS) e as telas corrigidas.
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`; no REC de hoje a SimVar ficou em ~99–100 sem pane); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
