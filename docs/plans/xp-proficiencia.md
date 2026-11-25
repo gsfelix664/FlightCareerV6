@@ -1,6 +1,6 @@
 # Plano — XP por proficiência e dificuldade
 
-Criado em 2026-11-21 (Claude), depois do voo de SNEJ (C152, pista de terra a 5.130 ft entre montanhas, 17,7 min, 23 XP). Status: **aprovado pelo usuário em 2026-11-21 (§ 5.1); implementação pendente**.
+Criado em 2026-11-21 (Claude), depois do voo de SNEJ (C152, pista de terra a 5.130 ft entre montanhas, 17,7 min, 23 XP). **Estado (conferido em 2026-11-25):** modelo da § 6 implementado (XP-NOVO, XP-PONTAS; prazo no quadro em 2026-11-25). Pendente: pesos por tipo de missão (§ 5.2) e o bônus de declividade (sem fonte de dados). As §§ 1–5.1 são histórico. Estado atual: `docs/sistemas/xp-fases.md`.
 
 ## 1. Como é hoje (`FlightService.ProcessFlightFinishAsync`, ~linha 258)
 ```

@@ -1,6 +1,6 @@
 # Plano — Taxas de aeroporto e serviços de solo
 
-Criado em 2026-11-16 (Claude). Status: **decidido** (§ 6, 2026-11-16); F1 em implementação.
+Criado em 2026-11-16 (Claude). **Estado (conferido em 2026-11-25):** decidido (§ 6); F1 implementada (catálogo e calculador, 2026-11-16). F2 (GPU, degelo, pushback medidos no sim) não implementada; F3 e F4 sem tarefa registrada no CHANGELOG. Estado atual: `docs/sistemas/economia-dificuldade.md`.
 Origem: análise das SimVars (`docs/plans/sensor-research/variaveis-eletrica.md`, `variaveis-diversos.md`): GPU, APU, estacionamento e clima podem ser detectados no sim e cobrados.
 
 ## 1. Objetivo

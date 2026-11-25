@@ -1,5 +1,7 @@
 # Adendo do usuário (2026-11-15) — Elétrico e Aviônicos (entra na rodada 2 da F2.1b)
 
+**Estado (conferido em 2026-11-25):** adendos incorporados ao catálogo e às regras (F2.1b, rodadas 2 e 3); as "ideias para fases seguintes" continuam sem tarefa. Registro histórico.
+
 Ideia central: elétrico e aviônicos sofrem com calor, umidade, ciclos liga/desliga, picos de tensão e partidas incorretas — servem para punir checklist mal feito.
 
 ## Peças (agrupar o que não mudar a jogabilidade)

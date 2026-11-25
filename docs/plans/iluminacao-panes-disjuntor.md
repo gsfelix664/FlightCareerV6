@@ -1,6 +1,6 @@
 # Plano — Iluminação no Hangar e panes por disjuntor/circuito
 
-Criado em 2026-11-16 (Claude). Status: **proposta**, aguardando decisões do usuário (§ 7) e testes no MSFS.
+Criado em 2026-11-16 (Claude). **Estado (conferido em 2026-11-25):** parcial — lâmpadas como peças do grupo Iluminação e MEL noturna só com aviso (decisões 1–3 da § 7, 2026-11-17). Não implementado: panes por disjuntor/circuito e atuação no sim (§§ 3, 4 e F4), que dependem de teste no MSFS e das decisões 4 e 5 da § 7. Estado atual: `docs/sistemas/pecas.md`.
 Origem: `docs/plans/sensor-research/variaveis-eletrica.md` (disjuntores, circuitos, linhas e relés graváveis no sistema elétrico v2) e a próxima fase do `AGENTS.md` › 7 ("Avaliar aviônicos: disjuntores por aeronave no MSFS 2024").
 
 ## 1. Objetivos

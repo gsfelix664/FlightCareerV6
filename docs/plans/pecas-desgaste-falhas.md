@@ -1,5 +1,7 @@
 # Plano: Sensores, peças com saúde oculta, desgaste, revisões e panes
 
+**Estado (conferido em 2026-11-25):** Fases 1 e 2 executadas (peças integradas ao voo na F2.4). Parte das Fases 3–5 foi feita por tarefas posteriores e regras mudaram (ex.: manutenção por faixas, walkaround com saúde exata): não use este plano como fila de tarefas. O diário no fim não foi mantido. Estado atual: `docs/sistemas/pecas.md`, `manutencao-hangar.md` e `panes-persistentes.md`.
+
 **Status:** aprovado pelo usuário (2026-11-13) · **Revisor/orquestrador:** Claude · **Executor:** Gemini (Antigravity CLI)
 **Branch base:** `feat/component-health-system`
 **Leitura obrigatória antes de começar:** `AGENTS.md`, `docs/plans/INSTRUCOES-GEMINI.md`, `docs/plans/sensor-inventory.md`.

@@ -1,5 +1,7 @@
 # Spike — Falhar o Sistema sem Mexer no Comando do Piloto (MSFS 2024)
 
+**Estado (conferido em 2026-11-25):** pesquisa concluída; alternador e flap tratados na F4.2e (2026-11-15). O texto descreve o addon antes dela. Estado atual: `docs/sistemas/desgaste-falhas.md`.
+
 **Data:** 2026-11-15  
 **Autor:** Gemini (Executor) — Revisão: Claude  
 **Objetivo:** Descobrir, na documentação oficial do SDK do MSFS 2024, como aplicar cada pane do addon sem mover chaves ou alavancas no painel (chave do alternador permanece ON, alavanca do flap se move, mas o sistema não responde) e entregar a análise comparativa, a recomendação técnica por pane e um roteiro prático de teste em voo (C152).
