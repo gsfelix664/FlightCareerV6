@@ -17,5 +17,7 @@ namespace FlightCareer.Application.DTOs
         public int CompletedMissions { get; set; }
         public int RemainingMissions { get; set; }
         public System.Collections.Generic.IReadOnlyList<string>? XpBreakdownLines { get; set; }
+        /// <summary>Contratos que pousaram no destino sem cumprir a exigência ("título: motivo").</summary>
+        public System.Collections.Generic.IReadOnlyList<string> IncompleteReasons { get; set; } = System.Array.Empty<string>();
     }
 }

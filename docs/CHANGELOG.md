@@ -3193,3 +3193,9 @@
 - `airport_profiles.py` aceita o `tier-report.csv` e usa o tier do jogo nas heurísticas; `airport_profiles.json` regenerado (10.974 → 12.385 aeroportos com perfil; bem mais `isolado`/`interior_distante`). Regras de tier na versão 3 (recalcula bancos existentes). Tier 1: 457 → 486.
 - Snapshot `missions_golden.json` regenerado. Build 0 erros; testes 1.058/1.058.
 - `career-stab` Médio, 1095 dias, 3 bots, base × branch: sem alertas; patrimônio de cauteloso e equilibrado no dia 1095 +1 a 2 %. Agressivo: falência 67 % → 100 % no dia 1095 (3 bots; já era frágil). Não testado no MSFS.
+
+## 2026-11-25 - Ajustes do primeiro voo de teste das missões (Claude)
+- Fim de voo: contrato não cumprido mostra o motivo ("CONTRATO NÃO CUMPRIDO", `FlightOutcome.IncompleteReasons`); antes aparecia só "Recompensa $0".
+- Briefing: o texto do contrato aparece no cartão da perna.
+- HUD: o mini-mapa desenha a área de instrução, pontos e escalas; célula, motor e pneus só com ícone colorido (texto na dica).
+- Build 0 erros; testes 1.059/1.059. Telas não conferidas visualmente.

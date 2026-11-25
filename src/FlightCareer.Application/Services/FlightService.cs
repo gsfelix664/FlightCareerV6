@@ -496,6 +496,7 @@ namespace FlightCareer.Application.Services
                         outcome.Message += " | Partida automática usada (−10% XP)";
                     }
                 }
+                outcome.IncompleteReasons = uncompletedMissionReasons;
                 if (uncompletedMissionReasons.Count > 0)
                 {
                     outcome.Message += $" | Contrato(s) não concluído(s): {string.Join(" • ", uncompletedMissionReasons)}";
