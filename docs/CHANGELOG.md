@@ -3258,3 +3258,8 @@
 - `BoardReporter`: integração do `BoardCache` instanciado uma única vez após a carga do banco temporário e reaproveitado entre todos os quadros da execução; adicionada medição de tempo segregada (seed vs simulação de quadros). Tempo de simulação reduzido de ~39 s para 12.39 s nos 10 aeroportos x 10 quadros (aceleração de 3,15×).
 - `BoardCacheTests`: novos testes unitários garantindo que a geração com e sem cache é rigorosamente idêntica missão por missão (`BoardCache_MesmaSemente_MesmoQuadro`) e que a alternância entre diferentes origens não polui o estado (`BoardCache_OrigensDiferentes_NaoVazaCandidatos`).
 - Suite de testes completa aprovada (1.120 testes, 0 falhas) com golden snapshot `missions_golden.json` inalterado.
+
+## 2026-11-25 - Revisão do BR-PERF (Claude)
+- Um só caminho de sorteio: elegibilidade e pesos de destino deixaram de estar duplicados entre o relatório e o jogo; o jogo também usa o cache (vida de um quadro).
+- `board-report` lê aeroportos e pistas em ordem fixa: antes a mesma semente variava entre execuções (Ids novos a cada seed).
+- Medido contra o código antigo com a mesma ordem (10 aeroportos × 10 quadros, Release): CSVs e relatório idênticos; tempo total 64 s → 31 s (quadros ~16 s, cerca de 3×); pico de memória ~415 MB nos dois.

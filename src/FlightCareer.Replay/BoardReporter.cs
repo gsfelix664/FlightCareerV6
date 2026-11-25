@@ -85,8 +85,16 @@ namespace FlightCareer.Replay
 
                 using (var db = new AppDbContext(dbOptions))
                 {
-                    allAirports = db.Airports.AsNoTracking().ToList();
-                    allRunways = db.Runways.AsNoTracking().ToList();
+                    // Ordem fixa: o seed gera Ids novos a cada execução e a ordem do banco mudaria o sorteio da mesma semente
+                    allAirports = db.Airports.AsNoTracking().ToList()
+                        .OrderBy(a => a.ICAO, StringComparer.Ordinal)
+                        .ToList();
+                    allRunways = db.Runways.AsNoTracking().ToList()
+                        .OrderBy(r => r.AirportIdent, StringComparer.Ordinal)
+                        .ThenByDescending(r => r.LengthFt)
+                        .ThenBy(r => r.Surface, StringComparer.Ordinal)
+                        .ThenByDescending(r => r.IsLighted)
+                        .ToList();
                 }
             }
             finally

@@ -83,34 +83,9 @@ namespace FlightCareer.Application.Services
             }
 
             // 1. Filtrar missões habilitadas com peso de origem > 0 e que caibam na pista e etiquetas da origem
-            List<(MissionDefinition Mission, double Weight)> eligibleMissions;
-            double totalOriginWeight;
-
-            if (cache != null)
-            {
-                (eligibleMissions, totalOriginWeight) = cache.GetOrComputeEligibleMissions(origin, originRunway, originTags, catalog);
-            }
-            else
-            {
-                eligibleMissions = new List<(MissionDefinition Mission, double Weight)>();
-                foreach (var m in catalog.Missions.Values)
-                {
-                    if (!m.Enabled) continue;
-
-                    bool anyProfileFits = m.Profiles.Any(p =>
-                        (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
-                        && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
-                    );
-                    if (!anyProfileFits) continue;
-
-                    double w = MissionWeighting.OriginWeight(m, origin.Tier, originTags);
-                    if (w > 0.0)
-                    {
-                        eligibleMissions.Add((m, w));
-                    }
-                }
-                totalOriginWeight = eligibleMissions.Sum(x => x.Weight);
-            }
+            var (eligibleMissions, totalOriginWeight) = cache != null
+                ? cache.GetOrComputeEligibleMissions(origin, originRunway, originTags, catalog)
+                : ComputeEligibleMissions(origin, originRunway, originTags, catalog);
 
             if (eligibleMissions.Count == 0) return missions;
             if (totalOriginWeight <= 0.0) return missions;
@@ -118,19 +93,9 @@ namespace FlightCareer.Application.Services
             int maxAttempts = targetCount * 4;
             int attempts = 0;
 
-            // Distância origem → candidato calculada uma vez por quadro (ou obtida do cache)
-            double[] distances = cache != null
-                ? cache.GetOrComputeDistances(origin, candidates)
-                : new double[candidates.Count];
-
-            if (cache == null)
-            {
-                for (int i = 0; i < candidates.Count; i++)
-                {
-                    var a = candidates[i].Airport;
-                    distances[i] = MissionGenerator.CalculateDistance(origin.Latitude, origin.Longitude, a.Latitude, a.Longitude);
-                }
-            }
+            // Sem cache externo, um com a vida desta chamada: distâncias e destinos são calculados uma vez por quadro
+            var boardCache = cache ?? new BoardCache();
+            var distances = boardCache.GetOrComputeDistances(origin, candidates);
 
             while (missions.Count < targetCount && attempts < maxAttempts)
             {
@@ -154,7 +119,7 @@ namespace FlightCareer.Application.Services
                     placesService,
                     distances,
                     originRunway,
-                    cache);
+                    boardCache);
 
                 if (mission != null)
                 {
@@ -270,18 +235,7 @@ namespace FlightCareer.Application.Services
 
             if (def.Generator == "ferry_permit")
             {
-                AirportCandidate? destCand;
-                if (cache != null)
-                {
-                    var group = cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                    destCand = group.Pick(random);
-                }
-                else
-                {
-                    var validCandidatesFerry = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                    if (validCandidatesFerry.Count == 0) return null;
-                    destCand = PickDestination(def, validCandidatesFerry, getAirportTags, random);
-                }
+                var destCand = SelectDestination(origin, def, profile, candidates, getAirportTags, random, candidateDistances, cache);
                 if (destCand == null) return null;
                 double actualDistFerry = MissionGenerator.CalculateDistance(
                     origin.Latitude, origin.Longitude, destCand.Airport.Latitude, destCand.Airport.Longitude);
@@ -320,18 +274,7 @@ namespace FlightCareer.Application.Services
 
             if (def.Generator == "round_trip")
             {
-                AirportCandidate? destCand;
-                if (cache != null)
-                {
-                    var group = cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                    destCand = group.Pick(random);
-                }
-                else
-                {
-                    var validCandidatesRoundTrip = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                    if (validCandidatesRoundTrip.Count == 0) return null;
-                    destCand = PickDestination(def, validCandidatesRoundTrip, getAirportTags, random);
-                }
+                var destCand = SelectDestination(origin, def, profile, candidates, getAirportTags, random, candidateDistances, cache);
                 if (destCand == null) return null;
                 double actualIdaDist = MissionGenerator.CalculateDistance(
                     origin.Latitude, origin.Longitude, destCand.Airport.Latitude, destCand.Airport.Longitude);
@@ -363,18 +306,7 @@ namespace FlightCareer.Application.Services
             }
 
             // Destino padrão: filtrar candidatos e sortear ponderado por DestinationWeight
-            AirportCandidate? selectedCandidate;
-            if (cache != null)
-            {
-                var group = cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                selectedCandidate = group.Pick(random);
-            }
-            else
-            {
-                var validCandidates = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-                if (validCandidates.Count == 0) return null;
-                selectedCandidate = PickDestination(def, validCandidates, getAirportTags, random);
-            }
+            var selectedCandidate = SelectDestination(origin, def, profile, candidates, getAirportTags, random, candidateDistances, cache);
             if (selectedCandidate == null) return null;
 
             double actualDist = MissionGenerator.CalculateDistance(
@@ -384,6 +316,64 @@ namespace FlightCareer.Application.Services
                 origin, selectedCandidate.Airport, actualDist, def, paxCount, luggageLbs, cargoLbs,
                 random, referenceTime, payMultiplier, payTable,
                 destRunway: selectedCandidate.BestRunway, textCatalog: textCatalog);
+        }
+
+        internal static (List<(MissionDefinition Mission, double Weight)> Missions, double TotalWeight) ComputeEligibleMissions(
+            Airport origin,
+            Runway? originRunway,
+            IReadOnlySet<string> originTags,
+            MissionCatalog catalog)
+        {
+            var eligible = new List<(MissionDefinition Mission, double Weight)>();
+            foreach (var m in catalog.Missions.Values)
+            {
+                if (!m.Enabled) continue;
+
+                bool anyProfileFits = m.Profiles.Any(p =>
+                    (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
+                    && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
+                );
+                if (!anyProfileFits) continue;
+
+                double w = MissionWeighting.OriginWeight(m, origin.Tier, originTags);
+                if (w > 0.0)
+                {
+                    eligible.Add((m, w));
+                }
+            }
+
+            return (eligible, eligible.Sum(x => x.Weight));
+        }
+
+        private static AirportCandidate? SelectDestination(
+            Airport origin,
+            MissionDefinition def,
+            MissionProfileDefinition profile,
+            IReadOnlyList<AirportCandidate> candidates,
+            Func<string, IReadOnlySet<string>> getAirportTags,
+            Random random,
+            IReadOnlyList<double>? candidateDistances,
+            BoardCache? cache)
+        {
+            if (cache != null)
+            {
+                return cache.GetOrComputeDestinationGroup(origin, def, profile, candidates, getAirportTags, candidateDistances).Pick(random);
+            }
+
+            var valid = FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
+            return PickDestination(def, valid, getAirportTags, random);
+        }
+
+        /// <summary>Etiquetas do candidato, com a etiqueta virtual "pista_curta" para casamento de destino.</summary>
+        internal static IReadOnlySet<string> DestinationTags(AirportCandidate c, Func<string, IReadOnlySet<string>> getAirportTags)
+        {
+            var tags = getAirportTags(c.Airport.ICAO);
+            bool isShortOrUnpaved = (c.BestRunway != null && (c.BestRunway.LengthFt <= 4000 || RunwaySurface.IsUnpaved(c.BestRunway.Surface))) || c.Airport.Tier == 4;
+            if (isShortOrUnpaved && !tags.Contains("pista_curta"))
+            {
+                return new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { "pista_curta" };
+            }
+            return tags;
         }
 
         public static MissionProfileDefinition? PickProfile(
@@ -475,7 +465,7 @@ namespace FlightCareer.Application.Services
             return Math.Round(totalKg * 2.20462, 0);
         }
 
-        public static List<AirportCandidate> FilterCandidates(
+        internal static List<AirportCandidate> FilterCandidates(
             Airport origin,
             MissionDefinition def,
             MissionProfileDefinition profile,
@@ -598,43 +588,7 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<AirportCandidate> candidates,
             Func<string, IReadOnlySet<string>> getAirportTags,
             Random random)
-        {
-            if (candidates.Count == 0) return null;
-            if (candidates.Count == 1) return candidates[0];
-
-            var weighted = new List<(AirportCandidate Candidate, double Weight)>(candidates.Count);
-            double totalWeight = 0.0;
-
-            for (int i = 0; i < candidates.Count; i++)
-            {
-                var c = candidates[i];
-                var tags = getAirportTags(c.Airport.ICAO);
-
-                // Se o candidato tiver pista curta/não pavimentada, adiciona tag virtual para casamento
-                bool isShortOrUnpaved = (c.BestRunway != null && (c.BestRunway.LengthFt <= 4000 || RunwaySurface.IsUnpaved(c.BestRunway.Surface))) || c.Airport.Tier == 4;
-                if (isShortOrUnpaved && !tags.Contains("pista_curta"))
-                {
-                    var extTags = new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { "pista_curta" };
-                    tags = extTags;
-                }
-
-                double w = MissionWeighting.DestinationWeight(def, tags);
-                weighted.Add((c, w));
-                totalWeight += w;
-            }
-
-            if (totalWeight <= 0.0) return candidates[random.Next(candidates.Count)];
-
-            double roll = random.NextDouble() * totalWeight;
-            double acc = 0.0;
-            for (int i = 0; i < weighted.Count; i++)
-            {
-                acc += weighted[i].Weight;
-                if (roll <= acc) return weighted[i].Candidate;
-            }
-
-            return weighted[^1].Candidate;
-        }
+            => new DestinationChoiceGroup(def, candidates, c => DestinationTags(c, getAirportTags)).Pick(random);
 
         private static MissionDefinition? PickWeighted(List<(MissionDefinition Mission, double Weight)> items, double totalWeight, Random random)
         {

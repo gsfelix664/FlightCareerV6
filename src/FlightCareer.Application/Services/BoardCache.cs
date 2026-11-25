@@ -37,8 +37,7 @@ namespace FlightCareer.Application.Services
         public DestinationChoiceGroup(
             MissionDefinition def,
             IReadOnlyList<AirportCandidate> validCandidates,
-            Func<string, IReadOnlySet<string>> getAirportTags,
-            Func<AirportCandidate, IReadOnlySet<string>>? getCandidateTags = null)
+            Func<AirportCandidate, IReadOnlySet<string>> getCandidateTags)
         {
             int count = validCandidates.Count;
             _candidates = new AirportCandidate[count];
@@ -58,24 +57,7 @@ namespace FlightCareer.Application.Services
             double total = 0.0;
             for (int i = 0; i < count; i++)
             {
-                var c = _candidates[i];
-                IReadOnlySet<string> tags;
-                if (getCandidateTags != null)
-                {
-                    tags = getCandidateTags(c);
-                }
-                else
-                {
-                    tags = getAirportTags(c.Airport.ICAO);
-                    bool isShortOrUnpaved = (c.BestRunway != null && (c.BestRunway.LengthFt <= 4000 || RunwaySurface.IsUnpaved(c.BestRunway.Surface))) || c.Airport.Tier == 4;
-                    if (isShortOrUnpaved && !tags.Contains("pista_curta"))
-                    {
-                        tags = new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { "pista_curta" };
-                    }
-                }
-
-                double w = MissionWeighting.DestinationWeight(def, tags);
-                total += w;
+                total += MissionWeighting.DestinationWeight(def, getCandidateTags(_candidates[i]));
                 _cumulativeWeights[i] = total;
             }
             _totalWeight = total;
@@ -107,6 +89,10 @@ namespace FlightCareer.Application.Services
         }
     }
 
+    /// <summary>
+    /// Reaproveita entre quadros o que não consome sorteio. Reutilize a mesma instância só com as mesmas listas de
+    /// aeroportos/pistas, catálogo e serviços: a chave interna é a origem (e missão + perfil).
+    /// </summary>
     public sealed class BoardCache
     {
         private IReadOnlyList<Airport>? _cachedAirportsRef;
@@ -242,26 +228,8 @@ namespace FlightCareer.Application.Services
                 return (_cachedEligibleMissions, _cachedTotalOriginWeight);
             }
 
-            var eligible = new List<(MissionDefinition Mission, double Weight)>();
-            foreach (var m in catalog.Missions.Values)
-            {
-                if (!m.Enabled) continue;
-
-                bool anyProfileFits = m.Profiles.Any(p =>
-                    (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
-                    && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
-                );
-                if (!anyProfileFits) continue;
-
-                double w = MissionWeighting.OriginWeight(m, origin.Tier, originTags);
-                if (w > 0.0)
-                {
-                    eligible.Add((m, w));
-                }
-            }
-
-            _cachedEligibleMissions = eligible;
-            _cachedTotalOriginWeight = eligible.Sum(x => x.Weight);
+            (_cachedEligibleMissions, _cachedTotalOriginWeight) =
+                MissionBoardCore.ComputeEligibleMissions(origin, originRunway, originTags, catalog);
             return (_cachedEligibleMissions, _cachedTotalOriginWeight);
         }
 
@@ -281,7 +249,7 @@ namespace FlightCareer.Application.Services
             }
 
             var filtered = MissionBoardCore.FilterCandidates(origin, def, profile, candidates, getAirportTags, candidateDistances);
-            group = new DestinationChoiceGroup(def, filtered, getAirportTags, c => GetCandidateTagsWithPistaCurta(c, getAirportTags));
+            group = new DestinationChoiceGroup(def, filtered, c => GetCandidateTagsWithPistaCurta(c, getAirportTags));
             _destinationGroups[key] = group;
             return group;
         }
@@ -293,13 +261,7 @@ namespace FlightCareer.Application.Services
                 return tags;
             }
 
-            tags = getAirportTags(c.Airport.ICAO);
-            bool isShortOrUnpaved = (c.BestRunway != null && (c.BestRunway.LengthFt <= 4000 || RunwaySurface.IsUnpaved(c.BestRunway.Surface))) || c.Airport.Tier == 4;
-            if (isShortOrUnpaved && !tags.Contains("pista_curta"))
-            {
-                tags = new HashSet<string>(tags, StringComparer.OrdinalIgnoreCase) { "pista_curta" };
-            }
-
+            tags = MissionBoardCore.DestinationTags(c, getAirportTags);
             _candidateTagsWithPistaCurta[c.Airport.ICAO] = tags;
             return tags;
         }
