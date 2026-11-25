@@ -71,6 +71,7 @@ namespace FlightCareer.Replay
             List<Airport> allAirports;
             List<Runway> allRunways;
 
+            var seedSw = System.Diagnostics.Stopwatch.StartNew();
             try
             {
                 Console.WriteLine("[BOARD-REPORT] Semeando banco temporário para dados de aeroportos e pistas...");
@@ -96,12 +97,15 @@ namespace FlightCareer.Replay
                 }
                 catch { }
             }
+            seedSw.Stop();
+            Console.WriteLine($"[BOARD-REPORT] Seed concluído em {seedSw.Elapsed.TotalSeconds:F2} s.");
 
             var airportsByIcao = allAirports.ToDictionary(a => a.ICAO, StringComparer.OrdinalIgnoreCase);
             var catalog = MissionCatalog.Shared;
             var profileCatalog = AirportProfileCatalog.Shared;
             var random = new Random(options.Seed);
             var refTime = new DateTime(2026, 11, 24, 12, 0, 0, DateTimeKind.Utc);
+            var cache = new BoardCache(allAirports, allRunways);
 
             // Estruturas de agregação
             // 1. % de cada tipo por aeroporto
@@ -118,6 +122,7 @@ namespace FlightCareer.Replay
             // 4. Cobertura de destinos
             var destinationHits = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
+            var simulationSw = System.Diagnostics.Stopwatch.StartNew();
             foreach (var icao in options.Airports)
             {
                 if (!airportsByIcao.TryGetValue(icao, out var origin))
@@ -140,7 +145,8 @@ namespace FlightCareer.Replay
                         random,
                         refTime,
                         countOverride: null,
-                        allRunways: allRunways);
+                        allRunways: allRunways,
+                        cache: cache);
 
                     foreach (var m in missions)
                     {
@@ -181,6 +187,8 @@ namespace FlightCareer.Replay
                     }
                 }
             }
+            simulationSw.Stop();
+            Console.WriteLine($"[BOARD-REPORT] Simulação de quadros concluída em {simulationSw.Elapsed.TotalSeconds:F2} s.");
 
             // Gerar Markdown e CSVs
             Directory.CreateDirectory(options.OutputDirectory);

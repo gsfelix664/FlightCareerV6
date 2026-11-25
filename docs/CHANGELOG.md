@@ -3250,3 +3250,11 @@
 - `FlightMonitor`: integração completa dos rastreadores no ciclo de monitoramento e apuração de resultados de voo.
 - Adicionadas variantes textuais em `mission_texts.json` e testes unitários em `AerialWorkTrackerTests` e `PhaseE2C2MissionTests`.
 - Snapshot `missions_golden.json` regravado e relatório de quadros executado com sucesso.
+
+
+## 2026-11-25 - board-report mais rápido (BR-PERF) (Gemini)
+- `BoardCache` (`Application/Services/BoardCache.cs`): nova classe pura para aceleração e reaproveitamento de cálculos em simulações de quadros em memória. Pré-computa pistas mais longas/iluminadas e lista base de candidatos uma única vez; gerencia o ciclo por origem computando distâncias geográficas e tags uma vez por aeroporto de partida; cacheia grupos de candidatos e pesos de sorteio (`DestinationChoiceGroup`) por perfil de missão preservando estritamente a precisão de ponto flutuante e o consumo determinístico do `Random`.
+- `MissionBoardCore` e `MissionGenerator`: adicionado parâmetro opcional `BoardCache? cache = null` em `GenerateBoard`, `CreateSingleMission` e `GenerateMissionsInMemory`; reordenados filtros rápidos (país, ICAO de origem e teto de distância) antes de comparações de tags em `FilterCandidates`.
+- `BoardReporter`: integração do `BoardCache` instanciado uma única vez após a carga do banco temporário e reaproveitado entre todos os quadros da execução; adicionada medição de tempo segregada (seed vs simulação de quadros). Tempo de simulação reduzido de ~39 s para 12.39 s nos 10 aeroportos x 10 quadros (aceleração de 3,15×).
+- `BoardCacheTests`: novos testes unitários garantindo que a geração com e sem cache é rigorosamente idêntica missão por missão (`BoardCache_MesmaSemente_MesmoQuadro`) e que a alternância entre diferentes origens não polui o estado (`BoardCache_OrigensDiferentes_NaoVazaCandidatos`).
+- Suite de testes completa aprovada (1.120 testes, 0 falhas) com golden snapshot `missions_golden.json` inalterado.
