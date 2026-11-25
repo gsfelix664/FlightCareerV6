@@ -523,3 +523,10 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 ### Reorganização sugerida pelo usuário (2026-11-24)
 - `pessoas_remotas` passou do grupo G para o grupo I no § 6, deixando o G só com aeronave e tripulação técnica (só documentação: o grupo não é campo do catálogo).
 - Contagem certa por grupo: A 6, B 9, C 11, D 13, E 5, F 10, G 6, H 4, I 5 = 69.
+
+## 11. Lote E2C-2 — decisões (Claude, 2026-11-25)
+- Entram 5 tipos que não precisam de SimVar nova: `patrulha_vigilancia`, `inspecao_linhas`, `monitoramento_trafego`, `sar` e `saude_familia`. Spec: `docs/agents/specs/spec-E2C-2.md`.
+- Um rastreador puro de trabalho aéreo (`AerialWorkTracker`) com quatro modos: setores em qualquer ordem (patrulha), traçado na ordem (inspeção), órbita por tempo simulado (monitoramento) e busca com alvo escondido no padrão (SAR, quadrado crescente ou rota paralela). A ronda de saúde reusa o `MultiStopTracker` (ida e volta com parada completa).
+- "Baixa altura" é medida contra a elevação da origem (o `SimTelemetry` não tem AGL; `PLANE ALT ABOVE GROUND` fica para quando der para conferir no simulador). Tetos: patrulha e SAR 1.500 ft, inspeção 1.000 ft, órbita 1.000–2.500 ft.
+- Traçados de linha, áreas de patrulha e padrões de SAR são procedurais (sem base de dados de linhas de transmissão); POIs do `tourist_pois.json` dão nome ao alvo quando houver.
+- Ficam para depois: regra do pôr do sol na ronda de saúde, `adaptacao_noturna` e `evacuacao_por_do_sol` (precisam de SimVar de hora/sol e luzes, conferir no MSFS); `pulverizacao` (precisa de AGL real a 10–30 ft); `demo_flight` (não há rolagem de decolagem de referência por avião); `instrucao_ifr` e `calibracao_auxilios` (geometria de aproximação e auxílio sintonizado); `reboque_planador` e `publicidade_aerea` (reboque nativo do SDK).
