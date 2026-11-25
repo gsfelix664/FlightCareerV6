@@ -48,7 +48,7 @@ namespace FlightCareer.UI.Services
                     _writer = new StreamWriter(new FileStream(_currentFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite));
                     
                     // Cabeçalho CSV formatado
-                    _writer.WriteLine("Timestamp;ElapsedSec;Origin;Dest;Latitude;Longitude;AltitudeFt;GroundSpeedKt;AirspeedKt;VerticalSpeedFpm;GForce;PitchDeg;BankDeg;HeadingDeg;IsOnGround;ParkingBrake;FlapsPct;EngineRunning;EngineRPM;EngineCHT;EngineOilTemp;EngineOilPress;TurboITT;EngineN1;FuelGallons;FuelWeightLbs;BrakeLeft;BrakeRight;AirframeCondition;EngineCondition;TiresCondition;Status");
+                    _writer.WriteLine("Timestamp;ElapsedSec;Origin;Dest;Latitude;Longitude;AltitudeFt;GroundSpeedKt;AirspeedKt;VerticalSpeedFpm;GForce;PitchDeg;BankDeg;HeadingDeg;IsOnGround;ParkingBrake;FlapsPct;EngineRunning;EngineRPM;EngineCHT;EngineOilTemp;EngineOilPress;TurboITT;EngineN1;FuelGallons;FuelWeightLbs;BrakeLeft;BrakeRight;AirframeCondition;EngineCondition;TiresCondition;Status;WindDirDeg;WindKt");
                     _writer.Flush();
 
                     System.Diagnostics.Debug.WriteLine($"[TelemetryLogger] Blackbox iniciada em: {_currentFilePath}");
@@ -113,7 +113,10 @@ namespace FlightCareer.UI.Services
                         aircraft?.AirframeCondition.ToString("F1", inv) ?? "100.0",
                         aircraft?.EngineCondition.ToString("F1", inv) ?? "100.0",
                         aircraft?.TiresCondition.ToString("F1", inv) ?? "100.0",
-                        flightStatus
+                        flightStatus,
+                        // Vento no fim: a tela de logs lê as colunas por posição
+                        data.AmbientWindDirection.ToString("F0", inv),
+                        data.AmbientWindVelocity.ToString("F1", inv)
                     );
 
                     _writer.WriteLine(line);

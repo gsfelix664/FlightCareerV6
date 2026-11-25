@@ -383,6 +383,11 @@ namespace FlightCareer.Domain.Components
         public double MinAirborneSec { get; set; } = 0.5;
         /// <summary>Trecho da leitura rápida gravado no blackbox antes do contato (s).</summary>
         public double TraceBeforeSec { get; set; } = 2.0;
+        /// <summary>
+        /// Contato até este tempo depois de sair do chão, sem pouso desde a decolagem, é quique na decolagem:
+        /// não conta como pouso; só a razão de descida pode causar dano (s).
+        /// </summary>
+        public double TakeoffBounceMaxAirborneSec { get; set; } = 8.0;
     }
 
     public class EngineLimits

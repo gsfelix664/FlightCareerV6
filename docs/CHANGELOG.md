@@ -3199,3 +3199,10 @@
 - Briefing: o texto do contrato aparece no cartão da perna.
 - HUD: o mini-mapa desenha a área de instrução, pontos e escalas; célula, motor e pneus só com ícone colorido (texto na dica).
 - Build 0 erros; testes 1.059/1.059. Telas não conferidas visualmente.
+
+## 2026-11-25 - Quique na decolagem, avião inicial com peças e vento na blackbox (Claude)
+- Quique na decolagem não conta como pouso (`TouchdownDetector.IsTakeoffBounce`, `TouchdownEvent.AirborneSec`, `takeoffBounceMaxAirborneSec` = 8 s); dano só pela razão de descida (pouso duro ≥ 400 fpm). No voo de SBJS, 1,5 s no ar + toque a 158 fpm com 33 fps de deriva tirou trem e pneus.
+- Avião inicial nasce com peças (`CreatePilotViewModel` → `PartMigrationService.ProvisionPurchasedAircraft`): antes o 1º voo rodava no desgaste antigo e o Hangar mostrava faixas em % até reabrir o app.
+- Blackbox grava `WindDirDeg;WindKt` (`AMBIENT WIND *`) no fim da linha.
+- Vento do voo de SBJS reestimado sem usar a proa (GS gravada × trilha verdadeira): ~20 kt de ~070° verdadeiro de 0 a 1.500 ft (resíduo 4–6 kt), consistente por faixa de altura. Decolagem (proa ~349° mag.) e pouso com cauda de ~6–15 kt (GS − IAS; o IAS do C152 lê baixo em baixa velocidade). O vento existiu; o cálculo de través do app (proa magnética × vento verdadeiro) continua errado.
+- Build 0 erros; testes 1.063/1.063. Não testado no MSFS.
