@@ -2,11 +2,12 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (13ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.165/1.165.
+**Última atualização:** 2026-11-25 (14ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.189/1.189.
 
 ## Feito nesta sessão
-- ROTAS-REAIS (spec do Claude, implementação do Gemini, revisão APROVADO em `docs/reviews/ROTAS-REAIS-revisao.md`, merge feito): as 8 missões de linha aérea dão multiplicador de peso (6 nas regulares, 4 nas regionais) ao destino que é rota real no OpenFlights `routes.dat` (2014, ODbL). Dados em `places/airline_routes.json` (`tools/places/build_routes.py`, gerado **sem** `--lnm`) e nota "Rota regular com demanda consolidada." no texto.
-- Decisões do usuário (2026-11-25, no plano `missoes-locais-rp.md` › 4): OpenFlights aceito; horários de banco adiados.
+- Importador de aeroportos dividido em 3 fases (`docs/plans/importador-aeroportos-simconnect.md` › 7, com a API do SimConnect conferida na DLL do projeto e o estudo do código da atools/Little Navmap).
+- **AIRSIM-1** (spec do Claude, Gemini implementou, revisão APROVADO com 2 ajustes em `docs/reviews/AIRSIM-1-revisao.md`, merge feito): `Domain/Airports/Sim/` (superfícies, impressão digital, diferença, builder) e `Infrastructure/Services/SimAirportSyncStore` (estado, fila persistente, aplicação da lista e dos detalhes). Ainda **não ligado** ao SimConnect nem ao app.
+- Referência: clones de `atools` e `littlenavmap` em `C:\projetosef\` (fora do repositório; só consulta, código GPL, não copiar).
 
 ## Conferir no próximo voo (PC de casa)
 - Quadro de linha aérea (hub tier 1–2): destinos que são rota real aparecem com mais frequência e trazem a nota "Rota regular com demanda consolidada.". Se tiver a base do Little Navmap, regerar com `python tools/places/build_routes.py --cache <pasta> --lnm <base>`.
@@ -20,7 +21,7 @@
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
 ## Próxima tarefa no PC do escritório (sem simulador) — escolha uma por sessão
-1. Importador de aeroportos (`docs/plans/importador-aeroportos-simconnect.md`). As melhorias da § 3 de `missoes-locais-rp.md` estão todas feitas; horários de banco da linha aérea ficaram adiados (pedem spec **Opus** se o usuário quiser).
+1. **AIRSIM-2** (spec **Opus**): cliente SimConnect `UI/Services/SimAirportImporter` (padrão `ContextSnapshotReader`, IDs a partir de 3000), versão do sim no `OnRecvOpen`, lista + detalhes em lotes, gravação pelo `SimAirportSyncStore`, registro no `App.xaml.cs`; acrescentar luzes de aproximação ao `SimRunwayData` para o `IsLighted` (plano › 7 e pendências da revisão AIRSIM-1). Implementa no escritório, mas só fecha com o teste no MSFS.
 2. HUD em modo tablet: spec (**Opus**), quando o usuário quiser começar.
 - Os 8 tipos da E2C que sobraram precisam de SimVar a conferir no MSFS ou de dados: `adaptacao_noturna`, `evacuacao_por_do_sol` e o pôr do sol da `saude_familia` (hora/sol e luzes), `pulverizacao` (AGL real), `demo_flight` (rolagem de decolagem de referência), `instrucao_ifr`, `calibracao_auxilios` (geometria de aproximação, auxílio sintonizado), `reboque_planador`, `publicidade_aerea` (reboque nativo). Um lote que acrescente `PLANE ALT ABOVE GROUND` e as SimVars de hora/sol pode ser especificado no escritório, mas só fecha com o teste no sim.
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".

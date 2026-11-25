@@ -3319,3 +3319,4 @@
 - `DataSeeder`: identificação de origem dos aeroportos gravados (`Source = "LittleNavmap"` no caminho LNM e `Source = "Csv"` no caminho OurAirports).
 - `SimAirportSyncStore`: store de sincronização com controle de versão, digest da lista, fila persistente por prioridade/distância, aplicação em lote de detalhes com transação, marcação incremental de ausentes com proteção de lista suspeita e rodízio em segundo plano.
 - Testes unitários dedicados em `FlightCareer.Tests/Airports/Sim/` (11 testes).
+- Revisão (Claude): APROVADO com 2 ajustes (`docs/reviews/AIRSIM-1-revisao.md`): aeroporto ausente que volta ao simulador é reenfileirado (impressão limpa ao marcar ausente) e `ApplyDetailsAsync` consulta fila, aeroportos e pistas uma vez por lote. 1.189 testes. Nada ligado ao SimConnect ainda (AIRSIM-2); não testado no MSFS.
