@@ -193,14 +193,14 @@ namespace FlightCareer.Application.Services
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
                 return WithPersonLuggage(MissionGenerator.CreateLocalInstructionMissionSync(
-                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
+                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog, placesService), def, random);
             }
 
             if (def.Generator == "checkride")
             {
                 var nearbyAirports = candidates.Where(c => c.Airport.Tier <= 2).Select(c => c.Airport).ToList();
                 return WithPersonLuggage(MissionGenerator.CreateCheckrideMissionSync(
-                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog), def, random);
+                    origin, def, random, referenceTime, nearbyAirports, payMultiplier, payTable, textCatalog, placesService), def, random);
             }
 
             if (def.Generator == "scenic_tour")

@@ -350,6 +350,43 @@ namespace FlightCareer.Application.Services
             };
         }
 
+        public static bool TryResolveRealAreaBand(TrainingAreaInfo area, int originElevFt, out int minAgl, out int maxAgl)
+        {
+            int pisoAgl = string.Equals(area.FloorRef, "SFC", StringComparison.OrdinalIgnoreCase)
+                ? area.FloorFt
+                : area.FloorFt - originElevFt;
+
+            int tetoAgl = string.Equals(area.CeilRef, "SFC", StringComparison.OrdinalIgnoreCase)
+                ? area.CeilFt
+                : area.CeilFt - originElevFt;
+
+            int baseAgl = (int)Math.Ceiling(Math.Max(pisoAgl, 1500) / 500.0) * 500;
+            int topAgl = (int)Math.Floor(Math.Min(tetoAgl, baseAgl + 1500) / 500.0) * 500;
+
+            if (topAgl - baseAgl >= 1000)
+            {
+                minAgl = baseAgl;
+                maxAgl = topAgl;
+                return true;
+            }
+
+            minAgl = 0;
+            maxAgl = 0;
+            return false;
+        }
+
+        public static double CalculateInitialBearing(double lat1, double lon1, double lat2, double lon2)
+        {
+            double lat1Rad = lat1 * Math.PI / 180.0;
+            double lat2Rad = lat2 * Math.PI / 180.0;
+            double dLonRad = (lon2 - lon1) * Math.PI / 180.0;
+
+            double y = Math.Sin(dLonRad) * Math.Cos(lat2Rad);
+            double x = Math.Cos(lat1Rad) * Math.Sin(lat2Rad) - Math.Sin(lat1Rad) * Math.Cos(lat2Rad) * Math.Cos(dLonRad);
+            double bearingRad = Math.Atan2(y, x);
+            return (bearingRad * 180.0 / Math.PI + 360.0) % 360.0;
+        }
+
         public static Mission CreateLocalInstructionMissionSync(
             Airport origin,
             MissionDefinition sub,
@@ -358,8 +395,64 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<Airport>? nearbyTierAirports = null,
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null,
-            MissionTextCatalog? textCatalog = null)
+            MissionTextCatalog? textCatalog = null,
+            IPlacesDataService? placesService = null)
         {
+            if (placesService != null)
+            {
+                var candidateAreas = placesService.FindTrainingAreas(origin.Latitude, origin.Longitude);
+                var validAreas = new List<(TrainingAreaInfo Area, int MinAgl, int MaxAgl)>();
+                for (int i = 0; i < candidateAreas.Count; i++)
+                {
+                    if (TryResolveRealAreaBand(candidateAreas[i], origin.ElevationFt, out int min, out int max))
+                    {
+                        validAreas.Add((candidateAreas[i], min, max));
+                    }
+                }
+
+                if (validAreas.Count > 0)
+                {
+                    var (area, minAgl, maxAgl) = validAreas[random.Next(validAreas.Count)];
+                    double realDistToArea = CalculateDistance(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
+                    double headingDeg = CalculateInitialBearing(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
+                    string realDir = GetCardinalDirection(headingDeg);
+                    double radius = Math.Clamp(area.RadiusNm, 3.0, 6.0);
+                    string realAltBand = $"{minAgl:N0} a {maxAgl:N0} ft AGL";
+                    string realAreaIdent = $"Área {area.Id} {area.Name}";
+                    string realOverflyWp = OverflyWaypointCodec.FormatCoordinatePoint(realAreaIdent, area.Lat, area.Lon, radius, maxAgl, minAgl);
+
+                    int realTgl = random.Next(1, 3);
+                    double realTotalDist = Math.Round((2.0 * realDistToArea) + 10.0, 0);
+                    string realManeuvers = PickManeuvers(random);
+
+                    var realValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["origin"] = origin.ICAO,
+                        ["dest"] = origin.ICAO,
+                        ["area_dir"] = $"{realDir} ({area.Name})",
+                        ["area_nm"] = realDistToArea.ToString("F0"),
+                        ["alt_band"] = realAltBand,
+                        ["maneuvers"] = realManeuvers,
+                        ["tgl"] = realTgl.ToString(),
+                        ["distance_nm"] = realTotalDist.ToString("F0")
+                    };
+
+                    string realFallbackTitle = $"Instrução Local: Setor {realDir} ({realTgl} TGL)";
+                    string realFallbackDesc = $"Voo de instrução no setor {realDir} a {realDistToArea:F0} NM ({realAltBand}). Pratique {realManeuvers}. Retorne para {realTgl} TGL(s) e pouso completo em {origin.ICAO}.";
+
+                    var realCatalog = textCatalog ?? MissionTextCatalog.Default;
+                    var realRendered = realCatalog.Render(sub.Id, random, realValues, realFallbackTitle, realFallbackDesc);
+
+                    return CreateMissionObjectSync(
+                        origin, origin, realTotalDist, sub, 1, 0, 0,
+                        random, referenceTime, payMultiplier, payTable,
+                        requiredTouchAndGoes: realTgl,
+                        overflyWaypoints: realOverflyWp,
+                        titleOverride: realRendered.Title,
+                        descriptionOverride: realRendered.Description);
+                }
+            }
+
             double bestDistToTier = -1.0;
             double areaLat = origin.Latitude;
             double areaLon = origin.Longitude;
@@ -447,8 +540,63 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<Airport>? nearbyTierAirports = null,
             double payMultiplier = 1.0,
             MissionPayTable? payTable = null,
-            MissionTextCatalog? textCatalog = null)
+            MissionTextCatalog? textCatalog = null,
+            IPlacesDataService? placesService = null)
         {
+            if (placesService != null)
+            {
+                var candidateAreas = placesService.FindTrainingAreas(origin.Latitude, origin.Longitude);
+                var validAreas = new List<(TrainingAreaInfo Area, int MinAgl, int MaxAgl)>();
+                for (int i = 0; i < candidateAreas.Count; i++)
+                {
+                    if (TryResolveRealAreaBand(candidateAreas[i], origin.ElevationFt, out int min, out int max))
+                    {
+                        validAreas.Add((candidateAreas[i], min, max));
+                    }
+                }
+
+                if (validAreas.Count > 0)
+                {
+                    var (area, minAgl, maxAgl) = validAreas[random.Next(validAreas.Count)];
+                    double realDistToArea = CalculateDistance(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
+                    double headingDeg = CalculateInitialBearing(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
+                    string realDir = GetCardinalDirection(headingDeg);
+                    double radius = Math.Clamp(area.RadiusNm, 3.0, 6.0);
+                    string realAltBand = $"{minAgl:N0} a {maxAgl:N0} ft AGL";
+                    string realAreaIdent = $"Área {area.Id} {area.Name}";
+                    string realOverflyWp = OverflyWaypointCodec.FormatCoordinatePoint(realAreaIdent, area.Lat, area.Lon, radius, maxAgl, minAgl);
+
+                    int realTgl = 2;
+                    double realTotalDist = Math.Round((2.0 * realDistToArea) + 10.0, 0);
+
+                    var realValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        ["origin"] = origin.ICAO,
+                        ["dest"] = origin.ICAO,
+                        ["pax"] = "1",
+                        ["area_dir"] = $"{realDir} ({area.Name})",
+                        ["area_nm"] = realDistToArea.ToString("F0"),
+                        ["alt_band"] = realAltBand,
+                        ["tgl"] = "2",
+                        ["distance_nm"] = realTotalDist.ToString("F0")
+                    };
+
+                    string realFallbackTitle = $"Voo de Cheque Prático (2 TGL)";
+                    string realFallbackDesc = $"Avaliação prática de voo com examinador a bordo em {origin.ICAO}. Área no setor {realDir} ({area.Name}) a {realDistToArea:F0} NM ({realAltBand}). Pane simulada (falha de motor simulada pelo examinador, pouso de precisão) e 2 TGLs com pouso completo na origem.";
+
+                    var realCatalog = textCatalog ?? MissionTextCatalog.Default;
+                    var realRendered = realCatalog.Render(sub.Id, random, realValues, realFallbackTitle, realFallbackDesc);
+
+                    return CreateMissionObjectSync(
+                        origin, origin, realTotalDist, sub, 1, 0, 0,
+                        random, referenceTime, payMultiplier, payTable,
+                        requiredTouchAndGoes: realTgl,
+                        overflyWaypoints: realOverflyWp,
+                        titleOverride: realRendered.Title,
+                        descriptionOverride: realRendered.Description);
+                }
+            }
+
             double bestDistToTier = -1.0;
             double areaLat = origin.Latitude;
             double areaLon = origin.Longitude;

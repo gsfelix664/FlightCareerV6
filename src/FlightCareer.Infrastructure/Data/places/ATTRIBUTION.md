@@ -8,6 +8,7 @@ Gerados por `tools/places/build_places.py --lnm <little_navmap_msfs24.sqlite>` (
 | `training_aerodromes.json` | `hubs_data.json` (curado) + nomes de aeródromos do OurAirports + escolas de voo e aeroclubes do OpenStreetMap a ≤ 3 NM | OurAirports: domínio público; OSM: ODbL |
 | `dropzones.json` | Lista curada pelo usuário (`tools/places/dropzones_curated.csv`, 32 zonas com nome e descrição) + OpenStreetMap (`sport=parachuting`) a ≤ 3 NM de um aeródromo + nomes de aeródromos do OurAirports | OSM: ODbL; OurAirports: domínio público |
 | `scenic_aerodromes.json` | Lista curada pelo usuário (`tools/places/scenic_aerodromes_curated.csv`, 16 aeródromos de voo panorâmico); coordenadas das atrações do Wikidata a ≤ 75 NM | Wikidata: CC0 |
+| `training_areas.json` | DECEA — AIP Brasil, WFS GeoAISWEB `ICA:airspace`, extração 2026-11-25 | Dado público oficial, sem licença explícita; uso citando a fonte |
 
 Contém dados do © OpenStreetMap contributors, disponíveis sob a Open Database License (https://www.openstreetmap.org/copyright).
 

@@ -20,11 +20,24 @@ namespace FlightCareer.Application.Interfaces
         public bool IsScenicBase => !string.Equals(Role, "destino", System.StringComparison.OrdinalIgnoreCase);
     }
 
+    public sealed record TrainingAreaInfo(
+        string Id,
+        string Name,
+        string Kind,
+        double Lat,
+        double Lon,
+        double RadiusNm,
+        int FloorFt,
+        string FloorRef,
+        int CeilFt,
+        string CeilRef);
+
     public interface IPlacesDataService
     {
         bool IsTrainingAerodrome(string icao);
         DropZoneInfo? GetDropZone(string icao);
         ScenicAerodromeInfo? GetScenicAerodrome(string icao);
         IReadOnlyList<TouristPoiInfo> FindPois(double lat, double lon, double minNm, double maxNm, IReadOnlySet<string>? kinds = null);
+        IReadOnlyList<TrainingAreaInfo> FindTrainingAreas(double lat, double lon, double maxNm = 25.0, string kind = "instrucao");
     }
 }
