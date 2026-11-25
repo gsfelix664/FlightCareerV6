@@ -396,7 +396,8 @@ namespace FlightCareer.Infrastructure.Services
                             IsMilitary = isMilitary,
                             CsvType = null,
                             ScheduledService = false,
-                            TierRulesVersion = rules.Version
+                            TierRulesVersion = rules.Version,
+                            Source = "LittleNavmap"
                         });
                     }
                 }
@@ -411,12 +412,12 @@ namespace FlightCareer.Infrastructure.Services
                             Id, ICAO, Name, City, Country, Latitude, Longitude, ElevationFt, 
                             Tier, IsInSimulator, MsfsIdent, IlsEnds, Approaches, Gates, 
                             CargoParking, HasTower, LongestRunwayFt, LongestRunwayPaved, TierScore, IsMilitary,
-                            CsvType, ScheduledService, TierRulesVersion
+                            CsvType, ScheduledService, TierRulesVersion, Source
                         ) VALUES (
                             @Id, @ICAO, @Name, @City, @Country, @Latitude, @Longitude, @ElevationFt,
                             @Tier, @IsInSimulator, @MsfsIdent, @IlsEnds, @Approaches, @Gates,
                             @CargoParking, @HasTower, @LongestRunwayFt, @LongestRunwayPaved, @TierScore, @IsMilitary,
-                            @CsvType, @ScheduledService, @TierRulesVersion
+                            @CsvType, @ScheduledService, @TierRulesVersion, @Source
                         );";
 
                     var pId = insertAirportCmd.CreateParameter(); pId.ParameterName = "@Id"; insertAirportCmd.Parameters.Add(pId);
@@ -442,6 +443,7 @@ namespace FlightCareer.Infrastructure.Services
                     var pCsvType = insertAirportCmd.CreateParameter(); pCsvType.ParameterName = "@CsvType"; insertAirportCmd.Parameters.Add(pCsvType);
                     var pSched = insertAirportCmd.CreateParameter(); pSched.ParameterName = "@ScheduledService"; insertAirportCmd.Parameters.Add(pSched);
                     var pVer = insertAirportCmd.CreateParameter(); pVer.ParameterName = "@TierRulesVersion"; insertAirportCmd.Parameters.Add(pVer);
+                    var pSource = insertAirportCmd.CreateParameter(); pSource.ParameterName = "@Source"; insertAirportCmd.Parameters.Add(pSource);
 
                     foreach (var a in airportsToInsert)
                     {
@@ -468,6 +470,7 @@ namespace FlightCareer.Infrastructure.Services
                         pCsvType.Value = (object?)a.CsvType ?? DBNull.Value;
                         pSched.Value = a.ScheduledService ? 1 : 0;
                         pVer.Value = a.TierRulesVersion;
+                        pSource.Value = a.Source ?? "LittleNavmap";
 
                         await insertAirportCmd.ExecuteNonQueryAsync();
                     }
@@ -1074,7 +1077,8 @@ namespace FlightCareer.Infrastructure.Services
                     TierScore = score.TotalScore,
                     CsvType = type,
                     ScheduledService = scheduled,
-                    TierRulesVersion = rules.Version
+                    TierRulesVersion = rules.Version,
+                    Source = "Csv"
                 };
                 AviationDataNormalizer.NormalizeAirport(airport);
                 airports.Add(airport);

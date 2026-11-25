@@ -3311,3 +3311,11 @@
 - `mission_texts.json`: marcador `{route_note}` adicionado às descrições das 8 missões de linha aérea regular.
 - `places/ATTRIBUTION.md`: atribuição formal dos dados do OpenFlights sob a licença ODbL.
 - Testes unitários novos em `AirlineRouteCatalogTests`.
+
+## 2026-11-25 - Base de aeroportos do simulador: lógica e persistência (AIRSIM-1) (Gemini)
+- `Domain/Airports/Sim/`: tipos de entrada (`SimAirportListItem`, `SimRunwayData`, `SimAirportDetail`), mapeamento e classificação de superfícies (`SimSurface`), cálculo de impressões digitais e resumo SHA-256 (`SimAirportFingerprint`), cálculo de diferenças (`SimAirportDiff`) e construtor de registros com recálculo de tier e iluminação herdada (`SimAirportRecordBuilder`).
+- Entidades `SimSyncState` e `SimAirportQueueItem` mapeadas para tabelas `SimSyncStates` e `SimAirportQueue`.
+- `Airport`: novas propriedades `Source`, `SimRegion`, `SimFingerprint` e `SimCheckedUtc`. Migração em `AppDbContext.EnsureSchemaUpdatedAsync` com `ALTER TABLE` e `CREATE TABLE IF NOT EXISTS`.
+- `DataSeeder`: identificação de origem dos aeroportos gravados (`Source = "LittleNavmap"` no caminho LNM e `Source = "Csv"` no caminho OurAirports).
+- `SimAirportSyncStore`: store de sincronização com controle de versão, digest da lista, fila persistente por prioridade/distância, aplicação em lote de detalhes com transação, marcação incremental de ausentes com proteção de lista suspeita e rodízio em segundo plano.
+- Testes unitários dedicados em `FlightCareer.Tests/Airports/Sim/` (11 testes).
