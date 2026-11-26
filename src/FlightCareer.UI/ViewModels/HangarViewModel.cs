@@ -504,9 +504,18 @@ namespace FlightCareer.UI.ViewModels
             string name = row.DisplayName;
             double cost = plan.TotalCost;
 
+            var replacedIds = new HashSet<Guid> { part.Id };
+            var resolvedDefects = DefectPartLink.ResolvedBy(SelectedAircraft.OpenDefects, SelectedAircraft.Aircraft.Parts, replacedIds);
+
+            string message = $"Trocar {name} em {SelectedAircraft.Prefix}:\n• {item.Reason} ({cost:C0})";
+            if (resolvedDefects.Count > 0)
+            {
+                message += "\n" + string.Join("\n", resolvedDefects.Select(d => $"• Pane \"{d.Title}\": resolvida com a troca"));
+            }
+
             await RunPaidServiceAsync(
                 "Trocar peça",
-                $"Trocar {name} em {SelectedAircraft.Prefix}:\n• {item.Reason} ({cost:C0})",
+                message,
                 cost,
                 $"TROCA DE PEÇA: {name}",
                 (aircraft, components) =>
@@ -521,6 +530,16 @@ namespace FlightCareer.UI.ViewModels
                 },
                 kind: DialogKind.Info,
                 successMessage: $"{name}: substituída a 100%.",
+                applyInContext: resolvedDefects.Count > 0 ? async context =>
+                {
+                    var rIds = resolvedDefects.Select(d => d.Id).ToHashSet();
+                    var rows = await context.AircraftDefects.Where(d => rIds.Contains(d.Id)).ToListAsync();
+                    foreach (var d in rows)
+                    {
+                        d.IsResolved = true;
+                        d.ResolvedAtUtc = DateTime.UtcNow;
+                    }
+                } : null,
                 downtimeHours: plan.DowntimeHours);
         }
 
@@ -538,12 +557,20 @@ namespace FlightCareer.UI.ViewModels
                 var plan = row.ReplacementPlan;
                 if (plan == null || plan.Items.Count == 0) return;
 
+                var partIds = plan.Items.Select(i => i.Part.Id).ToHashSet();
+                var resolvedDefects = DefectPartLink.ResolvedBy(SelectedAircraft.OpenDefects, SelectedAircraft.Aircraft.Parts, partIds);
+
                 int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
                 string list = string.Join("\n", plan.Items.Select(i =>
                 {
                     string name = PartHangarView.DisplayName(i.Part, i.Def, engineCount);
                     return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
                 }));
+
+                if (resolvedDefects.Count > 0)
+                {
+                    list += "\n" + string.Join("\n", resolvedDefects.Select(d => $"• Pane \"{d.Title}\": resolvida com a troca"));
+                }
 
                 await RunPaidServiceAsync(
                     row.ServiceName,
@@ -552,7 +579,6 @@ namespace FlightCareer.UI.ViewModels
                     row.ServiceName.ToUpperInvariant(),
                     (aircraft, components) =>
                     {
-                        var partIds = plan.Items.Select(i => i.Part.Id).ToHashSet();
                         var partsToApply = aircraft.Parts.Where(p => partIds.Contains(p.Id)).ToList();
                         var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
                         PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
@@ -560,6 +586,16 @@ namespace FlightCareer.UI.ViewModels
                     },
                     kind: DialogKind.Info,
                     successMessage: $"{row.Name}: {plan.Items.Count} peça(s) substituída(s) a 100%.",
+                    applyInContext: resolvedDefects.Count > 0 ? async context =>
+                    {
+                        var rIds = resolvedDefects.Select(d => d.Id).ToHashSet();
+                        var rows = await context.AircraftDefects.Where(d => rIds.Contains(d.Id)).ToListAsync();
+                        foreach (var d in rows)
+                        {
+                            d.IsResolved = true;
+                            d.ResolvedAtUtc = DateTime.UtcNow;
+                        }
+                    } : null,
                     downtimeHours: plan.DowntimeHours);
             }
             else
@@ -605,15 +641,55 @@ namespace FlightCareer.UI.ViewModels
         {
             if (!CanOperate() || SelectedAircraft == null || defects.Count == 0) return;
             var ids = defects.Select(d => d.Id).ToHashSet();
-            double total = defects.Sum(d => d.RepairCost);
-            string list = string.Join("\n", defects.Select(d => $"• {d.Title} ({d.OriginLabel}, {d.SeverityLabel}): {d.RepairCost:C0}"));
+
+            var quote = DefectPartLink.Quote(defects, SelectedAircraft.Aircraft.Parts);
+            var plan = PartReplacementPlanner.Plan(quote.PartsToReplace, _partCatalog, ResolveClassKey(SelectedAircraft.Aircraft), _careerClock, bands: _catalog.PartBands);
+            double total = Math.Round(plan.TotalCost + quote.DefectsCost, 2);
+            double downtimeHours = Math.Max(plan.DowntimeHours, CareerClock.DefaultRepairDowntimeHours);
+
+            int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+            var listItems = new List<string>();
+
+            foreach (var d in quote.DefectsCharged)
+            {
+                listItems.Add($"• {d.Title}: {d.RepairCost:C0}");
+            }
+
+            foreach (var d in quote.DefectsIncluded)
+            {
+                var linked = DefectPartLink.LinkedBrokenParts(d, SelectedAircraft.Aircraft.Parts);
+                string partNames = string.Join(", ", linked.Select(p =>
+                {
+                    var def = _partCatalog.Get(p.PartId);
+                    return def != null ? PartHangarView.DisplayName(p, def, engineCount) : p.PartId;
+                }));
+                listItems.Add($"• {d.Title}: incluída na troca de {partNames}");
+            }
+
+            foreach (var item in plan.Items)
+            {
+                string name = PartHangarView.DisplayName(item.Part, item.Def, engineCount);
+                listItems.Add($"• {name}: {item.Reason} ({item.PartPrice + item.LaborCost:C0})");
+            }
+
+            string list = string.Join("\n", listItems);
 
             await RunPaidServiceAsync(
                 defects.Count == 1 ? "Reparar pane" : "Reparar panes",
                 $"Oficina em {SelectedAircraft.Prefix}:\n{list}",
                 total,
                 defects.Count == 1 ? $"REPARO DE PANE: {defects[0].Title}" : $"REPARO DE {defects.Count} PANES",
-                (_, _) => { },
+                (aircraft, components) =>
+                {
+                    if (plan.Items.Count > 0)
+                    {
+                        var planPartIds = plan.Items.Select(i => i.Part.Id).ToHashSet();
+                        var partsToApply = aircraft.Parts.Where(p => planPartIds.Contains(p.Id)).ToList();
+                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                        PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
+                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                    }
+                },
                 kind: DialogKind.Warning,
                 successMessage: defects.Count == 1 ? $"{defects[0].Title}: reparada." : "Panes reparadas.",
                 applyInContext: async context =>
@@ -625,7 +701,7 @@ namespace FlightCareer.UI.ViewModels
                         d.ResolvedAtUtc = DateTime.UtcNow;
                     }
                 },
-                downtimeHours: CareerClock.DefaultRepairDowntimeHours);
+                downtimeHours: downtimeHours);
         }
 
         [RelayCommand]
@@ -638,18 +714,44 @@ namespace FlightCareer.UI.ViewModels
                 var rows = SelectedAircraft.Components
                     .Where(r => r.CanRepair && r.ReplacementPlan != null && r.ReplacementPlan.Items.Count > 0)
                     .ToList();
-                if (rows.Count == 0) return;
+                var componentParts = rows.SelectMany(r => r.ReplacementPlan!.Items.Select(i => i.Part)).ToList();
 
-                var allItems = rows.SelectMany(r => r.ReplacementPlan!.Items).ToList();
-                double totalCost = Math.Round(allItems.Sum(i => i.PartPrice + i.LaborCost), 2);
-                double maxDowntime = allItems.Count > 0 ? allItems.Max(i => i.DowntimeHours) : 0.0;
+                var quote = DefectPartLink.Quote(SelectedAircraft.OpenDefects, SelectedAircraft.Aircraft.Parts);
+
+                var allPartsToReplace = new List<AircraftPart>();
+                var seenIds = new HashSet<Guid>();
+                foreach (var p in componentParts.Concat(quote.PartsToReplace))
+                {
+                    if (seenIds.Add(p.Id)) allPartsToReplace.Add(p);
+                }
+
+                var plan = PartReplacementPlanner.Plan(allPartsToReplace, _partCatalog, ResolveClassKey(SelectedAircraft.Aircraft), _careerClock, bands: _catalog.PartBands);
+                if (plan.Items.Count == 0 && quote.DefectsCharged.Count == 0) return;
+
+                double totalCost = Math.Round(plan.TotalCost + quote.DefectsCost, 2);
+                double downtimeHours = Math.Max(plan.DowntimeHours, (quote.DefectsCharged.Count > 0 || quote.DefectsIncluded.Count > 0) ? CareerClock.DefaultRepairDowntimeHours : 0.0);
 
                 int engineCount = SelectedAircraft.Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
-                string list = string.Join("\n", allItems.Select(i =>
+                var listItems = new List<string>();
+
+                foreach (var item in plan.Items)
                 {
-                    string name = PartHangarView.DisplayName(i.Part, i.Def, engineCount);
-                    return $"• {name}: {i.Reason} ({i.PartPrice + i.LaborCost:C0})";
-                }));
+                    string name = PartHangarView.DisplayName(item.Part, item.Def, engineCount);
+                    listItems.Add($"• {name}: {item.Reason} ({item.PartPrice + item.LaborCost:C0})");
+                }
+
+                foreach (var d in quote.DefectsIncluded)
+                {
+                    listItems.Add($"• Pane \"{d.Title}\": resolvida com a troca");
+                }
+
+                foreach (var d in quote.DefectsCharged)
+                {
+                    listItems.Add($"• {d.Title}: {d.RepairCost:C0}");
+                }
+
+                string list = string.Join("\n", listItems);
+                var defectIdsToResolve = SelectedAircraft.OpenDefects.Select(d => d.Id).ToHashSet();
 
                 await RunPaidServiceAsync(
                     "Reparar tudo",
@@ -658,14 +760,27 @@ namespace FlightCareer.UI.ViewModels
                     "REPARO COMPLETO",
                     (aircraft, components) =>
                     {
-                        var partIds = allItems.Select(i => i.Part.Id).ToHashSet();
-                        var partsToApply = aircraft.Parts.Where(p => partIds.Contains(p.Id)).ToList();
-                        var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
-                        PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
-                        PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                        if (plan.Items.Count > 0)
+                        {
+                            var partIds = plan.Items.Select(i => i.Part.Id).ToHashSet();
+                            var partsToApply = aircraft.Parts.Where(p => partIds.Contains(p.Id)).ToList();
+                            var now = aircraft.Pilot?.CareerClockUtc ?? _careerClock;
+                            PartReplacementPlanner.ApplyToParts(partsToApply, Hours(aircraft), now);
+                            PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
+                        }
                     },
-                    successMessage: $"{allItems.Count} peça(s) substituída(s) a 100%.",
-                    downtimeHours: maxDowntime);
+                    kind: DialogKind.Warning,
+                    successMessage: plan.Items.Count > 0 ? $"{plan.Items.Count} peça(s) substituída(s) a 100%." : "Panes reparadas.",
+                    applyInContext: defectIdsToResolve.Count > 0 ? async context =>
+                    {
+                        var rows = await context.AircraftDefects.Where(d => defectIdsToResolve.Contains(d.Id)).ToListAsync();
+                        foreach (var d in rows)
+                        {
+                            d.IsResolved = true;
+                            d.ResolvedAtUtc = DateTime.UtcNow;
+                        }
+                    } : null,
+                    downtimeHours: downtimeHours);
             }
             else
             {

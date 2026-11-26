@@ -224,6 +224,23 @@ namespace FlightCareer.UI.ViewModels
                 var status = AircraftStatusEvaluator.Evaluate(Aircraft, Components.Select(r => r.Component).ToList(), _catalog, EngineClass);
                 if (status.Level is AircraftStatusLevel.Destroyed or AircraftStatusLevel.Interdicted) return status;
 
+                // Peças quebradas que bloqueiam voo: interdita antes da checagem de panes
+                if (PartComponentBridge.HasParts(Aircraft))
+                {
+                    var groundingParts = PartAirworthiness.GroundingParts(Aircraft.Parts, _partCatalog);
+                    if (groundingParts.Count > 0)
+                    {
+                        int engineCount = Aircraft.Parts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+                        string nomes = string.Join(", ", groundingParts.Select(p =>
+                        {
+                            var def = _partCatalog.Get(p.PartId);
+                            return def != null ? PartHangarView.DisplayName(p, def, engineCount) : p.PartId;
+                        }));
+                        return new AircraftStatus(AircraftStatusLevel.Interdicted, "INTERDITADA (PEÇA)",
+                            $"Peça quebrada: {nomes}. Troque a peça no Hangar.");
+                    }
+                }
+
                 // Panes persistentes abertas: NO-GO interdita; diferida rebaixa "pronta" para atenção
                 var grounding = OpenDefects.Where(d => d.IsGrounding).ToList();
                 if (grounding.Count > 0)
@@ -245,7 +262,26 @@ namespace FlightCareer.UI.ViewModels
         public ObservableCollection<AircraftDefect> OpenDefects { get; } = new();
         public bool HasOpenDefects => OpenDefects.Count > 0;
         public bool HasGroundingDefects => OpenDefects.Any(d => d.IsGrounding);
-        public double DefectsRepairTotal => OpenDefects.Sum(d => d.RepairCost);
+        public double DefectsRepairTotal
+        {
+            get
+            {
+                if (OpenDefects.Count == 0) return 0.0;
+                if (!PartComponentBridge.HasParts(Aircraft))
+                {
+                    return OpenDefects.Sum(d => d.RepairCost);
+                }
+
+                var quote = DefectPartLink.Quote(OpenDefects, Aircraft.Parts);
+                double partsCost = 0.0;
+                if (quote.PartsToReplace.Count > 0)
+                {
+                    var plan = PartReplacementPlanner.Plan(quote.PartsToReplace, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
+                    partsCost = plan.TotalCost;
+                }
+                return Math.Round(partsCost + quote.DefectsCost, 2);
+            }
+        }
         public string RepairAllDefectsText => $"Reparar todas as panes · {DefectsRepairTotal:C0}";
 
         public void SetOpenDefects(IEnumerable<AircraftDefect> defects)
@@ -256,6 +292,9 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(HasGroundingDefects));
             OnPropertyChanged(nameof(DefectsRepairTotal));
             OnPropertyChanged(nameof(RepairAllDefectsText));
+            OnPropertyChanged(nameof(TotalRepairCost));
+            OnPropertyChanged(nameof(HasRepairs));
+            OnPropertyChanged(nameof(RepairAllText));
             OnPropertyChanged(nameof(StatusLevel));
             OnPropertyChanged(nameof(StatusText));
             OnPropertyChanged(nameof(StatusDetail));
@@ -269,7 +308,35 @@ namespace FlightCareer.UI.ViewModels
         public bool IsCrashed => Status.Level == AircraftStatusLevel.Destroyed;
         public bool CanService => !IsCrashed;
 
-        public double TotalRepairCost => Components.Sum(c => c.RepairCost);
+        public double TotalRepairCost
+        {
+            get
+            {
+                if (!PartComponentBridge.HasParts(Aircraft))
+                {
+                    return Components.Sum(c => c.RepairCost);
+                }
+
+                var componentPlanItems = Components
+                    .Where(c => c.CanRepair && c.ReplacementPlan != null)
+                    .SelectMany(c => c.ReplacementPlan!.Items)
+                    .ToList();
+                double componentCost = componentPlanItems.Sum(i => i.PartPrice + i.LaborCost);
+
+                var quote = DefectPartLink.Quote(OpenDefects, Aircraft.Parts);
+                var plannedPartIds = componentPlanItems.Select(i => i.Part.Id).ToHashSet();
+                var extraParts = quote.PartsToReplace.Where(p => !plannedPartIds.Contains(p.Id)).ToList();
+
+                double extraPlanCost = 0.0;
+                if (extraParts.Count > 0)
+                {
+                    var extraPlan = PartReplacementPlanner.Plan(extraParts, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
+                    extraPlanCost = extraPlan.TotalCost;
+                }
+
+                return Math.Round(componentCost + extraPlanCost + quote.DefectsCost, 2);
+            }
+        }
         public bool HasRepairs => TotalRepairCost > 0;
         public string RepairAllText => HasRepairs ? $"Reparar tudo · {TotalRepairCost:C0}" : "Nada a reparar";
 

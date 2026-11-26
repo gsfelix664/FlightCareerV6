@@ -258,7 +258,7 @@ namespace FlightCareer.Tests.Parts
             tracker.Begin(new[] { pCyl, pTire }, CreateC152Profile(), new[] { "piston" });
 
             int broken = tracker.ApplyNativeFailed(39, ComponentKind.Engine);
-            Assert.True(broken >= 1);
+            Assert.Equal(1, broken);
             Assert.True(pCyl.IsBroken);
             Assert.Equal(0.0, pCyl.Health);
             Assert.False(pTire.IsBroken);

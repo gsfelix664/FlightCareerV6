@@ -36,9 +36,9 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 ## D. Bugs achados na análise (investigar com Opus)
 
 - [ ] **D1. Penalidade de pouso forçado não chega às peças** (acima). Aplicar nas peças, com teste. Reavaliar a severidade da faixa "hard" (600–850 fpm: só 2,5 % no trem).
-- [ ] **D2. Uma pane nativa quebrou 11 peças** no mesmo instante (ID 39): `PartFlightTracker.ApplyNativeFailed` quebra a união das peças de todas as regras com esse `nativeOverstress` (RPM + CHT): alternador, hélice, bomba de vácuo, magnetos, bomba de óleo etc. Uma falha deve quebrar uma peça (ou poucas, com mapa explícito). Mesmo risco no ID 35 (toque duro: asa, hélice, virabrequim, trem).
-- [ ] **D3. Cobrança em dobro:** "Reparar panes" só marca a pane resolvida; as 11 peças continuam quebradas (confirmado no banco depois do pagamento). Unificar: reparar a pane troca as peças ligadas a ela, um preço só.
-- [ ] **D4. Peça quebrada não interdita:** o status vem de componentes e panes; pagar as panes parece liberar o avião com peça quebrada (conferir).
+- [x] **D2. Uma pane nativa quebrou 11 peças** (PANE-PECAS) no mesmo instante (ID 39): agora quebra exatamente 1 peça prioritária via `NativeFailurePartMap` (menor saúde, ordem de tabela, menor motor).
+- [x] **D3. Cobrança em dobro:** (PANE-PECAS) unificado via `DefectPartLink`: reparar a pane inclui a substituição das peças ligadas com custo da pane zerado; trocar a peça física resolve a pane ligada no Hangar.
+- [x] **D4. Peça quebrada não interdita:** (PANE-PECAS) `PartAirworthiness.GroundingParts` confere `BlocksFlightWhenBroken == true` e interdita o avião tanto no status do Hangar ("INTERDITADA (PEÇA)") quanto no `FlightMonitor.StartMonitoring`.
 - [ ] **D5. Inspeções de voo só vão para o log:** `OnInspection` só chama `LogEvent` (pouso duro, ponta de asa, flap, sobre-rotação, comandos). Não aparecem no Hangar nem no relatório.
 - [ ] **D6. `isGrounding` ignorado:** a regra de ponta de asa em `wear_rules.json` usa `isGrounding`; o DTO só lê `grounding`.
 - [ ] **D7. Excedência falsa em solo:** aos 31 s, durante slew no pátio, IAS 377 kt gerou Vne "severe", dano e inspeção. Filtrar slew/solo/valor implausível.
@@ -50,7 +50,7 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 ## E. Hangar (pedidos e sugestões do usuário)
 
 - [ ] **E1. Aviso de oficina duplicado:** faixa "OFICINA ... Libera em" (`PilotAircraftWrapper` ~233) e cartão "Na oficina — libera em" (`WorkshopBannerText`). Manter um.
-- [ ] **E2. "Reparar todas as panes" × "Reparar tudo":** o 1º resolve as panes abertas (8.000 + 900); o 2º troca as peças ruins (14.652; só o motor 10.825). Um fluxo único (D3), com o que está incluído.
+- [x] **E2. "Reparar todas as panes" × "Reparar tudo":** (PANE-PECAS) fluxo único implementado no Hangar: `RepairAll` inclui todas as peças recomendadas e todas as panes abertas (as ligadas a peças saem sem custo duplo e as sem peças cobram seu valor), habilitando o botão mesmo que só haja pane aberta.
 - [ ] **E3. Preço do botão ≠ cobrado:** botão 8.900, cobrado 7.120 (dificuldade ×0,80, avisada só na confirmação). Mostrar o preço final.
   Pedido do usuário (2026-11-26): trocar "Dificuldade Fácil: custos ×0,80" (`HangarViewModel` ~268) por só o desconto, em %: "Desconto da dificuldade Fácil: 20%" (acima de 1,00: "Acréscimo da dificuldade X: N%"). É % de dinheiro, permitido pela regra da parte F.
 - [ ] **E4. Texto amigável das panes:** tirar "SIMULADOR · VOANDO (PLANANDO...) · WEAR AND TEAR IS FAILED:39..." (e o prefixo "[Operacional]"). Ex.: "O motor parou de funcionar em voo". Técnico só no log/tooltip. Botão com "Reparar · valor" formatado.
