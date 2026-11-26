@@ -1,6 +1,6 @@
 # POUSO-DANO — Quebra de trem/pneu no pouso, pouso forçado nas peças e inspeções no Hangar
 
-**Branch:** feat/pouso-dano · **Commit:** (a gerar) · **Data:** 2026-11-26
+**Branch:** feat/pouso-dano · **Commit:** bb4d09b · **Data:** 2026-11-26
 
 ## Plano (antes de codar)
 1. Criar `LandingBreakModel` no Domain com cálculo determinístico de chance base (`GearBaseChance`), multiplicadores de pneu, inclinação, pista e desgaste (`ChanceFor`), e sorteio de quebra (`Roll`), calibrado via `LandingSettings` e `component_catalog.json`.
