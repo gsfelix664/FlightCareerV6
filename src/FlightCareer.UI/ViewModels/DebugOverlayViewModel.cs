@@ -29,6 +29,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly IDbContextFactory<AppDbContext>? _dbContextFactory;
         private readonly ComponentCatalog _componentCatalog;
         private readonly PartCatalog _partCatalog;
+        private readonly ObjectiveCardService? _objectiveCard;
 
         // --- CONTROLES DE JANELA (HUD OVERLAY) ---
         [ObservableProperty] private bool _isTopmost = true;
@@ -182,7 +183,8 @@ namespace FlightCareer.UI.ViewModels
             AppDbContext? context = null,
             IDbContextFactory<AppDbContext>? dbContextFactory = null,
             ComponentCatalog? componentCatalog = null,
-            PartCatalog? partCatalog = null)
+            PartCatalog? partCatalog = null,
+            ObjectiveCardService? objectiveCard = null)
         {
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
@@ -192,6 +194,7 @@ namespace FlightCareer.UI.ViewModels
             _dbContextFactory = dbContextFactory;
             _componentCatalog = componentCatalog ?? ComponentCatalog.LoadDefault();
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
+            _objectiveCard = objectiveCard;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnConnected += (s, e) => UpdateConnectionStatus();
@@ -563,6 +566,12 @@ namespace FlightCareer.UI.ViewModels
                 WindowOpacity = 1.00;
                 OpacityLabel = "100%";
             }
+        }
+
+        [RelayCommand]
+        private void ShowObjectiveCard()
+        {
+            _objectiveCard?.Show();
         }
 
         [RelayCommand]
