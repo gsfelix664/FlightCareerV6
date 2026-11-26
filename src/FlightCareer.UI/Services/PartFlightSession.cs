@@ -29,6 +29,7 @@ namespace FlightCareer.UI.Services
         /// <summary>Excedências de cada tick (lista vazia = nenhuma faixa ativa), para o agrupador do blackbox.</summary>
         public event Action<IReadOnlyList<PartWearExceedance>>? OnExceedanceTick;
         public event Action<PartWearInspectionEvent>? OnInspection;
+        public event Action<LandingBreak>? OnLandingBreak;
         public event Action<string>? OnDiagnostic;
 
         public PartFlightSession(
@@ -149,6 +150,25 @@ namespace FlightCareer.UI.Services
                 foreach (var insp in result.Inspections)
                 {
                     OnInspection?.Invoke(insp);
+                }
+            }
+
+            if (_tracker.IsActive)
+            {
+                bool offRunway = false;
+                lock (_frameLock)
+                {
+                    if (_lastFrame != null && _lastFrame.Values.TryGetValue("ctx-on-any-runway", out double v))
+                    {
+                        offRunway = v < 0.5; // 1 = em pista, 0 = fora. Ausente => tratar como em pista (offRunway = false)
+                    }
+                }
+
+                var breaks = LandingBreakModel.Roll(_tracker.Parts, fpm, bankDeg, offRunway, _componentCatalog.Landing, _random);
+                foreach (var b in breaks)
+                {
+                    BreakPart(b.Part.Id);
+                    OnLandingBreak?.Invoke(b);
                 }
             }
         }

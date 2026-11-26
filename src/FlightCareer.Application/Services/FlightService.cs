@@ -17,6 +17,8 @@ namespace FlightCareer.Application.Services
 {
     public class FlightService
     {
+        public const double OffFieldXpFactor = 0.5;
+
         private readonly IAppDbContext _context;
         private readonly IPilotRepository _pilotRepository;
         private readonly IMissionGenerator _missionGenerator;
@@ -60,7 +62,8 @@ namespace FlightCareer.Application.Services
             bool skydiveDropCompleted = false,
             bool skydiveThermalShock = false,
             double skydiveMaxCoolingRate = 0.0,
-            MissionTrackerResults? trackers = null)
+            MissionTrackerResults? trackers = null,
+            bool terrainDamageApplied = false)
         {
             int durationMinutes = flightDurationMinutes > 0
                 ? Math.Max(1, (int)Math.Round(flightDurationMinutes))
@@ -188,29 +191,21 @@ namespace FlightCareer.Application.Services
                 // CASO DE POUSO FORÇADO FORA DE PISTA (EMERGÊNCIA)
                 if (isOffFieldLanding)
                 {
-                    // Dano Adicional de Terreno Despreparado
-                    aircraft.TiresCondition = Math.Max(0, aircraft.TiresCondition - 35.0);
-                    aircraft.AirframeCondition = Math.Max(0, aircraft.AirframeCondition - 20.0);
+                    if (!terrainDamageApplied)
+                    {
+                        // Dano Adicional de Terreno Despreparado
+                        aircraft.TiresCondition = Math.Max(0, aircraft.TiresCondition - 35.0);
+                        aircraft.AirframeCondition = Math.Max(0, aircraft.AirframeCondition - 20.0);
+                    }
 
-                    // NÃO CONCLUIR MISSÕES: Atualizar OriginICAO para destinationIcao (resgate)
-                    int missionsRemainingOff = 0;
+                    // Remoção de TODAS as missões ativas (B4)
                     foreach (var mission in activeMissions)
                     {
-                        mission.OriginICAO = destinationIcao;
                         var dbMission = await _context.Missions.FindAsync(mission.Id);
                         if (dbMission != null)
                         {
-                            dbMission.OriginICAO = destinationIcao;
-                            var destAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == dbMission.DestinationICAO);
-                            var curAirp = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == destinationIcao);
-                            if (destAirp != null && curAirp != null)
-                            {
-                                double newDist = LocationUtils.CalculateDistance(curAirp.Latitude, curAirp.Longitude, destAirp.Latitude, destAirp.Longitude);
-                                dbMission.DistanceNM = Math.Round(newDist, 0);
-                                mission.DistanceNM = dbMission.DistanceNM;
-                            }
+                            _context.Missions.Remove(dbMission);
                         }
-                        missionsRemainingOff++;
                     }
 
                     // Decisão 2026-11-21 (AGENTS.md › 6): combustível é pago na compra no Hangar. O consumo só é descontado dos tanques.
@@ -220,7 +215,7 @@ namespace FlightCareer.Application.Services
                     if (xpInputs != null)
                     {
                         var breakdown = XpCalculator.Compute(xpInputs);
-                        offFieldXP = isFlightInvalidated ? 0 : breakdown.Total;
+                        offFieldXP = isFlightInvalidated ? 0 : (int)Math.Round(breakdown.Total * OffFieldXpFactor);
                         outcome.XpBreakdownLines = breakdown.Lines;
                     }
                     else
@@ -228,7 +223,7 @@ namespace FlightCareer.Application.Services
                         double baseScore = (flightDurationMinutes > 0 ? flightDurationMinutes * 2.0 : outcome.FlightTimeMinutes * 2.0) + (distanceNM * 0.5) + 50.0;
                         double mQuality = Math.Clamp(qualityMultiplier - 0.40, 0.5, 1.15);
                         double mRealism = autoStartUsed ? 0.90 : 1.00;
-                        offFieldXP = isFlightInvalidated ? 0 : (int)Math.Round(baseScore * 1.0 * mRealism * mQuality);
+                        offFieldXP = isFlightInvalidated ? 0 : (int)Math.Round(baseScore * 1.0 * mRealism * mQuality * OffFieldXpFactor);
                     }
                     pilot.ExperiencePoints += offFieldXP;
 
@@ -248,6 +243,7 @@ namespace FlightCareer.Application.Services
                     };
                     _context.Flights.Add(flightOff);
 
+                    pilot.CareerClockUtc = CareerClock.AdvanceFlight(pilot.CareerClockUtc, hours);
                     await _context.SaveChangesAsync();
 
                     outcome.Success = false;
@@ -256,8 +252,8 @@ namespace FlightCareer.Application.Services
                     outcome.LandingFee = 0;
                     outcome.XP = offFieldXP;
                     outcome.CompletedMissions = 0;
-                    outcome.RemainingMissions = missionsRemainingOff;
-                    outcome.Message = $"POUSO FORÇADO FORA DE PISTA! Aeronave pousou a {nearestDistance:F1} NM de {destinationIcao}. Carga e passageiros aguardam resgate.";
+                    outcome.RemainingMissions = 0;
+                    outcome.Message = $"POUSO FORÇADO FORA DE PISTA a {nearestDistance:F1} NM de {destinationIcao}. Missão cancelada, sem pagamento; XP parcial.";
                     return outcome;
                 }
 

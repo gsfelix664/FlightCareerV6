@@ -18,6 +18,15 @@ namespace FlightCareer.UI.Services
 
         public bool IsLogging => _writer != null;
 
+        public void RecordPeakG(double g)
+        {
+            lock (_lock)
+            {
+                if (g > _maxGForce) _maxGForce = g;
+                if (g < _minGForce) _minGForce = g;
+            }
+        }
+
         public void StartFlightLog(string originIcao, string destinationIcao, PilotAircraft? aircraft)
         {
             lock (_lock)

@@ -174,7 +174,7 @@ namespace FlightCareer.UI.Services
         /// Grava uma pane. Retorna null se já existe pane aberta com o mesmo código (mesma pane, outra origem).
         /// </summary>
         public AircraftDefect? Record(string code, DefectOrigin origin, string cause, double? parameter = null,
-            string? title = null, string? description = null, bool alreadyInjected = false)
+            string? title = null, string? description = null, bool alreadyInjected = false, bool? isGrounding = null)
         {
             if (_aircraft == null) return null;
             if (_openDefects.Any(d => d.Code == code)) return null;
@@ -192,7 +192,7 @@ namespace FlightCareer.UI.Services
                 Description = description ?? string.Empty,
                 Cause = cause,
                 FlightPhase = _phaseProvider(),
-                IsGrounding = spec.IsGrounding,
+                IsGrounding = isGrounding ?? spec.IsGrounding,
                 RepairCost = DefectCatalog.CalculateRepairCost(code, _aircraft.AircraftType?.PurchasePrice ?? 0),
                 Parameter = param,
                 DetectedAtUtc = DateTime.UtcNow

@@ -9,6 +9,7 @@
   - As 9 barras de componentes e colunas legadas tornam-se agregadas da saúde das peças (`SyncComponentsFromParts` / `AggregateHealth`).
   - Danos de falhas e eventos são aplicados via `DamageGroup`/`ClampGroup`. Panes nativas do simulador quebram exatamente uma peça prioritária via `NativeFailurePartMap` (menor saúde, ordem na tabela, menor motor).
   - Peças quebradas com `BlocksFlightWhenBroken == true` interditam obrigatoriamente a aeronave (`PartAirworthiness`), bloqueando o voo no Hangar (status "INTERDITADA (PEÇA)") e no `FlightMonitor.StartMonitoring`.
+  - Quebra de trem e pneus no pouso (`LandingBreakModel`, 2026-11-26): chance calibrada em JSON por razão de descida (600/850/900 fpm), inclinação de asa, terreno fora de pista e desgaste; sorteia no máximo 1 peça de trem e 1 de pneu por impacto, priorizando montante principal antes do nariz/bequilha. Peça quebrada interdita imediatamente sem duplicar pane. Inspeções operacionais viram panes no Hangar (`InspectionDefectPolicy`), interditando em toque severo e diferidas para outras regras. Não testado no MSFS.
   - Reconciliação no início do voo (`ReconcilePartsFromComponents`) detecta reparos externos (eleva saúde e limpa `IsBroken`) ou avarias fora de voo.
   - Peças com vida em ciclos (pneus, freios, rodas) avançam em pousos reais (`PartWearEngine.ApplyLandingCycle`), ignorando quiques.
   - Lâmpadas no grupo `Iluminação` (`PartGroup.Iluminacao`) são `minorPart` (não recebem dano de grupo) com restrições operacionais da MEL noturna (`LightingMel`). Sem atuação direta no sim; não testado no MSFS.
