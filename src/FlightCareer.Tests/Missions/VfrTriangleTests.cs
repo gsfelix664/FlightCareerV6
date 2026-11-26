@@ -10,7 +10,7 @@ namespace FlightCareer.Tests.Missions
     public class VfrTriangleTests
     {
         [Fact]
-        public void SemPontoDeReportagem_FalhaSobrevoo()
+        public void SemPontoDeReporte_FalhaSobrevoo()
         {
             var mission = new Mission
             {
@@ -18,7 +18,7 @@ namespace FlightCareer.Tests.Missions
                 SubId = "navegacao_vfr",
                 OriginICAO = "SBJD",
                 DestinationICAO = "SBJD",
-                OverflyWaypoints = "P:Ponto de Reportagem VFR@-22.8,-47.1,2.0,3000"
+                OverflyWaypoints = "P:Ponto de Reporte VFR@-22.8,-47.1,2.0,3000"
             };
 
             var multiTracker = new MultiStopTracker();
@@ -48,7 +48,7 @@ namespace FlightCareer.Tests.Missions
         }
 
         [Fact]
-        public void Completo_ComPontoDeReportagemEParadas_Sucesso()
+        public void Completo_ComPontoDeReporteEParadas_Sucesso()
         {
             var mission = new Mission
             {
@@ -56,7 +56,7 @@ namespace FlightCareer.Tests.Missions
                 SubId = "navegacao_vfr",
                 OriginICAO = "SBJD",
                 DestinationICAO = "SBJD",
-                OverflyWaypoints = "P:Ponto de Reportagem VFR@-22.8,-47.1,2.0,3000"
+                OverflyWaypoints = "P:Ponto de Reporte VFR@-22.8,-47.1,2.0,3000"
             };
 
             var multiTracker = new MultiStopTracker();
@@ -74,7 +74,7 @@ namespace FlightCareer.Tests.Missions
             multiTracker.Update(false, -23.4808, -47.4897, 100, 34, 6);
             multiTracker.Update(true, -22.1969, -49.9261, 1.0, 30, 6); // SBDN
 
-            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Ponto de Reportagem VFR" };
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Ponto de Reporte VFR" };
             var trackerResults = new MissionTrackerResults(
                 VisitedWaypoints: visited,
                 MultiStop: multiTracker
@@ -95,7 +95,7 @@ namespace FlightCareer.Tests.Missions
                 SubId = "navegacao_vfr",
                 OriginICAO = "SBJD",
                 DestinationICAO = "SBJD",
-                OverflyWaypoints = "P:Ponto de Reportagem VFR@-22.8,-47.1,2.0,3000"
+                OverflyWaypoints = "P:Ponto de Reporte VFR@-22.8,-47.1,2.0,3000"
             };
 
             var multiTracker = new MultiStopTracker();
@@ -112,7 +112,7 @@ namespace FlightCareer.Tests.Missions
             multiTracker.Update(isOnGround: false, -23.1822, -46.9431, 100, 40, 10);
             multiTracker.Update(isOnGround: true, -23.1822, -46.9431, 1.0, 35, 6);
 
-            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Ponto de Reportagem VFR" };
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Ponto de Reporte VFR" };
             var trackerResults = new MissionTrackerResults(
                 VisitedWaypoints: visited,
                 MultiStop: multiTracker
@@ -174,7 +174,7 @@ namespace FlightCareer.Tests.Missions
                 Assert.Equal(origin.ICAO, mission.OriginICAO);
                 Assert.Equal(1, mission.PassengerCount);
 
-                // Ponto de reportagem P:
+                // Ponto de reporte P:
                 Assert.NotNull(mission.OverflyWaypoints);
                 Assert.StartsWith("P:", mission.OverflyWaypoints);
 

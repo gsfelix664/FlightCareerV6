@@ -1830,7 +1830,7 @@
     "DistanceNm": 94,
     "Title": "Navegação por Referências Visuais: SBMT - SDCO - SBMT",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ponto de Reportagem VFR@-23.37967,-47.05918,2.0,3000",
+    "OverflyWaypoints": "P:Ponto de Reporte VFR@-23.37967,-47.05918,2.0,3000",
     "ContractData": "{\u0022Stops\u0022:[{\u0022Icao\u0022:\u0022SDCO\u0022,\u0022Lat\u0022:-23.4808,\u0022Lon\u0022:-47.4897,\u0022ElevationFt\u0022:2077}],\u0022RequireNoRefuel\u0022:false,\u0022StopMode\u0022:\u0022full_stop\u0022}"
   },
   {
@@ -1984,7 +1984,7 @@
     "DistanceNm": 91,
     "Title": "Navegação por Referências Visuais: SDCO - SDAA - SDCO",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ponto de Reportagem VFR@-23.09579,-47.46446,2.0,3000",
+    "OverflyWaypoints": "P:Ponto de Reporte VFR@-23.09579,-47.46446,2.0,3000",
     "ContractData": "{\u0022Stops\u0022:[{\u0022Icao\u0022:\u0022SDAA\u0022,\u0022Lat\u0022:-22.7561,\u0022Lon\u0022:-47.2658,\u0022ElevationFt\u0022:1886}],\u0022RequireNoRefuel\u0022:false,\u0022StopMode\u0022:\u0022full_stop\u0022}"
   },
   {
@@ -2040,7 +2040,7 @@
     "DistanceNm": 182,
     "Title": "Navegação por Referências Visuais: SDCO - SBSJ - SDCO",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ponto de Reportagem VFR@-23.44056,-46.66036,2.0,3000",
+    "OverflyWaypoints": "P:Ponto de Reporte VFR@-23.44056,-46.66036,2.0,3000",
     "ContractData": "{\u0022Stops\u0022:[{\u0022Icao\u0022:\u0022SBSJ\u0022,\u0022Lat\u0022:-23.2289,\u0022Lon\u0022:-45.8625,\u0022ElevationFt\u0022:2120}],\u0022RequireNoRefuel\u0022:false,\u0022StopMode\u0022:\u0022full_stop\u0022}"
   },
   {
@@ -3370,7 +3370,7 @@
     "DistanceNm": 175,
     "Title": "Navegação VFR em Triângulo (SDAA e SDCO)",
     "RequiredTouchAndGoes": 0,
-    "OverflyWaypoints": "P:Ponto de Reportagem VFR@-22.46210,-47.03452,2.0,3000",
+    "OverflyWaypoints": "P:Ponto de Reporte VFR@-22.46210,-47.03452,2.0,3000",
     "ContractData": "{\u0022Stops\u0022:[{\u0022Icao\u0022:\u0022SDAA\u0022,\u0022Lat\u0022:-22.7561,\u0022Lon\u0022:-47.2658,\u0022ElevationFt\u0022:1886},{\u0022Icao\u0022:\u0022SDCO\u0022,\u0022Lat\u0022:-23.4808,\u0022Lon\u0022:-47.4897,\u0022ElevationFt\u0022:2077}],\u0022RequireNoRefuel\u0022:false,\u0022StopMode\u0022:\u0022full_stop\u0022}"
   },
   {

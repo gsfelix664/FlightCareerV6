@@ -18,12 +18,10 @@ namespace FlightCareer.UI.Utils
 {
     public partial class FlightMapControl : UserControl
     {
-        private readonly List<PointLatLng> _waypoints = new List<PointLatLng>();
         private GMapMarker? _aircraftMarker;
         private GMapMarker? _originMarker;
         private GMapMarker? _destinationMarker;
         private GMapRoute? _destinationRoute;
-        private GMapRoute? _waypointRoute;
         private GMapRoute? _recordedFlightRoute;
         private GMapMarker? _originPinMarker;
         private GMapMarker? _destPinMarker;
@@ -58,7 +56,6 @@ namespace FlightCareer.UI.Utils
         public static readonly DependencyProperty AircraftHeadingProperty = DependencyProperty.Register("AircraftHeading", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty AltitudeProperty = DependencyProperty.Register("Altitude", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
         public static readonly DependencyProperty GroundSpeedProperty = DependencyProperty.Register("GroundSpeed", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnTelemetryChanged));
-        public static readonly DependencyProperty ShowWaypointsOverlayProperty = DependencyProperty.Register("ShowWaypointsOverlay", typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true));
 
         // Propriedades de Clustering e Seleção de Missões pelo Mapa
         public static readonly DependencyProperty MissionsSourceProperty = DependencyProperty.Register(
@@ -88,7 +85,6 @@ namespace FlightCareer.UI.Utils
         public double AircraftHeading { get => (double)GetValue(AircraftHeadingProperty); set => SetValue(AircraftHeadingProperty, value); }
         public double Altitude { get => (double)GetValue(AltitudeProperty); set => SetValue(AltitudeProperty, value); }
         public double GroundSpeed { get => (double)GetValue(GroundSpeedProperty); set => SetValue(GroundSpeedProperty, value); }
-        public bool ShowWaypointsOverlay { get => (bool)GetValue(ShowWaypointsOverlayProperty); set => SetValue(ShowWaypointsOverlayProperty, value); }
         public System.Collections.IEnumerable? MissionsSource { get => (System.Collections.IEnumerable?)GetValue(MissionsSourceProperty); set => SetValue(MissionsSourceProperty, value); }
         public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
         public object? ContractMissions { get => GetValue(ContractMissionsProperty); set => SetValue(ContractMissionsProperty, value); }
@@ -708,7 +704,7 @@ namespace FlightCareer.UI.Utils
             _multiLegMarkers.Clear();
         }
 
-        private GMapMarker CreateWaypointCircle(PointLatLng pos, string hexColor, string tooltip)
+        private GMapMarker CreateRoutePointCircle(PointLatLng pos, string hexColor, string tooltip)
         {
             var circle = new Ellipse
             {
@@ -796,7 +792,7 @@ namespace FlightCareer.UI.Utils
                     _multiLegRoutes.Add(tglRoute);
                     MainMap.Markers.Add(tglRoute);
 
-                    var tglMarker = CreateWaypointCircle(
+                    var tglMarker = CreateRoutePointCircle(
                         new PointLatLng(lat0 + (dLat * 0.4), lon0 + dLon),
                         "#FFB300",
                         $"CIRCUITO DE TRÁFEGO • {leg.OriginICAO} (TGL) • {leg.DistanceNM:N0} NM");
@@ -834,7 +830,7 @@ namespace FlightCareer.UI.Utils
 
                     if (isFirstLeg && !plottedIcaos.Contains(leg.OriginICAO))
                     {
-                        var originCircle = CreateWaypointCircle(pStart, "#00E676", $"PARTIDA: {leg.OriginICAO}");
+                        var originCircle = CreateRoutePointCircle(pStart, "#00E676", $"PARTIDA: {leg.OriginICAO}");
                         _multiLegMarkers.Add(originCircle);
                         MainMap.Markers.Add(originCircle);
                         plottedIcaos.Add(leg.OriginICAO);
@@ -845,7 +841,7 @@ namespace FlightCareer.UI.Utils
                         ? $"DESTINO FINAL: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)"
                         : $"ESCALA / DESTINO: {leg.DestinationICAO} ({leg.DistanceNM:N0} NM)";
 
-                    var destCircle = CreateWaypointCircle(pEnd, pinColor, pinTooltip);
+                    var destCircle = CreateRoutePointCircle(pEnd, pinColor, pinTooltip);
                     _multiLegMarkers.Add(destCircle);
                     MainMap.Markers.Add(destCircle);
                     plottedIcaos.Add(leg.DestinationICAO);
@@ -1135,7 +1131,7 @@ namespace FlightCareer.UI.Utils
 
         #endregion
 
-        #region Aeroportos, Waypoints Manuais e Trajetória Gravada
+        #region Aeroportos e Trajetória Gravada
 
         private void UpdateAirportMarkers()
         {
@@ -1162,17 +1158,6 @@ namespace FlightCareer.UI.Utils
                 _airportMarkers.Add(marker);
                 MainMap.Markers.Add(marker);
             }
-        }
-
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
-        {
-            _waypoints.Clear();
-            if (_waypointRoute != null)
-            {
-                MainMap.Markers.Remove(_waypointRoute);
-                _waypointRoute = null;
-            }
-            TxtDistance.Text = "0.0 NM";
         }
 
         private static void OnRecordedPathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

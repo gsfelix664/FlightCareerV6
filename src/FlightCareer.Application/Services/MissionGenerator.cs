@@ -1264,7 +1264,7 @@ namespace FlightCareer.Application.Services
                 var airportA = chosen.A.Airport;
                 double totalDist = chosen.DistTotal;
 
-                // Ponto de reportagem VFR no meio da primeira etapa (origin -> A) com desvio de 3 a 8 NM
+                // Ponto de reporte VFR no meio da primeira etapa (origin -> A) com desvio de 3 a 8 NM
                 double midLat = (origin.Latitude + airportA.Latitude) / 2.0;
                 double midLon = (origin.Longitude + airportA.Longitude) / 2.0;
                 double cosMid = Math.Max(0.01, Math.Cos(midLat * Math.PI / 180.0));
@@ -1280,7 +1280,7 @@ namespace FlightCareer.Application.Services
                 double pLat = midLat + (side * offsetNm * perpLat / 60.0);
                 double pLon = midLon + (side * offsetNm * perpLon / (60.0 * cosMid));
 
-                string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint("Ponto de Reportagem VFR", pLat, pLon, 2.0, 3000.0);
+                string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint("Ponto de Reporte VFR", pLat, pLon, 2.0, 3000.0);
 
                 var contract = new MultiStopContractData
                 {
@@ -1303,7 +1303,7 @@ namespace FlightCareer.Application.Services
                 };
 
                 string fallbackTitle = $"Navegação VFR de Ida e Volta ({airportA.ICAO})";
-                string fallbackDesc = $"Navegação estimada ida e volta: {origin.ICAO} -> {airportA.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reportagem na ida e realize pouso completo em {airportA.ICAO}.";
+                string fallbackDesc = $"Navegação estimada ida e volta: {origin.ICAO} -> {airportA.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na ida e realize pouso completo em {airportA.ICAO}.";
 
                 var catalog = textCatalog ?? MissionTextCatalog.Default;
                 string textKey = $"{sub.Id}:{variant}";
@@ -1363,7 +1363,7 @@ namespace FlightCareer.Application.Services
                 var airportB = chosen.B.Airport;
                 double totalDist = chosen.DistTotal;
 
-                // Ponto de reportagem VFR no meio da primeira etapa (origin -> A) com desvio de 3 a 8 NM
+                // Ponto de reporte VFR no meio da primeira etapa (origin -> A) com desvio de 3 a 8 NM
                 double midLat = (origin.Latitude + airportA.Latitude) / 2.0;
                 double midLon = (origin.Longitude + airportA.Longitude) / 2.0;
                 double cosMid = Math.Max(0.01, Math.Cos(midLat * Math.PI / 180.0));
@@ -1379,7 +1379,7 @@ namespace FlightCareer.Application.Services
                 double pLat = midLat + (side * offsetNm * perpLat / 60.0);
                 double pLon = midLon + (side * offsetNm * perpLon / (60.0 * cosMid));
 
-                string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint("Ponto de Reportagem VFR", pLat, pLon, 2.0, 3000.0);
+                string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint("Ponto de Reporte VFR", pLat, pLon, 2.0, 3000.0);
 
                 var contract = new MultiStopContractData
                 {
@@ -1408,8 +1408,8 @@ namespace FlightCareer.Application.Services
                     : $"Navegação VFR em Triângulo ({airportA.ICAO} e {airportB.ICAO})";
 
                 string fallbackDesc = isTgl
-                    ? $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reportagem na primeira etapa e realize toque e arremetida em cada aeródromo na ordem."
-                    : $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reportagem na primeira etapa e realize parada completa em cada aeródromo na ordem.";
+                    ? $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize toque e arremetida em cada aeródromo na ordem."
+                    : $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize parada completa em cada aeródromo na ordem.";
 
                 var catalog = textCatalog ?? MissionTextCatalog.Default;
                 string textKey = $"{sub.Id}:{variant}";
