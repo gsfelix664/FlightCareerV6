@@ -162,10 +162,9 @@ namespace FlightCareer.UI.ViewModels
         // Coleções do Briefing Multi-Leg e Checklist
         public ObservableCollection<Mission> AcceptedMissions { get; }
         public ObservableCollection<FlightLegModel> RouteLegs { get; } = new();
-        public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
-
+        /// <summary>Contratos desenhados no mapa (o FlightMapControl monta os visuais).</summary>
         [ObservableProperty]
-        private SurveyMapArea? _surveyArea;
+        private IReadOnlyList<Mission> _contractMissions = Array.Empty<Mission>();
 
         public ObservableCollection<PreFlightCheckItem> ChecklistItems { get; } = new();
 
@@ -304,17 +303,9 @@ namespace FlightCareer.UI.ViewModels
             try
             {
                 RouteLegs.Clear();
-                ContractMarkers.Clear();
-
-                var activeMissions = AcceptedMissions.Any()
-                    ? (IEnumerable<Mission>)AcceptedMissions
+                ContractMissions = AcceptedMissions.Any()
+                    ? AcceptedMissions.ToList()
                     : (SelectedMission != null ? new[] { SelectedMission } : Array.Empty<Mission>());
-                var visuals = ContractMarkerBuilder.Build(activeMissions);
-                foreach (var marker in visuals.Markers)
-                {
-                    ContractMarkers.Add(marker);
-                }
-                SurveyArea = visuals.SurveyArea;
 
                 string originIcao = string.IsNullOrWhiteSpace(HangarAircraftLocation) || HangarAircraftLocation == "---"
                     ? (AcceptedMissions.FirstOrDefault()?.OriginICAO ?? "SBJD")

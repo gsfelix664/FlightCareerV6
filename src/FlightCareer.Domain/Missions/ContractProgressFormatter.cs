@@ -6,6 +6,10 @@ using FlightCareer.Domain.Entities;
 
 namespace FlightCareer.Domain.Missions
 {
+    public enum ContractObjectiveState { Pending, Done, Failed }
+
+    public sealed record ContractObjectiveLine(string Text, ContractObjectiveState State);
+
     public sealed record ContractProgressInputs(
         int TouchAndGoCount = 0,
         OverflyTracker? Overfly = null,
@@ -21,11 +25,11 @@ namespace FlightCareer.Domain.Missions
     {
         private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
 
-        public static string Build(IReadOnlyList<Mission>? missions, ContractProgressInputs inputs)
+        public static IReadOnlyList<ContractObjectiveLine> BuildLines(IReadOnlyList<Mission>? missions, ContractProgressInputs inputs)
         {
-            if (inputs == null) return string.Empty;
+            if (inputs == null) return Array.Empty<ContractObjectiveLine>();
 
-            var lines = new List<string>(8);
+            var lines = new List<ContractObjectiveLine>(8);
 
             // 1. TGL (se max(RequiredTouchAndGoes) das missões > 0)
             int reqTgl = (missions != null && missions.Count > 0)
@@ -33,8 +37,8 @@ namespace FlightCareer.Domain.Missions
                 : 0;
             if (reqTgl > 0)
             {
-                string check = inputs.TouchAndGoCount >= reqTgl ? " ✓" : "";
-                lines.Add($"TGL {inputs.TouchAndGoCount}/{reqTgl}{check}");
+                var state = inputs.TouchAndGoCount >= reqTgl ? ContractObjectiveState.Done : ContractObjectiveState.Pending;
+                lines.Add(new ContractObjectiveLine($"TGL {inputs.TouchAndGoCount}/{reqTgl}", state));
             }
 
             // 2. Sobrevoo (se Overfly?.HasWaypoints)
@@ -46,7 +50,7 @@ namespace FlightCareer.Domain.Missions
 
                 if (visited >= total && total > 0)
                 {
-                    lines.Add($"Pontos {total}/{total} ✓");
+                    lines.Add(new ContractObjectiveLine($"Pontos {total}/{total}", ContractObjectiveState.Done));
                 }
                 else
                 {
@@ -86,7 +90,7 @@ namespace FlightCareer.Domain.Missions
                             }
                         }
                     }
-                    lines.Add(line);
+                    lines.Add(new ContractObjectiveLine(line, ContractObjectiveState.Pending));
                 }
             }
 
@@ -96,19 +100,19 @@ namespace FlightCareer.Domain.Missions
                 var ms = inputs.MultiStop;
                 if (ms.RefuelViolationDetected)
                 {
-                    lines.Add("✖ Reabasteceu entre escalas");
+                    lines.Add(new ContractObjectiveLine("Reabasteceu entre escalas", ContractObjectiveState.Failed));
                 }
                 else if (ms.OrderViolationDetected)
                 {
-                    lines.Add($"✖ {ms.FailureReason}");
+                    lines.Add(new ContractObjectiveLine(ms.FailureReason ?? string.Empty, ContractObjectiveState.Failed));
                 }
                 else if (ms.AllStopsCompleted)
                 {
-                    lines.Add($"Escalas {ms.TotalStopsCount}/{ms.TotalStopsCount} ✓");
+                    lines.Add(new ContractObjectiveLine($"Escalas {ms.TotalStopsCount}/{ms.TotalStopsCount}", ContractObjectiveState.Done));
                 }
                 else
                 {
-                    lines.Add($"Escala {ms.CompletedStopsCount}/{ms.TotalStopsCount} · próxima {ms.NextStopIcao}");
+                    lines.Add(new ContractObjectiveLine($"Escala {ms.CompletedStopsCount}/{ms.TotalStopsCount} · próxima {ms.NextStopIcao}", ContractObjectiveState.Pending));
                 }
             }
 
@@ -118,17 +122,17 @@ namespace FlightCareer.Domain.Missions
                 var cf = inputs.CheckFlight;
                 if (cf.IsCompleted)
                 {
-                    lines.Add("Voo de teste ✓");
+                    lines.Add(new ContractObjectiveLine("Voo de teste", ContractObjectiveState.Done));
                 }
                 else if (!cf.Step1Reached)
                 {
                     double testAlt = cf.ContractData?.TestAltitudeFt ?? 0.0;
-                    lines.Add($"Passo 1/3 · subir a {testAlt.ToString("N0", PtBr)} ft");
+                    lines.Add(new ContractObjectiveLine($"Passo 1/3 · subir a {testAlt.ToString("N0", PtBr)} ft", ContractObjectiveState.Pending));
                 }
                 else if (!cf.Step2PowerChecked)
                 {
                     double powerSec = cf.ContractData?.PowerHoldSeconds ?? 0.0;
-                    lines.Add($"Passo 2/3 · potência máxima por {powerSec.ToString("N0", PtBr)} s");
+                    lines.Add(new ContractObjectiveLine($"Passo 2/3 · potência máxima por {powerSec.ToString("N0", PtBr)} s", ContractObjectiveState.Pending));
                 }
                 else
                 {
@@ -136,7 +140,7 @@ namespace FlightCareer.Domain.Missions
                     string mE = cf.HeldE ? "✓" : "·";
                     string mS = cf.HeldS ? "✓" : "·";
                     string mW = cf.HeldW ? "✓" : "·";
-                    lines.Add($"Passo 3/3 · rumos N{mN} E{mE} S{mS} W{mW}");
+                    lines.Add(new ContractObjectiveLine($"Passo 3/3 · rumos N{mN} E{mE} S{mS} W{mW}", ContractObjectiveState.Pending));
                 }
             }
 
@@ -144,16 +148,16 @@ namespace FlightCareer.Domain.Missions
             if (inputs.Stol != null && inputs.Stol.HasActiveContract)
             {
                 var stol = inputs.Stol;
-                string check = stol.IsCompleted ? " ✓" : "";
-                lines.Add($"Pousos curtos {stol.ValidLandingsCount}/{stol.RequiredLandings}{check}");
+                var state = stol.IsCompleted ? ContractObjectiveState.Done : ContractObjectiveState.Pending;
+                lines.Add(new ContractObjectiveLine($"Pousos curtos {stol.ValidLandingsCount}/{stol.RequiredLandings}", state));
             }
 
             // 6. Levantamento
             if (inputs.Survey != null && inputs.Survey.HasActiveContract)
             {
                 var survey = inputs.Survey;
-                string check = survey.IsCompleted ? " ✓" : "";
-                lines.Add($"Pernas {survey.CompletedLegs}/{survey.RequiredLegs}{check}");
+                var state = survey.IsCompleted ? ContractObjectiveState.Done : ContractObjectiveState.Pending;
+                lines.Add(new ContractObjectiveLine($"Pernas {survey.CompletedLegs}/{survey.RequiredLegs}", state));
             }
 
             // 7. Paraquedismo
@@ -162,11 +166,11 @@ namespace FlightCareer.Domain.Missions
                 var skydive = inputs.Skydive;
                 if (skydive.DropCompleted)
                 {
-                    lines.Add("Lançamento ✓");
+                    lines.Add(new ContractObjectiveLine("Lançamento", ContractObjectiveState.Done));
                 }
                 else
                 {
-                    lines.Add($"Lançamento · estável {skydive.StableSeconds.ToString("N0", PtBr)} s");
+                    lines.Add(new ContractObjectiveLine($"Lançamento · estável {skydive.StableSeconds.ToString("N0", PtBr)} s", ContractObjectiveState.Pending));
                 }
             }
 
@@ -176,15 +180,15 @@ namespace FlightCareer.Domain.Missions
                 var ferry = inputs.Ferry;
                 if (ferry.HasViolation)
                 {
-                    lines.Add($"✖ {ferry.FailureReason}");
+                    lines.Add(new ContractObjectiveLine(ferry.FailureReason ?? string.Empty, ContractObjectiveState.Failed));
                 }
                 else if (ferry.ContractData?.Restriction == "max_altitude")
                 {
-                    lines.Add($"Restrição: máx. {ferry.ContractData.MaxAltitudeFt.ToString("N0", PtBr)} ft");
+                    lines.Add(new ContractObjectiveLine($"Restrição: máx. {ferry.ContractData.MaxAltitudeFt.ToString("N0", PtBr)} ft", ContractObjectiveState.Pending));
                 }
                 else if (ferry.ContractData?.Restriction == "flaps_fixed")
                 {
-                    lines.Add("Restrição: flaps fixos");
+                    lines.Add(new ContractObjectiveLine("Restrição: flaps fixos", ContractObjectiveState.Pending));
                 }
             }
 
@@ -194,12 +198,14 @@ namespace FlightCareer.Domain.Missions
                 var aw = inputs.AerialWork;
                 string mode = aw.Mode.ToLowerInvariant();
                 string line = string.Empty;
+                var state = ContractObjectiveState.Pending;
 
                 if (mode == "sectors")
                 {
                     if (aw.IsCompleted)
                     {
-                        line = $"Setores {aw.TotalPoints}/{aw.TotalPoints} ✓";
+                        line = $"Setores {aw.TotalPoints}/{aw.TotalPoints}";
+                        state = ContractObjectiveState.Done;
                     }
                     else
                     {
@@ -235,7 +241,8 @@ namespace FlightCareer.Domain.Missions
                 {
                     if (aw.IsCompleted)
                     {
-                        line = $"Traçado {aw.TotalPoints}/{aw.TotalPoints} ✓";
+                        line = $"Traçado {aw.TotalPoints}/{aw.TotalPoints}";
+                        state = ContractObjectiveState.Done;
                     }
                     else
                     {
@@ -248,7 +255,8 @@ namespace FlightCareer.Domain.Missions
                     int accumMin = (int)Math.Floor(aw.OrbitSecondsAccumulated / 60.0);
                     if (aw.IsCompleted)
                     {
-                        line = $"Órbita {totalMin}/{totalMin} min ✓";
+                        line = $"Órbita {totalMin}/{totalMin} min";
+                        state = ContractObjectiveState.Done;
                     }
                     else
                     {
@@ -259,7 +267,8 @@ namespace FlightCareer.Domain.Missions
                 {
                     if (aw.TargetFound)
                     {
-                        line = "Alvo encontrado ✓";
+                        line = "Alvo encontrado";
+                        state = ContractObjectiveState.Done;
                     }
                     else
                     {
@@ -274,13 +283,26 @@ namespace FlightCareer.Domain.Missions
                     {
                         line += $" · reduza para {aw.ContractData.MaxIasKt.ToString("N0", PtBr)} kt";
                     }
-                    lines.Add(line);
+                    lines.Add(new ContractObjectiveLine(line, state));
                 }
             }
 
-            if (lines.Count == 0) return string.Empty;
-
-            return string.Join("\n", lines.Take(3));
+            return lines;
         }
+
+        public static string FormatHud(IReadOnlyList<ContractObjectiveLine> lines)
+        {
+            if (lines == null || lines.Count == 0) return string.Empty;
+
+            return string.Join("\n", lines.Take(3).Select(l => l.State switch
+            {
+                ContractObjectiveState.Done => l.Text + " ✓",
+                ContractObjectiveState.Failed => "✖ " + l.Text,
+                _ => l.Text
+            }));
+        }
+
+        public static string Build(IReadOnlyList<Mission>? missions, ContractProgressInputs inputs)
+            => FormatHud(BuildLines(missions, inputs));
     }
 }

@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -29,6 +30,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly IDbContextFactory<AppDbContext>? _dbContextFactory;
         private readonly ComponentCatalog _componentCatalog;
         private readonly PartCatalog _partCatalog;
+        private readonly ObjectiveCardService? _objectiveCard;
 
         // --- CONTROLES DE JANELA (HUD OVERLAY) ---
         [ObservableProperty] private bool _isTopmost = true;
@@ -153,11 +155,12 @@ namespace FlightCareer.UI.ViewModels
         public event Action? RequestClose;
 
         /// <summary>Áreas, pontos e escalas dos contratos ativos, desenhados no mini-mapa.</summary>
-        public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
-        [ObservableProperty] private SurveyMapArea? _surveyArea;
+        [ObservableProperty] private IReadOnlyList<Mission>? _contractMissions;
         [ObservableProperty] private string _contractProgressText = string.Empty;
         [ObservableProperty] private bool _hasContractProgress;
+        public ObservableCollection<HudContractItem> ContractItems { get; } = new();
         private string _contractMarkersKey = string.Empty;
+        private string _lastContractItemsKey = string.Empty;
 
         /// <summary>Contratos aceitos no briefing: o mini-mapa os mostra antes de o monitoramento começar.</summary>
         public IReadOnlyCollection<Mission>? AcceptedMissions { get; set; }
@@ -171,11 +174,42 @@ namespace FlightCareer.UI.ViewModels
             if (key == _contractMarkersKey) return;
             _contractMarkersKey = key;
 
-            var visuals = ContractMarkerBuilder.Build(missions);
-            // A área vem antes: o mapa a redesenha a cada mudança na coleção de marcadores
-            SurveyArea = visuals.SurveyArea;
-            ContractMarkers.Clear();
-            foreach (var marker in visuals.Markers) ContractMarkers.Add(marker);
+            // O mapa monta área, pontos e faixa a partir das missões (FlightMapControl.ContractMissions)
+            ContractMissions = missions.ToList();
+        }
+
+        private void UpdateContractItems(IReadOnlyList<ContractObjectiveLine>? lines)
+        {
+            if (lines == null || lines.Count == 0)
+            {
+                if (ContractItems.Count > 0)
+                {
+                    ContractItems.Clear();
+                    _lastContractItemsKey = string.Empty;
+                }
+                return;
+            }
+
+            var top3 = lines.Take(3).ToList();
+            var sb = new StringBuilder();
+            for (int i = 0; i < top3.Count; i++)
+            {
+                if (i > 0) sb.Append('|');
+                sb.Append((int)top3[i].State).Append(':').Append(top3[i].Text);
+            }
+            string key = sb.ToString();
+
+            if (key == _lastContractItemsKey)
+            {
+                return;
+            }
+
+            _lastContractItemsKey = key;
+            ContractItems.Clear();
+            for (int i = 0; i < top3.Count; i++)
+            {
+                ContractItems.Add(HudContractItem.From(top3[i]));
+            }
         }
 
         public DebugOverlayViewModel(
@@ -186,7 +220,8 @@ namespace FlightCareer.UI.ViewModels
             AppDbContext? context = null,
             IDbContextFactory<AppDbContext>? dbContextFactory = null,
             ComponentCatalog? componentCatalog = null,
-            PartCatalog? partCatalog = null)
+            PartCatalog? partCatalog = null,
+            ObjectiveCardService? objectiveCard = null)
         {
             _simConnect = simConnect;
             _flightMonitor = flightMonitor;
@@ -196,6 +231,7 @@ namespace FlightCareer.UI.ViewModels
             _dbContextFactory = dbContextFactory;
             _componentCatalog = componentCatalog ?? ComponentCatalog.LoadDefault();
             _partCatalog = partCatalog ?? PartCatalog.LoadDefault();
+            _objectiveCard = objectiveCard;
 
             _simConnect.OnDataReceived += OnSimDataReceived;
             _simConnect.OnConnected += (s, e) => UpdateConnectionStatus();
@@ -315,8 +351,17 @@ namespace FlightCareer.UI.ViewModels
                 // Depois da origem e do destino, para o mapa enquadrar tudo
                 RefreshContractMarkers();
 
-                ContractProgressText = _flightMonitor.IsMonitoring ? _flightMonitor.ContractProgressText : string.Empty;
-                HasContractProgress = ContractProgressText.Length > 0;
+                if (_flightMonitor.IsMonitoring)
+                {
+                    ContractProgressText = _flightMonitor.ContractProgressText;
+                    UpdateContractItems(_flightMonitor.ContractObjectiveLines);
+                }
+                else
+                {
+                    ContractProgressText = string.Empty;
+                    UpdateContractItems(null);
+                }
+                HasContractProgress = ContractItems.Count > 0 || ContractProgressText.Length > 0;
 
                 // Velocidades e Altitude
                 Altitude = Math.Round(data.Altitude, 0);
@@ -567,6 +612,12 @@ namespace FlightCareer.UI.ViewModels
                 WindowOpacity = 1.00;
                 OpacityLabel = "100%";
             }
+        }
+
+        [RelayCommand]
+        private void ShowObjectiveCard()
+        {
+            _objectiveCard?.Show();
         }
 
         [RelayCommand]

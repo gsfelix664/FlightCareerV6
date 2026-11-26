@@ -14,8 +14,7 @@
         WindowStyle="None"
         Background="Transparent"
         ShowInTaskbar="True"
-        WindowStartupLocation="Manual"
-        Left="40" Top="80">
+        WindowStartupLocation="Manual">
 
     <Window.Resources>
         <!-- Estilo dos Rótulos Mini -->
@@ -93,6 +92,13 @@
                                    FontSize="10" FontWeight="Bold" Foreground="#00E5FF"/>
                     </Button>
 
+                    <!-- Cartão de Objetivo -->
+                    <Button Command="{Binding ShowObjectiveCardCommand}" 
+                            ToolTip="Objetivo do voo (Ctrl+Alt+O)"
+                            Background="#1E293B" BorderBrush="#334155" BorderThickness="1" Padding="5,1" Cursor="Hand" Margin="0,0,4,0">
+                        <TextBlock Text="🎯" FontSize="10" Foreground="#00E5FF"/>
+                    </Button>
+
                     <!-- Fechar -->
                     <Button Command="{Binding CloseCommand}" 
                             ToolTip="Fechar HUD"
@@ -145,7 +151,13 @@
                         <TextBlock Text="{Binding FlightPhase}" FontSize="10" FontWeight="Bold" Foreground="{Binding FlightPhaseColor}" TextTrimming="CharacterEllipsis"/>
                         <TextBlock Text="{Binding RouteText}" FontSize="10" FontWeight="SemiBold" Foreground="#64748B" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis"/>
                     </Grid>
-                    <TextBlock Text="{Binding ContractProgressText}" FontSize="10" FontWeight="SemiBold" Foreground="#FBBF24" TextWrapping="Wrap" Visibility="{Binding HasContractProgress, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <ItemsControl ItemsSource="{Binding ContractItems}" Visibility="{Binding HasContractProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Text}" Foreground="{Binding Color}" FontSize="10" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
 
                 <!-- ========== MODO DETALHADO (EXPANDIDO) ========== -->
@@ -169,7 +181,13 @@
                     <Border Background="#131B26" BorderBrush="#1F2D3D" BorderThickness="1" CornerRadius="4" Padding="6,4" Margin="0,0,0,6" Visibility="{Binding HasContractProgress, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <DockPanel>
                             <TextBlock Text="CONTRATO: " FontSize="10.5" FontWeight="Bold" Foreground="#64748B" VerticalAlignment="Top"/>
-                            <TextBlock Text="{Binding ContractProgressText}" FontSize="11" FontWeight="Bold" Foreground="#FBBF24" TextWrapping="Wrap"/>
+                            <ItemsControl ItemsSource="{Binding ContractItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Text}" Foreground="{Binding Color}" FontSize="11" FontWeight="Bold" TextWrapping="Wrap"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </DockPanel>
                     </Border>
 
@@ -189,8 +207,7 @@
                                 DestLon="{Binding DestLon}"
                                 DestIcao="{Binding DestIcao}"
                                 OriginIcao="{Binding OriginIcao}"
-                                ContractMarkers="{Binding ContractMarkers}"
-                                SurveyArea="{Binding SurveyArea}"
+                                ContractMissions="{Binding ContractMissions}"
                                 ShowWaypointsOverlay="False"/>
 
                             <!-- Badge Mini-GPS / GPS STATUS no topo esquerdo do mapa -->

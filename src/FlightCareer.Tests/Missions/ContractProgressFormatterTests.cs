@@ -166,5 +166,116 @@ namespace FlightCareer.Tests.Missions
             Assert.StartsWith("Pontos", lines[1]);
             Assert.StartsWith("Escala", lines[2]);
         }
+
+        [Fact]
+        public void BuildLines_TglIncompleto_Pending()
+        {
+            var missions = new List<Mission> { new() { RequiredTouchAndGoes = 2 } };
+            var lines = ContractProgressFormatter.BuildLines(missions, new ContractProgressInputs(TouchAndGoCount: 1));
+            Assert.Single(lines);
+            Assert.Equal("TGL 1/2", lines[0].Text);
+            Assert.Equal(ContractObjectiveState.Pending, lines[0].State);
+        }
+
+        [Fact]
+        public void BuildLines_TglCompleto_DoneSemMarcador()
+        {
+            var missions = new List<Mission> { new() { RequiredTouchAndGoes = 2 } };
+            var lines = ContractProgressFormatter.BuildLines(missions, new ContractProgressInputs(TouchAndGoCount: 2));
+            Assert.Single(lines);
+            Assert.Equal("TGL 2/2", lines[0].Text);
+            Assert.Equal(ContractObjectiveState.Done, lines[0].State);
+        }
+
+        [Fact]
+        public void BuildLines_EscalaReabasteceu_Failed()
+        {
+            var tracker = new MultiStopTracker();
+            var data = new MultiStopContractData
+            {
+                Stops = new List<StopPoint>
+                {
+                    new() { Icao = "SBDN", Lat = -22.1969, Lon = -49.9261 }
+                }
+            };
+            tracker.Configure(data, initialIsOnGround: true);
+            tracker.Update(isOnGround: false, -23.0, -47.0, 100.0, 50.0, 10.0);
+            tracker.Update(isOnGround: false, -22.5, -48.0, 100.0, 35.0, 10.0);
+            tracker.Update(isOnGround: true, -22.1969, -49.9261, 1.0, 41.0, 6.0);
+
+            var lines = ContractProgressFormatter.BuildLines(null, new ContractProgressInputs(MultiStop: tracker));
+            Assert.Single(lines);
+            Assert.Equal("Reabasteceu entre escalas", lines[0].Text);
+            Assert.Equal(ContractObjectiveState.Failed, lines[0].State);
+        }
+
+        [Fact]
+        public void BuildLines_MaisDeTresLinhas_RetornaTodas()
+        {
+            var missions = new List<Mission> { new() { RequiredTouchAndGoes = 2 } };
+
+            var overfly = new OverflyTracker();
+            overfly.ConfigureWaypoints(new[] { new OverflyPoint("WP1", 0, 0, 1000) });
+
+            var multiStop = new MultiStopTracker();
+            multiStop.Configure(new MultiStopContractData
+            {
+                Stops = new List<StopPoint> { new() { Icao = "SBDN" } }
+            });
+
+            var checkFlight = new CheckFlightTracker();
+            checkFlight.Configure(new CheckFlightContractData { TestAltitudeFt = 5000 });
+
+            var inputs = new ContractProgressInputs(
+                TouchAndGoCount: 1,
+                Overfly: overfly,
+                MultiStop: multiStop,
+                CheckFlight: checkFlight);
+
+            var lines = ContractProgressFormatter.BuildLines(missions, inputs);
+            Assert.Equal(4, lines.Count);
+        }
+
+        [Fact]
+        public void Build_MaisDeTresLinhas_LimitaATres()
+        {
+            var missions = new List<Mission> { new() { RequiredTouchAndGoes = 2 } };
+
+            var overfly = new OverflyTracker();
+            overfly.ConfigureWaypoints(new[] { new OverflyPoint("WP1", 0, 0, 1000) });
+
+            var multiStop = new MultiStopTracker();
+            multiStop.Configure(new MultiStopContractData
+            {
+                Stops = new List<StopPoint> { new() { Icao = "SBDN" } }
+            });
+
+            var checkFlight = new CheckFlightTracker();
+            checkFlight.Configure(new CheckFlightContractData { TestAltitudeFt = 5000 });
+
+            var inputs = new ContractProgressInputs(
+                TouchAndGoCount: 1,
+                Overfly: overfly,
+                MultiStop: multiStop,
+                CheckFlight: checkFlight);
+
+            var result = ContractProgressFormatter.Build(missions, inputs);
+            var lines = result.Split('\n');
+            Assert.Equal(3, lines.Length);
+        }
+
+        [Fact]
+        public void FormatHud_RecolocaMarcadores()
+        {
+            var lines = new List<ContractObjectiveLine>
+            {
+                new("A", ContractObjectiveState.Done),
+                new("B", ContractObjectiveState.Failed),
+                new("C", ContractObjectiveState.Pending)
+            };
+
+            var formatted = ContractProgressFormatter.FormatHud(lines);
+            Assert.Equal("A ✓\n✖ B\nC", formatted);
+        }
     }
 }

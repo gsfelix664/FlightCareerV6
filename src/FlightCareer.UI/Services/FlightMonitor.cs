@@ -64,6 +64,7 @@ namespace FlightCareer.UI.Services
         public Guid? WatchedAircraftId => _aircraft?.Id ?? _watchedAircraft?.Id;
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         public string ContractProgressText { get; private set; } = string.Empty;
+        public IReadOnlyList<ContractObjectiveLine> ContractObjectiveLines { get; private set; } = Array.Empty<ContractObjectiveLine>();
         private bool _isAirborne;
         private readonly LandingCycleTracker _landingCycle;
         private DateTime _liftoffTime = DateTime.MinValue;
@@ -682,6 +683,7 @@ namespace FlightCareer.UI.Services
             _ferryMonitor.Reset(_simConnect.CurrentData.IsOnGround);
             _aerialWorkTracker.Reset();
             ContractProgressText = string.Empty;
+            ContractObjectiveLines = Array.Empty<ContractObjectiveLine>();
             foreach (var m in missions)
             {
                 var def = MissionCatalog.Shared.Get(m.SubId);
@@ -1257,7 +1259,7 @@ namespace FlightCareer.UI.Services
                 _aerialWorkTracker.Update(data.IsOnGround, data.Latitude, data.Longitude, data.Altitude, data.Airspeed, simDt);
             }
 
-            ContractProgressText = ContractProgressFormatter.Build(
+            ContractObjectiveLines = ContractProgressFormatter.BuildLines(
                 _activeMissions,
                 new ContractProgressInputs(
                     _touchAndGoCounter.Count,
@@ -1269,6 +1271,7 @@ namespace FlightCareer.UI.Services
                     _checkFlightTracker,
                     _ferryMonitor,
                     _aerialWorkTracker));
+            ContractProgressText = ContractProgressFormatter.FormatHud(ContractObjectiveLines);
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
             if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
