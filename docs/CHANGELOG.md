@@ -3329,3 +3329,7 @@
 - Decisão do usuário: `isolado` a partir de 200 NM; `airport_profiles.json` regerado (1.399 → 581 aeroportos).
 - Apagadas as pastas `.antigravity/` e `.gemini/` (personas repetidas, fora do fluxo do executor); referências removidas de `gemini.md` e `CLAUDE.md`.
 - Banco do Little Navmap não vai para o git: recorte de 8,7 MB em `references/lnm/` (ignorado), copiado à mão.
+
+## 2026-11-25 - Pasta antigos apagada, lista de aeronaves candidatas salva (Claude)
+- `docs/plans/aeronaves-candidatas.csv`: 17 aviões da v3 antiga que não estão no catálogo atual (valores antigos, **não conferidos**: usar só como lista; preços e desempenho pedem POH/fabricante).
+- Apagada a pasta local `antigos/` (v3 e PROJETO_152, fora do git), a pedido do usuário.
