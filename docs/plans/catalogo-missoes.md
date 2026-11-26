@@ -538,3 +538,14 @@ Não entram na etapa 2 (lista dos 69 fechada). Ficam aqui para um plano posterio
 - As 7 melhorias de `missoes-locais-rp.md` › 3 estão autorizadas.
 - Falência dos bots agressivos do Médio (40 % em 1095 dias, 20 bots): aceita.
 - Regra de `isolado`: apertar e medir de novo, no PC de casa (a regeração dos perfis pede o banco do Little Navmap e o `tier-report`). Medir `ISOLADO_NM=200` e `250` contra o 150 atual com `board-report` em SBMQ, SBHT, SBUG, SNVD, SWEK e YBDV. Referência (200 quadros, semente 1, só CSV), missões remotas antes → depois dos aeroportos novos: 17→33, 23→43, 17→35, 25→55, 40→70, 26→53 %. Corte final: decisão do usuário.
+
+### Medição dos cortes (2026-11-25, PC de casa)
+Perfis regerados com o banco `little_navmap_msfs24` (o de 150 NM saiu igual ao do repositório) e `board-report` com 200 quadros, semente 1. O seed usou a base do simulador, por isso os números não se comparam com a referência só-CSV acima. "Missões remotas" = soma dos 13 tipos do catálogo que citam `isolado`.
+
+| Corte | `isolado` | `interior_distante` | SBMQ | SBHT | SBUG | SNVD | SWEK | YBDV |
+|---|---|---|---|---|---|---|---|---|
+| 150 NM (atual) | 1.399 | 3.592 | 40 % | 43 % | 44 % | 55 % | 70 % | 53 % |
+| 200 NM | 581 | 4.330 | 24 % | 23 % | 27 % | 24 % | 71 % | 53 % |
+| 250 NM | 244 | 4.634 | 24 % | 23 % | 27 % | 24 % | 41 % | 53 % |
+
+Com 200 NM perdem `isolado`: SBMQ, SBHT, SBUG, SNVD e PABE (SWEK, YBDV, SBTF e SBFN mantêm). Com 250 NM também perdem: SWEK, SBTF e SBFN. Recomendação do Claude: 200 NM. **Decisão do usuário pendente**; o corte no repositório segue em 150.
