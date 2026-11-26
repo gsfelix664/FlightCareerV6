@@ -5,9 +5,9 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 
 ## A. Pedidos diretos (pequenos)
 
-- [ ] **A1. Remover o recurso de waypoints do mapa** (código morto: nada adiciona pontos). Em `FlightMapControl.xaml`: quadro "WAYPOINTS ATIVOS"/`TxtDistance` e botão LIMPAR. No `.cs`: `_waypoints`, `_waypointRoute`, `BtnClear_Click`, `ShowWaypointsOverlay` (e o uso em `DebugOverlayWindow.xaml`); renomear `CreateWaypointCircle` e a região.
+- [x] **A1. Remover o recurso de waypoints do mapa** (código morto: nada adiciona pontos). Em `FlightMapControl.xaml`: quadro "WAYPOINTS ATIVOS"/`TxtDistance` e botão LIMPAR. No `.cs`: `_waypoints`, `_waypointRoute`, `BtnClear_Click`, `ShowWaypointsOverlay` (e o uso em `DebugOverlayWindow.xaml`); renomear `CreateWaypointCircle` e a região.
   **Não tocar** em `Mission.OverflyWaypoints`/`OverflyWaypointCodec` (pontos dos contratos). O LIMPAR dos filtros em `MissionsView.xaml` é outro botão e fica.
-- [ ] **A2. Texto:** "ponto de reportagem VFR" → "ponto de reporte VFR" (`mission_texts.json` linhas ~33, 47, 61, 71; `MissionGenerator.cs` ~1267-1412, inclusive o nome gravado do ponto). Missões já geradas guardam o texto antigo. Conferir golden/testes.
+- [x] **A2. Texto:** "ponto de reportagem VFR" → "ponto de reporte VFR" (`mission_texts.json` linhas ~33, 47, 61, 71; `MissionGenerator.cs` ~1267-1412, inclusive o nome gravado do ponto). Missões já geradas guardam o texto antigo. Conferir golden/testes.
 - [ ] **A3. Apagar a linha verde "Circuito de Tráfego: Toque e Arremetida (TGL)"** em missão de navegação (ver B1).
 
 ## B. Briefing e mapas

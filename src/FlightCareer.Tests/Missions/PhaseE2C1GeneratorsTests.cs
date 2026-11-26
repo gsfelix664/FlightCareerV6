@@ -71,7 +71,7 @@ namespace FlightCareer.Tests.Missions
         }
 
         [Fact]
-        public void VfrTriangle_Gerador_SempreVoltaAOrigemETemPontoDeReportagem()
+        public void VfrTriangle_Gerador_SempreVoltaAOrigemETemPontoDeReporte()
         {
             var (origin, candidates) = CreateSampleAirports();
             var def = MissionCatalog.Shared.Get("navegacao_vfr")!;

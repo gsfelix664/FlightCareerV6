@@ -30,7 +30,7 @@
   "navegacao_vfr": [
     {
       "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
-      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reportagem obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reporte obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
     },
     {
       "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
@@ -44,7 +44,7 @@
   "navegacao_vfr:triangle": [
     {
       "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
-      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reportagem obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reporte obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
     },
     {
       "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
@@ -58,7 +58,7 @@
   "navegacao_vfr:out_and_back": [
     {
       "title": "Navegação VFR de Ida e Volta ({stop_a})",
-      "description": "Navegação estimada ida e volta: decolagem de {origin}, sobrevoo do ponto de reportagem na ida, pouso completo em {stop_a} e retorno à base em {origin}. {pax} instrutor a bordo."
+      "description": "Navegação estimada ida e volta: decolagem de {origin}, sobrevoo do ponto de reporte na ida, pouso completo em {stop_a} e retorno à base em {origin}. {pax} instrutor a bordo."
     },
     {
       "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {origin}",
@@ -68,7 +68,7 @@
   "navegacao_vfr:triangle_tgl": [
     {
       "title": "Triângulo VFR com Toque e Arremetida ({stop_a} e {stop_b})",
-      "description": "Navegação estimada triangular: {origin} -> {stop_a} -> {stop_b} -> {origin}. Sobrevoe o ponto de reportagem na primeira etapa e realize toque e arremetida em {stop_a} e {stop_b} antes do pouso final na base."
+      "description": "Navegação estimada triangular: {origin} -> {stop_a} -> {stop_b} -> {origin}. Sobrevoe o ponto de reporte na primeira etapa e realize toque e arremetida em {stop_a} e {stop_b} antes do pouso final na base."
     },
     {
       "title": "Navegação Visual com Toques e Arremetidas: {origin} - {stop_a} - {stop_b}",

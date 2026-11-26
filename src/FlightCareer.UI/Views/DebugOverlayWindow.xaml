@@ -207,8 +207,7 @@
                                 DestLon="{Binding DestLon}"
                                 DestIcao="{Binding DestIcao}"
                                 OriginIcao="{Binding OriginIcao}"
-                                ContractMissions="{Binding ContractMissions}"
-                                ShowWaypointsOverlay="False"/>
+                                ContractMissions="{Binding ContractMissions}"/>
 
                             <!-- Badge Mini-GPS / GPS STATUS no topo esquerdo do mapa -->
                             <Border VerticalAlignment="Top" HorizontalAlignment="Left" Background="#D9070B12" 

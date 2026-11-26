@@ -3388,3 +3388,9 @@
 - Inspeções operacionais e de toque integradas ao Hangar (`InspectionDefectPolicy`, `WearRuleCatalog`, `DefectCatalog`): suporte ao campo `isGrounding` em regras de desgaste; inspeções de pouso/toque severo interditam imediatamente a aeronave, enquanto as demais são registradas com custo base de 400 e listadas como pendentes no relatório final de voo.
 - Blackbox e telemetria: pico rápido de G-Force capturado no contato (`TouchdownEvent.PeakG`) registrado em `FlightTelemetryLogger.RecordPeakG` e `_worstTouchdownG`; status `"POUSO_FORCADO"` com formatação dedicada na lista de logs de voo.
 - 23 testes unitários novos em `LandingBreakModelTests`, `InspectionDefectPolicyTests`, `WearRuleCatalogTests` e `FlightServiceOffFieldLandingTests`; 1.245/1.245 testes aprovados. Não testado no MSFS.
+
+## 2026-11-26 - Limpeza do mapa e texto de reporte VFR (LIMPA-MAPA) (Gemini)
+- Remoção do recurso morto de waypoints manuais do mapa tático (`FlightMapControl`): removidos os controles visuais de overlay de distância ("WAYPOINTS ATIVOS", `TxtDistance`), botão LIMPAR (`BtnClear_Click`), o conversor `BoolToVisConverter`, e o binding `ShowWaypointsOverlay="False"` em `DebugOverlayWindow.xaml`.
+- Limpeza no code-behind de `FlightMapControl`: removidos `_waypoints`, `_waypointRoute`, `ShowWaypointsOverlayProperty`, propriedade `ShowWaypointsOverlay` e manipulador `BtnClear_Click`. Método utilitário `CreateWaypointCircle` renomeado para `CreateRoutePointCircle` e região atualizada para "Aeroportos e Trajetória Gravada".
+- Correção terminológica VFR: "ponto de reportagem" padronizado para "ponto de reporte" em `mission_texts.json`, gerador de missões (`MissionGenerator.cs`), testes de navegação em triângulo (`VfrTriangleTests.cs`, `PhaseE2C1GeneratorsTests.cs`) e arquivo de referência `missions_golden.json`.
+- Build 0 erros; 1.245/1.245 testes aprovados. Não testado visualmente no simulador/WPF em execução.
