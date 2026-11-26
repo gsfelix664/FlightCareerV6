@@ -3333,3 +3333,7 @@
 ## 2026-11-25 - Pasta antigos apagada, lista de aeronaves candidatas salva (Claude)
 - `docs/plans/aeronaves-candidatas.csv`: 17 aviões da v3 antiga que não estão no catálogo atual (valores antigos, **não conferidos**: usar só como lista; preços e desempenho pedem POH/fabricante).
 - Apagada a pasta local `antigos/` (v3 e PROJETO_152, fora do git), a pedido do usuário.
+
+## 2026-11-25 - Limpeza da pasta docs (Claude)
+- Apagados: `tarefas_sem_IA.md`, `VARS.txt`, `plans/lista-pecas-hangar.md`, `agents/TESTES-PC-2026-11-22.md` (testes sem registro de conferência passaram para o HANDOFF) e os brutos `report.csv`, `strings.csv`, `values.csv.gz` das sondagens do C152. Tudo recuperável pelo git.
+- Mantida `probe-runs/matriz-C152.csv`: é citada pelas análises de `sensor-research`.

@@ -61,7 +61,7 @@ Criado em 2026-11-16 (Claude). Fonte: página [Aircraft Flight Control Events](h
 3. **Auto-leme:** mesma regra do auto-start (perde XP, não invalida)?
 4. Superfície travada: não fazer (recomendação) ou fazer só a versão leve (curso limitado)?
 
-**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`, apagado em 2026-11-25, no histórico do git):**
 2. **Compensador — fazer as duas panes:** trim inoperante (`ELEVATOR/AILERON/RUDDER_TRIM_DISABLED_SET`, compensador congela) e trim disparado (o addon move `ELEVATOR TRIM POSITION` ~0,5–1°/s até o batente; para quando o piloto corta o sistema). Runaway só em aviões com trim elétrico/servo (Baron, King Air, TBM, Citation, airliners), por flag no JSON; trim mecânico (C152/C172) só tem inoperante.
 3. **Auto-leme:** mesma regra do auto-start — não invalida, −10 % de XP por assistência ativa entre a decolagem e o pouso, acumulável até −30 % (`AUTO COORDINATION`).
 4. **Superfície travada:** não travar superfícies primárias; usar só a versão leve (curso limitado a ±55–65 %) e flap travado/assimétrico.

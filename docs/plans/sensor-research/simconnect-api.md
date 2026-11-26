@@ -35,7 +35,7 @@ Criado em 2026-11-16 (Claude). Fontes (SDK 2024, `simconnect/api-reference/`): [
 4. Alertas dentro do sim (`DialogAction` com texto e som, destaque do instrumento, vibração do controle) junto com o HUD.
 5. `FailureAction` com `HealthPercent`: testar como alternativa às panes por `TOGGLE_*` (enums não documentados).
 
-**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`, apagado em 2026-11-25, no histórico do git):**
 1. **`FlightSave`/`FlightLoad`:** só no solo (parado, freio de estacionamento, motores cortados); depois do load o app reaplica combustível, payload e panes do banco.
 2. **`FlightPlanLoad`:** padrão no briefing, com opção "Carregar rota no GPS do simulador" (marcada); **só origem e destino da perna ativa**, sem rota completa.
 3. **Flow API:** teleporte e Back On Track após o off-block ou em voo invalidam como o slew; `PLANE_CRASH` encerra como acidente (aeronave AOG, seguro/resgate), com ~10 s de carência no carregamento.
