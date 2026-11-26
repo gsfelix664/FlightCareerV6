@@ -6,7 +6,7 @@ O guia acima (`AGENTS.md`) é a fonte de verdade sobre arquitetura, comandos, re
 
 ## Você divide o repositório com o Gemini
 
-- O Gemini também programa aqui (instruções dele em `gemini.md`, `docs/plans/INSTRUCOES-GEMINI.md`, `.gemini/` e `.antigravity/`). Sigam as mesmas regras de `AGENTS.md` › 4. Trabalho em dupla.
+- O Gemini também programa aqui (instruções dele em `gemini.md` e `docs/plans/INSTRUCOES-GEMINI.md`). Sigam as mesmas regras de `AGENTS.md` › 4. Trabalho em dupla.
 - **Uma tarefa por sessão** (`AGENTS.md` › 4.9): comece lendo `docs/agents/HANDOFF.md`; ao terminar, reescreva o HANDOFF, faça commit e push e peça ao usuário uma sessão nova para a próxima tarefa.
 - Comece por `git status` e `git log --oneline -5`. Não altere nem descarte alterações não commitadas que não foram feitas nesta sessão: pergunte ao usuário.
 - Ao terminar uma tarefa que mudou código, acrescente uma entrada no fim de `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (Claude)`) e atualize `docs/sistemas/<sistema>.md` se o estado do sistema mudou.

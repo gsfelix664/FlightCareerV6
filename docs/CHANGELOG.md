@@ -3324,3 +3324,8 @@
 ## 2026-11-25 - Medição do corte de isolado em 200 e 250 NM (Claude)
 - `isolado`: 1.399 (150 NM), 581 (200 NM), 244 (250 NM). Tabela em `docs/plans/catalogo-missoes.md` › 12. Nenhum dado ou código alterado; corte segue em 150 até a decisão do usuário.
 - Recorte do banco do Little Navmap (tabelas `airport`, `runway`, `metadata`: 22 MB, 8,7 MB compactado) gera `tier-report` e perfis idênticos aos do banco completo (506 MB). Ainda não commitado (repositório público).
+
+## 2026-11-25 - Corte de isolado em 200 NM e limpeza dos arquivos de agentes (Claude)
+- Decisão do usuário: `isolado` a partir de 200 NM; `airport_profiles.json` regerado (1.399 → 581 aeroportos).
+- Apagadas as pastas `.antigravity/` e `.gemini/` (personas repetidas, fora do fluxo do executor); referências removidas de `gemini.md` e `CLAUDE.md`.
+- Banco do Little Navmap não vai para o git: recorte de 8,7 MB em `references/lnm/` (ignorado), copiado à mão.

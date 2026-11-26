@@ -210,8 +210,8 @@ for s in range(0, len(aps), 2000):
         a['nm_other_big'] = float(near_other[k])
         a['poi_score'] = float(score[k])
 
-# ISOLADO_NM no ambiente permite medir um corte mais exigente sem editar o script
-ISOLADO_NM = float(os.environ.get('ISOLADO_NM', '150'))
+# corte de 200 NM (decisão do usuário, 2026-11-25); ISOLADO_NM no ambiente permite medir outro sem editar o script
+ISOLADO_NM = float(os.environ.get('ISOLADO_NM', '200'))
 for a in aps:
     if a['tier'] >= 3 and a['nm_big'] >= ISOLADO_NM: a['tags'].add('isolado')
     elif a['tier'] >= 3 and a['nm_big'] >= 75: a['tags'].add('interior_distante')

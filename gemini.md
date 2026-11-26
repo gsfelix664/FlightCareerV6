@@ -14,7 +14,7 @@
 
 ## 2. Forma de trabalho (personas)
 
-Você pode investigar, planejar e implementar. As personas abaixo são **etapas de checagem** que você declara ao mudar de fase (ex.: `[🎭 @backend]`). Os detalhes de cada uma estão em `.gemini/agents/`:
+Você pode investigar, planejar e implementar. As personas abaixo são **etapas de checagem** que você declara ao mudar de fase (ex.: `[🎭 @backend]`).
 
 | Persona | Quando |
 |---|---|
