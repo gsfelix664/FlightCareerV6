@@ -3337,3 +3337,10 @@
 ## 2026-11-25 - Limpeza da pasta docs (Claude)
 - Apagados: `tarefas_sem_IA.md`, `VARS.txt`, `plans/lista-pecas-hangar.md`, `agents/TESTES-PC-2026-11-22.md` (testes sem registro de conferência passaram para o HANDOFF) e os brutos `report.csv`, `strings.csv`, `values.csv.gz` das sondagens do C152. Tudo recuperável pelo git.
 - Mantida `probe-runs/matriz-C152.csv`: é citada pelas análises de `sensor-research`.
+
+## 2026-11-25 - Instruções enxutas e roteiro de voo (Claude)
+- `AGENTS.md`: detalhes da § 6 movidos para `docs/sistemas/simconnect.md` e `banco.md`; comandos de ferramentas em `docs/agents/COMANDOS.md`; índice de sistemas resumido.
+- `CLAUDE.md` do projeto e global resumidos; delegação ao Gemini em `tools/agents/global/gemini/DELEGACAO.md`.
+- `install-global.sh` desativa skills sem uso (`global/settings.json`, `skillOverrides`; efeito a conferir com `/context`).
+- HANDOFF limitado a 40 linhas; testes de voo em `docs/agents/TESTES-PENDENTES.md`; roteiro em `ROTEIRO-VOO.md`.
+- Só documentação e ferramentas; build e testes rodados antes das edições (0 erros, 1.189/1.189).

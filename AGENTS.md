@@ -40,17 +40,13 @@ Execute a partir da raiz do repositório:
 dotnet build src/FlightCareer.slnx
 dotnet test src/FlightCareer.Tests
 dotnet run --project src/FlightCareer.UI
-dotnet run --project src/FlightCareer.SimVarProbe [--probe-only] [--duration <seg>] [--filter <regex>]
-dotnet run --project src/FlightCareer.Replay -- <csv|csv.gz> [--aircraft <modelo>]
-dotnet run --project src/FlightCareer.Replay -- fuzz [--runs <n>] [--aircraft <modelo>] [--seed <n>]
-dotnet run --project src/FlightCareer.Replay -- career --aircraft "<modelo>,<modelo>" [--bots <n>] [--days <n>] [--hours-per-day <h>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]
-dotnet run --project src/FlightCareer.Replay -- career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]
 
 # Saída filtrada para economia de quota (use sempre):
 dotnet build src/FlightCareer.slnx -v q -nologo 2>&1 | grep -E " error |Erro\(s\)"
 dotnet test src/FlightCareer.Tests 2>&1 | grep -E "Com falha!|Aprovado!|^\s+Com falha "
 ```
 
+- Sonda de SimVars, replay, fuzz e simulação de carreira: `docs/agents/COMANDOS.md`.
 - Use o `dotnet` do PATH. Não fixe caminhos de usuário (`C:\Users\<nome>\...`).
 - O banco `flightcareer.db` fica na pasta de saída do `FlightCareer.UI` e está no `.gitignore`.
 
@@ -66,8 +62,8 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 6. Não reescreva o trabalho do outro agente sem motivo técnico; se discordar de uma decisão, explique ao usuário em vez de reverter.
 7. **Orquestração:** o Claude especifica, revisa e faz o merge; o Gemini implementa num worktree isolado. Fluxo, checklist e ferramentas em `docs/agents/ORQUESTRACAO.md` e `tools/agents/`.
 8. **Máquina nova:** siga `docs/agents/NOVA-MAQUINA.md` (`tools/agents/install-global.sh` instala instruções globais, ferramentas e hooks).
-9. **Uma tarefa por sessão** (economia de quota): cada sessão cuida de uma tarefa. Comece por `docs/agents/HANDOFF.md`. Ao terminar: build/testes, CHANGELOG e sistema; reescreva HANDOFF; commit/push; nova sessão. Nunca leia `docs/CHANGELOG.md` inteiro nem arquivos grandes (`missions_golden.json`, catálogos): use `grep`/`tail`. Detalhes em `docs/agents/ORQUESTRACAO.md`.
-10. **Economia de quota**: modelo por tipo de sessão (Opus: spec/arquitetura/arquivos quentes; Sonnet: rotina); comandos com saída filtrada (§ 3); diffs com `git diff --stat` primeiro; decisões nos planos (`docs/plans/`); mensagens agrupadas. Detalhes em `docs/agents/ORQUESTRACAO.md`.
+9. **Uma tarefa por sessão** (economia de quota): comece por `docs/agents/HANDOFF.md`; ao terminar: build/testes, CHANGELOG e sistema, reescreva o HANDOFF (máx. 40 linhas), commit/push, sessão nova. Nunca leia `docs/CHANGELOG.md` inteiro nem arquivos grandes (`missions_golden.json`, catálogos): use `grep`/`tail`.
+10. **Economia de quota**: Opus para spec, arquitetura e arquivos quentes; Sonnet para rotina; saída filtrada (§ 3); `git diff --stat` primeiro; decisões nos planos (`docs/plans/`). Detalhes em `docs/agents/ORQUESTRACAO.md`.
 11. **Hooks obrigatórios** (uma vez por clone): `git config core.hooksPath "$(pwd)/.githooks"`. Bloqueiam commit/push em `main` e `feat/component-health-system`, mensagem fora do padrão, force push e commit do banco. `FC_ALLOW_PROTECTED=1` libera branches protegidas (só revisor/usuário). Nunca use `--no-verify`.
 
 ## 5. Convenções de código
@@ -82,50 +78,36 @@ Os dois agentes editam o mesmo repositório. Para não sobrescrever um ao outro:
 
 ## 6. Regras técnicas que já causaram bugs
 
+Uma linha por armadilha. **Antes de mexer na área, leia o detalhe:** `docs/sistemas/simconnect.md` ou `docs/sistemas/banco.md`.
+
 ### SimConnect
-- **`SimTelemetry` e `AddToDef` precisam ter a mesma ordem.** O struct é lido por posição de memória: **só acrescente campos no fim**, nos dois lugares, com a mesma unidade.
-- **Frequências:** telemetria principal (`SimTelemetry`) 1 s; panes (`SimFailureState`) 6 frames; voo rápido (`SimFastFlightState`, toque/crash/G) 2 frames; sensores genéricos 30 frames. Definições separadas.
-- **Eventos:** use `SimConnectService.SendEvent(nome, dado)`, que mapeia cada evento uma única vez. Não chame `MapClientEventToSimEvent` de novo com o mesmo ID.
-- **Eventos de falha que existem no SDK:** `TOGGLE_ENGINE1..4_FAILURE`, `TOGGLE_ELECTRICAL_FAILURE`, `TOGGLE_VACUUM_FAILURE`, `TOGGLE_PITOT_BLOCKAGE`, `TOGGLE_STATIC_PORT_BLOCKAGE`, `TOGGLE_HYDRAULIC_FAILURE`, `TOGGLE_TOTAL/LEFT/RIGHT_BRAKE_FAILURE`. **Não existem** eventos diretos de pane de alternador, pneu, trem, flap, magneto ou pressurização: alternador = `ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE` via `SendEventEx`; flaps = `WriteFlapSurfacePercent`; magnetos pela SimVar; demais `effect: None` (detalhes: `docs/sistemas/desgaste-falhas.md`).
-- **Toggles reparam se enviados duas vezes:** antes de enviar, confira o estado pela SimVar (`SetFailure` já faz isso).
-- **Key Events observados sem mascarar:** use grupo próprio não mascarável (`GROUPS.ObservedPilotInputs = 3`, `maskable: false`, prioridade `SIMCONNECT_GROUP_PRIORITY_DEFAULT`). Evento mapeado com `GetOrMapEvent` pertence a um só grupo: roteie no `OnRecvEvent` por `e.uGroupID` (`OnObservedEvent` × `OnMaskedEvent`). Observa `ENGINE_AUTO_START`, `ENGINE_AUTO_SHUTDOWN` e `REQUEST_FUEL_KEY`.
-- **SimVars escritas pelo app:** `ENG ON FIRE:1` (`SetEngineFire`) e `GENERAL ENG OIL LEAKED PERCENT:1` (`SetOilLeakedPercent`).
-- Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
-- **Escrita de `FUELSYSTEM TANK QUANTITY:n` define o total, a leitura devolve o utilizável:** grave `utilizável + (FUELSYSTEM TANK CAPACITY:n − FUELSYSTEM TANK USABLE CAPACITY:n)` (`FuelTank.ToSimWriteValue`, aplicado em `SimConnectService.SetFuelTanks`). Tanques legados `FUEL TANK * QUANTITY`: leitura e escrita usam o total (com não utilizável). Pendente: distribuição proporcional em `FuelTankWritePlan.Distribute` põe em todos os tanques com carga parcial (detalhes: `docs/sistemas/combustivel.md`).
-- **SimVar com nome inválido desloca o struct:** datum rejeitado (`NAME_UNRECOGNIZED`) encurta o pacote e desloca os campos seguintes (o marshaling lê além do fim) (ex.: `PARTIAL PANEL STATIC` **não existe**). O log `[SimConnect EXCEPTION]` mostra nome rejeitado; `TelemetryDefinitionTests` confere contagem.
+- `SimTelemetry` e `AddToDef`: mesma ordem e unidade; campo novo **só no fim**, nos dois.
+- Nome de SimVar inválido encurta o pacote e desloca o struct. Confirme nomes de SimVars e eventos no SDK do MSFS 2024; não invente.
+- Eventos só por `SimConnectService.SendEvent` (nunca remapear o mesmo ID). Toggle enviado duas vezes repara: confira o estado antes (`SetFailure`).
+- Não existem eventos de pane de alternador, pneu, trem, flap, magneto ou pressurização (alternativas em `desgaste-falhas.md`).
+- Key Events observados usam grupo próprio não mascarável; roteie por `e.uGroupID`.
+- Combustível: a escrita em `FUELSYSTEM TANK QUANTITY` é o total e a leitura é o utilizável (`FuelTank.ToSimWriteValue`).
 
 ### Banco de dados
-- **Sem migrations EF:** banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (`ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes). Coluna nova = propriedade na entidade + `ALTER TABLE ... ADD COLUMN ... DEFAULT ...`. Tabela nova = `DbSet` + `CREATE TABLE IF NOT EXISTS` com os nomes e tipos que o EF geraria (teste de banco antigo: `ComponentPersistenceTests`).
-- **Contextos de longa duração (bug de cache/sobrescrita):** singletons (`MainViewModel`, `PilotRepository`, `FlightService`, `MissionGenerator`, `MarketViewModel`, `MarketSimulationService`, `FerryFlightViewModel`) com `AppDbContext` próprio guardam entidades em cache e um `SaveChanges` posterior sobrescreve dados de outros contextos. Código novo usa `IDbContextFactory<AppDbContext>` com contexto curto; nos contextos longos, chame `_context.ChangeTracker.Clear()` antes de ler para alterar; nunca altere entidade carregada por outro contexto esperando que o seu `SaveChanges` a grave (copie os valores para a entidade do seu contexto). Teste: `FlightPersistenceTests`.
+- Sem migrations EF: coluna ou tabela nova vai também em `EnsureSchemaUpdatedAsync` (idempotente).
+- Contexto longo guarda cache e sobrescreve dados: código novo usa `IDbContextFactory<AppDbContext>` com contexto curto.
 
 ### MSFS 2024 nativo
-- **Addon é a fonte da verdade:** wear and tear nativo fica ligado, mas a saúde é calculada e mantida pelo addon. O `WEAR AND TEAR LEVEL` nunca entra no Hangar. `WEAR AND TEAR OVERSTRESS DAMAGE RATE:<id>` é só sensor (faixa vermelha), nunca vira % de desgaste. Limites vêm de catálogo fixo por aeronave (`Data/aircraft/`).
-- **Panes nativas não ligam SimVars de falha de motor:** `IS FAILED:<id>` (0 → 1) indica pane, mas **não** liga `ENG FAILED:1` nem `GENERAL ENG DAMAGE PERCENT`. O `PersistentFailureService` lê `nw-is-failed-<id>` do `SensorFrameReader` e grava a pane via Tabela 2 (`Domain/Components/NativeWearFailures.cs`). SimVars `WEAR AND TEAR *` são somente leitura, ID 0–49 (`:39` = pistão) (detalhes: `docs/sistemas/desgaste-falhas.md`).
-- **Crash no 2024:** `CRASH FLAG` não aparece no 2024; impacto e crash são detectados pelo `TouchdownDetector` do addon.
-- **SimVars gravadas pelo addon:** somente `TURB ENG N1 LOSS`, `FUEL EFFICIENCY LOSS`, `ITT COOLING EFFICIENCY LOSS` e `THRUST EFFICIENCY LOSS` por motor (`TurbineDegradationActuator`). Demais são somente leitura.
-- **Abastecimento manual (2026-11-21):** o addon **não grava** nos tanques. O piloto abastece no menu do sim a quantidade paga; briefing e `StartMonitoring` conferem a bordo × pago; reabastecimento em voo invalida a missão e cobra consumo real (`GENERAL ENG FUEL USED SINCE START:1..4`) (detalhes: `docs/sistemas/combustivel.md`).
+- O addon é a fonte da verdade da saúde; `WEAR AND TEAR *` é só sensor (somente leitura) e nunca vai ao Hangar.
+- Pane nativa não liga `ENG FAILED`; `CRASH FLAG` não aparece (crash pelo `TouchdownDetector`).
+- O addon só grava as 4 `* LOSS` de turbina, `ENG ON FIRE:1` e óleo vazado; **não grava** nos tanques (abastecimento manual).
+
+---
 
 ## 7. Estado dos sistemas (sob demanda)
 
-Antes de mexer num sistema, leia o arquivo dele em `docs/sistemas/`; ao mudar o estado, atualize o arquivo, não este.
+Antes de mexer num sistema, leia o arquivo dele em `docs/sistemas/`; ao mudar o estado, atualize o arquivo, não este. Classes-chave de cada um: `docs/sistemas/README.md`.
 
-| Sistema | Arquivo | Classes/pastas-chave |
-|---|---|---|
-| Desgaste e falhas | `desgaste-falhas.md` | `Domain/Components/`, `ComponentFlightSession` |
-| Peças | `pecas.md` | `Domain/Parts/`, `PartFlightSession` |
-| Manutenção e Hangar | `manutencao-hangar.md` | `HangarViewModel`, `WorkshopDowntime` |
-| Panes persistentes | `panes-persistentes.md` | `AircraftDefect`, `DefectCatalog` |
-| Voo e integridade | `voo-integridade.md` | `FlightMonitor`, `TouchdownDetector` |
-| Combustível | `combustivel.md` | `FuelUsageAccumulator`, `FuelIntegrityMonitor` |
-| Economia e dificuldade | `economia-dificuldade.md` | `Domain/Economy/`, `EconomyServices` |
-| XP e fases | `xp-fases.md` | `XpCalculator`, `PilotLevel` |
-| Missões e quadro | `missoes-quadro.md` | `MissionBoardCore`, `Domain/Missions/` |
-| Aeroportos e tiers | `aeroportos-tiers.md` | `AirportTierClassifier`, `AirportProfileCatalog` |
-| Limites por aeronave | `limites-aeronave.md` | `AircraftLimitResolver`, `Data/aircraft/` |
-| Sensores | `sensores.md` | `Domain/Sensors/`, `SensorFrameReader` |
-| HUD | `hud.md` | `DebugOverlayViewModel`, `FlightMapControl` |
+`desgaste-falhas`, `pecas`, `manutencao-hangar`, `panes-persistentes`, `voo-integridade`, `combustivel`, `economia-dificuldade`, `xp-fases`, `missoes-quadro`, `aeroportos-tiers`, `limites-aeronave`, `sensores`, `hud`, `simconnect`, `banco` (todos `.md`).
 
 Histórico detalhado de cada tarefa: `docs/CHANGELOG.md` (busque pelo ID entre parênteses).
+
+---
 
 ## 8. Definição de pronto
 

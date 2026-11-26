@@ -2,7 +2,8 @@
 # Configura uma máquina nova para a divisão Claude (revisor) + Gemini/Antigravity (executor).
 # Uso (Git Bash, na raiz do repositório): tools/agents/install-global.sh
 #   - instala ~/.claude/CLAUDE.md (instruções globais, valem para todos os projetos)
-#   - instala ~/.claude/tools/gemini/ (agy-ask, agy-task, agy-audit)
+#   - instala ~/.claude/tools/gemini/ (agy-ask, agy-task, agy-audit, DELEGACAO.md)
+#   - desativa em ~/.claude/settings.json as skills que não usamos (skillOverrides)
 #   - ativa os hooks de git deste repositório (core.hooksPath)
 #   - confere se o agy está instalado e respondendo
 # Arquivos existentes são guardados com sufixo .bak-<data> antes de serem substituídos.
@@ -22,7 +23,11 @@ for f in "$SRC"/gemini/*.sh; do
   cp "$f" ~/.claude/tools/gemini/
 done
 chmod +x ~/.claude/tools/gemini/*.sh
+cp "$SRC"/gemini/*.md ~/.claude/tools/gemini/
 echo "  ok: ~/.claude/CLAUDE.md e ~/.claude/tools/gemini/"
+
+echo "1b) Skills sem uso"
+py -3 "$SRC/apply-settings.py" "$SRC/settings.json" || echo "  ATENÇÃO: não foi possível ajustar ~/.claude/settings.json"
 
 echo "2) Hooks de git deste repositório"
 git -C "$REPO" config core.hooksPath "$REPO/.githooks"

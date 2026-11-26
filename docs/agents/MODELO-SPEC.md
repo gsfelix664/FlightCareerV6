@@ -9,7 +9,7 @@
 - Padrão a seguir: classe/arquivo parecido que já resolve algo igual
 - Decisões do usuário que valem (link para `docs/plans/<plano>.md` › seção)
 - Sistema: `docs/sistemas/<sistema>.md` (o executor lê)
-- Armadilhas do `AGENTS.md` › 6 que se aplicam (e, se for arquivo quente, o passo a passo do que mudar)
+- Armadilhas do `AGENTS.md` › 6 que se aplicam (detalhes em `docs/sistemas/simconnect.md` e `banco.md`) (e, se for arquivo quente, o passo a passo do que mudar)
 
 ## 3. Arquivos
 - Mexer: `caminho/Arquivo.cs` (o que muda)
