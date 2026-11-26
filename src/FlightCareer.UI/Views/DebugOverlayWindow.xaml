@@ -189,8 +189,7 @@
                                 DestLon="{Binding DestLon}"
                                 DestIcao="{Binding DestIcao}"
                                 OriginIcao="{Binding OriginIcao}"
-                                ContractMarkers="{Binding ContractMarkers}"
-                                SurveyArea="{Binding SurveyArea}"
+                                ContractMissions="{Binding ContractMissions}"
                                 ShowWaypointsOverlay="False"/>
 
                             <!-- Badge Mini-GPS / GPS STATUS no topo esquerdo do mapa -->

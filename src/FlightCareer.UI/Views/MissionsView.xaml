@@ -461,7 +461,8 @@
                                             OriginIcao="{Binding CurrentAirportICAO}"
                                             DestIcao="{Binding SelectedMissionItem.DestinationICAO}"
                                             MissionsSource="{Binding FilteredMissions}"
-                                            SelectedMission="{Binding SelectedMissionItem, Mode=TwoWay}"/>
+                                            SelectedMission="{Binding SelectedMissionItem, Mode=TwoWay}"
+                                            ContractMissions="{Binding SelectedMissionItem}"/>
                 </Border>
 
                 <!-- 2. CARD DE PRÉ-DESPACHO OPERACIONAL & METEOROLOGIA -->

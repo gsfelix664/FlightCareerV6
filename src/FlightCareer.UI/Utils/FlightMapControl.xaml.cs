@@ -37,8 +37,12 @@ namespace FlightCareer.UI.Utils
         // Dependency Properties
         public static readonly DependencyProperty RecordedPathProperty = DependencyProperty.Register("RecordedPath", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRecordedPathChanged));
         public static readonly DependencyProperty RouteLegsProperty = DependencyProperty.Register("RouteLegs", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRouteLegsChanged));
-        public static readonly DependencyProperty ContractMarkersProperty = DependencyProperty.Register(nameof(ContractMarkers), typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnContractMarkersChanged));
-        public static readonly DependencyProperty SurveyAreaProperty = DependencyProperty.Register(nameof(SurveyArea), typeof(SurveyMapArea), typeof(FlightMapControl), new PropertyMetadata(null, OnSurveyAreaChanged));
+        /// <summary>
+        /// Contratos a desenhar (áreas, pontos, zonas de salto, faixa de varredura). Aceita uma
+        /// <see cref="Mission"/>, um <see cref="MissionDisplayItem"/> ou uma coleção deles; o próprio
+        /// controle monta os visuais com <see cref="ContractMarkerBuilder"/> (quadro, briefing e HUD iguais).
+        /// </summary>
+        public static readonly DependencyProperty ContractMissionsProperty = DependencyProperty.Register(nameof(ContractMissions), typeof(object), typeof(FlightMapControl), new PropertyMetadata(null, OnContractMissionsChanged));
         public static readonly DependencyProperty AircraftLatProperty = DependencyProperty.Register("AircraftLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty AircraftLonProperty = DependencyProperty.Register("AircraftLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty OriginLatProperty = DependencyProperty.Register("OriginLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnOriginChanged));
@@ -87,8 +91,9 @@ namespace FlightCareer.UI.Utils
         public bool ShowWaypointsOverlay { get => (bool)GetValue(ShowWaypointsOverlayProperty); set => SetValue(ShowWaypointsOverlayProperty, value); }
         public System.Collections.IEnumerable? MissionsSource { get => (System.Collections.IEnumerable?)GetValue(MissionsSourceProperty); set => SetValue(MissionsSourceProperty, value); }
         public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
-        public System.Collections.IEnumerable? ContractMarkers { get => (System.Collections.IEnumerable?)GetValue(ContractMarkersProperty); set => SetValue(ContractMarkersProperty, value); }
-        public SurveyMapArea? SurveyArea { get => (SurveyMapArea?)GetValue(SurveyAreaProperty); set => SetValue(SurveyAreaProperty, value); }
+        public object? ContractMissions { get => GetValue(ContractMissionsProperty); set => SetValue(ContractMissionsProperty, value); }
+
+        private ContractMapVisuals _contractVisuals = new();
 
         public FlightMapControl()
         {
@@ -208,30 +213,45 @@ namespace FlightCareer.UI.Utils
             UpdateMultiLegRoute();
         }
 
-        private static void OnContractMarkersChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnContractMissionsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is FlightMapControl map)
             {
                 if (e.OldValue is System.Collections.Specialized.INotifyCollectionChanged oldColl)
-                    oldColl.CollectionChanged -= map.ContractMarkers_CollectionChanged;
+                    oldColl.CollectionChanged -= map.ContractMissions_CollectionChanged;
 
                 if (e.NewValue is System.Collections.Specialized.INotifyCollectionChanged newColl)
-                    newColl.CollectionChanged += map.ContractMarkers_CollectionChanged;
+                    newColl.CollectionChanged += map.ContractMissions_CollectionChanged;
 
-                map.UpdateContractVisuals();
+                map.RebuildContractVisuals();
             }
         }
 
-        private void ContractMarkers_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void ContractMissions_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            RebuildContractVisuals();
+        }
+
+        private void RebuildContractVisuals()
+        {
+            _contractVisuals = ContractMarkerBuilder.Build(ExtractMissions(ContractMissions));
             UpdateContractVisuals();
         }
 
-        private static void OnSurveyAreaChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static IEnumerable<Mission> ExtractMissions(object? source)
         {
-            if (d is FlightMapControl map)
+            switch (source)
             {
-                map.UpdateContractVisuals();
+                case null: yield break;
+                case Mission m: yield return m; yield break;
+                case MissionDisplayItem item: yield return item.Mission; yield break;
+                case System.Collections.IEnumerable list:
+                    foreach (var o in list)
+                    {
+                        if (o is Mission lm) yield return lm;
+                        else if (o is MissionDisplayItem li) yield return li.Mission;
+                    }
+                    yield break;
             }
         }
 
@@ -259,11 +279,20 @@ namespace FlightCareer.UI.Utils
             foreach (var r in _contractRoutes) MainMap.Markers.Remove(r);
             _contractRoutes.Clear();
 
+            var surveyArea = _contractVisuals.SurveyArea;
+            // Sem contrato desenhado, o enquadramento fica com a rota (não muda o zoom)
+            if (_contractVisuals.Markers.Count == 0 && surveyArea == null) return;
+
             var framingPoints = new List<PointLatLng>();
 
             if (OriginLat != 0 && OriginLon != 0)
             {
                 framingPoints.Add(new PointLatLng(OriginLat, OriginLon));
+            }
+            else if (AircraftLat != 0 && AircraftLon != 0)
+            {
+                // Quadro de missões: a origem chega como posição da aeronave
+                framingPoints.Add(new PointLatLng(AircraftLat, AircraftLon));
             }
 
             if (DestLat != 0 && DestLon != 0)
@@ -271,11 +300,9 @@ namespace FlightCareer.UI.Utils
                 framingPoints.Add(new PointLatLng(DestLat, DestLon));
             }
 
-            if (ContractMarkers != null)
             {
-                foreach (var item in ContractMarkers)
+                foreach (var marker in _contractVisuals.Markers)
                 {
-                    if (item is MapContractMarker marker)
                     {
                         var pos = new PointLatLng(marker.Lat, marker.Lon);
                         framingPoints.Add(pos);
@@ -363,11 +390,11 @@ namespace FlightCareer.UI.Utils
                 }
             }
 
-            if (SurveyArea != null)
+            if (surveyArea != null)
             {
-                if (SurveyArea.Corners != null && SurveyArea.Corners.Count >= 3)
+                if (surveyArea.Corners != null && surveyArea.Corners.Count >= 3)
                 {
-                    var rectPts = SurveyArea.Corners.Select(c => new PointLatLng(c.Lat, c.Lon)).ToList();
+                    var rectPts = surveyArea.Corners.Select(c => new PointLatLng(c.Lat, c.Lon)).ToList();
                     rectPts.Add(rectPts[0]); // close loop
                     framingPoints.AddRange(rectPts);
 
@@ -385,9 +412,9 @@ namespace FlightCareer.UI.Utils
                     MainMap.Markers.Add(surveyRect);
                 }
 
-                if (SurveyArea.Legs != null)
+                if (surveyArea.Legs != null)
                 {
-                    foreach (var leg in SurveyArea.Legs)
+                    foreach (var leg in surveyArea.Legs)
                     {
                         if (leg == null || leg.Count < 2) continue;
                         var legPts = new List<PointLatLng>
@@ -487,6 +514,8 @@ namespace FlightCareer.UI.Utils
                     map.DestLon = coords.Value.lon;
                     map.DestIcao = coords.Value.icao;
                     map.UpdateDestinationRoute();
+                    // A rota acabou de reenquadrar: volta a incluir a área/pontos do contrato
+                    map.UpdateContractVisuals();
                 }
             }
         }

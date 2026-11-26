@@ -153,8 +153,7 @@ namespace FlightCareer.UI.ViewModels
         public event Action? RequestClose;
 
         /// <summary>Áreas, pontos e escalas dos contratos ativos, desenhados no mini-mapa.</summary>
-        public ObservableCollection<MapContractMarker> ContractMarkers { get; } = new();
-        [ObservableProperty] private SurveyMapArea? _surveyArea;
+        [ObservableProperty] private IReadOnlyList<Mission>? _contractMissions;
         [ObservableProperty] private string _contractProgressText = string.Empty;
         [ObservableProperty] private bool _hasContractProgress;
         private string _contractMarkersKey = string.Empty;
@@ -171,11 +170,8 @@ namespace FlightCareer.UI.ViewModels
             if (key == _contractMarkersKey) return;
             _contractMarkersKey = key;
 
-            var visuals = ContractMarkerBuilder.Build(missions);
-            // A área vem antes: o mapa a redesenha a cada mudança na coleção de marcadores
-            SurveyArea = visuals.SurveyArea;
-            ContractMarkers.Clear();
-            foreach (var marker in visuals.Markers) ContractMarkers.Add(marker);
+            // O mapa monta área, pontos e faixa a partir das missões (FlightMapControl.ContractMissions)
+            ContractMissions = missions.ToList();
         }
 
         public DebugOverlayViewModel(
