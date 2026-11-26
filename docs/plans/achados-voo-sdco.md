@@ -5,8 +5,7 @@ Corrigidos em 2026-11-26: ver CHANGELOG (VOO-SDCO-1 a 5). Abaixo, o que ficou.
 ## Pedidos do usuário (2026-11-26)
 - **Cartão de objetivo** (aprovado pelo usuário em 2026-11-26; spec OBJ-CARD-1, branch `feat/cartao-objetivo`): janela como a de alertas, abre no início do voo, arrastável e fechável; reabre pelo botão 🎯 do HUD e pelo atalho global **Ctrl+Alt+O** (escolha do Claude: combinação pouco usada no MSFS; trocar se colidir); amarelo = pendente, verde ✓ = cumprido, vermelho ✖ = falhou; termina com "Pouso final em X". As linhas vêm de `ContractProgressFormatter.BuildLines` (texto + estado), a mesma fonte da linha CONTRATO do HUD.
 - **Mapa do quadro com a área de instrução** (feito em 2026-11-26, `feat/mapa-contratos-unificado`): o `FlightMapControl` recebe `ContractMissions` e monta os visuais; quadro, briefing e HUD usam o mesmo caminho.
-- Salvar posição do HUD, cartão e alertas em `%LocalAppData%\FlightCareer`, trazendo para dentro da tela.
-- Cores por item na linha CONTRATO do HUD (hoje tudo âmbar): usar o estado de `ContractObjectiveLine` (OBJ-CARD-2, junto com as posições).
+- **Posições salvas** e **cores por item na linha CONTRATO** (feito em 2026-11-26, OBJ-CARD-2): `%LocalAppData%\FlightCareer\window-positions.json`, sempre trazido para a tela.
 
 ## Decisões abertas
 - Altitude da área genérica: hoje 2.500–4.500 ft AGL (SDCO: até 6.550 ft no altímetro). Sugestão: 1.500–3.000 ft AGL, como as áreas reais; mostrar também a altitude do altímetro.

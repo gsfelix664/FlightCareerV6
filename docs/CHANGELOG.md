@@ -3365,3 +3365,8 @@
 - Algoritmo puro de contenção de janela `WindowPlacement.ClampToArea` (`Domain/Utils`), garantindo título e margem visíveis na tela virtual (`SystemParameters.VirtualScreen*`) em configurações com um ou múltiplos monitores.
 - Linha CONTRATO do HUD (`DebugOverlayViewModel`, `DebugOverlayWindow.xaml`) renderizada com `ItemsControl` e `HudContractItem` coloridos por estado do objetivo (âmbar `#FBBF24` pendente, verde `#00E676` cumprido, vermelho `#FF5252` falhou), atualizando somente quando o conteúdo ou estado muda.
 - Build 0 erros; 1.212/1.212 testes aprovados. Posições persistidas e cores não testadas no MSFS nem em múltiplos monitores.
+
+## 2026-11-26 - Mapa de contratos unificado e voo de conferência em SDCO (Claude)
+- Quadro de missões mostra a área, os pontos e a faixa do contrato selecionado, como o briefing. `FlightMapControl.ContractMissions` (missão, item do quadro ou coleção) monta os visuais com `ContractMarkerBuilder`; saem `ContractMarkers`/`SurveyArea` duplicados do briefing e do HUD.
+- Voo de 26/11 (SDCO, C152): contrato cumprido, 2 pousos com toque e arremetida, área de Tatuí ok; pneus −4,6 % e RPM alto registrados no plano `achados-voo-sdco.md`.
+- Revisão e merge de OBJ-CARD-1 e OBJ-CARD-2 (Gemini). Build 0 erros; `dotnet test` 1.212/1.212. Não testado no MSFS.
