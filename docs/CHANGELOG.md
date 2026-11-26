@@ -3320,3 +3320,7 @@
 - `SimAirportSyncStore`: store de sincronização com controle de versão, digest da lista, fila persistente por prioridade/distância, aplicação em lote de detalhes com transação, marcação incremental de ausentes com proteção de lista suspeita e rodízio em segundo plano.
 - Testes unitários dedicados em `FlightCareer.Tests/Airports/Sim/` (11 testes).
 - Revisão (Claude): APROVADO com 2 ajustes (`docs/reviews/AIRSIM-1-revisao.md`): aeroporto ausente que volta ao simulador é reenfileirado (impressão limpa ao marcar ausente) e `ApplyDetailsAsync` consulta fila, aeroportos e pistas uma vez por lote. 1.189 testes. Nada ligado ao SimConnect ainda (AIRSIM-2); não testado no MSFS.
+
+## 2026-11-25 - Medição do corte de isolado em 200 e 250 NM (Claude)
+- `isolado`: 1.399 (150 NM), 581 (200 NM), 244 (250 NM). Tabela em `docs/plans/catalogo-missoes.md` › 12. Nenhum dado ou código alterado; corte segue em 150 até a decisão do usuário.
+- Recorte do banco do Little Navmap (tabelas `airport`, `runway`, `metadata`: 22 MB, 8,7 MB compactado) gera `tier-report` e perfis idênticos aos do banco completo (506 MB). Ainda não commitado (repositório público).
