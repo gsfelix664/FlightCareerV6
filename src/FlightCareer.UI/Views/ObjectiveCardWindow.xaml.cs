@@ -4,6 +4,8 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using FlightCareer.Domain.Utils;
+using FlightCareer.UI.Services;
 
 namespace FlightCareer.UI.Views
 {
@@ -22,14 +24,44 @@ namespace FlightCareer.UI.Views
         public ObjectiveCardWindow()
         {
             InitializeComponent();
-            Left = Math.Max(0, SystemParameters.PrimaryScreenWidth - Width - 40);
-            Top = 120;
+            ApplySavedOrDefaultPosition();
             SourceInitialized += OnSourceInitialized;
             Closing += (s, e) =>
             {
+                SavePosition();
                 e.Cancel = true;
                 Hide();
             };
+            IsVisibleChanged += (s, e) => { if (!IsVisible) SavePosition(); };
+        }
+
+        private void ApplySavedOrDefaultPosition()
+        {
+            if (WindowPositionStore.Shared.TryGet("objective", out var pos))
+            {
+                var virtualArea = new WindowRect(
+                    SystemParameters.VirtualScreenLeft,
+                    SystemParameters.VirtualScreenTop,
+                    SystemParameters.VirtualScreenWidth,
+                    SystemParameters.VirtualScreenHeight);
+
+                double w = !double.IsNaN(Width) && Width > 0 ? Width : 320;
+                double h = !double.IsNaN(Height) && Height > 0 ? Height : 200;
+
+                var clamped = WindowPlacement.ClampToArea(new WindowRect(pos.X, pos.Y, w, h), virtualArea);
+                Left = clamped.Left;
+                Top = clamped.Top;
+            }
+            else
+            {
+                Left = Math.Max(0, SystemParameters.PrimaryScreenWidth - Width - 40);
+                Top = 120;
+            }
+        }
+
+        private void SavePosition()
+        {
+            WindowPositionStore.Shared.Save("objective", Left, Top);
         }
 
         private void OnSourceInitialized(object? sender, EventArgs e)
@@ -52,6 +84,7 @@ namespace FlightCareer.UI.Views
             try
             {
                 DragMove();
+                SavePosition();
             }
             catch (InvalidOperationException ex)
             {
@@ -61,6 +94,7 @@ namespace FlightCareer.UI.Views
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            SavePosition();
             Hide();
         }
     }
