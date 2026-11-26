@@ -3,7 +3,9 @@
 Lido sob demanda, só quando houver voo. Apague o item quando for conferido. Roteiro do próximo voo: `ROTEIRO-VOO.md`.
 
 ## Conferir no próximo voo
-- Correções de 26/11 (SDCO): quadro **novo** com área "Aeroclube de Tatuí" (o quadro antigo mantém as genéricas); 2 toques e arremetidas + pouso final = 3 pousos no Hangar, status "VOANDO" entre eles, sem "BOUNCE"; ponto só marca a ±100 ft da faixa; mini-mapa do HUD com a área antes de iniciar o voo; texto "1.500 a 3.000 ft".
+- Correções de 26/11 (SDCO), ainda sem confirmação: ponto só marca a ±100 ft da faixa; mini-mapa do HUD com a área antes de iniciar o voo; texto "1.500 a 3.000 ft". Toque e arremetida, contagem de pousos e área de Tatuí conferidos no voo de 26/11.
+- Mapa do quadro de missões: ao selecionar uma instrução local (ou SAR, levantamento, paraquedismo), a área/pontos/faixa aparecem como no briefing e o zoom inclui a área.
+- Cartão de objetivo (OBJ-CARD-1): abre sozinho ao iniciar o voo, sem tirar o foco do MSFS; arrasta; ✕ esconde; 🎯 no HUD e Ctrl+Alt+O reabrem; itens ficam verdes ao cumprir; some ao terminar o voo. Ver se Ctrl+Alt+O colide com algum comando do MSFS.
 - Quadro de linha aérea (hub tier 1–2): destinos que são rota real aparecem com mais frequência e trazem a nota "Rota regular com demanda consolidada.". Se tiver a base do Little Navmap, regerar com `python tools/places/build_routes.py --cache <pasta> --lnm <base>`.
 - Quadro de origem agro/fazenda: nota "Época de plantio/colheita da safra." ou "Entressafra: ..." na descrição de `insumos_agro`, coerente com a data do relógio de carreira (sul: set–dez plantio, jan–abr colheita, mai–ago entressafra).
 - Quadro: linha "Prazo: ..." acima da carga (vermelha em missão médica/urgente; some em voo local) e se o limite bate com o bônus no fim do voo. Linha "Carga: ..." no pré-despacho (âmbar se perigosa), títulos longos de carga, mensagem "Carga Perigosa" ao aceitar `carga_dgr`/`combustivel_tambor` junto com contrato de passageiros.
