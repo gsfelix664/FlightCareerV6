@@ -151,6 +151,9 @@ namespace FlightCareer.UI
                 MainWindow = loginWindow;
                 splash.Close();
                 loginWindow.Show();
+
+                // Cartão de objetivo (OBJ-CARD-1): inicializar serviço para ativar timer e atalho global
+                ServiceProvider.GetRequiredService<Services.ObjectiveCardService>();
             }
             catch (Exception ex)
             {
@@ -244,6 +247,7 @@ namespace FlightCareer.UI
             });
 
             services.AddSingleton<Services.AlertOverlayService>();
+            services.AddSingleton<Services.ObjectiveCardService>();
             services.AddSingleton<DebugOverlayViewModel>();
             services.AddTransient<DebugOverlayWindow>(s => new DebugOverlayWindow
             {

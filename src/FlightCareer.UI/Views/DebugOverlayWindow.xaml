@@ -93,6 +93,13 @@
                                    FontSize="10" FontWeight="Bold" Foreground="#00E5FF"/>
                     </Button>
 
+                    <!-- Cartão de Objetivo -->
+                    <Button Command="{Binding ShowObjectiveCardCommand}" 
+                            ToolTip="Objetivo do voo (Ctrl+Alt+O)"
+                            Background="#1E293B" BorderBrush="#334155" BorderThickness="1" Padding="5,1" Cursor="Hand" Margin="0,0,4,0">
+                        <TextBlock Text="🎯" FontSize="10" Foreground="#00E5FF"/>
+                    </Button>
+
                     <!-- Fechar -->
                     <Button Command="{Binding CloseCommand}" 
                             ToolTip="Fechar HUD"

@@ -3352,3 +3352,9 @@
 - Mini-mapa do HUD (VOO-SDCO-4) mostra os contratos aceitos antes do monitoramento.
 - Faixa de altitude do texto do contrato sempre em pt-BR (VOO-SDCO-5).
 - Build 0 erros; `dotnet test` 1.195/1.195. Não testado no MSFS.
+
+## 2026-11-26 - Cartão de objetivo (OBJ-CARD-1) (Gemini)
+- Cartão de objetivos de voo em janela overlay transparente e arrastável (`ObjectiveCardWindow`, `ObjectiveCardViewModel`, `ObjectiveCardService`) exibindo missões, objetivos e pousos finais com status visual colorido (âmbar ○ pendente, verde ✓ cumprido, vermelho ✖ falhou).
+- Abre automaticamente ao iniciar monitoramento de voo; atalho global Ctrl+Alt+O e botão 🎯 no cabeçalho do HUD reabrem a janela.
+- Linhas estruturadas `ContractObjectiveLine` e `BuildLines` em `ContractProgressFormatter`; `ObjectiveCardBuilder` agrega missões e objetivos com deduplicação de destinos finais.
+- Build 0 erros; 1.203/1.203 testes aprovados. Janela, atalho e botão do HUD não testados no MSFS.
