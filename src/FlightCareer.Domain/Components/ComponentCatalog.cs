@@ -388,6 +388,24 @@ namespace FlightCareer.Domain.Components
         /// não conta como pouso; só a razão de descida pode causar dano (s).
         /// </summary>
         public double TakeoffBounceMaxAirborneSec { get; set; } = 8.0;
+
+        // Quebra de trem e pneus no pouso duro (C1) e dano de pouso fora de pista (D1)
+        public double BreakMinFpm { get; set; } = 600.0;
+        public double BreakSevereFpm { get; set; } = 850.0;
+        public double BreakMaxFpm { get; set; } = 900.0;
+        public double GearBreakChanceAtMin { get; set; } = 0.01;
+        public double GearBreakChanceAtSevere { get; set; } = 0.05;
+        public double GearBreakChanceSevereStart { get; set; } = 0.15;
+        public double GearBreakChanceAtMax { get; set; } = 0.30;
+        public double TireBreakFactor { get; set; } = 1.5;
+        public double BreakBankDeg { get; set; } = 10.0;
+        public double BreakBankMultiplier { get; set; } = 1.5;
+        public double OffRunwayBreakMultiplier { get; set; } = 2.0;
+        public double WornBreakMultiplierMax { get; set; } = 2.0;
+        public double BreakChanceCap { get; set; } = 0.6;
+        public double OffFieldTireDamagePct { get; set; } = 35.0;
+        public double OffFieldGearDamagePct { get; set; } = 20.0;
+        public double OffFieldAirframeDamagePct { get; set; } = 20.0;
     }
 
     public class EngineLimits

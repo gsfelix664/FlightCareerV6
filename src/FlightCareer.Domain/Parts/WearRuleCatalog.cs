@@ -301,7 +301,7 @@ namespace FlightCareer.Domain.Parts
                     )).ToList() ?? new List<WearRulePart>(),
                     b.Inspection != null ? new WearRuleInspection(
                         b.Inspection.DefectCode,
-                        b.Inspection.Grounding,
+                        b.Inspection.Grounding ?? b.Inspection.IsGrounding ?? false,
                         b.Inspection.MinSeconds,
                         b.Inspection.MinExcessPct,
                         b.Inspection.Description ?? string.Empty
@@ -309,7 +309,7 @@ namespace FlightCareer.Domain.Parts
                 )).ToList() ?? new List<WearRuleBand>(),
                 r.Inspection != null ? new WearRuleInspection(
                     r.Inspection.DefectCode,
-                    r.Inspection.Grounding,
+                    r.Inspection.Grounding ?? r.Inspection.IsGrounding ?? false,
                     r.Inspection.MinSeconds,
                     r.Inspection.MinExcessPct,
                     r.Inspection.Description ?? string.Empty
@@ -394,7 +394,8 @@ namespace FlightCareer.Domain.Parts
         private class WearRuleInspectionDto
         {
             public string DefectCode { get; set; } = string.Empty;
-            public bool Grounding { get; set; }
+            public bool? Grounding { get; set; }
+            public bool? IsGrounding { get; set; }
             public double? MinSeconds { get; set; }
             public double? MinExcessPct { get; set; }
             public string? Description { get; set; }

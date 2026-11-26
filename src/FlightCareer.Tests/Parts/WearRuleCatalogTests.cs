@@ -347,5 +347,21 @@ namespace FlightCareer.Tests.Parts
             Assert.Equal(1.00, rule!.Bands[0].Threshold, 6);
             Assert.Equal(1.04, rule.Bands[1].Threshold, 6);
         }
+
+        [Fact]
+        public void WingtipStrikeInspection_RecognizesIsGroundingFromJson()
+        {
+            var catalog = WearRuleCatalog.LoadDefault();
+            var rule = catalog.Find("touchdown_wingtip_strike");
+
+            Assert.NotNull(rule);
+            var wingtipInspections = rule!.Bands
+                .Select(b => b.Inspection)
+                .Where(i => i != null && i.DefectCode == "WINGTIP_STRIKE_INSPECTION")
+                .ToList();
+
+            Assert.NotEmpty(wingtipInspections);
+            Assert.Contains(wingtipInspections, i => i!.Grounding);
+        }
     }
 }

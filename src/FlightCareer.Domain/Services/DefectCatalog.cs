@@ -127,8 +127,14 @@ namespace FlightCareer.Domain.Services
             };
         }
 
-        public static DefectSpec Get(string code) =>
-            Specs.TryGetValue(code, out var spec) ? spec : new DefectSpec(code, code, true, 1000, DefectEnforcement.None);
+        public static bool IsInspection(string code) => code.EndsWith("_INSPECTION", StringComparison.Ordinal);
+
+        public static DefectSpec Get(string code)
+        {
+            if (Specs.TryGetValue(code, out var spec)) return spec;
+            if (IsInspection(code)) return new DefectSpec(code, "Inspeção pendente", false, 400, DefectEnforcement.None);
+            return new DefectSpec(code, code, true, 1000, DefectEnforcement.None);
+        }
 
         /// <summary>
         /// Custo de reparo escalado pelo valor da aeronave (peças de turbina/jato custam mais que de um C152).

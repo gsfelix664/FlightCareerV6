@@ -49,6 +49,7 @@ namespace FlightCareer.UI.Services
         private readonly FerryRestrictionMonitor _ferryMonitor = new();
         private readonly AerialWorkTracker _aerialWorkTracker = new();
         private readonly ExceedanceLogAggregator _exceedanceLog = new();
+        private readonly List<string> _flightInspections = new();
         private bool _autoStartUsed;
         private FuelIntegrityMonitor? _fuelIntegrity;
         private SlewMonitor _slewMonitor = new();
@@ -155,21 +156,43 @@ namespace FlightCareer.UI.Services
             _partCatalog = partCatalog;
             _wearRules = wearRules;
             _limitResolver = limitResolver;
-            _parts = new PartFlightSession(partCatalog, wearRules, limitResolver);
+            _parts = new PartFlightSession(partCatalog, wearRules, limitResolver, catalog, _random);
             sensorFrames.OnFrame += _parts.OnFrame;
+
+            _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
+            _persistentFailures.OnDefectRecorded += OnDefectRecorded;
+            _persistentFailures.OnNativeCrash += HandleSimulatorCrash;
+            _persistentFailures.OnEnforcementAction += msg => _telemetryLogger.LogEvent("PANE_PERSISTENTE", msg);
+
             // Uma linha no início e outra no fim de cada faixa (antes: uma por peça a cada tick)
             _parts.OnExceedanceTick += tick =>
             {
                 foreach (var line in _exceedanceLog.Update(tick, _simulatedFlightTimeSeconds))
                     _telemetryLogger.LogEvent("EXCEDENCIA_PECA", line);
             };
-            _parts.OnInspection += insp => _telemetryLogger.LogEvent("INSPECAO_PECA", $"{insp.DefectCode} - {insp.TargetPartId} - {insp.Description}");
+            _parts.OnLandingBreak += b =>
+            {
+                _telemetryLogger.LogEvent("QUEBRA_POUSO", $"{b.Part.PartId} - {b.Chance:P0} - {b.Reason}");
+                string partName = _partCatalog.Get(b.Part.PartId)?.Name ?? b.Part.PartId;
+                OnAlert?.Invoke("PEÇA QUEBRADA NO POUSO", $"{partName}: {b.Reason}. A aeronave fica interditada até o reparo.", true);
+            };
+            _parts.OnInspection += insp =>
+            {
+                _telemetryLogger.LogEvent("INSPECAO_PECA", $"{insp.DefectCode} - {insp.TargetPartId} - {insp.Description}");
+                string title = InspectionDefectPolicy.Title(insp);
+                _persistentFailures.Record(
+                    insp.DefectCode,
+                    DefectOrigin.Addon,
+                    $"[Inspeção] {insp.RuleId}",
+                    title: title,
+                    description: insp.Description,
+                    isGrounding: InspectionDefectPolicy.IsGrounding(insp));
+                lock (_flightInspections)
+                {
+                    _flightInspections.Add(title);
+                }
+            };
             _parts.OnDiagnostic += diag => _telemetryLogger.LogEvent("PECAS_DIAG", diag);
-
-            _persistentFailures = new PersistentFailureService(simConnect, contextFactory, sensorFrames);
-            _persistentFailures.OnDefectRecorded += OnDefectRecorded;
-            _persistentFailures.OnNativeCrash += HandleSimulatorCrash;
-            _persistentFailures.OnEnforcementAction += msg => _telemetryLogger.LogEvent("PANE_PERSISTENTE", msg);
 
             _simConnect.OnObservedEvent += OnObservedEventReceived;
             _simConnect.OnDataReceived += OnTelemetryForFuelTruck;
@@ -835,6 +858,10 @@ namespace FlightCareer.UI.Services
             _infractionTracker = new FlightInfractionTracker(isInstruction);
             _windHistory.Clear();
             _approachEnvHistory.Clear();
+            lock (_flightInspections)
+            {
+                _flightInspections.Clear();
+            }
             _landingCrosswindKt = 0;
             _landingGustSpreadKt = 0;
             _landingDensityAltitudeFt = 0;
@@ -1655,7 +1682,9 @@ namespace FlightCareer.UI.Services
                 _aircraft.LandingsCount++;
             }
             if (touchdownFpm > _worstTouchdownFpm) _worstTouchdownFpm = touchdownFpm;
-            if (data.GForce > _worstTouchdownG) _worstTouchdownG = data.GForce;
+            double contactG = Math.Max(data.GForce, _lastTouchdownEvent?.PeakG ?? 0);
+            if (contactG > _worstTouchdownG) _worstTouchdownG = contactG;
+            _telemetryLogger.RecordPeakG(_lastTouchdownEvent?.PeakG ?? data.GForce);
             UpdateLandingEnvironmentSnapshot();
 
             _failures.ProcessLanding(touchdownFpm, data.VelocityBodyX, data.IsWetOrContaminatedSurface);
@@ -1777,7 +1806,6 @@ namespace FlightCareer.UI.Services
         private async Task FinalizeFlightAsync(SimTelemetry data)
         {
             FlushExceedanceLog();
-            _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
             StopMonitoring();
 
             if (_pilot == null || _aircraft == null) return;
@@ -1834,6 +1862,16 @@ namespace FlightCareer.UI.Services
                 }
             }
             catch { }
+
+            _telemetryLogger.StopFlightLog(isOffFieldLanding ? "POUSO_FORCADO" : "VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
+
+            if (isOffFieldLanding)
+            {
+                var s = _catalog.Landing;
+                Damage(ComponentKind.Tires, s.OffFieldTireDamagePct);
+                Damage(ComponentKind.LandingGear, s.OffFieldGearDamagePct);
+                Damage(ComponentKind.Airframe, s.OffFieldAirframeDamagePct);
+            }
 
             double flightDurationMinutes = _simulatedFlightTimeSeconds / 60.0;
             double finalFuel = Math.Round(data.FuelTotalGallons + data.UnusableFuelGallons, 1);
@@ -1992,8 +2030,19 @@ namespace FlightCareer.UI.Services
                     CheckFlight: _checkFlightTracker,
                     Ferry: _ferryMonitor,
                     AerialWork: _aerialWorkTracker
-                )
+                ),
+                terrainDamageApplied: true
             );
+
+            List<string> inspections;
+            lock (_flightInspections)
+            {
+                inspections = _flightInspections.Distinct().ToList();
+            }
+            if (inspections.Count > 0)
+            {
+                outcome.Message += "\nInspeções pendentes no Hangar: " + string.Join(", ", inspections);
+            }
 
             OnFlightFinished?.Invoke(outcome);
         }

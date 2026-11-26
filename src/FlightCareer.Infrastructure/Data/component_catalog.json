@@ -55,7 +55,25 @@
     "minAirborneSec": 0.5,
     "traceBeforeSec": 2.0,
     // Contato até 8 s depois de sair do chão, sem pouso antes: quique na decolagem (não é pouso; dano só se duro)
-    "takeoffBounceMaxAirborneSec": 8.0
+    "takeoffBounceMaxAirborneSec": 8.0,
+    // Quebra de trem e pneus no pouso duro (C1)
+    "breakMinFpm": 600.0,
+    "breakSevereFpm": 850.0,
+    "breakMaxFpm": 900.0,
+    "gearBreakChanceAtMin": 0.01,
+    "gearBreakChanceAtSevere": 0.05,
+    "gearBreakChanceSevereStart": 0.15,
+    "gearBreakChanceAtMax": 0.30,
+    "tireBreakFactor": 1.5,
+    "breakBankDeg": 10.0,
+    "breakBankMultiplier": 1.5,
+    "offRunwayBreakMultiplier": 2.0,
+    "wornBreakMultiplierMax": 2.0,
+    "breakChanceCap": 0.6,
+    // Dano de pouso fora de pista em terreno despreparado (D1)
+    "offFieldTireDamagePct": 35.0,
+    "offFieldGearDamagePct": 20.0,
+    "offFieldAirframeDamagePct": 20.0
   },
 
   // Limites padrão por classe de motor (sobrescritos por modelo em "aircraftOverrides")
