@@ -22,7 +22,7 @@
 - Teste de XP do pouso forçado só confere `XP > 0` (não a metade exata).
 
 ## Decisões abertas do usuário
-- F4: tirar também o selo "- N%", a nota do voo e o "% MTOW"? Sugestão: manter.
+- F4 decidida (2026-11-26): manter os % que não são condição; tarefa 8 só F1–F3.
 - Altitude da área genérica e variedade de destinos na fase 1 (`achados-voo-sdco.md`); manter Ctrl+Alt+O.
 
 ## Notas

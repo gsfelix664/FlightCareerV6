@@ -88,9 +88,9 @@ Trocar por estado em palavras (os mesmos das peças). Ex.: "Ignição / magnetos
 **F3. Mercado de usados (decidido pelo usuário em 2026-11-26: tirar o %)**
 - [ ] Condição média, célula, motor, pneus e aviônicos em `MarketView.xaml` (~449-975): mostrar estado em palavras/cor, como no Hangar. Conferir se o valor exato aparece em outro texto do mercado.
 
-**F4. Decisão aberta (% que não é condição)**
+**F4. Decidido (usuário, 2026-11-26): manter os % que não são condição**
 - Selo de desconto "- N%" do mercado (`MarketView.xaml` ~412).
-- Taxas de dinheiro (corretagem 8%, expresso +50%, bônus/XP), nota do voo ("47%"), "% MTOW" e envelope no briefing, "100% EXATO", flap/N1/opacidade no HUD, restrição de flaps em ferry. *Claude: manter taxas e instrumentos; confirmar a nota do voo.*
+- Taxas de dinheiro (corretagem 8%, expresso +50%, bônus/XP), nota do voo ("47%"), "% MTOW" e envelope no briefing, "100% EXATO", flap/N1/opacidade no HUD, restrição de flaps em ferry. Ficam como estão: selo "- N%", taxas, nota do voo, "% MTOW", envelope, "100% EXATO" e instrumentos do HUD. A tarefa 8 (SEM-PORCENTO) só tira % de condição (F1–F3).
 
 Confirmado também pela captura: depois de pagar as panes o avião aparece como "RISCO DE PANE", não interditado, com peças quebradas (reforça D4).
 
@@ -119,7 +119,9 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 - **C1:** chance de quebra de trem e pneu **baixa no pouso duro e mais alta no muito duro**. Calibração (Claude, 2026-11-26) em `component_catalog.json` › `landing`: 0 abaixo de 600 fpm; trem 1 %→5 % de 600 a 850 fpm; 15 %→30 % de 850 a 900 fpm (≥ 900 já é perda total); pneu ×1,5; inclinação ≥ 10° ×1,5; fora de pista (`ON ANY RUNWAY` = 0) ×2; peça gasta até ×2; teto 60 %. Quebra = peça `IsBroken` (interdita via `PartAirworthiness`), sem pane extra (evita cobrança em dobro).
 - **D5 (Claude, 2026-11-26):** inspeção do voo vira pane persistente do addon (aparece no Hangar, custo base 400). Só as inspeções de toque (pouso duro, cauda, ponta de asa, vento cruzado, bequilha) respeitam o `grounding` do JSON; as demais ficam DIFERIDAS até a tarefa 9 tirar os falsos positivos (D7, D9).
 
+- **F4:** manter os % que não são condição (selo "- N%", taxas, nota do voo, "% MTOW", instrumentos). A tarefa 8 só trata F1–F3.
+
 ## Decisões abertas do usuário
-- F4: tirar também o selo "- N%" de desconto, a nota do voo e o "% MTOW"? Sugestão: manter taxas e instrumentos.
+- Nenhuma neste plano.
 
 Não testado no MSFS: tudo acima vem de leitura de código, log, REC e banco.
