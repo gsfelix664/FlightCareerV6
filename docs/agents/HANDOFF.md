@@ -35,7 +35,7 @@ Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo 
 
 ## Notas de trabalho
 - Repositório no GitHub é público: não commitar dados extraídos do simulador sem perguntar.
-- Referência: clones de `atools` e `littlenavmap` em `C:\projetosef\` (fora do repositório; só consulta, código GPL, não copiar).
+- Referência: clones de `atools` e `littlenavmap` em `C:/projetos/ref/` (fora do repositório; só consulta, código GPL, não copiar).
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.
 - Com o app aberto, `dotnet build` da solução falha ao copiar: use `-p:OutDir=<pasta do scratchpad>`; os testes rode sem `OutDir`.
 - Tamanho do `AGENTS.md`: meça no git (`git cat-file -s HEAD:AGENTS.md`).
