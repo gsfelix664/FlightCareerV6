@@ -1,6 +1,6 @@
 # Catálogo de missões em JSON (plano)
 
-**Estado (conferido em 2026-11-25):** implementado — catálogo JSON (CATALOGO-MISSOES), 69 tipos com pesos por perfil de aeroporto (E2A, E2A-L) e regras próprias (E2C-1, E2C-1b, E2C-2, CARGA-COERENTE, SAFRA-ESTACAO). Pendente: tipos que dependem de SimVar ou dados (§ 11), ideias do § 10 e o corte de `isolado` (§ 12, medir no PC de casa). A REORG-CATEGORIAS citada nas §§ 1–5 não bloqueia mais nada. Estado atual: `docs/sistemas/missoes-quadro.md`.
+**Estado (conferido em 2026-11-25):** implementado — catálogo JSON (CATALOGO-MISSOES), 69 tipos com pesos por perfil de aeroporto (E2A, E2A-L) e regras próprias (E2C-1, E2C-1b, E2C-2, CARGA-COERENTE, SAFRA-ESTACAO). Pendente: tipos que dependem de SimVar ou dados (§ 11), ideias do § 10 (corte de `isolado` definido em 200 NM, § 12). A REORG-CATEGORIAS citada nas §§ 1–5 não bloqueia mais nada. Estado atual: `docs/sistemas/missoes-quadro.md`.
 
 ## 1. Objetivo técnico
 Cada missão passa a ser um item de catálogo em JSON com id de texto estável (`medevac`, `carga_fragil`...) e declara: código exibido (ex.: 3.3.4), categoria, filtro do quadro, família de pagamento, fase, M_Tipo, regra de destino (`pista_curta`, `outro_pais`, `volta_a_origem`, `hub_de_saude`...), regras de conclusão e pesos por porte. O gerador aplica as regras pelas propriedades, não por `if (sub.Id == ...)`. Prova: `career-stab` com o mesmo resultado de antes.
@@ -193,8 +193,8 @@ Script: `tools/places/airport_profiles.py` (lê `airports.csv`, `runways.csv`, `
 | fazenda | nome com fazenda, usina, sítio, agropecuária, agrícola, estância, hacienda, finca, granja, farm, ranch, plantation, station, estate (exceto air/naval/research station etc.), só tier 3–4 | 3.151 | — / — / 641 / 2.510 | bom no BR (1.630) e EUA (1.379); fraco fora deles (AU 52, AR 4) — nomes de fazenda em outros países nem sempre têm essas palavras |
 | militar | nome com air base, air force, AFB, base aérea, naval air, army airfield, RAF, militar… | 623 | 3 / 401 / 146 / 73 | ok (Grand Forks AFB, RAF Marham, Vidsel, bases na Síria/Ucrânia) |
 | militar_misto | militar + voo regular ou "international/regional/municipal" no nome (uso civil e militar) | 49 | 9 / 37 / 3 / — | ok (Bergamo, Sacheon, Karup, Sierra Vista) — missões civis normais + militares |
-| isolado | tier 3–4 a ≥ 150 NM do tier 1/2 mais próximo; tier 2 a ≥ 150 NM de outro tier 1/2 | 524 | — / 94 / 118 / 312 | ok (Tefé, São Gabriel da Cachoeira, Fernando de Noronha, Funafuti, Ilha de Páscoa, Kulusuk, Faroé, Alasca, Sibéria, Pacífico) |
-| interior_distante | tier 3–4 a 75–150 NM do tier 1/2 mais próximo | 2.439 | — / — / 576 / 1.863 | ok (interior agrícola e sertão) |
+| isolado | tier 3–4 a ≥ 200 NM do tier 1/2 mais próximo; tier 2 a ≥ 200 NM de outro tier 1/2 (contagens ao lado são do corte antigo de 150) | 524 | — / 94 / 118 / 312 | ok (Tefé, São Gabriel da Cachoeira, Fernando de Noronha, Funafuti, Ilha de Páscoa, Kulusuk, Faroé, Alasca, Sibéria, Pacífico) |
+| interior_distante | tier 3–4 a 75–200 NM do tier 1/2 mais próximo | 2.439 | — / — / 576 / 1.863 | ok (interior agrícola e sertão) |
 | altitude | elevação ≥ 5.000 ft | 1.036 | 34 / 157 / 235 / 610 | ok (Lukla, Santa Fe, Andes, Himalaia, Mongólia) |
 
 Achados para depois:
@@ -548,4 +548,4 @@ Perfis regerados com o banco `little_navmap_msfs24` (o de 150 NM saiu igual ao d
 | 200 NM | 581 | 4.330 | 24 % | 23 % | 27 % | 24 % | 71 % | 53 % |
 | 250 NM | 244 | 4.634 | 24 % | 23 % | 27 % | 24 % | 41 % | 53 % |
 
-Com 200 NM perdem `isolado`: SBMQ, SBHT, SBUG, SNVD e PABE (SWEK, YBDV, SBTF e SBFN mantêm). Com 250 NM também perdem: SWEK, SBTF e SBFN. Recomendação do Claude: 200 NM. **Decisão do usuário pendente**; o corte no repositório segue em 150.
+Com 200 NM perdem `isolado`: SBMQ, SBHT, SBUG, SNVD e PABE (SWEK, YBDV, SBTF e SBFN mantêm). Com 250 NM também perdem: SWEK, SBTF e SBFN. Recomendação do Claude: 200 NM. **Decidido pelo usuário em 2026-11-25: 200 NM**, aplicado em `airport_profiles.py` e `airport_profiles.json`.

@@ -2,12 +2,12 @@
 
 > Regra (`AGENTS.md` › 4.9): uma tarefa por sessão. Comece por aqui; ao terminar, **reescreva** este arquivo (não acumule passagens: o histórico fica no `docs/CHANGELOG.md` e no git), faça commit e push e peça ao usuário uma sessão nova.
 
-**Última atualização:** 2026-11-25 (14ª sessão, escritório), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.189/1.189.
+**Última atualização:** 2026-11-25 (15ª sessão, casa), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.189/1.189.
 
 ## Feito nesta sessão
-- Importador de aeroportos dividido em 3 fases (`docs/plans/importador-aeroportos-simconnect.md` › 7, com a API do SimConnect conferida na DLL do projeto e o estudo do código da atools/Little Navmap).
-- **AIRSIM-1** (spec do Claude, Gemini implementou, revisão APROVADO com 2 ajustes em `docs/reviews/AIRSIM-1-revisao.md`, merge feito): `Domain/Airports/Sim/` (superfícies, impressão digital, diferença, builder) e `Infrastructure/Services/SimAirportSyncStore` (estado, fila persistente, aplicação da lista e dos detalhes). Ainda **não ligado** ao SimConnect nem ao app.
-- Referência: clones de `atools` e `littlenavmap` em `C:\projetos\ref\` (fora do repositório; só consulta, código GPL, não copiar).
+- Corte de `isolado` medido (150/200/250 NM) e definido pelo usuário em **200 NM**; `airport_profiles.json` e snapshot de missões regravados (`docs/plans/catalogo-missoes.md` › 12). Não testado no MSFS.
+- Apagadas `.antigravity/` e `.gemini/`.
+- Banco do Little Navmap **não** vai para o git: recorte em `references/lnm/little_navmap_msfs24.sqlite.gz` (PC de casa); o usuário leva para o escritório (uso: `docs/sistemas/aeroportos-tiers.md`).
 
 ## Conferir no próximo voo (PC de casa)
 - Quadro de linha aérea (hub tier 1–2): destinos que são rota real aparecem com mais frequência e trazem a nota "Rota regular com demanda consolidada.". Se tiver a base do Little Navmap, regerar com `python tools/places/build_routes.py --cache <pasta> --lnm <base>`.
@@ -27,15 +27,15 @@
 - Não dá no escritório: trem travado no `ferry_permit` (SimVar nova no `SimTelemetry`) e os itens "Precisam do MSFS".
 
 ## Próxima tarefa no PC de casa (com MSFS)
-**Isolamento (primeiro):** regerar perfis com `ISOLADO_NM=200` e `250` e medir; passos em `docs/plans/catalogo-missoes.md` › 12 e `docs/sistemas/aeroportos-tiers.md`. Conferir também o percentual do destino preferido de saúde com peso 100 (não medido).
-
-Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo voo". Para STOL, cheque, translado e os tipos da E2C-2 (fase 2–3), o usuário decide se libera a fase no banco; cheque e translado pedem ainda um aeroporto tier 1–3.
+Testes de missões (Sonnet basta para ler logs): itens de "Conferir no próximo voo". Para STOL, cheque, translado e os tipos da E2C-2 (fase 2–3), o usuário decide se libera a fase no banco; cheque e translado pedem ainda um aeroporto tier 1–3. Falta medir o percentual do destino preferido de saúde com peso 100.
 
 ## Pendências
 - **Precisam do MSFS:** óleo (inverter `GENERAL ENG OIL LEAKED PERCENT` no vazamento ativo, `ProcessOilLeak`/`TransmitOilLeak`); perda de desempenho no amarelo (`docs/plans/perda-desempenho-amarelo.md` › 3, passos 1–5); toque (`TOQUE-NORMAL`) a conferir contra o REC.
-- **Decisões abertas do usuário:** corte final de `isolado` (depois da medição em casa). Resolvidas em 2026-11-25 e mergeadas: CAN só em origem militar, peso de saúde 100, `saude_familia` abastece no destino, falência dos agressivos aceita, patrimônio e classe G encerradas.
+- **Decisões abertas do usuário:** nenhuma. Resolvidas em 2026-11-25 e mergeadas: CAN só em origem militar, peso de saúde 100, `saude_familia` abastece no destino, falência dos agressivos aceita, patrimônio e classe G encerradas.
 
 ## Notas de trabalho
+- Repositório no GitHub é público: não commitar dados extraídos do simulador sem perguntar.
+- Referência: clones de `atools` e `littlenavmap` em `C:\projetosef\` (fora do repositório; só consulta, código GPL, não copiar).
 - PC do escritório tem 4 GB: uma tarefa do Gemini por vez e poucos programas abertos.
 - Com o app aberto, `dotnet build` da solução falha ao copiar: use `-p:OutDir=<pasta do scratchpad>`; os testes rode sem `OutDir`.
 - Tamanho do `AGENTS.md`: meça no git (`git cat-file -s HEAD:AGENTS.md`).
