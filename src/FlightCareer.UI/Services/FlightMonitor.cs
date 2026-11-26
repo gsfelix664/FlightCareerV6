@@ -610,6 +610,25 @@ namespace FlightCareer.UI.Services
                 return false;
             }
 
+            using (var db = _contextFactory.CreateDbContext())
+            {
+                var brokenParts = db.AircraftParts
+                    .Where(p => p.PilotAircraftId == aircraft.Id && p.IsBroken)
+                    .ToList();
+                var groundingParts = PartAirworthiness.GroundingParts(brokenParts, _partCatalog);
+                if (groundingParts.Count > 0)
+                {
+                    int engineCount = brokenParts.Select(p => p.EngineIndex).DefaultIfEmpty(0).Max();
+                    string nomes = string.Join(", ", groundingParts.Select(p =>
+                    {
+                        var def = _partCatalog.Get(p.PartId);
+                        return def != null ? PartHangarView.DisplayName(p, def, engineCount) : p.PartId;
+                    }));
+                    OnAlert?.Invoke("PEÇA QUEBRADA", $"Aeronave impedida de voar: {nomes}. Troque a peça no Hangar.", true);
+                    return false;
+                }
+            }
+
             var prohibitedMission = missions.FirstOrDefault(m => m.RequiredPhase > pilot.CareerPhase);
             if (prohibitedMission != null)
             {

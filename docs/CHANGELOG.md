@@ -3374,3 +3374,10 @@
 ## 2026-11-26 - Análise do pouso forçado e plano de correções (Claude)
 - Plano `docs/plans/correcoes-voo-forcado-sdco.md`: pedidos do usuário (mapa, briefing VFR, Hangar sem %), bugs achados no REC, blackbox e banco (11 peças quebradas por uma pane, cobrança em dobro, dano de pouso fora das peças) e 10 tarefas com modelo recomendado.
 - Só documentação; nenhum código alterado. Nada testado no MSFS.
+
+## 2026-11-26 - Pane quebra uma peça e reparo único (PANE-PECAS) (Gemini)
+- Uma pane nativa do simulador quebra exatamente uma peça física candidata via `NativeFailurePartMap` (menor saúde, ordem da tabela, menor motor), eliminando quebra em massa de peças por uma falha nativa.
+- Reparo de panes no Hangar unificado via `DefectPartLink`: panes nativas associadas a peças quebradas são resolvidas com a troca física das peças (sem cobrança em dobro); trocar a peça no Hangar resolve as panes correspondentes.
+- Fluxo único em "Reparar tudo" (`RepairAll`): agrega substituição de peças recomendadas e todas as panes em aberto (panes com peças saem sem custo duplicado e panes avulsas cobram seu valor), habilitando o botão mesmo que só haja pane aberta.
+- Interdição obrigatória por peça quebrada com `BlocksFlightWhenBroken == true` (`PartAirworthiness`): reflete no status do Hangar ("INTERDITADA (PEÇA)") e bloqueia início de voo em `FlightMonitor.StartMonitoring`.
+- 10 testes unitários novos em `NativeFailureAndDefectTests`; 1.222/1.222 testes aprovados. Pane nativa real no simulador e interface do Hangar em tempo de execução não testadas no MSFS.

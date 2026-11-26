@@ -378,32 +378,44 @@ namespace FlightCareer.Domain.Parts
         {
             if (!IsActive) return 0;
 
-            // Decisão 3: união das parts de regras com nativeOverstress == id
-            var targetPartIds = _wearRuleCatalog.Rules
-                .Where(r => r.NativeOverstress != null && r.NativeOverstress.ComponentId == nativeWearId)
-                .SelectMany(r => r.Bands)
-                .SelectMany(b => b.Parts)
-                .Select(p => p.PartId)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            var installedTargets = _parts
-                .Where(p => targetPartIds.Contains(p.PartId))
-                .ToList();
-
-            if (installedTargets.Count > 0)
+            // PANE-PECAS: busca candidatas em NativeFailurePartMap
+            var candidates = NativeFailurePartMap.CandidatesFor(nativeWearId);
+            if (candidates.Count > 0)
             {
-                int brokenCount = 0;
-                foreach (var part in installedTargets)
+                var candidateIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < candidates.Count; i++)
                 {
-                    if (_wearEngine.ApplyNativeFailed(part)) brokenCount++;
+                    if (!candidateIndex.ContainsKey(candidates[i]))
+                    {
+                        candidateIndex[candidates[i]] = i;
+                    }
                 }
-                return brokenCount;
+
+                var installedCandidates = _parts
+                    .Where(p => !p.IsBroken && candidateIndex.ContainsKey(p.PartId))
+                    .OrderBy(p => p.Health)
+                    .ThenBy(p => candidateIndex[p.PartId])
+                    .ThenBy(p => p.EngineIndex)
+                    .ToList();
+
+                if (installedCandidates.Count > 0)
+                {
+                    var target = installedCandidates[0];
+                    if (_wearEngine.ApplyNativeFailed(target))
+                    {
+                        Debug.WriteLine($"[PartFlightTracker] Pane nativa ID {nativeWearId} quebrou peça {target.PartId}.");
+                        return 1;
+                    }
+                    return 0;
+                }
             }
 
-            // Fallback: menor saúde do grupo mapeado por fallbackKind
+            // Fallback: menor saúde do grupo mapeado por fallbackKind, ignorando já quebradas
             if (fallbackKind.HasValue)
             {
-                var groupParts = GetPartsByComponentKind(fallbackKind.Value).ToList();
+                var groupParts = GetPartsByComponentKind(fallbackKind.Value)
+                    .Where(p => !p.IsBroken)
+                    .ToList();
                 if (groupParts.Count > 0)
                 {
                     var lowest = groupParts
@@ -411,7 +423,12 @@ namespace FlightCareer.Domain.Parts
                         .ThenBy(p => p.PartId, StringComparer.Ordinal)
                         .First();
 
-                    return _wearEngine.ApplyNativeFailed(lowest) ? 1 : 0;
+                    if (_wearEngine.ApplyNativeFailed(lowest))
+                    {
+                        Debug.WriteLine($"[PartFlightTracker] Pane nativa ID {nativeWearId} quebrou peça {lowest.PartId} (fallback {fallbackKind.Value}).");
+                        return 1;
+                    }
+                    return 0;
                 }
             }
 

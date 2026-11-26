@@ -9,4 +9,4 @@
   - Gravidade: NO-GO (`IsGrounding`, bloqueia `StartMonitoring` com status "GROUNDED (PANE)") ou DIFERIDA (permite voar com restrição).
   - Atuação contínua e reaplicação: `Watchdog` e `NativeToggle` reaplicam efeitos ao recarregar a aeronave. Comandos do piloto para flaps e alternador não são mascarados.
   - Modo vigia (`FlightMonitor.WatchAircraft`): mantém falhas ativas fora do voo e monitora reparos no banco a cada 3 s para liberar no simulador.
-  - Reparo no card "Panes em aberto" no Hangar (`RepairDefect`/`RepairAllDefects`). O reparo da discrepância não restaura a saúde do componente ou peça associada. Não testado no MSFS após integração com peças.
+  - Reparo no card "Panes em aberto" no Hangar (`RepairDefect`/`RepairAllDefects`) e no fluxo unificado de "Reparar tudo": orçado via `DefectPartLink`. Panes associadas a peças quebradas são resolvidas com a substituição física da peça (custo zero na pane); trocar a peça no Hangar resolve as panes vinculadas; panes sem peça cobram seu `RepairCost`. Peças quebradas que bloqueiam voo interditam a aeronave antes mesmo das panes NO-GO. Não testado no MSFS após integração com peças.
