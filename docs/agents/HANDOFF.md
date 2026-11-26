@@ -2,19 +2,18 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-26 (21ª sessão, casa), Claude. Base `feat/component-health-system`. POUSO-DANO (tarefa 2 do plano) feita pelo Gemini, aprovada e no merge.
+**Última atualização:** 2026-11-26 (22ª sessão, casa), Claude. Base `feat/component-health-system`. LIMPA-MAPA (tarefa 3 do plano) feita pelo Gemini, aprovada e no merge.
 
 ## Estado
-- **POUSO-DANO feito** (C1, D1, D5, D6, D10, D11 e B4): pouso duro pode quebrar trem/pneu (`LandingBreakModel`, calibração em `component_catalog.json` › `landing`: 1 %→5 % de 600 a 850 fpm, 15 %→30 % de 850 a 900; pneu ×1,5; inclinação ≥ 10° ×1,5; fora de pista ×2; desgaste até ×2; teto 60 %). Peça quebrada interdita. Pouso fora de pista: dano nas peças, missão cancelada, XP 50 %, sem dinheiro, relógio avança. Inspeções viram pane "Inspeção pendente" (só as 5 de toque interditam). `isGrounding` do `wear_rules.json` agora é lido. Blackbox: "POUSO_FORCADO" e G do toque. Revisão: `docs/reviews/POUSO-DANO-revisao.md`.
-- **Não testado no MSFS nem com o app aberto.** Atenção: com `isGrounding` lido e inspeções virando pane, o Hangar vai mostrar mais itens pendentes depois de voos com excedências.
-- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (A, B1–B3, D7–D9, E1, E3–E5, F) não implementado. Tarefa 6 (RESGATE) cancelada pela decisão B4.
-- PT-HRY: segue interditado até "Reparar tudo" (peças da pane antiga). Mapa unificado e cartão de objetivo (OBJ-CARD-1/2) seguem sem teste no MSFS (`TESTES-PENDENTES.md`).
-- `install-global.sh` rodado nesta máquina (casa) em 2026-11-26.
+- **LIMPA-MAPA feito** (A1, A2): waypoints manuais e botão LIMPAR removidos do mapa; "ponto de reportagem" → "ponto de reporte" (missões já geradas guardam o texto antigo). Build ok, 1.245/1.245. Revisão: `docs/reviews/LIMPA-MAPA-revisao.md`. Mapas não conferidos com o app aberto.
+- POUSO-DANO feito (detalhe em `docs/reviews/POUSO-DANO-revisao.md`): pouso duro pode quebrar trem/pneu; fora de pista cancela a missão (XP 50 %, sem dinheiro); inspeções viram pane "Inspeção pendente". **Não testado no MSFS nem com o app aberto**; o Hangar vai mostrar mais itens pendentes após excedências.
+- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (A3, B1–B3, D7–D9, E1, E3–E5, F) não implementado.
+- PT-HRY: segue interditado até "Reparar tudo". Mapa unificado e OBJ-CARD-1/2 sem teste no MSFS (`TESTES-PENDENTES.md`).
 
 ## Próximo passo
-- No app/MSFS: um pouso duro (≈700 fpm) e um fora de pista; conferir alerta de peça quebrada, Hangar (peça quebrada, "Inspeção pendente"), missão sumida do quadro, XP pela metade, blackbox "POUSO FORÇADO".
-- **Sessão Sonnet: tarefa 3, LIMPA-MAPA** (A1, A2: remover waypoints/LIMPAR do mapa e "reporte VFR"; não mexer em `OverflyWaypoints`).
-- **Sessão Opus: tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes — decidido, D9 histerese do RPM). Depois dela, rever quais inspeções podem interditar (`InspectionDefectPolicy`).
+- No app/MSFS: pouso duro (≈700 fpm) e fora de pista (alerta de peça quebrada, Hangar, missão sumida, XP pela metade, blackbox "POUSO FORÇADO"); conferir os mapas sem o quadro de waypoints.
+- **Sessão Sonnet: tarefa 7, HANGAR-AVISOS** (E1, E3, E4; texto do desconto pedido em E3). `HangarViewModel` nunca em paralelo.
+- **Sessão Opus: tarefa 4, BRIEF-NAV** (A3, B1, B3; libera a 5, MAPA-ESCALAS) ou **tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes, decidido, D9 histerese do RPM; depois rever `InspectionDefectPolicy`).
 - PC do escritório: `git pull` e `tools/agents/install-global.sh`. Fila anterior: AIRSIM-2 (spec Opus; só fecha com MSFS), HUD em modo tablet (quando pedido), 8 tipos da E2C.
 
 ## Pendências
