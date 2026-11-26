@@ -954,7 +954,7 @@ namespace FlightCareer.UI.ViewModels
             var groundingDefects = _flightMonitor.GetGroundingDefects(aircraft.Id);
             if (groundingDefects.Count > 0)
             {
-                var lista = string.Join("\n", groundingDefects.Select(d => $"• {d.Title} ({d.OriginLabel}, {d.DetectedAtUtc.ToLocalTime():dd/MM HH:mm})"));
+                var lista = string.Join("\n", groundingDefects.Select(d => $"• {d.Title} ({d.DetectedAtUtc.ToLocalTime():dd/MM HH:mm})"));
                 System.Windows.MessageBox.Show($"Voo não autorizado! A aeronave {aircraft.Prefix} tem itens inoperantes:\n\n{lista}\n\nRepare as panes na oficina do Hangar antes de iniciar ou receber por missões.", "Pane em Aberto (NO-GO)", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return;
             }

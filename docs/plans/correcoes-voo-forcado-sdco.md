@@ -49,11 +49,11 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 
 ## E. Hangar (pedidos e sugestões do usuário)
 
-- [ ] **E1. Aviso de oficina duplicado:** faixa "OFICINA ... Libera em" (`PilotAircraftWrapper` ~233) e cartão "Na oficina — libera em" (`WorkshopBannerText`). Manter um.
+- [x] **E1. Aviso de oficina duplicado:** faixa "OFICINA ... Libera em" (`PilotAircraftWrapper` ~233) e cartão "Na oficina — libera em" (`WorkshopBannerText`). Manter um.
 - [x] **E2. "Reparar todas as panes" × "Reparar tudo":** (PANE-PECAS) fluxo único implementado no Hangar: `RepairAll` inclui todas as peças recomendadas e todas as panes abertas (as ligadas a peças saem sem custo duplo e as sem peças cobram seu valor), habilitando o botão mesmo que só haja pane aberta.
-- [ ] **E3. Preço do botão ≠ cobrado:** botão 8.900, cobrado 7.120 (dificuldade ×0,80, avisada só na confirmação). Mostrar o preço final.
+- [x] **E3. Preço do botão ≠ cobrado:** botão 8.900, cobrado 7.120 (dificuldade ×0,80, avisada só na confirmação). Mostrar o preço final.
   Pedido do usuário (2026-11-26): trocar "Dificuldade Fácil: custos ×0,80" (`HangarViewModel` ~268) por só o desconto, em %: "Desconto da dificuldade Fácil: 20%" (acima de 1,00: "Acréscimo da dificuldade X: N%"). É % de dinheiro, permitido pela regra da parte F.
-- [ ] **E4. Texto amigável das panes:** tirar "SIMULADOR · VOANDO (PLANANDO...) · WEAR AND TEAR IS FAILED:39..." (e o prefixo "[Operacional]"). Ex.: "O motor parou de funcionar em voo". Técnico só no log/tooltip. Botão com "Reparar · valor" formatado.
+- [x] **E4. Texto amigável das panes:** tirar "SIMULADOR · VOANDO (PLANANDO...) · WEAR AND TEAR IS FAILED:39..." (e o prefixo "[Operacional]"). Ex.: "O motor parou de funcionar em voo". Técnico só no log/tooltip. Botão com "Reparar · valor" formatado.
 - [ ] **E5. Peça "nunca inspecionada" com ✓ verde:** contradição (73/73 sem leitura).
 
 ### Sugestões do usuário (redesenho; fazer spec)
@@ -106,7 +106,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 4 | BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
 | 5 | MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
 | 6 | ~~RESGATE~~ | B4 decidido: cancelar a missão (entra na tarefa 2) | — | — | — |
-| 7 | HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
+| 7 | ✅ HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
 | 8 | SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |
 | 9 | EXCEDENCIAS | D7, D8, D9 e pneus/combustível/pausa de `achados-voo-sdco.md` | Opus (investigação) | Claude pesquisa; Gemini corrige | 2 |
 | 10 | HANGAR-REDESENHO | E5 e sugestões 1–9 | Opus (spec) | Gemini, em etapas | 1, 7, 8 |

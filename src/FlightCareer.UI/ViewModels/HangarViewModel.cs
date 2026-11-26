@@ -112,7 +112,7 @@ namespace FlightCareer.UI.ViewModels
             var replace = ReplacePartCommand;
             var wrapped = pilot.Hangar
                 .OrderBy(a => a.Prefix)
-                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a), HasConvertibleCabin(a), replace) { IsActive = a.Id == pilot.ActiveAircraftId })
+                .Select(a => new PilotAircraftWrapper(a, _catalog, repair, _careerClock, _partCatalog, ResolveClassKey(a), HasConvertibleCabin(a), replace, _pilotDifficulty) { IsActive = a.Id == pilot.ActiveAircraftId })
                 .ToList();
 
             // Panes persistentes abertas (gravadas pelo voo/vigia em outros contextos)
@@ -261,11 +261,11 @@ namespace FlightCareer.UI.ViewModels
             var aircraftId = SelectedAircraft.Aircraft.Id;
 
             var diffEcon = DifficultyEconomy.For(_pilotDifficulty);
-            if (diffEcon.CostMultiplier != 1.0)
+            cost = diffEcon.ApplyCost(cost);
+            var adjustmentText = DifficultyEconomy.CostAdjustmentText(_pilotDifficulty);
+            if (adjustmentText != null)
             {
-                cost = Math.Round(cost * diffEcon.CostMultiplier, 2);
-                string diffLabel = DifficultyEconomy.Label(_pilotDifficulty);
-                message = $"{message}\n\nDificuldade {diffLabel}: custos ×{diffEcon.CostMultiplier:0.00}";
+                message = $"{message}\n\n{adjustmentText}";
             }
 
             bool isExpress = false;
