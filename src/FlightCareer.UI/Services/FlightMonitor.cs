@@ -1808,7 +1808,12 @@ namespace FlightCareer.UI.Services
             FlushExceedanceLog();
             StopMonitoring();
 
-            if (_pilot == null || _aircraft == null) return;
+            if (_pilot == null || _aircraft == null)
+            {
+                // Sem piloto/aeronave não há como saber se foi fora de pista: fecha o blackbox mesmo assim
+                _telemetryLogger.StopFlightLog("VOO_CONCLUIDO", _qualityService.TouchdownFPM, _qualityService.GetQualityScore());
+                return;
+            }
 
             // Encontrar ICAO de destino (o mais próximo das coordenadas atuais)
             string destinationIcao = _originIcao;
