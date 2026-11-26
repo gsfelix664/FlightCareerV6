@@ -3370,3 +3370,7 @@
 - Quadro de missões mostra a área, os pontos e a faixa do contrato selecionado, como o briefing. `FlightMapControl.ContractMissions` (missão, item do quadro ou coleção) monta os visuais com `ContractMarkerBuilder`; saem `ContractMarkers`/`SurveyArea` duplicados do briefing e do HUD.
 - Voo de 26/11 (SDCO, C152): contrato cumprido, 2 pousos com toque e arremetida, área de Tatuí ok; pneus −4,6 % e RPM alto registrados no plano `achados-voo-sdco.md`.
 - Revisão e merge de OBJ-CARD-1 e OBJ-CARD-2 (Gemini). Build 0 erros; `dotnet test` 1.212/1.212. Não testado no MSFS.
+
+## 2026-11-26 - Análise do pouso forçado e plano de correções (Claude)
+- Plano `docs/plans/correcoes-voo-forcado-sdco.md`: pedidos do usuário (mapa, briefing VFR, Hangar sem %), bugs achados no REC, blackbox e banco (11 peças quebradas por uma pane, cobrança em dobro, dano de pouso fora das peças) e 10 tarefas com modelo recomendado.
+- Só documentação; nenhum código alterado. Nada testado no MSFS.
