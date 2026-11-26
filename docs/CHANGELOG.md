@@ -3344,3 +3344,11 @@
 - `install-global.sh` desativa skills sem uso (`global/settings.json`, `skillOverrides`; efeito a conferir com `/context`).
 - HANDOFF limitado a 40 linhas; testes de voo em `docs/agents/TESTES-PENDENTES.md`; roteiro em `ROTEIRO-VOO.md`.
 - Só documentação e ferramentas; build e testes rodados antes das edições (0 erros, 1.189/1.189).
+
+## 2026-11-26 - Correções do voo de instrução em SDCO (Claude)
+- Dados de lugares (VOO-SDCO-1): o DI escolhia o construtor de listas do `PlacesDataService`, todas vazias; o jogo rodava sem áreas do DECEA, zonas de salto, POIs, aeródromos cênicos e de instrução. Construtor de dados virou `PlacesDataService.FromData`; teste de DI.
+- Toque e arremetida (VOO-SDCO-2): `LandingCycleTracker` abre ciclo novo após 8 s no ar; antes, 3 toques contavam 1 pouso, o 2º virava "BOUNCE" e o status ficava "TÁXI / PÁTIO" em voo. Dano do pouso usa a razão daquele toque; perna de XP só com parada completa.
+- Sobrevoo (VOO-SDCO-3): folga de altitude de 500 para 100 ft.
+- Mini-mapa do HUD (VOO-SDCO-4) mostra os contratos aceitos antes do monitoramento.
+- Faixa de altitude do texto do contrato sempre em pt-BR (VOO-SDCO-5).
+- Build 0 erros; `dotnet test` 1.195/1.195. Não testado no MSFS.

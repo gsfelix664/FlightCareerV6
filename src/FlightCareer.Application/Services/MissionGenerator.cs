@@ -410,6 +410,12 @@ namespace FlightCareer.Application.Services
             return false;
         }
 
+        private static readonly System.Globalization.CultureInfo s_altitudeCulture = System.Globalization.CultureInfo.GetCultureInfo("pt-BR");
+
+        /// <summary>Faixa de altitude do texto do contrato, sempre no formato pt-BR (independe da cultura do Windows).</summary>
+        private static string FormatAltitudeBand(int minAgl, int maxAgl) =>
+            string.Format(s_altitudeCulture, "{0:N0} a {1:N0} ft AGL", minAgl, maxAgl);
+
         public static double CalculateInitialBearing(double lat1, double lon1, double lat2, double lon2)
         {
             double lat1Rad = lat1 * Math.PI / 180.0;
@@ -452,7 +458,7 @@ namespace FlightCareer.Application.Services
                     double headingDeg = CalculateInitialBearing(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
                     string realDir = GetCardinalDirection(headingDeg);
                     double radius = Math.Clamp(area.RadiusNm, 3.0, 6.0);
-                    string realAltBand = $"{minAgl:N0} a {maxAgl:N0} ft AGL";
+                    string realAltBand = FormatAltitudeBand(minAgl, maxAgl);
                     string realAreaIdent = $"Área {area.Id} {area.Name}";
                     string realOverflyWp = OverflyWaypointCodec.FormatCoordinatePoint(realAreaIdent, area.Lat, area.Lon, radius, maxAgl, minAgl);
 
@@ -531,7 +537,7 @@ namespace FlightCareer.Application.Services
 
             int altBase = 2500 + (random.Next(0, 3) * 500);
             int altTop = Math.Min(4500, altBase + 1000 + (random.Next(0, 2) * 500));
-            string altBand = $"{altBase:N0} a {altTop:N0} ft AGL";
+            string altBand = FormatAltitudeBand(altBase, altTop);
 
             string areaIdent = $"Área de instrução {dir}";
             string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, altTop, altBase);
@@ -597,7 +603,7 @@ namespace FlightCareer.Application.Services
                     double headingDeg = CalculateInitialBearing(origin.Latitude, origin.Longitude, area.Lat, area.Lon);
                     string realDir = GetCardinalDirection(headingDeg);
                     double radius = Math.Clamp(area.RadiusNm, 3.0, 6.0);
-                    string realAltBand = $"{minAgl:N0} a {maxAgl:N0} ft AGL";
+                    string realAltBand = FormatAltitudeBand(minAgl, maxAgl);
                     string realAreaIdent = $"Área {area.Id} {area.Name}";
                     string realOverflyWp = OverflyWaypointCodec.FormatCoordinatePoint(realAreaIdent, area.Lat, area.Lon, radius, maxAgl, minAgl);
 
@@ -675,7 +681,7 @@ namespace FlightCareer.Application.Services
 
             int altBase = 2500 + (random.Next(0, 3) * 500);
             int altTop = Math.Min(4500, altBase + 1000 + (random.Next(0, 2) * 500));
-            string altBand = $"{altBase:N0} a {altTop:N0} ft AGL";
+            string altBand = FormatAltitudeBand(altBase, altTop);
 
             string areaIdent = $"Área de instrução {dir}";
             string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint(areaIdent, areaLat, areaLon, 3.0, altTop, altBase);

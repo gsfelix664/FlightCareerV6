@@ -159,9 +159,14 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private bool _hasContractProgress;
         private string _contractMarkersKey = string.Empty;
 
+        /// <summary>Contratos aceitos no briefing: o mini-mapa os mostra antes de o monitoramento começar.</summary>
+        public IReadOnlyCollection<Mission>? AcceptedMissions { get; set; }
+
         private void RefreshContractMarkers()
         {
-            var missions = _flightMonitor.ActiveMissions;
+            IReadOnlyList<Mission> missions = _flightMonitor.IsMonitoring
+                ? _flightMonitor.ActiveMissions
+                : AcceptedMissions?.ToList() ?? new List<Mission>();
             string key = string.Join("|", missions.Select(m => m.Id));
             if (key == _contractMarkersKey) return;
             _contractMarkersKey = key;
@@ -288,9 +293,23 @@ namespace FlightCareer.UI.ViewModels
                     DestLat = 0;
                     DestLon = 0;
                     DestIcao = string.Empty;
-                    OriginLat = 0;
-                    OriginLon = 0;
-                    OriginIcao = string.Empty;
+                    if (AcceptedMissions is { Count: > 0 } && (data.PlaneLatitude != 0 || data.PlaneLongitude != 0))
+                    {
+                        // Com contrato aceito, o ponto de partida entra no enquadramento junto com a área
+                        // Atualiza só se não houver partida ou se ela sobrou de outro voo (> ~1 NM)
+                        if (OriginIcao != "PARTIDA" || Math.Abs(OriginLat - data.PlaneLatitude) > 0.02 || Math.Abs(OriginLon - data.PlaneLongitude) > 0.02)
+                        {
+                            OriginLat = data.PlaneLatitude;
+                            OriginLon = data.PlaneLongitude;
+                            OriginIcao = "PARTIDA";
+                        }
+                    }
+                    else
+                    {
+                        OriginLat = 0;
+                        OriginLon = 0;
+                        OriginIcao = string.Empty;
+                    }
                 }
 
                 // Depois da origem e do destino, para o mapa enquadrar tudo

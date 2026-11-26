@@ -76,12 +76,12 @@ namespace FlightCareer.Tests.Missions
         public void EvaluateAltitude_RespeitaTolerancia()
         {
             var ptFaixa = new OverflyPoint("P1", 0.0, 0.0, ElevationFt: 1000.0, RadiusNm: 2.0, MaxAglFt: 3500.0, MinAglFt: 2500.0);
-            // MinAgl > 0: Elev + Min - Tol = 1000 + 2500 - 500 = 3000
-            //             Elev + Max + Tol = 1000 + 3500 + 500 = 5000
-            Assert.Equal(OverflyAltitudeState.InBand, OverflyTracker.EvaluateAltitude(ptFaixa, 3000.0));
-            Assert.Equal(OverflyAltitudeState.Below, OverflyTracker.EvaluateAltitude(ptFaixa, 2999.0));
-            Assert.Equal(OverflyAltitudeState.InBand, OverflyTracker.EvaluateAltitude(ptFaixa, 5000.0));
-            Assert.Equal(OverflyAltitudeState.Above, OverflyTracker.EvaluateAltitude(ptFaixa, 5001.0));
+            // MinAgl > 0: Elev + Min - Tol = 1000 + 2500 - 100 = 3400
+            //             Elev + Max + Tol = 1000 + 3500 + 100 = 4600
+            Assert.Equal(OverflyAltitudeState.InBand, OverflyTracker.EvaluateAltitude(ptFaixa, 3400.0));
+            Assert.Equal(OverflyAltitudeState.Below, OverflyTracker.EvaluateAltitude(ptFaixa, 3399.0));
+            Assert.Equal(OverflyAltitudeState.InBand, OverflyTracker.EvaluateAltitude(ptFaixa, 4600.0));
+            Assert.Equal(OverflyAltitudeState.Above, OverflyTracker.EvaluateAltitude(ptFaixa, 4601.0));
 
             var ptTeto = new OverflyPoint("P2", 0.0, 0.0, ElevationFt: 1000.0, RadiusNm: 2.0, MaxAglFt: 3000.0, MinAglFt: 0.0);
             // MinAgl == 0: Elev + Max = 1000 + 3000 = 4000

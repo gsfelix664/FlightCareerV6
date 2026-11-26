@@ -534,6 +534,10 @@ namespace FlightCareer.UI.ViewModels
         private void ShowOverlay()
         {
             var overlayWindow = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Views.DebugOverlayWindow>(((App)System.Windows.Application.Current).ServiceProvider);
+            if (overlayWindow.DataContext is DebugOverlayViewModel overlayViewModel)
+            {
+                overlayViewModel.AcceptedMissions = ActiveMissions;
+            }
             overlayWindow.Show();
             overlayWindow.Activate();
         }

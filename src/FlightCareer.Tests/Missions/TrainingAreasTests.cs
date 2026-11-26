@@ -87,7 +87,7 @@ namespace FlightCareer.Tests.Missions
             var a2 = new TrainingAreaInfo("AREA2", "Instrução Longe", "instrucao", d40Lat, 0.0, 5.0, 0, "SFC", 5000, "MSL");
             var a3 = new TrainingAreaInfo("AREA3", "Acrobacia Perto", "acrobacia", d5Lat, 0.0, 2.0, 0, "SFC", 5000, "MSL");
 
-            var service = new PlacesDataService(null, null, null, null, new[] { a1, a2, a3 });
+            var service = PlacesDataService.FromData(null, null, null, null, new[] { a1, a2, a3 });
             var result = service.FindTrainingAreas(0.0, 0.0, 25.0, "instrucao");
 
             Assert.Single(result);
@@ -101,7 +101,7 @@ namespace FlightCareer.Tests.Missions
             var sub = GetSubConfig("instrucao_local");
             var area = new TrainingAreaInfo(
                 "SBR806", "Aeroclube de Tatuí", "instrucao", -23.34887, -47.88198, 3.4, 0, "SFC", 20000, "MSL");
-            var service = new PlacesDataService(null, null, null, null, new[] { area });
+            var service = PlacesDataService.FromData(null, null, null, null, new[] { area });
 
             var mission = MissionGenerator.CreateLocalInstructionMissionSync(
                 origin, sub, new Random(42), DateTime.UtcNow, placesService: service);
@@ -117,7 +117,7 @@ namespace FlightCareer.Tests.Missions
         {
             var origin = CreateTatuiAirport();
             var sub = GetSubConfig("instrucao_local");
-            var emptyService = new PlacesDataService(null, null, null, null, Array.Empty<TrainingAreaInfo>());
+            var emptyService = PlacesDataService.FromData(null, null, null, null, Array.Empty<TrainingAreaInfo>());
 
             var mNull = MissionGenerator.CreateLocalInstructionMissionSync(
                 origin, sub, new Random(999), DateTime.UtcNow, placesService: null);
@@ -139,7 +139,7 @@ namespace FlightCareer.Tests.Missions
             var sub = new MissionDefinition { Id = "checkride", Name = "Voo de Cheque" };
             var area = new TrainingAreaInfo(
                 "SBR806", "Aeroclube de Tatuí", "instrucao", -23.34887, -47.88198, 3.4, 0, "SFC", 20000, "MSL");
-            var service = new PlacesDataService(null, null, null, null, new[] { area });
+            var service = PlacesDataService.FromData(null, null, null, null, new[] { area });
 
             var mission = MissionGenerator.CreateCheckrideMissionSync(
                 origin, sub, new Random(42), DateTime.UtcNow, placesService: service);

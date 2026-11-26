@@ -19,7 +19,7 @@ namespace FlightCareer.Tests.Missions
         [Fact]
         public void AugmentOriginTags_TuristicoDestino_NaoViraBasePanoramica()
         {
-            var places = new PlacesDataService(null, null, Array.Empty<TouristPoiInfo>(),
+            var places = PlacesDataService.FromData(null, null, Array.Empty<TouristPoiInfo>(),
                 new[] { Scenic("SBBASE", "panoramico"), Scenic("SBDEST", "destino") });
 
             var baseTags = MissionBoardCore.AugmentOriginTags(new Airport { ICAO = "SBBASE" }, NoTags, places);
