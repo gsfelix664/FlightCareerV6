@@ -16,7 +16,7 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
   Correção: TGL só com `RequiredTouchAndGoes > 0`; missão com `MultiStopContractData` vira pernas reais (origem → escalas → origem), com ação por perna ("Pouso completo em X" ou "Toque e arremetida em X" conforme `StopMode`).
 - [ ] **B2. Escalas não aparecem em nenhum mapa** (briefing, HUD, quadro): `ContractMarkerBuilder` só desenha `OverflyWaypoints` e aerofoto/salto/aerial; ignora `MultiStopContractData.Stops`. Desenhar escalas numeradas e a linha do triângulo (origem → ponto de reporte → escalas → origem). Cobrir também STOL e outros contratos com aeródromo.
 - [ ] **B3. Ponto de reporte fora do enquadramento no briefing:** `RouteLegs` é montado depois de `ContractMissions`, e `UpdateMultiLegRoute` dá zoom no circuito falso. Enquadrar rota + contrato num passo só. HUD: conferir no MSFS (usa o mesmo construtor, então hoje mostra só o ponto de reporte).
-- [ ] **B4. Missão após pouso forçado:** a origem passou a SNZG (47 NM), mas título e descrição seguem "SDCO ... 214 NM" com as escalas antigas. Definir: texto de resgate/retomada, ou missão falha.
+- [x] **B4. Missão após pouso forçado:** (POUSO-DANO: cancelada, XP 50 %, sem dinheiro) a origem passou a SNZG (47 NM), mas título e descrição seguem "SDCO ... 214 NM" com as escalas antigas. Definir: texto de resgate/retomada, ou missão falha.
 
 ## C. Último voo (SDCO → pouso forçado perto de SNZG): o que aconteceu
 
@@ -31,21 +31,21 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 
 **Por que o cárter quebrou e o trem não** (pergunta do usuário): são regras diferentes. O vazamento de óleo é um sorteio no pouso duro (`oilLeakMinFpm` 650, 50 % a 1000 fpm; a 733 fpm, cerca de 12 %). Trem e pneus não têm chance de quebra: só desgaste fixo por faixa (600–850 fpm: 2,5 % e 3,5 %; ≥ 850: 10 % e 12 %), e ≥ 900 fpm é perda total.
 
-- [ ] **C1. (entra na tarefa 2)** Pouso duro com chance de quebra de trem e pneu, crescente com fpm, inclinação e terreno fora de pista; calibração no JSON e consequência visível no Hangar. Chances e limites: decisão do usuário na spec.
+- [x] **C1. (entra na tarefa 2)** Pouso duro com chance de quebra de trem e pneu, crescente com fpm, inclinação e terreno fora de pista; calibração no JSON e consequência visível no Hangar. Chances e limites: decisão do usuário na spec.
 
 ## D. Bugs achados na análise (investigar com Opus)
 
-- [ ] **D1. Penalidade de pouso forçado não chega às peças** (acima). Aplicar nas peças, com teste. Reavaliar a severidade da faixa "hard" (600–850 fpm: só 2,5 % no trem).
+- [x] **D1. Penalidade de pouso forçado não chega às peças** (acima). Aplicar nas peças, com teste. Reavaliar a severidade da faixa "hard" (600–850 fpm: só 2,5 % no trem).
 - [x] **D2. Uma pane nativa quebrou 11 peças** (PANE-PECAS) no mesmo instante (ID 39): agora quebra exatamente 1 peça prioritária via `NativeFailurePartMap` (menor saúde, ordem de tabela, menor motor).
 - [x] **D3. Cobrança em dobro:** (PANE-PECAS) unificado via `DefectPartLink`: reparar a pane inclui a substituição das peças ligadas com custo da pane zerado; trocar a peça física resolve a pane ligada no Hangar.
 - [x] **D4. Peça quebrada não interdita:** (PANE-PECAS) `PartAirworthiness.GroundingParts` confere `BlocksFlightWhenBroken == true` e interdita o avião tanto no status do Hangar ("INTERDITADA (PEÇA)") quanto no `FlightMonitor.StartMonitoring`.
-- [ ] **D5. Inspeções de voo só vão para o log:** `OnInspection` só chama `LogEvent` (pouso duro, ponta de asa, flap, sobre-rotação, comandos). Não aparecem no Hangar nem no relatório.
-- [ ] **D6. `isGrounding` ignorado:** a regra de ponta de asa em `wear_rules.json` usa `isGrounding`; o DTO só lê `grounding`.
+- [x] **D5. Inspeções de voo só vão para o log:** `OnInspection` só chama `LogEvent` (pouso duro, ponta de asa, flap, sobre-rotação, comandos). Não aparecem no Hangar nem no relatório.
+- [x] **D6. `isGrounding` ignorado:** a regra de ponta de asa em `wear_rules.json` usa `isGrounding`; o DTO só lê `grounding`.
 - [ ] **D7. Excedência falsa em solo:** aos 31 s, durante slew no pátio, IAS 377 kt gerou Vne "severe", dano e inspeção. Filtrar slew/solo/valor implausível.
 - [ ] **D8. Vfe do C152 dente 1 = 110 kt** (vem do SimVar); dentes 2 e 3 = 85 (POH). Conferir no POH; se 85 vale para todo flap, o voo excedeu muito mais.
 - [ ] **D9. `piston_rpm_overspeed`:** 2550 sem histerese gera dezenas de eventos (já em `achados-voo-sdco.md`).
-- [ ] **D10. Relógio de carreira** não avança no caminho de pouso fora de pista (`FlightService` ~188-261; confirmar se outro ponto avança).
-- [ ] **D11. Blackbox:** "Status Final: VOO_CONCLUIDO" em pouso forçado; resumo com G máx. 1,82 e o toque mediu 2,31.
+- [x] **D10. Relógio de carreira** não avança no caminho de pouso fora de pista (`FlightService` ~188-261; confirmar se outro ponto avança).
+- [x] **D11. Blackbox:** "Status Final: VOO_CONCLUIDO" em pouso forçado; resumo com G máx. 1,82 e o toque mediu 2,31.
 
 ## E. Hangar (pedidos e sugestões do usuário)
 
@@ -101,7 +101,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | # | ID | Itens | Modelo | Quem implementa | Depende de |
 |---|---|---|---|---|---|
 | 1 | PANE-PECAS | D2, D3, D4 e o fluxo único de E2 | Opus | Gemini; revisão linha a linha | — |
-| 2 | POUSO-DANO | C1, D1, D5, D6, D10, D11 | Opus | Gemini; revisão linha a linha | 1 |
+| 2 | ✅ POUSO-DANO | C1, D1, D5, D6, D10, D11 | Opus | Gemini; revisão linha a linha | 1 |
 | 3 | LIMPA-MAPA | A1, A2 | Sonnet | Gemini (golden pode mudar) | — |
 | 4 | BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
 | 5 | MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
