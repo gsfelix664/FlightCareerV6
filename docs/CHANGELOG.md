@@ -3358,3 +3358,10 @@
 - Abre automaticamente ao iniciar monitoramento de voo; atalho global Ctrl+Alt+O e botão 🎯 no cabeçalho do HUD reabrem a janela.
 - Linhas estruturadas `ContractObjectiveLine` e `BuildLines` em `ContractProgressFormatter`; `ObjectiveCardBuilder` agrega missões e objetivos com deduplicação de destinos finais.
 - Build 0 erros; 1.203/1.203 testes aprovados. Janela, atalho e botão do HUD não testados no MSFS.
+
+
+## 2026-11-26 - Posições das janelas e cores do CONTRATO (OBJ-CARD-2) (Gemini)
+- Posições salvas do HUD, do cartão de objetivo e do overlay de alertas em `%LocalAppData%\FlightCareer\window-positions.json` (`WindowPositionStore.Shared`), persistidas ao soltar o arrasto (`DragMove`), ao esconder e ao fechar.
+- Algoritmo puro de contenção de janela `WindowPlacement.ClampToArea` (`Domain/Utils`), garantindo título e margem visíveis na tela virtual (`SystemParameters.VirtualScreen*`) em configurações com um ou múltiplos monitores.
+- Linha CONTRATO do HUD (`DebugOverlayViewModel`, `DebugOverlayWindow.xaml`) renderizada com `ItemsControl` e `HudContractItem` coloridos por estado do objetivo (âmbar `#FBBF24` pendente, verde `#00E676` cumprido, vermelho `#FF5252` falhou), atualizando somente quando o conteúdo ou estado muda.
+- Build 0 erros; 1.212/1.212 testes aprovados. Posições persistidas e cores não testadas no MSFS nem em múltiplos monitores.
