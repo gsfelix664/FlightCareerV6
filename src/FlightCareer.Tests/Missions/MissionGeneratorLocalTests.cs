@@ -129,7 +129,7 @@ namespace FlightCareer.Tests.Missions
                 new("poi2", "Serra do Japi", -23.18, -46.67, "parque_nacional", "BR", 90),
                 new("poi3", "Represa Municipal", -23.51, -46.94, "lago", "BR", 70)
             };
-            var placesWithPois = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: mockPois);
+            var placesWithPois = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: mockPois);
 
             var missionWithPois = MissionGenerator.CreateScenicTourMissionSync(
                 origin, sub, rng, DateTime.UtcNow, placesService: placesWithPois);
@@ -140,7 +140,7 @@ namespace FlightCareer.Tests.Missions
             Assert.InRange(parsed.Count, 2, 3);
 
             // Sem POIs -> retorna null (para fazer fallback aos aeródromos no gerador principal)
-            var placesEmpty = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: Array.Empty<TouristPoiInfo>());
+            var placesEmpty = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: Array.Empty<TouristPoiInfo>());
             var missionEmpty = MissionGenerator.CreateScenicTourMissionSync(
                 origin, sub, rng, DateTime.UtcNow, placesService: placesEmpty);
             Assert.Null(missionEmpty);
@@ -159,7 +159,7 @@ namespace FlightCareer.Tests.Missions
             };
             // Coloca a origem a ~10 NM da barragem (faixa 5 a 25 NM)
             var originNearDam = CreateOriginAirport("SBNP", -22.35, -52.85);
-            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: mockPois);
+            var places = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: mockPois);
 
             var mission = MissionGenerator.CreateSurveyMissionSync(
                 originNearDam, sub, rng, DateTime.UtcNow, placesService: places);
@@ -186,7 +186,7 @@ namespace FlightCareer.Tests.Missions
             {
                 new("SDTI", "Boituva Parachuting Center", "BR", "Centro Nacional de Paraquedismo", -23.295, -47.685)
             };
-            var places = new PlacesDataService(dropZones: mockDzs, trainingAerodromes: null, pois: null);
+            var places = PlacesDataService.FromData(dropZones: mockDzs, trainingAerodromes: null, pois: null);
 
             var mission = MissionGenerator.CreateSkydiveMissionSync(
                 origin, sub, rng, DateTime.UtcNow, 25.0, placesService: places, engineClass: "turboprop");
@@ -210,7 +210,7 @@ namespace FlightCareer.Tests.Missions
             {
                 new("SDTI", "Boituva", "BR", "DZ Boituva", -23.28, -47.67)
             };
-            var places = new PlacesDataService(dropZones: mockDzs, trainingAerodromes: null, pois: null);
+            var places = PlacesDataService.FromData(dropZones: mockDzs, trainingAerodromes: null, pois: null);
 
             var allAirports = new List<Airport> { origin };
             var rng = new Random(777);
@@ -265,7 +265,7 @@ namespace FlightCareer.Tests.Missions
                 new("SBJR", "Passeios aéreos do Rio de Janeiro", "BR", "Corredores visuais dedicados (REA) sobre a Baía.", mockPoints)
             };
 
-            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+            var places = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
 
             var mission = MissionGenerator.CreateScenicTourMissionSync(
                 origin, sub, rng, DateTime.UtcNow, placesService: places);
@@ -309,7 +309,7 @@ namespace FlightCareer.Tests.Missions
                 new("SBJR", "Rio Panorâmico", "BR", "Nota", new List<ScenicPoint> { new("Cristo", -22.95, -43.21) })
             };
 
-            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: mockPois, scenicAerodromes: mockScenic);
+            var places = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: mockPois, scenicAerodromes: mockScenic);
 
             var mission = MissionGenerator.CreateScenicTourMissionSync(
                 origin, sub, rng, DateTime.UtcNow, placesService: places);
@@ -335,7 +335,7 @@ namespace FlightCareer.Tests.Missions
                 new("SBJR", "Rio Scenic", "BR", "Nota", mockPoints)
             };
 
-            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+            var places = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
             var allAirports = new List<Airport> { origin };
             var rng = new Random(888);
 
@@ -390,7 +390,7 @@ namespace FlightCareer.Tests.Missions
                 }, Role: "panoramico")
             };
 
-            var places = new PlacesDataService(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
+            var places = PlacesDataService.FromData(dropZones: null, trainingAerodromes: null, pois: null, scenicAerodromes: mockScenic);
             var baseTags = AirportProfileCatalog.Shared.TagsFor(origin.ICAO);
             var augmentedTags = MissionBoardCore.AugmentOriginTags(origin, baseTags, places);
 

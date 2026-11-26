@@ -11,7 +11,7 @@ namespace FlightCareer.Domain.Missions
     /// </summary>
     public sealed class OverflyTracker
     {
-        public const double AltitudeToleranceFt = 500.0;
+        public const double AltitudeToleranceFt = 100.0;
 
         private readonly List<OverflyPoint> _targets = new();
         private readonly HashSet<string> _visited = new(StringComparer.OrdinalIgnoreCase);

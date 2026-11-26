@@ -48,10 +48,10 @@ namespace FlightCareer.Tests.Missions
             var pt = new OverflyPoint("AREA1", 0.0, 0.0, ElevationFt: 100.0, RadiusNm: 2.0, MaxAglFt: 3500.0, MinAglFt: 2500.0);
             tracker.ConfigureWaypoints(new[] { pt });
 
-            tracker.Update(0.0, 0.0, 1900.0);
+            tracker.Update(0.0, 0.0, 2499.0);
             Assert.False(tracker.IsPointVisited("AREA1"));
 
-            tracker.Update(0.0, 0.0, 2100.0);
+            tracker.Update(0.0, 0.0, 2500.0);
             Assert.True(tracker.IsPointVisited("AREA1"));
         }
 
@@ -62,10 +62,10 @@ namespace FlightCareer.Tests.Missions
             var pt = new OverflyPoint("AREA1", 0.0, 0.0, ElevationFt: 100.0, RadiusNm: 2.0, MaxAglFt: 3500.0, MinAglFt: 2500.0);
             tracker.ConfigureWaypoints(new[] { pt });
 
-            tracker.Update(0.0, 0.0, 4101.0);
+            tracker.Update(0.0, 0.0, 3701.0);
             Assert.False(tracker.IsPointVisited("AREA1"));
 
-            tracker.Update(0.0, 0.0, 4100.0);
+            tracker.Update(0.0, 0.0, 3700.0);
             Assert.True(tracker.IsPointVisited("AREA1"));
         }
 

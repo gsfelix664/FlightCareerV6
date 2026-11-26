@@ -30,12 +30,24 @@ namespace FlightCareer.Application.Services
             EnsureDataLoaded();
         }
 
-        public PlacesDataService(
+        /// <summary>
+        /// Dados informados em memória (testes). Não há construtor público com listas de propósito: o contêiner de DI
+        /// resolve qualquer IEnumerable como lista vazia, escolhia aquele construtor e o jogo rodava sem dados de lugares.
+        /// </summary>
+        public static PlacesDataService FromData(
             IEnumerable<DropZoneInfo>? dropZones,
             IEnumerable<string>? trainingAerodromes,
             IEnumerable<TouristPoiInfo>? pois,
             IEnumerable<ScenicAerodromeInfo>? scenicAerodromes = null,
-            IEnumerable<TrainingAreaInfo>? trainingAreas = null)
+            IEnumerable<TrainingAreaInfo>? trainingAreas = null) =>
+            new(dropZones, trainingAerodromes, pois, scenicAerodromes, trainingAreas);
+
+        private PlacesDataService(
+            IEnumerable<DropZoneInfo>? dropZones,
+            IEnumerable<string>? trainingAerodromes,
+            IEnumerable<TouristPoiInfo>? pois,
+            IEnumerable<ScenicAerodromeInfo>? scenicAerodromes,
+            IEnumerable<TrainingAreaInfo>? trainingAreas)
         {
             if (dropZones != null || trainingAerodromes != null || pois != null || scenicAerodromes != null || trainingAreas != null)
             {

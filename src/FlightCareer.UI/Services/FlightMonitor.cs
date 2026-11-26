@@ -65,7 +65,7 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         public string ContractProgressText { get; private set; } = string.Empty;
         private bool _isAirborne;
-        private bool _hasTouchedDown;
+        private readonly LandingCycleTracker _landingCycle;
         private DateTime _liftoffTime = DateTime.MinValue;
         private double _simulatedFlightTimeSeconds = 0;
         private DateTime _lastTick = DateTime.MinValue;
@@ -120,7 +120,6 @@ namespace FlightCareer.UI.Services
         private double _worstTouchdownFpm;
         private double _worstTouchdownG = 1.0;
         private int _flightTouchdowns;
-        private int _flightLandingsCount;
         private FlightInfractionTracker _infractionTracker = new();
         private readonly Queue<(double SimSec, double WindKnots)> _windHistory = new();
         // Últimos 5 min simulados de visibilidade/nuvem: o bônus de IMC vale só na aproximação, não em cruzeiro
@@ -150,6 +149,7 @@ namespace FlightCareer.UI.Services
             _failures = new ComponentFlightSession(simConnect, catalog, _random);
             _failures.OnFailure += OnAircraftFailureTriggered;
             _touchdown = new TouchdownDetector(catalog.Landing);
+            _landingCycle = new LandingCycleTracker(catalog.Landing.TakeoffBounceMaxAirborneSec);
 
             _partCatalog = partCatalog;
             _wearRules = wearRules;
@@ -797,7 +797,7 @@ namespace FlightCareer.UI.Services
             _startConditionTime = null;
             IsFlightActive = false;
             _isAirborne = false;
-            _hasTouchedDown = false;
+            _landingCycle.Reset();
             _simulatedFlightTimeSeconds = 0;
             _lastTick = DateTime.MinValue;
             _lastPreflightTick = DateTime.MinValue;
@@ -807,7 +807,6 @@ namespace FlightCareer.UI.Services
             _worstTouchdownFpm = 0;
             _worstTouchdownG = 1.0;
             _flightTouchdowns = 0;
-            _flightLandingsCount = 0;
             var firstMission = _activeMissions.FirstOrDefault();
             string? missionFamilyId = firstMission != null ? MissionPayTable.Shared.Resolve(firstMission.SubId)?.Id : null;
             bool isInstruction = string.Equals(missionFamilyId, "instrucao", StringComparison.OrdinalIgnoreCase) ||
@@ -1383,9 +1382,16 @@ namespace FlightCareer.UI.Services
             if (!_isAirborne && !data.IsOnGround && data.GroundSpeed > 30)
             {
                 _isAirborne = true;
-                _hasTouchedDown = false;
                 _liftoffTime = DateTime.Now;
                 _infractionTracker.OnTakeoff(data.IsLandingLightOn, data.IsTaxiLightOn);
+                _currentStatus = data.IsEngineRunning ? "VOANDO" : "VOANDO (PLANANDO / MOTOR CORTADO)";
+                OnStatusChanged?.Invoke(_currentStatus);
+            }
+
+            // Voltou a voar depois de um pouso (toque e arremetida ou nova perna): o próximo toque é outro pouso
+            if (_isAirborne && _landingCycle.Update(data.IsOnGround, data.GroundSpeed, _simulatedFlightTimeSeconds, out bool afterFullStop))
+            {
+                if (afterFullStop) _infractionTracker.OnTakeoff(data.IsLandingLightOn, data.IsTaxiLightOn);
                 _currentStatus = data.IsEngineRunning ? "VOANDO" : "VOANDO (PLANANDO / MOTOR CORTADO)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
@@ -1400,29 +1406,29 @@ namespace FlightCareer.UI.Services
                 // Com a leitura rápida ativa, o toque e o bounce são registrados em OnFastFlight (medidos no contato)
                 // Sem leitura rápida não há tempo de contato: logo depois de sair do chão é quique na decolagem, não pouso
                 bool inTakeoffBounceWindow = (DateTime.Now - _liftoffTime).TotalSeconds < _catalog.Landing.TakeoffBounceMaxAirborneSec;
-                if (!_hasTouchedDown && !FastStreamAlive && inTakeoffBounceWindow)
+                if (!_landingCycle.HasTouchedDown && !FastStreamAlive && inTakeoffBounceWindow)
                 {
                     // espera: se continuar no solo depois da janela, conta como pouso
                 }
-                else if (!_hasTouchedDown && !FastStreamAlive)
+                else if (!_landingCycle.HasTouchedDown && !FastStreamAlive)
                 {
-                    _hasTouchedDown = true;
+                    _landingCycle.RegisterLanding(touchdownRate);
                     _qualityService.RecordTouchdownFpm(touchdownRate);
                     _lastTouchdownEvent = null;
-                    RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
+                    RegisterLanding(touchdownRate, data, isBounce: false);
 
-                    _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
+                    _currentStatus = $"POUSO ({touchdownRate:F0} FPM)";
                     OnStatusChanged?.Invoke(_currentStatus);
                 }
                 else
                 {
                     // Bounce detection: se o impacto subsequente for mais forte (durante a desaceleração de pouso > 35 kts)
-                    if (!FastStreamAlive && data.GroundSpeed > 35 && touchdownRate > _qualityService.TouchdownFPM)
+                    if (!FastStreamAlive && data.GroundSpeed > 35 && _landingCycle.TryRegisterBounce(touchdownRate))
                     {
                         _qualityService.RecordTouchdownFpm(touchdownRate);
                         _lastTouchdownEvent = null;
                         RegisterLanding(touchdownRate, data, isBounce: true);
-                        _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
+                        _currentStatus = $"POUSO BOUNCE ({touchdownRate:F0} FPM)";
                         OnStatusChanged?.Invoke(_currentStatus);
                     }
                     else if (data.GroundSpeed <= 35 && _currentStatus.StartsWith("POUSO") && _startConditionTime == null)
@@ -1450,11 +1456,14 @@ namespace FlightCareer.UI.Services
                 
                 if ((DateTime.Now - _startConditionTime.Value).TotalSeconds >= 5)
                 {
-                    if (!_hasTouchedDown)
+                    if (!_landingCycle.HasTouchedDown)
                     {
                         double fpm = Math.Abs(data.VelocityBodyY * 60.0);
-                        _qualityService.RecordTouchdownFpm(fpm > 10 ? fpm : Math.Abs(data.VerticalSpeed));
-                        RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
+                        double rate = fpm > 10 ? fpm : Math.Abs(data.VerticalSpeed);
+                        _landingCycle.RegisterLanding(rate);
+                        _qualityService.RecordTouchdownFpm(rate);
+                        RegisterLanding(rate, data, isBounce: false);
+                        _landingCycle.Update(true, data.GroundSpeed, _simulatedFlightTimeSeconds, out _);
                     }
                     _ = FinalizeFlightAsync(data);
                 }
@@ -1530,7 +1539,7 @@ namespace FlightCareer.UI.Services
             }
 
             // Quique logo depois de sair do chão: não é pouso (contagem, ciclo, qualidade, XP); só o impacto duro causa dano
-            if (_isAirborne && TouchdownDetector.IsTakeoffBounce(ev, _hasTouchedDown, _catalog.Landing))
+            if (_isAirborne && TouchdownDetector.IsTakeoffBounce(ev, _landingCycle.HasTouchedDown, _catalog.Landing))
             {
                 _telemetryLogger.LogEvent("QUIQUE_DECOLAGEM", string.Format(inv, "{0}, {1:F1} s no ar: não conta como pouso", summary, ev.AirborneSec));
                 _telemetryLogger.LogEvent("TOQUE_TRACE", trace);
@@ -1547,21 +1556,21 @@ namespace FlightCareer.UI.Services
 
             if (!_isAirborne) return; // contato antes de decolar de fato (ex.: salto na corrida): só registro
 
-            if (!_hasTouchedDown)
+            if (!_landingCycle.HasTouchedDown)
             {
-                _hasTouchedDown = true;
+                _landingCycle.RegisterLanding(ev.TouchdownFpm);
                 _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
                 _lastTouchdownEvent = ev;
-                if (_lastData is { } data) RegisterLanding(_qualityService.TouchdownFPM, data, isBounce: false);
-                _currentStatus = $"POUSO ({_qualityService.TouchdownFPM:F0} FPM)";
+                if (_lastData is { } data) RegisterLanding(ev.TouchdownFpm, data, isBounce: false);
+                _currentStatus = $"POUSO ({ev.TouchdownFpm:F0} FPM)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
-            else if (ev.GroundSpeedKnots > 35 && ev.TouchdownFpm > _qualityService.TouchdownFPM)
+            else if (ev.GroundSpeedKnots > 35 && _landingCycle.TryRegisterBounce(ev.TouchdownFpm))
             {
                 _qualityService.RecordTouchdownFpm(ev.TouchdownFpm);
                 _lastTouchdownEvent = ev;
                 if (_lastData is { } data) RegisterLanding(ev.TouchdownFpm, data, isBounce: true);
-                _currentStatus = $"POUSO BOUNCE ({_qualityService.TouchdownFPM:F0} FPM)";
+                _currentStatus = $"POUSO BOUNCE ({ev.TouchdownFpm:F0} FPM)";
                 OnStatusChanged?.Invoke(_currentStatus);
             }
         }
@@ -1622,7 +1631,6 @@ namespace FlightCareer.UI.Services
             if (!isBounce)
             {
                 _aircraft.LandingsCount++;
-                _flightLandingsCount++;
             }
             if (touchdownFpm > _worstTouchdownFpm) _worstTouchdownFpm = touchdownFpm;
             if (data.GForce > _worstTouchdownG) _worstTouchdownG = data.GForce;
@@ -1719,7 +1727,7 @@ namespace FlightCareer.UI.Services
         {
             IsFlightActive = true;
             _isAirborne = false;
-            _hasTouchedDown = false;
+            _landingCycle.Reset();
             _simConnect.ResetCrashState();
             _failures.Reset(clearSimState: true);
             _qualityService.Reset();
@@ -1895,7 +1903,7 @@ namespace FlightCareer.UI.Services
             var xpInputs = new XpFlightInputs(
                 AirborneMinutes: airborneMin,
                 DistanceNm: _distanceTraveled,
-                LegsCompleted: Math.Max(1, _flightLandingsCount),
+                LegsCompleted: Math.Max(1, _landingCycle.CompletedLegs),
                 MissionFamilyId: missionFamilyId,
                 IsFerryOrNoMission: isFerry,
                 UsedTimeAcceleration: _usedTimeAcceleration,

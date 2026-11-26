@@ -2,14 +2,16 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-25 (16ª sessão, casa), Claude. Base `feat/component-health-system`. Build 0 erros; `dotnet test` 1.189/1.189.
+**Última atualização:** 2026-11-26 (17ª sessão, casa), Claude. Branch `fix/achados-voo-sdco` (**sem merge** na base `feat/component-health-system`; aguarda o usuário). Build 0 erros; `dotnet test` 1.195/1.195.
 
 ## Estado
-- Instruções enxutas: detalhes em `docs/sistemas/simconnect.md` e `banco.md`, `docs/agents/COMANDOS.md` e `~/.claude/tools/gemini/DELEGACAO.md`.
-- Voo de teste preparado (`docs/agents/ROTEIRO-VOO.md`), **ainda não voado**: o usuário cria piloto novo em SDCO (C152). Banco anterior (SBJS) em `db-backup/flightcareer.db*.sbjs-20261125-232827` na saída do UI.
+- Voo de instrução em SDCO analisado; 5 bugs corrigidos no branch (CHANGELOG, VOO-SDCO-1 a 5): dados de lugares no DI, toque e arremetida, folga de altitude, mini-mapa do HUD, formato pt-BR.
+- Não testado no MSFS (item em `TESTES-PENDENTES.md`). O quadro já gravado mantém as áreas genéricas até ser reposto.
+- Banco anterior (SBJS) em `db-backup/flightcareer.db*.sbjs-20261125-232827` na saída do UI.
 
 ## Próximo passo
-- PC de casa: após o usuário dizer "voo terminado", analisar blackbox, REC e banco (Sonnet).
+- Se o usuário aprovar: `FC_ALLOW_PROTECTED=1 git merge --no-ff fix/achados-voo-sdco` na base e push.
+- Spec (Opus) do cartão de objetivo, posições salvas e cores do HUD: `docs/plans/achados-voo-sdco.md`.
 - Outras pendências de voo: `docs/agents/TESTES-PENDENTES.md`.
 - PC do escritório, primeiro: `git pull` e `tools/agents/install-global.sh`. Depois, uma por sessão:
   1. **AIRSIM-2** (spec Opus): `UI/Services/SimAirportImporter` (padrão `ContextSnapshotReader`, IDs ≥ 3000), versão do sim no `OnRecvOpen`, lista + detalhes em lotes, `SimAirportSyncStore`, registro no `App.xaml.cs`, luzes de aproximação no `SimRunwayData` (plano › 7). Só fecha com o MSFS.
@@ -17,9 +19,10 @@
   - Os 8 tipos restantes da E2C precisam de SimVar a conferir no MSFS ou de dados (`docs/plans/catalogo-missoes.md`).
 
 ## Pendências
-- Precisam do MSFS: óleo (`GENERAL ENG OIL LEAKED PERCENT`, `ProcessOilLeak`/`TransmitOilLeak`); desempenho no amarelo (`perda-desempenho-amarelo.md` › 3); toque (`TOQUE-NORMAL`) contra o REC.
+- Precisam do MSFS: óleo (`GENERAL ENG OIL LEAKED PERCENT`, `ProcessOilLeak`/`TransmitOilLeak`); desempenho no amarelo (`perda-desempenho-amarelo.md` › 3); toque (`TOQUE-NORMAL`) contra o REC (bateu no voo de 25/11 em C152).
+- A investigar (plano acima): RPM do C152, reinício do contador de combustível após pausa, detecção de pausa.
 - Casa: conferir em sessão nova com `/context` se as skills desativadas sumiram; no app, desligar conector Claude Docs, sugestões de prompt, navegador e Claude in Chrome se não usar (usuário).
-- Decisões abertas do usuário: nenhuma.
+- Decisões abertas do usuário: altitude da área genérica e variedade de destinos na fase 1 (plano acima).
 
 ## Notas
 - Repositório público: não commitar dados do simulador sem perguntar. `REGRAS_tiers.txt` (se existir) é do usuário: não analisar sem pedido.
