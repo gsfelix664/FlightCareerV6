@@ -241,7 +241,7 @@
 
                 <!-- Faixa de Oficina (PARADA-REAL) -->
                 <Border Background="#122330" BorderBrush="{StaticResource HgCyan}" BorderThickness="1" CornerRadius="6" Padding="14,10" Margin="0,8,0,0"
-                        Visibility="{Binding IsInWorkshop, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        Visibility="{Binding ShowWorkshopBanner, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="⏱" Foreground="{StaticResource HgCyan}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
                         <TextBlock Text="{Binding WorkshopBannerText}" Foreground="{StaticResource HgCyan}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center"/>
@@ -271,10 +271,11 @@
                             </Grid>
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,8" TextWrapping="Wrap"
                                        Text="Panes ficam no avião entre voos e após reiniciar o simulador. NO-GO impede o voo; DIFERIDA permite voar com o item inoperante."/>
-                            <ItemsControl ItemsSource="{Binding OpenDefects}">
+                            <ItemsControl ItemsSource="{Binding DefectRows}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="{StaticResource HgBorder}" BorderThickness="0,1,0,0" Padding="0,8">
+                                        <Border BorderBrush="{StaticResource HgBorder}" BorderThickness="0,1,0,0" Padding="0,8"
+                                                ToolTip="{Binding TechnicalText}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto"/>
@@ -296,14 +297,12 @@
                                                 </Border>
                                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                                     <TextBlock Text="{Binding Title}" Style="{StaticResource HgValue}" FontSize="13" TextWrapping="Wrap"/>
-                                                    <TextBlock Style="{StaticResource HgLabel}" FontSize="11" TextWrapping="Wrap">
-                                                        <Run Text="{Binding OriginLabel, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding FlightPhase, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding Cause, Mode=OneWay}"/>
-                                                    </TextBlock>
+                                                    <TextBlock Text="{Binding FriendlyText}" Style="{StaticResource HgLabel}" FontSize="11" TextWrapping="Wrap"/>
                                                 </StackPanel>
                                                 <Button Grid.Column="2" Style="{StaticResource HgSecondary}" Margin="10,0,0,0" VerticalAlignment="Center"
-                                                        Content="{Binding RepairCost, StringFormat='Reparar · {0:C0}'}"
+                                                        Content="{Binding RepairButtonText}"
                                                         Command="{Binding DataContext.RepairDefectCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                        CommandParameter="{Binding}"/>
+                                                        CommandParameter="{Binding Defect}"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -600,7 +599,7 @@
                                     </Border>
                                 </Grid>
                                 <TextBlock Text="{Binding InsuranceExpiryText}" Style="{StaticResource HgLabel}" Margin="0,0,0,10"/>
-                                <Grid Margin="0,0,0,4"><TextBlock Text="Prêmio (30 dias)" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsurancePremium, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
+                                <Grid Margin="0,0,0,4"><TextBlock Text="Prêmio (30 dias)" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsurancePremiumPrice, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
                                 <Grid Margin="0,0,0,4"><TextBlock Text="Cobertura (casco)" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsurancePayout, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
                                 <Grid Margin="0,0,0,12"><TextBlock Text="Franquia" Style="{StaticResource HgLabel}"/><TextBlock Text="{Binding InsuranceDeductible, StringFormat={}{0:C2}}" HorizontalAlignment="Right" Style="{StaticResource HgValue}"/></Grid>
                                 <Button Style="{StaticResource HgSecondary}" HorizontalAlignment="Stretch" Content="{Binding InsuranceButtonText}" IsEnabled="{Binding CanService}"

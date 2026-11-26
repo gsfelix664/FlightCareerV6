@@ -1,3 +1,4 @@
+using System;
 using FlightCareer.Domain.Entities;
 
 namespace FlightCareer.Domain.Economy
@@ -19,5 +20,19 @@ namespace FlightCareer.Domain.Economy
             DifficultyMode.Hard => "Difícil",
             _ => "Médio"
         };
+
+        public double ApplyCost(double cost) =>
+            CostMultiplier == 1.0 ? cost : Math.Round(cost * CostMultiplier, 2);
+
+        public static string? CostAdjustmentText(DifficultyMode mode)
+        {
+            var econ = For(mode);
+            if (econ.CostMultiplier == 1.0) return null;
+            var pct = Math.Round(Math.Abs(1.0 - econ.CostMultiplier) * 100.0);
+            var label = Label(mode);
+            return econ.CostMultiplier < 1.0
+                ? $"Desconto da dificuldade {label}: {pct:0}%"
+                : $"Acréscimo da dificuldade {label}: {pct:0}%";
+        }
     }
 }

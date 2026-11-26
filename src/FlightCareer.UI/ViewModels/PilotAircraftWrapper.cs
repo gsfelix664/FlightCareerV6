@@ -25,6 +25,7 @@ namespace FlightCareer.UI.ViewModels
         private readonly PartCatalog _partCatalog;
         private readonly string? _classKey;
         private readonly IRelayCommand<PartRowViewModel>? _replacePartCommand;
+        private readonly DifficultyEconomy _economy;
 
         public PilotAircraft Aircraft { get; }
         public EngineClass EngineClass { get; }
@@ -45,6 +46,7 @@ namespace FlightCareer.UI.ViewModels
                     OnPropertyChanged(nameof(InsuranceBrush));
                     OnPropertyChanged(nameof(InsuranceExpiryText));
                     OnPropertyChanged(nameof(InsuranceButtonText));
+                    OnPropertyChanged(nameof(InsurancePremiumPrice));
                     UpdateReplacementPlans();
                 }
             }
@@ -58,7 +60,8 @@ namespace FlightCareer.UI.ViewModels
             PartCatalog? partCatalog = null,
             string? classKey = null,
             bool hasConvertibleCabin = false,
-            IRelayCommand<PartRowViewModel>? replacePartCommand = null)
+            IRelayCommand<PartRowViewModel>? replacePartCommand = null,
+            DifficultyMode difficulty = DifficultyMode.Medium)
         {
             Aircraft = aircraft;
             _catalog = catalog;
@@ -68,13 +71,14 @@ namespace FlightCareer.UI.ViewModels
             _replacePartCommand = replacePartCommand;
             HasConvertibleCabin = (aircraft.AircraftType?.HasConvertibleCabin == true) || hasConvertibleCabin;
             EngineClass = catalog.ResolveEngineClass(aircraft.AircraftType);
+            _economy = DifficultyEconomy.For(difficulty);
 
             var order = catalog.Components.Select(d => d.Kind).ToList();
             foreach (var c in aircraft.Components.OrderBy(c => order.IndexOf(c.Kind)))
             {
                 var def = catalog.Components.FirstOrDefault(d => d.Kind == c.Kind);
                 if (def == null || !def.AppliesTo.Contains(EngineClass)) continue;
-                Components.Add(new ComponentRowViewModel(c, def, catalog, EngineClass, PurchasePrice, aircraft.CurrentAirframeHours, repairCommand, aircraft));
+                Components.Add(new ComponentRowViewModel(c, def, catalog, EngineClass, PurchasePrice, aircraft.CurrentAirframeHours, repairCommand, aircraft, _economy));
             }
 
             _targetFuel = aircraft.FuelAmount;
@@ -260,6 +264,7 @@ namespace FlightCareer.UI.ViewModels
 
         // --- Panes persistentes (discrepâncias abertas, addon ou simulador) ---
         public ObservableCollection<AircraftDefect> OpenDefects { get; } = new();
+        public ObservableCollection<DefectRowViewModel> DefectRows { get; } = new();
         public bool HasOpenDefects => OpenDefects.Count > 0;
         public bool HasGroundingDefects => OpenDefects.Any(d => d.IsGrounding);
         public double DefectsRepairTotal
@@ -282,12 +287,17 @@ namespace FlightCareer.UI.ViewModels
                 return Math.Round(partsCost + quote.DefectsCost, 2);
             }
         }
-        public string RepairAllDefectsText => $"Reparar todas as panes · {DefectsRepairTotal:C0}";
+        public string RepairAllDefectsText => $"Reparar todas as panes · {_economy.ApplyCost(DefectsRepairTotal):C0}";
 
         public void SetOpenDefects(IEnumerable<AircraftDefect> defects)
         {
             OpenDefects.Clear();
-            foreach (var d in defects) OpenDefects.Add(d);
+            DefectRows.Clear();
+            foreach (var d in defects)
+            {
+                OpenDefects.Add(d);
+                DefectRows.Add(new DefectRowViewModel(d, _economy));
+            }
             OnPropertyChanged(nameof(HasOpenDefects));
             OnPropertyChanged(nameof(HasGroundingDefects));
             OnPropertyChanged(nameof(DefectsRepairTotal));
@@ -299,6 +309,7 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(StatusText));
             OnPropertyChanged(nameof(StatusDetail));
             OnPropertyChanged(nameof(StatusBrush));
+            OnPropertyChanged(nameof(ShowWorkshopBanner));
         }
 
         public AircraftStatusLevel StatusLevel => Status.Level;
@@ -338,10 +349,11 @@ namespace FlightCareer.UI.ViewModels
             }
         }
         public bool HasRepairs => TotalRepairCost > 0;
-        public string RepairAllText => HasRepairs ? $"Reparar tudo · {TotalRepairCost:C0}" : "Nada a reparar";
+        public string RepairAllText => HasRepairs ? $"Reparar tudo · {_economy.ApplyCost(TotalRepairCost):C0}" : "Nada a reparar";
 
         // --- Oficina em tempo real (PARADA-REAL) ---
         public bool IsInWorkshop => WorkshopDowntime.IsInWorkshop(Aircraft.WorkshopUntilUtc, DateTime.UtcNow);
+        public bool ShowWorkshopBanner => IsInWorkshop && Status.Text != "OFICINA";
         public TimeSpan WorkshopRemaining => WorkshopDowntime.Remaining(Aircraft.WorkshopUntilUtc, DateTime.UtcNow);
         public string WorkshopRemainingFormatted
         {
@@ -356,6 +368,7 @@ namespace FlightCareer.UI.ViewModels
         public void RefreshWorkshop()
         {
             OnPropertyChanged(nameof(IsInWorkshop));
+            OnPropertyChanged(nameof(ShowWorkshopBanner));
             OnPropertyChanged(nameof(WorkshopRemaining));
             OnPropertyChanged(nameof(WorkshopRemainingFormatted));
             OnPropertyChanged(nameof(WorkshopBannerText));
@@ -397,11 +410,11 @@ namespace FlightCareer.UI.ViewModels
         public double DowntimeToggleConfiguration => CabinConversion.GetDowntimeHours(MTOW);
         public string TargetConfigurationName => IsCargoConfig ? "Passageiro" : "Carga";
 
-        public string Text50h => $"Troca de óleo · {Cost50hInspection:C0}";
-        public string Text100h => $"Inspeção anual · {Cost100hInspection:C0}";
-        public string Text500h => $"Revisão de ignição · {Cost500hInspection:C0}";
-        public string TextOverhaul => $"Retífica · {CostOverhaul:C0}";
-        public string TextToggleConfiguration => $"Converter para {TargetConfigurationName} · {CostToggleConfiguration:C0} · {DowntimeToggleConfiguration:F0} h";
+        public string Text50h => $"Troca de óleo · {_economy.ApplyCost(Cost50hInspection):C0}";
+        public string Text100h => $"Inspeção anual · {_economy.ApplyCost(Cost100hInspection):C0}";
+        public string Text500h => $"Revisão de ignição · {_economy.ApplyCost(Cost500hInspection):C0}";
+        public string TextOverhaul => $"Retífica · {_economy.ApplyCost(CostOverhaul):C0}";
+        public string TextToggleConfiguration => $"Converter para {TargetConfigurationName} · {_economy.ApplyCost(CostToggleConfiguration):C0} · {DowntimeToggleConfiguration:F0} h";
         public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";
 
         // --- Abastecimento ---
@@ -411,7 +424,7 @@ namespace FlightCareer.UI.ViewModels
         public double RefuelGallons => Math.Max(0, TargetFuel - Aircraft.FuelAmount);
         public double RefuelCost => RefuelGallons * FuelPricePerGallon;
         public bool CanRefuel => RefuelCost > 0.01 && !IsCrashed;
-        public string RefuelButtonText => CanRefuel ? $"Abastecer {RefuelGallons:F1} gal · {RefuelCost:C0}" : "Ajuste o volume para abastecer";
+        public string RefuelButtonText => CanRefuel ? $"Abastecer {RefuelGallons:F1} gal · {_economy.ApplyCost(RefuelCost):C0}" : "Ajuste o volume para abastecer";
 
         partial void OnTargetFuelChanged(double value)
         {
@@ -424,6 +437,7 @@ namespace FlightCareer.UI.ViewModels
 
         // --- Seguro ---
         public double InsurancePremium => InsuranceService.CalculateMonthlyPremium(PurchasePrice);
+        public double InsurancePremiumPrice => _economy.ApplyCost(InsurancePremium);
         public double InsuranceDeductible => InsuranceService.CalculateDeductible(PurchasePrice);
         public double InsurancePayout => InsuranceService.CalculatePayout(PurchasePrice);
         public bool IsInsured => InsuranceService.IsInsured(Aircraft, CareerClock);
@@ -432,7 +446,7 @@ namespace FlightCareer.UI.ViewModels
         public string InsuranceExpiryText => IsInsured
             ? $"vence em {Aircraft.InsuranceExpirationDate:dd/MM/yyyy} ({(Aircraft.InsuranceExpirationDate!.Value - CareerClock).TotalDays:F0} dias)"
             : "sem cobertura";
-        public string InsuranceButtonText => IsInsured ? $"Renovar +30 dias · {InsurancePremium:C0}" : $"Contratar 30 dias · {InsurancePremium:C0}";
+        public string InsuranceButtonText => IsInsured ? $"Renovar +30 dias · {_economy.ApplyCost(InsurancePremium):C0}" : $"Contratar 30 dias · {_economy.ApplyCost(InsurancePremium):C0}";
 
         /// <summary>Atualiza as peças com atenção visíveis em cada card de componente.</summary>
         public void SetFlaggedParts(IEnumerable<AircraftPart> parts, PartCatalog partCatalog)
@@ -537,7 +551,7 @@ namespace FlightCareer.UI.ViewModels
                     foreach (var hRow in hangarRows)
                     {
                         var singlePlan = PartReplacementPlanner.Plan(new[] { hRow.Part }, _partCatalog, _classKey, CareerClock, bands: _catalog.PartBands);
-                        string replaceText = $"Trocar · {singlePlan.TotalCost:C0}";
+                        string replaceText = $"Trocar · {_economy.ApplyCost(singlePlan.TotalCost):C0}";
                         partRowViewModels.Add(new PartRowViewModel(hRow, replaceText, _replacePartCommand));
                     }
                     row.SetParts(partRowViewModels);

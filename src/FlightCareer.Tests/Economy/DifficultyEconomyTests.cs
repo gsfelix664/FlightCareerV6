@@ -43,6 +43,37 @@ namespace FlightCareer.Tests.Economy
         }
 
         [Fact]
+        public void ApplyCost_Facil_Aplica80PorCento()
+        {
+            var easy = DifficultyEconomy.For(DifficultyMode.Easy);
+            Assert.Equal(7120.0, easy.ApplyCost(8900.0));
+
+            var medium = DifficultyEconomy.For(DifficultyMode.Medium);
+            Assert.Equal(8900.0, medium.ApplyCost(8900.0));
+
+            var hard = DifficultyEconomy.For(DifficultyMode.Hard);
+            Assert.Equal(115.0, hard.ApplyCost(100.0));
+        }
+
+        [Fact]
+        public void CostAdjustmentText_Facil_Desconto20()
+        {
+            Assert.Equal("Desconto da dificuldade Fácil: 20%", DifficultyEconomy.CostAdjustmentText(DifficultyMode.Easy));
+        }
+
+        [Fact]
+        public void CostAdjustmentText_Dificil_Acrescimo15()
+        {
+            Assert.Equal("Acréscimo da dificuldade Difícil: 15%", DifficultyEconomy.CostAdjustmentText(DifficultyMode.Hard));
+        }
+
+        [Fact]
+        public void CostAdjustmentText_Medio_Null()
+        {
+            Assert.Null(DifficultyEconomy.CostAdjustmentText(DifficultyMode.Medium));
+        }
+
+        [Fact]
         public void CareerStart_EasyUmMilhao()
         {
             Assert.Equal(1_000_000.0, CareerStart.EasyInitialBalance);

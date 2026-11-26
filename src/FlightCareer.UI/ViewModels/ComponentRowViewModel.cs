@@ -7,6 +7,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Parts;
 
@@ -104,10 +105,11 @@ namespace FlightCareer.UI.ViewModels
         private readonly double _purchasePrice;
         private double _airframeHours;
         private PilotAircraft? _aircraft;
+        private readonly DifficultyEconomy _economy;
 
         public ComponentRowViewModel(AircraftComponent component, ComponentDefinition definition, ComponentCatalog catalog,
             EngineClass engineClass, double purchasePrice, double airframeHours, IRelayCommand<ComponentRowViewModel> repairCommand,
-            PilotAircraft? aircraft = null)
+            PilotAircraft? aircraft = null, DifficultyEconomy? economy = null)
         {
             Component = component;
             Definition = definition;
@@ -117,6 +119,7 @@ namespace FlightCareer.UI.ViewModels
             _airframeHours = airframeHours;
             RepairCommand = repairCommand;
             _aircraft = aircraft;
+            _economy = economy ?? DifficultyEconomy.For(DifficultyMode.Medium);
         }
 
         public AircraftComponent Component { get; }
@@ -246,10 +249,10 @@ namespace FlightCareer.UI.ViewModels
                 {
                     if (_replacementPlan.Items.Count == 0) return "Em dia";
                     string pecas = _replacementPlan.Items.Count == 1 ? "1 peça" : $"{_replacementPlan.Items.Count} peças";
-                    return $"Trocar {pecas} · {RepairCost:C0}";
+                    return $"Trocar {pecas} · {_economy.ApplyCost(RepairCost):C0}";
                 }
 
-                return CanRepair ? $"Reparar · {RepairCost:C0}" : "Em dia";
+                return CanRepair ? $"Reparar · {_economy.ApplyCost(RepairCost):C0}" : "Em dia";
             }
         }
 
