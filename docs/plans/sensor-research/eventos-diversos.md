@@ -62,7 +62,7 @@ Regras de `eventos-eletricos.md` § 1 (enviar × receber, `_SET` × `_TOGGLE`) e
 4. Fogo: o extintor do piloto (`EXTINGUISH_ENGINE_FIRE`) apaga o fogo progressivo do addon conforme o estágio?
 5. Capas/calços no pernoite e `TOOLS_QUICK_PREFLIGHT` (walkaround pulado): efeito?
 
-**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`):**
+**Decididas pelo usuário (2026-11-19, `docs/tarefas_sem_IA.md`, apagado em 2026-11-25, no histórico do git):**
 1. **Integridade:** em voo ou após o off-block, `SIM_RESET`, `SITUATION_RESET`, `RELOAD_USER_AIRCRAFT` e `REPAIR_AND_REFUEL` invalidam o voo e reaplicam o estado do banco (combustível, desgaste, panes). `BACK_TO_FLY` sozinho não invalida: serve de auditoria (compara posição, altitude, combustível e panes com o último tick válido). Ignorar `RELOAD_USER_AIRCRAFT`/`SITUATION_RESET` nos primeiros 10–15 s da sessão (posicionamento inicial).
 2. **Serviços de solo — modelo híbrido:** o piloto compra o pacote no briefing e o app chama os eventos ao parar no gate (no solo, freio de estacionamento e motores cortados); serviço pedido direto no sim é cobrado avulso com ~20 % de acréscimo. Pushback grátis até ~5.700 kg (empurrado à mão).
 3. **Alarme nativo:** pane degradada → `MASTER_CAUTION_SET`; pane crítica (fogo, motor, despressurização, perda de barramento) → `MASTER_WARNING_SET`. Flag por aeronave no JSON para desligar em aviões de estudo cujo WASM sobrescreve o alarme.

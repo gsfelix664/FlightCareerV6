@@ -17,6 +17,13 @@
 - Tipos novos da E2C-2: linha do HUD de cada modo, marcadores no mapa (SAR sem o alvo), conclusão e motivo de falha. Atenção ao teto "acima do solo" em terreno mais alto que a origem (é relativo à elevação da origem).
 - Do teste anterior (C152, SBJS): triângulo VFR com toque e arremetida, escalas com motor ligado, STOL, cheque e translado (fase 2) e o quadro de SDCO/SBTF/PABE × SBFI/SBPS ainda não testados. Pneus caindo 4 % num pouso de 41 fpm com través real: conferir a calibração se repetir.
 
+## Testes de 22/11 sem registro de conferência (PC de casa)
+Vieram do roteiro `TESTES-PC-2026-11-22.md` (apagado; completo no git). Não se sabe quais já foram vistos.
+- Telas: fase/nível, quadro com "≈ XP" e fases bloqueadas, ícones de peça no Hangar sem %, serviço Normal/Expresso com "Na oficina" (fechando o app no meio), combustível no briefing, mapinha do HUD com a partida, processo encerra ao fechar.
+- Voo normal: "TOQUE" do blackbox × REC, sem combustível cobrado no fim, detalhamento do XP, diário.
+- Abusos: TGL a menos, pouso > 400 fpm, partida com faróis ligados, táxi rápido em curva, frenagem forte, derrapagem, estol, pausa e aceleração de tempo, crash no diário.
+- Fase 2 (fotografia, paraquedistas), panorâmico incompleto, partida de turbina e regras elétricas; locais reais no briefing, área de instrução e Boituva.
+
 ## Pendente da configuração do PC de casa
 - No app do Claude: desligar o conector **Claude Docs**, as **sugestões de prompt** e, se não usar, o **navegador do Claude** / Claude in Chrome (o usuário faz).
 
