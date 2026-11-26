@@ -105,7 +105,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 3 | LIMPA-MAPA | A1, A2 | Sonnet | Gemini (golden pode mudar) | — |
 | 4 | BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
 | 5 | MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
-| 6 | RESGATE | B4 (precisa da decisão abaixo) | Sonnet | Gemini | 2, 4 |
+| 6 | ~~RESGATE~~ | B4 decidido: cancelar a missão (entra na tarefa 2) | — | — | — |
 | 7 | HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
 | 8 | SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |
 | 9 | EXCEDENCIAS | D7, D8, D9 e pneus/combustível/pausa de `achados-voo-sdco.md` | Opus (investigação) | Claude pesquisa; Gemini corrige | 2 |
@@ -113,9 +113,13 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 
 3 a 5 não dependem de 1 e 2 e podem ir antes. `HangarViewModel` entra em 1, 7, 8 e 10: nunca em paralelo.
 
+## Decisões do usuário (2026-11-26)
+- **B4:** após pouso forçado fora de pista a missão é **cancelada** e não volta ao quadro; o piloto ganha **XP parcial (50 %)** e **nenhum dinheiro**. Entra na tarefa 2 (POUSO-DANO), que já mexe nesse trecho do `FlightService`; a tarefa 6 (RESGATE) deixa de existir.
+- **D8:** Vfe do C152 = **85 kt** para todos os dentes de flap (vai para a tarefa 9).
+- **C1:** chance de quebra de trem e pneu **baixa no pouso duro e mais alta no muito duro**. Calibração (Claude, 2026-11-26) em `component_catalog.json` › `landing`: 0 abaixo de 600 fpm; trem 1 %→5 % de 600 a 850 fpm; 15 %→30 % de 850 a 900 fpm (≥ 900 já é perda total); pneu ×1,5; inclinação ≥ 10° ×1,5; fora de pista (`ON ANY RUNWAY` = 0) ×2; peça gasta até ×2; teto 60 %. Quebra = peça `IsBroken` (interdita via `PartAirworthiness`), sem pane extra (evita cobrança em dobro).
+- **D5 (Claude, 2026-11-26):** inspeção do voo vira pane persistente do addon (aparece no Hangar, custo base 400). Só as inspeções de toque (pouso duro, cauda, ponta de asa, vento cruzado, bequilha) respeitam o `grounding` do JSON; as demais ficam DIFERIDAS até a tarefa 9 tirar os falsos positivos (D7, D9).
+
 ## Decisões abertas do usuário
-- B4: missão depois de pouso forçado continua como resgate (texto e distância novos) ou falha?
 - F4: tirar também o selo "- N%" de desconto, a nota do voo e o "% MTOW"? Sugestão: manter taxas e instrumentos.
-- D8: Vfe do dente 1 do C152 (POH antes de mudar).
 
 Não testado no MSFS: tudo acima vem de leitura de código, log, REC e banco.
