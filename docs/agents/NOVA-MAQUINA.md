@@ -6,8 +6,9 @@ Tudo o que o Claude e o Gemini precisam está versionado neste repositório:
 |---|---|---|
 | Regras do projeto (os dois agentes) | `AGENTS.md`, `CLAUDE.md`, `gemini.md`, `docs/plans/INSTRUCOES-GEMINI.md`, `docs/agents/` | já usados direto do repositório |
 | Instruções globais do Claude (todos os projetos) | `tools/agents/global/CLAUDE.md` | `~/.claude/CLAUDE.md` |
-| Ferramentas globais (consulta, tarefa, auditoria do Gemini) | `tools/agents/global/gemini/*.sh` | `~/.claude/tools/gemini/` |
+| Ferramentas globais do Gemini e `DELEGACAO.md` | `tools/agents/global/gemini/` | `~/.claude/tools/gemini/` |
 | Ferramentas deste projeto | `tools/agents/gemini-task.sh`, `review-pack.sh` | usadas direto do repositório |
+| Skills desativadas (economia de contexto) | `tools/agents/global/settings.json` | mesclado em `~/.claude/settings.json` |
 | Travas de git | `.githooks/` | ativadas por `core.hooksPath` |
 
 **Não vão pelo git** (ficam só em cada máquina): o banco `flightcareer.db`, os logs de sensores em

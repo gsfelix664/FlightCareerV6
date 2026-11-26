@@ -17,5 +17,7 @@ Antes de mexer num sistema, leia o arquivo dele; ao mudar o estado, atualize o a
 | Limites por aeronave | `docs/sistemas/limites-aeronave.md` | `AircraftLimitResolver`, `Data/aircraft/`, `AircraftLimitSeeder` |
 | Sensores | `docs/sistemas/sensores.md` | `Domain/Sensors/`, `SensorFrameReader`, `FlightCareer.SimVarProbe` |
 | HUD | `docs/sistemas/hud.md` | `DebugOverlayViewModel`, `FlightMapControl`, `HudHealthSummary` |
+| SimConnect e MSFS | `docs/sistemas/simconnect.md` | `SimConnectService`, `SimTelemetry` |
+| Banco de dados | `docs/sistemas/banco.md` | `AppDbContext` |
 
 Histórico detalhado de cada tarefa: `docs/CHANGELOG.md` (busque pelo ID entre parênteses).

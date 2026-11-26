@@ -7,9 +7,7 @@ O guia acima (`AGENTS.md`) é a fonte de verdade sobre arquitetura, comandos, re
 ## Você divide o repositório com o Gemini
 
 - O Gemini também programa aqui (instruções dele em `gemini.md` e `docs/plans/INSTRUCOES-GEMINI.md`). Sigam as mesmas regras de `AGENTS.md` › 4. Trabalho em dupla.
-- **Uma tarefa por sessão** (`AGENTS.md` › 4.9): comece lendo `docs/agents/HANDOFF.md`; ao terminar, reescreva o HANDOFF, faça commit e push e peça ao usuário uma sessão nova para a próxima tarefa.
-- Comece por `git status` e `git log --oneline -5`. Não altere nem descarte alterações não commitadas que não foram feitas nesta sessão: pergunte ao usuário.
-- Ao terminar uma tarefa que mudou código, acrescente uma entrada no fim de `docs/CHANGELOG.md` (`## AAAA-MM-DD - Título (Claude)`) e atualize `docs/sistemas/<sistema>.md` se o estado do sistema mudou.
+- Comece lendo `docs/agents/HANDOFF.md`; o restante (git, uma tarefa por sessão, CHANGELOG como `(Claude)`, sistemas) segue `AGENTS.md` › 4 e 8.
 
 ## Como trabalhar
 
@@ -21,11 +19,8 @@ O guia acima (`AGENTS.md`) é a fonte de verdade sobre arquitetura, comandos, re
 
 ## Orquestrando o Gemini (você revisa, ele implementa)
 
-Fluxo, travas e checklist em `docs/agents/ORQUESTRACAO.md`. Resumo:
+Antes de delegar ou revisar, leia `docs/agents/ORQUESTRACAO.md` (fluxo, travas, checklist) e `docs/agents/MODELO-SPEC.md`.
 
-- Tarefa de implementação do plano → spec curta (`docs/agents/MODELO-SPEC.md`, no scratchpad) e `tools/agents/gemini-task.sh <ID> <branch> <spec>` **em segundo plano**. Não acompanhe o log; espere a notificação.
-- Revisão: `tools/agents/review-pack.sh <ID> <branch>` primeiro, depois só o diff dos arquivos relevantes (quentes: inteiros). Veredito em `docs/reviews/<ID>-revisao.md` (APROVADO / CORRIGIR numerado). Erro recorrente → uma linha em `docs/agents/LICOES.md`.
-- Máximo de 2 rodadas de CORRIGIR; depois corrija você mesmo ou leve a decisão ao usuário.
+- `tools/agents/gemini-task.sh <ID> <branch> <spec>` em segundo plano; revisão com `tools/agents/review-pack.sh <ID> <branch>`; veredito em `docs/reviews/`; máx. 2 rodadas de CORRIGIR.
 - Merge na base só após APROVADO: `FC_ALLOW_PROTECTED=1 git merge --no-ff <branch>`. Push só quando o usuário pedir.
-- **Arquivos quentes também vão para o Gemini** (decisão do usuário, 2026-11-15, para economizar tokens): a spec traz o passo a passo (o que mudar, em qual arquivo/método, por quê, o que **não** tocar, armadilhas do `AGENTS.md` › 6) e o revisor lê o diff desses arquivos **linha a linha** (arquivo inteiro) e roda build e testes antes do merge. Faça você mesmo só o que é trivial (≲ 20 linhas), os ajustes da própria revisão e as decisões de arquitetura (que entram na spec).
-- **Dados também vão para o Gemini** (decisão do usuário, 2026-11-16): preencher ou alterar catálogos (`Data/aircraft/*.json`, `wear_rules.json`, `parts_catalog.json`, `poh_values.csv` etc.) com mais de ~20 linhas. Você decide o critério (fonte, notas, o que não inventar) e escreve na spec; o Gemini preenche; você revisa por amostragem e roda build/testes. Pesquisa, análise de documentação do SDK e planos continuam com você.
+- Decisões do usuário: **arquivos quentes** (2026-11-15) e **dados de catálogo** com mais de ~20 linhas (2026-11-16) também vão para o Gemini, com spec detalhada; você revisa quentes linha a linha e dados por amostragem. Pesquisa, SDK, planos e arquitetura continuam com você.
