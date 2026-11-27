@@ -995,7 +995,7 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             await RunPaidServiceAsync(
                 "Retífica geral do motor",
-                $"Overhaul completo: motor{(SelectedAircraft.IsPiston ? "" : " e seção quente")} como novo, óleo trocado e TBO restaurado para {SelectedAircraft.EngineLifeHours:N0} h.",
+                $"Overhaul completo: {(SelectedAircraft.IsPiston ? "motor como novo" : "motor e seção quente como novos")}, óleo trocado e TBO restaurado para {SelectedAircraft.EngineLifeHours:N0} h.",
                 SelectedAircraft.CostOverhaul,
                 "RETÍFICA GERAL / OVERHAUL TBO",
                 (aircraft, components) =>

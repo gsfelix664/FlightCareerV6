@@ -118,9 +118,9 @@ namespace FlightCareer.Domain.Parts
                     }
                     else
                     {
-                        reason = part.KnownHealth.Value < 80.0
-                            ? "Troca preventiva (peça boa)"
-                            : "Troca preventiva (peça íntegra)";
+                        reason = part.KnownHealth.Value < PartHangarView.GoodAbovePct
+                            ? "Troca preventiva, peça boa"
+                            : "Troca preventiva, peça íntegra";
                     }
                 }
                 else

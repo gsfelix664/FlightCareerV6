@@ -14,7 +14,8 @@ namespace FlightCareer.Domain.Components
         public override string ToString()
         {
             if (Max <= 0.0) return "Quebrado";
-            string minWord = HealthWords.For(Min);
+            // Min pode ser cortado em 0 pela estimativa: com Max > 0 isso é "Crítico", não "Quebrado".
+            string minWord = HealthWords.For(Math.Max(Min, 0.1));
             string maxWord = HealthWords.For(Max);
             if (IsExact || minWord == maxWord) return minWord;
             return $"{minWord} a {maxWord.ToLowerInvariant()}";

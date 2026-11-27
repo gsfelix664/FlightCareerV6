@@ -49,6 +49,7 @@ namespace FlightCareer.Tests.Components
         [InlineData(35.0, 45.0, "Atenção a bom")]
         [InlineData(63.4, 63.4, "Bom")]
         [InlineData(0.0, 0.0, "Quebrado")]
+        [InlineData(0.0, 15.0, "Crítico")]
         public void HealthRange_ToString_SemNumeros(double min, double max, string esperado)
         {
             Assert.Equal(esperado, new HealthRange(min, max).ToString());

@@ -51,7 +51,7 @@ namespace FlightCareer.Tests.Parts
 
             Assert.Single(plan.Items);
             var item = plan.Items[0];
-            Assert.Contains("Troca preventiva (peça boa)", item.Reason);
+            Assert.Contains("Troca preventiva, peça boa", item.Reason);
 
             double expectedPartPrice = PartPricing.CalculatePartPrice(def, "A");
             double expectedLaborCost = PartPricing.CalculateLaborCost(def, 100.0);
@@ -85,7 +85,7 @@ namespace FlightCareer.Tests.Parts
             // Mas pode ser orçada e trocada se o usuário a selecionar diretamente
             var plan = PartReplacementPlanner.Plan(new[] { oil }, _catalog, "A", DateTime.UtcNow);
             Assert.Single(plan.Items);
-            Assert.Contains("Troca preventiva (peça íntegra)", plan.Items[0].Reason);
+            Assert.Contains("Troca preventiva, peça íntegra", plan.Items[0].Reason);
         }
 
         [Fact]
