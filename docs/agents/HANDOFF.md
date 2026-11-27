@@ -2,19 +2,18 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-26 (23ª sessão, casa), Claude. Base `feat/component-health-system`. HANGAR-AVISOS (tarefa 7 do plano) feita pelo Gemini, aprovada e no merge.
+**Última atualização:** 2026-11-27 (24ª sessão, casa), Claude. Base `feat/component-health-system`. BRIEF-NAV (tarefa 4 do plano) feita pelo Gemini, aprovada e no merge.
 
 ## Estado
-- **HANGAR-AVISOS feito** (E1, E3, E4): botões do Hangar mostram o preço com o ajuste da dificuldade; panes com frase amigável (técnico no tooltip); um só aviso de oficina. Build ok, 1.267/1.267. Revisão: `docs/reviews/HANGAR-AVISOS-revisao.md`. Não conferido com o app aberto.
-- LIMPA-MAPA feito (A1, A2); mapas não conferidos com o app aberto.
-- POUSO-DANO feito (detalhe em `docs/reviews/POUSO-DANO-revisao.md`): pouso duro pode quebrar trem/pneu; fora de pista cancela a missão (XP 50 %, sem dinheiro); inspeções viram pane "Inspeção pendente". **Não testado no MSFS nem com o app aberto**; o Hangar vai mostrar mais itens pendentes após excedências.
-- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (A3, B1–B3, D7–D9, E5, F) não implementado.
+- **BRIEF-NAV feito** (A3, B1, B3): `Domain/Missions/BriefingLegPlanner` monta as pernas do briefing; TGL só com `RequiredTouchAndGoes > 0`; voo local aparece como "(LOCAL)"; escalas do contrato viram pernas reais ("Pouso completo"/"Toque e arremetida em X (escala do contrato)"), pagamento só na última perna; mapa enquadra rota + contrato juntos (`ApplyCombinedFraming`). Build ok, 1.277/1.277. Revisão: `docs/reviews/BRIEF-NAV-revisao.md`. **Não conferido com o app aberto nem no MSFS.**
+- HANGAR-AVISOS, LIMPA-MAPA e POUSO-DANO feitos e não conferidos com o app aberto (detalhes nas revisões em `docs/reviews/`).
+- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (B2, D7–D9, E5, F) não implementado.
 - PT-HRY: segue interditado até "Reparar tudo". Mapa unificado e OBJ-CARD-1/2 sem teste no MSFS (`TESTES-PENDENTES.md`).
 
 ## Próximo passo
-- No app/MSFS: pouso duro (≈700 fpm) e fora de pista (alerta de peça quebrada, Hangar, missão sumida, XP pela metade, blackbox "POUSO FORÇADO"); no Hangar, preços dos botões × cobrado, tooltip das panes e aviso de oficina; mapas sem o quadro de waypoints.
-- **Sessão Sonnet: tarefa 8, SEM-PORCENTO** (F1–F3; F4 fica). `HangarViewModel` nunca em paralelo.
-- **Sessão Opus: tarefa 4, BRIEF-NAV** (A3, B1, B3; libera a 5, MAPA-ESCALAS) ou **tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes, decidido, D9 histerese do RPM; depois rever `InspectionDefectPolicy`).
+- No app/MSFS: briefing de uma navegação com escalas (SDCO → escalas → SDCO: sem "(TGL)", pernas com escala, ponto de reporte dentro do quadro do mapa); pouso duro e fora de pista; preços e avisos do Hangar.
+- **Sessão Sonnet: tarefa 5, MAPA-ESCALAS** (B2, agora liberada) ou **tarefa 8, SEM-PORCENTO** (F1–F3). `HangarViewModel` nunca em paralelo.
+- **Sessão Opus: tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes, decidido, D9 histerese do RPM; depois rever `InspectionDefectPolicy`).
 - PC do escritório: `git pull` e `tools/agents/install-global.sh`. Fila anterior: AIRSIM-2 (spec Opus; só fecha com MSFS), HUD em modo tablet (quando pedido), 8 tipos da E2C.
 
 ## Pendências
@@ -22,7 +21,6 @@
 - Teste de XP do pouso forçado só confere `XP > 0` (não a metade exata).
 
 ## Decisões abertas do usuário
-- F4 decidida (2026-11-26): manter os % que não são condição; tarefa 8 só F1–F3.
 - Altitude da área genérica e variedade de destinos na fase 1 (`achados-voo-sdco.md`); manter Ctrl+Alt+O.
 
 ## Notas

@@ -103,7 +103,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 1 | PANE-PECAS | D2, D3, D4 e o fluxo único de E2 | Opus | Gemini; revisão linha a linha | — |
 | 2 | ✅ POUSO-DANO | C1, D1, D5, D6, D10, D11 | Opus | Gemini; revisão linha a linha | 1 |
 | 3 | LIMPA-MAPA | A1, A2 | Sonnet | Gemini (golden pode mudar) | — |
-| 4 | BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
+| 4 | ✅ BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
 | 5 | MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
 | 6 | ~~RESGATE~~ | B4 decidido: cancelar a missão (entra na tarefa 2) | — | — | — |
 | 7 | ✅ HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
