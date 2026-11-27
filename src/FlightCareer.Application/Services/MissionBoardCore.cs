@@ -74,7 +74,8 @@ namespace FlightCareer.Application.Services
             Runway? originRunway = null,
             BoardCache? cache = null,
             DateTime? seasonDate = null,
-            AirlineRouteCatalog? routes = null)
+            AirlineRouteCatalog? routes = null,
+            int? pilotLevel = null)
         {
             var missions = new List<Mission>();
             if (origin == null || candidates == null || catalog == null) return missions;
@@ -124,7 +125,8 @@ namespace FlightCareer.Application.Services
                     distances,
                     originRunway,
                     boardCache,
-                    routes);
+                    routes,
+                    pilotLevel);
 
                 if (mission != null)
                 {
@@ -150,12 +152,13 @@ namespace FlightCareer.Application.Services
             IReadOnlyList<double>? candidateDistances = null,
             Runway? originRunway = null,
             BoardCache? cache = null,
-            AirlineRouteCatalog? routes = null)
+            AirlineRouteCatalog? routes = null,
+            int? pilotLevel = null)
         {
             if (def == null || def.Profiles == null || def.Profiles.Count == 0) return null;
 
             // 1. Sortear perfil correlacionado com ajuste de bigAirport e compatível com a origem
-            var profile = PickProfile(def, origin, originTags, random, originRunway);
+            var profile = PickProfile(def, origin, originTags, random, originRunway, pilotLevel);
             if (profile == null) return null;
 
             // 2. Sortear dentro do perfil: distância, pax e carga uniformes inteiros
@@ -223,6 +226,13 @@ namespace FlightCareer.Application.Services
                 var triangle = MissionGenerator.CreateVfrTriangleMissionSync(
                     origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, profile);
                 return triangle != null ? WithPersonLuggage(triangle, def, random) : null;
+            }
+
+            if (def.Generator == "vfr_one_way")
+            {
+                var oneWay = MissionGenerator.CreateVfrOneWayMissionSync(
+                    origin, def, random, referenceTime, candidates, payMultiplier, payTable, textCatalog, profile);
+                return oneWay != null ? WithPersonLuggage(oneWay, def, random) : null;
             }
 
             if (def.Generator == "stol_training")
@@ -392,13 +402,15 @@ namespace FlightCareer.Application.Services
             Airport origin,
             IReadOnlySet<string> originTags,
             Random random,
-            Runway? originRunway = null)
+            Runway? originRunway = null,
+            int? pilotLevel = null)
         {
             if (def.Profiles == null || def.Profiles.Count == 0) return null;
 
             var availableProfiles = def.Profiles.Where(p =>
                 (originRunway == null || (originRunway.LengthFt >= p.MinRunwayFt && (!p.Paved || !RunwaySurface.IsUnpaved(originRunway.Surface))))
                 && (p.RequireAnyTag == null || p.RequireAnyTag.Count == 0 || (originTags != null && p.RequireAnyTag.Any(pat => AirportProfileCatalog.MatchesAny(pat, originTags))))
+                && (pilotLevel == null || p.MinPilotLevel == null || pilotLevel >= p.MinPilotLevel)
             ).ToList();
 
             if (availableProfiles.Count == 0) return null;

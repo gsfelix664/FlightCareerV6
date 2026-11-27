@@ -22,6 +22,7 @@ namespace FlightCareer.Replay
             "SBGR", "KMEM", "SBKP", "SBTF", "SDCO", "SDOI", "SBJR", "SDAO", "PABE", "SBAN"
         };
         public bool Coverage { get; set; }
+        public int? Level { get; set; }
         public string OutputDirectory { get; set; } = ".";
     }
 
@@ -49,6 +50,10 @@ namespace FlightCareer.Replay
                 {
                     options.Coverage = true;
                 }
+                else if (args[i].Equals("--level", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    if (int.TryParse(args[++i], out int lvl)) options.Level = lvl;
+                }
                 else if (args[i].Equals("--out", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
                 {
                     options.OutputDirectory = args[++i];
@@ -59,6 +64,10 @@ namespace FlightCareer.Replay
             Console.WriteLine("                  FlightCareer V6 — Relatório de Quadros (Board Report)        ");
             Console.WriteLine("===============================================================================");
             Console.WriteLine($"Boards por aeroporto: {options.BoardsCount} | Seed: {options.Seed} | Coverage: {options.Coverage}");
+            if (options.Level.HasValue)
+            {
+                Console.WriteLine($"Nível do piloto: {options.Level.Value}");
+            }
             Console.WriteLine($"Aeroportos: {string.Join(", ", options.Airports)}");
             Console.WriteLine($"Diretório de saída: {options.OutputDirectory}");
             Console.WriteLine();
@@ -154,7 +163,8 @@ namespace FlightCareer.Replay
                         refTime,
                         countOverride: null,
                         allRunways: allRunways,
-                        cache: cache);
+                        cache: cache,
+                        pilotLevel: options.Level);
 
                     foreach (var m in missions)
                     {

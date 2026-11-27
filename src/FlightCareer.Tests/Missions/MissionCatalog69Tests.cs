@@ -36,10 +36,10 @@ namespace FlightCareer.Tests.Missions
         };
 
         [Fact]
-        public void MissionCatalog_Carrega69Tipos_IdsUnicosEDadosValidos()
+        public void MissionCatalog_Carrega70Tipos_IdsUnicosEDadosValidos()
         {
             var catalog = MissionCatalog.Shared;
-            Assert.Equal(69, catalog.Missions.Count);
+            Assert.Equal(70, catalog.Missions.Count);
 
             var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             int disabledCount = 0;

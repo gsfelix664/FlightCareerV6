@@ -2,6 +2,7 @@ using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Career;
 using FlightCareer.Domain.Missions;
+using FlightCareer.Domain.Xp;
 using FlightCareer.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -210,7 +211,9 @@ namespace FlightCareer.Application.Services
                     .Select(a => new AirportCandidate(a, runwaysByIcao.GetValueOrDefault(a.ICAO)))
                     .ToList();
 
-                var seasonDate = await _context.Pilots.AsNoTracking().OrderBy(p => p.Id).Select(p => (DateTime?)p.CareerClockUtc).FirstOrDefaultAsync();
+                var pilotInfo = await _context.Pilots.AsNoTracking().OrderBy(p => p.Id).Select(p => new { p.CareerClockUtc, p.ExperiencePoints }).FirstOrDefaultAsync();
+                var seasonDate = pilotInfo?.CareerClockUtc;
+                int? pilotLevel = pilotInfo != null ? PilotLevel.ForXp(pilotInfo.ExperiencePoints) : null;
 
                 var newMissions = MissionBoardCore.GenerateBoard(
                     currentAirport,
@@ -226,7 +229,8 @@ namespace FlightCareer.Application.Services
                     _textCatalog,
                     _placesService,
                     originRunway,
-                    seasonDate: seasonDate);
+                    seasonDate: seasonDate,
+                    pilotLevel: pilotLevel);
 
                 if (newMissions.Count > 0)
                 {
@@ -1324,10 +1328,19 @@ namespace FlightCareer.Application.Services
             else
             {
                 bool isTgl = string.Equals(variant, "triangle_tgl", StringComparison.OrdinalIgnoreCase);
-                double minLeg = 25.0;
-                double maxLeg = isTgl ? 70.0 : 90.0;
-                double minTotal = isTgl ? 75.0 : 80.0;
-                double maxTotal = isTgl ? 200.0 : 250.0;
+                bool isLong = string.Equals(variant, "triangle_long", StringComparison.OrdinalIgnoreCase);
+                double minLeg = isLong
+                    ? (profile?.LegNm != null && profile.LegNm.Length >= 1 ? profile.LegNm[0] : 40.0)
+                    : 25.0;
+                double maxLeg = isLong
+                    ? (profile?.LegNm != null && profile.LegNm.Length >= 2 ? profile.LegNm[1] : 130.0)
+                    : (isTgl ? 70.0 : 90.0);
+                double minTotal = isLong
+                    ? (profile?.RangeNm != null && profile.RangeNm.Length >= 1 ? profile.RangeNm[0] : 150.0)
+                    : (isTgl ? 75.0 : 80.0);
+                double maxTotal = isLong
+                    ? (profile?.RangeNm != null && profile.RangeNm.Length >= 2 ? profile.RangeNm[1] : 300.0)
+                    : (isTgl ? 200.0 : 250.0);
 
                 var validPairs = new List<(AirportCandidate A, AirportCandidate B, double DistTotal)>();
 
@@ -1403,13 +1416,17 @@ namespace FlightCareer.Application.Services
                     ["pax"] = "1"
                 };
 
-                string fallbackTitle = isTgl
-                    ? $"Triângulo VFR com Toque e Arremetida ({airportA.ICAO} e {airportB.ICAO})"
-                    : $"Navegação VFR em Triângulo ({airportA.ICAO} e {airportB.ICAO})";
+                string fallbackTitle = isLong
+                    ? $"Navegação VFR Longa ({airportA.ICAO} e {airportB.ICAO})"
+                    : (isTgl
+                        ? $"Triângulo VFR com Toque e Arremetida ({airportA.ICAO} e {airportB.ICAO})"
+                        : $"Navegação VFR em Triângulo ({airportA.ICAO} e {airportB.ICAO})");
 
-                string fallbackDesc = isTgl
-                    ? $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize toque e arremetida em cada aeródromo na ordem."
-                    : $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize parada completa em cada aeródromo na ordem.";
+                string fallbackDesc = isLong
+                    ? $"Navegação visual longa: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO} ({totalDist:F0} NM total). Sobrevoe o ponto de reporte, cumpra paradas completas nas escalas {airportA.ICAO} e {airportB.ICAO} e regresse à base."
+                    : (isTgl
+                        ? $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize toque e arremetida em cada aeródromo na ordem."
+                        : $"Navegação estimada triangular: {origin.ICAO} -> {airportA.ICAO} -> {airportB.ICAO} -> {origin.ICAO}. Sobrevoe o ponto de reporte na primeira etapa e realize parada completa em cada aeródromo na ordem.");
 
                 var catalog = textCatalog ?? MissionTextCatalog.Default;
                 string textKey = $"{sub.Id}:{variant}";
@@ -1427,6 +1444,86 @@ namespace FlightCareer.Application.Services
                     destRunway: null,
                     contractData: contractJson);
             }
+        }
+
+        public static Mission? CreateVfrOneWayMissionSync(
+            Airport origin,
+            MissionDefinition def,
+            Random random,
+            DateTime referenceTime,
+            IReadOnlyList<AirportCandidate> candidates,
+            double payMultiplier = 1.0,
+            MissionPayTable? payTable = null,
+            MissionTextCatalog? textCatalog = null,
+            MissionProfileDefinition? profile = null)
+        {
+            if (candidates == null || candidates.Count == 0) return null;
+
+            string variant = profile?.Variant ?? "iniciante";
+            int minRange = profile?.RangeNm != null && profile.RangeNm.Length > 0 ? profile.RangeNm[0] : 50;
+            int maxRange = profile?.RangeNm != null && profile.RangeNm.Length > 1 ? profile.RangeNm[1] : 100;
+
+            AirportCandidate? dest;
+            if (string.Equals(variant, "intermediaria", StringComparison.OrdinalIgnoreCase))
+            {
+                dest = VfrOneWayDestinations.PickIntermediate(origin, candidates, minRange, maxRange, random);
+            }
+            else
+            {
+                int poolSize = profile?.RepeatPool ?? 3;
+                var pool = VfrOneWayDestinations.BeginnerPool(origin, candidates, minRange, maxRange, poolSize);
+                dest = pool.Count > 0 ? pool[random.Next(pool.Count)] : null;
+            }
+
+            if (dest == null) return null;
+
+            double rawDist = CalculateDistance(origin.Latitude, origin.Longitude, dest.Airport.Latitude, dest.Airport.Longitude);
+            double dist = Math.Round(rawDist, 0);
+
+            // Ponto de reporte VFR no meio da etapa (origin -> dest) com desvio de 3 a 8 NM
+            double midLat = (origin.Latitude + dest.Airport.Latitude) / 2.0;
+            double midLon = (origin.Longitude + dest.Airport.Longitude) / 2.0;
+            double cosMid = Math.Max(0.01, Math.Cos(midLat * Math.PI / 180.0));
+            double dLatNm = (dest.Airport.Latitude - origin.Latitude) * 60.0;
+            double dLonNm = (dest.Airport.Longitude - origin.Longitude) * 60.0 * cosMid;
+            double legDistNm = Math.Max(1.0, Math.Sqrt((dLatNm * dLatNm) + (dLonNm * dLonNm)));
+
+            double perpLat = -dLonNm / legDistNm;
+            double perpLon = dLatNm / legDistNm;
+            double offsetNm = 3.0 + (random.NextDouble() * 5.0); // 3 a 8 NM
+            double side = random.Next(0, 2) == 0 ? 1.0 : -1.0;
+
+            double pLat = midLat + (side * offsetNm * perpLat / 60.0);
+            double pLon = midLon + (side * offsetNm * perpLon / (60.0 * cosMid));
+
+            string overflyWp = OverflyWaypointCodec.FormatCoordinatePoint("Ponto de Reporte VFR", pLat, pLon, 2.0, 3000.0);
+
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["origin"] = origin.ICAO,
+                ["dest"] = dest.Airport.ICAO,
+                ["distance_nm"] = dist.ToString("F0"),
+                ["pax"] = "1"
+            };
+
+            string fallbackTitle = $"Navegação VFR {origin.ICAO} → {dest.Airport.ICAO}";
+            string fallbackDesc = $"Navegação visual de {origin.ICAO} a {dest.Airport.ICAO} ({dist:F0} NM). Sobrevoe o ponto de reporte e faça pouso completo em {dest.Airport.ICAO}.";
+
+            var catalog = textCatalog ?? MissionTextCatalog.Default;
+            string textKey = $"{def.Id}:{variant}";
+            var rendered = catalog.Templates.ContainsKey(textKey)
+                ? catalog.Render(textKey, random, values, fallbackTitle, fallbackDesc)
+                : catalog.Render(def.Id, random, values, fallbackTitle, fallbackDesc);
+
+            return CreateMissionObjectSync(
+                origin, dest.Airport, dist, def, 1, 15.0, 0.0,
+                random, referenceTime, payMultiplier, payTable,
+                requiredTouchAndGoes: 0,
+                overflyWaypoints: overflyWp,
+                titleOverride: rendered.Title,
+                descriptionOverride: rendered.Description,
+                destRunway: dest.BestRunway,
+                textCatalog: textCatalog);
         }
 
         public static Mission? CreateStolTrainingMissionSync(
@@ -2314,7 +2411,8 @@ namespace FlightCareer.Application.Services
             IPlacesDataService? placesService = null,
             MissionTextCatalog? textCatalog = null,
             BoardCache? cache = null,
-            DateTime? seasonDate = null)
+            DateTime? seasonDate = null,
+            int? pilotLevel = null)
         {
             if (currentAirport == null) return new List<Mission>();
             if (currentAirport.Tier < 1 || currentAirport.Tier > 4)
@@ -2381,7 +2479,8 @@ namespace FlightCareer.Application.Services
                 placesService,
                 originRunway,
                 cache,
-                seasonDate: seasonDate);
+                seasonDate: seasonDate,
+                pilotLevel: pilotLevel);
         }
 
         public static bool IsDifficultRunway(Runway? runway)

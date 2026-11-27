@@ -159,8 +159,8 @@ namespace FlightCareer.Application.Simulation
             var snapshots = new List<BotMilestoneSnapshot>();
             var startDate = new DateTime(2024, 1, 1);
 
-            // Cache de missões por (ICAO, Dia) para evitar recomputações
-            var missionCache = new Dictionary<(string Icao, int Day, DifficultyMode Difficulty), List<Mission>>();
+            // Cache de missões por (ICAO, Dia, Dificuldade, Nível) para evitar recomputações
+            var missionCache = new Dictionary<(string Icao, int Day, DifficultyMode Difficulty, int Level), List<Mission>>();
 
             int groupIndex = 0;
             foreach (var difficulty in difficulties)
@@ -301,8 +301,10 @@ namespace FlightCareer.Application.Simulation
 
                                 while (dayHoursFlown < options.HoursPerDay && !isBankrupt)
                                 {
+                                    int currentLevel = PilotLevel.ForXp(totalXP);
+
                                     // Obter missões geradas para o aeroporto neste dia (com semente determinística do aeródromo)
-                                    var cacheKey = (currentAirport.ICAO, day, difficulty);
+                                    var cacheKey = (currentAirport.ICAO, day, difficulty, currentLevel);
                                     if (!missionCache.TryGetValue(cacheKey, out var availableMissions))
                                     {
                                         int apSeed = unchecked((StableHash(currentAirport.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
@@ -315,7 +317,8 @@ namespace FlightCareer.Application.Simulation
                                             simulatedDate,
                                             countOverride: 80,
                                             payMultiplier: diffEcon.PayMultiplier,
-                                            seasonDate: simulatedDate);
+                                            seasonDate: simulatedDate,
+                                            pilotLevel: currentLevel);
                                         missionCache[cacheKey] = availableMissions;
                                     }
 
@@ -336,11 +339,11 @@ namespace FlightCareer.Application.Simulation
 
                                     List<Mission> MissionsAt(Airport ap)
                                     {
-                                        var key = (ap.ICAO, day, difficulty);
+                                        var key = (ap.ICAO, day, difficulty, currentLevel);
                                         if (!missionCache.TryGetValue(key, out var list))
                                         {
                                             int seedAp = unchecked((StableHash(ap.ICAO) * 397) ^ (day * 101) ^ (options.Seed * 17));
-                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier, seasonDate: simulatedDate);
+                                            list = MissionGenerator.GenerateMissionsInMemory(ap, allAirports, _hubDataService, new Random(seedAp & 0x7FFFFFFF), simulatedDate, countOverride: 80, payMultiplier: diffEcon.PayMultiplier, seasonDate: simulatedDate, pilotLevel: currentLevel);
                                             missionCache[key] = list;
                                         }
                                         return list;
