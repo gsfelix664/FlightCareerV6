@@ -10,13 +10,14 @@ namespace FlightCareer.Domain.Components
     {
         public bool IsExact => Max - Min < 0.05;
         public double Mid => (Min + Max) / 2.0;
-        /// <summary>Estimativa que arredonda para o mesmo inteiro (ex.: 51,2–51,4) mostra "~51%", sem "51–51%".</summary>
+        /// <summary>Estimativa por palavras (ex.: "Atenção a bom", "Bom", "Quebrado").</summary>
         public override string ToString()
         {
-            string min = Min.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
-            string max = Max.ToString("F0", System.Globalization.CultureInfo.InvariantCulture);
-            if (IsExact) return $"{min}%";
-            return min == max ? $"~{min}%" : $"{min}–{max}%";
+            if (Max <= 0.0) return "Quebrado";
+            string minWord = HealthWords.For(Min);
+            string maxWord = HealthWords.For(Max);
+            if (IsExact || minWord == maxWord) return minWord;
+            return $"{minWord} a {maxWord.ToLowerInvariant()}";
         }
     }
 

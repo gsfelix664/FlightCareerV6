@@ -173,7 +173,7 @@ namespace FlightCareer.UI.Services
                     OnRecord?.Invoke(new FlightFailureRecord
                     {
                         Title = "INCÊNDIO EXTINTO (CORTE DE COMBUSTÍVEL)",
-                        Description = $"O corte de combustível e o vento relativo extinguiram o fogo. Motor preservado em {engine?.Health ?? 0:F1}%. Não tente repartir.",
+                        Description = "O corte de combustível e o vento relativo extinguiram o fogo. O motor ficou danificado. Não tente repartir.",
                         IsCritical = false,
                         Effect = FailureEffect.EngineFire,
                         Kind = ComponentKind.Engine,

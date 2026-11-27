@@ -108,10 +108,10 @@ namespace FlightCareer.Domain.Components
 
             var worst = shown.FirstOrDefault();
             if (worst.Def != null && worst.Range.Mid < catalog.Hazard.Threshold)
-                return new AircraftStatus(AircraftStatusLevel.FailureRisk, "RISCO DE PANE", $"{worst.Def.Name} em {worst.Range}: chance de pane a cada hora de voo.");
+                return new AircraftStatus(AircraftStatusLevel.FailureRisk, "RISCO DE PANE", $"{worst.Def.Name}: estado crítico, chance de pane a cada hora de voo. Repare antes de voar.");
 
             if (worst.Def != null && worst.Range.Mid < catalog.SymptomThreshold)
-                return new AircraftStatus(AircraftStatusLevel.Attention, "ATENÇÃO", $"{worst.Def.Name} em {worst.Range}: componente perto do limite.");
+                return new AircraftStatus(AircraftStatusLevel.Attention, "ATENÇÃO", $"{worst.Def.Name}: requer atenção, componente perto do limite.");
 
             var due = new List<string>();
             if (aircraft.HoursUntilNext50hInspection <= 1.2) due.Add("troca de óleo");

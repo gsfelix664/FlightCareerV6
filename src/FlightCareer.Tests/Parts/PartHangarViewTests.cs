@@ -50,7 +50,7 @@ namespace FlightCareer.Tests.Parts
             var row = PartHangarView.Build(part, def, engineCount: 1, airframeHours: 103.0, careerNow: DateTime.UtcNow);
 
             Assert.Equal(PartKnownBand.Green, row.Band);
-            Assert.Equal("62 %", row.HealthText);
+            Assert.Equal("Boa", row.HealthText);
             Assert.Equal("visto há 3 h", row.SeenText);
         }
 
@@ -90,7 +90,7 @@ namespace FlightCareer.Tests.Parts
             var row = PartHangarView.Build(part, def, engineCount: 1, airframeHours: 105.0, careerNow: DateTime.UtcNow);
 
             Assert.Equal(PartKnownBand.Green, row.Band);
-            Assert.Equal("55 %", row.HealthText);
+            Assert.Equal("Boa", row.HealthText);
         }
 
         [Fact]
@@ -236,7 +236,7 @@ namespace FlightCareer.Tests.Parts
 
             Assert.Equal(2, plan.Items.Count);
             Assert.Equal("Troca por escolha do piloto", plan.Items[0].Reason);
-            Assert.Equal("Faixa amarela: 30 %", plan.Items[1].Reason);
+            Assert.Equal("Faixa amarela", plan.Items[1].Reason);
         }
     }
 }

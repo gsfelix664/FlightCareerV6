@@ -320,7 +320,7 @@
                                     <Button Style="{StaticResource HgSecondary}" Content="Walkaround" Margin="0,0,8,0"
                                             Command="{Binding DataContext.WalkaroundCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             IsEnabled="{Binding CanService}"
-                                            ToolTip="Inspeção visual grátis: estima pneus, freios, trem, óleo e célula com ±10%"/>
+                                            ToolTip="Inspeção visual grátis: estima o estado de pneus, freios, trem, óleo e célula"/>
                                     <Button Style="{StaticResource HgPrimary}" Content="{Binding RepairAllText}" IsEnabled="{Binding HasRepairs}"
                                             Command="{Binding DataContext.RepairAllCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
                                 </StackPanel>
@@ -368,7 +368,7 @@
                             <!-- Legenda clássica (sem peças) -->
                             <TextBlock Style="{StaticResource HgLabel}" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap"
                                        Visibility="{Binding HasPartsDriven, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
-                                       Text="Faixa (ex.: 48–52%) = estimativa: abre com as horas desde a última inspeção ou walkaround. Verde acima de 40%; amarelo 40–20% (desgaste acelerado e perda de desempenho); vermelho abaixo de 20% (risco de pane)."/>
+                                       Text="Dois estados (ex.: Atenção a bom) = estimativa: abre com as horas desde a última inspeção ou walkaround. Verde: bom ou íntegro; amarelo: atenção (desgaste acelerado e perda de desempenho); vermelho: crítico (risco de pane)."/>
 
                             <ItemsControl ItemsSource="{Binding Components}">
                                 <ItemsControl.ItemTemplate>

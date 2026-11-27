@@ -178,7 +178,7 @@ namespace FlightCareer.UI.Services
                 {
                     PartBreakSink?.Invoke(failure.Part.Id);
                     string partName = _partCatalog.Get(failure.Part.PartId)?.Name ?? failure.Part.PartId;
-                    string desc = $"{failure.Mode.Description} ({partName} em {failure.HealthAtFailure:F0}%)";
+                    string desc = $"{failure.Mode.Description} ({partName})";
                     ApplyMode(failure.Kind, failure.Mode, data, desc);
                     _failedKindsInFlight.Add(failure.Kind);
                 }
@@ -200,7 +200,7 @@ namespace FlightCareer.UI.Services
                 Emit(new FlightFailureRecord
                 {
                     Title = o.Name.ToUpperInvariant(),
-                    Description = $"{o.Description} (dano: {ev.Damage:F0}% em {ComponentName(o.Kind)})",
+                    Description = $"{o.Description} (dano em {ComponentName(o.Kind)})",
                     IsCritical = o.Critical,
                     Effect = o.Effect,
                     Kind = o.Kind,
@@ -294,7 +294,7 @@ namespace FlightCareer.UI.Services
         }
 
         private void ApplyMode(ComponentKind kind, FailureModeDefinition mode, SimTelemetry data) =>
-            ApplyMode(kind, mode, data, $"{mode.Description} ({ComponentName(kind)} em {Get(kind)?.Health ?? 0:F0}%)");
+            ApplyMode(kind, mode, data, $"{mode.Description} ({ComponentName(kind)})");
 
         private void ApplyMode(ComponentKind kind, FailureModeDefinition mode, SimTelemetry data, string customDescription)
         {

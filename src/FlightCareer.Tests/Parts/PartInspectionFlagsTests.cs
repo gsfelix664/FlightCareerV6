@@ -110,7 +110,7 @@ namespace FlightCareer.Tests.Parts
             var result = PartInspectionFlags.Evaluate(part, def, DateTime.UtcNow);
 
             Assert.Equal(PartFlag.Suspect, result.Level);
-            Assert.Equal("Faixa amarela: 35 %", result.Reason);
+            Assert.Equal("Faixa amarela", result.Reason);
         }
 
         [Fact]

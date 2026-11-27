@@ -445,10 +445,7 @@
 
                                         <!-- Badge de Condição Média com StateColor -->
                                         <Border Grid.Column="1" Background="#161F2A" BorderBrush="{Binding StateColor}" BorderThickness="1" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding AverageCondition, StringFormat={}{0:F0}%}" FontSize="11.5" FontWeight="Bold" Foreground="{Binding StateColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                <TextBlock Text=" CONDIÇÃO" FontSize="9.5" FontWeight="Bold" Foreground="{Binding StateColor}" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                            </StackPanel>
+                                            <TextBlock Text="{Binding GeneralState, StringFormat={}CONDIÇÃO: {0}}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding StateColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                         </Border>
                                     </Grid>
                                 </Grid>
@@ -546,10 +543,7 @@
 
                                 <!-- Badge de Estado Geral da Aeronave -->
                                 <Border Grid.Column="2" Background="#121820" BorderBrush="{Binding SelectedOffer.StateColor}" BorderThickness="1" CornerRadius="6" Padding="10,6" VerticalAlignment="Center">
-                                    <StackPanel HorizontalAlignment="Center">
-                                        <TextBlock Text="{Binding SelectedOffer.GeneralState}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.StateColor}" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="{Binding SelectedOffer.AverageCondition, StringFormat={}{0:F0}% MÉDIA}" FontSize="9.5" FontWeight="Bold" Foreground="{Binding SelectedOffer.StateColor}" HorizontalAlignment="Center" Margin="0,2,0,0" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                    </StackPanel>
+                                    <TextBlock Text="{Binding SelectedOffer.GeneralState}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.StateColor}" HorizontalAlignment="Center"/>
                                 </Border>
                             </Grid>
                         </Border>
@@ -570,7 +564,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="1. CÉLULA / FUSELAGEM (AIRFRAME)" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AirframeCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AirframeConditionText}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.AirframeConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                         </Grid>
                                         <ProgressBar Value="{Binding SelectedOffer.AirframeCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
                                         <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8">
@@ -591,7 +585,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="2. GRUPO MOTOPROPULSOR (MOTOR &amp; HÉLICE)" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.EngineCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.EngineConditionText}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.EngineConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                         </Grid>
                                         <ProgressBar Value="{Binding SelectedOffer.EngineCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
                                         <TextBlock Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8">
@@ -612,7 +606,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="3. TREM DE POUSO &amp; PNEUS" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.TiresCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.TiresConditionText}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.TiresConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                         </Grid>
                                         <ProgressBar Value="{Binding SelectedOffer.TiresCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
                                         <TextBlock Text="Desgaste moderado, sem vazamento no amortecedor hidráulico" Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8"/>
@@ -628,7 +622,7 @@
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Text="4. AVIÔNICOS &amp; ELÉTRICA" FontSize="11" FontWeight="Bold" Foreground="#F0F4F8"/>
-                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AvionicsCondition, StringFormat={}{0:F0}%}" FontSize="12" FontWeight="Black" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding SelectedOffer.AvionicsConditionText}" FontSize="12" FontWeight="Black" Foreground="{Binding SelectedOffer.AvionicsConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                         </Grid>
                                         <ProgressBar Value="{Binding SelectedOffer.AvionicsCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
                                         <TextBlock Text="Rádio COMM/NAV operacionais, barramento DC saudável" Margin="0,6,0,0" FontSize="11" Foreground="#94A3B8"/>
@@ -679,7 +673,7 @@
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="REVISÃO ESTIMADA PÓS-COMPRA" FontSize="10.5" FontWeight="Bold" Foreground="#FFB300" FontFamily="Inter, Segoe UI, sans-serif"/>
                                             <TextBlock Text="{Binding SelectedOffer.EstimatedPostBuyCost, StringFormat={}${0:N2}}" FontSize="18" FontWeight="Black" Foreground="#FFB300" FontFamily="JetBrains Mono, Consolas, monospace" Margin="0,2,0,2"/>
-                                            <TextBlock Text="Valor sugerido para trazer a aeronave a 100% de confiabilidade operacional." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
+                                            <TextBlock Text="Valor sugerido para deixar a aeronave plenamente confiável." FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"/>
                                         </StackPanel>
                                     </Grid>
                                 </Border>
@@ -911,10 +905,7 @@
 
                                         <!-- Badge de Condição Geral -->
                                         <Border Grid.Column="1" Background="#161F2A" BorderBrush="{Binding StateColor}" BorderThickness="1" CornerRadius="6" Padding="10,6" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding AverageCondition, StringFormat={}{0:F0}%}" FontSize="12.5" FontWeight="Black" Foreground="{Binding StateColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
-                                                <TextBlock Text="{Binding GeneralState, StringFormat={} • {0}}" FontSize="11" FontWeight="Bold" Foreground="{Binding StateColor}" Margin="4,0,0,0" VerticalAlignment="Center"/>
-                                            </StackPanel>
+                                            <TextBlock Text="{Binding GeneralState}" FontSize="12" FontWeight="Black" Foreground="{Binding StateColor}" VerticalAlignment="Center"/>
                                         </Border>
                                     </Grid>
 
@@ -939,7 +930,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="Célula / Fuselagem" FontSize="11" Foreground="#94A3B8"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding AirframeCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding AirframeConditionText}" FontSize="11" FontWeight="Bold" Foreground="{Binding AirframeConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding AirframeCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
 
@@ -950,7 +941,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="Grupo Motopropulsor" FontSize="11" Foreground="#94A3B8"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding EngineCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding EngineConditionText}" FontSize="11" FontWeight="Bold" Foreground="{Binding EngineConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding EngineCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
 
@@ -961,7 +952,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="Trem de Pouso &amp; Pneus" FontSize="11" Foreground="#94A3B8"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding TiresCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding TiresConditionText}" FontSize="11" FontWeight="Bold" Foreground="{Binding TiresConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding TiresCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}" Margin="0,0,0,10"/>
 
@@ -972,7 +963,7 @@
                                                         <ColumnDefinition Width="Auto"/>
                                                     </Grid.ColumnDefinitions>
                                                     <TextBlock Text="Aviônicos &amp; Sistemas Elétricos" FontSize="11" Foreground="#94A3B8"/>
-                                                    <TextBlock Grid.Column="1" Text="{Binding AvionicsCondition, StringFormat={}{0:F0}%}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" FontFamily="JetBrains Mono, Consolas, monospace"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding AvionicsConditionText}" FontSize="11" FontWeight="Bold" Foreground="{Binding AvionicsConditionColor}" FontFamily="JetBrains Mono, Consolas, monospace"/>
                                                 </Grid>
                                                 <ProgressBar Value="{Binding AvionicsCondition, Mode=OneWay}" Style="{StaticResource AvionicsProgressBar}"/>
                                             </StackPanel>
