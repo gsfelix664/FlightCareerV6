@@ -31,6 +31,8 @@ namespace FlightCareer.UI.Utils
         private readonly List<GMapMarker> _missionClusterMarkers = new List<GMapMarker>();
         private readonly List<GMapMarker> _contractMarkers = new List<GMapMarker>();
         private readonly List<GMapRoute> _contractRoutes = new List<GMapRoute>();
+        private readonly List<PointLatLng> _routeFramingPoints = new List<PointLatLng>();
+        private readonly List<PointLatLng> _contractFramingPoints = new List<PointLatLng>();
 
         // Dependency Properties
         public static readonly DependencyProperty RecordedPathProperty = DependencyProperty.Register("RecordedPath", typeof(System.Collections.IEnumerable), typeof(FlightMapControl), new PropertyMetadata(null, OnRecordedPathChanged));
@@ -274,26 +276,29 @@ namespace FlightCareer.UI.Utils
             _contractMarkers.Clear();
             foreach (var r in _contractRoutes) MainMap.Markers.Remove(r);
             _contractRoutes.Clear();
+            _contractFramingPoints.Clear();
 
             var surveyArea = _contractVisuals.SurveyArea;
             // Sem contrato desenhado, o enquadramento fica com a rota (não muda o zoom)
-            if (_contractVisuals.Markers.Count == 0 && surveyArea == null) return;
-
-            var framingPoints = new List<PointLatLng>();
+            if (_contractVisuals.Markers.Count == 0 && surveyArea == null)
+            {
+                ApplyCombinedFraming();
+                return;
+            }
 
             if (OriginLat != 0 && OriginLon != 0)
             {
-                framingPoints.Add(new PointLatLng(OriginLat, OriginLon));
+                _contractFramingPoints.Add(new PointLatLng(OriginLat, OriginLon));
             }
             else if (AircraftLat != 0 && AircraftLon != 0)
             {
                 // Quadro de missões: a origem chega como posição da aeronave
-                framingPoints.Add(new PointLatLng(AircraftLat, AircraftLon));
+                _contractFramingPoints.Add(new PointLatLng(AircraftLat, AircraftLon));
             }
 
             if (DestLat != 0 && DestLon != 0)
             {
-                framingPoints.Add(new PointLatLng(DestLat, DestLon));
+                _contractFramingPoints.Add(new PointLatLng(DestLat, DestLon));
             }
 
             {
@@ -301,7 +306,7 @@ namespace FlightCareer.UI.Utils
                 {
                     {
                         var pos = new PointLatLng(marker.Lat, marker.Lon);
-                        framingPoints.Add(pos);
+                        _contractFramingPoints.Add(pos);
 
                         switch (marker.Kind)
                         {
@@ -323,7 +328,7 @@ namespace FlightCareer.UI.Utils
                             {
                                 double r = Math.Max(0.5, marker.RadiusNm);
                                 var circlePts = GenerateCirclePoints(marker.Lat, marker.Lon, r);
-                                framingPoints.AddRange(circlePts);
+                                _contractFramingPoints.AddRange(circlePts);
 
                                 var circleRoute = new GMapRoute(circlePts)
                                 {
@@ -355,7 +360,7 @@ namespace FlightCareer.UI.Utils
                             {
                                 double r = Math.Max(0.5, marker.RadiusNm);
                                 var dzPts = GenerateCirclePoints(marker.Lat, marker.Lon, r);
-                                framingPoints.AddRange(dzPts);
+                                _contractFramingPoints.AddRange(dzPts);
 
                                 var dzRoute = new GMapRoute(dzPts)
                                 {
@@ -392,7 +397,7 @@ namespace FlightCareer.UI.Utils
                 {
                     var rectPts = surveyArea.Corners.Select(c => new PointLatLng(c.Lat, c.Lon)).ToList();
                     rectPts.Add(rectPts[0]); // close loop
-                    framingPoints.AddRange(rectPts);
+                    _contractFramingPoints.AddRange(rectPts);
 
                     var surveyRect = new GMapRoute(rectPts)
                     {
@@ -418,7 +423,7 @@ namespace FlightCareer.UI.Utils
                             new PointLatLng(leg[0].Lat, leg[0].Lon),
                             new PointLatLng(leg[1].Lat, leg[1].Lon)
                         };
-                        framingPoints.AddRange(legPts);
+                        _contractFramingPoints.AddRange(legPts);
 
                         var legRoute = new GMapRoute(legPts)
                         {
@@ -436,29 +441,7 @@ namespace FlightCareer.UI.Utils
                 }
             }
 
-            if (framingPoints.Count >= 2)
-            {
-                try
-                {
-                    double minLat = framingPoints.Min(p => p.Lat);
-                    double maxLat = framingPoints.Max(p => p.Lat);
-                    double minLon = framingPoints.Min(p => p.Lng);
-                    double maxLon = framingPoints.Max(p => p.Lng);
-
-                    double latSpan = Math.Max(0.06, maxLat - minLat);
-                    double lonSpan = Math.Max(0.06, maxLon - minLon);
-
-                    var rect = RectLatLng.FromLTRB(
-                        minLon - (lonSpan * 0.30),
-                        maxLat + (latSpan * 0.30),
-                        maxLon + (lonSpan * 0.30),
-                        minLat - (latSpan * 0.30)
-                    );
-
-                    MainMap.SetZoomToFitRect(rect);
-                }
-                catch { }
-            }
+            ApplyCombinedFraming();
         }
 
         private static void OnAirportsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -725,11 +708,13 @@ namespace FlightCareer.UI.Utils
 
         public void UpdateMultiLegRoute()
         {
+            _routeFramingPoints.Clear();
             ClearMultiLegVisuals();
 
             if (RouteLegs == null)
             {
                 UpdateDestinationRoute();
+                ApplyCombinedFraming();
                 return;
             }
 
@@ -737,6 +722,7 @@ namespace FlightCareer.UI.Utils
             if (!legs.Any())
             {
                 UpdateDestinationRoute();
+                ApplyCombinedFraming();
                 return;
             }
 
@@ -745,10 +731,9 @@ namespace FlightCareer.UI.Utils
             if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
             if (_originMarker != null) MainMap.Markers.Remove(_originMarker);
 
-            var allRoutePoints = new List<PointLatLng>();
             if (AircraftLat != 0 && AircraftLon != 0)
             {
-                allRoutePoints.Add(new PointLatLng(AircraftLat, AircraftLon));
+                _routeFramingPoints.Add(new PointLatLng(AircraftLat, AircraftLon));
             }
 
             var plottedIcaos = new HashSet<string>();
@@ -760,7 +745,7 @@ namespace FlightCareer.UI.Utils
                 bool isLastLeg = (i == legs.Count - 1);
 
                 // 1. Circuito de Tráfego / Toque e Arremetida (TGL)
-                if (leg.IsTglOrLocal || leg.OriginICAO == leg.DestinationICAO)
+                if (leg.IsTglOrLocal)
                 {
                     double lat0 = leg.OriginLat != 0 ? leg.OriginLat : AircraftLat;
                     double lon0 = leg.OriginLon != 0 ? leg.OriginLon : AircraftLon;
@@ -777,7 +762,7 @@ namespace FlightCareer.UI.Utils
                     var pBase = new PointLatLng(lat0 + dLat, lon0);
 
                     var circuitPoints = new List<PointLatLng> { pRwy, pUpwind, pCrosswind, pDownwind, pBase, pRwy };
-                    allRoutePoints.AddRange(circuitPoints);
+                    _routeFramingPoints.AddRange(circuitPoints);
 
                     var tglRoute = new GMapRoute(circuitPoints)
                     {
@@ -801,6 +786,26 @@ namespace FlightCareer.UI.Utils
 
                     plottedIcaos.Add(leg.OriginICAO);
                 }
+                else if (leg.OriginICAO == leg.DestinationICAO)
+                {
+                    // Perna com origem = destino e !IsTglOrLocal (local): só o marcador de partida ("BASE: {icao}") se ainda não plotado, e o ponto entra no enquadramento; sem circuito.
+                    double lat0 = leg.OriginLat != 0 ? leg.OriginLat : AircraftLat;
+                    double lon0 = leg.OriginLon != 0 ? leg.OriginLon : AircraftLon;
+
+                    if (lat0 != 0 || lon0 != 0)
+                    {
+                        var pBase = new PointLatLng(lat0, lon0);
+                        _routeFramingPoints.Add(pBase);
+
+                        if (!plottedIcaos.Contains(leg.OriginICAO))
+                        {
+                            var baseCircle = CreateRoutePointCircle(pBase, "#00E676", $"BASE: {leg.OriginICAO}");
+                            _multiLegMarkers.Add(baseCircle);
+                            MainMap.Markers.Add(baseCircle);
+                            plottedIcaos.Add(leg.OriginICAO);
+                        }
+                    }
+                }
                 else
                 {
                     // 2. Perna de Navegação entre Aeródromos Distintos com Arco Geodésico Curvo
@@ -813,7 +818,7 @@ namespace FlightCareer.UI.Utils
                     if (pEnd.Lat == 0 && pEnd.Lng == 0) continue;
 
                     var arcPoints = GenerateGreatCircleArc(pStart, pEnd, 15);
-                    allRoutePoints.AddRange(arcPoints);
+                    _routeFramingPoints.AddRange(arcPoints);
 
                     var legRoute = new GMapRoute(arcPoints)
                     {
@@ -848,13 +853,23 @@ namespace FlightCareer.UI.Utils
                 }
             }
 
-            // Enquadramento automático cobrindo todas as pernas do voo
-            if (allRoutePoints.Count >= 2)
+            ApplyCombinedFraming();
+        }
+
+        private void ApplyCombinedFraming()
+        {
+            try
             {
-                double minLat = allRoutePoints.Min(p => p.Lat);
-                double maxLat = allRoutePoints.Max(p => p.Lat);
-                double minLon = allRoutePoints.Min(p => p.Lng);
-                double maxLon = allRoutePoints.Max(p => p.Lng);
+                var allPoints = new List<PointLatLng>(_routeFramingPoints.Count + _contractFramingPoints.Count);
+                allPoints.AddRange(_routeFramingPoints);
+                allPoints.AddRange(_contractFramingPoints);
+
+                if (allPoints.Count < 2) return;
+
+                double minLat = allPoints.Min(p => p.Lat);
+                double maxLat = allPoints.Max(p => p.Lat);
+                double minLon = allPoints.Min(p => p.Lng);
+                double maxLon = allPoints.Max(p => p.Lng);
 
                 double latSpan = Math.Max(0.06, maxLat - minLat);
                 double lonSpan = Math.Max(0.06, maxLon - minLon);
@@ -867,6 +882,10 @@ namespace FlightCareer.UI.Utils
                 );
 
                 MainMap.SetZoomToFitRect(rect);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[FlightMapControl] Erro ao enquadrar mapa: {ex.Message}");
             }
         }
 

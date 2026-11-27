@@ -320,84 +320,38 @@ namespace FlightCareer.UI.ViewModels
                     return;
                 }
 
-                // Construção sequencial das pernas (Multi-Leg & TGL)
-                var legDefinitions = new List<(string from, string to, bool isTgl, Mission? mission)>();
-
-                // 1. Verificar se existem voos locais / TGL na base de partida (ex: SDTB -> SDTB)
-                var localMissionsAtOrigin = AcceptedMissions
-                    .Where(m => (m.OriginICAO == originIcao && m.DestinationICAO == originIcao) || (m.OriginICAO == originIcao && m.MissionCategoryType.Contains("Local", StringComparison.OrdinalIgnoreCase)))
-                    .ToList();
-
-                foreach (var lm in localMissionsAtOrigin)
-                {
-                    legDefinitions.Add((originIcao, originIcao, true, lm));
-                }
-
-                // 2. Encadear pernas de travessia / navegação para outros aeroportos
-                var remainingCrossMissions = AcceptedMissions
-                    .Where(m => !localMissionsAtOrigin.Contains(m))
-                    .ToList();
-
-                string currentHop = originIcao;
-                int safetyGuard = 0;
-
-                while (remainingCrossMissions.Any() && safetyGuard++ < 50)
-                {
-                    // 1. Encontrar missão que decola do aeroporto atual
-                    var nextMission = remainingCrossMissions.FirstOrDefault(m => m.OriginICAO == currentHop && m.DestinationICAO != currentHop);
-
-                    if (nextMission == null && currentHop != originIcao)
-                    {
-                        // 2. Se currentHop != originIcao, verificar se há outra missão para o mesmo destino
-                        var sameDestMission = remainingCrossMissions.FirstOrDefault(m => m.DestinationICAO == currentHop);
-                        if (sameDestMission != null)
-                        {
-                            legDefinitions.Add((originIcao, currentHop, false, sameDestMission));
-                            remainingCrossMissions.Remove(sameDestMission);
-                            continue;
-                        }
-
-                        // 3. Se não, procurar missão carregada na base
-                        nextMission = remainingCrossMissions.FirstOrDefault(m => m.OriginICAO == originIcao);
-                    }
-
-                    // 4. Fallback se ainda for nulo
-                    if (nextMission == null)
-                    {
-                        nextMission = remainingCrossMissions.First();
-                    }
-
-                    string nextDest = nextMission.DestinationICAO;
-                    legDefinitions.Add((currentHop, nextDest, false, nextMission));
-                    remainingCrossMissions.Remove(nextMission);
-
-                    currentHop = nextDest;
-                }
+                // Construção sequencial das pernas (Multi-Leg, TGL, Voo Local e Escalas)
+                var legPlans = BriefingLegPlanner.Plan(AcceptedMissions, originIcao);
 
                 // Montar lista de pontos para o sumário de rota
                 var summaryHops = new List<string>();
                 double totalDistance = 0;
                 int legIndex = 1;
 
-                for (int i = 0; i < legDefinitions.Count; i++)
+                for (int i = 0; i < legPlans.Count; i++)
                 {
-                    var def = legDefinitions[i];
-                    var aptOrigin = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == def.from);
-                    var aptDest = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == def.to);
+                    var plan = legPlans[i];
+                    var aptOrigin = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == plan.From);
+                    var aptDest = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == plan.To);
+
+                    double originLat = aptOrigin?.Latitude ?? 0;
+                    double originLon = aptOrigin?.Longitude ?? 0;
+                    double destLat = aptDest?.Latitude ?? plan.ToLat ?? aptOrigin?.Latitude ?? 0;
+                    double destLon = aptDest?.Longitude ?? plan.ToLon ?? aptOrigin?.Longitude ?? 0;
 
                     double dist = 40.0;
-                    if (def.isTgl || def.from == def.to)
+                    if (plan.Kind == BriefingLegKind.TouchAndGo || plan.Kind == BriefingLegKind.Local || plan.From == plan.To)
                     {
-                        dist = (def.mission != null && def.mission.DistanceNM > 0) ? def.mission.DistanceNM : 10.0;
+                        dist = (plan.Mission != null && plan.Mission.DistanceNM > 0) ? plan.Mission.DistanceNM : 10.0;
                     }
-                    else if (aptOrigin != null && aptDest != null)
+                    else if (aptOrigin != null && (aptDest != null || (plan.ToLat.HasValue && plan.ToLon.HasValue)))
                     {
-                        dist = Math.Round(Domain.Utils.LocationUtils.CalculateDistance(aptOrigin.Latitude, aptOrigin.Longitude, aptDest.Latitude, aptDest.Longitude), 0);
-                        if (dist <= 0) dist = (def.mission != null && def.mission.DistanceNM > 0) ? def.mission.DistanceNM : 40.0;
+                        dist = Math.Round(Domain.Utils.LocationUtils.CalculateDistance(originLat, originLon, destLat, destLon), 0);
+                        if (dist <= 0) dist = (plan.Mission != null && plan.Mission.DistanceNM > 0) ? plan.Mission.DistanceNM : 40.0;
                     }
-                    else if (def.mission != null && def.mission.DistanceNM > 0)
+                    else if (plan.Mission != null && plan.Mission.DistanceNM > 0)
                     {
-                        dist = def.mission.DistanceNM;
+                        dist = plan.Mission.DistanceNM;
                     }
 
                     totalDistance += dist;
@@ -405,13 +359,18 @@ namespace FlightCareer.UI.ViewModels
                     // Formatar sumário da rota
                     if (i == 0)
                     {
-                        summaryHops.Add(def.isTgl ? $"{def.from} (TGL)" : def.from);
+                        if (plan.Kind == BriefingLegKind.TouchAndGo)
+                            summaryHops.Add($"{plan.From} (TGL)");
+                        else if (plan.Kind == BriefingLegKind.Local)
+                            summaryHops.Add($"{plan.From} (LOCAL)");
+                        else
+                            summaryHops.Add(plan.From);
                     }
-                    if (!def.isTgl)
+                    if (plan.Kind == BriefingLegKind.ContractStop || plan.Kind == BriefingLegKind.Navigation)
                     {
-                        if (!summaryHops.Any() || summaryHops.Last() != def.to)
+                        if (!summaryHops.Any() || summaryHops.Last() != plan.To)
                         {
-                            summaryHops.Add(def.to);
+                            summaryHops.Add(plan.To);
                         }
                     }
 
@@ -419,35 +378,70 @@ namespace FlightCareer.UI.ViewModels
                     string actionText;
                     int legPax;
                     double legCargo;
+                    decimal reward = 0m;
+                    string fallbackTitle = "Escala Técnica / Translado";
 
-                    if (def.isTgl)
+                    if (plan.Kind == BriefingLegKind.TouchAndGo)
                     {
-                        actionText = $"↳ Circuito de Tráfego: Toque e Arremetida (TGL) em {def.to}";
-                        legPax = def.mission?.PassengerCount ?? 0;
-                        legCargo = (def.mission?.CargoWeightLbs ?? 0) + (def.mission?.LuggageWeightLbs ?? 0);
+                        actionText = $"↳ Circuito de Tráfego: Toque e Arremetida (TGL) em {plan.To}";
+                        legPax = plan.Mission?.PassengerCount ?? 0;
+                        legCargo = (plan.Mission?.CargoWeightLbs ?? 0) + (plan.Mission?.LuggageWeightLbs ?? 0);
+                        reward = (decimal)(plan.Mission?.RewardMoney ?? 0);
+                        fallbackTitle = "Instrução Local / TGL";
+                    }
+                    else if (plan.Kind == BriefingLegKind.Local)
+                    {
+                        actionText = $"↳ Voo local com retorno a {plan.To}";
+                        legPax = plan.Mission?.PassengerCount ?? 0;
+                        legCargo = (plan.Mission?.CargoWeightLbs ?? 0) + (plan.Mission?.LuggageWeightLbs ?? 0);
+                        reward = (decimal)(plan.Mission?.RewardMoney ?? 0);
+                        fallbackTitle = "Voo Local";
+                    }
+                    else if (plan.Kind == BriefingLegKind.ContractStop)
+                    {
+                        actionText = plan.StopMode == "touch_and_go"
+                            ? $"↳ Toque e arremetida em {plan.To} (escala do contrato)"
+                            : $"↳ Pouso completo em {plan.To} (escala do contrato)";
+                        legPax = plan.Mission?.PassengerCount ?? 0;
+                        legCargo = (plan.Mission?.CargoWeightLbs ?? 0) + (plan.Mission?.LuggageWeightLbs ?? 0);
+                        reward = 0m;
                     }
                     else
                     {
-                        if (def.mission != null)
+                        // Navigation
+                        if (plan.Mission != null)
                         {
-                            legPax = def.mission.PassengerCount;
-                            legCargo = def.mission.CargoWeightLbs + def.mission.LuggageWeightLbs;
+                            legPax = plan.Mission.PassengerCount;
+                            legCargo = plan.Mission.CargoWeightLbs + plan.Mission.LuggageWeightLbs;
                         }
                         else
                         {
-                            var deliveringMissions = AcceptedMissions.Where(m => m.DestinationICAO == def.to && !localMissionsAtOrigin.Contains(m)).ToList();
+                            var localMissionSet = legPlans
+                                .Where(p => p.Kind == BriefingLegKind.TouchAndGo || p.Kind == BriefingLegKind.Local)
+                                .Select(p => p.Mission)
+                                .Where(m => m != null)
+                                .ToHashSet();
+
+                            var deliveringMissions = AcceptedMissions
+                                .Where(m => m.DestinationICAO == plan.To && !localMissionSet.Contains(m))
+                                .ToList();
                             legPax = deliveringMissions.Sum(m => m.PassengerCount);
                             legCargo = deliveringMissions.Sum(m => m.CargoWeightLbs + m.LuggageWeightLbs);
                         }
 
                         if (legPax > 0 && legCargo > 0)
-                            actionText = $"↳ Desembarque: {legPax} PAX e {legCargo:N0} lbs carga em {def.to}";
+                            actionText = $"↳ Desembarque: {legPax} PAX e {legCargo:N0} lbs carga em {plan.To}";
                         else if (legPax > 0)
-                            actionText = $"↳ Desembarque: {legPax} PAX em {def.to}";
+                            actionText = $"↳ Desembarque: {legPax} PAX em {plan.To}";
                         else if (legCargo > 0)
-                            actionText = $"↳ Entrega: {legCargo:N0} lbs de carga em {def.to}";
+                            actionText = $"↳ Entrega: {legCargo:N0} lbs de carga em {plan.To}";
                         else
-                            actionText = $"↳ Escala técnica / Trânsito em {def.to}";
+                            actionText = $"↳ Escala técnica / Trânsito em {plan.To}";
+
+                        if (plan.IsFinalLegOfMission)
+                        {
+                            reward = (decimal)(plan.Mission?.RewardMoney ?? 0);
+                        }
                     }
 
                     double legPayload = (legPax * 170.0) + legCargo + 170.0; // +170 lbs Piloto
@@ -467,18 +461,19 @@ namespace FlightCareer.UI.ViewModels
                     RouteLegs.Add(new FlightLegModel
                     {
                         LegNumber = legIndex++,
-                        OriginICAO = def.from,
-                        DestinationICAO = def.to,
-                        AssociatedMission = def.mission,
-                        MissionTitle = def.mission?.Title ?? (def.isTgl ? "Instrução Local / TGL" : "Escala Técnica / Translado"),
-                        RewardMoney = (decimal)(def.mission?.RewardMoney ?? 0),
-                        OriginMsfsIdent = aptOrigin?.MsfsIdent ?? def.from,
-                        DestinationMsfsIdent = aptDest?.MsfsIdent ?? def.to,
-                        OriginLat = aptOrigin?.Latitude ?? 0,
-                        OriginLon = aptOrigin?.Longitude ?? 0,
-                        DestLat = aptDest?.Latitude ?? aptOrigin?.Latitude ?? 0,
-                        DestLon = aptDest?.Longitude ?? aptOrigin?.Longitude ?? 0,
-                        IsTglOrLocal = def.isTgl,
+                        OriginICAO = plan.From,
+                        DestinationICAO = plan.To,
+                        AssociatedMission = plan.Mission,
+                        MissionTitle = plan.Mission?.Title ?? fallbackTitle,
+                        RewardMoney = reward,
+                        OriginMsfsIdent = aptOrigin?.MsfsIdent ?? plan.From,
+                        DestinationMsfsIdent = aptDest?.MsfsIdent ?? plan.To,
+                        OriginLat = originLat,
+                        OriginLon = originLon,
+                        DestLat = destLat,
+                        DestLon = destLon,
+                        IsTglOrLocal = plan.Kind == BriefingLegKind.TouchAndGo,
+                        IsLocal = plan.Kind == BriefingLegKind.Local,
                         DistanceNM = dist,
                         OnboardPax = legPax,
                         OnboardCargoLbs = legCargo,
@@ -504,7 +499,7 @@ namespace FlightCareer.UI.ViewModels
                 // Atualizar destino padrão no mapa se houver primeira perna
                 if (RouteLegs.Any())
                 {
-                    var nonTglLeg = RouteLegs.FirstOrDefault(l => !l.IsTglOrLocal) ?? RouteLegs.First();
+                    var nonTglLeg = RouteLegs.FirstOrDefault(l => !l.IsTglOrLocal && !l.IsLocal) ?? RouteLegs.First();
                     _ = UpdateDestinationCoordinatesAsync(nonTglLeg.DestinationICAO);
                 }
 

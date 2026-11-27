@@ -8,14 +8,14 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 - [x] **A1. Remover o recurso de waypoints do mapa** (código morto: nada adiciona pontos). Em `FlightMapControl.xaml`: quadro "WAYPOINTS ATIVOS"/`TxtDistance` e botão LIMPAR. No `.cs`: `_waypoints`, `_waypointRoute`, `BtnClear_Click`, `ShowWaypointsOverlay` (e o uso em `DebugOverlayWindow.xaml`); renomear `CreateWaypointCircle` e a região.
   **Não tocar** em `Mission.OverflyWaypoints`/`OverflyWaypointCodec` (pontos dos contratos). O LIMPAR dos filtros em `MissionsView.xaml` é outro botão e fica.
 - [x] **A2. Texto:** "ponto de reportagem VFR" → "ponto de reporte VFR" (`mission_texts.json` linhas ~33, 47, 61, 71; `MissionGenerator.cs` ~1267-1412, inclusive o nome gravado do ponto). Missões já geradas guardam o texto antigo. Conferir golden/testes.
-- [ ] **A3. Apagar a linha verde "Circuito de Tráfego: Toque e Arremetida (TGL)"** em missão de navegação (ver B1).
+- [x] **A3. Apagar a linha verde "Circuito de Tráfego: Toque e Arremetida (TGL)"** em missão de navegação (ver B1).
 
 ## B. Briefing e mapas
 
-- [ ] **B1. Navegação tratada como TGL.** `BriefingViewModel.RebuildItineraryAndValidateAsync` (~327): toda missão com origem = destino, ou categoria "Local", vira TGL (texto verde, circuito âmbar falso, "(TGL)" no título "SDCO (TGL)"). Vale também para área de instrução, aerofoto, paraquedismo, STOL.
+- [x] **B1. Navegação tratada como TGL.** `BriefingViewModel.RebuildItineraryAndValidateAsync` (~327): toda missão com origem = destino, ou categoria "Local", vira TGL (texto verde, circuito âmbar falso, "(TGL)" no título "SDCO (TGL)"). Vale também para área de instrução, aerofoto, paraquedismo, STOL.
   Correção: TGL só com `RequiredTouchAndGoes > 0`; missão com `MultiStopContractData` vira pernas reais (origem → escalas → origem), com ação por perna ("Pouso completo em X" ou "Toque e arremetida em X" conforme `StopMode`).
 - [ ] **B2. Escalas não aparecem em nenhum mapa** (briefing, HUD, quadro): `ContractMarkerBuilder` só desenha `OverflyWaypoints` e aerofoto/salto/aerial; ignora `MultiStopContractData.Stops`. Desenhar escalas numeradas e a linha do triângulo (origem → ponto de reporte → escalas → origem). Cobrir também STOL e outros contratos com aeródromo.
-- [ ] **B3. Ponto de reporte fora do enquadramento no briefing:** `RouteLegs` é montado depois de `ContractMissions`, e `UpdateMultiLegRoute` dá zoom no circuito falso. Enquadrar rota + contrato num passo só. HUD: conferir no MSFS (usa o mesmo construtor, então hoje mostra só o ponto de reporte).
+- [x] **B3. Ponto de reporte fora do enquadramento no briefing:** `RouteLegs` é montado depois de `ContractMissions`, e `UpdateMultiLegRoute` dá zoom no circuito falso. Enquadrar rota + contrato num passo só. HUD: conferir no MSFS (usa o mesmo construtor, então hoje mostra só o ponto de reporte).
 - [x] **B4. Missão após pouso forçado:** (POUSO-DANO: cancelada, XP 50 %, sem dinheiro) a origem passou a SNZG (47 NM), mas título e descrição seguem "SDCO ... 214 NM" com as escalas antigas. Definir: texto de resgate/retomada, ou missão falha.
 
 ## C. Último voo (SDCO → pouso forçado perto de SNZG): o que aconteceu
