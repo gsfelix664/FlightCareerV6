@@ -195,6 +195,7 @@
                     <Border Background="#070B12" BorderBrush="#00E5FF" BorderThickness="1.2" CornerRadius="6" Height="150" Margin="0,0,0,6" ClipToBounds="True">
                         <Grid>
                             <utils:FlightMapControl
+                                ShowContractLabels="False"
                                 AircraftLat="{Binding Latitude}"
                                 AircraftLon="{Binding Longitude}"
                                 AircraftHeading="{Binding Heading}"

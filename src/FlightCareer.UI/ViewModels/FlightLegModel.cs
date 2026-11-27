@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Missions;
 
 namespace FlightCareer.UI.ViewModels
 {
@@ -30,9 +31,13 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private Mission? _associatedMission;
         [ObservableProperty] private string _missionTitle = string.Empty;
         [ObservableProperty] private decimal _rewardMoney;
+        [ObservableProperty] private IReadOnlyList<MissionCoordinatePoint> _coordinatePoints = Array.Empty<MissionCoordinatePoint>();
 
         public bool HasAssociatedMission => AssociatedMission != null;
+        public bool HasCoordinatePoints => CoordinatePoints != null && CoordinatePoints.Count > 0;
+
         partial void OnAssociatedMissionChanged(Mission? value) => OnPropertyChanged(nameof(HasAssociatedMission));
+        partial void OnCoordinatePointsChanged(IReadOnlyList<MissionCoordinatePoint> value) => OnPropertyChanged(nameof(HasCoordinatePoints));
         partial void OnIsTglOrLocalChanged(bool value) => OnPropertyChanged(nameof(RouteDisplay));
         partial void OnIsLocalChanged(bool value) => OnPropertyChanged(nameof(RouteDisplay));
 
