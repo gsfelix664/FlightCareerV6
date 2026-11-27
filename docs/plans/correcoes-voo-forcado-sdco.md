@@ -17,6 +17,7 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 - [x] **B2. Escalas não aparecem em nenhum mapa** (briefing, HUD, quadro): `ContractMarkerBuilder` só desenha `OverflyWaypoints` e aerofoto/salto/aerial; ignora `MultiStopContractData.Stops`. Desenhar escalas numeradas e a linha do triângulo (origem → ponto de reporte → escalas → origem). Cobrir também STOL e outros contratos com aeródromo.
 - [x] **B3. Ponto de reporte fora do enquadramento no briefing:** `RouteLegs` é montado depois de `ContractMissions`, e `UpdateMultiLegRoute` dá zoom no circuito falso. Enquadrar rota + contrato num passo só. HUD: conferir no MSFS (usa o mesmo construtor, então hoje mostra só o ponto de reporte).
 - [ ] **B5. Linha tracejada do briefing presa (usuário, 2026-11-27):** com o avião ainda carregando no sim, a linha tracejada (posição do avião → rota) sai de uma posição inválida (ex.: centro do mapa-múndi). Até aí, esperado. Depois que o avião carrega, a linha continua lá; só se corrige saindo e voltando ao briefing. Investigar se o `BriefingViewModel` (quente) redesenha essa linha quando chega a primeira posição válida da telemetria; também ignorar posição 0/0 enquanto o sim carrega. Tarefa **BRIEF-LINHA** (Sonnet, Gemini; não pode rodar junto com outra tarefa que mexa no `BriefingViewModel`).
+- [ ] **B6. Telemetria congelada depois que o sim carrega (Claude, 2026-11-27; provável causa de B5):** app aberto 06:56, MSFS 07:15 (C152 em SNZG). Briefing mostrava combustível 13,0 gal e carga 0 lbs, e sair/voltar não corrigia; a sonda (`SimVarProbe`, 07:22) lia 7,8 gal (6,3 + 1,5 inutilizável) e 358 lbs, iguais ao plano. Ou seja, o app parou de receber `SimTelemetry` depois que o avião foi carregado. Hipótese (não conferida no SDK): os `RequestDataOnSimObject` em `SIMCONNECT_OBJECT_ID_USER` feitos durante o carregamento deixam de mandar dados quando o MSFS 2024 recria o avião do usuário. Correção proposta: refazer os pedidos de dados em `FlightLoaded`/`AircraftLoaded` e ter um vigia (conectado e sem pacote de telemetria por ~5 s → refazer os pedidos), com registro em `Debug.WriteLine`. Arquivo quente `SimConnectService.cs`. Tarefa **TELEMETRIA-RECARGA** (Opus spec, Gemini), antes de BRIEF-LINHA.
 - [x] **B4. Missão após pouso forçado:** (POUSO-DANO: cancelada, XP 50 %, sem dinheiro) a origem passou a SNZG (47 NM), mas título e descrição seguem "SDCO ... 214 NM" com as escalas antigas. Definir: texto de resgate/retomada, ou missão falha.
 
 ## C. Último voo (SDCO → pouso forçado perto de SNZG): o que aconteceu
@@ -113,7 +114,8 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 8 | ✅ SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |
 | 9 | EXCEDENCIAS | D7, D8, D9 e pneus/combustível/pausa de `achados-voo-sdco.md` | Opus (investigação) | Claude pesquisa; Gemini corrige | 2 |
 | 10 | HANGAR-REDESENHO | E5 e sugestões 1–9 | Opus (spec) | Gemini, em etapas | 1, 7, 8 |
-| 11 | BRIEF-LINHA | B5 (`BriefingViewModel`, quente) | Sonnet | Gemini | — |
+| 11 | TELEMETRIA-RECARGA | B6 (`SimConnectService`, quente) | Opus | Gemini; revisão linha a linha | — |
+| 12 | BRIEF-LINHA | B5, se sobrar depois da 11 (`BriefingViewModel`, quente) | Sonnet | Gemini | 11 |
 
 3 a 5 não dependem de 1 e 2 e podem ir antes. `HangarViewModel` entra em 1, 7, 8 e 10: nunca em paralelo.
 
