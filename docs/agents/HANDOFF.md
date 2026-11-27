@@ -10,7 +10,7 @@
 
 ## Próximo passo
 - **No MSFS:** fechar o sim à força com o app aberto → "DESCONECTADO" em ≤ 35 s e volta sozinho; no menu principal e no carregamento do voo, o log `[SimConnect]` não pode mostrar reconexão em laço. Se laço, subir o limite de 30 s. Depois ver se B5 (BRIEF-LINHA) ainda acontece.
-- **Sessão Sonnet: A4, mini mapa do HUD sem textos** (pedido do usuário 2026-11-27; `correcoes-voo-forcado-sdco.md` › A4).
+- **Sessão Sonnet: A4 (mini mapa do HUD sem textos) e A5 (coordenadas dos pontos no briefing)**, pedidos do usuário 2026-11-27; `correcoes-voo-forcado-sdco.md` › A.
 - **Sessão Opus: OFICINA-TEMPO-JOGO** (decisão do usuário 2026-11-27; `manutencao-parada-real.md` › 7).
 - Sessão Opus: tarefa 9, EXCEDENCIAS (D7–D9). Depois tarefa 10, HANGAR-REDESENHO (inclui E5). `HangarViewModel` nunca em paralelo.
 - No app/MSFS: missões só de ida no quadro de SNZG (nível 1 e 3); textos sem %; escalas nos mapas; pouso duro e fora de pista.
