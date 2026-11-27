@@ -9,7 +9,7 @@ Corrigidos em 2026-11-26: ver CHANGELOG (VOO-SDCO-1 a 5). Abaixo, o que ficou.
 
 ## Decisões abertas
 - Altitude da área genérica: hoje 2.500–4.500 ft AGL (SDCO: até 6.550 ft no altímetro). Sugestão: 1.500–3.000 ft AGL, como as áreas reais; mostrar também a altitude do altímetro.
-- Variedade de destino: na fase 1, ~90% dos tipos voltam à origem. Sugestão: tipo "navegação de instrução" só de ida e mais peso no ferry.
+- Variedade de destino: na fase 1, ~90% dos tipos voltam à origem. Sugestão: tipo "navegação de instrução" só de ida e mais peso no ferry. **Decidido em 2026-11-27:** `navegacao-instrucao.md`.
 
 ## A investigar
 - `piston_rpm_overspeed`: 48% das amostras em voo acima de 2550 RPM, dezenas de eventos com dano exibido 0,00%. Conferir o limite no POH e pensar em histerese.

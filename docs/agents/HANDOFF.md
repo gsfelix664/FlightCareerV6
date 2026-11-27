@@ -11,6 +11,8 @@
 - PT-HRY: segue interditado até "Reparar tudo". Mapa unificado e OBJ-CARD-1/2 sem teste no MSFS (`TESTES-PENDENTES.md`).
 
 ## Próximo passo
+- Usuário vai fazer um voo de teste sem roteiro e pedir a análise do log em sessão nova (Opus).
+- **Sessão Opus: NAV-IDA** (navegação VFR só de ida, peso 10, por nível; decisões em `docs/plans/navegacao-instrucao.md`).
 - No app/MSFS: textos do Hangar e do mercado sem %; escalas nos três mapas; pouso duro e fora de pista; preços e avisos do Hangar.
 - **Sessão Opus: tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes, decidido, D9 histerese do RPM; depois rever `InspectionDefectPolicy`).
 - Depois: tarefa 10, HANGAR-REDESENHO (spec Opus; inclui E5). `HangarViewModel` nunca em paralelo.
@@ -22,7 +24,7 @@
 - Mercado: textos fixos de pneus e aviônicos podem contradizer o estado mostrado.
 
 ## Decisões abertas do usuário
-- Altitude da área genérica e variedade de destinos na fase 1 (`achados-voo-sdco.md`); manter Ctrl+Alt+O.
+- Altitude da área genérica (`achados-voo-sdco.md`); manter Ctrl+Alt+O.
 
 ## Notas
 - Repositório público: não commitar dados do simulador sem perguntar. `REGRAS_tiers.txt` (se existir) é do usuário.
