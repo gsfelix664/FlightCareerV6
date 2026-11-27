@@ -3437,3 +3437,10 @@
 - NAV-IDA aprovado na 1ª rodada (`docs/reviews/NAV-IDA-revisao.md`) e integrado na base.
 - B6 (TELEMETRIA-RECARGA): app fica "conectado" a um sim fechado à força; causa e correção proposta em `docs/plans/correcoes-voo-forcado-sdco.md`. B5 (linha tracejada presa) é o mesmo sintoma.
 - Decisão do usuário: oficina só em tempo de jogo (`docs/plans/manutencao-parada-real.md` › 7).
+
+
+## 2026-11-27 - Vigia da ligação com o simulador (TELEMETRIA-RECARGA) (Gemini)
+- Detecção de perda de conexão quando o simulador é fechado à força sem evento Quit: criação de `SimLinkWatchdog` em `Domain/Connection` para rastrear mensagens recebidas e identificar silêncio prolongado (> 30 s).
+- Integração em `SimConnectService`: temporizador de reconexão mantido ativo durante a conexão para sondar o simulador a cada 5 s via `RequestSystemState("Sim")`; exceção na chamada ou silêncio > 30 s desarmam a ligação e acionam `Disconnect()`.
+- Tratamento robusto em `Disconnect()` protegendo `_simConnect.Dispose()` com try/catch contra exceções em pipes quebrados; `ReceiveMessage()` marca mensagens no vigia; reconexão automática no tique seguinte (≤ 5 s).
+- Testes unitários puros em `SimLinkWatchdogTests` cobrindo construtor, tolerância, estolamento por timeout, reset por mensagens recebidas, desarme e reconexão; 1.323/1.323 testes aprovados. Não testado no MSFS.
