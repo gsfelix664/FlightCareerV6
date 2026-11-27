@@ -52,3 +52,10 @@
 ## 7. Decisão do usuário (2026-11-27): parada em tempo de jogo, não em minutos reais
 Revoga a espera em tempo real de § 2.1 e § 6.1 (1 a 20 minutos de relógio). A parada da oficina passa a ser **só em tempo de jogo**: o serviço avança o relógio de carreira e esse avanço tem efeito no mundo (missões do quadro expiram e outras aparecem). Em tempo real o piloto **não espera**, ou espera apenas alguns segundos (animação/confirmação).
 - A definir na spec (Opus, tarefa **OFICINA-TEMPO-JOGO**): segundos de espera (0 ou poucos); se o expresso continua (hoje: metade das horas e +50 %) e o que ele passa a valer; como o avanço do relógio expira e repõe o quadro (conferir se hoje o quadro já usa `CareerClockUtc`); o que fazer com `WorkshopUntilUtc` e os bloqueios em `MainViewModel.StartFlight`/`BriefingViewModel` (quentes); textos do Hangar.
+
+## 8. Spec de OFICINA-TEMPO-JOGO (Claude, 2026-11-27)
+Definições do revisor sobre os pontos abertos da § 7 (o usuário pode mudar):
+1. **Espera real: zero.** O serviço sai pronto na confirmação. Saem a contagem regressiva, a faixa "Na oficina", os bloqueios no voo e no briefing e `WorkshopUntilUtc`/`WorkshopDescription` (as colunas ficam sem uso em bancos antigos; um avião preso na oficina é liberado).
+2. **Expresso continua:** +50 % no preço e metade das horas de jogo. Vale porque agora as horas custam contratos do quadro e prazo de seguro.
+3. **Quadro:** a validade segue em relógio do computador (como antes) e a oficina a **encurta** pelas horas de jogo do serviço (todos os contratos não aceitos, de todos os aeroportos). Os vencidos saem na hora; o quadro do aeroporto atual é recarregado e reposto, os outros na próxima visita. Contratos aceitos (manifesto) não mudam. Voos não mexem na validade (o tempo real já passa durante o voo).
+4. `CareerProgressionSimulator` não muda (já usa só horas de jogo).
