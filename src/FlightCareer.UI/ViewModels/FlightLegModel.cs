@@ -13,6 +13,7 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _destLat;
         [ObservableProperty] private double _destLon;
         [ObservableProperty] private bool _isTglOrLocal;
+        [ObservableProperty] private bool _isLocal;
         [ObservableProperty] private string _originMsfsIdent = string.Empty;
         [ObservableProperty] private string _destinationMsfsIdent = string.Empty;
         [ObservableProperty] private double _distanceNM;
@@ -32,6 +33,8 @@ namespace FlightCareer.UI.ViewModels
 
         public bool HasAssociatedMission => AssociatedMission != null;
         partial void OnAssociatedMissionChanged(Mission? value) => OnPropertyChanged(nameof(HasAssociatedMission));
+        partial void OnIsTglOrLocalChanged(bool value) => OnPropertyChanged(nameof(RouteDisplay));
+        partial void OnIsLocalChanged(bool value) => OnPropertyChanged(nameof(RouteDisplay));
 
         public string MtowBarColor => IsOverweight ? "#FF3D00" : (MtowPercent > 85 ? "#FFB300" : "#00E676");
         public string DestinationDisplay
@@ -46,7 +49,9 @@ namespace FlightCareer.UI.ViewModels
                     : DestinationICAO;
             }
         }
-        public string RouteDisplay => IsTglOrLocal ? $"{OriginICAO} ➔ {DestinationDisplay} (TGL)" : $"{OriginICAO} ➔ {DestinationDisplay}";
+        public string RouteDisplay => IsTglOrLocal
+            ? $"{OriginICAO} ➔ {DestinationDisplay} (TGL)"
+            : (IsLocal ? $"{OriginICAO} ➔ {DestinationDisplay} (LOCAL)" : $"{OriginICAO} ➔ {DestinationDisplay}");
         public string DistanceDisplay => $"{DistanceNM:N0} NM";
         public string PayloadDisplay => $"{LegPayloadLbs:N0} LBS";
         public string MtowPercentDisplay => $"{MtowPercent:F0}% MTOW";
