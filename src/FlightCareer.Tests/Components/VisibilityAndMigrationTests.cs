@@ -22,11 +22,35 @@ namespace FlightCareer.Tests.Components
         }
 
         [Theory]
-        [InlineData(51.2, 51.4, "~51%")]  // estimativa estreita que arredonda igual: um valor só, com ~
-        [InlineData(55.2, 55.6, "55–56%")]
-        [InlineData(48.0, 52.0, "48–52%")]
-        [InlineData(63.4, 63.4, "63%")]   // exato
-        public void Texto_da_faixa_nao_repete_o_mesmo_numero(double min, double max, string esperado)
+        [InlineData(0, false, "Quebrado")]
+        [InlineData(0, true, "Quebrada")]
+        [InlineData(19.9, false, "Crítico")]
+        [InlineData(19.9, true, "Crítica")]
+        [InlineData(20.0, false, "Atenção")]
+        [InlineData(20.0, true, "Atenção")]
+        [InlineData(39.9, false, "Atenção")]
+        [InlineData(39.9, true, "Atenção")]
+        [InlineData(40.0, false, "Bom")]
+        [InlineData(40.0, true, "Boa")]
+        [InlineData(79.9, false, "Bom")]
+        [InlineData(79.9, true, "Boa")]
+        [InlineData(80.0, false, "Íntegro")]
+        [InlineData(80.0, true, "Íntegra")]
+        [InlineData(100.0, false, "Íntegro")]
+        [InlineData(100.0, true, "Íntegra")]
+        public void HealthWords_For_Faixas_RetornaPalavra(double health, bool feminine, string esperado)
+        {
+            Assert.Equal(esperado, HealthWords.For(health, feminine));
+        }
+
+        [Theory]
+        [InlineData(51.2, 51.4, "Bom")]
+        [InlineData(48.0, 52.0, "Bom")]
+        [InlineData(35.0, 45.0, "Atenção a bom")]
+        [InlineData(63.4, 63.4, "Bom")]
+        [InlineData(0.0, 0.0, "Quebrado")]
+        [InlineData(0.0, 15.0, "Crítico")]
+        public void HealthRange_ToString_SemNumeros(double min, double max, string esperado)
         {
             Assert.Equal(esperado, new HealthRange(min, max).ToString());
         }

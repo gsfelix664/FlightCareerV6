@@ -71,12 +71,15 @@ namespace FlightCareer.Tests.Components
             Assert.Equal(AircraftStatusLevel.Ready, AircraftStatusEvaluator.Evaluate(aircraft, comps, Catalog, EngineClass.Piston).Level);
 
             comps.Get(ComponentKind.Brakes).Health = 25;
-            Assert.Equal(AircraftStatusLevel.Attention, AircraftStatusEvaluator.Evaluate(aircraft, comps, Catalog, EngineClass.Piston).Level);
+            var attention = AircraftStatusEvaluator.Evaluate(aircraft, comps, Catalog, EngineClass.Piston);
+            Assert.Equal(AircraftStatusLevel.Attention, attention.Level);
+            Assert.DoesNotContain("%", attention.Detail);
 
             comps.Get(ComponentKind.Oil).Health = 12;
             var risk = AircraftStatusEvaluator.Evaluate(aircraft, comps, Catalog, EngineClass.Piston);
             Assert.Equal(AircraftStatusLevel.FailureRisk, risk.Level);
             Assert.Contains("Óleo", risk.Detail);
+            Assert.DoesNotContain("%", risk.Detail);
 
             aircraft.IsInterdicted = true;
             aircraft.InterdictionReason = "Inspeção de 100 h vencida";

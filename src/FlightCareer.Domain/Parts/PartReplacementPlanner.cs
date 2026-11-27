@@ -110,15 +110,17 @@ namespace FlightCareer.Domain.Parts
                 {
                     if (part.KnownHealth.Value < bands.RedBelowPct)
                     {
-                        reason = $"Faixa vermelha: {part.KnownHealth.Value:F0} %";
+                        reason = "Faixa vermelha";
                     }
                     else if (part.KnownHealth.Value < bands.YellowBelowPct)
                     {
-                        reason = $"Faixa amarela: {part.KnownHealth.Value:F0} %";
+                        reason = "Faixa amarela";
                     }
                     else
                     {
-                        reason = $"Saúde {part.KnownHealth.Value:F0} %";
+                        reason = part.KnownHealth.Value < PartHangarView.GoodAbovePct
+                            ? "Troca preventiva, peça boa"
+                            : "Troca preventiva, peça íntegra";
                     }
                 }
                 else

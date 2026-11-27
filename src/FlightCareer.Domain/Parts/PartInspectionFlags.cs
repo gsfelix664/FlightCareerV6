@@ -36,12 +36,12 @@ namespace FlightCareer.Domain.Parts
 
             if (part.Health < bands.RedBelowPct)
             {
-                return new PartFlagResult(PartFlag.Broken, $"Faixa vermelha: {part.Health:F0} %");
+                return new PartFlagResult(PartFlag.Broken, "Faixa vermelha");
             }
 
             if (part.Health < bands.YellowBelowPct)
             {
-                return new PartFlagResult(PartFlag.Suspect, $"Faixa amarela: {part.Health:F0} %");
+                return new PartFlagResult(PartFlag.Suspect, "Faixa amarela");
             }
 
             return new PartFlagResult(PartFlag.None, string.Empty);

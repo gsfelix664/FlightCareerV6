@@ -224,8 +224,8 @@ namespace FlightCareer.Tests.Parts
             var plan = PartReplacementPlanner.Plan(new[] { p35, p15 }, PartsCatalog, "A", DateTime.UtcNow);
 
             Assert.Equal(2, plan.Items.Count);
-            Assert.Contains("Faixa amarela: 35 %", plan.Items[0].Reason);
-            Assert.Contains("Faixa vermelha: 15 %", plan.Items[1].Reason);
+            Assert.Contains("Faixa amarela", plan.Items[0].Reason);
+            Assert.Contains("Faixa vermelha", plan.Items[1].Reason);
             Assert.True(plan.TotalCost > 0);
         }
 

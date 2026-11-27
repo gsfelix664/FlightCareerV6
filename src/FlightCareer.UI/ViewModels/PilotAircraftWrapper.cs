@@ -415,7 +415,7 @@ namespace FlightCareer.UI.ViewModels
         public string Text500h => $"Revisão de ignição · {_economy.ApplyCost(Cost500hInspection):C0}";
         public string TextOverhaul => $"Retífica · {_economy.ApplyCost(CostOverhaul):C0}";
         public string TextToggleConfiguration => $"Converter para {TargetConfigurationName} · {_economy.ApplyCost(CostToggleConfiguration):C0} · {DowntimeToggleConfiguration:F0} h";
-        public string OverhaulTooltip => $"Restaura o motor a 100% e o TBO para {EngineLifeHours:N0} h";
+        public string OverhaulTooltip => $"Restaura o motor como novo e o TBO para {EngineLifeHours:N0} h";
 
         // --- Abastecimento ---
         [ObservableProperty] private double _targetFuel;

@@ -529,7 +529,7 @@ namespace FlightCareer.UI.ViewModels
                     }
                 },
                 kind: DialogKind.Info,
-                successMessage: $"{name}: substituída a 100%.",
+                successMessage: $"{name}: substituída por uma nova.",
                 applyInContext: resolvedDefects.Count > 0 ? async context =>
                 {
                     var rIds = resolvedDefects.Select(d => d.Id).ToHashSet();
@@ -585,7 +585,7 @@ namespace FlightCareer.UI.ViewModels
                         PartComponentBridge.SyncComponentsFromParts(aircraft, components, aircraft.Parts, _partCatalog);
                     },
                     kind: DialogKind.Info,
-                    successMessage: $"{row.Name}: {plan.Items.Count} peça(s) substituída(s) a 100%.",
+                    successMessage: $"{row.Name}: {plan.Items.Count} peça(s) substituída(s) por nova(s).",
                     applyInContext: resolvedDefects.Count > 0 ? async context =>
                     {
                         var rIds = resolvedDefects.Select(d => d.Id).ToHashSet();
@@ -602,7 +602,7 @@ namespace FlightCareer.UI.ViewModels
             {
                 await RunPaidServiceAsync(
                     row.ServiceName,
-                    $"{row.ServiceName} em {SelectedAircraft.Prefix}: {row.Name.ToLowerInvariant()} de {row.RangeText} para 100%.{extra}",
+                    $"{row.ServiceName} em {SelectedAircraft.Prefix}: {row.Name.ToLowerInvariant()} (estado atual: {row.RangeText.ToLowerInvariant()}) volta a ficar como novo.{extra}",
                     row.RepairCost,
                     row.ServiceName.ToUpperInvariant(),
                     (aircraft, components) =>
@@ -612,7 +612,7 @@ namespace FlightCareer.UI.ViewModels
                         ApplyRegulatoryReset(aircraft, kind);
                     },
                     kind: kind == ComponentKind.Engine ? DialogKind.Warning : DialogKind.Info,
-                    successMessage: $"{row.Name} restaurado(a) a 100%.",
+                    successMessage: $"{row.Name}: serviço concluído, como novo.",
                     downtimeHours: ResolveDowntimeForKind(kind));
             }
         }
@@ -770,7 +770,7 @@ namespace FlightCareer.UI.ViewModels
                         }
                     },
                     kind: DialogKind.Warning,
-                    successMessage: plan.Items.Count > 0 ? $"{plan.Items.Count} peça(s) substituída(s) a 100%." : "Panes reparadas.",
+                    successMessage: plan.Items.Count > 0 ? $"{plan.Items.Count} peça(s) substituída(s) por nova(s)." : "Panes reparadas.",
                     applyInContext: defectIdsToResolve.Count > 0 ? async context =>
                     {
                         var rows = await context.AircraftDefects.Where(d => defectIdsToResolve.Contains(d.Id)).ToListAsync();
@@ -785,7 +785,7 @@ namespace FlightCareer.UI.ViewModels
             else
             {
                 var rows = SelectedAircraft.Components.Where(r => r.CanRepair).ToList();
-                string list = string.Join("\n", rows.Select(r => $"• {r.Name}: {r.RangeText} → 100% ({r.RepairCost:C0})"));
+                string list = string.Join("\n", rows.Select(r => $"• {r.Name}: {r.RangeText} ({r.RepairCost:C0})"));
 
                 await RunPaidServiceAsync(
                     "Reparar tudo",
@@ -803,7 +803,7 @@ namespace FlightCareer.UI.ViewModels
                         }
                         PartInspectionFlags.ClearForKinds(aircraft.Parts, _partCatalog, kinds);
                     },
-                    successMessage: "Todos os componentes foram restaurados a 100%.",
+                    successMessage: "Todos os componentes foram restaurados.",
                     downtimeHours: rows.Select(r => ResolveDowntimeForKind(r.Kind)).DefaultIfEmpty(CareerClock.DefaultRepairDowntimeHours).Max());
             }
         }
@@ -857,7 +857,7 @@ namespace FlightCareer.UI.ViewModels
             int flagged = 0;
             await RunPaidServiceAsync(
                 "Troca de óleo (12 h)",
-                "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a 100% e o motor tem a saúde medida com exatidão.",
+                "Troca de óleo e filtro, inspeção de limalhas e verificação do motor. O óleo volta a ficar como novo e o motor tem a saúde medida com exatidão.",
                 SelectedAircraft.Cost50hInspection,
                 "TROCA DE ÓLEO",
                 (aircraft, components) =>
@@ -944,7 +944,7 @@ namespace FlightCareer.UI.ViewModels
             int flagged = 0;
             await RunPaidServiceAsync(
                 "Revisão de ignição (125 h)",
-                "Revisão dos magnetos, platinados e troca de velas. A ignição volta a 100%.",
+                "Revisão dos magnetos, platinados e troca de velas. A ignição volta a ficar como nova.",
                 SelectedAircraft.Cost500hInspection,
                 "REVISÃO DE IGNIÇÃO",
                 (aircraft, components) =>
@@ -995,7 +995,7 @@ namespace FlightCareer.UI.ViewModels
             if (!CanOperate() || SelectedAircraft == null) return;
             await RunPaidServiceAsync(
                 "Retífica geral do motor",
-                $"Overhaul completo: motor{(SelectedAircraft.IsPiston ? "" : " e seção quente")} a 100%, óleo trocado e TBO restaurado para {SelectedAircraft.EngineLifeHours:N0} h.",
+                $"Overhaul completo: {(SelectedAircraft.IsPiston ? "motor como novo" : "motor e seção quente como novos")}, óleo trocado e TBO restaurado para {SelectedAircraft.EngineLifeHours:N0} h.",
                 SelectedAircraft.CostOverhaul,
                 "RETÍFICA GERAL / OVERHAUL TBO",
                 (aircraft, components) =>

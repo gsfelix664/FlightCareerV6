@@ -231,9 +231,19 @@ namespace FlightCareer.Domain.Parts
             string displayName = DisplayName(part, def, engineCount);
             double? knownHealth = part.KnownHealth;
 
-            string healthText = knownHealth.HasValue
-                ? $"{knownHealth.Value:F0} %"
-                : "—";
+            string healthText;
+            if (part.IsBroken)
+            {
+                healthText = knownHealth.HasValue ? "Quebrada" : "—";
+            }
+            else if (knownHealth.HasValue)
+            {
+                healthText = HealthWords.For(knownHealth.Value, feminine: true, bands.RedBelowPct, bands.YellowBelowPct);
+            }
+            else
+            {
+                healthText = "—";
+            }
 
             string seenText;
             if (!part.KnownAtAirframeHours.HasValue)

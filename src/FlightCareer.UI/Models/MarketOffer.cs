@@ -25,6 +25,15 @@ namespace FlightCareer.UI.Models
 
         public double AverageCondition => (EngineCondition + TiresCondition + AirframeCondition + AvionicsCondition) / 4.0;
         public double EstimatedPostBuyCost => Math.Round(Math.Max(0, (100 - AverageCondition) * 120.0), 2);
+
+        public string AirframeConditionText => MarketConditionHelper.ConditionText(AirframeCondition);
+        public string AirframeConditionColor => MarketConditionHelper.ConditionColor(AirframeCondition);
+        public string EngineConditionText => MarketConditionHelper.ConditionText(EngineCondition);
+        public string EngineConditionColor => MarketConditionHelper.ConditionColor(EngineCondition);
+        public string TiresConditionText => MarketConditionHelper.ConditionText(TiresCondition);
+        public string TiresConditionColor => MarketConditionHelper.ConditionColor(TiresCondition);
+        public string AvionicsConditionText => MarketConditionHelper.ConditionText(AvionicsCondition);
+        public string AvionicsConditionColor => MarketConditionHelper.ConditionColor(AvionicsCondition);
         
         // Preço baseado no estado (ex: uma aeronave 100% custa o preço cheio, 70% custa proporcional)
         public double SalePrice { get; set; }

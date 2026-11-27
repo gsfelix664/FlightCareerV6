@@ -74,19 +74,19 @@ Ex. visto: "RISCO DE PANE — Ignição / magnetos em ~0%: chance de pane a cada
 Trocar por estado em palavras (os mesmos das peças). Ex.: "Ignição / magnetos com peça quebrada. Troque antes de voar." Levantamento por busca no código (não conferido tela a tela com o app aberto).
 
 **F1. Hangar (saúde de peça/componente)**
-- [ ] `ComponentMaintenance.cs` ~111 e ~114: avisos "RISCO DE PANE" e "ATENÇÃO" com `{worst.Range}`. Usam a saúde do componente mesmo com peças (revelam peça nunca inspecionada).
-- [ ] `HealthVisibility.cs` ~18-19 (`"{min}%"`, `"~{min}%"`, faixa): origem do `RangeText` (`HangarView.xaml` ~419; confirmações em `HangarViewModel` ~569 e ~673).
-- [ ] `PartHangarView.cs` ~235 (`HealthText` "NN %").
-- [ ] Motivos "Faixa vermelha/amarela: NN %" e "Saúde NN %": `PartInspectionFlags.cs` ~39, ~44; `PartReplacementPlanner.cs` ~113-121.
-- [ ] `HangarView.xaml` ~324 (tooltip "±10%") e ~372 (legenda "48–52%", "acima de 40%").
-- [ ] "a 100%" em `HangarViewModel` (~523, 562, 569, 579, 667, 673, 691, 745, 832, 883) e `PilotAircraftWrapper` ~338: "como nova(o)".
+- [x] `ComponentMaintenance.cs` ~111 e ~114: avisos "RISCO DE PANE" e "ATENÇÃO" com `{worst.Range}`. Usam a saúde do componente mesmo com peças (revelam peça nunca inspecionada).
+- [x] `HealthVisibility.cs` ~18-19 (`"{min}%"`, `"~{min}%"`, faixa): origem do `RangeText` (`HangarView.xaml` ~419; confirmações em `HangarViewModel` ~569 e ~673).
+- [x] `PartHangarView.cs` ~235 (`HealthText` "NN %").
+- [x] Motivos "Faixa vermelha/amarela: NN %" e "Saúde NN %": `PartInspectionFlags.cs` ~39, ~44; `PartReplacementPlanner.cs` ~113-121.
+- [x] `HangarView.xaml` ~324 (tooltip "±10%") e ~372 (legenda "48–52%", "acima de 40%").
+- [x] "a 100%" em `HangarViewModel` (~523, 562, 569, 579, 667, 673, 691, 745, 832, 883) e `PilotAircraftWrapper` ~338: "como nova(o)".
 
 **F2. Avisos em voo e panes**
-- [ ] `ComponentFlightSession.cs` ~181, ~203, ~297 ("em NN%", "dano: NN%"); `SimFailureActuator.cs` ~176.
-- [ ] Causa de pane em `PersistentFailureService.cs` ~440, ~455 (aparece na lista de panes; ver E4).
+- [x] `ComponentFlightSession.cs` ~181, ~203, ~297 ("em NN%", "dano: NN%"); `SimFailureActuator.cs` ~176.
+- [x] Causa de pane em `PersistentFailureService.cs` ~440, ~455 (aparece na lista de panes; ver E4).
 
 **F3. Mercado de usados (decidido pelo usuário em 2026-11-26: tirar o %)**
-- [ ] Condição média, célula, motor, pneus e aviônicos em `MarketView.xaml` (~449-975): mostrar estado em palavras/cor, como no Hangar. Conferir se o valor exato aparece em outro texto do mercado.
+- [x] Condição média, célula, motor, pneus e aviônicos em `MarketView.xaml` (~449-975): mostrar estado em palavras/cor, como no Hangar. Conferir se o valor exato aparece em outro texto do mercado.
 
 **F4. Decidido (usuário, 2026-11-26): manter os % que não são condição**
 - Selo de desconto "- N%" do mercado (`MarketView.xaml` ~412).
@@ -107,7 +107,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 5 | ✅ MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
 | 6 | ~~RESGATE~~ | B4 decidido: cancelar a missão (entra na tarefa 2) | — | — | — |
 | 7 | ✅ HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
-| 8 | SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |
+| 8 | ✅ SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |
 | 9 | EXCEDENCIAS | D7, D8, D9 e pneus/combustível/pausa de `achados-voo-sdco.md` | Opus (investigação) | Claude pesquisa; Gemini corrige | 2 |
 | 10 | HANGAR-REDESENHO | E5 e sugestões 1–9 | Opus (spec) | Gemini, em etapas | 1, 7, 8 |
 

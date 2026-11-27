@@ -14,6 +14,15 @@ namespace FlightCareer.UI.Models
         public double AirframeCondition => Aircraft.AirframeCondition;
         public double AvionicsCondition => Aircraft.AvionicsCondition;
         public double AverageCondition => (EngineCondition + TiresCondition + AirframeCondition + AvionicsCondition) / 4.0;
+
+        public string AirframeConditionText => MarketConditionHelper.ConditionText(AirframeCondition);
+        public string AirframeConditionColor => MarketConditionHelper.ConditionColor(AirframeCondition);
+        public string EngineConditionText => MarketConditionHelper.ConditionText(EngineCondition);
+        public string EngineConditionColor => MarketConditionHelper.ConditionColor(EngineCondition);
+        public string TiresConditionText => MarketConditionHelper.ConditionText(TiresCondition);
+        public string TiresConditionColor => MarketConditionHelper.ConditionColor(TiresCondition);
+        public string AvionicsConditionText => MarketConditionHelper.ConditionText(AvionicsCondition);
+        public string AvionicsConditionColor => MarketConditionHelper.ConditionColor(AvionicsCondition);
         
         public double BasePurchasePrice => Aircraft?.AircraftType?.PurchasePrice ?? 0;
         

@@ -437,7 +437,7 @@ namespace FlightCareer.UI.Services
                                    || DateTime.Now <= _expectEngineFailureUntil;
             if (!engineFailedNow && p.EngineDamagePercent < EngineDamageThresholdPercent && s.EngineDamagePercent >= EngineDamageThresholdPercent)
                 Record(DefectCatalog.EngineDamage, DefectOrigin.Native,
-                    $"GENERAL ENG DAMAGE PERCENT subiu para {s.EngineDamagePercent:F0}%", parameter: Math.Round(s.EngineDamagePercent, 1),
+                    "GENERAL ENG DAMAGE PERCENT passou do limite de dano", parameter: Math.Round(s.EngineDamagePercent, 1),
                     description: "Dano interno de motor acumulado no simulador.");
 
             if (Rising(p.FlapDamage, s.FlapDamage))
@@ -452,7 +452,7 @@ namespace FlightCareer.UI.Services
             double prevBrakes = Math.Min(p.BrakeLeftRemaining, p.BrakeRightRemaining);
             double brakes = Math.Min(s.BrakeLeftRemaining, s.BrakeRightRemaining);
             if (prevBrakes >= BrakesWornThresholdPercent && brakes < BrakesWornThresholdPercent)
-                Record(DefectCatalog.BrakesWorn, DefectOrigin.Native, $"BRAKE WEIGHT REMAINING caiu para {brakes:F0}%",
+                Record(DefectCatalog.BrakesWorn, DefectOrigin.Native, "BRAKE WEIGHT REMAINING abaixo do limite de serviço",
                     parameter: Math.Round(brakes, 1), description: "Pastilhas de freio abaixo do limite de serviço.");
 
             if (p.CrashFlag < 0.5 && s.CrashFlag >= 0.5)
