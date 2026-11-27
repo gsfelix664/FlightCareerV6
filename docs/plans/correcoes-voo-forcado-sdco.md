@@ -119,6 +119,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 - **C1:** chance de quebra de trem e pneu **baixa no pouso duro e mais alta no muito duro**. Calibração (Claude, 2026-11-26) em `component_catalog.json` › `landing`: 0 abaixo de 600 fpm; trem 1 %→5 % de 600 a 850 fpm; 15 %→30 % de 850 a 900 fpm (≥ 900 já é perda total); pneu ×1,5; inclinação ≥ 10° ×1,5; fora de pista (`ON ANY RUNWAY` = 0) ×2; peça gasta até ×2; teto 60 %. Quebra = peça `IsBroken` (interdita via `PartAirworthiness`), sem pane extra (evita cobrança em dobro).
 - **D5 (Claude, 2026-11-26):** inspeção do voo vira pane persistente do addon (aparece no Hangar, custo base 400). Só as inspeções de toque (pouso duro, cauda, ponta de asa, vento cruzado, bequilha) respeitam o `grounding` do JSON; as demais ficam DIFERIDAS até a tarefa 9 tirar os falsos positivos (D7, D9).
 
+- **B1 (Claude, 2026-11-27, BRIEF-NAV):** missão local sem `RequiredTouchAndGoes` (área de instrução, aerofoto, paraquedismo, STOL) aparece no briefing como "(LOCAL)", sem circuito âmbar; escalas viram pernas "(escala do contrato)" e o pagamento aparece só na última perna da missão. Regra em `Domain/Missions/BriefingLegPlanner`.
 - **F4:** manter os % que não são condição (selo "- N%", taxas, nota do voo, "% MTOW", instrumentos). A tarefa 8 só trata F1–F3.
 
 ## Decisões abertas do usuário
