@@ -2,15 +2,16 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-27 (28ª sessão, casa), Claude. Base `feat/component-health-system`. TELEMETRIA-RECARGA feita pelo Gemini e aprovada na 1ª rodada.
+**Última atualização:** 2026-11-27 (29ª sessão, casa), Claude. Base `feat/component-health-system`. MAPA-COORD (A4 + A5) feito pelo Gemini e aprovado na 1ª rodada.
 
 ## Estado
-- **TELEMETRIA-RECARGA feito (B6):** o temporizador de 5 s não para mais depois de conectar; pede `RequestSystemState("Sim")` e desconecta/reconecta se a chamada lançar ou se não chegar mensagem em 30 s (`SimLinkWatchdog` no Domain, com testes). Build ok, 1.323/1.323. Revisão: `docs/reviews/TELEMETRIA-RECARGA-revisao.md`. **Não testado no MSFS.** A documentação online do SDK deu 404 (comportamento do pipe quebrado não conferido).
+- **MAPA-COORD feito:** mini mapa do HUD só com pontos coloridos e o avião (`ShowContractLabels="False"`; o selo "NAV GPS" com a proa ficou). Briefing mostra "COORDENADAS" (`S23°30,5' W046°38,2'`) na 1ª perna de cada missão, com botão COPIAR (graus decimais). Build ok, 1.333/1.333. Revisão: `docs/reviews/MAPA-COORD-revisao.md`. **Não conferido com o app aberto.**
+- **TELEMETRIA-RECARGA feito (B6):** vigia da ligação (`SimLinkWatchdog`), reconecta se o sim morrer sem Quit. **Não testado no MSFS.**
 - NAV-IDA, SEM-PORCENTO, MAPA-ESCALAS, BRIEF-NAV, HANGAR-AVISOS, LIMPA-MAPA e POUSO-DANO feitos e não conferidos com o app aberto.
 
 ## Próximo passo
-- **No MSFS:** fechar o sim à força com o app aberto → "DESCONECTADO" em ≤ 35 s e volta sozinho; no menu principal e no carregamento do voo, o log `[SimConnect]` não pode mostrar reconexão em laço. Se laço, subir o limite de 30 s. Depois ver se B5 (BRIEF-LINHA) ainda acontece.
-- **Sessão Sonnet: A4 (mini mapa do HUD sem textos) e A5 (coordenadas dos pontos no briefing)**, pedidos do usuário 2026-11-27; `correcoes-voo-forcado-sdco.md` › A.
+- **No app:** briefing (bloco de coordenadas cabe no cartão; COPIAR) e HUD (pontos centrados, sem rótulos).
+- **No MSFS:** fechar o sim à força com o app aberto → "DESCONECTADO" em ≤ 35 s e volta sozinho; no menu principal e no carregamento do voo, o log `[SimConnect]` não pode mostrar reconexão em laço (se laço, subir o limite de 30 s). Depois ver se B5 (BRIEF-LINHA) ainda acontece.
 - **Sessão Opus: OFICINA-TEMPO-JOGO** (decisão do usuário 2026-11-27; `manutencao-parada-real.md` › 7).
 - Sessão Opus: tarefa 9, EXCEDENCIAS (D7–D9). Depois tarefa 10, HANGAR-REDESENHO (inclui E5). `HangarViewModel` nunca em paralelo.
 - No app/MSFS: missões só de ida no quadro de SNZG (nível 1 e 3); textos sem %; escalas nos mapas; pouso duro e fora de pista.
