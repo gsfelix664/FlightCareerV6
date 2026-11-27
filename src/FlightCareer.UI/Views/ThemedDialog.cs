@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using FlightCareer.Domain.Components;
 
 namespace FlightCareer.UI.Views
 {
@@ -42,9 +43,9 @@ namespace FlightCareer.UI.Views
             string title,
             string message,
             double normalCost,
-            int normalRealMinutes,
+            double normalHours,
             double expressCost,
-            int expressRealMinutes,
+            double expressHours,
             DialogKind kind = DialogKind.Info)
         {
             Brush accent = kind switch
@@ -96,11 +97,11 @@ namespace FlightCareer.UI.Views
 
             buttons.Children.Add(MakeButton("Cancelar", ButtonNeutral, TextSecondary, () => { result = ServiceOption.Cancel; window.Close(); }));
 
-            var normalButton = MakeButton($"Normal ({normalRealMinutes} min) · {normalCost:C0}", ButtonNeutral, Brush("#00E5FF"), () => { result = ServiceOption.Normal; window.Close(); });
+            var normalButton = MakeButton($"Normal ({WorkshopDowntime.FormatHours(normalHours)}) · {normalCost:C0}", ButtonNeutral, Brush("#00E5FF"), () => { result = ServiceOption.Normal; window.Close(); });
             normalButton.Margin = new Thickness(10, 0, 0, 0);
             buttons.Children.Add(normalButton);
 
-            var expressButton = MakeButton($"⚡ Expresso ({expressRealMinutes} min) · {expressCost:C0}", accent, Brush("#0B0F14"), () => { result = ServiceOption.Express; window.Close(); });
+            var expressButton = MakeButton($"⚡ Expresso ({WorkshopDowntime.FormatHours(expressHours)}) · {expressCost:C0}", accent, Brush("#0B0F14"), () => { result = ServiceOption.Express; window.Close(); });
             expressButton.Margin = new Thickness(10, 0, 0, 0);
             buttons.Children.Add(expressButton);
 

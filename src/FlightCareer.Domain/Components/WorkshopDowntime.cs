@@ -1,73 +1,58 @@
 using System;
+using System.Globalization;
 
 namespace FlightCareer.Domain.Components
 {
     /// <summary>
-    /// Regras e conversão de tempo de parada na oficina em tempo de relógio real (PARADA-REAL).
-    /// Lógica pura compartilhada entre UI, persistência e testes.
+    /// Regras e formatação de tempo de parada na oficina em tempo de jogo (OFICINA-TEMPO-JOGO).
+    /// O atendimento sai pronto na hora real; o tempo de carreira avança e envelhece o quadro de missões.
     /// </summary>
     public static class WorkshopDowntime
     {
-        public const int MinRealMinutes = 1;
-        public const int MaxRealMinutes = 20;
         public const double ExpressCostMultiplier = 1.5;
 
-        /// <summary>
-        /// Converte horas de jogo da parada em minutos reais do relógio do computador:
-        /// clamp(round(2 × √horasDeJogo), 1, 20).
-        /// Se horasDeJogo <= 0, retorna 0 (sem parada).
-        /// </summary>
-        public static int RealMinutesFor(double gameHours)
-        {
-            if (gameHours <= 0.0) return 0;
-            int minutes = (int)Math.Round(2.0 * Math.Sqrt(gameHours), MidpointRounding.AwayFromZero);
-            return Math.Clamp(minutes, MinRealMinutes, MaxRealMinutes);
-        }
+        private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
 
         /// <summary>
         /// Aplica os parâmetros do serviço conforme o modo (Normal ou Expresso).
-        /// Serviço expresso: +50 % no preço (custo × 1,5), metade das horas de jogo e metade dos minutos reais.
+        /// Serviço expresso: metade das horas de carreira e +50% no preço (fator 1,5).
+        /// Normal: horas mantidas e custo padrão (fator 1,0).
         /// </summary>
-        public static (double gameHours, int realMinutes, double costFactor) Apply(double gameHours, bool express)
+        public static (double gameHours, double costFactor) Apply(double gameHours, bool express)
         {
             if (express)
             {
-                double gHours = gameHours / 2.0;
-                int rMinutes = RealMinutesFor(gHours);
-                return (gHours, rMinutes, ExpressCostMultiplier);
+                return (gameHours / 2.0, ExpressCostMultiplier);
             }
-            return (gameHours, RealMinutesFor(gameHours), 1.0);
+            return (gameHours, 1.0);
         }
 
         /// <summary>
-        /// Confere se a aeronave ainda está em manutenção na oficina no instante informado.
+        /// Formata as horas no padrão "0.##" em cultura pt-BR seguido de " h".
+        /// Ex: 72 -> "72 h", 0.5 -> "0,5 h", 0.25 -> "0,25 h", 8 -> "8 h".
         /// </summary>
-        public static bool IsInWorkshop(DateTime? untilUtc, DateTime nowUtc)
+        public static string FormatHours(double hours)
         {
-            return untilUtc.HasValue && untilUtc.Value > nowUtc;
+            return $"{hours.ToString("0.##", PtBr)} h";
         }
 
         /// <summary>
-        /// Retorna o tempo restante de parada na oficina. Devolve TimeSpan.Zero se já liberada.
+        /// Retorna o resumo de conclusão do serviço da oficina, com as horas de carreira gastas,
+        /// a data atualizada da carreira e o impacto nos contratos do quadro de missões.
         /// </summary>
-        public static TimeSpan Remaining(DateTime? untilUtc, DateTime nowUtc)
+        public static string CompletionSummary(double gameHours, DateTime careerClock, int expiredContracts)
         {
-            if (!IsInWorkshop(untilUtc, nowUtc)) return TimeSpan.Zero;
-            return untilUtc!.Value - nowUtc;
-        }
+            string formattedHours = FormatHours(gameHours);
+            string formattedDate = careerClock.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-        /// <summary>
-        /// Calcula o novo prazo de liberação da oficina (UTC).
-        /// Serviço sobre parada em andamento usa o maior prazo (não soma).
-        /// </summary>
-        public static DateTime CalculateNewUntilUtc(DateTime? currentUntilUtc, DateTime nowUtc, int realMinutes)
-        {
-            var targetUntil = nowUtc.AddMinutes(realMinutes);
-            if (currentUntilUtc.HasValue && currentUntilUtc.Value > targetUntil)
+            string contractsNotice = expiredContracts switch
             {
-                return currentUntilUtc.Value;
-            }
-            return targetUntil;
+                0 => "Nenhum contrato do quadro venceu nesse tempo.",
+                1 => "1 contrato do quadro venceu nesse tempo.",
+                _ => $"{expiredContracts} contratos do quadro venceram nesse tempo."
+            };
+
+            return $"A oficina levou {formattedHours} de carreira. Dia da carreira: {formattedDate}.\n{contractsNotice}";
         }
     }
 }

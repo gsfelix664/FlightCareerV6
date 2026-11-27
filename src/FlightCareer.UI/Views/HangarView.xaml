@@ -238,15 +238,6 @@
                         <TextBlock Text="{Binding StatusDetail}" Foreground="{StaticResource HgText2}" FontSize="12.5" Margin="14,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
-
-                <!-- Faixa de Oficina (PARADA-REAL) -->
-                <Border Background="#122330" BorderBrush="{StaticResource HgCyan}" BorderThickness="1" CornerRadius="6" Padding="14,10" Margin="0,8,0,0"
-                        Visibility="{Binding ShowWorkshopBanner, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="⏱" Foreground="{StaticResource HgCyan}" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="{Binding WorkshopBannerText}" Foreground="{StaticResource HgCyan}" FontFamily="{StaticResource HgMono}" FontWeight="Bold" FontSize="12.5" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
             </StackPanel>
 
             <!-- Conteúdo -->

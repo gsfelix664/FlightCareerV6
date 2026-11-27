@@ -563,8 +563,6 @@ namespace FlightCareer.UI.ViewModels
                     _briefingViewModel.HangarAircraftLocation = active.CurrentLocationICAO;
                     _briefingViewModel.HangarAircraftMtow = AircraftWeightSpecs.GetMtow(active.AircraftType?.Model, active.AircraftType);
                     _briefingViewModel.HangarAircraftCruiseSpeed = active.AircraftType?.CruiseSpeedKts ?? 110.0;
-                    _briefingViewModel.WorkshopUntilUtc = active.WorkshopUntilUtc;
-                    _briefingViewModel.WorkshopDescription = active.WorkshopDescription;
                 }
             }
             else
@@ -575,8 +573,6 @@ namespace FlightCareer.UI.ViewModels
                 _briefingViewModel.HangarAircraftLocation = "---";
                 _briefingViewModel.HangarAircraftMtow = 2500.0;
                 _briefingViewModel.HangarAircraftCruiseSpeed = 110.0;
-                _briefingViewModel.WorkshopUntilUtc = null;
-                _briefingViewModel.WorkshopDescription = null;
             }
             
             await _briefingViewModel.RebuildItineraryAndValidateAsync();
@@ -891,26 +887,6 @@ namespace FlightCareer.UI.ViewModels
             var aircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
             if (aircraft == null) return;
 
-            // Releitura fresca da aeronave para conferir oficina sem cache (PARADA-REAL)
-            var freshAircraft = await _context.PilotAircrafts
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Id == aircraft.Id);
-
-            var workshopUntil = freshAircraft?.WorkshopUntilUtc ?? aircraft.WorkshopUntilUtc;
-            var workshopDesc = freshAircraft?.WorkshopDescription ?? aircraft.WorkshopDescription ?? "manutenção";
-
-            if (WorkshopDowntime.IsInWorkshop(workshopUntil, DateTime.UtcNow))
-            {
-                var remaining = WorkshopDowntime.Remaining(workshopUntil, DateTime.UtcNow);
-                string mmss = $"{(int)remaining.TotalMinutes:D2}:{remaining.Seconds:D2}";
-                System.Windows.MessageBox.Show(
-                    $"A aeronave {aircraft.Prefix} está na oficina ({workshopDesc}). Libera em {mmss}.",
-                    "Aeronave na Oficina",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Warning);
-                return;
-            }
-
             if (aircraft.IsInterdicted)
             {
                 System.Windows.MessageBox.Show($"Voo não autorizado! A aeronave {aircraft.Prefix} está INTERDITADA.\n\nMotivo: {aircraft.InterdictionReason}\n\nRealize a manutenção regulatória obrigatória no Hangar antes da decolagem.", "Aeronave Interditada", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
@@ -1122,6 +1098,21 @@ namespace FlightCareer.UI.ViewModels
             }
             var balance = await _context.Pilots.AsNoTracking().Where(p => p.Name == PilotName).Select(p => (double?)p.Balance).FirstOrDefaultAsync();
             if (balance.HasValue) Balance = balance.Value;
+        }
+
+        /// <summary>
+        /// Atualiza o estado da janela principal após serviço na oficina. Recarrega o piloto e repõe o quadro
+        /// de missões se não estiver em voo; se estiver monitorando voo ou sem piloto, apenas atualiza o saldo.
+        /// </summary>
+        public async Task RefreshAfterWorkshopAsync()
+        {
+            if (_flightMonitor.IsMonitoring || string.IsNullOrEmpty(PilotName))
+            {
+                await RefreshPilotBalanceAsync();
+                return;
+            }
+
+            await InitializeForPilotAsync(PilotName);
         }
 
         public async Task InitializeForPilotAsync(string pilotName)
