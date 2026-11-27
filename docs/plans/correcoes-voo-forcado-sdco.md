@@ -14,7 +14,7 @@ Fontes: capturas do app, REC `20261126-0719-Cessna_C152.csv`, blackbox `flight_2
 
 - [x] **B1. Navegação tratada como TGL.** `BriefingViewModel.RebuildItineraryAndValidateAsync` (~327): toda missão com origem = destino, ou categoria "Local", vira TGL (texto verde, circuito âmbar falso, "(TGL)" no título "SDCO (TGL)"). Vale também para área de instrução, aerofoto, paraquedismo, STOL.
   Correção: TGL só com `RequiredTouchAndGoes > 0`; missão com `MultiStopContractData` vira pernas reais (origem → escalas → origem), com ação por perna ("Pouso completo em X" ou "Toque e arremetida em X" conforme `StopMode`).
-- [ ] **B2. Escalas não aparecem em nenhum mapa** (briefing, HUD, quadro): `ContractMarkerBuilder` só desenha `OverflyWaypoints` e aerofoto/salto/aerial; ignora `MultiStopContractData.Stops`. Desenhar escalas numeradas e a linha do triângulo (origem → ponto de reporte → escalas → origem). Cobrir também STOL e outros contratos com aeródromo.
+- [x] **B2. Escalas não aparecem em nenhum mapa** (briefing, HUD, quadro): `ContractMarkerBuilder` só desenha `OverflyWaypoints` e aerofoto/salto/aerial; ignora `MultiStopContractData.Stops`. Desenhar escalas numeradas e a linha do triângulo (origem → ponto de reporte → escalas → origem). Cobrir também STOL e outros contratos com aeródromo.
 - [x] **B3. Ponto de reporte fora do enquadramento no briefing:** `RouteLegs` é montado depois de `ContractMissions`, e `UpdateMultiLegRoute` dá zoom no circuito falso. Enquadrar rota + contrato num passo só. HUD: conferir no MSFS (usa o mesmo construtor, então hoje mostra só o ponto de reporte).
 - [x] **B4. Missão após pouso forçado:** (POUSO-DANO: cancelada, XP 50 %, sem dinheiro) a origem passou a SNZG (47 NM), mas título e descrição seguem "SDCO ... 214 NM" com as escalas antigas. Definir: texto de resgate/retomada, ou missão falha.
 
@@ -104,7 +104,7 @@ Uma tarefa por sessão, na ordem. "Modelo" = sessão do Claude (spec e revisão)
 | 2 | ✅ POUSO-DANO | C1, D1, D5, D6, D10, D11 | Opus | Gemini; revisão linha a linha | 1 |
 | 3 | LIMPA-MAPA | A1, A2 | Sonnet | Gemini (golden pode mudar) | — |
 | 4 | ✅ BRIEF-NAV | A3, B1, B3 (`BriefingViewModel`, quente) | Opus | Gemini | 3 |
-| 5 | MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
+| 5 | ✅ MAPA-ESCALAS | B2 | Sonnet | Gemini | 4 |
 | 6 | ~~RESGATE~~ | B4 decidido: cancelar a missão (entra na tarefa 2) | — | — | — |
 | 7 | ✅ HANGAR-AVISOS | E1, E3, E4 | Sonnet | Gemini | 1 |
 | 8 | SEM-PORCENTO | F1, F2, F3 | Sonnet | Gemini | 1, 7 |

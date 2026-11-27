@@ -6,7 +6,8 @@ namespace FlightCareer.Domain.Missions
     {
         Point,
         Area,
-        DropZone
+        DropZone,
+        Stop
     }
 
     public sealed record MapContractMarker(
@@ -17,6 +18,8 @@ namespace FlightCareer.Domain.Missions
         ContractMarkerKind Kind);
 
     public sealed record GeoPoint(double Lat, double Lon);
+
+    public sealed record ContractRouteLine(IReadOnlyList<GeoPoint> Points);
 
     public sealed record SurveyMapArea(
         IReadOnlyList<GeoPoint> Corners,
