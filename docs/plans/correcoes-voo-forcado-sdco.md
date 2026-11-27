@@ -88,6 +88,8 @@ Trocar por estado em palavras (os mesmos das peças). Ex.: "Ignição / magnetos
 **F3. Mercado de usados (decidido pelo usuário em 2026-11-26: tirar o %)**
 - [x] Condição média, célula, motor, pneus e aviônicos em `MarketView.xaml` (~449-975): mostrar estado em palavras/cor, como no Hangar. Conferir se o valor exato aparece em outro texto do mercado.
 
+Decidido (usuário, 2026-11-27): o status "RISCO DE PANE"/"ATENÇÃO" fica como está, mesmo podendo indicar problema em peça nunca inspecionada.
+
 **F4. Decidido (usuário, 2026-11-26): manter os % que não são condição**
 - Selo de desconto "- N%" do mercado (`MarketView.xaml` ~412).
 - Taxas de dinheiro (corretagem 8%, expresso +50%, bônus/XP), nota do voo ("47%"), "% MTOW" e envelope no briefing, "100% EXATO", flap/N1/opacidade no HUD, restrição de flaps em ferry. Ficam como estão: selo "- N%", taxas, nota do voo, "% MTOW", envelope, "100% EXATO" e instrumentos do HUD. A tarefa 8 (SEM-PORCENTO) só tira % de condição (F1–F3).
