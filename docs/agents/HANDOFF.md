@@ -2,17 +2,17 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-27 (24ª sessão, casa), Claude. Base `feat/component-health-system`. BRIEF-NAV (tarefa 4 do plano) feita pelo Gemini, aprovada e no merge.
+**Última atualização:** 2026-11-27 (25ª sessão, casa), Claude. Base `feat/component-health-system`. MAPA-ESCALAS (tarefa 5 do plano) feita pelo Gemini, aprovada com ajuste do revisor e no merge.
 
 ## Estado
-- **BRIEF-NAV feito** (A3, B1, B3): `Domain/Missions/BriefingLegPlanner` monta as pernas do briefing; TGL só com `RequiredTouchAndGoes > 0`; voo local aparece como "(LOCAL)"; escalas do contrato viram pernas reais ("Pouso completo"/"Toque e arremetida em X (escala do contrato)"), pagamento só na última perna; mapa enquadra rota + contrato juntos (`ApplyCombinedFraming`). Build ok, 1.277/1.277. Revisão: `docs/reviews/BRIEF-NAV-revisao.md`. **Não conferido com o app aberto nem no MSFS.**
-- HANGAR-AVISOS, LIMPA-MAPA e POUSO-DANO feitos e não conferidos com o app aberto (detalhes nas revisões em `docs/reviews/`).
-- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (B2, D7–D9, E5, F) não implementado.
+- **MAPA-ESCALAS feito** (B2): escalas numeradas, pista STOL e linha do contrato (roxa) no briefing, quadro e HUD. Build ok, 1.283/1.283. Revisão: `docs/reviews/MAPA-ESCALAS-revisao.md`. **Não conferido com o app aberto nem no MSFS.**
+- BRIEF-NAV, HANGAR-AVISOS, LIMPA-MAPA e POUSO-DANO feitos e não conferidos com o app aberto (revisões em `docs/reviews/`).
+- Resto do plano `docs/plans/correcoes-voo-forcado-sdco.md` (D7–D9, E5, F) não implementado.
 - PT-HRY: segue interditado até "Reparar tudo". Mapa unificado e OBJ-CARD-1/2 sem teste no MSFS (`TESTES-PENDENTES.md`).
 
 ## Próximo passo
-- No app/MSFS: briefing de uma navegação com escalas (SDCO → escalas → SDCO: sem "(TGL)", pernas com escala, ponto de reporte dentro do quadro do mapa); pouso duro e fora de pista; preços e avisos do Hangar.
-- **Sessão Sonnet: tarefa 5, MAPA-ESCALAS** (B2, agora liberada) ou **tarefa 8, SEM-PORCENTO** (F1–F3). `HangarViewModel` nunca em paralelo.
+- No app/MSFS: navegação com escalas nos três mapas (escalas numeradas, linha origem → reporte → escalas → origem, sem "(TGL)"); trocar de aeroporto no quadro e ver de onde parte a linha; pouso duro e fora de pista; preços e avisos do Hangar.
+- **Sessão Sonnet: tarefa 8, SEM-PORCENTO** (F1–F3). `HangarViewModel` nunca em paralelo.
 - **Sessão Opus: tarefa 9, EXCEDENCIAS** (D7 slew/solo, D8 Vfe C152 = 85 kt em todos os dentes, decidido, D9 histerese do RPM; depois rever `InspectionDefectPolicy`).
 - PC do escritório: `git pull` e `tools/agents/install-global.sh`. Fila anterior: AIRSIM-2 (spec Opus; só fecha com MSFS), HUD em modo tablet (quando pedido), 8 tipos da E2C.
 
