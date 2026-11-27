@@ -32,6 +32,9 @@ namespace FlightCareer.Domain.Missions
         public bool Paved { get; set; }
         public List<string>? RequireAnyTag { get; set; }
         public string? Variant { get; set; }
+        public int? MinPilotLevel { get; set; }
+        public int[]? LegNm { get; set; }
+        public int? RepeatPool { get; set; }
     }
 
     public sealed class MissionCrewDefinition

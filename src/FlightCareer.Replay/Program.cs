@@ -227,7 +227,7 @@ namespace FlightCareer.Replay
             Console.WriteLine("     FlightCareer.Replay career --aircraft <modelos> [--bots <n>] [--days <n>] [--hours-per-day <n>] [--seed <n>] [--policy best|random] [--fast] [--out <pasta>]");
             Console.WriteLine("     FlightCareer.Replay career-stab [--days <n>] [--bots <n>] [--seed <n>] [--difficulty easy|medium|hard|all] [--policy all|cauteloso|equilibrado|agressivo] [--fast] [--out <pasta>]");
             Console.WriteLine("     FlightCareer.Replay coverage [--out <caminho>]");
-            Console.WriteLine("     FlightCareer.Replay board-report [--boards <n>] [--seed <n>] [--airports <lista>] [--coverage] [--out <pasta>]");
+            Console.WriteLine("     FlightCareer.Replay board-report [--boards <n>] [--seed <n>] [--airports <lista>] [--level <n>] [--coverage] [--out <pasta>]");
             Console.WriteLine("     FlightCareer.Replay tier-report [--lnm <caminho>] [--csv <caminho>] [--out <pasta>]");
             Console.WriteLine();
             Console.WriteLine("Opções de Replay:");

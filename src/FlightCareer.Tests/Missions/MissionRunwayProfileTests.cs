@@ -180,6 +180,7 @@ namespace FlightCareer.Tests.Missions
                 "instrucao_local",
                 "circuito_tgl",
                 "navegacao_vfr",
+                "navegacao_vfr_ida",
                 "instrucao_ifr",
                 "adaptacao_noturna",
                 "cheque",

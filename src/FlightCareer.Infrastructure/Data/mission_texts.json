@@ -75,6 +75,46 @@
       "description": "Treinamento de navegação VFR ({distance_nm} NM total). Reporte mandatório na primeira perna, toque e arremetida em {stop_a} e {stop_b} e retorno para pouso em {origin}."
     }
   ],
+  "navegacao_vfr:triangle_long": [
+    {
+      "title": "Navegação VFR Longa ({stop_a} e {stop_b})",
+      "description": "Navegação visual longa ({distance_nm} NM total). Decolagem de {origin}, sobrevoo do ponto de reporte mandatório na primeira perna, paradas completas nas escalas {stop_a} e {stop_b} e regresso à base em {origin}."
+    },
+    {
+      "title": "Navegação Triangular Longa: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento avançado de navegação estimada com dois pousos completos em aeródromos distintos ({stop_a} e {stop_b}) e retorno a {origin}. Sobrevoe o ponto de reporte obrigatório na saída."
+    }
+  ],
+  "navegacao_vfr_ida": [
+    {
+      "title": "Navegação VFR {origin} → {dest}",
+      "description": "Navegação visual de {origin} a {dest} ({distance_nm} NM). Sobrevoe o ponto de reporte visual na rota e faça pouso completo no destino."
+    },
+    {
+      "title": "Navegação Visual de Ponto a Ponto: {origin} - {dest}",
+      "description": "Voo de instrução de navegação estimada ({distance_nm} NM). Mantenha a proa planejada, cumpra o sobrevoo do ponto de reporte mandatório e realize pouso em {dest}."
+    }
+  ],
+  "navegacao_vfr_ida:iniciante": [
+    {
+      "title": "Primeiras Navegações VFR: {origin} → {dest}",
+      "description": "Instrução visual básica de ponto a ponto para destino conhecido ({distance_nm} NM). Sobrevoe o ponto de reporte obrigatório na perna e realize pouso completo em {dest} com {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação VFR Inicial ({dest})",
+      "description": "Voo de instrução inicial de rota entre {origin} e {dest}. Identifique o ponto de reporte visual na primeira metade da etapa e conclua com aproximação padronizada e pouso em {dest}."
+    }
+  ],
+  "navegacao_vfr_ida:intermediaria": [
+    {
+      "title": "Navegação VFR Intermediária: {origin} → {dest}",
+      "description": "Navegação visual para destino desafiador com tráfego controlado, pista curta ou variação de relevo ({distance_nm} NM). Sobrevoe o ponto de reporte e faça pouso completo em {dest}."
+    },
+    {
+      "title": "Treinamento em Rota Visual: {dest}",
+      "description": "Exercício de navegação VFR de {origin} para {dest} explorando novos aeródromos e procedimentos. Mantenha reporte visual compulsório e cumpra aproximação e pouso em {dest}."
+    }
+  ],
   "instrucao_ifr": [
     {
       "title": "Instrução IFR ({dest})",

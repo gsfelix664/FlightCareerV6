@@ -150,7 +150,7 @@ namespace FlightCareer.Tests.Missions
 
             var def = MissionCatalog.Shared.Get("navegacao_vfr")!;
             Assert.NotNull(def);
-            Assert.Equal(3, def.Profiles.Count);
+            Assert.Equal(4, def.Profiles.Count);
 
             var seenVariants = new HashSet<string>();
 
@@ -208,10 +208,17 @@ namespace FlightCareer.Tests.Missions
                     }
                     else
                     {
-                        // triangle
-                        seenVariants.Add("triangle");
                         Assert.Equal("full_stop", contract.StopMode);
-                        Assert.True(mission.DistanceNM >= 80.0 && mission.DistanceNM <= 250.0, $"Distância triangle fora de faixa: {mission.DistanceNM}");
+                        if (mission.Title.Contains("Longa"))
+                        {
+                            seenVariants.Add("triangle_long");
+                            Assert.True(mission.DistanceNM >= 150.0 && mission.DistanceNM <= 300.0, $"Distância triangle_long fora de faixa: {mission.DistanceNM}");
+                        }
+                        else
+                        {
+                            seenVariants.Add("triangle");
+                            Assert.True(mission.DistanceNM >= 80.0 && mission.DistanceNM <= 250.0, $"Distância triangle fora de faixa: {mission.DistanceNM}");
+                        }
                     }
                 }
             }

@@ -1,6 +1,6 @@
 # Navegação de instrução só de ida (NAV-IDA)
 
-**Estado:** decidido, não implementado. Spec detalhada em sessão Opus; implementação pelo Gemini.
+**Estado:** implementado, aguardando revisão do Claude. Spec detalhada em sessão Opus; implementação pelo Gemini (NAV-IDA).
 
 ## Problema
 Fase 1 em SNZG (tier 3): ~88% dos contratos aceitáveis voltam à origem (instrução local 10, TGL 10, navegação VFR 10, cheque 6, panorâmico 6; translados só de ida 3 + 3). Origem: `achados-voo-sdco.md` › Decisões abertas.

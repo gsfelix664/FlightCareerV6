@@ -262,6 +262,30 @@
           "bigAirport": false,
           "minRunwayFt": 0,
           "paved": false
+        },
+        {
+          "variant": "triangle_long",
+          "weight": 20,
+          "rangeNm": [
+            150,
+            300
+          ],
+          "legNm": [
+            40,
+            130
+          ],
+          "minPilotLevel": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
         }
       ],
       "luggagePerPersonKg": [
@@ -285,6 +309,100 @@
         "navegacao_cross_country",
         "3.4.2"
       ]
+    },
+    {
+      "id": "navegacao_vfr_ida",
+      "name": "Navegação VFR (só ida)",
+      "description": "Navegação visual de um aeródromo a outro, com ponto de reporte e pouso completo no destino.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "vfr_one_way",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "instrucao": 3,
+        "aeroclube": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "variant": "iniciante",
+          "weight": 60,
+          "rangeNm": [
+            50,
+            100
+          ],
+          "repeatPool": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "intermediaria",
+          "weight": 40,
+          "rangeNm": [
+            50,
+            150
+          ],
+          "minPilotLevel": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
     },
     {
       "id": "instrucao_ifr",
