@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Connection;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Fuel;
 using FlightCareer.Domain.Integrity;
@@ -13,7 +14,7 @@ using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState, RequestIntegrityState }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState, RequestIntegrityState, RequestSimState }
     public enum DEFINITIONS
     {
         AircraftData, EngineFireState, OilLeakState, FailureState,
@@ -180,6 +181,8 @@ namespace FlightCareer.UI.Services
         private IntPtr _handle;
         private HwndSource? _hwndSource;
         private System.Timers.Timer? _reconnectTimer;
+        private static readonly TimeSpan LinkSilenceTimeout = TimeSpan.FromSeconds(30);
+        private readonly SimLinkWatchdog _linkWatchdog = new(LinkSilenceTimeout);
 
         public void Initialize(IntPtr windowHandle)
         {
@@ -191,6 +194,7 @@ namespace FlightCareer.UI.Services
             _reconnectTimer = new System.Timers.Timer(5000);
             _reconnectTimer.Elapsed += (s, e) => {
                 if (!IsConnected) Connect();
+                else if (_simConnect != null) CheckLinkAlive();
             };
             _reconnectTimer.Start();
         }
@@ -208,6 +212,7 @@ namespace FlightCareer.UI.Services
             try
             {
                 _simConnect = new SimConnect("Flight Career V6", _handle, WM_USER_SIMCONNECT, null, 0);
+                _linkWatchdog.MarkConnected(DateTime.UtcNow);
 
                 // 1. Identificação da Aeronave (256 bytes)
                 _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "TITLE", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
@@ -463,7 +468,6 @@ namespace FlightCareer.UI.Services
 
                 _simConnect.OnRecvOpen += (s, e) => {
                     IsCrashed = false;
-                    _reconnectTimer?.Stop();
                     ApplyMaskedEvents();
                     ApplyObservedEvents();
                     OnConnected?.Invoke(this, EventArgs.Empty);
@@ -530,6 +534,7 @@ namespace FlightCareer.UI.Services
             {
                 Debug.WriteLine($"SimConnect Error: {ex.Message}");
                 _simConnect = null;
+                _linkWatchdog.MarkDisconnected();
             }
         }
 
@@ -592,11 +597,45 @@ namespace FlightCareer.UI.Services
             _simConnect.RegisterDataDefineStruct<SimDoubleValue>(def);
         }
 
+        private void CheckLinkAlive()
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            dispatcher.BeginInvoke(() =>
+            {
+                if (_simConnect == null) return;
+                var now = DateTime.UtcNow;
+                if (_linkWatchdog.IsStale(now))
+                {
+                    Debug.WriteLine($"[SimConnect] Sem mensagens há {_linkWatchdog.SilenceFor(now).TotalSeconds:F0} s: ligação considerada morta (sim fechado sem Quit). Reconectando.");
+                    Disconnect();
+                    return;
+                }
+                try
+                {
+                    _simConnect.RequestSystemState(DATA_REQUESTS.RequestSimState, "Sim");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] Ligação perdida ao pedir estado do sistema: {ex.GetType().Name}: {ex.Message}. Reconectando.");
+                    Disconnect();
+                }
+            });
+        }
+
         public void Disconnect()
         {
             if (_simConnect != null)
             {
-                _simConnect.Dispose();
+                _linkWatchdog.MarkDisconnected();
+                try
+                {
+                    _simConnect.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] Dispose falhou: {ex.Message}");
+                }
                 _simConnect = null;
                 _mappedEvents.Clear();
                 _eventNames.Clear();
@@ -895,6 +934,7 @@ namespace FlightCareer.UI.Services
                 try
                 {
                     _simConnect.ReceiveMessage();
+                    _linkWatchdog.MarkMessage(DateTime.UtcNow);
                     handled = true;
                 }
                 catch (Exception ex)

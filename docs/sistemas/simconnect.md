@@ -14,6 +14,7 @@
 - Confirme nomes de eventos e SimVars na documentação do SDK do MSFS 2024 antes de usar. Não invente nomes.
 - **Escrita de `FUELSYSTEM TANK QUANTITY:n` define o total, a leitura devolve o utilizável:** grave `utilizável + (FUELSYSTEM TANK CAPACITY:n − FUELSYSTEM TANK USABLE CAPACITY:n)` (`FuelTank.ToSimWriteValue`, aplicado em `SimConnectService.SetFuelTanks`). Tanques legados `FUEL TANK * QUANTITY`: leitura e escrita usam o total (com não utilizável). Pendente: distribuição proporcional em `FuelTankWritePlan.Distribute` põe em todos os tanques com carga parcial (detalhes: `docs/sistemas/combustivel.md`).
 - **SimVar com nome inválido desloca o struct:** datum rejeitado (`NAME_UNRECOGNIZED`) encurta o pacote e desloca os campos seguintes (o marshaling lê além do fim) (ex.: `PARTIAL PANEL STATIC` **não existe**). O log `[SimConnect EXCEPTION]` mostra nome rejeitado; `TelemetryDefinitionTests` confere contagem.
+- **Vigia da ligação (TELEMETRIA-RECARGA):** para detectar sim fechado à força (sem Quit), o temporizador de reconexão (5 s) envia `RequestSystemState(RequestSimState, "Sim")`; 30 s de silêncio (`SimLinkWatchdog`) ou exceção na chamada desconectam para religar a reconexão automática.
 
 ## MSFS 2024 nativo
 
