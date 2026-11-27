@@ -91,6 +91,7 @@ namespace FlightCareer.UI.Utils
         public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
         public object? ContractMissions { get => GetValue(ContractMissionsProperty); set => SetValue(ContractMissionsProperty, value); }
 
+        private const double AircraftAnchorToleranceDeg = 0.05; // ~3 NM
         private ContractMapVisuals _contractVisuals = new();
         private GeoPoint? _lastDrawnOriginAnchor;
         private GeoPoint? _lastDrawnDestAnchor;
@@ -265,20 +266,24 @@ namespace FlightCareer.UI.Utils
                     return new GeoPoint(OriginLat, OriginLon);
                 }
 
-                if (_originAnchoredByAircraft &&
+                var cached = _originAnchoredByAircraft &&
                     ReferenceEquals(ContractMissions, _aircraftAnchorContractMissions) &&
-                    string.Equals(OriginIcao, _aircraftAnchorOriginIcao, StringComparison.OrdinalIgnoreCase) &&
-                    _lastDrawnOriginAnchor != null)
+                    string.Equals(OriginIcao, _aircraftAnchorOriginIcao, StringComparison.OrdinalIgnoreCase)
+                        ? _lastDrawnOriginAnchor
+                        : null;
+
+                // Nunca ancorar a origem num avião em voo: fica a última posição em solo
+                if (!IsOnGround || (AircraftLat == 0 && AircraftLon == 0)) return cached;
+
+                // Táxi não redesenha o mapa; salto grande (troca de aeroporto, lat antes de lon) atualiza
+                if (cached != null &&
+                    Math.Abs(cached.Lat - AircraftLat) < AircraftAnchorToleranceDeg &&
+                    Math.Abs(cached.Lon - AircraftLon) < AircraftAnchorToleranceDeg)
                 {
-                    return _lastDrawnOriginAnchor;
+                    return cached;
                 }
 
-                if ((AircraftLat != 0 || AircraftLon != 0) && OriginLat == 0 && OriginLon == 0 && IsOnGround)
-                {
-                    return new GeoPoint(AircraftLat, AircraftLon);
-                }
-
-                return null;
+                return new GeoPoint(AircraftLat, AircraftLon);
             }
 
             if (string.Equals(icao, DestIcao, StringComparison.OrdinalIgnoreCase))
@@ -295,6 +300,9 @@ namespace FlightCareer.UI.Utils
 
         private void RefreshContractAnchors()
         {
+            // Sem contrato não há linha a redesenhar (e o reenquadramento atrapalharia a rota)
+            if (!ExtractMissions(ContractMissions).Any()) return;
+
             var currentOrigin = ResolveAirport(OriginIcao);
             var currentDest = ResolveAirport(DestIcao);
 
