@@ -48,3 +48,7 @@
 2. Serviço expresso: **sim** (+50 % no preço, metade dos minutos reais e das horas de jogo).
 3. Prazo real: **sempre × 4** (não usar o valor do fabricante por motor).
 4. Restante: **(b)** — prazo em horas reais e o restante em horas de voo do jogo, com o rótulo "de voo" (ex.: "TBO 2.000 h (vida real) · faltam 280 h de voo"); cai 1 h a cada hora voada.
+
+## 7. Decisão do usuário (2026-11-27): parada em tempo de jogo, não em minutos reais
+Revoga a espera em tempo real de § 2.1 e § 6.1 (1 a 20 minutos de relógio). A parada da oficina passa a ser **só em tempo de jogo**: o serviço avança o relógio de carreira e esse avanço tem efeito no mundo (missões do quadro expiram e outras aparecem). Em tempo real o piloto **não espera**, ou espera apenas alguns segundos (animação/confirmação).
+- A definir na spec (Opus, tarefa **OFICINA-TEMPO-JOGO**): segundos de espera (0 ou poucos); se o expresso continua (hoje: metade das horas e +50 %) e o que ele passa a valer; como o avanço do relógio expira e repõe o quadro (conferir se hoje o quadro já usa `CareerClockUtc`); o que fazer com `WorkshopUntilUtc` e os bloqueios em `MainViewModel.StartFlight`/`BriefingViewModel` (quentes); textos do Hangar.

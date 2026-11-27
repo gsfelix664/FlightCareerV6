@@ -3432,3 +3432,8 @@
 - Controle de nível do piloto no sorteio (`MissionProfileDefinition.MinPilotLevel`, `MissionBoardCore.PickProfile`, `MissionGenerator.GenerateMissionsInMemory`): perfis com nível mínimo são omitidos para pilotos abaixo do nível exigido (nível 1–2 operam apenas iniciante; nível 3+ desbloqueia intermediária e triangular longa). No jogo, o relógio e XP do piloto são consultados para derivar o nível; o quadro salvo no banco não é invalidado e missões repostas usam o nível corrente.
 - Ferramenta de análise e testes (`BoardReporter`, `CareerProgressionSimulator`): suporte à opção `--level <n>` no comando `board-report`; chave de cache de missões do simulador de carreira expandida para incluir o nível do piloto. Snapshot de equivalência de catálogo `missions_golden.json` regenerado.
 - 13 testes unitários novos em `VfrOneWayTests` e atualizações de compatibilidade em `MissionCatalog69Tests`, `MissionRunwayProfileTests` e `VfrTriangleTests`; 1.314/1.314 testes aprovados. Telas do app e simulador em voo real não testados no MSFS.
+
+## 2026-11-27 - Revisão NAV-IDA e registro de bugs de conexão e oficina (Claude)
+- NAV-IDA aprovado na 1ª rodada (`docs/reviews/NAV-IDA-revisao.md`) e integrado na base.
+- B6 (TELEMETRIA-RECARGA): app fica "conectado" a um sim fechado à força; causa e correção proposta em `docs/plans/correcoes-voo-forcado-sdco.md`. B5 (linha tracejada presa) é o mesmo sintoma.
+- Decisão do usuário: oficina só em tempo de jogo (`docs/plans/manutencao-parada-real.md` › 7).
