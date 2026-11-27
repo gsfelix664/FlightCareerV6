@@ -327,6 +327,7 @@ namespace FlightCareer.UI.ViewModels
                 var summaryHops = new List<string>();
                 double totalDistance = 0;
                 int legIndex = 1;
+                var missionsWithCoordinates = new HashSet<Mission>();
 
                 for (int i = 0; i < legPlans.Count; i++)
                 {
@@ -458,6 +459,12 @@ namespace FlightCareer.UI.ViewModels
                     int lm = (int)legMinutes % 60;
                     string legEte = lh > 0 ? $"{lh}h {lm:D2}m" : $"{lm} min";
 
+                    IReadOnlyList<Domain.Missions.MissionCoordinatePoint> legCoords = Array.Empty<Domain.Missions.MissionCoordinatePoint>();
+                    if (plan.Mission != null && missionsWithCoordinates.Add(plan.Mission))
+                    {
+                        legCoords = Domain.Missions.MissionCoordinates.For(plan.Mission);
+                    }
+
                     RouteLegs.Add(new FlightLegModel
                     {
                         LegNumber = legIndex++,
@@ -466,6 +473,7 @@ namespace FlightCareer.UI.ViewModels
                         AssociatedMission = plan.Mission,
                         MissionTitle = plan.Mission?.Title ?? fallbackTitle,
                         RewardMoney = reward,
+                        CoordinatePoints = legCoords,
                         OriginMsfsIdent = aptOrigin?.MsfsIdent ?? plan.From,
                         DestinationMsfsIdent = aptDest?.MsfsIdent ?? plan.To,
                         OriginLat = originLat,
@@ -927,6 +935,22 @@ Localização: {HangarAircraftLocation}
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Falha ao copiar: {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        private void CopyCoordinates(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return;
+
+            try
+            {
+                Clipboard.SetText(text);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[BriefingViewModel] Falha ao copiar coordenadas: {ex.Message}");
                 MessageBox.Show($"Falha ao copiar: {ex.Message}");
             }
         }

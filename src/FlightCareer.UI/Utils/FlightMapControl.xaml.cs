@@ -43,6 +43,7 @@ namespace FlightCareer.UI.Utils
         /// controle monta os visuais com <see cref="ContractMarkerBuilder"/> (quadro, briefing e HUD iguais).
         /// </summary>
         public static readonly DependencyProperty ContractMissionsProperty = DependencyProperty.Register(nameof(ContractMissions), typeof(object), typeof(FlightMapControl), new PropertyMetadata(null, OnContractMissionsChanged));
+        public static readonly DependencyProperty ShowContractLabelsProperty = DependencyProperty.Register(nameof(ShowContractLabels), typeof(bool), typeof(FlightMapControl), new PropertyMetadata(true, OnShowContractLabelsChanged));
         public static readonly DependencyProperty AircraftLatProperty = DependencyProperty.Register("AircraftLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty AircraftLonProperty = DependencyProperty.Register("AircraftLon", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnAircraftPosChanged));
         public static readonly DependencyProperty OriginLatProperty = DependencyProperty.Register("OriginLat", typeof(double), typeof(FlightMapControl), new PropertyMetadata(0.0, OnOriginChanged));
@@ -90,6 +91,7 @@ namespace FlightCareer.UI.Utils
         public System.Collections.IEnumerable? MissionsSource { get => (System.Collections.IEnumerable?)GetValue(MissionsSourceProperty); set => SetValue(MissionsSourceProperty, value); }
         public object? SelectedMission { get => GetValue(SelectedMissionProperty); set => SetValue(SelectedMissionProperty, value); }
         public object? ContractMissions { get => GetValue(ContractMissionsProperty); set => SetValue(ContractMissionsProperty, value); }
+        public bool ShowContractLabels { get => (bool)GetValue(ShowContractLabelsProperty); set => SetValue(ShowContractLabelsProperty, value); }
 
         private const double AircraftAnchorToleranceDeg = 0.05; // ~3 NM
         private ContractMapVisuals _contractVisuals = new();
@@ -232,6 +234,14 @@ namespace FlightCareer.UI.Utils
                     newColl.CollectionChanged += map.ContractMissions_CollectionChanged;
 
                 map.RebuildContractVisuals();
+            }
+        }
+
+        private static void OnShowContractLabelsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is FlightMapControl map)
+            {
+                map.UpdateContractVisuals();
             }
         }
 
@@ -398,13 +408,7 @@ namespace FlightCareer.UI.Utils
                         {
                             case ContractMarkerKind.Point:
                             {
-                                var badge = CreatePinBadge(marker.Label, "#FFD600");
-                                var gMarker = new GMapMarker(pos)
-                                {
-                                    ZIndex = 120,
-                                    Shape = badge,
-                                    Offset = new Point(-5, -12)
-                                };
+                                var gMarker = CreateContractMarker(pos, marker.Label, "#FFD600", 120);
                                 _contractMarkers.Add(gMarker);
                                 MainMap.Markers.Add(gMarker);
                                 break;
@@ -430,13 +434,7 @@ namespace FlightCareer.UI.Utils
                                 _contractRoutes.Add(circleRoute);
                                 MainMap.Markers.Add(circleRoute);
 
-                                var badge = CreatePinBadge(marker.Label, "#FFD600");
-                                var gMarker = new GMapMarker(pos)
-                                {
-                                    ZIndex = 120,
-                                    Shape = badge,
-                                    Offset = new Point(-5, -12)
-                                };
+                                var gMarker = CreateContractMarker(pos, marker.Label, "#FFD600", 120);
                                 _contractMarkers.Add(gMarker);
                                 MainMap.Markers.Add(gMarker);
                                 break;
@@ -461,13 +459,7 @@ namespace FlightCareer.UI.Utils
                                 _contractRoutes.Add(dzRoute);
                                 MainMap.Markers.Add(dzRoute);
 
-                                var badge = CreatePinBadge(marker.Label, "#FF9100");
-                                var gMarker = new GMapMarker(pos)
-                                {
-                                    ZIndex = 120,
-                                    Shape = badge,
-                                    Offset = new Point(-5, -12)
-                                };
+                                var gMarker = CreateContractMarker(pos, marker.Label, "#FF9100", 120);
                                 _contractMarkers.Add(gMarker);
                                 MainMap.Markers.Add(gMarker);
                                 break;
@@ -475,13 +467,7 @@ namespace FlightCareer.UI.Utils
 
                             case ContractMarkerKind.Stop:
                             {
-                                var badge = CreatePinBadge(marker.Label, "#B388FF");
-                                var gMarker = new GMapMarker(pos)
-                                {
-                                    ZIndex = 121,
-                                    Shape = badge,
-                                    Offset = new Point(-5, -12)
-                                };
+                                var gMarker = CreateContractMarker(pos, marker.Label, "#B388FF", 121);
                                 _contractMarkers.Add(gMarker);
                                 MainMap.Markers.Add(gMarker);
                                 break;
@@ -1414,6 +1400,33 @@ namespace FlightCareer.UI.Utils
                 MainMap.SetZoomToFitRect(rect);
             }
             catch { }
+        }
+
+        private GMapMarker CreateContractMarker(PointLatLng pos, string label, string colorHex, int zIndex = 120)
+        {
+            if (!ShowContractLabels)
+            {
+                return new GMapMarker(pos)
+                {
+                    ZIndex = zIndex,
+                    Shape = new Ellipse
+                    {
+                        Width = 10,
+                        Height = 10,
+                        Fill = (Brush)new BrushConverter().ConvertFromString(colorHex)!,
+                        Stroke = (Brush)new BrushConverter().ConvertFromString("#0B0F14")!,
+                        StrokeThickness = 2
+                    },
+                    Offset = new Point(-5, -5)
+                };
+            }
+
+            return new GMapMarker(pos)
+            {
+                ZIndex = zIndex,
+                Shape = CreatePinBadge(label, colorHex),
+                Offset = new Point(-5, -12)
+            };
         }
 
         private FrameworkElement CreatePinBadge(string text, string colorHex)
