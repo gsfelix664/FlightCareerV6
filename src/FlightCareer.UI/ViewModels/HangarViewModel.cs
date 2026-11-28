@@ -198,7 +198,7 @@ namespace FlightCareer.UI.ViewModels
         /// <summary>
         /// Executa um serviço pago: confirma, confere saldo, aplica sobre a aeronave e componentes de um contexto novo,
         /// registra a transação, sincroniza as colunas antigas, salva e recarrega a frota.
-        /// Suporta parada em tempo real e serviço expresso (PARADA-REAL).
+        /// Suporta parada em tempo de jogo e serviço expresso (OFICINA-TEMPO-JOGO).
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
             Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
