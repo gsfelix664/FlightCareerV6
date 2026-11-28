@@ -2,19 +2,18 @@
 
 > Uma tarefa por sessão (`AGENTS.md` › 4.9). Reescreva ao terminar, **máximo 40 linhas**; histórico fica no `docs/CHANGELOG.md` e no git.
 
-**Última atualização:** 2026-11-27 (30ª sessão, casa), Claude. Base `feat/component-health-system`. **OFICINA-TEMPO-JOGO pela metade**, em `feat/oficina-tempo-jogo` (`8f12df7`).
+**Última atualização:** 2026-11-28 (31ª sessão), Gemini. Base `feat/component-health-system`. **OFICINA-TEMPO-JOGO revisada e integrada.**
 
 ## Estado
-- **OFICINA-TEMPO-JOGO (em andamento):** spec em `docs/plans/spec-OFICINA-TEMPO-JOGO.md`; decisões em `manutencao-parada-real.md` › 8. Gemini interrompido: app compila (0 erros), **testes não compilam** (faltam spec § 5 e docs de § 6.5). Sem relatório e **sem revisão**; `MissionBoardAging` sem teste.
-- **MAPA-COORD feito:** mini mapa do HUD só com pontos coloridos e o avião (`ShowContractLabels="False"`; o selo "NAV GPS" com a proa ficou). Briefing mostra "COORDENADAS" (`S23°30,5' W046°38,2'`) na 1ª perna de cada missão, com botão COPIAR (graus decimais). Build ok, 1.333/1.333. Revisão: `docs/reviews/MAPA-COORD-revisao.md`. **Não conferido com o app aberto.**
+- **OFICINA-TEMPO-JOGO feito:** parada da oficina só em tempo de jogo (serviço pronto na hora real, sem bloqueio/timer/faixa); avanço do `CareerClockUtc` envelhece e remove contratos não aceitos vencidos (`MissionBoardAging.AdvanceAsync`), recarrega o quadro (`MainViewModel.RefreshAfterWorkshopAsync`) e exibe `WorkshopDowntime.CompletionSummary`. Build ok, 1.334/1.334. Revisão: `docs/reviews/OFICINA-TEMPO-JOGO-revisao.md`. **Não conferido com o app aberto nem no MSFS.**
+- **MAPA-COORD feito:** mini mapa do HUD só com pontos coloridos e o avião (`ShowContractLabels="False"`; o selo "NAV GPS" com a proa ficou). Briefing mostra "COORDENADAS" (`S23°30,5' W046°38,2'`) na 1ª perna de cada missão, com botão COPIAR (graus decimais). Revisão: `docs/reviews/MAPA-COORD-revisao.md`. **Não conferido com o app aberto.**
 - **TELEMETRIA-RECARGA feito (B6):** vigia da ligação (`SimLinkWatchdog`), reconecta se o sim morrer sem Quit. **Não testado no MSFS.**
 - NAV-IDA, SEM-PORCENTO, MAPA-ESCALAS, BRIEF-NAV, HANGAR-AVISOS, LIMPA-MAPA e POUSO-DANO feitos e não conferidos com o app aberto.
 
 ## Próximo passo
-- **Primeiro (Opus):** no escritório, `git pull`; `tools/agents/gemini-task.sh OFICINA-TEMPO-JOGO feat/oficina-tempo-jogo docs/plans/spec-OFICINA-TEMPO-JOGO.md` → revisão dos arquivos quentes linha a linha → merge → apagar a spec de `docs/plans/`.
-- **No app:** briefing (bloco de coordenadas cabe no cartão; COPIAR) e HUD (pontos centrados, sem rótulos).
+- **Próxima tarefa (sessão nova, Opus):** tarefa 9, EXCEDENCIAS (D7–D9). Depois tarefa 10, HANGAR-REDESENHO (inclui E5). `HangarViewModel` nunca em paralelo.
+- **No app:** Hangar/oficina (diálogo Normal/Expresso em horas, resumo pós-serviço e quadro atualizado na janela principal); briefing (bloco de coordenadas cabe no cartão; COPIAR) e HUD (pontos centrados, sem rótulos).
 - **No MSFS:** fechar o sim à força com o app aberto → "DESCONECTADO" em ≤ 35 s e volta sozinho; no menu principal e no carregamento do voo, o log `[SimConnect]` não pode mostrar reconexão em laço (se laço, subir o limite de 30 s). Depois ver se B5 (BRIEF-LINHA) ainda acontece.
-- Sessão Opus: tarefa 9, EXCEDENCIAS (D7–D9). Depois tarefa 10, HANGAR-REDESENHO (inclui E5). `HangarViewModel` nunca em paralelo.
 - No app/MSFS: missões só de ida no quadro de SNZG (nível 1 e 3); textos sem %; escalas nos mapas; pouso duro e fora de pista.
 - PC do escritório: `git pull` e `tools/agents/install-global.sh`. Fila anterior: AIRSIM-2, HUD em modo tablet (quando pedido), 8 tipos da E2C.
 
