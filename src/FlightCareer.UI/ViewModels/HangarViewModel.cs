@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Application.Interfaces;
+using FlightCareer.Application.Services;
 using FlightCareer.Domain.Components;
 using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
@@ -128,60 +129,6 @@ namespace FlightCareer.UI.ViewModels
             var selectId = keepSelection ?? SelectedAircraft?.Aircraft.Id ?? pilot.ActiveAircraftId;
             SelectedAircraft = Fleet.FirstOrDefault(a => a.Aircraft.Id == selectId) ?? Fleet.FirstOrDefault();
             await LoadFlaggedPartsForSelectedAircraftAsync();
-            UpdateWorkshopTimer();
-        }
-
-        private System.Windows.Threading.DispatcherTimer? _workshopTimer;
-
-        private void UpdateWorkshopTimer()
-        {
-            bool anyInWorkshop = Fleet != null && Fleet.Any(a => a.IsInWorkshop);
-            if (anyInWorkshop)
-            {
-                if (_workshopTimer == null)
-                {
-                    _workshopTimer = new System.Windows.Threading.DispatcherTimer
-                    {
-                        Interval = TimeSpan.FromSeconds(1)
-                    };
-                    _workshopTimer.Tick += OnWorkshopTimerTick;
-                }
-                if (!_workshopTimer.IsEnabled)
-                {
-                    _workshopTimer.Start();
-                }
-            }
-            else
-            {
-                if (_workshopTimer != null && _workshopTimer.IsEnabled)
-                {
-                    _workshopTimer.Stop();
-                }
-            }
-        }
-
-        private void OnWorkshopTimerTick(object? sender, EventArgs e)
-        {
-            if (Fleet == null || Fleet.Count == 0)
-            {
-                _workshopTimer?.Stop();
-                return;
-            }
-
-            bool anyRemaining = false;
-            foreach (var a in Fleet)
-            {
-                if (a.IsInWorkshop)
-                {
-                    anyRemaining = true;
-                }
-                a.RefreshWorkshop();
-            }
-
-            if (!anyRemaining)
-            {
-                _workshopTimer?.Stop();
-            }
         }
 
         partial void OnSelectedAircraftChanged(PilotAircraftWrapper? value)
@@ -251,7 +198,7 @@ namespace FlightCareer.UI.ViewModels
         /// <summary>
         /// Executa um serviço pago: confirma, confere saldo, aplica sobre a aeronave e componentes de um contexto novo,
         /// registra a transação, sincroniza as colunas antigas, salva e recarrega a frota.
-        /// Suporta parada em tempo real e serviço expresso (PARADA-REAL).
+        /// Suporta parada em tempo de jogo e serviço expresso (OFICINA-TEMPO-JOGO).
         /// </summary>
         private async Task<bool> RunPaidServiceAsync(string title, string message, double cost, string transactionDescription,
             Action<PilotAircraft, List<AircraftComponent>> apply, string category = "Manutenção", DialogKind kind = DialogKind.Info, string? successMessage = null,
@@ -271,7 +218,6 @@ namespace FlightCareer.UI.ViewModels
             bool isExpress = false;
             double effectiveCost = cost;
             double effectiveDowntimeHours = downtimeHours;
-            int realMinutes = 0;
 
             if (downtimeHours > 0.0)
             {
@@ -287,25 +233,23 @@ namespace FlightCareer.UI.ViewModels
                     {
                         effectiveCost = expressCost;
                         effectiveDowntimeHours = expressCalc.gameHours;
-                        realMinutes = expressCalc.realMinutes;
                     }
                     else
                     {
                         effectiveCost = normalCost;
                         effectiveDowntimeHours = normal.gameHours;
-                        realMinutes = normal.realMinutes;
                     }
                 }
                 else
                 {
-                    string serviceMsg = $"{message}\n\nEscolha o atendimento na oficina:\n• Normal: libera em {normal.realMinutes} min ({normal.gameHours:F0} h de carreira)\n• Expresso (+50%): libera em {expressCalc.realMinutes} min ({expressCalc.gameHours:F0} h de carreira)";
+                    string serviceMsg = $"{message}\n\nEscolha o atendimento na oficina:\n• Normal: {WorkshopDowntime.FormatHours(normal.gameHours)} de carreira\n• Expresso (+50% no preço): {WorkshopDowntime.FormatHours(expressCalc.gameHours)} de carreira\n\nO avião sai pronto na hora. O tempo passa no jogo: contratos do quadro perdem validade e o prazo do seguro corre.";
                     var choice = ThemedDialog.ConfirmService(
                         title,
                         serviceMsg,
                         normalCost,
-                        normal.realMinutes,
+                        normal.gameHours,
                         expressCost,
-                        expressCalc.realMinutes,
+                        expressCalc.gameHours,
                         kind);
 
                     if (choice == ServiceOption.Cancel) return false;
@@ -315,13 +259,11 @@ namespace FlightCareer.UI.ViewModels
                         isExpress = true;
                         effectiveCost = expressCost;
                         effectiveDowntimeHours = expressCalc.gameHours;
-                        realMinutes = expressCalc.realMinutes;
                     }
                     else
                     {
                         effectiveCost = normalCost;
                         effectiveDowntimeHours = normal.gameHours;
-                        realMinutes = normal.realMinutes;
                     }
                 }
             }
@@ -348,19 +290,13 @@ namespace FlightCareer.UI.ViewModels
             pilot.Balance -= effectiveCost;
             aircraft.Pilot = pilot;
 
+            int expiredContracts = 0;
             if (effectiveDowntimeHours > 0.0)
             {
                 pilot.CareerClockUtc = CareerClock.Advance(pilot.CareerClockUtc, effectiveDowntimeHours);
                 _careerClock = pilot.CareerClockUtc;
                 CareerDateText = $"Dia da carreira: {_careerClock:dd/MM/yyyy}";
-            }
-
-            if (realMinutes > 0)
-            {
-                var nowUtc = DateTime.UtcNow;
-                aircraft.WorkshopUntilUtc = WorkshopDowntime.CalculateNewUntilUtc(aircraft.WorkshopUntilUtc, nowUtc, realMinutes);
-                string desc = isExpress ? $"{transactionDescription} (EXPRESSO)" : transactionDescription;
-                aircraft.WorkshopDescription = desc;
+                expiredContracts = await MissionBoardAging.AdvanceAsync(context, effectiveDowntimeHours, DateTime.Now);
             }
 
             apply(aircraft, aircraft.Components);
@@ -383,8 +319,14 @@ namespace FlightCareer.UI.ViewModels
 
             await context.SaveChangesAsync();
             await LoadFleetAsync(aircraftId);
-            await RefreshMainBalanceAsync();
-            UpdateWorkshopTimer();
+            if (effectiveDowntimeHours > 0.0)
+            {
+                await RefreshMainAfterWorkshopAsync();
+            }
+            else
+            {
+                await RefreshMainBalanceAsync();
+            }
 
             if (successMessage != null)
             {
@@ -396,9 +338,9 @@ namespace FlightCareer.UI.ViewModels
                         successMessage = $"{successMessage.TrimEnd('.')} — {n} peça(s) com atenção.";
                     }
                 }
-                if (realMinutes > 0)
+                if (effectiveDowntimeHours > 0.0)
                 {
-                    successMessage = $"{successMessage}\n\n⏱ Aeronave na oficina: liberação em {realMinutes} min.";
+                    successMessage = $"{successMessage}\n\n🕒 " + WorkshopDowntime.CompletionSummary(effectiveDowntimeHours, pilot.CareerClockUtc, expiredContracts);
                 }
                 ThemedDialog.Info(title, successMessage, DialogKind.Success);
             }
@@ -415,6 +357,19 @@ namespace FlightCareer.UI.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[Hangar] Falha ao atualizar saldo: {ex.Message}");
+            }
+        }
+
+        private static async Task RefreshMainAfterWorkshopAsync()
+        {
+            try
+            {
+                if (System.Windows.Application.Current?.MainWindow?.DataContext is MainViewModel main)
+                    await main.RefreshAfterWorkshopAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Hangar] Falha ao atualizar pós-oficina: {ex.Message}");
             }
         }
 

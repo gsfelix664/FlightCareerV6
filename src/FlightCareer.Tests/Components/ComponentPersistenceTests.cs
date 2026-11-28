@@ -65,13 +65,6 @@ namespace FlightCareer.Tests.Components
                 Assert.Contains(piston.Components, c => c.Kind == ComponentKind.Oil && c.Health == 45.0);
                 Assert.Contains(turboprop.Components, c => c.Kind == ComponentKind.HotSection && c.Health == 95.0);
                 Assert.DoesNotContain(turboprop.Components, c => c.Kind == ComponentKind.Ignition);
-
-                // Colunas de oficina (PARADA-REAL)
-                Assert.Null(piston.WorkshopUntilUtc);
-                Assert.Null(piston.WorkshopDescription);
-                piston.WorkshopUntilUtc = DateTime.UtcNow.AddMinutes(10);
-                piston.WorkshopDescription = "Troca de óleo";
-                await db.SaveChangesAsync();
             }
         }
 

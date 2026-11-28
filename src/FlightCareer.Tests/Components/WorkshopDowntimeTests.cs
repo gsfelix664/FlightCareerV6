@@ -6,81 +6,53 @@ namespace FlightCareer.Tests.Components
 {
     public class WorkshopDowntimeTests
     {
-        [Theory]
-        [InlineData(2.0, 3)]     // 2 h -> 3 min
-        [InlineData(8.0, 6)]     // 8 h -> 6 min
-        [InlineData(72.0, 17)]   // 72 h -> 17 min
-        [InlineData(150.0, 20)]  // 150 h -> 20 min (teto)
-        [InlineData(0.1, 1)]     // 0,1 h -> 1 min (piso)
-        [InlineData(0.0, 0)]     // 0 h -> sem parada
-        [InlineData(-1.0, 0)]
-        public void RealMinutesFor_CalculaConformeRegraComPisoETeto(double gameHours, int expectedMinutes)
-        {
-            int minutes = WorkshopDowntime.RealMinutesFor(gameHours);
-            Assert.Equal(expectedMinutes, minutes);
-        }
-
         [Fact]
-        public void Apply_ServicoExpresso_ReduzMetadeHorasEMinutosECustaMais50Pct()
+        public void Apply_ServicoNormal_MantemHorasECustoPadrao()
         {
-            // 72 h jogo -> 36 h jogo, 12 min reais, custo x 1,5
-            var (gHours, rMinutes, costFactor) = WorkshopDowntime.Apply(72.0, express: true);
+            var (gameHours, costFactor) = WorkshopDowntime.Apply(72.0, express: false);
 
-            Assert.Equal(36.0, gHours);
-            Assert.Equal(12, rMinutes);
-            Assert.Equal(1.5, costFactor);
-        }
-
-        [Fact]
-        public void Apply_ServicoNormal_MantemHorasEMinutosECustoPadrao()
-        {
-            var (gHours, rMinutes, costFactor) = WorkshopDowntime.Apply(72.0, express: false);
-
-            Assert.Equal(72.0, gHours);
-            Assert.Equal(17, rMinutes);
+            Assert.Equal(72.0, gameHours);
             Assert.Equal(1.0, costFactor);
         }
 
         [Fact]
-        public void IsInWorkshop_ERemaining_ComRelogioInjetado()
+        public void Apply_ServicoExpresso_ReduzMetadeHorasECustaMais50Pct()
         {
-            var baseTime = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
-            var untilTime = baseTime.AddMinutes(15);
+            var (gameHours72, costFactor72) = WorkshopDowntime.Apply(72.0, express: true);
+            Assert.Equal(36.0, gameHours72);
+            Assert.Equal(1.5, costFactor72);
 
-            // Antes da liberação
-            Assert.True(WorkshopDowntime.IsInWorkshop(untilTime, baseTime));
-            Assert.True(WorkshopDowntime.IsInWorkshop(untilTime, baseTime.AddMinutes(14)));
-            var remaining = WorkshopDowntime.Remaining(untilTime, baseTime);
-            Assert.Equal(TimeSpan.FromMinutes(15), remaining);
+            var (gameHoursHalf, costFactorHalf) = WorkshopDowntime.Apply(0.5, express: true);
+            Assert.Equal(0.25, gameHoursHalf);
+            Assert.Equal(1.5, costFactorHalf);
+        }
 
-            // No momento exato ou depois
-            Assert.False(WorkshopDowntime.IsInWorkshop(untilTime, untilTime));
-            Assert.False(WorkshopDowntime.IsInWorkshop(untilTime, untilTime.AddSeconds(1)));
-            Assert.Equal(TimeSpan.Zero, WorkshopDowntime.Remaining(untilTime, untilTime));
-            Assert.Equal(TimeSpan.Zero, WorkshopDowntime.Remaining(untilTime, untilTime.AddMinutes(5)));
-
-            // Sem prazo
-            Assert.False(WorkshopDowntime.IsInWorkshop(null, baseTime));
-            Assert.Equal(TimeSpan.Zero, WorkshopDowntime.Remaining(null, baseTime));
+        [Theory]
+        [InlineData(72.0, "72 h")]
+        [InlineData(0.5, "0,5 h")]
+        [InlineData(0.25, "0,25 h")]
+        [InlineData(8.0, "8 h")]
+        public void FormatHours_FormataEmPtBr(double hours, string expected)
+        {
+            Assert.Equal(expected, WorkshopDowntime.FormatHours(hours));
         }
 
         [Fact]
-        public void CalculateNewUntilUtc_ServicoSobreParadaUsaAMaior()
+        public void CompletionSummary_ComZeroUmEMultiplosVencidos()
         {
-            var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
+            var careerClock = new DateTime(2026, 11, 27, 15, 0, 0, DateTimeKind.Utc);
 
-            // Caso 1: sem parada prévia
-            var firstUntil = WorkshopDowntime.CalculateNewUntilUtc(null, now, 10);
-            Assert.Equal(now.AddMinutes(10), firstUntil);
+            Assert.Equal(
+                "A oficina levou 8 h de carreira. Dia da carreira: 27/11/2026.\nNenhum contrato do quadro venceu nesse tempo.",
+                WorkshopDowntime.CompletionSummary(8.0, careerClock, 0));
 
-            // Caso 2: nova parada menor que a parada restante (mantém a maior)
-            var nowPlus3 = now.AddMinutes(3); // 7 min restantes
-            var smallerUntil = WorkshopDowntime.CalculateNewUntilUtc(firstUntil, nowPlus3, 5); // nowPlus3 + 5 = now + 8 min (< now + 10 min)
-            Assert.Equal(firstUntil, smallerUntil);
+            Assert.Equal(
+                "A oficina levou 0,5 h de carreira. Dia da carreira: 27/11/2026.\n1 contrato do quadro venceu nesse tempo.",
+                WorkshopDowntime.CompletionSummary(0.5, careerClock, 1));
 
-            // Caso 3: nova parada maior que a restante (estende)
-            var largerUntil = WorkshopDowntime.CalculateNewUntilUtc(firstUntil, nowPlus3, 15); // nowPlus3 + 15 = now + 18 min (> now + 10 min)
-            Assert.Equal(nowPlus3.AddMinutes(15), largerUntil);
+            Assert.Equal(
+                "A oficina levou 72 h de carreira. Dia da carreira: 27/11/2026.\n3 contratos do quadro venceram nesse tempo.",
+                WorkshopDowntime.CompletionSummary(72.0, careerClock, 3));
         }
 
         [Fact]
@@ -97,24 +69,6 @@ namespace FlightCareer.Tests.Components
         public void MaintenancePricing_RealCycles_MultiplicaPorQuatro()
         {
             Assert.Equal(400.0, MaintenancePricing.RealCycles(100.0));
-        }
-
-        [Fact]
-        public void PilotAircraft_NaOficina_CalculaRestanteECorreto()
-        {
-            var now = new DateTime(2026, 11, 22, 12, 0, 0, DateTimeKind.Utc);
-            var aircraft = new FlightCareer.Domain.Entities.PilotAircraft
-            {
-                Prefix = "PT-TST",
-                WorkshopUntilUtc = now.AddMinutes(5),
-                WorkshopDescription = "Troca de óleo"
-            };
-
-            Assert.True(WorkshopDowntime.IsInWorkshop(aircraft.WorkshopUntilUtc, now));
-            Assert.Equal(TimeSpan.FromMinutes(5), WorkshopDowntime.Remaining(aircraft.WorkshopUntilUtc, now));
-
-            // Após término
-            Assert.False(WorkshopDowntime.IsInWorkshop(aircraft.WorkshopUntilUtc, now.AddMinutes(5).AddSeconds(1)));
         }
     }
 }

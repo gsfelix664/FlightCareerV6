@@ -1,6 +1,6 @@
 # Plano — Parada real de manutenção e textos com os prazos reais
 
-**Estado (conferido em 2026-11-25):** implementado (PARADA-REAL, 2026-11-22), com as decisões da § 6. As §§ 1 e 5 descrevem a situação anterior. Estado atual: `docs/sistemas/manutencao-hangar.md`.
+**Estado (atualizado em 2026-11-27):** §§ 7 e 8 implementadas (`OFICINA-TEMPO-JOGO`, parada da oficina só em tempo de jogo, revogando a espera real de PARADA-REAL). As §§ 1–6 descrevem o histórico anterior. Estado atual: `docs/sistemas/manutencao-hangar.md`.
 
 ## 1. Como é hoje
 - Todo serviço pago do Hangar (`HangarViewModel.RunPaidServiceAsync`, ~linha 236) só avança o relógio de carreira (`CareerClock.Advance`). Não existe campo de "disponível a partir de": o avião pode voar logo depois de uma retífica de 72 h.
