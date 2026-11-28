@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 5,
+  "id": "C172SP G1000",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "fixedGear",
+    "fixedPitchProp",
+    "fuelInjected",
+    "glassCockpit",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [
+      "C172SP G1000"
+    ],
+    "atcModel": [
+      "C172"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 163.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (163 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-7 (500 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 118.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (245 °F, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 40.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 48.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0758-C172SP_G1000_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 110.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 10° 110 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 20° 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (Flaps 30° Full 85 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 20.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-6 (https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 129.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (129 KIAS, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs +3.8g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.52,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-11 (Normal Category 2550 lbs -1.52g, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 105.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 2 p. 2-4 (105 KIAS at 2550 lbs)",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecAvionicsCircuitIndex",
+      "value": 3.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecAvionicsBusAmpsIndex",
+      "value": 4.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "elecMainBusIndex",
+      "value": 1.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1636-C172SP_G1000_Passengers.csv",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60.0,
+      "unit": "amperes",
+      "source": "POH",
+      "reference": "Cessna 172S Nav III POH 2005, Sec. 7 p. 7-47 (28-volt DC 60-ampere alternator, https://kerrville.cap.gov/media/cms/C172SP_IM_2005_navIII_B45C89F810DC8.pdf)",
+      "notes": null
+    }
+  ]
+}

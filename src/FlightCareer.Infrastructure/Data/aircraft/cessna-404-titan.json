@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "Cessna 404 Titan",
+  "class": "Piston",
+  "engineCount": 2,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "convertibleCabin",
+    "deIceBoots",
+    "fireProtection",
+    "fuelInjected",
+    "hydraulicGear",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "piston",
+    "propDeIce",
+    "retractableGear",
+    "turbocharged",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 230.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO ≈ 230 KIAS (Cessna 404, aproximado; POH não encontrado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Aproximação: ≈180 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 150.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Total: ≈150 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental GTSIO-520-M (RPM do motor com redutor)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 3350.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental GTSIO-520-M (RPM do motor com redutor)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 238.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental GTSIO-520-M (RPM do motor com redutor)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 116.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental GTSIO-520-M (RPM do motor com redutor)",
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 8,
+  "id": "Cessna C152",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "carbureted",
+    "fixedGear",
+    "fixedPitchProp",
+    "noAvionicsMaster",
+    "noseWheelSteering",
+    "piston",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [
+      "Cessna C152"
+    ],
+    "atcModel": [
+      "C152"
+    ]
+  },
+  "limits": [
+    {
+      "key": "rpmRedline",
+      "value": 2550,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Cessna 152 POH, seção 2 (Limitações)",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 260.18,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "RECIP MAX CHT (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 118.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-4 / 2-5 (245 °F, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "egtMax",
+      "value": 893.52,
+      "unit": "celsius",
+      "source": "SimVar",
+      "reference": "MAX EGT (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "vne",
+      "value": 149.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (149 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 110,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (MSFS 2024, 2026-11-15)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 20° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 4.4,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 152 POH, categoria utilidade",
+      "notes": null
+    },
+    {
+      "key": "rpmNativeOnset",
+      "value": 2600,
+      "unit": "rpm",
+      "source": "NativeOnset",
+      "reference": "calibration-C152.md",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 33.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 40.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0756-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (Flaps 30° 85 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 25.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-5 (https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vno",
+      "value": 111.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (111 KIAS, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.76,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-6 (Flaps Up -1.76g, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 104.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 2 p. 2-3 / 2-4 (104 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "elecMainBusIndex",
+      "value": 1.0,
+      "unit": "index",
+      "source": "SimVar",
+      "reference": "20261115-1733-Cessna_C152.csv / cal:alternator-off",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "SimVar",
+      "reference": "20261115-1733-Cessna_C152.csv / cal:alternator-on",
+      "notes": null
+    },
+    {
+      "key": "rpmMaxRated",
+      "value": 2550.0,
+      "unit": "rpm",
+      "source": "SimVar",
+      "reference": "MAX RATED ENGINE RPM:1 (20261115-1733-Cessna_C152.csv)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 60.0,
+      "unit": "amperes",
+      "source": "POH",
+      "reference": "Cessna 152 POH 1979, Sec. 7 p. 7-22 (28-volt DC 60-amp alternator, https://www.touringmachine.com/PDFs-Txt/Cessna-152_POH.pdf)",
+      "notes": null
+    }
+  ]
+}

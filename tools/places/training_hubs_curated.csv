@@ -1,0 +1,259 @@
+icao,cc,note,tags
+SBJD,BR,Maior polo de escolas de aviação civil e formação IFR/multimotor do Brasil,escola|ifr|multimotor
+SBMT,BR,Aeroclube histórico de São Paulo e escolas de helicóptero,aeroclube|helicoptero
+SDAM,BR,Escolas de aviação e formação de instrutores,escola
+SDPW,BR,Aeroclube tradicional com grande volume de instrução,aeroclube|ifr
+SDCO,BR,Polo de instrução prática e centros de treinamento,escola
+SDBK,BR,Aeroclube histórico e formação de pilotos agrícolas,aeroclube|agricola
+SDIO,BR,Grande frota de instrução da América Latina,escola
+SDIM,BR,Base litorânea de treinamento VFR/IFR,escola|ifr
+SDAI,BR,Instrução e formação básica no interior paulista,escola
+SBAQ,BR,Formação prática e navegação no centro paulista,escola
+SDAA,BR,Aeroclube forte em instrução básica e planadores,aeroclube|planador
+SBRP,BR,Formação comercial e navegação no interior,escola
+SBYS,BR,Principal centro de formação de pilotos militares do Brasil,militar
+SBGW,BR,Apoio à escola de especialistas da Aeronáutica,militar
+SBTA,BR,Formação de pilotos de helicóptero do Exército,militar|helicoptero
+SBJR,BR,Maior polo de formação de helicóptero e aviação civil do Rio,escola|helicoptero
+SBBH,BR,Polo tradicional de escolas e formação IFR em Minas,escola|ifr
+SBPR,BR,Base histórica de formação básica,aeroclube
+SBLS,BR,Formação básica e planadores,aeroclube|planador
+SNPA,BR,Formação básica e planadores,aeroclube|planador
+SBJF,BR,Aeroclube tradicional de Juiz de Fora,aeroclube
+SBBI,BR,Principal hub de escolas e aeroclube do Paraná,escola|aeroclube
+SBLO,BR,Grande polo de formação no norte do Paraná,aeroclube
+SBMG,BR,Base de instrução e navegação no sul,escola
+SSZW,BR,Formação básica e instrução visual no Paraná,aeroclube
+SSBL,BR,Aeroclube de referência no Vale do Itajaí,aeroclube
+SSKT,BR,Aeroclube de Santa Catarina,aeroclube
+SSCN,BR,Formação e planadores na Serra Gaúcha,aeroclube|planador
+SBTR,BR,Formação e planadores no litoral gaúcho,aeroclube|planador
+SSNH,BR,Sede do aeroclube do Rio Grande do Sul,aeroclube
+SSBN,BR,Formação básica em Porto Alegre,aeroclube
+SBPF,BR,Formação comercial e aviação agrícola,escola|agricola
+SSZR,BR,Formação comercial e aviação agrícola,escola|agricola
+SWNV,BR,Base de treinamento próxima à base aérea de Anápolis,escola
+SWUZ,BR,Instrução prática para alunos de Brasília,escola
+SIXE,BR,Aeroclube na região de Porto Alegre,aeroclube
+SBCG,BR,Aeroclube de Campo Grande e instrução regional,aeroclube
+SSKS,BR,Referência na formação de pilotos agrícolas,agricola
+SSKZ,BR,Referência na formação de pilotos agrícolas,agricola
+SNVR,BR,Sede do aeroclube da Bahia,aeroclube
+SBRF,BR,Bases de formação do aeroclube de Pernambuco,aeroclube
+SNRU,BR,Bases de formação do aeroclube de Pernambuco,aeroclube
+SBSG,BR,Bases de formação do Rio Grande do Norte,aeroclube
+SBKG,BR,Bases de formação da Paraíba,aeroclube
+SBFZ,BR,Bases de instrução do aeroclube do Ceará,aeroclube
+SNAT,BR,Bases de instrução do Ceará,aeroclube
+SBBE,BR,Instrução e formação da Amazônia Oriental,aeroclube
+SBJC,BR,Aeroclube do Pará,aeroclube
+SBEG,BR,Instrução prática e voos de selva,escola|selva
+SWFN,BR,Instrução prática e voos de selva,aeroclube|selva
+SBBV,BR,Formação para o táxi aéreo amazônico,aeroclube|selva
+KDAB,US,Sede da maior universidade de aviação do mundo,universidade
+KPRC,US,Segundo campus de universidade de aviação,universidade
+KGFK,US,Universidade com uma das maiores frotas de treinamento,universidade
+KDVT,US,Um dos aeroportos com mais operações de treinamento do mundo,escola|alta_densidade
+KFFZ,US,Grande hub de escolas de voo,escola|academia_linha
+KIWA,US,Centro de treinamento de pilotos de linha aérea,academia_linha
+KCHD,US,Alta densidade de instrução VFR/IFR,escola|alta_densidade
+KGYR,US,Academia de cadetes de companhias europeias,academia_linha
+KSFB,US,Hub internacional de treinamento de linha aérea,academia_linha
+KVRB,US,Fábrica de aeronaves e academias de voo,academia_linha
+KFPR,US,Polo de escolas de voo internacionais,escola
+KMLB,US,Programa universitário de aviação,universidade
+KTMB,US,Polo de escolas de aviação bilíngues,escola
+KPMP,US,Instrução básica e comercial,escola
+KCRG,US,Base nacional de escola de linha aérea,academia_linha
+KLAF,US,Programa histórico de aviação universitária,universidade
+KCMI,US,Polo universitário de formação de pilotos,universidade
+KAZO,US,Faculdade de aviação universitária,universidade
+KAUO,US,Programa de aviação universitária,universidade
+KOSU,US,Aeroporto universitário de instrução e pesquisa,universidade
+KSLN,US,Campus aeroespacial universitário,universidade
+KMHK,US,Polo de formação do Meio-Oeste,escola
+KCLL,US,Base universitária e instrução regional,universidade
+KDTO,US,Grande hub de escolas de voo do norte do Texas,escola
+KGKY,US,Centro de instrução de Dallas-Fort Worth,escola
+KFTW,US,Centro de instrução de Dallas-Fort Worth,escola
+KDWH,US,Grande aeroporto privado de treinamento,escola
+KBJC,US,Escolas de voo de Denver em alta altitude,escola|altitude
+KGXY,US,Instrução VFR/IFR e formação agrícola,escola|agricola
+KAPA,US,Treinamento avançado e simuladores,escola|simulador
+KPVU,US,Escola de aviação universitária,universidade
+KLGU,US,Programa de aviação universitária,universidade
+KOGD,US,Polo de instrução das Montanhas Rochosas,escola|montanha
+KVGT,US,Treinamento de aviões e helicópteros em Las Vegas,escola|helicoptero
+KRNO,US,Treinamento de voo em montanha,escola|montanha
+KRTS,US,Treinamento de voo em montanha,escola|montanha
+KCNO,US,Polo de escolas de voo do sul da Califórnia,escola
+KRAL,US,Base movimentada de instrução,escola
+KCMA,US,Base movimentada de instrução,escola
+KSEE,US,Principal aeroporto de treinamento de San Diego,escola
+KPAO,US,Centros de instrução do Vale do Silício,escola
+KRHV,US,Centros de instrução do Vale do Silício,escola
+KLVK,US,Polo de instrução da Baía de São Francisco,escola
+KPAE,US,Polo de treinamento de voo e testes,escola
+KHIO,US,Grande escola de aviação e helicópteros,escola|helicoptero
+KBDN,US,Formação de pilotos de helicóptero e avião,escola|helicoptero
+KGEU,US,Treinamento constante no deserto,escola
+KRYN,US,Treinamento constante no deserto,escola
+KSPS,US,Treinamento conjunto de pilotos de caça,militar
+KEND,US,Formação de pilotos da força aérea,militar
+KDLF,US,Formação de pilotos da força aérea,militar
+KNPA,US,Berço da aviação naval,militar
+CYOO,CA,Grande hub de escolas de voo do Canadá,escola
+CYKF,CA,Centro de voo com parceria universitária,universidade
+CYXU,CA,Centro de voo e programas universitários,universidade
+CYHU,CA,Principal polo de escolas de aviação de Quebec,escola
+CZBB,CA,Maior aeroporto de instrução da costa oeste canadense,escola|alta_densidade
+CYBW,CA,Principal hub de instrução de Alberta,escola|montanha
+CYQM,CA,Maior academia de aviação do Canadá,academia_linha
+MMJC,MX,Polo histórico de escolas de aviação da Cidade do México,escola|altitude
+MMCV,MX,Base de formação de escola de aviação,escola
+MMCU,MX,Base de formação de escola de aviação,escola
+SADF,AR,Principal polo de escolas de aviação civil da Argentina,escola
+SADM,AR,Aeroclube histórico argentino,aeroclube
+SADP,AR,Bases de instrução e escola militar,militar
+SAOC,AR,Bases de instrução,escola
+SCTB,CL,Maior aeroclube da América do Sul,aeroclube
+SCBQ,CL,Escola de aviação da força aérea chilena,militar
+SKGY,CO,Principal hub de escolas de aviação da Colômbia,escola
+SKUL,CO,Polo regional de instrução,escola
+SKBG,CO,Polo regional de instrução,escola
+SPSO,PE,Base de treinamento no clima desértico,escola
+SPLP,PE,Escola de oficiais da força aérea e instrução básica,militar
+SUAA,UY,Principal hub de instrução e aeroclubes do Uruguai,aeroclube
+SGAS,PY,Base de formação de pilotos paraguaios,aeroclube
+MPMG,PA,Principal base de escolas de aviação da América Central,escola
+MRPV,CR,Escolas de aviação civil da Costa Rica,escola
+TJIG,PR,Principal base de escolas de voo do Caribe,escola
+SVCS,VE,Principal polo de formação civil da Venezuela,escola
+EGTK,GB,Academia mundialmente famosa de cadetes,academia_linha
+EGHH,GB,Treinamento comercial e IFR,academia_linha|ifr
+EGBJ,GB,Maior polo de instrução IFR e multimotor do Reino Unido,escola|ifr|multimotor
+EGCB,GB,Aeródromo histórico de formação básica,aeroclube
+EGNH,GB,Aeródromo histórico de formação básica,aeroclube
+EGKA,GB,Grande centro de instrução,escola
+EGSU,GB,Instrução de voo e aviação histórica,aeroclube
+EGSC,GB,Instrução de voo,escola
+EGPT,GB,Principal escola de aviação da Escócia,escola
+EIWT,IE,Principal polo de escolas de aviação da Irlanda,escola
+EICK,IE,Academia de treinamento de cadetes,academia_linha
+LEAX,ES,Escolas no sul da Espanha,escola
+LEJR,ES,Academia que forma cadetes de grandes companhias,academia_linha
+LECU,ES,Maior hub de escolas de aviação da Espanha,escola
+LELL,ES,Principal polo de formação da Catalunha,escola
+LEAM,ES,Base de treinamento ensolarada,escola
+LEMI,ES,Base de treinamento ensolarada,escola
+LPCS,PT,Principal polo de escolas de aviação de Portugal,escola
+LPEV,PT,Formação comercial em Portugal,escola
+LFPN,FR,Hub histórico de escolas e aeroclubes de Paris,aeroclube|escola
+LFPT,FR,Instrução VFR/IFR ao norte de Paris,escola
+LFBF,FR,Bases da escola nacional de aviação civil,universidade
+LFCL,FR,Bases da escola nacional de aviação civil,universidade
+LFBA,FR,Campus regional de instrução prática,universidade
+LFBZ,FR,Campus regional de instrução prática,universidade
+LFMT,FR,Campus de voo no sul da França,universidade
+EDFE,DE,Principal polo de instrução de Frankfurt,escola|helicoptero
+EDDW,DE,Sede histórica de academia de linha aérea,academia_linha
+EDVE,DE,Pesquisa aeroespacial e formação de pilotos,universidade
+EDAY,DE,Polo de instrução de Berlim,escola
+EDAZ,DE,Polo de instrução de Berlim,escola
+EHLE,NL,Maior hub de escolas de aviação da Holanda,escola|academia_linha
+EHGG,NL,Academia oficial de pilotos de linha,academia_linha
+EBAW,BE,Escolas de aviação belgas,escola
+EBCI,BE,Escola de aviação e treinamento de linha,escola
+LSZG,CH,Principal polo de instrução da Suíça,escola
+LSZR,CH,Formação executiva e comercial suíça,escola
+LOWG,AT,Academias de voo austríacas,escola
+LOAN,AT,Fábrica de aeronaves de instrução e academias,escola|fabrica
+LIAU,IT,Instrução civil italiana,escola
+LIRE,IT,Instrução militar italiana,militar
+LIPU,IT,Aeroclube e escola civil do norte da Itália,aeroclube
+LIPH,IT,Aeroclube e escola civil do norte da Itália,aeroclube
+LIMB,IT,Aeroclube histórico de Milão,aeroclube
+ESPA,SE,Treinamento em clima ártico,escola|artico
+ESOW,SE,Academia escandinava,escola
+EFPO,FI,Academia nacional de pilotos de linha,academia_linha
+EFHF,FI,Base finlandesa de formação,aeroclube
+EFTP,FI,Base finlandesa de formação,escola
+ENHD,NO,Escolas de aviação da Noruega,escola
+ENTO,NO,Escolas de aviação da Noruega,escola
+EKRK,DK,Maior centro de instrução civil da Dinamarca,escola
+EPRZ,PL,Centro universitário de treinamento de voo,universidade
+EPBC,PL,Aeroclube e instrução básica de Varsóvia,aeroclube
+LKHO,CZ,Centro de formação comercial,escola
+LKTB,CZ,Centro de formação técnico-aeronáutica,escola
+LHNY,HU,Academia de voo universitária,universidade
+LGMG,GR,Principal aeroporto de instrução civil da Grécia,escola
+LGKV,GR,Grande academia de cadetes do sudeste europeu,academia_linha
+OMDW,AE,Academia de voo de companhia aérea,academia_linha
+OMFJ,AE,Academia de aviação e treinamento de toque e arremetida,academia_linha
+OMRK,AE,Academia de cadetes de linha aérea,academia_linha
+OMAL,AE,Academia internacional de voo,academia_linha
+OTBD,QA,Academia aeronáutica do Catar,academia_linha
+OEDF,SA,Academia de voo saudita,academia_linha
+OERK,SA,Academia de voo saudita,academia_linha
+OJAM,JO,Academia de aviação da Jordânia,academia_linha
+FALA,ZA,Maior polo de escolas de aviação civil da África,escola
+FAGM,ZA,Aeroporto histórico de formação e acrobacia,escola|acrobacia
+FAWB,ZA,Formação de pilotos comerciais e instrutores,escola
+FAGG,ZA,Academia de voo famosa do hemisfério sul,academia_linha
+HKNW,KE,Principal hub de escolas de aviação da África Oriental,escola
+HAAB,ET,Maior academia de aviação da África,academia_linha
+HEOC,EG,Academia de aviação egípcia,academia_linha
+GMMB,MA,Principal polo de instrução civil de Marrocos,aeroclube
+DTTB,TN,Principal centro de formação de pilotos da Tunísia,escola
+DNIL,NG,Escola de aviação nigeriana,escola
+DNZA,NG,Faculdade de tecnologia de aviação da Nigéria,academia_linha
+DGAA,GH,Base de instrução regional da África Ocidental,escola
+FYWE,NA,Formação e bush flying na África Austral,escola|bush
+YMMB,AU,Maior hub de escolas de aviação da Austrália,escola|alta_densidade
+YSBK,AU,Principal polo de instrução de voo e helicópteros,escola|helicoptero
+YBAF,AU,Maior centro de formação de Queensland,escola
+YPJT,AU,Mega-hub internacional de treinamento de cadetes,academia_linha
+YPPF,AU,Academia que forma cadetes para grandes companhias,academia_linha
+YSCN,AU,Centro histórico de formação,escola
+YSTW,AU,Centro histórico de formação militar e comercial,academia_linha
+YBSU,AU,Base de treinamento de academia,escola
+NZHN,NZ,Academia de linha aérea na Nova Zelândia,academia_linha
+NZPM,NZ,Escola de aviação universitária,universidade
+NZAR,NZ,Maior aeroporto de instrução da Nova Zelândia,escola|alta_densidade
+NZWB,NZ,Base tradicional de instrução,escola
+VAGD,IN,Principal academia nacional de pilotos da Índia,academia_linha
+VOBG,IN,Polo histórico de formação no sul da Índia,escola
+VOHY,IN,Academia de aviação e simuladores,academia_linha|simulador
+VABM,IN,Polo de escolas de voo,escola
+VAAU,IN,Polo de escolas de voo,escola
+VABP,IN,Polo de escolas de voo,escola
+ZUGH,CN,Maior universidade de aviação do mundo em alunos e frota,universidade|alta_densidade
+ZUMY,CN,Campo de voo satélite da universidade de aviação,universidade
+ZUXC,CN,Campo de voo satélite da universidade de aviação,universidade
+ZYCY,CN,Base de voo de academia de linha aérea,academia_linha
+RJFM,JP,Principal academia nacional de pilotos do Japão,academia_linha
+RJSS,JP,Base avançada de treinamento,academia_linha
+RJFK,JP,Base avançada de treinamento,academia_linha
+RJNY,JP,Formação básica militar e civil,militar
+RJOH,JP,Formação básica militar e civil,militar
+RKJY,KR,Centro de treinamento universitário,universidade
+RKTU,KR,Centro de treinamento universitário,universidade
+RKTA,KR,Centro de treinamento universitário,universidade
+RCFN,TW,Principal escola de aviação de Taiwan,escola
+RPLC,PH,Grande polo de escolas de voo das Filipinas,escola
+RPUQ,PH,Polo de escolas de voo das Filipinas,escola
+RPLS,PH,Aeródromo costeiro dedicado a treinamento,escola
+RPUH,PH,Aeródromo costeiro dedicado a treinamento,escola
+RPUG,PH,Aeródromo costeiro dedicado a treinamento,escola
+WSSL,SG,Clube de voo e treinamento inicial de linha,aeroclube|academia_linha
+WMKL,MY,Formação de cadetes de companhias malaias,academia_linha
+WIRR,ID,Instituto de aviação civil da Indonésia,academia_linha
+WICC,ID,Instituto de aviação civil da Indonésia,escola
+VTBU,TH,Centro de treinamento de aviação civil,academia_linha
+VTBO,TH,Centro de treinamento de aviação civil,escola
+VTBH,TH,Centro de treinamento de aviação,escola
+VVCR,VN,Base de treinamento prático,escola
+VVCT,VN,Base de treinamento prático,escola
+OPLH,PK,Aeródromo histórico de instrução civil,aeroclube
+VCCC,LK,Principal centro de escolas de aviação do Sri Lanka,escola
+NFFN,FJ,Escola de voo do Pacífico Sul,escola

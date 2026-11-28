@@ -18,20 +18,32 @@ namespace FlightCareer.Domain.Entities
         public string InitialBaseICAO { get; set; } = string.Empty;
         public string CurrentAirportICAO { get; set; } = string.Empty;
         public double Balance { get; set; }
-        public DifficultyMode Difficulty { get; set; }
+        public DifficultyMode Difficulty { get; set; } = DifficultyMode.Medium;
         public double TotalHours { get; set; }
         public int ExperiencePoints { get; set; }
+        public int Level => FlightCareer.Domain.Xp.PilotLevel.ForXp(ExperiencePoints);
         public string Rank { get; set; } = "Student Pilot";
         public Guid? ActiveAircraftId { get; set; }
 
-        // Progressão Regulatória da Empresa (Categorias 1 a 5)
+        /// <summary>
+        /// Relógio simulado de carreira UTC. Avança somente com tempo voado e paradas de oficina no Hangar,
+        /// nunca pelo relógio do computador, para não penalizar jogadores inativos na vida real.
+        /// </summary>
+        public DateTime CareerClockUtc { get; set; } = DateTime.UtcNow;
+
+        // Progressão da Carreira do Piloto (Fases 1 a 7)
+        public CareerPhase CareerPhase { get; set; } = CareerPhase.Phase1_FlightSchool;
+
+        // Coluna mantida no banco para compatibilidade com schema legado
+        [Obsolete("Utilize CareerPhase")]
         public PilotCategory PilotCategory { get; set; } = PilotCategory.Category1_FlightSchool;
 
-        // Mantido para compatibilidade com código existente
+        // Mantido para compatibilidade transitória
+        [Obsolete("Utilize CareerPhase")]
         public CompanyTier CompanyTier
         {
-            get => (CompanyTier)(int)PilotCategory;
-            set => PilotCategory = (PilotCategory)(int)value;
+            get => (CompanyTier)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
         }
 
         // Licenças e Habilitações Aeronáuticas

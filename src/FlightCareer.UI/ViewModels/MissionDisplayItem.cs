@@ -1,4 +1,6 @@
+using FlightCareer.Domain.Missions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Infrastructure.Services;
 using System;
@@ -14,6 +16,16 @@ namespace FlightCareer.UI.ViewModels
         public string Description => Mission.Description;
         public string OriginICAO => Mission.OriginICAO;
         public string DestinationICAO => Mission.DestinationICAO;
+
+        public string CargoSummary { get; }
+        public bool IsDangerousGoods { get; }
+        public bool HasCargoSummary => !string.IsNullOrEmpty(CargoSummary);
+
+        /// <summary>Linha de prazo do bônus de XP no pré-despacho (vazia em voo local).</summary>
+        public string DeadlineSummary { get; } = string.Empty;
+        /// <summary>Missão urgente ou do quadro médico: bônus de prazo maior, linha em destaque.</summary>
+        public bool IsUrgentDeadline { get; }
+        public bool HasDeadlineSummary => !string.IsNullOrEmpty(DeadlineSummary);
 
         // Dicionário de Códigos ICAO que divergiram entre a base DECEA/AISWEB e a base do MSFS (Asobo/NavBlue)
         public static readonly System.Collections.Generic.Dictionary<string, string> MsfsIcaoAliases = new(StringComparer.OrdinalIgnoreCase)
@@ -71,6 +83,8 @@ namespace FlightCareer.UI.ViewModels
         public double CargoWeightLbs => Mission.CargoWeightLbs;
         public double RewardMoney => Mission.RewardMoney;
         public int ExperienceGain => Mission.ExperienceGain;
+        public CareerPhase RequiredPhase => Mission.RequiredPhase;
+        [Obsolete("Utilize RequiredPhase")]
         public PilotCategory RequiredCategory => Mission.RequiredCategory;
         public string MissionCategoryType => Mission.MissionCategoryType;
         public DateTime ExpirationTime => Mission.ExpirationTime;
@@ -99,56 +113,49 @@ namespace FlightCareer.UI.ViewModels
             BatchSelectionChanged?.Invoke(this, value);
         }
 
+        // Categoria do quadro pelo subtipo (MissionCategoryType guarda o nome da fase desde FASES-1)
+        public MissionBoardKind BoardKind => MissionBoardCategory.Classify(Mission.SubId, Mission.MissionCategoryType);
+        private bool IsVip => MissionCatalog.Shared.Get(Mission.SubId)?.Vip ?? false;
+
         // Tag Curta para Badge da Categoria
-        public string CategoryShortTag => MissionCategoryType switch
-        {
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "INSTRUÇÃO",
-            var t when t.Contains("Táxi") || t.Contains("Charter") => "TÁXI AÉREO",
-            var t when t.Contains("Linha Regional") => "REGIONAL",
-            var t when t.Contains("Linha Regular") || t.Contains("Heavy") => "REGULAR",
-            var t when t.Contains("SAE") => "SAE",
-            var t when t.Contains("Carga") => "CARGA",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") => "MÉDICA",
-            _ => "GERAL"
-        };
+        public string CategoryShortTag => MissionBoardCategory.ShortTag(BoardKind);
 
         // Indicadores de Performance & Lucratividade
         public double ProfitPerNM => DistanceNM > 0 ? Math.Round(RewardMoney / DistanceNM, 1) : 0;
         public string ProfitPerNmDisplay => $"${ProfitPerNM:F1}/NM";
 
         // Badges Cromáticos Semânticos (Cores apenas para exceções/destaques; neutro sutil para padrão)
-        public string SemanticBorderBrush => MissionCategoryType switch
+        public string SemanticBorderBrush => IsVip ? "#F59E0B" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#F59E0B",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#A855F7",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            MissionBoardKind.Medica => "#EF4444",
+            MissionBoardKind.Instrucao => "#A855F7",
+            MissionBoardKind.Sae => "#00E5FF",
             _ => "#2A3749" // Neutro sutil
         };
 
-        public string SemanticBadgeBackground => MissionCategoryType switch
+        public string SemanticBadgeBackground => IsVip ? "#2E1E05" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#2E1E05",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#2E1214",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#251233",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#0B2730",
+            MissionBoardKind.Medica => "#2E1214",
+            MissionBoardKind.Instrucao => "#251233",
+            MissionBoardKind.Sae => "#0B2730",
             _ => "#161F2A" // Fundo neutro discreto
         };
 
-        public string SemanticTextColor => MissionCategoryType switch
+        public string SemanticTextColor => IsVip ? "#F59E0B" : BoardKind switch
         {
-            var t when t.Contains("VIP") => "#F59E0B",
-            var t when t.Contains("Saúde") || t.Contains("Remoção") || t.Contains("Médica") => "#EF4444",
-            var t when t.Contains("Instrução") || t.Contains("Treinamento") => "#C084FC",
-            var t when t.Contains("SAE") || t.Contains("Agro") => "#00E5FF",
+            MissionBoardKind.Medica => "#EF4444",
+            MissionBoardKind.Instrucao => "#C084FC",
+            MissionBoardKind.Sae => "#00E5FF",
             _ => "#94A3B8" // Neutro suave
         };
 
         public string CategoryColor => SemanticTextColor;
         public string CategoryBadgeBackground => SemanticBadgeBackground;
 
-        public string RequiredCategoryDisplay => RequiredCategory.GetShortName();
-        public string RequiredCategoryTooltip => RequiredCategory.GetDisplayName();
+        public string RequiredCategoryDisplay => RequiredPhase.GetShortName();
+        public string RequiredCategoryTooltip => RequiredPhase.GetDisplayName();
+        public string RequiredPhaseDisplay => RequiredPhase.GetShortName();
+        public string RequiredPhaseTooltip => RequiredPhase.GetDisplayName();
 
         // Metadados Formatados para a Tabela e Cards Operacionais
         public string PayloadFormatted => PassengerCount > 0 
@@ -163,7 +170,8 @@ namespace FlightCareer.UI.ViewModels
             _ => "800m"
         };
 
-        public string XpDisplay => $"+{ExperienceGain} XP";
+        public int EstimatedXp { get; private set; }
+        public string XpDisplay => $"≈ {EstimatedXp} XP";
         public string FlightRulesDisplay => WeatherCategory == "IFR" ? "IFR" : "VFR";
         public string FlightRulesColor => WeatherCategory == "IFR" ? "#FF5252" : "#00E676";
 
@@ -272,7 +280,7 @@ namespace FlightCareer.UI.ViewModels
         public string ExpirationBadgeBorder => ExpirationColor == "#FF5252" ? "#5A1E24" : (ExpirationColor == "#FFB300" ? "#593D0F" : "#263545");
         public string ExpirationTooltip => $"Validade do contrato até {ExpirationTime:dd/MM/yyyy HH:mm}";
 
-        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory, Airport? originAirport = null)
+        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, CareerPhase pilotPhase, Airport? originAirport = null)
         {
             Mission = mission;
 
@@ -329,11 +337,11 @@ namespace FlightCareer.UI.ViewModels
                 HeadingDisplay = "---";
             }
 
-            // Checagem de Homologação
-            if (mission.RequiredCategory > pilotCategory)
+            // Checagem de Homologação pela Fase
+            if (mission.RequiredPhase > pilotPhase)
             {
                 IsEligibleForPilot = false;
-                IneligibilityReason = $"Exige {mission.RequiredCategory.GetDisplayName()}";
+                IneligibilityReason = $"Exige {mission.RequiredPhase.GetDisplayName()}";
             }
 
             // Cálculos com Aeronave Ativa
@@ -343,8 +351,18 @@ namespace FlightCareer.UI.ViewModels
                 double speed = type?.CruiseSpeedKts > 0 ? type.CruiseSpeedKts : 110.0;
                 double gph = type?.FuelConsumptionGPH > 0 ? type.FuelConsumptionGPH : 8.0;
                 double maxPayload = type?.MaxPayloadLbs > 0 ? type.MaxPayloadLbs : 500.0;
+                int maxPax = type?.MaxPax ?? 0;
+                bool hasConvertible = type?.HasConvertibleCabin ?? false;
 
-                IsOverweight = mission.PayloadLbs > maxPayload;
+                IsOverweight = !CabinConversion.IsMissionCompatible(
+                    activeAircraft.Configuration,
+                    maxPax,
+                    maxPayload,
+                    mission.PassengerCount,
+                    mission.PayloadLbs,
+                    mission.LuggageWeightLbs,
+                    mission.CargoWeightLbs,
+                    hasConvertible);
 
                 double hours = Math.Max(0.1, mission.DistanceNM / speed);
                 int totalMinutes = (int)Math.Round(hours * 60.0);
@@ -355,6 +373,55 @@ namespace FlightCareer.UI.ViewModels
                 EstimatedFuelGallons = Math.Round(hours * gph, 1);
                 EstimatedFuelLbs = Math.Round(EstimatedFuelGallons * 6.0, 0); // 1 gal Avgas ~ 6 lbs
             }
+
+            // Estimativa de XP para exibição no quadro (XP-PONTAS)
+            double estSpeed = activeAircraft?.AircraftType?.CruiseSpeedKts > 0 ? activeAircraft.AircraftType.CruiseSpeedKts : 110.0;
+            var def = MissionCatalog.Shared.Get(mission.SubId);
+            bool isCircuitOrTgl = (def?.Generator is "local_instruction" or "tgl_circuit") || string.Equals(mission.OriginICAO, mission.DestinationICAO, StringComparison.OrdinalIgnoreCase);
+            int legs = isCircuitOrTgl ? 2 : 1;
+            EstimatedXp = FlightCareer.Domain.Xp.XpCalculator.Estimate(
+                distanceNm: mission.DistanceNM,
+                cruiseSpeedKts: estSpeed,
+                missionFamilyOrSubId: mission.SubId,
+                origin: null,
+                destination: null,
+                legs: legs);
+
+            // Prazo do bônus de XP (mesma regra do fim do voo, XpCalculator › 5.3)
+            IsUrgentDeadline = mission.Urgency > 1.0 || def?.Board == MissionBoardKind.Medica;
+            var deadline = FlightCareer.Domain.Xp.XpDeadline.Compute(
+                mission.DistanceNM, estSpeed, IsUrgentDeadline, isCircuitOrTgl);
+            DeadlineSummary = deadline == null
+                ? string.Empty
+                : $"Prazo{(IsUrgentDeadline ? " (urgente)" : "")}: +{deadline.OnTimeBonusXp:F0} XP com voo até {FlightCareer.Domain.Xp.XpDeadline.FormatMinutes(deadline.OnTimeLimitMinutes)}"
+                  + $" · +{deadline.AcceptableBonusXp:F0} XP até {FlightCareer.Domain.Xp.XpDeadline.FormatMinutes(deadline.AcceptableLimitMinutes)}";
+
+            if (!string.IsNullOrEmpty(mission.CargoName))
+            {
+                var dg = DangerousGoodsRules.Resolve(mission);
+                if (dg != null)
+                {
+                    IsDangerousGoods = true;
+                    string dgSuffix = $" · perigosa classe {dg.Code} ({dg.Label})" + (dg.CargoAircraftOnly ? " · somente cargueiro" : "");
+                    CargoSummary = $"Carga: {mission.CargoName}{dgSuffix}";
+                }
+                else
+                {
+                    IsDangerousGoods = false;
+                    CargoSummary = $"Carga: {mission.CargoName}";
+                }
+            }
+            else
+            {
+                CargoSummary = string.Empty;
+                IsDangerousGoods = false;
+            }
+        }
+
+        [Obsolete("Utilize o construtor com CareerPhase")]
+        public MissionDisplayItem(Mission mission, Airport? destAirport, PilotAircraft? activeAircraft, PilotCategory pilotCategory, Airport? originAirport = null)
+            : this(mission, destAirport, activeAircraft, (CareerPhase)(int)pilotCategory, originAirport)
+        {
         }
 
         private static bool IsValidCityName(string? city, string? country)

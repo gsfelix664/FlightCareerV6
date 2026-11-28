@@ -1,0 +1,991 @@
+{
+  "version": 1,
+  "dangerousGoods": {
+    "1.1D": {
+      "label": "explosivos",
+      "cargoAircraftOnly": true
+    },
+    "3": {
+      "label": "líquido inflamável",
+      "cargoAircraftOnly": true
+    },
+    "9 (UN3480)": {
+      "label": "baterias de lítio",
+      "cargoAircraftOnly": true
+    },
+    "9 (UN1845)": {
+      "label": "gelo seco",
+      "cargoAircraftOnly": false
+    },
+    "6.2": {
+      "label": "substância infecciosa",
+      "cargoAircraftOnly": false
+    },
+    "7": {
+      "label": "material radioativo",
+      "cargoAircraftOnly": false
+    },
+    "8": {
+      "label": "corrosivo",
+      "cargoAircraftOnly": false
+    }
+  },
+  "missions": {
+    "carga_paletizada": [
+      {
+        "id": "carga_geral_consol",
+        "weight": 1.0,
+        "tags": {
+          "carga": 3.0,
+          "carga:distribuicao": 5.0
+        },
+        "names": [
+          "paletes de carga geral consolidada",
+          "fardos de caixas e embalagens diversas",
+          "lotes de mercadorias mistas embaladas",
+          "paletes com caixas padronizadas de varejo"
+        ],
+        "dg": null
+      },
+      {
+        "id": "pecas_mineracao",
+        "weight": 0.0,
+        "tags": {
+          "carga:mineracao": 6.0
+        },
+        "names": [
+          "peças de reposição para britadores",
+          "rolamentos pesados para correias transportadoras",
+          "componentes de mandíbulas de moagem",
+          "brocas e coroas de perfuração pesada"
+        ],
+        "dg": null
+      },
+      {
+        "id": "pecas_navais_portuarias",
+        "weight": 0.0,
+        "tags": {
+          "carga:portuario": 6.0
+        },
+        "names": [
+          "sobressalentes de guindastes portuários",
+          "peças pesadas para rebocadores e embarcações",
+          "cabos e componentes de amarração marítima",
+          "bombas de lastro e válvulas navais"
+        ],
+        "dg": null
+      },
+      {
+        "id": "maquinas_industriais",
+        "weight": 1.0,
+        "tags": {
+          "carga:industrial": 5.0,
+          "carga:automotivo": 4.0
+        },
+        "names": [
+          "motores elétricos trifásicos industriais",
+          "componentes de prensas hidráulicas",
+          "redutores de velocidade industriais",
+          "painéis elétricos industriais montados"
+        ],
+        "dg": null
+      },
+      {
+        "id": "produtos_texteis",
+        "weight": 0.0,
+        "tags": {
+          "carga:textil": 6.0
+        },
+        "names": [
+          "fardos de tecidos industriais",
+          "bobinas de fiação especial e acabamento",
+          "paletes de confecções prontas para distribuição",
+          "lotes de aviamentos industriais"
+        ],
+        "dg": null
+      }
+    ],
+    "carga_overnight": [
+      {
+        "id": "documentos_expressos",
+        "weight": 1.0,
+        "tags": {
+          "carga:expressa": 5.0,
+          "carga:integrador": 5.0
+        },
+        "names": [
+          "envelopes e contratos urgentes",
+          "documentação corporativa prioritária",
+          "malotes de desembaraço e certidões urgentes",
+          "remessas expressas prioritárias de negócios"
+        ],
+        "dg": null
+      },
+      {
+        "id": "amostras_comerciais",
+        "weight": 1.0,
+        "tags": {
+          "carga:expressa": 4.0,
+          "carga:noturno": 5.0
+        },
+        "names": [
+          "amostras de produtos industriais para aprovação",
+          "protótipos para reuniões de engenharia",
+          "lotes de catálogo para apresentação matinal",
+          "amostras de tecidos e materiais para análise"
+        ],
+        "dg": null
+      },
+      {
+        "id": "reposicao_emergencial",
+        "weight": 1.0,
+        "tags": {
+          "carga:integrador": 5.0,
+          "carga:noturno": 5.0
+        },
+        "names": [
+          "peças críticas para substituição noturna",
+          "módulos de hardware de substituição imediata",
+          "equipamentos de backup para escritórios",
+          "cabos de fibra e switches para pronta instalação"
+        ],
+        "dg": null
+      },
+      {
+        "id": "remessas_postais_noturnas",
+        "weight": 1.0,
+        "tags": {
+          "carga:postal": 6.0,
+          "carga:noturno": 4.0
+        },
+        "names": [
+          "encomendas postais expressas prioritárias",
+          "correspondência noturna classificada",
+          "remessas de correio prioritário noturno",
+          "malotes de triagem para entrega matutina"
+        ],
+        "dg": null
+      }
+    ],
+    "malotes": [
+      {
+        "id": "malotes_bancarios",
+        "weight": 1.0,
+        "tags": {
+          "carga:alto_valor": 4.0,
+          "linha:hub": 2.0
+        },
+        "names": [
+          "malotes lacrados de compensação bancária",
+          "talonários e correspondência financeira interbancária",
+          "documentos de custódia e cheques em custódia",
+          "fichas e contratos de crédito autenticados"
+        ],
+        "dg": null
+      },
+      {
+        "id": "malotes_judiciais_cartorarios",
+        "weight": 1.0,
+        "tags": {
+          "carga:governo": 5.0,
+          "carga:expressa": 3.0
+        },
+        "names": [
+          "processos físicos de trânsito em julgado",
+          "livros e certidões cartorárias para registro",
+          "malotes de protocolo judicial prioritário",
+          "documentos de precatórios e mandados judiciais"
+        ],
+        "dg": null
+      },
+      {
+        "id": "malotes_corporativos",
+        "weight": 1.0,
+        "tags": {
+          "carga:integrador": 4.0,
+          "carga:distribuicao": 3.0
+        },
+        "names": [
+          "correspondência administrativa de filiais",
+          "pastas de auditoria contábil externa",
+          "dossiês confidenciais de diretoria",
+          "documentação societária e atas registradas"
+        ],
+        "dg": null
+      }
+    ],
+    "carga_valores": [
+      {
+        "id": "ouro_metais_preciosos",
+        "weight": 0.0,
+        "tags": {
+          "carga:mineracao": 6.0,
+          "carga:alto_valor": 6.0
+        },
+        "names": [
+          "lingotes de ouro bruto lacrados",
+          "barras de prata refinada em cofres portáteis",
+          "amostras de concentrado de ouro certificado",
+          "pepitas e barras de fundição mineral"
+        ],
+        "dg": null
+      },
+      {
+        "id": "joias_e_relogios",
+        "weight": 1.0,
+        "tags": {
+          "carga:alto_valor": 6.0,
+          "carga:distribuicao": 3.0
+        },
+        "names": [
+          "estojos blindados de alta joalheria",
+          "remessa de relógios de luxo consignados",
+          "lotes de pedras preciosas lapidadas",
+          "mostruários de alta joalheria para eventos"
+        ],
+        "dg": null
+      },
+      {
+        "id": "papel_moeda_numerario",
+        "weight": 1.0,
+        "tags": {
+          "carga:alto_valor": 5.0
+        },
+        "names": [
+          "cédulas novas para abastecimento de agências",
+          "pacotes lacrados de papel-moeda nacional",
+          "remessas de numerário estrangeiro para câmbio",
+          "moedas comemorativas e cédulas custodiadas"
+        ],
+        "dg": null
+      },
+      {
+        "id": "chips_seguranca_cripto",
+        "weight": 0.0,
+        "tags": {
+          "carga:eletronicos": 5.0,
+          "carga:alto_valor": 5.0
+        },
+        "names": [
+          "módulos criptográficos de segurança bancária",
+          "lotes de cartões inteligentes com chip virgem",
+          "chaves físicas seguras de token financeiro",
+          "leitores biométricos com firmware blindado"
+        ],
+        "dg": null
+      }
+    ],
+    "ecommerce": [
+      {
+        "id": "encomendas_varejo",
+        "weight": 1.0,
+        "tags": {
+          "carga:ecommerce": 6.0,
+          "carga:distribuicao": 4.0
+        },
+        "names": [
+          "pacotes de compras online de vestuário e calçados",
+          "caixas com artigos de casa e decoração de e-commerce",
+          "encomendas variadas de marketplaces",
+          "remessas de itens de conveniência comprados na internet"
+        ],
+        "dg": null
+      },
+      {
+        "id": "eletronicos_consumo",
+        "weight": 1.0,
+        "tags": {
+          "carga:ecommerce": 5.0,
+          "carga:eletronicos": 5.0
+        },
+        "names": [
+          "smartphones e fones sem fio em embalagens de envio",
+          "tablets e leitores digitais embalados para entrega",
+          "consoles portáteis e periféricos gamers de varejo",
+          "gadgets e relógios inteligentes de e-commerce"
+        ],
+        "dg": null
+      },
+      {
+        "id": "cosmeticos_perfumaria",
+        "weight": 1.0,
+        "tags": {
+          "carga:ecommerce": 5.0,
+          "carga:distribuicao": 3.0
+        },
+        "names": [
+          "kits de beleza e perfumaria de compras online",
+          "dermocosméticos e produtos de autocuidado para entrega",
+          "caixas de maquiagem e cuidados pessoais de catálogo",
+          "paletes fracionados de loções e cremes cosméticos"
+        ],
+        "dg": null
+      },
+      {
+        "id": "livros_papelaria",
+        "weight": 1.0,
+        "tags": {
+          "carga:ecommerce": 4.0,
+          "carga:postal": 4.0
+        },
+        "names": [
+          "encomendas de livros e materiais didáticos de e-commerce",
+          "artigos de papelaria e cadernos enviados por correio",
+          "caixas de apostilas e impressos técnicos",
+          "jogos de tabuleiro e publicações de livraria online"
+        ],
+        "dg": null
+      }
+    ],
+    "carga_jit": [
+      {
+        "id": "componentes_automotivos",
+        "weight": 1.0,
+        "tags": {
+          "carga:automotivo": 6.0,
+          "carga:industrial": 4.0
+        },
+        "names": [
+          "chicotes elétricos e conectores para linha de montagem",
+          "módulos de injeção eletrônica automotiva",
+          "sensores de freio abs e atuadores automotivos",
+          "conjuntos de comando de válvulas de motor"
+        ],
+        "dg": null
+      },
+      {
+        "id": "pecas_aeronauticas_aog",
+        "weight": 1.0,
+        "tags": {
+          "mro": 6.0,
+          "carga:aeroespacial": 6.0
+        },
+        "names": [
+          "atuadores hidráulicos e servo-válvulas para aeronave aog",
+          "sensores aviônicos e módulos de navegação urgentes",
+          "bombas de combustível de alta pressão para reposição aog",
+          "válvulas pneumáticas de pressurização para hangar"
+        ],
+        "dg": null
+      },
+      {
+        "id": "baterias_litio_montagem",
+        "weight": 0.0,
+        "tags": {
+          "carga:eletronicos": 6.0,
+          "carga:automotivo": 3.0
+        },
+        "names": [
+          "módulos de baterias de íon-lítio para eletrônica",
+          "conjuntos de baterias de lítio industriais não instaladas",
+          "células de íon-lítio para fabricação de baterias",
+          "packs de baterias de lítio de reposição para robótica"
+        ],
+        "dg": "9 (UN3480)"
+      },
+      {
+        "id": "semicondutores_chips",
+        "weight": 1.0,
+        "tags": {
+          "carga:eletronicos": 6.0,
+          "carga:industrial": 3.0
+        },
+        "names": [
+          "wafers de silício e microcontroladores industriais",
+          "chips de memória flash para placas eletrônicas",
+          "processadores industriais para equipamentos de automação",
+          "circuitos integrados para linha de automação fabril"
+        ],
+        "dg": null
+      },
+      {
+        "id": "moldes_usinagem_urgente",
+        "weight": 1.0,
+        "tags": {
+          "carga:industrial": 5.0
+        },
+        "names": [
+          "matrizes de estampagem de aço temperado",
+          "moldes de injeção plástica de precisão",
+          "eletrodos de usinagem por eletroerosão",
+          "ferramental de corte de precisão para fresadoras cnc"
+        ],
+        "dg": null
+      }
+    ],
+    "cadeia_fria": [
+      {
+        "id": "vacinas_refrigeradas",
+        "weight": 1.0,
+        "tags": {
+          "carga:farma": 6.0,
+          "saude": 5.0
+        },
+        "names": [
+          "lotes de vacinas virais em caixas térmicas com gelo seco",
+          "imunobiológicos sensíveis com monitoramento térmico",
+          "doses de vacinas pediátricas em caixas com gelo seco",
+          "frascos de vacinas bacterianas sob refrigeração criogênica"
+        ],
+        "dg": "9 (UN1845)"
+      },
+      {
+        "id": "frutas_frescas_exportacao",
+        "weight": 0.0,
+        "tags": {
+          "agro:fruticultura": 6.0,
+          "carga:pereciveis": 5.0
+        },
+        "names": [
+          "caixas climatizadas de mangas selecionadas para exportação",
+          "uvas de mesa em atmosfera controlada",
+          "melões nobres e mamões frescos embalados",
+          "paletes de frutas vermelhas frescas colhidas no dia"
+        ],
+        "dg": null
+      },
+      {
+        "id": "pescado_fresco_refrigerado",
+        "weight": 0.0,
+        "tags": {
+          "agro:pescado": 6.0,
+          "carga:pereciveis": 5.0
+        },
+        "names": [
+          "lombos de atum fresco eviscerado sobre gelo escama",
+          "filés de salmão fresco refrigerado em caixas térmicas",
+          "camarões frescos resfriados para restaurantes",
+          "pescado nobre fresco embalado para transporte aéreo"
+        ],
+        "dg": null
+      },
+      {
+        "id": "carnes_nobres_climatizadas",
+        "weight": 1.0,
+        "tags": {
+          "agro:pecuaria": 5.0,
+          "carga:pereciveis": 5.0
+        },
+        "names": [
+          "cortes bovinos nobres embalados a vácuo e refrigerados",
+          "peças maturadas resfriadas em recipientes térmicos",
+          "filés suínos especiais sob temperatura controlada",
+          "carnes nobres de ovinos climatizadas para atacado"
+        ],
+        "dg": null
+      },
+      {
+        "id": "insulina_medicamentos_frios",
+        "weight": 1.0,
+        "tags": {
+          "carga:farma": 5.0,
+          "saude": 4.0
+        },
+        "names": [
+          "canetas e frascos de insulina mantidos de 2 a 8 graus",
+          "anticorpos monoclonais em caixas térmicas certificadas",
+          "medicamentos hemoderivados refrigerados",
+          "soluções proteicas sensíveis a variações de calor"
+        ],
+        "dg": null
+      }
+    ],
+    "carga_dgr": [
+      {
+        "id": "explosivos_mineracao",
+        "weight": 0.0,
+        "tags": {
+          "carga:mineracao": 8.0
+        },
+        "names": [
+          "dinamite encartuchada para detonação em cava",
+          "cordéis detonantes e reforçadores para mineração",
+          "cargas de emulsão para fragmentação de rocha",
+          "explosivos industriais à base de emulsão"
+        ],
+        "dg": "1.1D"
+      },
+      {
+        "id": "tintas_solventes_inflamaveis",
+        "weight": 1.0,
+        "tags": {
+          "carga:industrial": 4.0,
+          "mro": 4.0
+        },
+        "names": [
+          "tintas aeronáuticas poliuretano em baldes homologados",
+          "solventes e tíneres industriais para desengraxe",
+          "resinas inflamáveis e primers automotivos",
+          "vernizes epóxi inflamáveis em embalagens especiais"
+        ],
+        "dg": "3"
+      },
+      {
+        "id": "baterias_litio_avulsas",
+        "weight": 1.0,
+        "tags": {
+          "carga:eletronicos": 5.0,
+          "carga:integrador": 3.0
+        },
+        "names": [
+          "baterias de íon-lítio avulsas para equipamentos industriais",
+          "lotes de baterias de lítio metálico em tambores de segurança",
+          "acumuladores de lítio sobressalentes para sistemas de rádio",
+          "baterias recarregáveis de íon-lítio para drones profissionais"
+        ],
+        "dg": "9 (UN3480)"
+      },
+      {
+        "id": "amostras_diagnostico_infecciosas",
+        "weight": 1.0,
+        "tags": {
+          "saude": 5.0,
+          "carga:farma": 4.0
+        },
+        "names": [
+          "amostras clínicas de agentes patogênicos categoria b",
+          "frascos com culturas bacterianas para laboratório de referência",
+          "tubos com soro viral infeccioso para vigilância genômica",
+          "amostras de biópsia com suspeita de microrganismos de risco"
+        ],
+        "dg": "6.2"
+      },
+      {
+        "id": "radiofarmacos_medicina_nuclear",
+        "weight": 0.0,
+        "tags": {
+          "saude:hospital_referencia": 6.0
+        },
+        "names": [
+          "geradores de tecnécio-99m para cintilografia",
+          "doses de iodo-131 para radioterapia hospitalar",
+          "flúor-18 em blindagem de chumbo para tomografia pet",
+          "radioisótopos médicos para tratamento oncológico"
+        ],
+        "dg": "7"
+      },
+      {
+        "id": "acido_produtos_corrosivos",
+        "weight": 1.0,
+        "tags": {
+          "carga:industrial": 5.0
+        },
+        "names": [
+          "ácido sulfúrico concentrado em bombonas especiais",
+          "eletrólito para baterias de empilhadeiras em recipientes seguros",
+          "soluções decapantes ácidas para tratamento de superfícies",
+          "ácido clorídrico reagente para laboratórios analíticos"
+        ],
+        "dg": "8"
+      },
+      {
+        "id": "gelo_seco_refrigerante",
+        "weight": 1.0,
+        "tags": {
+          "carga:farma": 4.0,
+          "saude": 4.0
+        },
+        "names": [
+          "blocos de dióxido de carbono sólido em caixas ventiladas",
+          "pellets de gelo seco para preservação criogênica",
+          "gelo seco granular para climatização de insumos hospitalares",
+          "cilindros térmicos com gelo seco para transporte biológico"
+        ],
+        "dg": "9 (UN1845)"
+      }
+    ],
+    "carga_sensivel": [
+      {
+        "id": "amostras_biologicas_vivas",
+        "weight": 1.0,
+        "tags": {
+          "saude": 5.0,
+          "carga:farma": 4.0
+        },
+        "names": [
+          "amostras de sangue e tecidos para tipagem genética",
+          "tubos de líquor e biópsias para análise patológica urgente",
+          "culturas celulares vivas em meio de cultura estéril",
+          "amostras de swabs respiratórios para painel viral"
+        ],
+        "dg": "6.2"
+      },
+      {
+        "id": "material_genetico_bovino",
+        "weight": 0.0,
+        "tags": {
+          "agro:genetica": 6.0,
+          "agro:pecuaria": 5.0
+        },
+        "names": [
+          "botijões criogênicos com sêmen de touros reprodutores",
+          "embriões bovinos congelados de alta linhagem zebuína",
+          "palhetas de material genético equino para inseminação",
+          "contêineres criogênicos secos com genética selecionada"
+        ],
+        "dg": null
+      },
+      {
+        "id": "animais_vivos_pequeno_porte",
+        "weight": 1.0,
+        "tags": {
+          "carga": 3.0
+        },
+        "names": [
+          "caixas de transporte climatizadas com cães de serviço e guia",
+          "caixas ventiladas com gatos de raça para exposições",
+          "aves canoras registradas em gaiolas de viagem climatizadas",
+          "animais de resgate ambiental em caixas de contenção acolchoadas"
+        ],
+        "dg": null
+      },
+      {
+        "id": "instrumentos_opticos_precisao",
+        "weight": 1.0,
+        "tags": {
+          "carga:eletronicos": 4.0,
+          "carga:alto_valor": 4.0
+        },
+        "names": [
+          "lentes e telescópios astronômicos com amortecimento de vibração",
+          "câmeras termográficas de inspeção em cases impermeáveis",
+          "espectrofotômetros de bancada com calibração sensível",
+          "lasers cirúrgicos de precisão em suportes de absorção de choque"
+        ],
+        "dg": null
+      }
+    ],
+    "insumos_agro": [
+      {
+        "id": "sementes_certificadas",
+        "weight": 1.0,
+        "tags": {
+          "agro:sementes": 6.0,
+          "agro:graos": 5.0,
+          "safra:plantio": 6.0
+        },
+        "names": [
+          "sacarias de sementes híbridas de milho tratadas",
+          "bags de sementes certificadas de soja de alta produtividade",
+          "embalagens de sementes de hortaliças de alto vigor",
+          "sementes fiscalizadas de algodão para plantio imediato"
+        ],
+        "dg": null
+      },
+      {
+        "id": "defensivos_agricolas",
+        "weight": 1.0,
+        "tags": {
+          "agro:pulverizacao": 6.0,
+          "agro": 4.0,
+          "safra:plantio": 3.0,
+          "safra:colheita": 3.0
+        },
+        "names": [
+          "bombonas de bioinseticidas para lavoura",
+          "fungicidas sistêmicos para controle de ferrugem em grãos",
+          "adjuvantes e surfactantes de pulverização agrícola",
+          "herbicidas seletivos para manejo pré-emergente"
+        ],
+        "dg": null
+      },
+      {
+        "id": "pecas_maquinas_agricolas",
+        "weight": 1.0,
+        "tags": {
+          "agro:maquinas": 6.0,
+          "fazenda": 4.0,
+          "safra:colheita": 4.0,
+          "safra:entressafra": 3.0
+        },
+        "names": [
+          "bicos e barras de pulverização de trator agrícola",
+          "sensores de umidade de colheitadeira para troca urgente",
+          "facas e discos de corte de plantadeira",
+          "filtros hidráulicos e correias para tratores em campo"
+        ],
+        "dg": null
+      },
+      {
+        "id": "fertilizantes_especiais",
+        "weight": 0.0,
+        "tags": {
+          "agro:cafe": 5.0,
+          "agro:citros": 5.0,
+          "safra:plantio": 3.0
+        },
+        "names": [
+          "micronutrientes quelatados para fertirrigação",
+          "adubos foliares solúveis para cafezais e pomares",
+          "complexos minerais para desenvolvimento radicular",
+          "bioestimulantes e aminoácidos para nutrição de lavouras"
+        ],
+        "dg": null
+      },
+      {
+        "id": "revisao_entressafra",
+        "weight": 0.0,
+        "tags": {
+          "safra:entressafra": 6.0
+        },
+        "names": [
+          "kits de revisão de colheitadeiras para a entressafra",
+          "peças de reforma de plantadeiras na parada da entressafra",
+          "componentes de motor para revisão de tratores",
+          "correntes e rolamentos para manutenção de máquinas fora da safra"
+        ],
+        "dg": null
+      }
+    ],
+    "suprimentos_remotos": [
+      {
+        "id": "mantimentos_alimentos_basicos",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 6.0,
+          "alimentador:amazonia": 5.0
+        },
+        "names": [
+          "fardos de farinha, arroz, feijão e açúcar",
+          "caixas de leite em pó, óleo e conservas não perecíveis",
+          "cestas de alimentos secos para comunidades ribeirinhas",
+          "mantimentos essenciais para postos isolados de fronteira"
+        ],
+        "dg": null
+      },
+      {
+        "id": "medicamentos_postos_remotos",
+        "weight": 1.0,
+        "tags": {
+          "saude:amazonia": 6.0,
+          "isolado": 5.0
+        },
+        "names": [
+          "caixas de antibióticos e analgésicos para postos de saúde de selva",
+          "soros antiofídicos e antiparasitários essenciais",
+          "kits de primeiros socorros e sutura para vilarejos remotos",
+          "soluções de reidratação oral e curativos básicos"
+        ],
+        "dg": null
+      },
+      {
+        "id": "geradores_ferramentas_comunidade",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 5.0,
+          "fazenda": 3.0
+        },
+        "names": [
+          "motobombas portáteis para poços comunitários",
+          "motosserras e lâminas para manutenção de clareiras e pistas",
+          "placas solares e baterias estacionárias para postos remotos",
+          "caixas de ferramentas e geradores portáteis a gasolina"
+        ],
+        "dg": null
+      },
+      {
+        "id": "material_escolar_comunitario",
+        "weight": 0.0,
+        "tags": {
+          "alimentador:amazonia": 5.0,
+          "isolado": 4.0
+        },
+        "names": [
+          "caixas de cadernos e lápis para escolas ribeirinhas",
+          "livros didáticos e cartilhas de alfabetização infantil",
+          "jogos pedagógicos e mapas para salas de aula do interior",
+          "mochilas e kits de higiene infantil para comunidades"
+        ],
+        "dg": null
+      }
+    ],
+    "conexao_pista_curta": [
+      {
+        "id": "encomendas_fazendas",
+        "weight": 1.0,
+        "tags": {
+          "fazenda": 6.0,
+          "agro:executivo_rural": 4.0
+        },
+        "names": [
+          "peças leves de trator e arame liso para cercas",
+          "caixas de sal mineral e suplementos para rebanho",
+          "medicamentos veterinários e vacinas contra aftosa",
+          "encomendas pessoais e suprimentos para a sede da fazenda"
+        ],
+        "dg": null
+      },
+      {
+        "id": "equipamentos_prospeccao_campo",
+        "weight": 1.0,
+        "tags": {
+          "carga:mineracao": 5.0,
+          "carga:oleo_gas": 4.0
+        },
+        "names": [
+          "teodolitos e estações totais para topografia de campo",
+          "amostradores de solo e cilindros de perfil geológico",
+          "receptores gps geodésicos para levantamento fundiário",
+          "baterias e rádios transmissores de longa distância para acampamentos"
+        ],
+        "dg": null
+      },
+      {
+        "id": "ferramentas_manutencao_pista",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 4.0,
+          "fazenda": 4.0
+        },
+        "names": [
+          "peças para roçadeiras e lâminas de trator de esteira",
+          "mangueiras reforçadas e conexões hidráulicas industriais",
+          "cabos de aço para guinchos e roldanas de tração",
+          "cones de balizamento e birutas de reposição para pista"
+        ],
+        "dg": null
+      }
+    ],
+    "humanitario": [
+      {
+        "id": "cestas_basicas_emergencia",
+        "weight": 1.0,
+        "tags": {
+          "saude:humanitario": 6.0,
+          "isolado": 4.0
+        },
+        "names": [
+          "cestas de alimentos desidratados e refeições prontas mres",
+          "fardos de leite infantil, água potável e biscoitos nutritivos",
+          "mantimentos secos e enlatados para desabrigados de enchentes",
+          "ração humanitária de emergência para socorro imediato"
+        ],
+        "dg": null
+      },
+      {
+        "id": "kits_higiene_abrigo",
+        "weight": 1.0,
+        "tags": {
+          "carga:governo": 5.0,
+          "isolado": 3.0
+        },
+        "names": [
+          "fardos de cobertores térmicos e lonas impermeáveis para abrigo",
+          "kits de sabonete, escovas e desinfetantes para abrigos",
+          "barracas de campanha e colchonetes infláveis de emergência",
+          "roupas de emergência e toalhas para famílias resgatadas"
+        ],
+        "dg": null
+      },
+      {
+        "id": "medicamentos_insumos_socorro",
+        "weight": 1.0,
+        "tags": {
+          "saude": 6.0,
+          "saude:hospital_referencia": 4.0
+        },
+        "names": [
+          "pastilhas de cloro para purificação de água potável",
+          "kits cirúrgicos estéreis de pronto atendimento em catástrofes",
+          "soro fisiológico e antibióticos para hospital de campanha",
+          "ataduras, gazes e macas dobráveis de emergência"
+        ],
+        "dg": null
+      }
+    ],
+    "combustivel_tambor": [
+      {
+        "id": "avgas_em_tambores",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 6.0,
+          "fazenda": 4.0
+        },
+        "names": [
+          "tambores lacrados de gasolina de aviação avgas 100ll",
+          "barris metálicos de avgas com lacre de controle de pureza",
+          "tambores de avgas para reabastecimento em pista remota",
+          "combustível de aviação 100ll em tambores de 200 litros"
+        ],
+        "dg": "3"
+      },
+      {
+        "id": "querosene_jet_a1_tambor",
+        "weight": 1.0,
+        "tags": {
+          "carga:oleo_gas": 5.0,
+          "carga:mineracao": 4.0
+        },
+        "names": [
+          "tambores lacrados de querosene de aviação jet a-1",
+          "barris de jet a-1 para abastecimento de helicópteros",
+          "tambores de querosene aeronáutico com aditivo anticongelante",
+          "combustível jet a-1 em tambores homologados da defesa civil"
+        ],
+        "dg": "3"
+      },
+      {
+        "id": "diesel_gerador_campo",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 5.0,
+          "fazenda": 5.0
+        },
+        "names": [
+          "tambores de óleo diesel s10 para geradores de energia",
+          "barris de óleo diesel para maquinário pesado de acampamento",
+          "tambores de diesel filtrado para motobombas e tratores",
+          "óleo diesel em tambores de segurança para bases de exploração"
+        ],
+        "dg": "3"
+      }
+    ],
+    "apoio_acampamento": [
+      {
+        "id": "equipamentos_pesquisa_expedicao",
+        "weight": 1.0,
+        "tags": {
+          "carga:oleo_gas": 5.0,
+          "carga:mineracao": 5.0
+        },
+        "names": [
+          "drones de mapeamento e bases rtk de expedição geológica",
+          "cromatógrafos e kits de análise de água e sedimentos",
+          "amostradores de gás e analisadores portáteis de hidrocarbonetos",
+          "equipamentos sismográficos e baterias seladas para pesquisa"
+        ],
+        "dg": null
+      },
+      {
+        "id": "provisoes_viveres_acampamento",
+        "weight": 1.0,
+        "tags": {
+          "isolado": 5.0,
+          "fazenda": 3.0
+        },
+        "names": [
+          "caixas com rações de campo e café para equipes de pesquisa",
+          "fardos de água mineral e sucos liofilizados para exploradores",
+          "mantimentos frescos e congelados em caixas térmicas reforçadas",
+          "fogareiros portáteis e panelas industriais para o rancho do acampamento"
+        ],
+        "dg": null
+      },
+      {
+        "id": "ferramentas_estruturas_acampamento",
+        "weight": 1.0,
+        "tags": {
+          "carga:mineracao": 4.0,
+          "isolado": 4.0
+        },
+        "names": [
+          "lonas de cobertura pesada e estacas de aço para tendas",
+          "cabos elétricos blindados e refletores led para canteiro",
+          "ferramentas manuais pesadas, picaretas, pás e alavancas",
+          "motobombas submersíveis e mangotes para captação de água"
+        ],
+        "dg": null
+      }
+    ]
+  }
+}

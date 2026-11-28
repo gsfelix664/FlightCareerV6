@@ -1,8 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using FlightCareer.Domain.Utils;
+using FlightCareer.UI.Services;
 using FlightCareer.UI.Utils;
 using FlightCareer.UI.ViewModels;
 
@@ -13,7 +16,39 @@ namespace FlightCareer.UI.Views
         public DebugOverlayWindow()
         {
             InitializeComponent();
+            ApplySavedOrDefaultPosition();
             DataContextChanged += DebugOverlayWindow_DataContextChanged;
+            Closing += (s, e) => SavePosition();
+            IsVisibleChanged += (s, e) => { if (!IsVisible) SavePosition(); };
+        }
+
+        private void ApplySavedOrDefaultPosition()
+        {
+            if (WindowPositionStore.Shared.TryGet("hud", out var pos))
+            {
+                var virtualArea = new WindowRect(
+                    SystemParameters.VirtualScreenLeft,
+                    SystemParameters.VirtualScreenTop,
+                    SystemParameters.VirtualScreenWidth,
+                    SystemParameters.VirtualScreenHeight);
+
+                double w = !double.IsNaN(Width) && Width > 0 ? Width : 340;
+                double h = !double.IsNaN(Height) && Height > 0 ? Height : 200;
+
+                var clamped = WindowPlacement.ClampToArea(new WindowRect(pos.X, pos.Y, w, h), virtualArea);
+                Left = clamped.Left;
+                Top = clamped.Top;
+            }
+            else
+            {
+                Left = 40;
+                Top = 80;
+            }
+        }
+
+        private void SavePosition()
+        {
+            WindowPositionStore.Shared.Save("hud", Left, Top);
         }
 
         private void DebugOverlayWindow_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -28,7 +63,15 @@ namespace FlightCareer.UI.Views
         {
             if (e.ButtonState == MouseButtonState.Pressed)
             {
-                try { DragMove(); } catch { }
+                try
+                {
+                    DragMove();
+                    SavePosition();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[DebugOverlay] DragMove: {ex.Message}");
+                }
             }
         }
 
@@ -44,7 +87,15 @@ namespace FlightCareer.UI.Views
 
             if (e.ButtonState == MouseButtonState.Pressed)
             {
-                try { DragMove(); } catch { }
+                try
+                {
+                    DragMove();
+                    SavePosition();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[DebugOverlay] DragMove: {ex.Message}");
+                }
             }
         }
 

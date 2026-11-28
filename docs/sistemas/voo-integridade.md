@@ -1,0 +1,15 @@
+# Voo e integridade
+
+> Estado atual do sistema. Lido sob demanda (índice em AGENTS.md › 7). Atualize este arquivo quando o estado do sistema mudar.
+
+- **O que faz:** Monitora fases de voo, toque, acidentes, conforto de passageiros, infrações e anti-cheat de slew/congelamento.
+- **Onde está:** `UI/Services/FlightMonitor`, `Domain/Components/TouchdownDetector`, `Domain/Integrity/SlewMonitor`, `Domain/Services/FlightQualityService`, `UI/Services/AlertOverlayService`, `CrashPolicy`.
+- **Regras e integridade:**
+  - Toque e impacto medidos pelo `TouchdownDetector` priorizando `PLANE TOUCHDOWN NORMAL VELOCITY` (reserva `VERTICAL SPEED`, sem `VELOCITY BODY Y`). Crash detectado pelo simulador gera perda total direta (`CrashPolicy`), registrando voo no logbook, avançando carreira e devolvendo contratos ao mercado.
+  - Quique na decolagem (`TouchdownDetector.IsTakeoffBounce`): contato até `takeoffBounceMaxAirborneSec` (8 s, `component_catalog.json`) depois de sair do chão, sem pouso desde a decolagem, não é pouso (sem contagem, ciclo, qualidade, luzes ou XP); só a razão de descida entra no dano (regras de pouso duro, ≥ 400 fpm), sem deriva lateral nem atitude. Blackbox: evento `QUIQUE_DECOLAGEM`. Sem leitura rápida, o caminho de 1 s espera a janela.
+  - Ciclo de pouso (`LandingCycleTracker`, 2026-11-26): depois de um toque, voltar a voar (> 30 kt) por 8 s simulados abre ciclo novo, e o próximo toque é outro pouso (contagem e ciclo da aeronave, status "VOANDO"). Antes disso é quique. Perna de XP (`LegsCompleted`) só conta com parada completa (< 5 kt); toque e arremetida não vale perna. Não testado no MSFS.
+  - Pouso forçado fora de pista (`FlightMonitor.FinalizeFlightAsync`, 2026-11-26): aplica dano de terreno despreparado diretamente nas peças/componentes de pneus (35%), trem (20%) e célula (20%); cancela todas as missões ativas no banco, atribui XP parcial (50%), avança relógio de carreira e registra status "POUSO_FORCADO" na blackbox com G de impacto rápido (`TouchdownEvent.PeakG`). Não testado no MSFS.
+  - Integridade de posição (`SlewMonitor`): slew curto no solo antes da decolagem é tolerado (até 1.000 m acumulados com log); slew no ar, slew pós-decolagem ou qualquer congelamento de atitude/posição invalidam o voo (`FlightMonitor.InvalidateFlight`).
+  - Conforto de passageiros (`FlightQualityService`): acumula desconforto em segundos simulados fora dos limites operacionais (`FlightQualityRules`), ignorando solo e pausa. Voos de carga avaliam apenas solavanco e fator G. Vento vertical atenua penalidades.
+  - Notificações em voo: utilizar sempre `AlertOverlayService` (janela overlay, topo, sem foco); nunca exibir caixas modais (`MessageBox`) durante o voo monitorado.
+  - Pendência: W&B e detecção de aeronave (`docs/plans/simconnect-wb-deteccao-aeronave.md`).

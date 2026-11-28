@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "families": [
+    {
+      "id": "panoramico",
+      "baseFee": 300.0,
+      "ratePerMile": 6.5,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 1.0
+    },
+    {
+      "id": "translado",
+      "baseFee": 250.0,
+      "ratePerMile": 5.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 1.0
+    },
+    {
+      "id": "instrucao_basica",
+      "baseFee": 220.0,
+      "ratePerMile": 6.5,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 2.0
+    },
+    {
+      "id": "instrucao",
+      "baseFee": 350.0,
+      "ratePerMile": 6.5,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 2.0
+    },
+    {
+      "id": "medevac",
+      "baseFee": 2400.0,
+      "ratePerMile": 14.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.25,
+      "scale": 0.7
+    },
+    {
+      "id": "aog",
+      "baseFee": 950.0,
+      "ratePerMile": 8.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.35,
+      "scale": 0.7
+    },
+    {
+      "id": "carga_fragil",
+      "baseFee": 950.0,
+      "ratePerMile": 8.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.35,
+      "scale": 0.7
+    },
+    {
+      "id": "agro_bush",
+      "baseFee": 380.0,
+      "ratePerMile": 4.5,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.18,
+      "scale": 0.7
+    },
+    {
+      "id": "agro_municipal",
+      "baseFee": 450.0,
+      "ratePerMile": 5.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.15,
+      "scale": 0.7
+    },
+    {
+      "id": "taxi_aereo",
+      "baseFee": 950.0,
+      "ratePerMile": 7.5,
+      "ratePerPaxMile": 1.5,
+      "paxAtLeastOne": true,
+      "ratePerPayloadLb": 0.12,
+      "scale": 0.35
+    },
+    {
+      "id": "carga_expressa",
+      "baseFee": 500.0,
+      "ratePerMile": 4.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.22,
+      "scale": 0.7
+    },
+    {
+      "id": "regional",
+      "baseFee": 1800.0,
+      "ratePerMile": 6.0,
+      "ratePerPaxMile": 0.45,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.08,
+      "scale": 0.35
+    },
+    {
+      "id": "linha",
+      "baseFee": 5500.0,
+      "ratePerMile": 8.0,
+      "ratePerPaxMile": 0.3,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.05,
+      "scale": 0.35
+    },
+    {
+      "id": "carga_global",
+      "baseFee": 5500.0,
+      "ratePerMile": 8.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.05,
+      "scale": 0.35
+    },
+    {
+      "id": "aerofoto",
+      "baseFee": 600.0,
+      "baseFeePerPax": 0.0,
+      "ratePerMile": 6.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 1.0
+    },
+    {
+      "id": "paraquedismo",
+      "baseFee": 0.0,
+      "baseFeePerPax": 120.0,
+      "ratePerMile": 4.0,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": true,
+      "ratePerPayloadLb": 0.1,
+      "scale": 1.0
+    },
+    {
+      "id": "fallback",
+      "baseFee": 400.0,
+      "ratePerMile": 5.5,
+      "ratePerPaxMile": 0.0,
+      "paxAtLeastOne": false,
+      "ratePerPayloadLb": 0.1,
+      "scale": 0.7
+    }
+  ]
+}

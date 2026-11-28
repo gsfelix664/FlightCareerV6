@@ -1,0 +1,17 @@
+{
+  "skillOverrides": {
+    "dataviz": "off",
+    "artifact-capabilities": "off",
+    "artifact-diagramming": "off",
+    "keybindings-help": "off",
+    "claude-api": "off",
+    "plugin-authoring": "off",
+    "loop": "off",
+    "schedule": "off",
+    "init": "off",
+    "ship": "off",
+    "steward": "off",
+    "fewer-permission-prompts": "off",
+    "run": "off"
+  }
+}

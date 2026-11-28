@@ -22,14 +22,23 @@ namespace FlightCareer.Domain.Entities
         public DateTime? InsuranceExpirationDate { get; set; }
 
         // Manutenção Regulatória & TBO
-        public double EngineTboRemainingHours { get; set; } = 1800; // Horas restantes para overhaul do motor
-        public double HoursUntilNext50hInspection { get; set; } = 50;  // Inspeção de 50h
-        public double HoursUntilNext100hInspection { get; set; } = 100; // Inspeção de 100h
-        public double HoursUntilNext500hInspection { get; set; } = 500;  // Inspeção de 500h (Magnetos & Velas)
+        public double EngineTboRemainingHours { get; set; } = 500; // Horas restantes para overhaul do motor
+        public double HoursUntilNext50hInspection { get; set; } = 12;  // Troca de óleo (antiga 50h)
+        public double HoursUntilNext100hInspection { get; set; } = 25; // Inspeção anual (antiga 100h)
+        public double HoursUntilNext500hInspection { get; set; } = 125;  // Revisão de ignição (antiga 500h)
         public double MagnetosCondition { get; set; } = 100;            // Condição dos Magnetos & Ignição (0-100%)
         public double OilCondition { get; set; } = 100; // Saúde do Óleo e Sistema de Lubrificação (0-100%)
         public bool IsInterdicted { get; set; } = false;               // Aeronave interditada para voo
         public string InterdictionReason { get; set; } = string.Empty; // Motivo da interdição (ex: TBO vencido)
         public string Configuration { get; set; } = "Passageiro";     // "Passageiro", "Carga (Sem Assentos)"
+
+        // Barras de saúde individuais por componente (motor, óleo, pneus, freios...)
+        public List<AircraftComponent> Components { get; set; } = new();
+
+        // Peças individuais com saúde oculta (F2.1)
+        public List<AircraftPart> Parts { get; set; } = new();
+
+        /// <summary>Data UTC em que as peças individuais desta aeronave foram migradas das barras/colunas legadas.</summary>
+        public DateTime? PartsMigratedAtUtc { get; set; }
     }
 }

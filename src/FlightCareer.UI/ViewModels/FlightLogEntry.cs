@@ -74,6 +74,8 @@ namespace FlightCareer.UI.ViewModels
             "VOO_CONCLUIDO" => "#00E676",
             "CANCELADO_PELO_PILOTO" => "#FF5252",
             "RESTART" => "#FFB300",
+            "PERDA_TOTAL_DESTRUIDA" => "#FF5252",
+            "POUSO_FORCADO" => "#FFA726",
             _ => "#00E5FF"
         };
 
@@ -81,6 +83,8 @@ namespace FlightCareer.UI.ViewModels
         {
             "VOO_CONCLUIDO" => "#0D2B1E",
             "CANCELADO_PELO_PILOTO" => "#2E1214",
+            "PERDA_TOTAL_DESTRUIDA" => "#2E1214",
+            "POUSO_FORCADO" => "#2B1E0D",
             _ => "#1F2B37"
         };
 
@@ -89,6 +93,8 @@ namespace FlightCareer.UI.ViewModels
             "VOO_CONCLUIDO" => "✓ CONCLUÍDO",
             "CANCELADO_PELO_PILOTO" => "✕ CANCELADO",
             "RESTART" => "⚡ REINICIADO",
+            "PERDA_TOTAL_DESTRUIDA" => "✖ ACIDENTE",
+            "POUSO_FORCADO" => "⚠ POUSO FORÇADO",
             _ => Status
         };
 

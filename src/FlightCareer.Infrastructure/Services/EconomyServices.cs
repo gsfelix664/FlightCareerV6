@@ -17,6 +17,18 @@ namespace FlightCareer.Infrastructure.Services
 
         public static double CalculatePayout(double basePrice)
             => FlightCareer.Application.Services.InsuranceService.CalculatePayout(basePrice);
+
+        public static bool IsInsured(FlightCareer.Domain.Entities.PilotAircraft aircraft, System.DateTime careerClock)
+            => FlightCareer.Application.Services.InsuranceService.IsInsured(aircraft, careerClock);
+
+        public static System.DateTime CalculateNewExpirationDate(System.DateTime? currentExpiration, System.DateTime careerClock)
+            => FlightCareer.Application.Services.InsuranceService.CalculateNewExpirationDate(currentExpiration, careerClock);
+
+        public static bool ClaimDenied(FlightCareer.Domain.Entities.PilotAircraft a, out string reason)
+            => FlightCareer.Application.Services.InsuranceService.ClaimDenied(a, out reason);
+
+        public static bool ClaimDenied(FlightCareer.Domain.Entities.PilotAircraft a)
+            => FlightCareer.Application.Services.InsuranceService.ClaimDenied(a);
     }
 
     public static class FuelService

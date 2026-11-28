@@ -1,0 +1,6 @@
+# Banco de dados
+
+> Detalhes das armadilhas resumidas no `AGENTS.md` › 6. Leia antes de mexer nesta área; ao mudar o estado, atualize este arquivo.
+
+- **Sem migrations EF:** banco nasce com `EnsureCreatedAsync()` e evolui por `AppDbContext.EnsureSchemaUpdatedAsync()` (`ALTER TABLE` / `CREATE TABLE IF NOT EXISTS` idempotentes). Coluna nova = propriedade na entidade + `ALTER TABLE ... ADD COLUMN ... DEFAULT ...`. Tabela nova = `DbSet` + `CREATE TABLE IF NOT EXISTS` com os nomes e tipos que o EF geraria (teste de banco antigo: `ComponentPersistenceTests`).
+- **Contextos de longa duração (bug de cache/sobrescrita):** singletons (`MainViewModel`, `PilotRepository`, `FlightService`, `MissionGenerator`, `MarketViewModel`, `MarketSimulationService`, `FerryFlightViewModel`) com `AppDbContext` próprio guardam entidades em cache e um `SaveChanges` posterior sobrescreve dados de outros contextos. Código novo usa `IDbContextFactory<AppDbContext>` com contexto curto; nos contextos longos, chame `_context.ChangeTracker.Clear()` antes de ler para alterar; nunca altere entidade carregada por outro contexto esperando que o seu `SaveChanges` a grave (copie os valores para a entidade do seu contexto). Teste: `FlightPersistenceTests`.

@@ -32,15 +32,34 @@ namespace FlightCareer.Domain.Entities
         public bool IsAccepted { get; set; }
         public Guid? PilotId { get; set; }
 
-        // Categoria Regulatória Requerida e Tipo da Missão
+        // Fase Regulatória Requerida da Missão (Fases 1 a 7)
+        public CareerPhase RequiredPhase { get; set; } = CareerPhase.Phase1_FlightSchool;
+
+        // Coluna mantida no banco para compatibilidade com schema legado
+        [Obsolete("Utilize RequiredPhase")]
         public PilotCategory RequiredCategory { get; set; } = PilotCategory.Category1_FlightSchool;
 
-        // Mantido para compatibilidade com código existente
+        // Mantido para compatibilidade transitória
+        [Obsolete("Utilize RequiredPhase")]
         public CompanyTier RequiredTier
         {
-            get => (CompanyTier)(int)RequiredCategory;
-            set => RequiredCategory = (PilotCategory)(int)value;
+            get => (CompanyTier)(int)RequiredPhase;
+            set => RequiredPhase = (CareerPhase)(int)value;
         }
         public string MissionCategoryType { get; set; } = "Instrucao"; // Instrucao, SAE_Foto, SAE_Reboque, SAE_Carga, Taxi_Charter, etc.
+        /// <summary>Subcategoria do gerador (ex.: "3.4.1"): define a família de pagamento em mission_pay.json. Nulo em missões antigas.</summary>
+        public string? SubId { get; set; }
+
+        /// <summary>Número obrigatório de toques e arremetidas (TGL) exigidos na missão. 0 = não se aplica.</summary>
+        public int RequiredTouchAndGoes { get; set; }
+
+        /// <summary>Identificadores de pontos/aeródromos de sobrevoo obrigatório (ex.: "SBXX;SDYY;SNZZ"). Nulo/vazio = não se aplica.</summary>
+        public string? OverflyWaypoints { get; set; }
+
+        /// <summary>Parâmetros específicos do contrato serializados em JSON (geometria de pernas de levantamento ou zona/altitude de salto). Nulo em missões padrão.</summary>
+        public string? ContractData { get; set; }
+
+        public string? CargoKind { get; set; }
+        public string? CargoName { get; set; }
     }
 }

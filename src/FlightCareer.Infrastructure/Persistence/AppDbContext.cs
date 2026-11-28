@@ -16,7 +16,13 @@ namespace FlightCareer.Infrastructure.Persistence
         public DbSet<Mission> Missions { get; set; }
         public DbSet<FinancialTransaction> FinancialTransactions { get; set; }
         public DbSet<MarketListing> MarketListings { get; set; }
+        public DbSet<AircraftComponent> AircraftComponents { get; set; }
+        public DbSet<AircraftPart> AircraftParts { get; set; }
         public DbSet<AircraftDefect> AircraftDefects { get; set; }
+        public DbSet<AircraftLimitProfileEntity> AircraftLimitProfiles { get; set; }
+        public DbSet<AircraftLimitEntity> AircraftLimits { get; set; }
+        public DbSet<SimSyncState> SimSyncStates { get; set; }
+        public DbSet<SimAirportQueueItem> SimAirportQueue { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -34,15 +40,65 @@ namespace FlightCareer.Infrastructure.Persistence
                 .WithOne(pa => pa.Pilot)
                 .HasForeignKey(pa => pa.PilotId);
 
+            modelBuilder.Entity<PilotAircraft>()
+                .HasMany(pa => pa.Components)
+                .WithOne(c => c.PilotAircraft)
+                .HasForeignKey(c => c.PilotAircraftId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftComponent>()
+                .HasIndex(c => new { c.PilotAircraftId, c.Kind })
+                .IsUnique();
+
+            modelBuilder.Entity<PilotAircraft>()
+                .HasMany(pa => pa.Parts)
+                .WithOne(p => p.PilotAircraft)
+                .HasForeignKey(p => p.PilotAircraftId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftPart>()
+                .HasIndex(p => new { p.PilotAircraftId, p.PartId, p.EngineIndex })
+                .IsUnique();
+
+            modelBuilder.Entity<AircraftLimitProfileEntity>()
+                .HasMany(p => p.Limits)
+                .WithOne(l => l.Profile)
+                .HasForeignKey(l => l.ProfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AircraftLimitProfileEntity>()
+                .HasIndex(p => p.AircraftTypeModel)
+                .IsUnique();
+
             modelBuilder.Entity<Airport>()
                 .HasIndex(a => a.ICAO)
                 .IsUnique();
 
+            modelBuilder.Entity<SimSyncState>()
+                .ToTable("SimSyncStates")
+                .HasKey(s => s.Id);
+
+            modelBuilder.Entity<SimAirportQueueItem>()
+                .ToTable("SimAirportQueue")
+                .HasKey(q => q.Ident);
+
             modelBuilder.Entity<Pilot>()
                 .Ignore(p => p.CompanyTier);
 
+            modelBuilder.Entity<Pilot>()
+                .Property(p => p.CareerPhase)
+                .HasDefaultValue(CareerPhase.Phase1_FlightSchool);
+
             modelBuilder.Entity<Mission>()
                 .Ignore(m => m.RequiredTier);
+
+            modelBuilder.Entity<Mission>()
+                .Property(m => m.RequiredPhase)
+                .HasDefaultValue(CareerPhase.Phase1_FlightSchool);
+
+            modelBuilder.Entity<Mission>()
+                .Property(m => m.RequiredTouchAndGoes)
+                .HasDefaultValue(0);
 
             modelBuilder.Entity<MarketListing>(entity =>
             {
@@ -106,14 +162,40 @@ namespace FlightCareer.Infrastructure.Persistence
                 "UPDATE Missions SET RequiredCategory = RequiredTier WHERE RequiredTier IS NOT NULL AND (RequiredCategory IS NULL OR RequiredCategory = 1);",
                 "ALTER TABLE Missions ADD COLUMN MissionCategoryType TEXT DEFAULT 'Instrucao';",
 
+                // 7 Fases da Carreira por Nível de Experiência (FASES-1: 1→1, 2→2, 3→3, 4→5, 5→6)
+                "ALTER TABLE Pilots ADD COLUMN CareerPhase INTEGER DEFAULT 1;",
+                "UPDATE Pilots SET CareerPhase = CASE PilotCategory WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 3 THEN 3 WHEN 4 THEN 5 WHEN 5 THEN 6 ELSE 1 END WHERE PilotCategory IS NOT NULL AND (CareerPhase IS NULL OR CareerPhase = 1);",
+                "ALTER TABLE Missions ADD COLUMN RequiredPhase INTEGER DEFAULT 1;",
+                "UPDATE Missions SET RequiredPhase = CASE RequiredCategory WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 3 THEN 3 WHEN 4 THEN 5 WHEN 5 THEN 6 ELSE 1 END WHERE RequiredCategory IS NOT NULL AND (RequiredPhase IS NULL OR RequiredPhase = 1);",
+
                 // Cenário MSFS 2024 e Divergências de ICAO
                 "ALTER TABLE Airports ADD COLUMN IsInSimulator INTEGER DEFAULT 0;",
                 "ALTER TABLE Airports ADD COLUMN MsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Airports ADD COLUMN ElevationFt INTEGER DEFAULT 0;",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_IsInSimulator ON Airports(IsInSimulator);",
                 "CREATE INDEX IF NOT EXISTS IX_Airports_MsfsIdent ON Airports(MsfsIdent);",
+
+                // Sinais de Estrutura e Tier por Movimento (TIER-A)
+                "ALTER TABLE Airports ADD COLUMN IlsEnds INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN Approaches INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN Gates INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN CargoParking INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN HasTower INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN LongestRunwayFt INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN LongestRunwayPaved INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN TierScore INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN IsMilitary INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN CsvType TEXT DEFAULT NULL;",
+                "ALTER TABLE Airports ADD COLUMN ScheduledService INTEGER DEFAULT 0;",
+                "ALTER TABLE Airports ADD COLUMN TierRulesVersion INTEGER DEFAULT 0;",
                 "ALTER TABLE Missions ADD COLUMN OriginMsfsIdent TEXT DEFAULT '';",
                 "ALTER TABLE Missions ADD COLUMN DestinationMsfsIdent TEXT DEFAULT '';",
+                "ALTER TABLE Missions ADD COLUMN SubId TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN RequiredTouchAndGoes INTEGER DEFAULT 0;",
+                "ALTER TABLE Missions ADD COLUMN OverflyWaypoints TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN ContractData TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN CargoKind TEXT DEFAULT NULL;",
+                "ALTER TABLE Missions ADD COLUMN CargoName TEXT DEFAULT NULL;",
 
                 // Normalização de Dados Aeronáuticos e Correção de Bases Existentes
                 "UPDATE Airports SET Country = 'BR' WHERE (ICAO LIKE 'SB%' OR ICAO LIKE 'SS%' OR ICAO LIKE 'SW%' OR ICAO LIKE 'SD%' OR ICAO LIKE 'SJ%' OR ICAO LIKE 'SN%' OR ICAO LIKE 'SI%') AND (Country IN ('SB','SS','SW','SJ','SD','SI','SN') OR Country = '' OR Country IS NULL);",
@@ -154,6 +236,23 @@ namespace FlightCareer.Infrastructure.Persistence
                 "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsSold ON MarketListings(IsSold);",
                 "CREATE INDEX IF NOT EXISTS IX_MarketListings_IsPlayerOwned ON MarketListings(IsPlayerOwned);",
 
+                // Barras de saúde por componente (motor, óleo, ignição/seção quente, elétrico, trem, pneus, freios, célula)
+                @"CREATE TABLE IF NOT EXISTS AircraftComponents (
+                    Id TEXT NOT NULL CONSTRAINT PK_AircraftComponents PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    Kind INTEGER NOT NULL,
+                    Health REAL NOT NULL,
+                    HoursSinceOverhaul REAL NOT NULL,
+                    CyclesSinceOverhaul INTEGER NOT NULL,
+                    LastInspectionAirframeHours REAL NOT NULL,
+                    InspectionPrecision REAL NOT NULL,
+                    InspectionBias REAL NOT NULL,
+                    LastShopServiceAtUtc TEXT NULL,
+                    LastShopServiceAirframeHours REAL NULL,
+                    LastShopServiceAirframeCycles INTEGER NULL,
+                    CONSTRAINT FK_AircraftComponents_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
+                );",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftComponents_PilotAircraftId_Kind ON AircraftComponents(PilotAircraftId, Kind);",
                 // Panes persistentes (addon + nativas do simulador)
                 @"CREATE TABLE IF NOT EXISTS AircraftDefects (
                     Id TEXT NOT NULL PRIMARY KEY,
@@ -171,7 +270,111 @@ namespace FlightCareer.Infrastructure.Persistence
                     IsResolved INTEGER NOT NULL,
                     ResolvedAtUtc TEXT NULL
                 );",
-                "CREATE INDEX IF NOT EXISTS IX_AircraftDefects_PilotAircraftId_IsResolved ON AircraftDefects(PilotAircraftId, IsResolved);"
+                "CREATE INDEX IF NOT EXISTS IX_AircraftDefects_PilotAircraftId_IsResolved ON AircraftDefects(PilotAircraftId, IsResolved);",
+
+                // Catálogo de limites de aeronaves
+                @"CREATE TABLE IF NOT EXISTS AircraftLimitProfiles (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    AircraftTypeModel TEXT NOT NULL,
+                    Class TEXT NOT NULL,
+                    DataVersion INTEGER NOT NULL,
+                    SimMatchJson TEXT NOT NULL
+                );",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftLimitProfiles_AircraftTypeModel ON AircraftLimitProfiles(AircraftTypeModel);",
+                @"CREATE TABLE IF NOT EXISTS AircraftLimits (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    ProfileId TEXT NOT NULL,
+                    Key TEXT NOT NULL,
+                    Value REAL NOT NULL,
+                    Unit TEXT NOT NULL,
+                    Source INTEGER NOT NULL,
+                    Reference TEXT NOT NULL,
+                    Notes TEXT NULL,
+                    CONSTRAINT FK_AircraftLimits_AircraftLimitProfiles_ProfileId FOREIGN KEY (ProfileId) REFERENCES AircraftLimitProfiles (Id) ON DELETE CASCADE
+                );",
+                "CREATE INDEX IF NOT EXISTS IX_AircraftLimits_ProfileId ON AircraftLimits(ProfileId);",
+
+                // Características (features), contagem de motores e Peças com saúde oculta (F2.1)
+                "ALTER TABLE AircraftLimitProfiles ADD COLUMN FeaturesJson TEXT DEFAULT '[]';",
+                "ALTER TABLE AircraftLimitProfiles ADD COLUMN EngineCount INTEGER NOT NULL DEFAULT 1;",
+                "ALTER TABLE AircraftParts ADD COLUMN EngineIndex INTEGER NOT NULL DEFAULT 0;",
+                @"CREATE TABLE IF NOT EXISTS AircraftParts (
+                    Id TEXT NOT NULL PRIMARY KEY,
+                    PilotAircraftId TEXT NOT NULL,
+                    PartId TEXT NOT NULL,
+                    EngineIndex INTEGER NOT NULL DEFAULT 0,
+                    Health REAL NOT NULL,
+                    HoursSinceReplacement REAL NOT NULL,
+                    CyclesSinceReplacement INTEGER NOT NULL,
+                    LastReplacedAtUtc TEXT NOT NULL,
+                    LastReplacedAirframeHours REAL NOT NULL,
+                    Flag INTEGER NOT NULL,
+                    FlaggedBy INTEGER NOT NULL,
+                    FlaggedAtUtc TEXT NULL,
+                    IsBroken INTEGER NOT NULL,
+                    BrokenAtUtc TEXT NULL,
+                    LastShopServiceAtUtc TEXT NULL,
+                    LastShopServiceAirframeHours REAL NULL,
+                    LastShopServiceCycles INTEGER NULL,
+                    FlaggedAirframeHours REAL NULL,
+                    KnownHealth REAL NULL,
+                    KnownAtAirframeHours REAL NULL,
+                    FoundRedAtAnnualAirframeHours REAL NULL,
+                    CONSTRAINT FK_AircraftParts_PilotAircrafts_PilotAircraftId FOREIGN KEY (PilotAircraftId) REFERENCES PilotAircrafts (Id) ON DELETE CASCADE
+                );",
+                "DROP INDEX IF EXISTS IX_AircraftParts_PilotAircraftId_PartId;",
+                "CREATE UNIQUE INDEX IF NOT EXISTS IX_AircraftParts_PilotAircraftId_PartId_EngineIndex ON AircraftParts(PilotAircraftId, PartId, EngineIndex);",
+
+                // Migração de peças e rastreamento de serviço de oficina (F2.3)
+                "ALTER TABLE PilotAircrafts ADD COLUMN PartsMigratedAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftComponents ADD COLUMN LastShopServiceAirframeCycles INTEGER NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAtUtc TEXT NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN LastShopServiceCycles INTEGER NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN FlaggedAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN KnownHealth REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN KnownAtAirframeHours REAL NULL;",
+                "ALTER TABLE AircraftParts ADD COLUMN FoundRedAtAnnualAirframeHours REAL NULL;",
+
+                // Compressão de tempo ÷ 4: limites regulatórios de inspeção e TBO para carreiras existentes (CALIBRA-F4)
+                "UPDATE PilotAircrafts SET HoursUntilNext50hInspection = 12.0 WHERE HoursUntilNext50hInspection > 12.0;",
+                "UPDATE PilotAircrafts SET HoursUntilNext100hInspection = 25.0 WHERE HoursUntilNext100hInspection > 25.0;",
+                "UPDATE PilotAircrafts SET HoursUntilNext500hInspection = 125.0 WHERE HoursUntilNext500hInspection > 125.0;",
+                "UPDATE PilotAircrafts SET EngineTboRemainingHours = 900.0 WHERE EngineTboRemainingHours > 900.0 AND (EXISTS (SELECT 1 FROM AircraftComponents ac WHERE ac.PilotAircraftId = PilotAircrafts.Id AND ac.Kind = 3) OR EXISTS (SELECT 1 FROM AircraftTypes at WHERE at.Id = PilotAircrafts.AircraftTypeId AND (at.FuelType LIKE '%JET%' OR at.Type LIKE '%Turboprop%' OR at.Type LIKE '%Jet%')));",
+                "UPDATE PilotAircrafts SET EngineTboRemainingHours = 500.0 WHERE EngineTboRemainingHours > 500.0 AND NOT (EXISTS (SELECT 1 FROM AircraftComponents ac WHERE ac.PilotAircraftId = PilotAircrafts.Id AND ac.Kind = 3) OR EXISTS (SELECT 1 FROM AircraftTypes at WHERE at.Id = PilotAircrafts.AircraftTypeId AND (at.FuelType LIKE '%JET%' OR at.Type LIKE '%Turboprop%' OR at.Type LIKE '%Jet%')));",
+
+                // Relógio de carreira por piloto (CALENDARIO-JOGO)
+                "ALTER TABLE Pilots ADD COLUMN CareerClockUtc TEXT NULL;",
+                "UPDATE Pilots SET CareerClockUtc = datetime('now') WHERE CareerClockUtc IS NULL OR CareerClockUtc = '';",
+
+                // Cabine conversível por tipo de aeronave (CABINE)
+                "ALTER TABLE AircraftTypes ADD COLUMN HasConvertibleCabin INTEGER NOT NULL DEFAULT 0;",
+
+                // Sincronização de Aeroportos com o Simulador (AIRSIM-1)
+                "ALTER TABLE Airports ADD COLUMN Source TEXT DEFAULT '';",
+                "ALTER TABLE Airports ADD COLUMN SimRegion TEXT DEFAULT NULL;",
+                "ALTER TABLE Airports ADD COLUMN SimFingerprint TEXT DEFAULT NULL;",
+                "ALTER TABLE Airports ADD COLUMN SimCheckedUtc TEXT DEFAULT NULL;",
+                @"CREATE TABLE IF NOT EXISTS SimSyncStates (
+                    Id INTEGER PRIMARY KEY,
+                    SimVersion TEXT NOT NULL DEFAULT '',
+                    ListDigest TEXT NOT NULL DEFAULT '',
+                    LastListUtc TEXT NULL,
+                    ListCount INTEGER NOT NULL DEFAULT 0
+                );",
+                @"CREATE TABLE IF NOT EXISTS SimAirportQueue (
+                    Ident TEXT PRIMARY KEY,
+                    Region TEXT NOT NULL DEFAULT '',
+                    Latitude REAL NOT NULL DEFAULT 0,
+                    Longitude REAL NOT NULL DEFAULT 0,
+                    AltitudeM REAL NOT NULL DEFAULT 0,
+                    Fingerprint TEXT NOT NULL DEFAULT '',
+                    Priority INTEGER NOT NULL DEFAULT 0,
+                    Attempts INTEGER NOT NULL DEFAULT 0,
+                    EnqueuedUtc TEXT NOT NULL
+                );"
             };
 
             foreach (var stmt in migrationStatements)

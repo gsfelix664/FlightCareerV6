@@ -1,0 +1,87 @@
+<Window x:Class="FlightCareer.UI.Views.ObjectiveCardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="FlightCareer - Objetivo do Voo"
+        Width="320"
+        SizeToContent="Height"
+        Topmost="True"
+        ShowActivated="False"
+        AllowsTransparency="True"
+        WindowStyle="None"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        WindowStartupLocation="Manual">
+
+    <Border CornerRadius="6" Background="#E60B1118"
+            BorderBrush="#00E5FF" BorderThickness="1"
+            MouseLeftButtonDown="Window_MouseLeftButtonDown">
+        <Grid Margin="12,10,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Cabeçalho -->
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🎯" FontSize="13" Foreground="#00E5FF" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="OBJETIVO" FontWeight="Bold" FontSize="12" Foreground="#00E5FF"
+                               FontFamily="Segoe UI" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <Button Grid.Column="1" Content="✕" Width="20" Height="20"
+                        Background="Transparent" BorderThickness="0" Foreground="#94A3B8" FontSize="11" Cursor="Hand"
+                        ToolTip="Ocultar (Ctrl+Alt+O)"
+                        Click="CloseButton_Click"/>
+            </Grid>
+
+            <!-- Mensagem quando não há voo -->
+            <TextBlock Grid.Row="1" Text="{Binding EmptyMessage}" Foreground="#94A3B8" FontSize="11.5"
+                       FontFamily="Segoe UI" Margin="2,4,2,4"
+                       Visibility="{Binding HasFlight, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+
+            <!-- Lista de Missões -->
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding Missions}" Margin="0,0,0,6"
+                          Visibility="{Binding HasFlight, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="0,0,0,6">
+                            <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="12.5" Foreground="#FFFFFF"
+                                       FontFamily="Segoe UI" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding Route}" FontSize="11" Foreground="#94A3B8"
+                                       FontFamily="Segoe UI" Margin="0,1,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- Lista de Objetivos -->
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding Objectives}"
+                          Visibility="{Binding HasFlight, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,2,0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Icon}" FontWeight="Bold" FontSize="12"
+                                       Foreground="{Binding Brush}" VerticalAlignment="Top" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="12"
+                                       Foreground="{Binding Brush}" FontFamily="Segoe UI" TextWrapping="Wrap"
+                                       VerticalAlignment="Center"/>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Border>
+</Window>

@@ -86,6 +86,33 @@ namespace FlightCareer.Domain.Entities
         // Simulação e Tempo (1 double)
         public double SimulationRate;        // Taxa de simulação (1.0, 2.0, 4.0, etc.)
 
+        // Estado de Falhas e Chaves para Enforcement (6 doubles)
+        public double PartialPanelVacuum;    // PARTIAL PANEL VACUUM (0=OK, 1=Falha, 2=Apagado)
+        public double PartialPanelPitot;     // PARTIAL PANEL PITOT
+        public double PartialPanelAltimeter; // PARTIAL PANEL ALTIMETER. Era "PARTIAL PANEL STATIC", que não existe no SDK: o MSFS rejeitava o datum e deslocava todos os campos seguintes (2026-11-14)
+        public double LeftMagneto;           // RECIP ENG LEFT MAGNETO:1 (1=On)
+        public double RightMagneto;          // RECIP ENG RIGHT MAGNETO:1 (1=On)
+        public double MasterAlternator;      // GENERAL ENG MASTER ALTERNATOR:1 (1=On)
+
+        // Estado de falha elétrica (1 double)
+        public double PartialPanelElectrical; // PARTIAL PANEL ELECTRICAL (0=OK, 1=Falha)
+
+        // Realismo e Ambiente (XP-NOVO) (6 doubles)
+        public double RealismCrashDetection;  // REALISM CRASH DETECTION (Bool, 1=On)
+        public double AutoCoordination;       // AUTO COORDINATION (Bool, 1=On)
+        public double Realism;                // REALISM (Number, 0-100)
+        public double AmbientVisibility;      // AMBIENT VISIBILITY (Meters)
+        public double AmbientInCloud;         // AMBIENT IN CLOUD (Bool, 1=On)
+        public double DensityAltitude;        // DENSITY ALTITUDE (Feet)
+
+        // Alertas e Luzes para Infrações de XP (XP-PONTAS) (3 doubles)
+        public double StallWarning;           // STALL WARNING (Bool, 1=Active)
+        public double LightLanding;           // LIGHT LANDING (Bool, 1=On)
+        public double LightTaxi;              // LIGHT TAXI (Bool, 1=On)
+
+        // Navegação e Vento (VOO-VENTO-INSTRUCAO) (1 double)
+        public double PlaneHeadingTrue;       // PLANE HEADING DEGREES TRUE (degrees)
+
         // --- PROPRIEDADES CALCULADAS (NÃO AFETAM LAYOUT DO STRUCT) ---
         public double PlaneLatitude => Latitude;
         public double PlaneLongitude => Longitude;
@@ -104,11 +131,17 @@ namespace FlightCareer.Domain.Entities
         public bool IsPrecipitating => AmbientPrecipState > 0.5;
         public bool IsCarbHeatOn => EngAntiIce > 0.5;
         public bool HasCarbHeat => CarbHeatAvailable > 0.5;
+        public bool IsCrashDetectionOn => RealismCrashDetection > 0.5;
+        public bool IsAutoCoordinationOn => AutoCoordination > 0.5;
+        public bool IsInCloud => AmbientInCloud > 0.5;
+        public bool IsStallWarning => StallWarning > 0.5;
+        public bool IsLandingLightOn => LightLanding > 0.5;
+        public bool IsTaxiLightOn => LightTaxi > 0.5;
         public double CrosswindComponentKnots
         {
             get
             {
-                double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
+                double angleDiff = (AmbientWindDirection - PlaneHeadingTrue) * (Math.PI / 180.0);
                 return Math.Abs(AmbientWindVelocity * Math.Sin(angleDiff));
             }
         }
@@ -116,7 +149,7 @@ namespace FlightCareer.Domain.Entities
         {
             get
             {
-                double angleDiff = (AmbientWindDirection - PlaneHeading) * (Math.PI / 180.0);
+                double angleDiff = (AmbientWindDirection - PlaneHeadingTrue) * (Math.PI / 180.0);
                 return -AmbientWindVelocity * Math.Cos(angleDiff);
             }
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FlightCareer.Domain.Components;
 
 namespace FlightCareer.Domain.Services
 {
@@ -10,9 +11,9 @@ namespace FlightCareer.Domain.Services
     {
         /// <summary>Sem efeito no simulador (apenas registro/interdição).</summary>
         None,
-        /// <summary>Evento TOGGLE_* nativo, reenviado uma vez a cada carregamento de aeronave.</summary>
+        /// <summary>Evento TOGGLE_* nativo (ou toggle de conexão de barramento), reaplicado a cada carregamento de aeronave.</summary>
         NativeToggle,
-        /// <summary>Vigilância contínua de SimVar com correção imediata (+ bloqueio de comandos quando aplicável).</summary>
+        /// <summary>Vigilância contínua de SimVar/superfície com correção imediata (+ bloqueio de comandos quando aplicável).</summary>
         Watchdog
     }
 
@@ -47,6 +48,16 @@ namespace FlightCareer.Domain.Services
         public const string BrakesWorn = "BRAKES_WORN";
         public const string Pressurization = "PRESSURIZATION";
         public const string OilLeak = "OIL_LEAK";
+        public const string Electrical = "ELECTRICAL";
+        public const string BrakeFailure = "BRAKE_FAILURE";
+        public const string Hydraulic = "HYDRAULIC";
+        public const string Structural = "STRUCTURAL";
+        // Panes que só o wear and tear nativo gera hoje (native-wear-mapping.md, Tabela 2)
+        public const string Battery = "BATTERY";
+        public const string TireFlat = "TIRE_FLAT";
+        public const string FlightControl = "FLIGHT_CONTROL";
+        public const string FuelSystem = "FUEL_SYSTEM";
+        public const string Autopilot = "AUTOPILOT";
 
         private static readonly Dictionary<string, DefectSpec> Specs = new()
         {
@@ -54,7 +65,7 @@ namespace FlightCareer.Domain.Services
             [MagnetoRight] = new(MagnetoRight, "Magneto direito inoperante", true, 1200, DefectEnforcement.Watchdog),
             [FlapLock] = new(FlapLock, "Flaps travados", false, 1500, DefectEnforcement.Watchdog),
             [FlapDamage] = new(FlapDamage, "Flaps danificados por velocidade", false, 2500, DefectEnforcement.Watchdog),
-            [Alternator] = new(Alternator, "Alternador inoperante", true, 900, DefectEnforcement.Watchdog),
+            [Alternator] = new(Alternator, "Alternador inoperante", true, 900, DefectEnforcement.NativeToggle, "ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE"),
             [Vacuum] = new(Vacuum, "Bomba de vácuo inoperante", false, 750, DefectEnforcement.NativeToggle, "TOGGLE_VACUUM_FAILURE"),
             [Pitot] = new(Pitot, "Tubo de pitot obstruído", false, 250, DefectEnforcement.NativeToggle, "TOGGLE_PITOT_BLOCKAGE"),
             [StaticPort] = new(StaticPort, "Tomada estática obstruída", false, 200, DefectEnforcement.NativeToggle, "TOGGLE_STATIC_PORT_BLOCKAGE"),
@@ -67,10 +78,63 @@ namespace FlightCareer.Domain.Services
             [BrakesWorn] = new(BrakesWorn, "Freios gastos abaixo do limite", true, 600, DefectEnforcement.None),
             [Pressurization] = new(Pressurization, "Sistema de pressurização inoperante", true, 3500, DefectEnforcement.None),
             [OilLeak] = new(OilLeak, "Vazamento de óleo do motor", true, 900, DefectEnforcement.None),
+            [Electrical] = new(Electrical, "Pane elétrica (curto no chicote)", true, 1500, DefectEnforcement.NativeToggle, "TOGGLE_ELECTRICAL_FAILURE"),
+            [BrakeFailure] = new(BrakeFailure, "Sistema de freios inoperante", true, 800, DefectEnforcement.None),
+            [Hydraulic] = new(Hydraulic, "Vazamento hidráulico", true, 2500, DefectEnforcement.None),
+            [Structural] = new(Structural, "Trinca estrutural", true, 6000, DefectEnforcement.None),
+            [Battery] = new(Battery, "Bateria inoperante", true, 600, DefectEnforcement.None),
+            [TireFlat] = new(TireFlat, "Pneu murcho", true, 200, DefectEnforcement.None),
+            [FlightControl] = new(FlightControl, "Comando de voo danificado", true, 3000, DefectEnforcement.None),
+            [FuelSystem] = new(FuelSystem, "Sistema de combustível inoperante", true, 1500, DefectEnforcement.None),
+            [Autopilot] = new(Autopilot, "Piloto automático inoperante", false, 2000, DefectEnforcement.None),
         };
 
-        public static DefectSpec Get(string code) =>
-            Specs.TryGetValue(code, out var spec) ? spec : new DefectSpec(code, code, true, 1000, DefectEnforcement.None);
+        /// <summary>
+        /// Pane do sistema de componentes (efeito no sim + componente + gravidade) → pane persistente.
+        /// null = não gera discrepância (só dano no componente, ex.: perda parcial de potência, velas encharcadas).
+        /// </summary>
+        public static string? CodeFor(FailureEffect effect, ComponentKind? kind, bool critical)
+        {
+            // Pneu estourado usa o efeito de freio de um lado no sim, mas a pane é do pneu
+            if (kind == ComponentKind.Tires && critical) return TireBlowout;
+
+            switch (effect)
+            {
+                case FailureEffect.EngineFailure: return EngineFailure;
+                case FailureEffect.EngineFire: return EngineFire;
+                case FailureEffect.OilLeak: return OilLeak;
+                case FailureEffect.MagnetoLeft: return MagnetoLeft;
+                case FailureEffect.MagnetoRight: return MagnetoRight;
+                case FailureEffect.AlternatorOff: return Alternator;
+                case FailureEffect.ElectricalFailure: return Electrical;
+                case FailureEffect.VacuumFailure: return Vacuum;
+                case FailureEffect.PitotBlockage: return Pitot;
+                case FailureEffect.StaticBlockage: return StaticPort;
+                case FailureEffect.FlapJam: return FlapLock;
+                case FailureEffect.BrakeFailureOneSide:
+                case FailureEffect.BrakeFailureTotal: return BrakeFailure;
+                case FailureEffect.HydraulicFailure: return Hydraulic;
+            }
+
+            // Sem efeito no sim: só as críticas viram discrepância
+            if (!critical) return null;
+            return kind switch
+            {
+                ComponentKind.Engine or ComponentKind.HotSection => EngineDamage,
+                ComponentKind.LandingGear => GearCollapse,
+                ComponentKind.Airframe => Structural,
+                _ => null
+            };
+        }
+
+        public static bool IsInspection(string code) => code.EndsWith("_INSPECTION", StringComparison.Ordinal);
+
+        public static DefectSpec Get(string code)
+        {
+            if (Specs.TryGetValue(code, out var spec)) return spec;
+            if (IsInspection(code)) return new DefectSpec(code, "Inspeção pendente", false, 400, DefectEnforcement.None);
+            return new DefectSpec(code, code, true, 1000, DefectEnforcement.None);
+        }
 
         /// <summary>
         /// Custo de reparo escalado pelo valor da aeronave (peças de turbina/jato custam mais que de um C152).

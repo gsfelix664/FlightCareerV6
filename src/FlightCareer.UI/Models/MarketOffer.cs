@@ -18,13 +18,22 @@ namespace FlightCareer.UI.Models
         public double FuelAmount { get; set; }
 
         public int YearOfManufacture { get; set; } = 1995;
-        public double TsmoHours { get; set; } = 450;
-        public double TboHours { get; set; } = 1800;
+        public double TsmoHours { get; set; } = 0;
+        public double TboHours { get; set; } = 500;
         public string StructuralIncidentHistory { get; set; } = "Sem histórico de incidentes estruturais";
         public string CategoryBadge { get; set; } = "Monomotor Pistão";
 
         public double AverageCondition => (EngineCondition + TiresCondition + AirframeCondition + AvionicsCondition) / 4.0;
         public double EstimatedPostBuyCost => Math.Round(Math.Max(0, (100 - AverageCondition) * 120.0), 2);
+
+        public string AirframeConditionText => MarketConditionHelper.ConditionText(AirframeCondition);
+        public string AirframeConditionColor => MarketConditionHelper.ConditionColor(AirframeCondition);
+        public string EngineConditionText => MarketConditionHelper.ConditionText(EngineCondition);
+        public string EngineConditionColor => MarketConditionHelper.ConditionColor(EngineCondition);
+        public string TiresConditionText => MarketConditionHelper.ConditionText(TiresCondition);
+        public string TiresConditionColor => MarketConditionHelper.ConditionColor(TiresCondition);
+        public string AvionicsConditionText => MarketConditionHelper.ConditionText(AvionicsCondition);
+        public string AvionicsConditionColor => MarketConditionHelper.ConditionColor(AvionicsCondition);
         
         // Preço baseado no estado (ex: uma aeronave 100% custa o preço cheio, 70% custa proporcional)
         public double SalePrice { get; set; }

@@ -70,11 +70,53 @@ namespace FlightCareer.Application.Services
                     ProcessCategory(regionKey, regionObj, "HealthHubs", HubType.Health, _healthHubs);
                 }
 
+                LoadTrainingAerodromes();
+
                 System.Diagnostics.Debug.WriteLine($"[HubDataService] Carregados com sucesso: {_instructionHubs.Count} Instruction, {_cargoHubs.Count} Cargo, {_executiveHubs.Count} Exec, {_commercialPaxHubs.Count} Pax, {_maintenanceHubs.Count} Maint, {_feederHubs.Count} Feeder, {_agroHubs.Count} Agro, {_healthHubs.Count} Health hubs.");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[HubDataService] Erro ao carregar hubs_data.json: {ex.Message}");
+            }
+        }
+
+        private void LoadTrainingAerodromes()
+        {
+            try
+            {
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Data", "places", "training_aerodromes.json");
+                if (!File.Exists(filePath))
+                {
+                    filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "places", "training_aerodromes.json");
+                }
+                if (!File.Exists(filePath))
+                {
+                    filePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "FlightCareer.Infrastructure", "Data", "places", "training_aerodromes.json");
+                }
+                if (!File.Exists(filePath))
+                {
+                    filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "FlightCareer.Infrastructure", "Data", "places", "training_aerodromes.json");
+                }
+
+                if (!File.Exists(filePath)) return;
+
+                using var stream = File.OpenRead(filePath);
+                using var doc = JsonDocument.Parse(stream);
+                if (doc.RootElement.TryGetProperty("aerodromes", out var arrayElem) && arrayElem.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var elem in arrayElem.EnumerateArray())
+                    {
+                        var icao = elem.GetProperty("icao").GetString()?.Trim().ToUpperInvariant();
+                        if (!string.IsNullOrEmpty(icao))
+                        {
+                            _instructionHubs.Add(icao);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[HubDataService] Erro ao carregar training_aerodromes.json: {ex.Message}");
             }
         }
 

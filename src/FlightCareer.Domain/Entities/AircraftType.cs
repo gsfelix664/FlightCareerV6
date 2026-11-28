@@ -17,5 +17,6 @@ namespace FlightCareer.Domain.Entities
         public int MinRunwayLength { get; set; }
         public int ServiceCeiling { get; set; }
         public string FuelType { get; set; } = string.Empty;
+        public bool HasConvertibleCabin { get; set; }
     }
 }

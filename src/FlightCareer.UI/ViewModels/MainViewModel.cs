@@ -1,5 +1,8 @@
+using FlightCareer.Domain.Missions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Economy;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
 using FlightCareer.Domain.Services;
@@ -49,7 +52,12 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private double _destLon;
         [ObservableProperty] private string _currentView = "Missions";
         [ObservableProperty] private Guid? _activeAircraftId;
-        [ObservableProperty] private PilotCategory _pilotCategory = PilotCategory.Category1_FlightSchool;
+        [ObservableProperty] private CareerPhase _careerPhase = CareerPhase.Phase1_FlightSchool;
+        public PilotCategory PilotCategory
+        {
+            get => (PilotCategory)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
+        }
 
         // Filtros e Busca da Tabela de Missões
         [ObservableProperty] private string _selectedCategoryFilter = "TODOS";
@@ -124,18 +132,23 @@ namespace FlightCareer.UI.ViewModels
 
         public CompanyTier CompanyTier
         {
-            get => (CompanyTier)(int)PilotCategory;
-            set => PilotCategory = (PilotCategory)(int)value;
+            get => (CompanyTier)(int)CareerPhase;
+            set => CareerPhase = (CareerPhase)(int)value;
         }
 
-        public string PilotCategoryDisplay => PilotCategory.GetDisplayName();
-        public string PilotCategoryBadge => PilotCategory.GetShortName();
-        public string PilotCategoryColor => PilotCategory.GetBadgeColor();
+        public string CareerPhaseStatusDisplay => CareerPhase.FormatPhaseStatus(PilotLevel);
+        public string CareerPhaseDisplay => CareerPhase.GetDisplayName();
+        public string CareerPhaseBadge => CareerPhase.GetShortName();
+        public string CareerPhaseColor => CareerPhase.GetBadgeColor();
 
         // Aliases para compatibilidade XAML
-        public string CompanyTierDisplay => PilotCategoryDisplay;
-        public string CompanyTierBadge => PilotCategoryBadge;
-        public string CompanyTierColor => PilotCategoryColor;
+        public string PilotCategoryDisplay => CareerPhaseStatusDisplay;
+        public string PilotCategoryBadge => CareerPhaseBadge;
+        public string PilotCategoryColor => CareerPhaseColor;
+
+        public string CompanyTierDisplay => CareerPhaseStatusDisplay;
+        public string CompanyTierBadge => CareerPhaseBadge;
+        public string CompanyTierColor => CareerPhaseColor;
         
         partial void OnSelectedMissionChanged(Mission? value)
         {
@@ -217,7 +230,8 @@ namespace FlightCareer.UI.ViewModels
         public FinanceViewModel Finance => _financeViewModel;
         public FlightLogsViewModel FlightLogs => _flightLogsViewModel;
         public string CashDisplay => $"$ {Balance:N2}";
-        public string RankDisplay => Rank?.ToUpper() ?? "STUDENT";
+        public int PilotLevel => FlightCareer.Domain.Xp.PilotLevel.ForXp(ExperiencePoints);
+        public string RankDisplay => $"{Rank?.ToUpper() ?? "STUDENT"} · NÍVEL {PilotLevel}";
         public double XpProgress => (TotalHours % 100);
         public string CurrentLocation => $"{CurrentAirportICAO} - {CurrentAirportName}";
 
@@ -349,14 +363,34 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonColor));
             };
             _flightMonitor.OnAlert += (title, msg, isError) => {
-                // BeginInvoke: o alerta não pode travar o monitor de voo enquanto a janela estiver aberta
-                System.Windows.Application.Current.Dispatcher.BeginInvoke(() => {
-                    System.Windows.MessageBox.Show(msg, title, System.Windows.MessageBoxButton.OK, isError ? System.Windows.MessageBoxImage.Error : System.Windows.MessageBoxImage.Information);
-                });
+                // Overlay por cima do simulador (não modal): o alerta não trava o monitor de voo nem tira o foco do MSFS
+                ShowFlightMessage(title, msg, isError ? AlertKind.Error : AlertKind.Info);
             };
             _flightMonitor.OnFlightFinished += OnFlightFinished;
             _flightMonitor.OnTotalLoss += OnTotalLoss;
             _flightMonitor.OnMonitoringCancelled += OnMonitoringCancelled;
+            _flightMonitor.OnFuelTruckCharged += aircraftId =>
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() => RefreshAfterFuelTruckAsync(aircraftId));
+        }
+
+        /// <summary>
+        /// O caminhão de combustível foi cobrado em outro contexto: recarrega saldo e aeronave rastreados por este
+        /// contexto longo, para que um SaveChanges posterior não grave valores antigos (AGENTS.md › 6).
+        /// </summary>
+        private async Task RefreshAfterFuelTruckAsync(Guid aircraftId)
+        {
+            try
+            {
+                await RefreshPilotBalanceAsync();
+                // Em voo monitorado a mesma entidade é a do FlightMonitor (já atualizada em memória): não recarregar
+                if (_flightMonitor.IsMonitoring) return;
+                var tracked = _context.PilotAircrafts.Local.FirstOrDefault(a => a.Id == aircraftId);
+                if (tracked != null) await _context.Entry(tracked).ReloadAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MainViewModel] Falha ao recarregar após o caminhão de combustível: {ex.Message}");
+            }
         }
 
         private void OnMonitoringCancelled()
@@ -372,6 +406,15 @@ namespace FlightCareer.UI.ViewModels
             });
         }
 
+        /// <summary>Mensagens do voo vão para o overlay por cima do simulador (AlertOverlayService).</summary>
+        private static void ShowFlightMessage(string title, string message, AlertKind kind, bool sticky = false)
+        {
+            var provider = ((App)System.Windows.Application.Current).ServiceProvider;
+            Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<Services.AlertOverlayService>(provider)
+                .Show(title, message, kind, sticky);
+        }
+
         private void OnTotalLoss(PilotAircraft aircraft)
         {
             System.Windows.Application.Current.Dispatcher.Invoke(async () => {
@@ -381,7 +424,7 @@ namespace FlightCareer.UI.ViewModels
                 OnPropertyChanged(nameof(StartFlightButtonText));
                 OnPropertyChanged(nameof(StartFlightButtonColor));
 
-                System.Windows.MessageBox.Show($"PERDA TOTAL! A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída.\n\nVerifique seu hangar para acionar o seguro.", "Crash - Perda Total", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                ShowFlightMessage("CRASH - PERDA TOTAL", $"A aeronave {aircraft.Prefix} sofreu danos catastróficos e foi destruída. Verifique seu hangar para acionar o seguro.", AlertKind.Error);
                 
                 await InitializeForPilotAsync(PilotName);
             });
@@ -491,13 +534,20 @@ namespace FlightCareer.UI.ViewModels
         private void ShowOverlay()
         {
             var overlayWindow = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<Views.DebugOverlayWindow>(((App)System.Windows.Application.Current).ServiceProvider);
+            if (overlayWindow.DataContext is DebugOverlayViewModel overlayViewModel)
+            {
+                overlayViewModel.AcceptedMissions = ActiveMissions;
+            }
             overlayWindow.Show();
             overlayWindow.Activate();
         }
 
         private async Task RefreshBriefingAircraftAsync()
         {
+            // Sem rastreamento: o _context é de longa duração e devolvia o avião em cache, com o combustível
+            // de antes de abastecer no Hangar (o briefing seguia conferindo a quantidade antiga).
             var pilot = await _context.Pilots
+                .AsNoTracking()
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)
                 .FirstOrDefaultAsync(p => p.Name == PilotName);
@@ -539,7 +589,7 @@ namespace FlightCareer.UI.ViewModels
                 {
                     var result = System.Windows.MessageBox.Show(
                         $"ATENÇÃO: Esta carga foi transportada de {mission.OriginICAO} até {CurrentAirportICAO}.\n\n" +
-                        "Se você descarregar agora, você NÃO receberá o pagamento por este transporte e a missão voltará ao mercado local com valor atualizado.\n\n" +
+                        "Se você descarregar agora, você NÃO receberá o pagamento por este transporte e a missão voltará ao mercado local, com o mesmo valor, saindo daqui.\n\n" +
                         "Deseja realmente descarregar e cancelar?", 
                         "Confirmar Descarregamento", 
                         System.Windows.MessageBoxButton.YesNo, 
@@ -564,7 +614,9 @@ namespace FlightCareer.UI.ViewModels
                 // Persistência: A carga agora está no aeroporto atual
                 mission.OriginICAO = CurrentAirportICAO;
 
-                // Recalcular distância e recompensa do novo ponto de origem até o destino
+                // Distância restante a partir do aeroporto atual. O valor da missão NÃO é recalculado: antes ele era
+                // sorteado de novo (flutuação de mercado) e com a família errada (título no lugar do subId), e remover
+                // e aceitar de novo mudava o pagamento.
                 var origin = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.OriginICAO);
                 var dest = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
 
@@ -572,23 +624,11 @@ namespace FlightCareer.UI.ViewModels
                 {
                     double newDist = Domain.Utils.LocationUtils.CalculateDistance(origin.Latitude, origin.Longitude, dest.Latitude, dest.Longitude);
                     mission.DistanceNM = Math.Round(newDist, 0);
-                    
-                    // Recalcular usando a lógica do gerador
-                    if (_missionGenerator is MissionGenerator mg)
-                    {
-                        mission.RewardMoney = mg.CalculateReward(
-                            newDist, 
-                            mission.PayloadLbs, 
-                            mission.Urgency, 
-                            mission.Title, 
-                            mission.PassengerCount, 
-                            origin.Tier, 
-                            dest.Tier);
-                        mission.ExperienceGain = (int)(newDist * 0.5 * mission.Urgency);
-                    }
+                    mission.ExperienceGain = (int)(newDist * 0.5 * mission.Urgency);
                 }
 
                 AvailableMissions.Add(mission);
+                await StageMissionStateAsync(mission);
                 await _context.SaveChangesAsync();
 
                 try
@@ -596,10 +636,10 @@ namespace FlightCareer.UI.ViewModels
                     var pilots = await _pilotRepository.GetAllAsync();
                     var p = pilots.FirstOrDefault(x => x.Name == PilotName);
                     var activeAircraft = p?.Hangar.FirstOrDefault(a => a.Id == p.ActiveAircraftId);
-                    var pCat = p?.PilotCategory ?? PilotCategory.Category1_FlightSchool;
+                    var pPhase = p?.CareerPhase ?? CareerPhase.Phase1_FlightSchool;
                     var originAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.OriginICAO);
                     var destAirport = await _context.Airports.FirstOrDefaultAsync(a => a.ICAO == mission.DestinationICAO);
-                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pCat, originAirport);
+                    var item = new MissionDisplayItem(mission, destAirport, activeAircraft, pPhase, originAirport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     _allMissionDisplayItems.Add(item);
                     ApplyMissionFilters();
@@ -617,22 +657,7 @@ namespace FlightCareer.UI.ViewModels
             // 1. Categoria
             if (!string.IsNullOrWhiteSpace(SelectedCategoryFilter) && SelectedCategoryFilter != "TODOS")
             {
-                query = query.Where(m =>
-                {
-                    if (SelectedCategoryFilter == "TÁXI AÉREO")
-                        return m.MissionCategoryType.Contains("Táxi", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Charter", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "LINHA REGIONAL")
-                        return m.MissionCategoryType.Contains("Linha Regional", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "LINHA REGULAR")
-                        return m.MissionCategoryType.Contains("Linha Regular", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Heavy", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "CARGA / SAE")
-                        return m.MissionCategoryType.Contains("Carga", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("SAE", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "INSTRUÇÃO")
-                        return m.MissionCategoryType.Contains("Instrução", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Treinamento", StringComparison.OrdinalIgnoreCase);
-                    if (SelectedCategoryFilter == "MÉDICA / ESPECIAL")
-                        return m.MissionCategoryType.Contains("Saúde", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Remoção", StringComparison.OrdinalIgnoreCase) || m.MissionCategoryType.Contains("Médica", StringComparison.OrdinalIgnoreCase);
-                    return true;
-                });
+                query = query.Where(m => MissionBoardCategory.MatchesFilter(m.BoardKind, SelectedCategoryFilter));
             }
 
             // 2. Busca Rápida (ICAO ou Cidade)
@@ -719,14 +744,25 @@ namespace FlightCareer.UI.ViewModels
 
             if (itemsToAccept.Count == 0) return;
 
-            // Checagem de Homologação
-            var blocked = itemsToAccept.Where(i => i.Mission.RequiredCategory > pilot.PilotCategory).ToList();
+            // Checagem de Homologação pela Fase
+            var blocked = itemsToAccept.Where(i => i.Mission.RequiredPhase > pilot.CareerPhase).ToList();
             if (blocked.Count > 0)
             {
                 var firstBlocked = blocked.First();
                 System.Windows.MessageBox.Show(
-                    $"Sua empresa ({pilot.PilotCategory.GetDisplayName()}) ainda não possui homologação para realizar contratos do tipo '{firstBlocked.Mission.RequiredCategory.GetDisplayName()}'.\n\nEvolua a categoria da sua empresa para desbloquear esta operação.",
+                    $"Sua empresa ({pilot.CareerPhase.GetDisplayName()}) ainda não possui homologação para realizar contratos da '{firstBlocked.Mission.RequiredPhase.GetDisplayName()}'.\n\nEvolua a fase da sua empresa para desbloquear esta operação.",
                     "Contrato Bloqueado por Homologação",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+                return;
+            }
+
+            var dgReason = DangerousGoodsRules.CheckManifest(ActiveMissions.Concat(itemsToAccept.Select(i => i.Mission)));
+            if (dgReason != null)
+            {
+                System.Windows.MessageBox.Show(
+                    dgReason,
+                    "Carga Perigosa",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Warning);
                 return;
@@ -737,6 +773,34 @@ namespace FlightCareer.UI.ViewModels
             if (activeAircraft?.AircraftType != null)
             {
                 var type = activeAircraft.AircraftType;
+                if (type.HasConvertibleCabin)
+                {
+                    var effectiveCap = CabinConversion.GetEffectiveCapacity(type.MaxPax, type.MaxPayloadLbs, activeAircraft.Configuration, hasConvertibleCabin: true);
+
+                    if (CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount > 0))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para CARGA (sem assentos de passageiros).\n\n" +
+                            $"Para aceitar contratos com passageiros, alterne a configuração da cabine para Passageiro no Hangar.",
+                            "Configuração Incompatível",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    if (!CabinConversion.IsCargoConfiguration(activeAircraft.Configuration) && itemsToAccept.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveCap.MaxCargoLbs))
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"A aeronave ativa ({activeAircraft.Prefix}) está configurada para PASSAGEIRO.\n\n" +
+                            $"Contratos de carga pura estão limitados à capacidade do bagageiro ({effectiveCap.MaxCargoLbs:N0} LBS).\n" +
+                            $"Para transportar cargas maiores, alterne a configuração da cabine para Carga no Hangar.",
+                            "Configuração Incompatível",
+                            System.Windows.MessageBoxButton.OK,
+                            System.Windows.MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+
                 double totalBatchPayload = itemsToAccept.Sum(m => m.PayloadLbs);
                 int totalBatchPax = itemsToAccept.Sum(m => m.PassengerCount);
 
@@ -774,6 +838,7 @@ namespace FlightCareer.UI.ViewModels
                     _allMissionDisplayItems.Remove(item);
                     mission.IsAccepted = true;
                     mission.PilotId = pilot.Id;
+                    await StageMissionStateAsync(mission);
                 }
             }
 
@@ -785,6 +850,23 @@ namespace FlightCareer.UI.ViewModels
 
             // Redireciona e prepara o Briefing
             ShowBriefingCommand.Execute(null);
+        }
+
+        /// <summary>
+        /// As missões do quadro vêm do contexto do MissionGenerator, não deste. Copia o estado da instância
+        /// exibida para a entidade rastreada aqui; sem isso o SaveChanges deste contexto não gravava
+        /// o aceite/descarregamento (o manifesto sumia ao recarregar).
+        /// </summary>
+        private async Task StageMissionStateAsync(Mission mission)
+        {
+            var db = await _context.Missions.FindAsync(mission.Id);
+            if (db == null || ReferenceEquals(db, mission)) return;
+            db.IsAccepted = mission.IsAccepted;
+            db.PilotId = mission.PilotId;
+            db.OriginICAO = mission.OriginICAO;
+            db.DistanceNM = mission.DistanceNM;
+            db.RewardMoney = mission.RewardMoney;
+            db.ExperienceGain = mission.ExperienceGain;
         }
 
         private async void AcceptMission()
@@ -811,23 +893,44 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredCategory > pilot.PilotCategory);
+            var prohibitedMission = ActiveMissions.FirstOrDefault(m => m.RequiredPhase > pilot.CareerPhase);
             if (prohibitedMission != null)
             {
-                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige homologação {prohibitedMission.RequiredCategory.GetDisplayName()}, mas sua empresa opera em {pilot.PilotCategory.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                System.Windows.MessageBox.Show($"Operação não homologada!\nA missão '{prohibitedMission.Title}' exige a {prohibitedMission.RequiredPhase.GetDisplayName()}, mas sua empresa opera na {pilot.CareerPhase.GetDisplayName()}.\n\nRemova a missão do manifesto ou obtenha a certificação necessária.", "Homologação Regulatória Insuficiente", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
 
-            if (ActiveMissions.Any(m => m.PassengerCount > 0) && aircraft.Configuration.Contains("Carga"))
+            if (aircraft.AircraftType?.HasConvertibleCabin == true)
             {
-                System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                if (ActiveMissions.Any(m => m.PassengerCount > 0) && CabinConversion.IsCargoConfiguration(aircraft.Configuration))
+                {
+                    System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está configurada para CARGA (sem assentos de passageiros).\n\nPara transportar passageiros, alterne a configuração da cabine para Passageiro no Hangar.", "Configuração Incompatível", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+
+                var effectiveFlightCap = CabinConversion.GetEffectiveCapacity(aircraft.AircraftType.MaxPax, aircraft.AircraftType.MaxPayloadLbs, aircraft.Configuration, hasConvertibleCabin: true);
+                if (!CabinConversion.IsCargoConfiguration(aircraft.Configuration) && ActiveMissions.Any(m => m.PassengerCount == 0 && m.PayloadLbs > effectiveFlightCap.MaxCargoLbs))
+                {
+                    System.Windows.MessageBox.Show($"A aeronave {aircraft.Prefix} está em configuração PASSAGEIRO e possui contrato de carga que excede o bagageiro ({effectiveFlightCap.MaxCargoLbs:N0} LBS).\n\nConverta a cabine para Carga no Hangar para transportar este volume.", "Carga Excede Capacidade de Bagagem", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
+            var dgFlightReason = DangerousGoodsRules.CheckManifest(ActiveMissions);
+            if (dgFlightReason != null)
+            {
+                System.Windows.MessageBox.Show(
+                    dgFlightReason,
+                    "Carga Perigosa (NO-GO)",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
                 return;
             }
 
             var groundingDefects = _flightMonitor.GetGroundingDefects(aircraft.Id);
             if (groundingDefects.Count > 0)
             {
-                var lista = string.Join("\n", groundingDefects.Select(d => $"• {d.Title} ({d.OriginLabel}, {d.DetectedAtUtc.ToLocalTime():dd/MM HH:mm})"));
+                var lista = string.Join("\n", groundingDefects.Select(d => $"• {d.Title} ({d.DetectedAtUtc.ToLocalTime():dd/MM HH:mm})"));
                 System.Windows.MessageBox.Show($"Voo não autorizado! A aeronave {aircraft.Prefix} tem itens inoperantes:\n\n{lista}\n\nRepare as panes na oficina do Hangar antes de iniciar ou receber por missões.", "Pane em Aberto (NO-GO)", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return;
             }
@@ -842,61 +945,64 @@ namespace FlightCareer.UI.ViewModels
 
         private async Task PromoteCompanyTierAsync()
         {
-            var pilots = await _pilotRepository.GetAllAsync();
-            var pilot = pilots.FirstOrDefault(p => p.Name == PilotName);
+            // Carregado deste contexto (antes vinha do repositório e o SaveChanges abaixo não gravava saldo nem categoria)
+            _context.ChangeTracker.Clear();
+            var pilot = await _context.Pilots.FirstOrDefaultAsync(p => p.Name == PilotName);
             if (pilot == null) return;
 
-            if (PilotCategory >= PilotCategory.Category5_MajorAirline)
+            if (pilot.CareerPhase >= CareerPhase.Phase7_InternationalAirline)
             {
-                System.Windows.MessageBox.Show("Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Categoria 5 (Linha Aérea Regular)!", "Nível Máximo Atingido", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                System.Windows.MessageBox.Show(
+                    "Parabéns! Sua companhia já atingiu a homologação máxima da aviação: Fase 7 (Companhia internacional / widebody)!\n\n" +
+                    "Não há mais fases a desbloquear. Seus níveis continuam progredindo livremente pelo ganho de experiência (XP).", 
+                    "Fase Máxima Atingida", 
+                    System.Windows.MessageBoxButton.OK, 
+                    System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            var nextCategory = (PilotCategory)((int)PilotCategory + 1);
-            double cost = PilotCategory.GetPromotionCost();
-            double reqHours = PilotCategory.GetRequiredHours();
-            int reqXP = PilotCategory.GetRequiredXP();
+            var nextPhase = (CareerPhase)((int)pilot.CareerPhase + 1);
+            int reqLevel = nextPhase.GetEntryLevel();
+            double reqHours = nextPhase.GetMinHours();
+            double cost = nextPhase.GetPromotionCost();
 
-            string reqDesc = nextCategory switch
-            {
-                PilotCategory.Category2_SAE => "- Carteira de Piloto Privado (40+ Horas de Voo)\n- Manual de Serviços Especializados e Inspeção ANAC/FAA",
-                PilotCategory.Category3_AirTaxi => "- Licença de Piloto Comercial (PC) + IFR (150+ Horas)\n- Homologação de Táxi Aéreo, Gestor SGSO e Mecânico Responsável (DTS)",
-                PilotCategory.Category4_Regional => "- Habilitação Multimotor (MLTE) + IFR (500+ Horas)\n- Infraestrutura de Rampa/Ground Handling e Sistema DOV",
-                PilotCategory.Category5_MajorAirline => "- Licença de Piloto de Linha Aérea (PLA) (1500+ Horas)\n- Slots em Hubs Principais, Auditoria IOSA e Homologação Regular",
-                _ => ""
-            };
-
+            bool levelOk = pilot.Level >= reqLevel;
             bool hoursOk = TotalHours >= reqHours;
-            bool xpOk = pilot.ExperiencePoints >= reqXP;
             bool balanceOk = Balance >= cost;
-            bool canPromote = hoursOk && xpOk && balanceOk;
+            bool canPromote = levelOk && hoursOk && balanceOk;
+
+            string levelStatus = levelOk ? $"Nível {reqLevel} — ok" : $"Nível {pilot.Level}/{reqLevel}";
+            string hoursStatus = hoursOk ? $"Horas {reqHours:F0} — ok" : $"Horas {TotalHours:F1}/{reqHours:F0}";
+            string balanceStatus = balanceOk ? $"Homologação {cost:C0} — ok" : $"Homologação {cost:C0} (Saldo: {Balance:C0})";
+            string summaryLine = $"{levelStatus} · {hoursStatus} · {balanceStatus}";
 
             string statusMsg = $"=== CERTIFICAÇÃO REGULATÓRIA DA EMPRESA ===\n\n" +
-                               $"Homologação Atual: {PilotCategory.GetDisplayName()}\n" +
-                               $"Próxima Categoria: {nextCategory.GetDisplayName()}\n\n" +
-                               $"REQUISITOS OPERACIONAIS:\n{reqDesc}\n\n" +
+                               $"Fase Atual: {pilot.CareerPhase.FormatPhaseStatus(pilot.Level)}\n" +
+                               $"Próxima Fase: {nextPhase.FormatPhaseStatus(reqLevel)}\n\n" +
+                               $"REQUISITOS OPERACIONAIS:\n{nextPhase.GetOperationalDescription()}\n\n" +
                                $"TRÍADE DE PROGRESSÃO:\n" +
+                               $"• Nível do Piloto: {pilot.Level} / {reqLevel} {(levelOk ? "[OK]" : "[PENDENTE]")}\n" +
                                $"• Horas de Voo: {TotalHours:F1}h / {reqHours:F0}h {(hoursOk ? "[OK]" : "[PENDENTE]")}\n" +
-                               $"• Experiência (XP): {pilot.ExperiencePoints:N0} / {reqXP:N0} XP {(xpOk ? "[OK]" : "[PENDENTE]")}\n" +
-                               $"• Taxa de Homologação: {cost:C2} (Saldo: {Balance:C2}) {(balanceOk ? "[OK]" : "[PENDENTE]")}\n\n";
+                               $"• Taxa de Homologação: {cost:C2} (Saldo: {Balance:C2}) {(balanceOk ? "[OK]" : "[PENDENTE]")}\n\n" +
+                               $"Status: {summaryLine}\n\n";
 
             if (!canPromote)
             {
                 statusMsg += "SUA EMPRESA AINDA NÃO CUMPRE TODOS OS REQUISITOS:\n";
+                if (!levelOk) statusMsg += $"- Nível insuficiente. Alcance o nível {reqLevel} por meio de XP (atualmente nível {pilot.Level}).\n";
                 if (!hoursOk) statusMsg += $"- Faltam {(reqHours - TotalHours):F1} horas de voo registradas no manche.\n";
-                if (!xpOk) statusMsg += $"- Faltam {(reqXP - pilot.ExperiencePoints):N0} pontos de XP. Realize voos com pousos suaves e sem infrações para elevar sua pontuação de proficiência.\n";
                 if (!balanceOk) statusMsg += $"- Capital insuficiente. Faltam {(cost - Balance):C2} em caixa para pagar a homologação regulatória.\n";
 
                 System.Windows.MessageBox.Show(statusMsg, "Progresso de Certificação", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 return;
             }
 
-            statusMsg += "Todos os requisitos regulatórios, horas e pontuação de XP foram atingidos!\n\nDeseja pagar a taxa e homologar sua empresa para a nova Categoria agora?";
-            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Categoria Operacional", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            statusMsg += $"Todos os requisitos ({summaryLine}) foram atingidos!\n\nDeseja pagar a taxa de {cost:C2} e homologar sua empresa para a {nextPhase.GetDisplayName()} agora?";
+            var result = System.Windows.MessageBox.Show(statusMsg, "Evolução de Fase da Carreira", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             if (result != System.Windows.MessageBoxResult.Yes) return;
 
             pilot.Balance -= cost;
-            pilot.PilotCategory = nextCategory;
+            pilot.CareerPhase = nextPhase;
 
             _context.FinancialTransactions.Add(new FinancialTransaction
             {
@@ -904,7 +1010,7 @@ namespace FlightCareer.UI.ViewModels
                 PilotId = pilot.Id,
                 Date = DateTime.Now,
                 Category = "Certificação",
-                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextCategory.GetDisplayName()}",
+                Description = $"HOMOLOGAÇÃO REGULATÓRIA: {nextPhase.GetDisplayName()}",
                 Amount = cost,
                 Type = TransactionType.Expense
             });
@@ -912,7 +1018,7 @@ namespace FlightCareer.UI.ViewModels
             await _context.SaveChangesAsync();
             await InitializeForPilotAsync(pilot.Name);
 
-            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob: {nextCategory.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            System.Windows.MessageBox.Show($"HOMOLOGAÇÃO APROVADA!\n\nSua empresa agora opera oficialmente sob a: {nextPhase.GetDisplayName()}.\nNovas missões e operações comerciais foram desbloqueadas!", "Certificação Concluída", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         private async Task CancelFlightAsync()
@@ -956,20 +1062,62 @@ namespace FlightCareer.UI.ViewModels
 
                 if (outcome.Success)
                 {
-                    System.Windows.MessageBox.Show($"Voo concluído com sucesso!\n\nRecompensa: {outcome.Revenue:C2}\nXP: {outcome.XP}\nMissões: {outcome.CompletedMissions}", "Debriefing");
+                    string summary = $"Recompensa: {outcome.Revenue:C2} · XP: {outcome.XP} · Missões: {outcome.CompletedMissions}";
+                    if (outcome.IncompleteReasons.Count > 0)
+                    {
+                        // Sem o motivo, o piloto vê $0 com qualidade alta e não sabe por quê
+                        ShowFlightMessage("CONTRATO NÃO CUMPRIDO", $"{summary}\n{string.Join("\n", outcome.IncompleteReasons)}\nO contrato voltou ao mercado, sem multa.", AlertKind.Warning, sticky: true);
+                    }
+                    else
+                    {
+                        ShowFlightMessage("VOO CONCLUÍDO", summary, AlertKind.Info, sticky: true);
+                    }
                     
                     // Recarregar tudo do banco (isso vai atualizar as missões ativas restantes)
                     await InitializeForPilotAsync(PilotName);
                 }
                 else
                 {
-                    System.Windows.MessageBox.Show($"O voo não foi registrado: {outcome.Message}", "Aviso");
+                    ShowFlightMessage("VOO NÃO REGISTRADO", outcome.Message, AlertKind.Warning, sticky: true);
                 }
             });
         }
 
+        /// <summary>
+        /// Relê o saldo do banco após serviços feitos em outro contexto (Hangar). Recarrega também a entidade
+        /// rastreada por este contexto, para que um SaveChanges posterior não grave um saldo antigo.
+        /// </summary>
+        public async Task RefreshPilotBalanceAsync()
+        {
+            var tracked = _context.Pilots.Local.FirstOrDefault(p => p.Name == PilotName);
+            if (tracked != null)
+            {
+                await _context.Entry(tracked).ReloadAsync();
+                Balance = tracked.Balance;
+                return;
+            }
+            var balance = await _context.Pilots.AsNoTracking().Where(p => p.Name == PilotName).Select(p => (double?)p.Balance).FirstOrDefaultAsync();
+            if (balance.HasValue) Balance = balance.Value;
+        }
+
+        /// <summary>
+        /// Atualiza o estado da janela principal após serviço na oficina. Recarrega o piloto e repõe o quadro
+        /// de missões se não estiver em voo; se estiver monitorando voo ou sem piloto, apenas atualiza o saldo.
+        /// </summary>
+        public async Task RefreshAfterWorkshopAsync()
+        {
+            if (_flightMonitor.IsMonitoring || string.IsNullOrEmpty(PilotName))
+            {
+                await RefreshPilotBalanceAsync();
+                return;
+            }
+
+            await InitializeForPilotAsync(PilotName);
+        }
+
         public async Task InitializeForPilotAsync(string pilotName)
         {
+            _context.ChangeTracker.Clear(); // Contexto de longa duração: descarta entidades em cache para ler o estado atual do banco
             var pilot = await _context.Pilots
                 .Include(p => p.Hangar)
                 .ThenInclude(a => a.AircraftType)
@@ -984,7 +1132,7 @@ namespace FlightCareer.UI.ViewModels
             Balance = pilot.Balance;
             ExperiencePoints = pilot.ExperiencePoints;
             ActiveAircraftId = pilot.ActiveAircraftId;
-            PilotCategory = pilot.PilotCategory;
+            CareerPhase = pilot.CareerPhase;
 
             // REGRA: A localização do piloto é ONDE ESTÁ O AVIÃO ATIVO
             var activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
@@ -1008,6 +1156,10 @@ namespace FlightCareer.UI.ViewModels
             OnPropertyChanged(nameof(CashDisplay));
             OnPropertyChanged(nameof(RankDisplay));
             OnPropertyChanged(nameof(XpProgress));
+            OnPropertyChanged(nameof(CareerPhaseStatusDisplay));
+            OnPropertyChanged(nameof(CareerPhaseDisplay));
+            OnPropertyChanged(nameof(CareerPhaseBadge));
+            OnPropertyChanged(nameof(CareerPhaseColor));
             OnPropertyChanged(nameof(PilotCategoryDisplay));
             OnPropertyChanged(nameof(PilotCategoryBadge));
             OnPropertyChanged(nameof(PilotCategoryColor));
@@ -1042,11 +1194,16 @@ namespace FlightCareer.UI.ViewModels
                     OriginLon = airport.Longitude;
                 }
                 
+                if (_missionGenerator is MissionGenerator mg)
+                {
+                    mg.PayMultiplier = DifficultyEconomy.For(pilot.Difficulty).PayMultiplier;
+                }
+
                 var missions = await _missionGenerator.GenerateMissionsAsync(airport);
                 var missionList = missions.ToList();
 
                 activeAircraft = pilot.Hangar.FirstOrDefault(a => a.Id == pilot.ActiveAircraftId);
-                var pilotCategory = pilot.PilotCategory;
+                var pilotPhase = pilot.CareerPhase;
 
                 var destIcaos = missionList.Select(m => m.DestinationICAO).Distinct().ToList();
                 var destAirports = await _context.Airports
@@ -1057,7 +1214,7 @@ namespace FlightCareer.UI.ViewModels
                 foreach (var m in missionList)
                 {
                     destAirports.TryGetValue(m.DestinationICAO, out var dest);
-                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotCategory, airport);
+                    var item = new MissionDisplayItem(m, dest, activeAircraft, pilotPhase, airport);
                     item.BatchSelectionChanged += (s, sel) => UpdateBatchCount();
                     displayItems.Add(item);
                 }

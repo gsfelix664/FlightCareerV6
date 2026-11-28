@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AircraftLimitProfile",
+  "description": "Perfil de limites operacionais de aeronave do FlightCareer V6",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "dataVersion",
+    "id",
+    "class",
+    "engineCount",
+    "features",
+    "simMatch",
+    "limits"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "dataVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "class": {
+      "type": "string",
+      "enum": [
+        "Piston",
+        "Turboprop",
+        "Jet",
+        "Unknown"
+      ]
+    },
+    "engineCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "piston",
+          "turboprop",
+          "jet",
+          "diesel",
+          "turbocharged",
+          "carbureted",
+          "fuelInjected",
+          "fixedPitchProp",
+          "constantSpeedProp",
+          "singleEngine",
+          "multiEngine",
+          "fixedGear",
+          "retractableGear",
+          "tailwheel",
+          "pressurized",
+          "hydraulicGear",
+          "apu",
+          "electricHybrid",
+          "noFlaps",
+          "noElectrical",
+          "glassCockpit",
+          "fms",
+          "autopilot",
+          "weatherRadar",
+          "slats",
+          "spoilers",
+          "thsTrim",
+          "deIceBoots",
+          "bleedAntiIce",
+          "antiskid",
+          "noseWheelSteering",
+          "ptu",
+          "rat",
+          "propDeIce",
+          "fadec",
+          "bleedAir",
+          "passengerCabin",
+          "galley",
+          "lavatory",
+          "oxygen",
+          "fireProtection",
+          "floats",
+          "skis",
+          "wipers",
+          "iceDetector",
+          "convertibleCabin"
+        ]
+      }
+    },
+    "simMatch": {
+      "type": "object",
+      "required": [
+        "title",
+        "atcModel"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "atcModel": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "value",
+          "unit",
+          "source",
+          "reference"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string",
+            "enum": [
+              "rpm",
+              "celsius",
+              "psi",
+              "percent",
+              "knots",
+              "mach",
+              "g",
+              "fpm",
+              "celsius_per_minute",
+              "volts",
+              "index",
+              "amperes"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "POH",
+              "SimVar",
+              "Cfg",
+              "NativeOnset",
+              "ClassDefault"
+            ]
+          },
+          "reference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

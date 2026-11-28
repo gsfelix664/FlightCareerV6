@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "Beechcraft Bonanza V35",
+  "class": "Piston",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "constantSpeedProp",
+    "fuelInjected",
+    "noseWheelSteering",
+    "passengerCabin",
+    "piston",
+    "retractableGear",
+    "singleEngine"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 196.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Vne ≈ 196 KIAS (Bonanza V35B, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 140.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Aproximação: ≈140 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 110.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: Total: ≈110 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 70.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Piston (70 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 14.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-520-BA",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2700.0,
+      "unit": "rpm",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-520-BA",
+      "notes": null
+    },
+    {
+      "key": "chtMax",
+      "value": 238.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-520-BA",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 116.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: Continental IO-520-BA",
+      "notes": null
+    }
+  ]
+}

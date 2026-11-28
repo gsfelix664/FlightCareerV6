@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FlightCareer.Domain.Entities;
 using FlightCareer.Domain.Repositories;
+using FlightCareer.Domain.Services;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -19,10 +20,14 @@ namespace FlightCareer.UI.ViewModels
         [ObservableProperty] private string _initialBaseICAO = string.Empty;
         [ObservableProperty] private DifficultyMode _selectedDifficulty = DifficultyMode.Easy;
 
-        public CreatePilotViewModel(IPilotRepository pilotRepository, Infrastructure.Persistence.AppDbContext context)
+        private readonly Infrastructure.Services.PartMigrationService _partProvisioner;
+
+        public CreatePilotViewModel(IPilotRepository pilotRepository, Infrastructure.Persistence.AppDbContext context,
+            Infrastructure.Services.PartMigrationService partProvisioner)
         {
             _pilotRepository = pilotRepository;
             _context = context;
+            _partProvisioner = partProvisioner;
             CreateCommand = new AsyncRelayCommand(CreatePilotAsync);
         }
 
@@ -55,13 +60,7 @@ namespace FlightCareer.UI.ViewModels
                 return;
             }
 
-            double initialBalance = SelectedDifficulty switch
-            {
-                DifficultyMode.Easy => 1000000000,
-                DifficultyMode.Medium => 100000,
-                DifficultyMode.Hard => 10000,
-                _ => 100000
-            };
+            double initialBalance = CareerStart.GetInitialBalance(SelectedDifficulty);
 
             var pilot = new Pilot
             {
@@ -73,7 +72,7 @@ namespace FlightCareer.UI.ViewModels
                 Balance = initialBalance,
                 Difficulty = SelectedDifficulty,
                 Rank = "Student Pilot",
-                PilotCategory = PilotCategory.Category1_FlightSchool,
+                CareerPhase = CareerPhase.Phase1_FlightSchool,
                 HasPPLicense = true
             };
 
@@ -91,20 +90,23 @@ namespace FlightCareer.UI.ViewModels
                     PilotId = pilot.Id,
                     AircraftTypeId = c152.Id,
                     PurchaseDate = DateTime.Now,
-                    CurrentAirframeHours = 5000, // C152 padrão começa com horas
+                    CurrentAirframeHours = CareerStart.DefaultStartingAirframeHours, // C152 padrão começa com horas
                     Prefix = generatedPrefix,
                     EngineCondition = 100,
                     TiresCondition = 100,
                     AirframeCondition = 100,
-                    FuelAmount = c152.FuelTankGallons / 2, // Começa com meio tanque
+                    FuelAmount = c152.FuelTankGallons * CareerStart.DefaultStartingFuelFraction, // Começa com meio tanque
                     CurrentLocationICAO = pilot.InitialBaseICAO,
-                    EngineTboRemainingHours = 1800,
-                    HoursUntilNext50hInspection = 50,
-                    HoursUntilNext100hInspection = 100,
+                    EngineTboRemainingHours = CareerStart.DefaultStartingTboRemainingHours,
+                    HoursUntilNext50hInspection = CareerStart.DefaultStarting50hHours,
+                    HoursUntilNext100hInspection = CareerStart.DefaultStarting100hHours,
+                    HoursUntilNext500hInspection = CareerStart.DefaultStarting500hHours,
                     IsInterdicted = false,
                     InterdictionReason = string.Empty,
                     Configuration = "Passageiro"
                 };
+                // Peças já na criação (como na compra): sem elas o 1º voo usa o desgaste antigo e o Hangar mostra %
+                await ProvisionStartingPartsAsync(startingAircraft, c152.Model);
                 pilot.Hangar.Add(startingAircraft);
                 pilot.ActiveAircraftId = startingAircraft.Id;
             }
@@ -113,6 +115,31 @@ namespace FlightCareer.UI.ViewModels
             await _pilotRepository.SaveChangesAsync();
 
             RequestClose?.Invoke();
+        }
+
+        private async Task ProvisionStartingPartsAsync(PilotAircraft aircraft, string model)
+        {
+            var profile = await _context.AircraftLimitProfiles
+                .FirstOrDefaultAsync(p => p.AircraftTypeModel.ToLower() == model.ToLower());
+            if (profile == null)
+            {
+                // A abertura do app (AircraftPartProvisioner) ainda cria as peças depois
+                System.Diagnostics.Debug.WriteLine($"[Peças] Sem perfil de limites para '{model}': avião inicial criado sem peças.");
+                return;
+            }
+
+            var features = new System.Collections.Generic.List<string>();
+            try
+            {
+                features = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<string>>(profile.FeaturesJson) ?? new();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Peças] Falha ao ler FeaturesJson de '{model}': {ex.Message}");
+            }
+
+            _partProvisioner.ProvisionPurchasedAircraft(aircraft, features, profile.EngineCount,
+                aircraft.EngineCondition, aircraft.TiresCondition, aircraft.AirframeCondition, aircraft.AvionicsCondition);
         }
 
         private string GeneratePrefixByCountry(string countryCode)

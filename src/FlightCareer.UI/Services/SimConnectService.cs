@@ -1,22 +1,45 @@
 using Microsoft.FlightSimulator.SimConnect;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using FlightCareer.Domain.Components;
+using FlightCareer.Domain.Connection;
 using FlightCareer.Domain.Entities;
+using FlightCareer.Domain.Fuel;
+using FlightCareer.Domain.Integrity;
 using FlightCareer.Application.Interfaces;
 
 namespace FlightCareer.UI.Services
 {
-    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState }
-    public enum DEFINITIONS { AircraftData, EngineFireState, OilLeakState, FailureState, WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex }
-    public enum EVENTS { FailureEvent, CrashedEvent, AircraftLoaded, FlightLoaded }
-    public enum GROUPS { MaskedPilotInputs = 1 }
+    public enum DATA_REQUESTS { RequestTelemetry, RequestFailureState, RequestFastFlight, RequestTurbineLosses, RequestFuelState, RequestIntegrityState, RequestSimState }
+    public enum DEFINITIONS
+    {
+        AircraftData, EngineFireState, OilLeakState, FailureState,
+        WriteLeftMagneto, WriteRightMagneto, WriteFlapsHandleIndex, FastFlight,
+        WriteFlapsLeftPercent, WriteFlapsRightPercent,
+        TurbineLossesRead,
+        WriteTurbineN1Loss1, WriteTurbineN1Loss2, WriteTurbineN1Loss3, WriteTurbineN1Loss4,
+        WriteTurbineFuelLoss1, WriteTurbineFuelLoss2, WriteTurbineFuelLoss3, WriteTurbineFuelLoss4,
+        WriteTurbineIttLoss1, WriteTurbineIttLoss2, WriteTurbineIttLoss3, WriteTurbineIttLoss4,
+        WriteTurbineThrustLoss1, WriteTurbineThrustLoss2, WriteTurbineThrustLoss3, WriteTurbineThrustLoss4,
+        FuelStateRead,
+        WriteFuelSystemTank1, WriteFuelSystemTank2, WriteFuelSystemTank3, WriteFuelSystemTank4,
+        WriteFuelSystemTank5, WriteFuelSystemTank6, WriteFuelSystemTank7, WriteFuelSystemTank8,
+        WriteFuelTankLeftMain, WriteFuelTankRightMain,
+        WriteFuelTankLeftAux, WriteFuelTankRightAux,
+        WriteFuelTankLeftTip, WriteFuelTankRightTip,
+        WriteFuelTankCenter, WriteFuelTankCenter2, WriteFuelTankCenter3,
+        IntegrityStateRead
+    }
+    public enum EVENTS { FailureEvent, CrashedEvent, FlightLoadedEvent, AircraftLoadedEvent }
+    public enum GROUPS : uint { Default = 1, MaskedPilotInputs = 2, ObservedPilotInputs = 3 }
 
     /// <summary>
-    /// Leitura rápida (~5-10 Hz) usada para vigilância das panes persistentes e detecção de panes nativas.
-    /// Todas as variáveis foram validadas no MSFS 2024 (C152) via SimConnect.
+    /// Leitura rápida (~5-10 Hz) usada pelas panes persistentes (vigilância + detecção de panes nativas).
+    /// Variáveis validadas no MSFS 2024 (C152) via SimConnect.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SimFailureState
@@ -35,8 +58,56 @@ namespace FlightCareer.UI.Services
         public double CrashFlag;            // CRASH FLAG
         public double SuctionPressure;      // SUCTION PRESSURE (inHg)
         public double EngineCombustion;     // GENERAL ENG COMBUSTION:1
+        public double TrailingEdgeFlapsLeftPercent; // TRAILING EDGE FLAPS LEFT PERCENT (Percent Over 100)
+        public double FlapsNumHandlePositions;     // FLAPS NUM HANDLE POSITIONS (Number)
     }
 
+    /// <summary>
+    /// Leitura rápida e leve (a cada 2 frames do simulador, ~20–30 Hz): contato com o solo, razão de descida, G e atitude.
+    /// Definição separada da telemetria principal (nome rejeitado aqui não desloca o SimTelemetry). Mesma ordem do AddFastDef.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SimFastFlightState
+    {
+        public double OnGround;          // SIM ON GROUND
+        public double VerticalSpeed;     // VERTICAL SPEED (ft/min)
+        public double BodyVertical;      // VELOCITY BODY Y (ft/s)
+        public double GForce;            // G FORCE
+        public double Pitch;             // PLANE PITCH DEGREES (MSFS: negativo = nariz para cima)
+        public double Bank;              // PLANE BANK DEGREES
+        public double Airspeed;          // AIRSPEED INDICATED (kt)
+        public double GroundSpeed;       // GROUND VELOCITY (kt)
+        public double TouchdownNormalVelocity; // PLANE TOUCHDOWN NORMAL VELOCITY (ft/s, normal ao solo no último toque)
+    }
+
+    /// <summary>
+    /// Leitura de conferência das perdas de turbina gravadas no simulador (motores 1..4).
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct SimTurbineLossesState
+    {
+        public double N1Loss1;
+        public double FuelEfficiencyLoss1;
+        public double IttCoolingLoss1;
+        public double ThrustEfficiencyLoss1;
+
+        public double N1Loss2;
+        public double FuelEfficiencyLoss2;
+        public double IttCoolingLoss2;
+        public double ThrustEfficiencyLoss2;
+
+        public double N1Loss3;
+        public double FuelEfficiencyLoss3;
+        public double IttCoolingLoss3;
+        public double ThrustEfficiencyLoss3;
+
+        public double N1Loss4;
+        public double FuelEfficiencyLoss4;
+        public double IttCoolingLoss4;
+        public double ThrustEfficiencyLoss4;
+
+        public double NumberOfEngines;
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
     public struct SimDoubleValue
@@ -47,14 +118,9 @@ namespace FlightCareer.UI.Services
     public class SimConnectService : ISimConnectService
     {
         private SimConnect? _simConnect;
+        internal SimConnect? Raw => _simConnect;
+        internal event Action<SimConnect>? OnSimConnectReady;
         private const int WM_USER_SIMCONNECT = 0x0402;
-
-        // Cada evento do simulador precisa do seu próprio ID de cliente: o SimConnect recusa remapear um ID já mapeado.
-        private const uint FirstDynamicEventId = 1000;
-        private readonly Dictionary<string, uint> _eventIds = new(StringComparer.OrdinalIgnoreCase);
-        private readonly Dictionary<uint, string> _eventNames = new();
-        private uint _nextEventId = FirstDynamicEventId;
-        private HashSet<string> _maskedEvents = new(StringComparer.OrdinalIgnoreCase);
 
         public event EventHandler? OnConnected;
         public event EventHandler? OnDisconnected;
@@ -63,12 +129,24 @@ namespace FlightCareer.UI.Services
 
         /// <summary>Estado rápido de panes (vigilância + detecção nativa).</summary>
         public event Action<SimFailureState>? OnFailureStateReceived;
+        /// <summary>Leitura rápida de voo (toque, crash, G): a cada 2 frames do simulador.</summary>
+        public event Action<SimFastFlightState>? OnFastFlightReceived;
         /// <summary>Comando do piloto interceptado (mascarado) antes de chegar à aeronave.</summary>
         public event Action<string, uint>? OnMaskedEvent;
-        /// <summary>O simulador (re)carregou aeronave ou voo: as panes nativas foram zeradas pelo sim.</summary>
+        /// <summary>Comando do piloto observado sem mascaramento (auto-start, caminhão de combustível, etc.).</summary>
+        public event Action<string, uint>? OnObservedEvent;
+        /// <summary>O simulador (re)carregou aeronave ou voo: as falhas do sim foram zeradas.</summary>
         public event Action? OnAircraftReloaded;
+        /// <summary>Estado de combustível e tanques atualizado a cada 1 s.</summary>
+        public event Action<SimFuelState>? OnFuelStateReceived;
+        /// <summary>Estado de integridade (slew e congelamentos) atualizado a cada 1 s.</summary>
+        public event Action<SimIntegrityState>? OnIntegrityStateReceived;
 
         public SimFailureState? CurrentFailureState { get; private set; }
+        public SimFuelState CurrentFuelState => _currentFuelState;
+        private SimFuelState _currentFuelState;
+        public SimIntegrityState CurrentIntegrityState => _currentIntegrityState;
+        private SimIntegrityState _currentIntegrityState;
 
         public bool IsCrashed { get; set; } = false;
 
@@ -103,6 +181,8 @@ namespace FlightCareer.UI.Services
         private IntPtr _handle;
         private HwndSource? _hwndSource;
         private System.Timers.Timer? _reconnectTimer;
+        private static readonly TimeSpan LinkSilenceTimeout = TimeSpan.FromSeconds(30);
+        private readonly SimLinkWatchdog _linkWatchdog = new(LinkSilenceTimeout);
 
         public void Initialize(IntPtr windowHandle)
         {
@@ -114,6 +194,7 @@ namespace FlightCareer.UI.Services
             _reconnectTimer = new System.Timers.Timer(5000);
             _reconnectTimer.Elapsed += (s, e) => {
                 if (!IsConnected) Connect();
+                else if (_simConnect != null) CheckLinkAlive();
             };
             _reconnectTimer.Start();
         }
@@ -131,6 +212,7 @@ namespace FlightCareer.UI.Services
             try
             {
                 _simConnect = new SimConnect("Flight Career V6", _handle, WM_USER_SIMCONNECT, null, 0);
+                _linkWatchdog.MarkConnected(DateTime.UtcNow);
 
                 // 1. Identificação da Aeronave (256 bytes)
                 _simConnect.AddToDataDefinition(DEFINITIONS.AircraftData, "TITLE", null, SIMCONNECT_DATATYPE.STRING256, 0.0f, SimConnect.SIMCONNECT_UNUSED);
@@ -212,9 +294,36 @@ namespace FlightCareer.UI.Services
                 // 12. Simulação e Tempo (1 double)
                 AddToDef("SIMULATION RATE", "number");
 
+                // 13. Estado de Falhas e Chaves para Enforcement (6 doubles)
+                AddToDef("PARTIAL PANEL VACUUM", "Enum");
+                AddToDef("PARTIAL PANEL PITOT", "Enum");
+                // Não existe "PARTIAL PANEL STATIC" no SDK (o estado da tomada estática não é exposto).
+                // Datum rejeitado desloca o struct inteiro: mantenha sempre um nome válido nesta posição.
+                AddToDef("PARTIAL PANEL ALTIMETER", "Enum");
+                AddToDef("RECIP ENG LEFT MAGNETO:1", "Bool");
+                AddToDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
+                AddToDef("GENERAL ENG MASTER ALTERNATOR:1", "Bool");
+
+                // 14. Estado de falha elétrica (1 double)
+                AddToDef("PARTIAL PANEL ELECTRICAL", "Enum");
+
+                // 15. Realismo e Ambiente para XP (6 doubles)
+                AddToDef("REALISM CRASH DETECTION", "Bool");
+                AddToDef("AUTO COORDINATION", "Bool");
+                AddToDef("REALISM", "Number");
+                AddToDef("AMBIENT VISIBILITY", "Meters");
+                AddToDef("AMBIENT IN CLOUD", "Bool");
+                AddToDef("DENSITY ALTITUDE", "Feet");
+
+                // 16. Alertas e Luzes para Infrações de XP (XP-PONTAS) (3 doubles)
+                AddToDef("STALL WARNING", "Bool");
+                AddToDef("LIGHT LANDING", "Bool");
+                AddToDef("LIGHT TAXI", "Bool");
+                AddToDef("PLANE HEADING DEGREES TRUE", "degrees");
+
                 _simConnect.RegisterDataDefineStruct<SimTelemetry>(DEFINITIONS.AircraftData);
 
-                // Estado rápido de panes (vigilância contínua + panes nativas)
+                // Estado rápido de panes (vigilância contínua das panes persistentes + panes nativas)
                 AddFailureDef("RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddFailureDef("RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddFailureDef("FLAPS HANDLE INDEX", "Number");
@@ -229,12 +338,29 @@ namespace FlightCareer.UI.Services
                 AddFailureDef("CRASH FLAG", "Enum");
                 AddFailureDef("SUCTION PRESSURE", "inHg");
                 AddFailureDef("GENERAL ENG COMBUSTION:1", "Bool");
+                AddFailureDef("TRAILING EDGE FLAPS LEFT PERCENT", "Percent Over 100");
+                AddFailureDef("FLAPS NUM HANDLE POSITIONS", "Number");
                 _simConnect.RegisterDataDefineStruct<SimFailureState>(DEFINITIONS.FailureState);
 
-                // Definições de escrita (correção imediata pela vigilância)
+                // Leitura rápida de voo (toque/crash/G medidos pelo addon, independem do aviso de crash do sim)
+                AddFastDef("SIM ON GROUND", "Bool");
+                AddFastDef("VERTICAL SPEED", "ft/min");
+                AddFastDef("VELOCITY BODY Y", "Feet per second");
+                AddFastDef("G FORCE", "GForce");
+                AddFastDef("PLANE PITCH DEGREES", "degrees");
+                AddFastDef("PLANE BANK DEGREES", "degrees");
+                AddFastDef("AIRSPEED INDICATED", "knots");
+                AddFastDef("GROUND VELOCITY", "knots");
+                AddFastDef("PLANE TOUCHDOWN NORMAL VELOCITY", "feet per second");
+                _simConnect.RegisterDataDefineStruct<SimFastFlightState>(DEFINITIONS.FastFlight);
+
+                // Escritas diretas (testadas no MSFS 2024: o valor gravado persiste)
                 AddWriteDef(DEFINITIONS.WriteLeftMagneto, "RECIP ENG LEFT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteRightMagneto, "RECIP ENG RIGHT MAGNETO:1", "Bool");
                 AddWriteDef(DEFINITIONS.WriteFlapsHandleIndex, "FLAPS HANDLE INDEX", "Number");
+                // Teste do spike "falhas sem mexer no comando" (botões de depuração do HUD)
+                AddWriteDef(DEFINITIONS.WriteFlapsLeftPercent, "TRAILING EDGE FLAPS LEFT PERCENT", "Percent Over 100");
+                AddWriteDef(DEFINITIONS.WriteFlapsRightPercent, "TRAILING EDGE FLAPS RIGHT PERCENT", "Percent Over 100");
 
                 // Definições de escrita (SetDataOnSimObject) para Fogo Real e Vazamento Progressivo de Óleo
                 _simConnect.AddToDataDefinition(DEFINITIONS.EngineFireState, "ENG ON FIRE:1", "Bool", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
@@ -243,17 +369,109 @@ namespace FlightCareer.UI.Services
                 _simConnect.AddToDataDefinition(DEFINITIONS.OilLeakState, "GENERAL ENG OIL LEAKED PERCENT:1", "Percent", SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
                 _simConnect.RegisterDataDefineStruct<SimDoubleValue>(DEFINITIONS.OilLeakState);
 
+                // Definições de escrita para perdas de motor a turbina (motores 1..4)
+                for (int i = 1; i <= 4; i++)
+                {
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineN1Loss1 + (i - 1)), $"TURB ENG N1 LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineFuelLoss1 + (i - 1)), $"TURB ENG FUEL EFFICIENCY LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineIttLoss1 + (i - 1)), $"TURB ENG ITT COOLING EFFICIENCY LOSS:{i}", "Percent");
+                    AddWriteDef((DEFINITIONS)((int)DEFINITIONS.WriteTurbineThrustLoss1 + (i - 1)), $"TURB ENG THRUST EFFICIENCY LOSS:{i}", "Percent");
+                }
+
+                // Leitura de conferência das perdas de turbina gravadas no simulador (motores 1..4)
+                for (int i = 1; i <= 4; i++)
+                {
+                    AddTurbineLossesDef($"TURB ENG N1 LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG FUEL EFFICIENCY LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG ITT COOLING EFFICIENCY LOSS:{i}");
+                    AddTurbineLossesDef($"TURB ENG THRUST EFFICIENCY LOSS:{i}");
+                }
+                AddTurbineLossesDef("NUMBER OF ENGINES", "Number");
+                _simConnect.RegisterDataDefineStruct<SimTurbineLossesState>(DEFINITIONS.TurbineLossesRead);
+
+                // Leitura do estado de combustível (UNLIMITED FUEL, consumo por motor e tanques)
+                AddFuelDef("UNLIMITED FUEL", "Bool");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:1", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:2", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:3", "Pounds");
+                AddFuelDef("GENERAL ENG FUEL USED SINCE START:4", "Pounds");
+                AddFuelDef("NEW FUEL SYSTEM", "Bool");
+
+                for (int i = 1; i <= 8; i++)
+                {
+                    AddFuelDef($"FUELSYSTEM TANK USABLE CAPACITY:{i}", "Gallons");
+                    AddFuelDef($"FUELSYSTEM TANK QUANTITY:{i}", "Gallons");
+                }
+
+                AddFuelDef("FUEL TANK LEFT MAIN CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT MAIN QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT MAIN CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT MAIN QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT AUX CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT AUX QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT AUX CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT AUX QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT TIP CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK LEFT TIP QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT TIP CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK RIGHT TIP QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER2 CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER2 QUANTITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER3 CAPACITY", "Gallons");
+                AddFuelDef("FUEL TANK CENTER3 QUANTITY", "Gallons");
+
+                // Capacidade total dos tanques do sistema moderno (no fim, mesma ordem do SimFuelState)
+                for (int i = 1; i <= 8; i++)
+                {
+                    AddFuelDef($"FUELSYSTEM TANK CAPACITY:{i}", "Gallons");
+                }
+
+                _simConnect.RegisterDataDefineStruct<SimFuelState>(DEFINITIONS.FuelStateRead);
+
+                // Leitura do estado de integridade (slew e congelamentos)
+                AddIntegrityDef("IS SLEW ACTIVE");
+                AddIntegrityDef("IS ALTITUDE FREEZE ON");
+                AddIntegrityDef("IS ATTITUDE FREEZE ON");
+                AddIntegrityDef("IS LATITUDE LONGITUDE FREEZE ON");
+                _simConnect.RegisterDataDefineStruct<SimIntegrityState>(DEFINITIONS.IntegrityStateRead);
+
+                // Definições de escrita para tanques de combustível (mapeadas uma vez)
+                foreach (var (simVar, def) in FuelTankWriteDefs)
+                {
+                    AddWriteDef(def, simVar, "Gallons");
+                }
+
                 // Inscrição no evento do sistema de Crash
                 _simConnect.SubscribeToSystemEvent(EVENTS.CrashedEvent, "Crashed");
-                // O simulador zera as falhas ao recarregar a aeronave: avisar para reaplicar
-                _simConnect.SubscribeToSystemEvent(EVENTS.AircraftLoaded, "AircraftLoaded");
-                _simConnect.SubscribeToSystemEvent(EVENTS.FlightLoaded, "FlightLoaded");
+
+                // Novo voo carregado no MSFS: o simulador zera as próprias falhas
+                _simConnect.SubscribeToSystemEvent(EVENTS.FlightLoadedEvent, "FlightLoaded");
+                _simConnect.SubscribeToSystemEvent(EVENTS.AircraftLoadedEvent, "AircraftLoaded");
+                _simConnect.OnRecvEventFilename += (s, e) =>
+                {
+                    if (e.uEventID == (uint)EVENTS.FlightLoadedEvent || e.uEventID == (uint)EVENTS.AircraftLoadedEvent)
+                    {
+                        _untrackedToggles.Clear();
+                        foreach (var (index, tracker) in _alternatorTrackers)
+                        {
+                            if (tracker.OnSimReloaded())
+                            {
+                                SendEventEx("ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE", 1, (uint)index);
+                            }
+                        }
+                        // Panes persistentes precisam ser reaplicadas depois que a aeronave terminar de carregar
+                        OnAircraftReloaded?.Invoke();
+                    }
+                };
 
                 _simConnect.OnRecvOpen += (s, e) => {
                     IsCrashed = false;
-                    _reconnectTimer?.Stop();
                     ApplyMaskedEvents();
+                    ApplyObservedEvents();
                     OnConnected?.Invoke(this, EventArgs.Empty);
+                    OnSimConnectReady?.Invoke(_simConnect);
                 };
 
                 _simConnect.OnRecvQuit += (s, e) => {
@@ -267,45 +485,109 @@ namespace FlightCareer.UI.Services
                         IsCrashed = true;
                         OnCrashEvent?.Invoke(this, EventArgs.Empty);
                     }
-                    else if (e.uEventID == (uint)EVENTS.AircraftLoaded || e.uEventID == (uint)EVENTS.FlightLoaded)
-                    {
-                        OnAircraftReloaded?.Invoke();
-                    }
                     else if (e.uEventID >= FirstDynamicEventId && _eventNames.TryGetValue(e.uEventID, out var name))
                     {
-                        // Só chegam aqui eventos do grupo mascarado: o comando já foi bloqueado pelo SimConnect
-                        OnMaskedEvent?.Invoke(name, e.dwData);
+                        if (e.uGroupID == (uint)GROUPS.ObservedPilotInputs)
+                        {
+                            OnObservedEvent?.Invoke(name, e.dwData);
+                        }
+                        else
+                        {
+                            // Só chegam aqui eventos do grupo mascarado: o comando já foi bloqueado pelo SimConnect
+                            OnMaskedEvent?.Invoke(name, e.dwData);
+                        }
                     }
                 };
 
                 _simConnect.OnRecvException += (s, e) => {
-                    Debug.WriteLine($"[SimConnect EXCEPTION] ID: {(SIMCONNECT_EXCEPTION)e.dwException}, SendID: {e.dwSendID}, Index: {e.dwIndex}");
+                    string datum = _datumBySendId.TryGetValue(e.dwSendID, out var d) ? $", SimVar: {d}" : string.Empty;
+                    Debug.WriteLine($"[SimConnect EXCEPTION] ID: {(SIMCONNECT_EXCEPTION)e.dwException}, SendID: {e.dwSendID}, Index: {e.dwIndex}{datum}");
                 };
 
                 _simConnect.OnRecvSimobjectData += SimConnect_OnRecvSimobjectData;
 
+                // A cada segundo (antes: a cada 4 s, o que media o toque segundos depois do contato)
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTelemetry, DEFINITIONS.AircraftData,
-                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.CHANGED, 0, 4, 0);
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.CHANGED, 0, 0, 0);
 
                 // A cada 6 frames (~5-10 Hz): rápido o bastante para desfazer um comando do piloto quase na hora
                 _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFailureState, DEFINITIONS.FailureState,
                     SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 6, 0);
+
+                // A cada 2 frames (~20–30 Hz conforme o FPS): o toque e o pico de G duram frações de segundo
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFastFlight, DEFINITIONS.FastFlight,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SIM_FRAME, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 2, 0);
+
+                // Leitura de conferência de perdas de turbina a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestTurbineLosses, DEFINITIONS.TurbineLossesRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+
+                // Leitura do estado e tanques de combustível a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestFuelState, DEFINITIONS.FuelStateRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
+
+                // Leitura do estado de integridade (slew e congelamentos) a cada 1 s
+                _simConnect.RequestDataOnSimObject(DATA_REQUESTS.RequestIntegrityState, DEFINITIONS.IntegrityStateRead,
+                    SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_PERIOD.SECOND, SIMCONNECT_DATA_REQUEST_FLAG.DEFAULT, 0, 0, 0);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"SimConnect Error: {ex.Message}");
                 _simConnect = null;
+                _linkWatchdog.MarkDisconnected();
             }
         }
+
+        // Pacote enviado → SimVar, para dizer no log qual datum o simulador rejeitou (NAME_UNRECOGNIZED).
+        private readonly Dictionary<uint, string> _datumBySendId = new();
 
         private void AddToDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.AircraftData, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
         }
 
         private void AddFailureDef(string datum, string unit)
         {
             _simConnect?.AddToDataDefinition(DEFINITIONS.FailureState, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddFastDef(string datum, string unit)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.FastFlight, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddTurbineLossesDef(string datum, string unit = "Percent")
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.TurbineLossesRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddFuelDef(string datum, string unit)
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.FuelStateRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void AddIntegrityDef(string datum, string unit = "Bool")
+        {
+            _simConnect?.AddToDataDefinition(DEFINITIONS.IntegrityStateRead, datum, unit, SIMCONNECT_DATATYPE.FLOAT64, 0.0f, SimConnect.SIMCONNECT_UNUSED);
+            TrackDatum(datum);
+        }
+
+        private void TrackDatum(string datum)
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _datumBySendId[_simConnect.GetLastSentPacketID()] = datum;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] GetLastSentPacketID falhou para {datum}: {ex.Message}");
+            }
         }
 
         private void AddWriteDef(DEFINITIONS def, string datum, string unit)
@@ -315,55 +597,249 @@ namespace FlightCareer.UI.Services
             _simConnect.RegisterDataDefineStruct<SimDoubleValue>(def);
         }
 
+        private void CheckLinkAlive()
+        {
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            dispatcher.BeginInvoke(() =>
+            {
+                if (_simConnect == null) return;
+                var now = DateTime.UtcNow;
+                if (_linkWatchdog.IsStale(now))
+                {
+                    Debug.WriteLine($"[SimConnect] Sem mensagens há {_linkWatchdog.SilenceFor(now).TotalSeconds:F0} s: ligação considerada morta (sim fechado sem Quit). Reconectando.");
+                    Disconnect();
+                    return;
+                }
+                try
+                {
+                    _simConnect.RequestSystemState(DATA_REQUESTS.RequestSimState, "Sim");
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] Ligação perdida ao pedir estado do sistema: {ex.GetType().Name}: {ex.Message}. Reconectando.");
+                    Disconnect();
+                }
+            });
+        }
+
         public void Disconnect()
         {
             if (_simConnect != null)
             {
-                _simConnect.Dispose();
+                _linkWatchdog.MarkDisconnected();
+                try
+                {
+                    _simConnect.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] Dispose falhou: {ex.Message}");
+                }
                 _simConnect = null;
-                _eventIds.Clear();
+                _mappedEvents.Clear();
                 _eventNames.Clear();
                 _nextEventId = FirstDynamicEventId;
                 CurrentFailureState = null;
+                _currentTurbineLosses = default;
+                _currentFuelState = default;
+                _untrackedToggles.Clear();
+                _alternatorTrackers.Clear();
+                _datumBySendId.Clear();
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        private uint GetOrMapEvent(string simEventName)
+        // O SimConnect não permite remapear um mesmo ID de evento cliente: cada evento
+        // do simulador recebe seu próprio ID, mapeado uma única vez por conexão.
+        private const uint FirstDynamicEventId = 1000;
+        private readonly Dictionary<string, uint> _mappedEvents = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<uint, string> _eventNames = new();
+        private HashSet<string> _maskedEvents = new(StringComparer.OrdinalIgnoreCase);
+
+        private uint GetOrMapEvent(string eventName)
         {
-            if (_eventIds.TryGetValue(simEventName, out var id)) return id;
+            if (_mappedEvents.TryGetValue(eventName, out uint id)) return id;
             id = _nextEventId++;
-            _simConnect!.MapClientEventToSimEvent((EVENTS)id, simEventName);
-            _eventIds[simEventName] = id;
-            _eventNames[id] = simEventName;
+            _simConnect!.MapClientEventToSimEvent((EVENTS)id, eventName);
+            _mappedEvents[eventName] = id;
+            _eventNames[id] = eventName;
             return id;
         }
+        private uint _nextEventId = FirstDynamicEventId;
 
-        /// <summary>Envia um evento do simulador. Cada nome recebe um ID próprio, mapeado uma única vez por conexão.</summary>
-        public void TransmitEvent(string simEventName, uint data = 0)
+        // Eventos de falha do SimConnect que funcionam como toggle (enviar duas vezes = reparar).
+        private static readonly string[] ToggleFailureEvents =
         {
-            if (_simConnect == null || string.IsNullOrWhiteSpace(simEventName)) return;
+            "TOGGLE_ENGINE1_FAILURE",
+            "TOGGLE_VACUUM_FAILURE",
+            "TOGGLE_PITOT_BLOCKAGE",
+            "TOGGLE_STATIC_PORT_BLOCKAGE",
+            "TOGGLE_ELECTRICAL_FAILURE"
+        };
+
+        // Toggles sem SimVar de estado (freios, hidráulico) enviados nesta sessão do simulador.
+        // São desfeitos em ClearSimFailures; esquecidos quando o MSFS carrega um novo voo (FlightLoaded).
+        private readonly HashSet<string> _untrackedToggles = new(StringComparer.OrdinalIgnoreCase);
+
+        public void SendEvent(string eventName, uint data = 0)
+        {
+            if (_simConnect == null || string.IsNullOrWhiteSpace(eventName)) return;
             try
             {
-                var id = GetOrMapEvent(simEventName);
+                uint id = GetOrMapEvent(eventName);
+
                 _simConnect.TransmitClientEvent(SimConnect.SIMCONNECT_OBJECT_ID_USER, (EVENTS)id, data,
                     (GROUPS)SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[SimConnect] TransmitEvent {simEventName} falhou: {ex.Message}");
+                Debug.WriteLine($"SimConnect SendEvent({eventName}) Error: {ex.Message}");
             }
         }
 
-        public void SetFailure(string eventName) => TransmitEvent(eventName, 1);
+        /// <summary>
+        /// Evento com até 5 parâmetros (TransmitClientEvent_EX1), ex.: ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE.
+        /// Usado pelos botões de teste do HUD de depuração (spike "falhas sem mexer no comando").
+        /// </summary>
+        public void SendEventEx(string eventName, uint p0 = 0, uint p1 = 0, uint p2 = 0, uint p3 = 0, uint p4 = 0)
+        {
+            if (_simConnect == null || string.IsNullOrWhiteSpace(eventName)) return;
+            try
+            {
+                uint id = GetOrMapEvent(eventName);
+                _simConnect.TransmitClientEvent_EX1(SimConnect.SIMCONNECT_OBJECT_ID_USER, (EVENTS)id,
+                    (GROUPS)SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST, SIMCONNECT_EVENT_FLAG.GROUPID_IS_PRIORITY,
+                    p0, p1, p2, p3, p4);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SendEventEx({eventName}) Error: {ex.Message}");
+            }
+        }
+
+        private readonly Dictionary<int, ToggleStateTracker> _alternatorTrackers = new();
+
+        private ToggleStateTracker GetAlternatorTracker(int alternatorIndex)
+        {
+            if (!_alternatorTrackers.TryGetValue(alternatorIndex, out var tracker))
+            {
+                tracker = new ToggleStateTracker(defaultState: true);
+                _alternatorTrackers[alternatorIndex] = tracker;
+            }
+            return tracker;
+        }
+
+        /// <summary>
+        /// Conecta ou desconecta o alternador do barramento elétrico via ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE.
+        /// O estado é rastreado por ToggleStateTracker e o toggle só é transmitido quando há mudança de estado.
+        /// </summary>
+        public void SetAlternatorConnected(int alternatorIndex, bool connected)
+        {
+            var tracker = GetAlternatorTracker(alternatorIndex);
+            if (tracker.RequestState(connected))
+            {
+                // [0] = Source bus index (1), [1] = Target alternator index
+                SendEventEx("ELECTRICAL_BUS_TO_ALTERNATOR_CONNECTION_TOGGLE", 1, (uint)alternatorIndex);
+            }
+        }
+
+        /// <summary>Teste do spike: força a posição da superfície dos flaps (0..1) sem mexer na alavanca.</summary>
+        public void WriteFlapSurfacePercent(double fraction)
+        {
+            double v = Math.Clamp(fraction, 0.0, 1.0);
+            WriteSingle(DEFINITIONS.WriteFlapsLeftPercent, v);
+            WriteSingle(DEFINITIONS.WriteFlapsRightPercent, v);
+        }
+
+        /// <summary>
+        /// Estado atual de uma falha do tipo toggle no simulador.
+        /// null = o simulador não expõe uma SimVar confiável para esse evento.
+        /// </summary>
+        private bool? IsToggleFailureActive(string eventName) => eventName.ToUpperInvariant() switch
+        {
+            "TOGGLE_ENGINE1_FAILURE" => CurrentData.IsEngineFailed,
+            "TOGGLE_VACUUM_FAILURE" => CurrentData.PartialPanelVacuum > 0.5,
+            "TOGGLE_PITOT_BLOCKAGE" => CurrentData.PartialPanelPitot > 0.5,
+            // Sem SimVar de estado da tomada estática no SDK: tratada como toggle não rastreado (_untrackedToggles)
+            "TOGGLE_STATIC_PORT_BLOCKAGE" => null,
+            "TOGGLE_ELECTRICAL_FAILURE" => CurrentData.PartialPanelElectrical > 0.5,
+            _ => null
+        };
+
+        public void SetFailure(string eventName)
+        {
+            // Evita que um segundo TOGGLE repare uma falha que o simulador já reporta como ativa
+            bool? active = IsToggleFailureActive(eventName);
+            if (active == true) return;
+            if (active == null)
+            {
+                if (_untrackedToggles.Contains(eventName)) return; // Já enviado nesta sessão do simulador
+                _untrackedToggles.Add(eventName);
+            }
+            SendEvent(eventName);
+        }
+
+        /// <summary>Desfaz uma falha toggle (ex.: motor recuperado após gelo no carburador).</summary>
+        public void ClearFailure(string eventName)
+        {
+            if (_persistentToggles.Contains(eventName)) return; // Pane persistente aberta: só a oficina desfaz
+            ForceClearFailure(eventName);
+        }
+
+        /// <summary>
+        /// Toggles que pertencem a panes persistentes abertas (AircraftDefects). ClearSimFailures e ClearFailure
+        /// não os desfazem: eles só saem quando a pane é reparada na oficina.
+        /// </summary>
+        private HashSet<string> _persistentToggles = new(StringComparer.OrdinalIgnoreCase);
+
+        public void SetPersistentToggles(IEnumerable<string> eventNames)
+        {
+            _persistentToggles = new HashSet<string>(eventNames, StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Desfaz um toggle mesmo que pertença a uma pane persistente (pane reparada na oficina).</summary>
+        public void ForceClearFailure(string eventName)
+        {
+            bool? active = IsToggleFailureActive(eventName);
+            if (active == true || (active == null && _untrackedToggles.Remove(eventName)))
+            {
+                SendEvent(eventName);
+            }
+        }
+
+        /// <summary>
+        /// Desfaz no simulador as falhas toggle que ainda estão ativas (início de um novo voo).
+        /// Só re-envia o toggle quando a SimVar confirma a falha, para não criar uma falha nova.
+        /// </summary>
+        public void ClearSimFailures()
+        {
+            if (_simConnect == null) return;
+            // Panes persistentes abertas (diferidas, ex.: pitot) continuam aplicadas no voo seguinte
+            foreach (var eventName in ToggleFailureEvents)
+            {
+                if (_persistentToggles.Contains(eventName)) continue;
+                if (IsToggleFailureActive(eventName) == true)
+                {
+                    SendEvent(eventName);
+                }
+            }
+
+            foreach (var eventName in _untrackedToggles.ToList())
+            {
+                if (_persistentToggles.Contains(eventName)) continue;
+                SendEvent(eventName);
+                _untrackedToggles.Remove(eventName);
+            }
+        }
 
         /// <summary>
         /// Define os comandos do piloto que devem ser bloqueados (grupo mascarável de prioridade máxima).
         /// Nunca incluir aqui um evento que o próprio addon transmite, ou ele também seria bloqueado.
         /// </summary>
-        public void SetMaskedEvents(IEnumerable<string> simEventNames)
+        public void SetMaskedEvents(IEnumerable<string> eventNames)
         {
-            var desired = new HashSet<string>(simEventNames, StringComparer.OrdinalIgnoreCase);
+            var desired = new HashSet<string>(eventNames, StringComparer.OrdinalIgnoreCase);
             if (desired.SetEquals(_maskedEvents)) return;
             _maskedEvents = desired;
             ApplyMaskedEvents();
@@ -378,14 +854,30 @@ namespace FlightCareer.UI.Services
                 if (_maskedEvents.Count == 0) return;
                 foreach (var name in _maskedEvents)
                 {
-                    var id = GetOrMapEvent(name);
-                    _simConnect.AddClientEventToNotificationGroup(GROUPS.MaskedPilotInputs, (EVENTS)id, true);
+                    _simConnect.AddClientEventToNotificationGroup(GROUPS.MaskedPilotInputs, (EVENTS)GetOrMapEvent(name), true);
                 }
                 _simConnect.SetNotificationGroupPriority(GROUPS.MaskedPilotInputs, SimConnect.SIMCONNECT_GROUP_PRIORITY_HIGHEST_MASKABLE);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"[SimConnect] Falha ao aplicar mascaramento: {ex.Message}");
+            }
+        }
+
+        private void ApplyObservedEvents()
+        {
+            if (_simConnect == null) return;
+            try
+            {
+                _simConnect.ClearNotificationGroup(GROUPS.ObservedPilotInputs);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("ENGINE_AUTO_START"), false);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("ENGINE_AUTO_SHUTDOWN"), false);
+                _simConnect.AddClientEventToNotificationGroup(GROUPS.ObservedPilotInputs, (EVENTS)GetOrMapEvent("REQUEST_FUEL_KEY"), false);
+                _simConnect.SetNotificationGroupPriority(GROUPS.ObservedPilotInputs, SimConnect.SIMCONNECT_GROUP_PRIORITY_DEFAULT);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[SimConnect] Falha ao aplicar eventos observados: {ex.Message}");
             }
         }
 
@@ -442,9 +934,13 @@ namespace FlightCareer.UI.Services
                 try
                 {
                     _simConnect.ReceiveMessage();
+                    _linkWatchdog.MarkMessage(DateTime.UtcNow);
                     handled = true;
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"[SimConnect] ReceiveMessage falhou: {ex.GetType().Name}: {ex.Message}");
+                }
             }
             return IntPtr.Zero;
         }
@@ -462,6 +958,158 @@ namespace FlightCareer.UI.Services
             {
                 CurrentFailureState = failureState;
                 OnFailureStateReceived?.Invoke(failureState);
+            }
+            else if (data.dwData[0] is SimFastFlightState fast)
+            {
+                OnFastFlightReceived?.Invoke(fast);
+            }
+            else if (data.dwData[0] is SimTurbineLossesState lossesState)
+            {
+                _currentTurbineLosses = lossesState;
+            }
+            else if (data.dwData[0] is SimFuelState fuelState)
+            {
+                _currentFuelState = fuelState;
+                OnFuelStateReceived?.Invoke(fuelState);
+            }
+            else if (data.dwData[0] is SimIntegrityState integrityState)
+            {
+                _currentIntegrityState = integrityState;
+                OnIntegrityStateReceived?.Invoke(integrityState);
+            }
+        }
+
+        private SimTurbineLossesState _currentTurbineLosses;
+
+        public int TurbineEngineCount => _currentTurbineLosses.NumberOfEngines > 0 ? (int)Math.Round(_currentTurbineLosses.NumberOfEngines) : 0;
+
+        public TurbineLosses GetTurbineLosses(int engineIndex)
+        {
+            return engineIndex switch
+            {
+                1 => new TurbineLosses(_currentTurbineLosses.N1Loss1, _currentTurbineLosses.FuelEfficiencyLoss1, _currentTurbineLosses.IttCoolingLoss1, _currentTurbineLosses.ThrustEfficiencyLoss1),
+                2 => new TurbineLosses(_currentTurbineLosses.N1Loss2, _currentTurbineLosses.FuelEfficiencyLoss2, _currentTurbineLosses.IttCoolingLoss2, _currentTurbineLosses.ThrustEfficiencyLoss2),
+                3 => new TurbineLosses(_currentTurbineLosses.N1Loss3, _currentTurbineLosses.FuelEfficiencyLoss3, _currentTurbineLosses.IttCoolingLoss3, _currentTurbineLosses.ThrustEfficiencyLoss3),
+                4 => new TurbineLosses(_currentTurbineLosses.N1Loss4, _currentTurbineLosses.FuelEfficiencyLoss4, _currentTurbineLosses.IttCoolingLoss4, _currentTurbineLosses.ThrustEfficiencyLoss4),
+                _ => TurbineLosses.None
+            };
+        }
+
+        public void SetTurbineLosses(int engineIndex, TurbineLosses losses)
+        {
+            if (_simConnect == null) return;
+            if (engineIndex < 1 || engineIndex > 4) return;
+            if (losses == null) return;
+
+            try
+            {
+                var n1Def = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineN1Loss1 + (engineIndex - 1));
+                var fuelDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineFuelLoss1 + (engineIndex - 1));
+                var ittDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineIttLoss1 + (engineIndex - 1));
+                var thrustDef = (DEFINITIONS)((int)DEFINITIONS.WriteTurbineThrustLoss1 + (engineIndex - 1));
+
+                var n1Val = new SimDoubleValue { Value = Math.Clamp(losses.N1LossPct, 0.0, 100.0) };
+                var fuelVal = new SimDoubleValue { Value = Math.Clamp(losses.FuelEfficiencyLossPct, 0.0, 100.0) };
+                var ittVal = new SimDoubleValue { Value = Math.Clamp(losses.IttCoolingLossPct, 0.0, 100.0) };
+                var thrustVal = new SimDoubleValue { Value = Math.Clamp(losses.ThrustEfficiencyLossPct, 0.0, 100.0) };
+
+                _simConnect.SetDataOnSimObject(n1Def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, n1Val);
+                _simConnect.SetDataOnSimObject(fuelDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, fuelVal);
+                _simConnect.SetDataOnSimObject(ittDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, ittVal);
+                _simConnect.SetDataOnSimObject(thrustDef, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, thrustVal);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SimConnect SetTurbineLosses Error: {ex.Message}");
+            }
+        }
+
+        private static readonly Dictionary<string, DEFINITIONS> FuelTankWriteDefs = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "FUELSYSTEM TANK QUANTITY:1", DEFINITIONS.WriteFuelSystemTank1 },
+            { "FUELSYSTEM TANK QUANTITY:2", DEFINITIONS.WriteFuelSystemTank2 },
+            { "FUELSYSTEM TANK QUANTITY:3", DEFINITIONS.WriteFuelSystemTank3 },
+            { "FUELSYSTEM TANK QUANTITY:4", DEFINITIONS.WriteFuelSystemTank4 },
+            { "FUELSYSTEM TANK QUANTITY:5", DEFINITIONS.WriteFuelSystemTank5 },
+            { "FUELSYSTEM TANK QUANTITY:6", DEFINITIONS.WriteFuelSystemTank6 },
+            { "FUELSYSTEM TANK QUANTITY:7", DEFINITIONS.WriteFuelSystemTank7 },
+            { "FUELSYSTEM TANK QUANTITY:8", DEFINITIONS.WriteFuelSystemTank8 },
+            { "FUEL TANK LEFT MAIN QUANTITY", DEFINITIONS.WriteFuelTankLeftMain },
+            { "FUEL TANK RIGHT MAIN QUANTITY", DEFINITIONS.WriteFuelTankRightMain },
+            { "FUEL TANK LEFT AUX QUANTITY", DEFINITIONS.WriteFuelTankLeftAux },
+            { "FUEL TANK RIGHT AUX QUANTITY", DEFINITIONS.WriteFuelTankRightAux },
+            { "FUEL TANK LEFT TIP QUANTITY", DEFINITIONS.WriteFuelTankLeftTip },
+            { "FUEL TANK RIGHT TIP QUANTITY", DEFINITIONS.WriteFuelTankRightTip },
+            { "FUEL TANK CENTER QUANTITY", DEFINITIONS.WriteFuelTankCenter },
+            { "FUEL TANK CENTER2 QUANTITY", DEFINITIONS.WriteFuelTankCenter2 },
+            { "FUEL TANK CENTER3 QUANTITY", DEFINITIONS.WriteFuelTankCenter3 }
+        };
+
+        public IReadOnlyList<FuelTank> GetActiveFuelTanks()
+        {
+            var tanks = new List<FuelTank>();
+            var fuel = _currentFuelState;
+
+            if (fuel.NewFuelSystem > 0.5)
+            {
+                if (fuel.FuelSystemTankUsableCapacity1 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:1", fuel.FuelSystemTankUsableCapacity1, fuel.FuelSystemTankQuantity1, Unusable(fuel.FuelSystemTankCapacity1, fuel.FuelSystemTankUsableCapacity1)));
+                if (fuel.FuelSystemTankUsableCapacity2 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:2", fuel.FuelSystemTankUsableCapacity2, fuel.FuelSystemTankQuantity2, Unusable(fuel.FuelSystemTankCapacity2, fuel.FuelSystemTankUsableCapacity2)));
+                if (fuel.FuelSystemTankUsableCapacity3 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:3", fuel.FuelSystemTankUsableCapacity3, fuel.FuelSystemTankQuantity3, Unusable(fuel.FuelSystemTankCapacity3, fuel.FuelSystemTankUsableCapacity3)));
+                if (fuel.FuelSystemTankUsableCapacity4 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:4", fuel.FuelSystemTankUsableCapacity4, fuel.FuelSystemTankQuantity4, Unusable(fuel.FuelSystemTankCapacity4, fuel.FuelSystemTankUsableCapacity4)));
+                if (fuel.FuelSystemTankUsableCapacity5 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:5", fuel.FuelSystemTankUsableCapacity5, fuel.FuelSystemTankQuantity5, Unusable(fuel.FuelSystemTankCapacity5, fuel.FuelSystemTankUsableCapacity5)));
+                if (fuel.FuelSystemTankUsableCapacity6 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:6", fuel.FuelSystemTankUsableCapacity6, fuel.FuelSystemTankQuantity6, Unusable(fuel.FuelSystemTankCapacity6, fuel.FuelSystemTankUsableCapacity6)));
+                if (fuel.FuelSystemTankUsableCapacity7 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:7", fuel.FuelSystemTankUsableCapacity7, fuel.FuelSystemTankQuantity7, Unusable(fuel.FuelSystemTankCapacity7, fuel.FuelSystemTankUsableCapacity7)));
+                if (fuel.FuelSystemTankUsableCapacity8 > 0) tanks.Add(new FuelTank("FUELSYSTEM TANK QUANTITY:8", fuel.FuelSystemTankUsableCapacity8, fuel.FuelSystemTankQuantity8, Unusable(fuel.FuelSystemTankCapacity8, fuel.FuelSystemTankUsableCapacity8)));
+            }
+            else
+            {
+                if (fuel.TankLeftMainCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT MAIN QUANTITY", fuel.TankLeftMainCapacity, fuel.TankLeftMainQuantity));
+                if (fuel.TankRightMainCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT MAIN QUANTITY", fuel.TankRightMainCapacity, fuel.TankRightMainQuantity));
+                if (fuel.TankLeftAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT AUX QUANTITY", fuel.TankLeftAuxCapacity, fuel.TankLeftAuxQuantity));
+                if (fuel.TankRightAuxCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT AUX QUANTITY", fuel.TankRightAuxCapacity, fuel.TankRightAuxQuantity));
+                if (fuel.TankLeftTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK LEFT TIP QUANTITY", fuel.TankLeftTipCapacity, fuel.TankLeftTipQuantity));
+                if (fuel.TankRightTipCapacity > 0) tanks.Add(new FuelTank("FUEL TANK RIGHT TIP QUANTITY", fuel.TankRightTipCapacity, fuel.TankRightTipQuantity));
+                if (fuel.TankCenterCapacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER QUANTITY", fuel.TankCenterCapacity, fuel.TankCenterQuantity));
+                if (fuel.TankCenter2Capacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER2 QUANTITY", fuel.TankCenter2Capacity, fuel.TankCenter2Quantity));
+                if (fuel.TankCenter3Capacity > 0) tanks.Add(new FuelTank("FUEL TANK CENTER3 QUANTITY", fuel.TankCenter3Capacity, fuel.TankCenter3Quantity));
+            }
+
+            return tanks;
+        }
+
+        // Parte não utilizável = capacidade total − utilizável (0 se a total não for lida)
+        private static double Unusable(double totalCapacity, double usableCapacity) =>
+            totalCapacity > usableCapacity ? totalCapacity - usableCapacity : 0.0;
+
+        public void SetFuelTanks(IReadOnlyList<(string simVar, double gallons)> tanks)
+        {
+            if (_simConnect == null || tanks == null || tanks.Count == 0) return;
+
+            // Os valores recebidos são utilizáveis; a escrita do sistema moderno define o total (com o não utilizável)
+            var known = new Dictionary<string, FuelTank>(StringComparer.OrdinalIgnoreCase);
+            foreach (var t in GetActiveFuelTanks()) known[t.SimVar] = t;
+
+            foreach (var (simVar, gallons) in tanks)
+            {
+                if (string.IsNullOrWhiteSpace(simVar)) continue;
+
+                if (FuelTankWriteDefs.TryGetValue(simVar.Trim(), out var def))
+                {
+                    try
+                    {
+                        double write = known.TryGetValue(simVar.Trim(), out var tank) ? tank.ToSimWriteValue(gallons) : Math.Max(0.0, gallons);
+                        var val = new SimDoubleValue { Value = write };
+                        _simConnect.SetDataOnSimObject(def, SimConnect.SIMCONNECT_OBJECT_ID_USER, SIMCONNECT_DATA_SET_FLAG.DEFAULT, val);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"SimConnect SetFuelTanks Error para {simVar}: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine($"[SimConnect] SimVar de tanque não mapeada para escrita: {simVar}");
+                }
             }
         }
     }

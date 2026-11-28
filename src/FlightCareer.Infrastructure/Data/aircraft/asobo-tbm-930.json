@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 7,
+  "id": "Asobo TBM 930",
+  "class": "Turboprop",
+  "engineCount": 1,
+  "features": [
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "deIceBoots",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "singleEngine",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "TBM 930"
+    ],
+    "atcModel": [
+      "TBM9"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 266.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VMO 266 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 65.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0813-Asobo_TBM_930_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 83.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0813-Asobo_TBM_930_Passengers.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 178.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Takeoff 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 122.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (Flaps Landing 122 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 178.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLO extension 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 178.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.2.1 (VLE 178 KIAS, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "torqueMaxPct",
+      "value": 100.0,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (100% Torque at Np 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "n1MaxPct",
+      "value": 104.1,
+      "unit": "percent",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Ng limitation 104.1%, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 2000.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (Np limitation 2000 RPM, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 850.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.1 (ITT Take off 850°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 104.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Maximum oil temperature 104°C, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "oilPressMin",
+      "value": 60.0,
+      "unit": "psi",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.3.2 (Oil pressure Minimum 60 psi, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.8,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs +3.8g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "Daher TBM 930 POH, Sec. 2 p. 2.6.1 (Weight below 6579 lbs -1.5g, https://s3728f283e85acd32.jimcontent.com/download/version/1616689845/module/9061693320/name/Daher-Socata%20TBM930%20Aircraft%20Information%20Manual%20PDF.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 158.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "Daher TBM 930 Pilot Operating Handbook, Sec. 2 (158 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 200.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: starter-gerador 200 A (TBM, aproximado)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-66D",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.65,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Daher TBM 930 Pilot's Operating Handbook (POH); não conferido no POH)",
+      "notes": null
+    }
+  ]
+}

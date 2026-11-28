@@ -1,0 +1,350 @@
+icao,cc,note,tags
+SBSO,BR,Capital nacional do agronegócio; aviação agrícola e executiva rural,pulverizacao|executivo_rural|graos
+SBSI,BR,"Hub regional do nortão mato-grossense (soja, milho e madeira)",graos|executivo_rural
+SBLU,BR,"Polo agroindustrial de soja, algodão, etanol de milho e proteína animal",graos|pulverizacao
+SBRD,BR,Polo logístico do sul de Mato Grosso,graos|logistica
+SWPY,BR,Produção de algodão e grãos no sudeste mato-grossense,graos|pulverizacao
+SJIE,BR,Megafazendas e pistas agrícolas privadas,pulverizacao|graos
+SWTS,BR,Hub agropecuário do médio-norte de Mato Grosso,graos|pecuaria
+SWJN,BR,Pecuária e expansão agrícola do norte mato-grossense,pecuaria
+SBAT,BR,Pecuária e grãos do extremo norte mato-grossense,pecuaria|graos
+SWEK,BR,Hub agropecuário do leste de Mato Grosso,graos|pecuaria
+SBBW,BR,Hub agropecuário do leste de Mato Grosso,pecuaria
+SWLC,BR,Maior polo agroindustrial e de pulverização aérea de Goiás,pulverizacao|graos
+SWJW,BR,Aviação agrícola e grãos no sudoeste goiano,pulverizacao|graos
+SWME,BR,Base agropecuária e sucroenergética goiana,cana|graos
+SBLQ,BR,Maior polo de agricultura irrigada do Brasil,irrigacao|hortifruti|graos
+SJCN,BR,Aviação agrícola da agricultura irrigada,pulverizacao|irrigacao
+SBIT,BR,Cana-de-açúcar e grãos no sul de Goiás,cana|graos
+SWFR,BR,Polo agropecuário do entorno do DF,graos
+SBDO,BR,Principal hub agrícola e sucroenergético do sul de MS,graos|cana
+SSMJ,BR,Referência em produtividade de soja/milho e aviação agrícola,pulverizacao|graos
+SSCD,BR,"Polos de algodão, cana e celulose",graos|cana|florestal
+SBPP,BR,Hub agropecuário na fronteira Brasil–Paraguai,graos|fronteira
+SDXJ,BR,Polo de grãos sul-mato-grossense,graos
+SNBR,BR,Capital do agronegócio no Oeste Baiano (MATOPIBA),graos|pulverizacao|irrigacao
+SSQZ,BR,Maior concentração de aviação agrícola do Nordeste,pulverizacao|graos
+SBVC,BR,"Eucalipto, café e pecuária na Bahia",cafe|florestal|pecuaria
+SBPL,BR,Exportação aérea de frutas frescas do Vale do São Francisco,pereciveis|fruticultura
+SBJU,BR,Fruticultura irrigada do Cariri,fruticultura
+SNAT,BR,Fruticultura irrigada da Chapada do Apodi,fruticultura
+SBIZ,BR,Polo logístico e agropecuário do sul do Maranhão,graos
+SNBS,BR,Fronteira agrícola de soja e milho do Maranhão,graos|pulverizacao
+SBPJ,BR,Hub central do agronegócio tocantinense,graos|pecuaria
+SWGN,BR,Pecuária de corte e grãos do Tocantins,pecuaria
+SWGI,BR,Pecuária de corte e grãos do Tocantins,pecuaria|graos
+SSBJ,BR,Expansão de grãos no cerrado piauiense,graos
+SBVH,BR,Principal hub de grãos e aviação agrícola de Rondônia,graos|pulverizacao
+SSKW,BR,"Café clonal, cacau e pecuária em Rondônia",cafe|pecuaria
+SBJI,BR,"Café, cacau e pecuária em Rondônia",cafe|pecuaria
+SBMA,BR,"Pecuária, cacau e grãos do arco norte",pecuaria
+SBHT,BR,Pecuária e cacau do Xingu,pecuaria
+SBSN,BR,Grãos do arco norte,graos|logistica
+SBRP,BR,Capital do setor sucroenergético paulista,cana|executivo_rural
+SBSR,BR,"Citros, cana e seringueira",citros|cana
+SBAU,BR,Pecuária intensiva e usinas de etanol,pecuaria|cana
+SBDN,BR,Pecuária e usinas de etanol,pecuaria|cana
+SBAE,BR,Pulverização de cana e citros,pulverizacao|cana|citros
+SDPW,BR,Pulverização de cana,pulverizacao|cana
+SDBK,BR,Fabricação do avião agrícola Ipanema,fabrica_agricola|pulverizacao
+SBUL,BR,Genética bovina e grãos do Triângulo Mineiro,pecuaria|genetica|graos
+SBUR,BR,Capital da genética bovina zebu,pecuaria|genetica
+SNPD,BR,Polo de café do Cerrado Mineiro,cafe
+SNPJ,BR,Polo de café do Cerrado Mineiro,cafe
+SBVG,BR,Hub do café do Sul de Minas,cafe
+SBPC,BR,Hub do café do Sul de Minas,cafe
+SNUN,BR,Agricultura irrigada e grãos no noroeste mineiro,irrigacao|graos
+SNZR,BR,Agricultura irrigada e grãos no noroeste mineiro,irrigacao|graos
+SBCA,BR,Capital do agronegócio e cooperativismo do oeste paranaense,graos|cooperativa
+SBLO,BR,Polo agroindustrial do norte do Paraná,graos
+SBMG,BR,Polo agroindustrial do norte do Paraná,graos
+SSZW,BR,"Cevada, trigo, soja e leite dos Campos Gerais",graos|leite
+SBCH,BR,Capital da agroindústria de aves e suínos,proteina_animal
+SBLJ,BR,"Maçã, madeira e agroindústria catarinense",fruticultura|florestal
+SSJA,BR,Maçã e agroindústria catarinense,fruticultura|proteina_animal
+SBPF,BR,Capital da soja no sul e polo de máquinas agrícolas,graos
+SSKS,BR,Capital nacional do arroz e berço da aviação agrícola gaúcha,arroz|pulverizacao
+SBUG,BR,Pulverização aérea de arroz irrigado,arroz|pulverizacao
+SBSM,BR,Pulverização aérea de arroz irrigado,arroz|pulverizacao
+SBPK,BR,Pulverização aérea de arroz irrigado,arroz|pulverizacao
+SSIJ,BR,Cooperativismo e equipamentos aeroagrícolas,graos|cooperativa
+SSZR,BR,Cooperativismo e equipamentos aeroagrícolas,graos|pulverizacao
+SSKM,BR,Cooperativismo do Paraná,graos|cooperativa
+SBBG,BR,"Pecuária, arroz e vinho da Campanha Gaúcha",pecuaria|arroz|vinho
+SSLT,BR,Pecuária e arroz da Campanha Gaúcha,pecuaria|arroz
+SSDP,BR,Pecuária e arroz da Campanha Gaúcha,pecuaria|arroz
+SNEE,BR,Maior polo produtor de maçãs do Brasil,fruticultura
+SBCX,BR,Vitivinicultura da Serra Gaúcha,vinho
+SSBG,BR,Vitivinicultura da Serra Gaúcha,vinho
+SBKF,BR,Pecuária do leste de Mato Grosso,pecuaria
+SWKC,BR,Polo pecuário da fronteira oeste de Mato Grosso,pecuaria
+SSSB,BR,Polo arrozeiro na fronteira com a Argentina,arroz|pulverizacao
+SSOS,BR,Aviação agrícola do litoral norte gaúcho (arroz),arroz|pulverizacao
+SNLN,BR,"Mamão papaia, café conilon e cacau",fruticultura|cafe
+SBSG,BR,"Exportação aérea de melão, mamão e pescados",pereciveis|fruticultura
+SBFZ,BR,Exportação aérea de frutas e flores do Ceará,pereciveis|flores
+SBKG,BR,Polo agropecuário do interior paraibano,pecuaria
+KFAT,US,"Capital mundial da agricultura irrigada (amêndoas, uvas, pistache)",irrigacao|fruticultura|pulverizacao
+KBFL,US,"Citros, cenouras, uvas e aviação agrícola",citros|pulverizacao
+KMOD,US,"Nozes, frutas e laticínios do Vale Central",fruticultura|leite
+KSCK,US,"Nozes, frutas e laticínios do Vale Central",fruticultura|leite
+KSNS,US,Hortaliças e morangos de alto valor,hortifruti|pereciveis
+KSMX,US,"Morangos, brócolis e vinhedos",hortifruti|vinho
+KIPL,US,Agricultura intensiva de inverno no Vale Imperial,hortifruti|pulverizacao
+KNYL,US,Capital mundial da alface de inverno,hortifruti|pulverizacao
+KBOI,US,"Batata, beterraba sacarina e laticínios",graos|leite
+KTWF,US,"Batata, beterraba sacarina e laticínios",graos|leite
+KIDA,US,"Trigo, cevada e batata",graos
+KPIH,US,"Trigo, cevada e batata",graos
+KYKM,US,"Capital mundial do lúpulo, maçãs e cerejas",fruticultura|pereciveis
+KEAT,US,Maior polo produtor de maçãs dos EUA,fruticultura
+KPSC,US,Agricultura irrigada e vinhedos,irrigacao|vinho
+KDSM,US,Coração do Corn Belt,graos|proteina_animal
+KALO,US,Coração do Corn Belt,graos
+KSUX,US,Grãos e frigoríficos,graos|proteina_animal
+KOMA,US,Milho irrigado e gado de corte,graos|pecuaria
+KLNK,US,Milho irrigado e gado de corte,graos|pecuaria
+KGRI,US,Milho irrigado e gado de corte,graos|pecuaria
+KICT,US,Cinturão de trigo,graos
+KGCK,US,Capital da carne bovina,pecuaria
+KDDC,US,Capital da carne bovina,pecuaria
+KSLN,US,Trigo e sorgo,graos
+KHYS,US,Trigo e sorgo,graos
+KFAR,US,"Trigo, canola, girassol e beterraba",graos|pulverizacao
+KGFK,US,"Trigo, canola, girassol e beterraba",graos
+KFSD,US,"Milho, soja e pecuária das planícies",graos|pecuaria
+KABR,US,"Milho, soja e pecuária das planícies",graos
+KRST,US,"Soja, milho e agroindústria",graos
+KMKT,US,"Soja, milho e agroindústria",graos
+KCMI,US,Cinturão de grãos,graos
+KBMI,US,Cinturão de grãos,graos
+KPIA,US,Máquinas agrícolas e cinturão de grãos,graos|maquinas
+KMLI,US,Sede mundial de máquinas agrícolas,maquinas|graos
+KLAF,US,"Milho, soja e pesquisa agrícola",graos
+KFWA,US,Milho e soja,graos
+KLBB,US,Maior polo produtor de algodão dos EUA,algodao|pulverizacao
+KAMA,US,Pecuária confinada e trigo,pecuaria|graos
+KMFE,US,Citros e frutas do Vale do Rio Grande,citros
+KHRL,US,Citros e frutas do Vale do Rio Grande,citros
+KGLH,US,Maior concentração de aviação agrícola do Delta do Mississippi,pulverizacao|arroz|algodao
+KJBR,US,Maiores polos de pulverização aérea de arroz dos EUA,arroz|pulverizacao
+KPBF,US,Maiores polos de pulverização aérea de arroz dos EUA,arroz|pulverizacao
+KLFT,US,"Cana-de-açúcar, arroz e algodão",cana|arroz|pulverizacao
+KAEX,US,"Cana-de-açúcar, arroz e algodão",cana|arroz
+KABY,US,Capital do amendoim e fábrica de avião agrícola,graos|fabrica_agricola
+KVRB,US,Citros e morangos da Flórida,citros
+KLAL,US,Citros e morangos da Flórida,citros|hortifruti
+KGXY,US,"Gado, milho e beterraba",pecuaria|graos
+CYQR,CA,Coração das pradarias canadenses,graos|pulverizacao
+CYXE,CA,Coração das pradarias canadenses,graos
+CYQL,CA,Agricultura irrigada e pecuária,irrigacao|pecuaria
+CYXH,CA,Agricultura irrigada e pecuária,irrigacao|pecuaria
+CYBR,CA,Grãos e aviação agrícola canadense,graos|pulverizacao
+CYWG,CA,Grãos do Canadá,graos
+CYLW,CA,Fruticultura e vinhedos do Okanagan,fruticultura|vinho
+MMCL,MX,Maior polo hortifrutigranjeiro do México,hortifruti|pulverizacao
+MMCN,MX,Vales irrigados e pulverização aérea,irrigacao|pulverizacao
+MMLM,MX,Vales irrigados e pulverização aérea,irrigacao|pulverizacao
+MMPN,MX,Capital mundial do abacate,fruticultura|pereciveis
+MMGL,MX,"Agave, frutas vermelhas e pecuária",fruticultura|pecuaria
+SAAR,AR,Hub mundial de exportação de farelo e óleo de soja,graos
+SACO,AR,"Soja, milho, amendoim e aviação agrícola",graos|pulverizacao
+SAOC,AR,"Soja, milho e amendoim",graos
+SAZB,AR,"Trigo, girassol e pecuária da Pampa",graos|pecuaria
+SAZR,AR,"Trigo, girassol e pecuária da Pampa",graos|pecuaria
+SAAP,AR,"Arroz, lácteos e grãos do litoral argentino",arroz|leite
+SAAV,AR,"Arroz, lácteos e grãos do litoral argentino",arroz|graos
+SAME,AR,Capital sul-americana do vinho e fruticultura irrigada,vinho|fruticultura
+SAZN,AR,Maior polo de peras e maçãs da América do Sul,fruticultura
+SANT,AR,"Limão, cana-de-açúcar e mirtilos",citros|cana
+SCEL,CL,"Exportação aérea de cerejas, uvas e vinhos",pereciveis|fruticultura|vinho
+SCIC,CL,Vale Central chileno de frutas e vinhos,fruticultura|vinho
+SCTL,CL,Vale Central chileno de frutas e vinhos,fruticultura|vinho
+SCAR,CL,Agricultura de oásis e exportação de sementes,sementes
+SCDA,CL,Agricultura de oásis,hortifruti
+SCTE,CL,Polo mundial de salmão fresco exportado,pescado|pereciveis
+SCBA,CL,Aquicultura da Patagônia,pescado
+SPJC,PE,Agroexportação irrigada no deserto,pereciveis|fruticultura
+SPSO,PE,Agroexportação irrigada no deserto,fruticultura|irrigacao
+SPRU,PE,Agroexportação e cana da costa norte,fruticultura|cana
+SPHI,PE,Agroexportação e cana da costa norte,cana
+SPUR,PE,Agroexportação da costa norte,fruticultura
+SKBO,CO,Maior hub das Américas de exportação de flores,flores|pereciveis
+SKRG,CO,"Flores, café e abacate",flores|cafe
+SKPE,CO,Eixo Cafeeiro colombiano,cafe
+SKAR,CO,Eixo Cafeeiro colombiano,cafe
+SEQM,EC,Exportação de rosas de altitude,flores|pereciveis
+SEGU,EC,"Banana, cacau fino e camarão",fruticultura|pescado
+SLVR,BO,Coração agrícola da Bolívia,graos|pecuaria
+SGAS,PY,"Soja, milho, trigo e carne do Paraguai",graos|pecuaria
+SGES,PY,Soja e milho do Paraguai,graos
+SUMU,UY,"Arroz, soja, citros e pecuária",arroz|pecuaria
+SUSO,UY,Citros e pecuária,citros|pecuaria
+SUPU,UY,Arroz e soja,arroz|graos
+EHAM,NL,Maior hub mundial do comércio aéreo de flores e sementes,flores|sementes|pereciveis
+EHRD,NL,Estufas de alta tecnologia,hortifruti
+EHEH,NL,Agroindústria holandesa,hortifruti
+LEAM,ES,Maior concentração de estufas da Europa,hortifruti
+LEMI,ES,"Horta da Europa (citros, frutas e hortaliças)",citros|hortifruti
+LEAL,ES,Horta da Europa,citros|hortifruti
+LEVC,ES,Citros valencianos,citros
+LEZL,ES,"Azeite, arroz e algodão",azeite|arroz|algodao
+LEJR,ES,Azeite e vinho,azeite|vinho
+LEBA,ES,Azeite de oliva,azeite
+LEDA,ES,Fruticultura e suinocultura,fruticultura|proteina_animal
+LFBD,FR,Capital mundial do vinho,vinho
+LFBO,FR,Maior polo produtor de milho da França,graos
+LFBZ,FR,Milho das Landes,graos
+LFOK,FR,Carga agrícola da região de Champagne,vinho|graos|pereciveis
+LFRS,FR,Agropecuária e lácteos do oeste francês,leite|pecuaria
+LFRB,FR,Agropecuária e lácteos da Bretanha,leite|pecuaria
+LFRN,FR,Agropecuária e lácteos da Bretanha,leite|pecuaria
+LFML,FR,"Arroz da Camargue, frutas e vinhos",arroz|vinho
+LFTW,FR,Frutas e vinhos mediterrâneos,vinho|fruticultura
+LFMT,FR,Frutas e vinhos mediterrâneos,vinho
+LIPE,IT,Food Valley italiana,leite|fruticultura
+LIPR,IT,Food Valley italiana,fruticultura
+LIPK,IT,Food Valley italiana,fruticultura
+LIMZ,IT,"Arroz, avelãs e vinhos do Piemonte",arroz|vinho
+LIMF,IT,"Arroz, avelãs e vinhos do Piemonte",arroz|vinho
+LIPX,IT,Vitivinicultura e maçãs do norte italiano,vinho|fruticultura
+LIPH,IT,Vitivinicultura do norte italiano,vinho
+LIBD,IT,"Trigo duro, azeite e uvas de mesa",graos|azeite|fruticultura
+LIBR,IT,Trigo duro e azeite,graos|azeite
+LIBF,IT,Trigo duro,graos
+LICC,IT,Citros e hortaliças da Sicília,citros|hortifruti
+EDDV,DE,Agroindústria e máquinas agrícolas,maquinas|graos
+EDDW,DE,Agroindústria do norte alemão,graos
+EDDG,DE,Pecuária intensiva e agroindústria,proteina_animal
+EDJA,DE,Lácteos e lúpulo,leite
+EDDM,DE,Lácteos e lúpulo,leite
+EKBI,DK,"Laticínios, sementes e suinocultura",leite|sementes|proteina_animal
+EKYT,DK,Laticínios e suinocultura,leite|proteina_animal
+EIDW,IE,Carne bovina e laticínios,pecuaria|leite
+EICK,IE,Carne bovina e laticínios,pecuaria|leite
+EINN,IE,Carne bovina e laticínios,pecuaria|leite
+EGNT,GB,Cevada e pecuária,graos|pecuaria
+EGPD,GB,Pescado e pecuária,pescado|pecuaria
+EGNX,GB,Cevada e pecuária,graos
+EPPO,PL,"Maçãs, grãos e aves",fruticultura|graos
+EPBY,PL,"Maçãs, grãos e aves",fruticultura|graos
+EPLL,PL,"Maçãs, grãos e aves",fruticultura|proteina_animal
+LHBP,HU,Planície da Panônia,graos
+LHDC,HU,Planície da Panônia,graos
+LROP,RO,Grãos e girassol do Leste Europeu,graos
+LRCK,RO,Grãos e girassol do Leste Europeu,graos
+LRTR,RO,Grãos e girassol do Leste Europeu,graos
+LBSF,BG,"Óleo de rosa, girassol e trigo",graos|flores
+LBPD,BG,"Óleo de rosa, girassol e trigo",graos|flores
+LGTS,GR,"Algodão, pêssegos, tabaco e azeite",algodao|fruticultura
+LGLR,GR,Planície da Tessália,algodao|fruticultura
+LPBJ,PT,Agricultura irrigada do Alqueva,irrigacao|azeite|vinho
+LTAI,TR,Frutas e estufas de exportação,hortifruti|pereciveis
+LTAF,TR,Polo agrícola turco,algodao|fruticultura
+URKK,RU,Celeiro da Rússia,graos
+URRP,RU,Celeiro da Rússia,graos
+HKJK,KE,"Exportação aérea de rosas, chá, café e hortaliças",flores|pereciveis|cafe
+HKNW,KE,Exportação de flores e hortaliças,flores
+HKEL,KE,Polo agrícola do oeste queniano,graos|leite
+HAAB,ET,"Exportação aérea de flores, café e carne",flores|cafe|pereciveis
+FAOR,ZA,"Grãos, uvas de mesa e pecuária",graos|pecuaria
+FAUP,ZA,Uvas de mesa,fruticultura
+FABL,ZA,Grãos e pecuária,graos|pecuaria
+FACT,ZA,"Exportação de vinhos, citros e frutas de caroço",vinho|citros|pereciveis
+FAGG,ZA,Frutas e laticínios,fruticultura|leite
+FAPE,ZA,Citros e lã,citros|pecuaria
+FAEL,ZA,Citros e lã,citros|pecuaria
+FBMN,BW,Pecuária de corte,pecuaria
+FBSK,BW,Pecuária de corte,pecuaria
+FVHA,ZW,"Tabaco, flores e hortaliças de exportação",flores|hortifruti
+FLKK,ZM,"Milho, soja e horticultura",graos|hortifruti
+HTKJ,TZ,"Café, flores e sementes",cafe|flores
+HTAR,TZ,"Café, flores e sementes",cafe|flores
+HUEN,UG,"Exportação aérea de peixe fresco, café e frutas",pescado|cafe|pereciveis
+GMMN,MA,"Exportação de tomates, frutas vermelhas e citros",hortifruti|citros
+GMAD,MA,"Exportação de tomates, frutas vermelhas e citros",hortifruti|pereciveis
+HECA,EG,Delta do Nilo,hortifruti|algodao
+HEBA,EG,Delta do Nilo,citros|fruticultura
+DNKN,NG,Polo agrícola do norte da Nigéria,graos
+DNKA,NG,Polo agrícola do norte da Nigéria,graos
+DIAP,CI,Maior polo mundial de cacau e castanha de caju,cacau
+DGAA,GH,"Exportação aérea de abacaxi, mamão e cacau",fruticultura|cacau
+LLBG,IL,Tecnologia agrícola e exportação de tâmaras e sementes,sementes|fruticultura
+LLER,IL,Agricultura no deserto,hortifruti
+OERK,SA,Tâmaras e laticínios no deserto,fruticultura|leite
+OEGS,SA,Maior polo de tâmaras do mundo,fruticultura
+OMDB,AE,Reexportação e logística refrigerada de alimentos,pereciveis
+OMDW,AE,Logística refrigerada de alimentos,pereciveis
+OOSA,OM,Agricultura tropical do sul de Omã,fruticultura
+OIMM,IR,Capital mundial do açafrão e pistache,especiarias
+YBBN,AU,Exportação agrícola para a Ásia,pecuaria|leite|pereciveis
+YBWW,AU,Terminal de carga de exportação agrícola,pereciveis|pecuaria
+YSSY,AU,"Trigo, algodão e pecuária",graos|algodao
+YSDU,AU,"Trigo, algodão e pecuária",graos|algodao|pulverizacao
+YSWG,AU,Trigo e pecuária,graos|pecuaria
+YMML,AU,"Frutas, uvas, nozes e laticínios",fruticultura|leite
+YMIA,AU,Frutas e uvas do Vale do Murray,fruticultura|irrigacao
+YSHT,AU,Frutas e laticínios,fruticultura|leite
+YPAD,AU,"Vinho, trigo e frutos do mar",vinho|graos|pescado
+YPPH,AU,Exportação de trigo e canola,graos
+YGEL,AU,Trigo e canola,graos|pulverizacao
+YABA,AU,Trigo e canola,graos
+YBCS,AU,"Cana, bananas e mangas",cana|fruticultura
+YBTL,AU,Cana-de-açúcar,cana
+YBMK,AU,Cana-de-açúcar,cana|pulverizacao
+YPDN,AU,Agricultura irrigada do norte tropical,irrigacao|fruticultura
+YPKU,AU,Agricultura irrigada do Rio Ord,irrigacao|fruticultura
+NZAA,NZ,Kiwi e laticínios,fruticultura|leite
+NZTG,NZ,Capital mundial do kiwi,fruticultura|pereciveis
+NZCH,NZ,"Laticínios, cordeiro e sementes",leite|pecuaria|sementes
+NZTU,NZ,Laticínios e sementes,leite|sementes
+NZNP,NZ,Polo leiteiro,leite
+NZPM,NZ,Polo leiteiro e pecuário,leite|pecuaria
+NZWB,NZ,Capital mundial do Sauvignon Blanc,vinho
+NZNS,NZ,Maçãs e lúpulo,fruticultura
+ZPPP,CN,Maior hub de exportação aérea de flores da Ásia,flores|cafe
+ZYHB,CN,Celeiro do nordeste da China,graos|pulverizacao
+ZYCC,CN,Celeiro do nordeste da China,graos
+ZYJM,CN,Celeiro do nordeste da China,graos|arroz|pulverizacao
+ZWWW,CN,"Algodão, tomates e frutas secas",algodao|fruticultura
+ZWSH,CN,Algodão e frutas secas,algodao|fruticultura
+ZWAK,CN,Algodão,algodao|pulverizacao
+ZJSY,CN,Frutas tropicais e sementes híbridas,fruticultura|sementes
+ZJHK,CN,Frutas tropicais,fruticultura
+ZUUU,CN,"Agroindústria, suinocultura e chá",proteina_animal|cha
+VTBS,TH,"Arroz jasmim, durian, orquídeas e borracha",arroz|flores|pereciveis
+VTCC,TH,Frutas e flores do norte,fruticultura|flores
+VTSP,TH,Borracha e frutas,fruticultura
+VVTS,VN,"Delta do Mekong: arroz, pescado e frutas",arroz|pescado|fruticultura
+VVCT,VN,Delta do Mekong: arroz e frutas,arroz|fruticultura
+VVDL,VN,"Flores, café e hortaliças de altitude",flores|cafe|hortifruti
+RPMD,PH,"Banana, abacaxi e atum",fruticultura|pescado
+RPMR,PH,"Banana, abacaxi e atum",fruticultura|pescado
+WIMM,ID,"Óleo de palma, borracha e café",palma|cafe
+WAAA,ID,"Cacau, café e especiarias",cacau|cafe|especiarias
+WMKK,MY,Óleo de palma e durian,palma|fruticultura
+WBKK,MY,Óleo de palma,palma
+RJCC,JP,Celeiro do Japão,leite|graos
+RJEC,JP,Celeiro do Japão,graos|leite
+RJCB,JP,Celeiro do Japão,graos|leite
+RJFK,JP,"Wagyu, chá verde e batata-doce",pecuaria|cha
+RJFM,JP,Wagyu e chá verde,pecuaria|cha
+RCKH,TW,"Mangas, abacaxis, orquídeas e aquicultura",fruticultura|flores|pescado
+RCNN,TW,Mangas e orquídeas,fruticultura|flores
+VIAR,IN,Celeiro da Índia (trigo e arroz basmati),graos|arroz
+VICG,IN,Celeiro da Índia,graos
+VAPO,IN,"Uva, cebola e romã",fruticultura|vinho
+VAAU,IN,Uva e romã,fruticultura
+VOBL,IN,"Café, especiarias e flores",cafe|especiarias|flores
+VOCI,IN,Especiarias e borracha,especiarias
+VEGT,IN,Maior polo produtor de chá do mundo,cha
+VEMR,IN,Chá,cha
+OPLA,PK,"Manga, algodão e trigo",fruticultura|algodao|graos
+OPMT,PK,Manga e algodão,fruticultura|algodao
+VCBI,LK,Chá do Ceilão e coco,cha
+AYPY,PG,"Café, cacau e óleo de palma",cafe|cacau|palma
+AYMD,PG,Café e cacau por via aérea,cafe|cacau
+AYNZ,PG,Café e cacau por via aérea,cafe|cacau
+NFFN,FJ,Açúcar e gengibre,cana|especiarias
+PHOG,US,"Café, macadâmia, mamão e orquídeas",cafe|fruticultura|flores
+PHTO,US,"Café Kona, macadâmia e orquídeas",cafe|fruticultura|flores

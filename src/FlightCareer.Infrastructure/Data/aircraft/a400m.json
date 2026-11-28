@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "A400M",
+  "class": "Turboprop",
+  "engineCount": 4,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "constantSpeedProp",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "pressurized",
+    "propDeIce",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "A400M"
+    ],
+    "atcModel": [
+      "A400M"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 400.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 113.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 130.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 220.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "REFERENCE SPEED MAX IAS GEAR DOWN (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 235.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 1 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:3",
+      "value": 200.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 3 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:5",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "FLAPS CURRENT SPEED LIMITATION, dente 5 (20261115-0826-A400M_Cargo.csv)",
+      "notes": null
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: TP400-D6; geradores AC + TRU, como a classe jato",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: TP400-D6; geradores AC + TRU, como a classe jato",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 206.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=2.5); atualizar pelo POH",
+      "notes": null
+    }
+  ]
+}

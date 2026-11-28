@@ -1,0 +1,816 @@
+{
+  "instrucao_local": [
+    {
+      "title": "Instrução Local: Manobras no Setor {area_dir} ({tgl} TGL)",
+      "description": "Voo de instrução partindo de {origin}. Voe para a área de treinamento no rumo {area_dir} a {area_nm} NM ({alt_band}), executando {maneuvers}. Ao término, retorne para {tgl} toque(s) e arremetida(s) e pouso completo em {origin}."
+    },
+    {
+      "title": "Treinamento em Voo: Setor {area_dir} e Toques em {origin}",
+      "description": "Sessão prática de pilotagem saindo de {origin}. Efetue saída visual para a área de instrução a {area_nm} NM no setor {area_dir} na faixa de {alt_band}. Pratique {maneuvers} e retorne ao circuito para {tgl} TGL(s) e pouso final em {origin}."
+    },
+    {
+      "title": "Instrução de Manobras: Área {area_dir} ({area_nm} NM)",
+      "description": "Voo de treinamento básico/avançado em {origin}. Desloque-se até a área de treinamento no setor {area_dir} ({alt_band}) para executar {maneuvers}. Reingresse no circuito para {tgl} TGL(s) e corte dos motores em {origin}."
+    }
+  ],
+  "circuito_tgl": [
+    {
+      "title": "Sessão de Circuito de Tráfego: {tgl} TGLs em {origin}",
+      "description": "Treinamento intensivo de decolagens, aproximações e toques na pista de {origin}. Execute {tgl} toques e arremetidas no circuito padrão, seguido de pouso completo final."
+    },
+    {
+      "title": "Prática de Pousos e Arremetidas ({tgl} TGL) em {origin}",
+      "description": "Sessão focada em proficiência de pouso em {origin}. Realize {tgl} TGLs cumprindo pernas contra o vento, através, do vento, base e final com pouso na cabeceira."
+    },
+    {
+      "title": "Treinamento em Circuito Padrão: {origin} ({tgl} TGL)",
+      "description": "Padronização de aproximação e pouso com {tgl} TGLs seguidos de corte em {origin}. Mantenha coordenação de comandos e controle rigoroso de velocidade na final."
+    }
+  ],
+  "navegacao_vfr": [
+    {
+      "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reporte obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR triangular ({distance_nm} NM total). Cumprir reporte visual na primeira perna, escala completa em {stop_a}, prosseguimento para escala em {stop_b} e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Triângulo VFR de Aeroclube ({origin})",
+      "description": "Exercício de navegação em triângulo ligando {origin} a {stop_a} e {stop_b} com ponto de reporte mandatório. Requer paradas completas em cada aeródromo na ordem e pouso final em {origin}."
+    }
+  ],
+  "navegacao_vfr:triangle": [
+    {
+      "title": "Navegação VFR em Triângulo ({stop_a} e {stop_b})",
+      "description": "Voo de instrução de navegação estimada: decolagem de {origin}, sobrevoo do ponto de reporte obrigatório, pousos completos nas escalas intermediárias {stop_a} e {stop_b} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR triangular ({distance_nm} NM total). Cumprir reporte visual na primeira perna, escala completa em {stop_a}, prosseguimento para escala em {stop_b} e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Triângulo VFR de Aeroclube ({origin})",
+      "description": "Exercício de navegação em triângulo ligando {origin} a {stop_a} e {stop_b} com ponto de reporte mandatório. Requer paradas completas em cada aeródromo na ordem e pouso final em {origin}."
+    }
+  ],
+  "navegacao_vfr:out_and_back": [
+    {
+      "title": "Navegação VFR de Ida e Volta ({stop_a})",
+      "description": "Navegação estimada ida e volta: decolagem de {origin}, sobrevoo do ponto de reporte na ida, pouso completo em {stop_a} e retorno à base em {origin}. {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação por Referências Visuais: {origin} - {stop_a} - {origin}",
+      "description": "Treinamento de navegação VFR ({distance_nm} NM total). Cumprir ponto de reporte na primeira perna, pouso completo em {stop_a} e regresso para pouso final em {origin}."
+    }
+  ],
+  "navegacao_vfr:triangle_tgl": [
+    {
+      "title": "Triângulo VFR com Toque e Arremetida ({stop_a} e {stop_b})",
+      "description": "Navegação estimada triangular: {origin} -> {stop_a} -> {stop_b} -> {origin}. Sobrevoe o ponto de reporte na primeira etapa e realize toque e arremetida em {stop_a} e {stop_b} antes do pouso final na base."
+    },
+    {
+      "title": "Navegação Visual com Toques e Arremetidas: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento de navegação VFR ({distance_nm} NM total). Reporte mandatório na primeira perna, toque e arremetida em {stop_a} e {stop_b} e retorno para pouso em {origin}."
+    }
+  ],
+  "navegacao_vfr:triangle_long": [
+    {
+      "title": "Navegação VFR Longa ({stop_a} e {stop_b})",
+      "description": "Navegação visual longa ({distance_nm} NM total). Decolagem de {origin}, sobrevoo do ponto de reporte mandatório na primeira perna, paradas completas nas escalas {stop_a} e {stop_b} e regresso à base em {origin}."
+    },
+    {
+      "title": "Navegação Triangular Longa: {origin} - {stop_a} - {stop_b}",
+      "description": "Treinamento avançado de navegação estimada com dois pousos completos em aeródromos distintos ({stop_a} e {stop_b}) e retorno a {origin}. Sobrevoe o ponto de reporte obrigatório na saída."
+    }
+  ],
+  "navegacao_vfr_ida": [
+    {
+      "title": "Navegação VFR {origin} → {dest}",
+      "description": "Navegação visual de {origin} a {dest} ({distance_nm} NM). Sobrevoe o ponto de reporte visual na rota e faça pouso completo no destino."
+    },
+    {
+      "title": "Navegação Visual de Ponto a Ponto: {origin} - {dest}",
+      "description": "Voo de instrução de navegação estimada ({distance_nm} NM). Mantenha a proa planejada, cumpra o sobrevoo do ponto de reporte mandatório e realize pouso em {dest}."
+    }
+  ],
+  "navegacao_vfr_ida:iniciante": [
+    {
+      "title": "Primeiras Navegações VFR: {origin} → {dest}",
+      "description": "Instrução visual básica de ponto a ponto para destino conhecido ({distance_nm} NM). Sobrevoe o ponto de reporte obrigatório na perna e realize pouso completo em {dest} com {pax} instrutor a bordo."
+    },
+    {
+      "title": "Navegação VFR Inicial ({dest})",
+      "description": "Voo de instrução inicial de rota entre {origin} e {dest}. Identifique o ponto de reporte visual na primeira metade da etapa e conclua com aproximação padronizada e pouso em {dest}."
+    }
+  ],
+  "navegacao_vfr_ida:intermediaria": [
+    {
+      "title": "Navegação VFR Intermediária: {origin} → {dest}",
+      "description": "Navegação visual para destino desafiador com tráfego controlado, pista curta ou variação de relevo ({distance_nm} NM). Sobrevoe o ponto de reporte e faça pouso completo em {dest}."
+    },
+    {
+      "title": "Treinamento em Rota Visual: {dest}",
+      "description": "Exercício de navegação VFR de {origin} para {dest} explorando novos aeródromos e procedimentos. Mantenha reporte visual compulsório e cumpra aproximação e pouso em {dest}."
+    }
+  ],
+  "instrucao_ifr": [
+    {
+      "title": "Instrução IFR ({dest})",
+      "description": "Instrução IFR: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "adaptacao_noturna": [
+    {
+      "title": "Adaptação Noturna ({dest})",
+      "description": "Adaptação Noturna: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "cheque": [
+    {
+      "title": "Voo de Cheque / Revalidação ({dest})",
+      "description": "Voo de Cheque / Revalidação: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "instrucao_stol": [
+    {
+      "title": "Instrução STOL / Pouso Curto em {strip}",
+      "description": "Treinamento de técnicas bush em pista desfavorável em {strip} ({rwy_len} ft). Exige aproximação íngreme (rampa ≥ 4°) e {landings} pousos com parada completa em até {max_stop} ft. Retorno para pouso em {origin}."
+    },
+    {
+      "title": "Aperfeiçoamento Bush / Pista Curta ({strip})",
+      "description": "Sessão de instrução avançada de pousos de precisão em pista curta em {strip}. Executar {landings} toques com rampa acentuada e parada curta (≤ {max_stop} ft). Retorno e pouso completo na base {origin}."
+    },
+    {
+      "title": "Treinamento STOL Operacional: {strip}",
+      "description": "Instrução em campo não pavimentado ({strip}) com {pax} instrutor. Rampa de aproximação íngreme sobre obstáculos e imobilização em ≤ {max_stop} ft por {landings} vezes com retorno a {origin}."
+    }
+  ],
+  "ponte_aerea": [
+    {
+      "title": "Ponte Aérea de Alta Frequência ({dest})",
+      "description": "Ponte Aérea de Alta Frequência: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "troncal_domestico": [
+    {
+      "title": "Troncal Doméstico ({dest})",
+      "description": "Troncal Doméstico: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "regional_internacional": [
+    {
+      "title": "Regional Internacional ({dest})",
+      "description": "Regional Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "longo_curso": [
+    {
+      "title": "Longo Curso Internacional ({dest})",
+      "description": "Longo Curso Internacional: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "feeder_inbound": [
+    {
+      "title": "Alimentador de Hub (Inbound) ({dest})",
+      "description": "Alimentador de Hub (Inbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "feeder_outbound": [
+    {
+      "title": "Distribuidor de Hub (Outbound) ({dest})",
+      "description": "Distribuidor de Hub (Outbound): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "sub_regional": [
+    {
+      "title": "Sub-Regional Leve ({dest})",
+      "description": "Sub-Regional Leve: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "pinga_pinga": [
+    {
+      "title": "Pinga-Pinga Regional: Linha Postal e Encomendas ({stops_count} escalas)",
+      "description": "Voo regular de interior ligando {origin} a {dest} com escalas intermediárias em {stops_list}. Transporte de {pax} passageiros e {cargo_lbs} lbs de malotes e encomendas. Proibido reabastecer entre as etapas."
+    },
+    {
+      "title": "Pinga-Pinga do Interior: {origin} a {dest}",
+      "description": "Atendimento regional com paradas completas em {stops_list} e destino final em {dest}. {pax} passageiros e {cargo_lbs} lbs de carga distribuídos pela rota sem reabastecimento."
+    },
+    {
+      "title": "Rota Multi-Escalas Regional ({dest})",
+      "description": "Circuito regional conectando {origin} ao destino {dest} via {stops_list}. Exige pouso completo em cada escala intermediária mantendo autonomia original com {pax} pax e {cargo_lbs} lbs."
+    }
+  ],
+  "regional_essencial": [
+    {
+      "title": "Regional Essencial / Táxi Social ({dest})",
+      "description": "Regional Essencial / Táxi Social: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga.{route_note}"
+    }
+  ],
+  "executivo_corporativo": [
+    {
+      "title": "Táxi Aéreo Corporativo ({dest})",
+      "description": "Táxi Aéreo Corporativo: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "executivo_intercontinental": [
+    {
+      "title": "Executivo Intercontinental ({dest})",
+      "description": "Executivo Intercontinental: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "vip_internacional": [
+    {
+      "title": "VIP Internacional ({dest})",
+      "description": "VIP Internacional: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "agro_executivo": [
+    {
+      "title": "Táxi Aéreo do Agronegócio ({dest})",
+      "description": "Táxi Aéreo do Agronegócio: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "familia_alto_padrao": [
+    {
+      "title": "Férias em Família / Alto Padrão para {dest}",
+      "description": "Transporte privativo de família e bagagens ({pax} pax) de {origin} com destino a balneário/estância turística em {dest} ({distance_nm} NM). Voo tranquilo e seguro."
+    },
+    {
+      "title": "Fretamento de Lazer Familiar: {dest}",
+      "description": "Deslocamento de passageiros em viagem de descanso ({pax} pax) para {dest} ({distance_nm} NM). Atenção especial ao conforto de cabine e bagagens despachadas."
+    },
+    {
+      "title": "Voo Privado de Turismo Familiar para {dest}",
+      "description": "Viagem de lazer exclusiva partindo de {origin} com chegada ao aeroporto de {dest} ({pax} passageiros, {distance_nm} NM)."
+    }
+  ],
+  "equipes_urgentes": [
+    {
+      "title": "Deslocamento de Equipe Emergencial para {dest}",
+      "description": "Transporte rápido de engenheiros e técnicos de manutenção ({pax} pax) de {origin} para conter falha em planta industrial em {dest} ({distance_nm} NM)."
+    },
+    {
+      "title": "Equipe de Resposta Rápida: {origin} a {dest}",
+      "description": "Voo prioritário transportando profissionais especializados ({pax} pax) rumo a {dest} ({distance_nm} NM). Saída imediata solicitada pelo contratante."
+    },
+    {
+      "title": "Mobilização de Equipe Técnica para {dest}",
+      "description": "Transporte de especialistas ({pax} ocupantes) para suporte de emergência em {dest} ({distance_nm} NM). Pouso sem atrasos no destino."
+    }
+  ],
+  "charter_lazer": [
+    {
+      "title": "Fretamento Turístico / Lazer ({dest})",
+      "description": "Fretamento Turístico / Lazer: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "charter_esportivo": [
+    {
+      "title": "Charter Esportivo / Turnês ({dest})",
+      "description": "Charter Esportivo / Turnês: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "transfer_metropolitano": [
+    {
+      "title": "Transfer Metropolitano ({dest})",
+      "description": "Transfer Metropolitano: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "panoramico": [
+    {
+      "title": "Voo Panorâmico ({dest})",
+      "description": "Voo Panorâmico: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "demo_flight": [
+    {
+      "title": "Voo de Demonstração Comercial ({dest})",
+      "description": "Voo de Demonstração Comercial: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "carga_paletizada": [
+    {
+      "title": "Carga Paletizada ({dest})",
+      "description": "Carga Geral Paletizada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Frete de {cargo} ({dest})",
+      "description": "Transporte de {cargo}: voo cargueiro de {origin} para {dest} com {cargo_lbs} lbs de carga paletizada."
+    },
+    {
+      "title": "Logística Paletizada ({dest})",
+      "description": "Operação de logística paletizada ligando {origin} a {dest}: entrega de {cargo_lbs} lbs de {cargo}."
+    }
+  ],
+  "carga_overnight": [
+    {
+      "title": "Carga Expressa Overnight ({dest})",
+      "description": "Carga Expressa Overnight: voo noturno de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} com prioridade máxima."
+    },
+    {
+      "title": "Envio Noturno de {cargo} ({dest})",
+      "description": "Despacho noturno prioritário de {cargo}: voo de {origin} para {dest} transportando {cargo_lbs} lbs para entrega matutina."
+    },
+    {
+      "title": "Conexão Expressa Noturna ({dest})",
+      "description": "Operação overnight de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} com prazo crítico."
+    }
+  ],
+  "malotes": [
+    {
+      "title": "Malotes e Documentos ({dest})",
+      "description": "Malotes Bancários e Documentos: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Transporte Seguro de {cargo} ({dest})",
+      "description": "Remessa prioritária de {cargo}: voo seguro de {origin} para {dest} transportando {cargo_lbs} lbs sob custódia."
+    },
+    {
+      "title": "Malotes Corporativos ({dest})",
+      "description": "Despacho lacrado de {origin} para {dest}: {cargo_lbs} lbs de {cargo} com protocolo prioritário."
+    }
+  ],
+  "carga_valores": [
+    {
+      "title": "Transporte de Valores ({dest})",
+      "description": "Transporte de Valores: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} sob escolta."
+    },
+    {
+      "title": "Remessa de Valores ({dest})",
+      "description": "Remessa de custódia especial de {origin} para {dest}: transporte blindado de {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Valores sob Custódia ({dest})",
+      "description": "Operação de segurança especial de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} de alto valor."
+    }
+  ],
+  "ecommerce": [
+    {
+      "title": "E-Commerce e Carga Fracionada ({dest})",
+      "description": "E-Commerce e Carga Fracionada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para distribuição."
+    },
+    {
+      "title": "Distribuição de {cargo} ({dest})",
+      "description": "Distribuição expressa de e-commerce de {origin} para {dest}: {cargo_lbs} lbs de {cargo} para entrega ao consumidor."
+    },
+    {
+      "title": "Remessa de E-Commerce ({dest})",
+      "description": "Conexão logística de {origin} para {dest}: carga fracionada de {cargo_lbs} lbs de {cargo} para triagem rápida."
+    }
+  ],
+  "carga_jit": [
+    {
+      "title": "Carga Industrial Just-In-Time ({dest})",
+      "description": "Carga Industrial Just-In-Time / AOG: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Suprimento Industrial de {cargo} ({dest})",
+      "description": "Fornecimento just-in-time urgente de {origin} para {dest}: {cargo_lbs} lbs de {cargo} para manter linha ativa. {cargo_note}"
+    },
+    {
+      "title": "Despacho AOG / Crítico ({dest})",
+      "description": "Remessa de emergência industrial de {origin} para {dest}: {cargo_lbs} lbs de {cargo} com entrega imediata. {cargo_note}"
+    }
+  ],
+  "cadeia_fria": [
+    {
+      "title": "Cadeia Fria e Perecíveis ({dest})",
+      "description": "Cadeia Fria e Perecíveis: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} sob controle rigoroso de temperatura. {cargo_note}"
+    },
+    {
+      "title": "Transporte Frigorificado de {cargo} ({dest})",
+      "description": "Remessa climatizada de {cargo}: voo de {origin} para {dest} com {cargo_lbs} lbs sob temperatura controlada. {cargo_note}"
+    },
+    {
+      "title": "Logística Refrigerada ({dest})",
+      "description": "Carga térmica refrigerada de {origin} para {dest}: manifesto de {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    }
+  ],
+  "carga_dgr": [
+    {
+      "title": "Carga Perigosa ({dest})",
+      "description": "Transporte de carga perigosa regulamentada: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Remessa Regulamentada de {cargo} ({dest})",
+      "description": "Carga perigosa DGR de {origin} para {dest}: transporte especializado de {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Voo Técnico DGR ({dest})",
+      "description": "Operação de materiais perigosos de {origin} para {dest}: manifesto técnico com {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    }
+  ],
+  "carga_sensivel": [
+    {
+      "title": "Carga Sensível e Especial ({dest})",
+      "description": "Carga Sensível e Viva: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} com cuidados especiais. {cargo_note}"
+    },
+    {
+      "title": "Transporte Especial de {cargo} ({dest})",
+      "description": "Remessa de carga frágil e especial: voo cuidadoso de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Manifesto Especial de Carga Sensível ({dest})",
+      "description": "Operação com manuseio diferenciado de {origin} para {dest}: {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    }
+  ],
+  "carga_combi": [
+    {
+      "title": "Carga Combi (Passageiros + Suprimentos) ({dest})",
+      "description": "Carga Combi (Passageiros + Suprimentos): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "insumos_agro": [
+    {
+      "title": "Insumos e Peças Agrícolas ({dest})",
+      "description": "Insumos e Peças Agrícolas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para lavoura.{safra}"
+    },
+    {
+      "title": "Apoio Agrícola: {cargo} ({dest})",
+      "description": "Remessa urgente para safra: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para apoio ao campo.{safra}"
+    },
+    {
+      "title": "Suprimento de Insumos Rurais ({dest})",
+      "description": "Logística agropecuária de {origin} para {dest}: manifesto com {cargo_lbs} lbs de {cargo} para produtores locais.{safra}"
+    }
+  ],
+  "suprimentos_remotos": [
+    {
+      "title": "Suprimentos para Comunidades Remotas ({dest})",
+      "description": "Suprimentos para Comunidades Remotas: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} essencial."
+    },
+    {
+      "title": "Abastecimento Remoto de {cargo} ({dest})",
+      "description": "Voo de abastecimento regional de {origin} para {dest}: entrega vital de {cargo_lbs} lbs de {cargo}."
+    },
+    {
+      "title": "Logística Comunitária Remota ({dest})",
+      "description": "Apoio logístico a pistas isoladas: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} para atendimento local."
+    }
+  ],
+  "conexao_pista_curta": [
+    {
+      "title": "Conexão de Pista Curta ({dest})",
+      "description": "Conexão de Pista Curta: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} em pista desafiadora."
+    },
+    {
+      "title": "Frete para Pista Desafiadora ({dest})",
+      "description": "Operação de pouso curto de {origin} para {dest}: transporte de {cargo_lbs} lbs de {cargo} para pista rústica."
+    },
+    {
+      "title": "Apoio a Pista Não Pavimentada ({dest})",
+      "description": "Acesso aéreo a pista remota: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} para entrega direta."
+    }
+  ],
+  "orgaos": [
+    {
+      "title": "Transporte de Órgãos para Transplante ({dest})",
+      "description": "Transporte de Órgãos para Transplante: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "uti_inter_hospitalar": [
+    {
+      "title": "Remoção Aeromédica UTI Inter-Hospitalar ({dest})",
+      "description": "Remoção Aeromédica UTI Inter-Hospitalar: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "medevac_remoto": [
+    {
+      "title": "Evacuação Aeromédica Remota (Bush Medevac) ({dest})",
+      "description": "Evacuação Aeromédica Remota (Bush Medevac): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "uti_longa_distancia": [
+    {
+      "title": "UTI Aérea de Longa Distância / Repatriação ({dest})",
+      "description": "UTI Aérea de Longa Distância / Repatriação: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "saude_familia": [
+    {
+      "title": "Ronda Médica e Vacinação: {origin} a {dest}",
+      "description": "Transporte de equipe médica multidisciplinar ({pax} profissionais) e {cargo_lbs} lbs de insumos e caixas térmicas de vacinas de {origin} até {dest}. Parada completa no destino e retorno à base no mesmo dia."
+    },
+    {
+      "title": "Atendimento Médico Preventivo ({dest})",
+      "description": "Missão do programa de saúde da família. Deslocamento de {pax} especialistas e {cargo_lbs} lbs de suprimentos médicos para assistência em comunidade atendida por {dest}, com retorno completo para {origin}."
+    },
+    {
+      "title": "Ronda de Saúde e Imunização ({dest})",
+      "description": "Voo de apoio ao programa de saúde comunitária. Leve {pax} profissionais de saúde e {cargo_lbs} lbs de material odontológico e vacinas para atendimento em {dest}, retornando a {origin}."
+    }
+  ],
+  "aerolevantamento": [
+    {
+      "title": "Levantamento Aerofotogramétrico: {target} ({legs} pernas)",
+      "description": "Contrato especializado para {client}. Execute levantamento fotográfico detalhado sobre {target} com {legs} pernas paralelas no rumo {heading}° a {alt} ft e {speed} kt constantes. Mantenha estabilidade rigorosa para calibração das fotos e retorne a {origin}."
+    },
+    {
+      "title": "Fotografia Aérea e Mapeamento Técnico: {target}",
+      "description": "Missão técnica contratada por {client} cobrindo {target}. Realize {legs} faixas de sobrevoo orientadas a {heading}° mantendo velocidade constante de {speed} kt e altitude de {alt} ft. Retorno para pouso em {origin}."
+    },
+    {
+      "title": "Aerolevantamento Técnico de Precisão: {target}",
+      "description": "Voo aerofotogramétrico solicitado por {client} para imageamento de {target}. Requer {legs} pernas alinhadas ({heading}°, {alt} ft, {speed} kt). Pouso completo na base em {origin}."
+    }
+  ],
+  "paraquedismo": [
+    {
+      "title": "Lançamento de Paraquedistas: {dz} ({alt} ft AGL)",
+      "description": "Operação de paraquedismo esportivo com {pax} saltadores na vertical de {dz}. Subida até {alt} ft AGL sobre a zona (raio ≤ 2 NM), estabilização a velocidade segura (≤ {speed} kt) para o salto e descida controlada sem choque térmico para pouso em {origin}. {dz_note}"
+    },
+    {
+      "title": "Salto Esportivo de Paraquedismo: {dz}",
+      "description": "Lançamento de {pax} paraquedistas na zona de salto em {dz}. Voe até a altitude de lançamento ({alt} ft AGL), mantenha voo nivelado a {speed} kt por 30 s para a largada e retorne com descida suave a {origin}. {dz_note}"
+    },
+    {
+      "title": "Voo de Lançamento de Paraquedistas em {dz}",
+      "description": "Decolagem de {origin} transportando {pax} atletas de salto. Subida com motor estabilizado até {alt} ft AGL sobre {dz}, ejeção segura e retorno para pouso em {origin} protegendo os cilindros do motor. {dz_note}"
+    }
+  ],
+  "pulverizacao": [
+    {
+      "title": "Pulverização Agrícola ({dest})",
+      "description": "Pulverização Agrícola: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "reboque_planador": [
+    {
+      "title": "Reboque de Planadores ({dest})",
+      "description": "Reboque de Planadores: voo de {origin} para {dest}."
+    }
+  ],
+  "publicidade_aerea": [
+    {
+      "title": "Publicidade Aérea ({dest})",
+      "description": "Publicidade Aérea: voo de {origin} para {dest} transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "patrulha_vigilancia": [
+    {
+      "title": "Patrulha e Vigilância de Área: {target}",
+      "description": "Voo de patrulha e vigilância ambiental cobrindo {sectors_count} setores sobre {target}. Voe a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Retorno para pouso em {origin}."
+    },
+    {
+      "title": "Monitoramento e Prevenção de Queimadas ({target})",
+      "description": "Vigilância aérea preventiva sobre {target}. Inspecione todos os {sectors_count} setores demarcados mantendo voo visual dentro dos limites operacionais com {pax} fiscal(is) a bordo antes do retorno a {origin}."
+    },
+    {
+      "title": "Patrulha Rural e Contagem de Rebanho: {target}",
+      "description": "Inspeção patrimonial e contagem de rebanho cobrindo {sectors_count} setores em {target} a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Decolagem e pouso em {origin}."
+    }
+  ],
+  "inspecao_linhas": [
+    {
+      "title": "Inspeção Aérea de {line_kind} ({points_count} pontos)",
+      "description": "Inspeção técnica e visual ao longo do traçado de {line_kind}. Siga os {points_count} marcos da rota a até {max_alt} ft com {pax} inspetor(es) e retorne para pouso em {origin}."
+    },
+    {
+      "title": "Monitoramento de {line_kind}: {origin} ({distance_nm} NM)",
+      "description": "Voo de monitoramento de infraestrutura seguindo o alinhamento de {line_kind} por {points_count} pontos de checagem a baixa altura com {pax} especialista(s). Retorno à base em {origin}."
+    },
+    {
+      "title": "Vistoria Técnica de {line_kind} ({points_count} pontos)",
+      "description": "Varredura aérea de segurança patrimonial sobre {line_kind}. Navegue estritamente ao longo dos {points_count} pontos do traçado abaixo de {max_alt} ft com {pax} tripulante(s) e retorne a {origin}."
+    }
+  ],
+  "monitoramento_trafego": [
+    {
+      "title": "Monitoramento de Tráfego: {target} ({minutes} min)",
+      "description": "Apoio aéreo e observação de fluxo viário sobre {target}. Mantenha órbita por {minutes} minutos entre {min_alt} e {max_alt} ft com {pax} observador(es) e {cargo_lbs} lbs de equipamento de transmissão. Pouso em {origin}."
+    },
+    {
+      "title": "Cobertura Aérea de Evento: {target}",
+      "description": "Voo de suporte à segurança e transmissão sobre {target}. Permaneça em órbita de {minutes} minutos na faixa de {min_alt} a {max_alt} ft com {pax} passageiro(s) e {cargo_lbs} lbs de carga, retornando a {origin}."
+    },
+    {
+      "title": "Vigilância de Malha Viária: {target} ({minutes} min)",
+      "description": "Monitoramento de fluxo rodoviário na área de {target}. Execute órbita de {minutes} minutos sobre o local com {pax} tripulante(s) técnico(s) e {cargo_lbs} lbs de equipamentos, retornando para pouso em {origin}."
+    }
+  ],
+  "sar": [
+    {
+      "title": "Busca e Salvamento (SAR): {target_name}",
+      "description": "Operação de busca e salvamento visual ({pattern_kind}) visando localizar {target_name}. Cumpra as pernas do padrão a até {max_alt} ft e {max_speed} kt com {pax} observador(es). Retorno a {origin}."
+    },
+    {
+      "title": "Missão SAR de Emergência ({target_name})",
+      "description": "Varredura de busca visual para resgate de {target_name}. Execute o padrão de busca a baixa altura com {pax} tripulante(s) de resgate e retorne para pouso em {origin}."
+    },
+    {
+      "title": "Varredura e Busca Visual: {target_name}",
+      "description": "Localização de emergência de {target_name} em operação de busca aérea com {pax} observador(es). Conduza o padrão {pattern_kind} a até {max_alt} ft e retorne a {origin}."
+    }
+  ],
+  "calibracao_auxilios": [
+    {
+      "title": "Calibração de Auxílios à Navegação ({dest})",
+      "description": "Calibração de Auxílios à Navegação: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "ferry_posicionamento": [
+    {
+      "title": "Translado e Posicionamento (Ferry) ({dest})",
+      "description": "Translado e Posicionamento (Ferry): voo de {origin} para {dest}."
+    }
+  ],
+  "translado_manutencao": [
+    {
+      "title": "Translado para Manutenção / Revisão ({dest})",
+      "description": "Translado para Manutenção / Revisão: voo de {origin} para {dest}."
+    }
+  ],
+  "ferry_permit": [
+    {
+      "title": "Translado com Restrição Técnica para {dest}",
+      "description": "Voo com Special Flight Permit de {origin} para {dest}. Limitação operacional mandatória: {restriction_desc}. Desvio ou violação invalida a autorização de translado."
+    },
+    {
+      "title": "Voo de Translado sob Autorização Especial ({dest})",
+      "description": "Translado vazio para homologação ou reparos estruturais em {dest}. Restrição técnica ativa: {restriction_desc}. Condução estrita dentro dos limites operacionais de segurança."
+    },
+    {
+      "title": "Special Flight Permit: {origin} a {dest}",
+      "description": "Reposicionamento técnico até a base de manutenção em {dest} sob restrição ({restriction_desc}). Aeronave em translado sem passageiros ou carga."
+    }
+  ],
+  "check_flight": [
+    {
+      "title": "Voo de Teste Pós-Manutenção ({origin})",
+      "description": "Voo de cheque e calibração de sistemas após intervenção mecânica em {origin}. Subida para {alt} ft MSL, verificação de potência máxima contínua e manutenção dos 4 rumos cardinais (N, E, S, W) nivelado. Pouso na origem com {pax} mecânico."
+    },
+    {
+      "title": "Cheque Funcional em Voo (Swing Check & Potência)",
+      "description": "Avaliação operacional de aviônicos e grupo motopropulsor após serviço de oficina em {origin}. Roteiro: atingir {alt} ft, 10 s de potência máxima, 15 s em cada rumo cardinal na tolerância e retorno à origem."
+    },
+    {
+      "title": "Voo de Verificação de Oficina em {origin}",
+      "description": "Voo técnico local de homologação pós-revisão. Exige nivelamento a {alt} ft MSL, teste de rotação plena do motor e estabilização de bússola nos 4 pontos cardinais antes do pouso em {origin}."
+    }
+  ],
+  "crew_parts": [
+    {
+      "title": "Logística de Apoio a Aeronaves (Crew & Parts) ({dest})",
+      "description": "Logística de Apoio a Aeronaves (Crew & Parts): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "translado_piloto_agricola": [
+    {
+      "title": "Translado de Piloto Agrícola para {dest}",
+      "description": "Translado de piloto ({pax} pax) ou retorno de aeronave vazia de {origin} para assumir avião agrícola em {dest} ({distance_nm} NM)."
+    },
+    {
+      "title": "Ferry de Piloto para Base Operacional: {dest}",
+      "description": "Reposicionamento de piloto de fazenda de {origin} para iniciar trabalhos de pulverização em {dest} ({distance_nm} NM)."
+    },
+    {
+      "title": "Voo Ferry de Apoio a Pilotos: {dest}",
+      "description": "Deslocamento pontual de aeronave de apoio transportando piloto de {origin} para a base avançada em {dest} ({distance_nm} NM)."
+    },
+    {
+      "title": "Entrega de Aeronave Agrícola ao Proprietário em {dest}",
+      "description": "Voo de translado para entrega de aeronave agrícola ao produtor rural em {dest} ({distance_nm} NM). Saída de {origin} sem defensivos ou carga comercial a bordo."
+    },
+    {
+      "title": "Translado de Aeronave Revisada para a Fazenda em {dest}",
+      "description": "Aeronave recém-saída de revisão geral de entressafra em {origin}, entregue em voo direto ao proprietário no hangar rural de {dest} ({distance_nm} NM)."
+    }
+  ],
+  "pessoas_remotas": [
+    {
+      "title": "Transporte de Pessoal para Locais Remotos ({dest})",
+      "description": "Transporte de Pessoal para Locais Remotos: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "autoridades": [
+    {
+      "title": "Autoridades e Comitivas Oficiais ({dest})",
+      "description": "Autoridades e Comitivas Oficiais: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "diplomatico": [
+    {
+      "title": "Missão Diplomática e Comitivas de Estado ({dest})",
+      "description": "Missão Diplomática e Comitivas de Estado: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "militar_can": [
+    {
+      "title": "Logística Militar e Fronteiras (CAN) ({dest})",
+      "description": "Logística Militar e Fronteiras (CAN): voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "humanitario": [
+    {
+      "title": "Apoio Humanitário e Defesa Civil ({dest})",
+      "description": "Apoio Humanitário e Defesa Civil: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} de socorro."
+    },
+    {
+      "title": "Ajuda Humanitária: {cargo} ({dest})",
+      "description": "Missão de socorro emergencial de {origin} para {dest}: entrega imediata de {cargo_lbs} lbs de {cargo} para auxílio à população."
+    },
+    {
+      "title": "Operação de Defesa Civil ({dest})",
+      "description": "Transporte de emergência comunitária de {origin} para {dest}: manifesto humanitário de {cargo_lbs} lbs de {cargo}."
+    }
+  ],
+  "combustivel_tambor": [
+    {
+      "title": "Transporte de Combustível em Tambores ({dest})",
+      "description": "Transporte de Combustível em Tambores: voo cargueiro de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo}. {cargo_note}"
+    },
+    {
+      "title": "Abastecimento Aéreo de {cargo} ({dest})",
+      "description": "Remessa de combustível inflamável: voo de {origin} para {dest} com {cargo_lbs} lbs de {cargo} em tambores homologados. {cargo_note}"
+    },
+    {
+      "title": "Logística de Combustível em Tambores ({dest})",
+      "description": "Voo especial de combustível de {origin} para {dest}: {cargo_lbs} lbs de {cargo} sob rigorosas normas de segurança. {cargo_note}"
+    }
+  ],
+  "apoio_acampamento": [
+    {
+      "title": "Apoio a Acampamentos e Expedições ({dest})",
+      "description": "Apoio a Acampamentos e Expedições: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de {cargo} para base de campo."
+    },
+    {
+      "title": "Logística de Expedição: {cargo} ({dest})",
+      "description": "Suprimento de campo para acampamento: voo de {origin} para {dest} transportando {cargo_lbs} lbs de {cargo} para pesquisadores."
+    },
+    {
+      "title": "Suprimentos de Acampamento Remoto ({dest})",
+      "description": "Conexão logística para base temporária: transporte de {origin} para {dest} com {cargo_lbs} lbs de {cargo}."
+    }
+  ],
+  "evacuacao_por_do_sol": [
+    {
+      "title": "Evacuação Antes do Pôr do Sol ({dest})",
+      "description": "Evacuação Antes do Pôr do Sol: voo de {origin} para {dest} com {pax} passageiros transportando {cargo_lbs} lbs de carga."
+    }
+  ],
+  "panoramico-turistico": [
+    {
+      "title": "Circuito Panorâmico: {scenic_name}",
+      "description": "Voo panorâmico sobrevoando {poi_list}. {scenic_note} Mantenha sobrevoo a até 1,5 NM e abaixo de 3.000 ft AGL nos pontos visuais, com retorno e pouso em {origin} ({distance_nm} NM)."
+    },
+    {
+      "title": "Excursão Aérea Guiada: {scenic_name}",
+      "description": "Passeio turístico panorâmico com partida e chegada em {origin}. {scenic_note} Rota sobrevoando as atrações de destaque: {poi_list} ({distance_nm} NM). Mantenha voo estável para contemplação dos passageiros."
+    },
+    {
+      "title": "{scenic_name}: Voo Panorâmico com {pax} Passageiro(s)",
+      "description": "Passeio aéreo de {scenic_name} com saída e retorno a {origin}. {scenic_note} Roteiro de {distance_nm} NM sobre {poi_list}, passando a até 1,5 NM de cada ponto e abaixo de 3.000 ft AGL, com curvas suaves para as fotos dos passageiros."
+    }
+  ],
+  "voo_panoramico-turistico": [
+    {
+      "title": "Circuito Panorâmico: {scenic_name}",
+      "description": "Voo panorâmico sobrevoando {poi_list}. {scenic_note} Mantenha sobrevoo a até 1,5 NM e abaixo de 3.000 ft AGL nos pontos visuais, com retorno e pouso em {origin} ({distance_nm} NM)."
+    },
+    {
+      "title": "Excursão Aérea Guiada: {scenic_name}",
+      "description": "Passeio turístico panorâmico com partida e chegada em {origin}. {scenic_note} Rota sobrevoando as atrações de destaque: {poi_list} ({distance_nm} NM). Mantenha voo estável para contemplação dos passageiros."
+    },
+    {
+      "title": "{scenic_name}: Voo Panorâmico com {pax} Passageiro(s)",
+      "description": "Passeio aéreo de {scenic_name} com saída e retorno a {origin}. {scenic_note} Roteiro de {distance_nm} NM sobre {poi_list}, passando a até 1,5 NM de cada ponto e abaixo de 3.000 ft AGL, com curvas suaves para as fotos dos passageiros."
+    }
+  ],
+  "voo_panoramico": [
+    {
+      "title": "Voo Panorâmico ({dest})",
+      "description": "Voo Panorâmico: voo de {origin} para {dest} com {pax} passageiros."
+    }
+  ],
+  "sar:expanding_square": [
+    {
+      "title": "Busca SAR em Quadrado Crescente: {target_name}",
+      "description": "Varredura visual em padrão de quadrado crescente (expanding square) para localizar {target_name}. Voe as pernas a até {max_alt} ft e {max_speed} kt com {pax} observador(es) e retorne a {origin}."
+    },
+    {
+      "title": "Varredura em Expanding Square: {target_name}",
+      "description": "Operação SAR com padrão de quadrado crescente sobre a área do datum visando encontrar {target_name}. Voo com {pax} observador(es) e pouso em {origin}."
+    },
+    {
+      "title": "Busca Concentrada em Quadrado: {target_name}",
+      "description": "Padrão de busca visual em expansão retangular a partir do datum para localização de {target_name}. Teto de {max_alt} ft com {pax} tripulante(s) e retorno a {origin}."
+    }
+  ],
+  "sar:creeping_line": [
+    {
+      "title": "Busca SAR em Rota Paralela: {target_name}",
+      "description": "Varredura visual em padrão de pernas paralelas (creeping line) para busca de {target_name}. Mantenha voo a até {max_alt} ft e {max_speed} kt com {pax} observador(es) e retorne a {origin}."
+    },
+    {
+      "title": "Varredura em Creeping Line: {target_name}",
+      "description": "Operação SAR em varredura transversal ao longo do eixo de avanço para localizar {target_name}. Condução com {pax} observador(es) e retorno para pouso em {origin}."
+    },
+    {
+      "title": "Busca em Faixas Paralelas: {target_name}",
+      "description": "Padrão de busca aérea em linhas paralelas sucessivas para localização de {target_name}. Varredura com {pax} especialista(s) a até {max_alt} ft e pouso final em {origin}."
+    }
+  ]
+}

@@ -1,0 +1,6253 @@
+{
+  "version": 2,
+  "missions": [
+    {
+      "id": "instrucao_local",
+      "name": "Instrução Local",
+      "description": "Voo de instrução inicial com manobras em área e toques na origem.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao_basica",
+      "xpType": "instrucao_basica",
+      "generator": "local_instruction",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "instrucao": 4,
+        "aeroclube": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            40
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "instrucao_local",
+        "3.4.1"
+      ]
+    },
+    {
+      "id": "circuito_tgl",
+      "name": "Circuito de Tráfego (TGL)",
+      "description": "Treinamento intensivo de aproximação, toques e arremetidas no circuito de tráfego.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao_basica",
+      "xpType": "instrucao_basica",
+      "generator": "tgl_circuit",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "instrucao": 4,
+        "aeroclube": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 80,
+          "rangeNm": [
+            10,
+            25
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "weight": 20,
+          "rangeNm": [
+            10,
+            25
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "circuito_tgl",
+        "3.5.2"
+      ]
+    },
+    {
+      "id": "navegacao_vfr",
+      "name": "Navegação VFR",
+      "description": "Navegação visual entre aeródromos homologados com reporte e pousos completos.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "vfr_triangle",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "instrucao": 3,
+        "aeroclube": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "variant": "triangle",
+          "weight": 50,
+          "rangeNm": [
+            80,
+            250
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "out_and_back",
+          "weight": 25,
+          "rangeNm": [
+            80,
+            240
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "triangle_tgl",
+          "weight": 25,
+          "rangeNm": [
+            75,
+            200
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "triangle_long",
+          "weight": 20,
+          "rangeNm": [
+            150,
+            300
+          ],
+          "legNm": [
+            40,
+            130
+          ],
+          "minPilotLevel": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "navegacao_cross_country",
+        "3.4.2"
+      ]
+    },
+    {
+      "id": "navegacao_vfr_ida",
+      "name": "Navegação VFR (só ida)",
+      "description": "Navegação visual de um aeródromo a outro, com ponto de reporte e pouso completo no destino.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "vfr_one_way",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "instrucao": 3,
+        "aeroclube": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "variant": "iniciante",
+          "weight": 60,
+          "rangeNm": [
+            50,
+            100
+          ],
+          "repeatPool": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "variant": "intermediaria",
+          "weight": 40,
+          "rangeNm": [
+            50,
+            150
+          ],
+          "minPilotLevel": 3,
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "instrucao_ifr",
+      "name": "Instrução IFR",
+      "description": "Procedimentos de aproximação por instrumentos e esperas em rota.",
+      "enabled": false,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 6,
+        "3": 6,
+        "4": 0
+      },
+      "originProfiles": {
+        "instrucao:ifr": 5,
+        "instrucao:academia_linha": 3,
+        "instrucao": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            40,
+            160
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": []
+    },
+    {
+      "id": "adaptacao_noturna",
+      "name": "Adaptação Noturna",
+      "description": "Treinamento de voo noturno e operação em aeródromo com balizamento luminoso.",
+      "enabled": false,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 6,
+        "4": 0
+      },
+      "originProfiles": {
+        "instrucao": 3,
+        "aeroclube": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "lighted",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            10,
+            30
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "cheque",
+      "name": "Voo de Cheque / Revalidação",
+      "description": "Voo de avaliação prática com examinador credenciado para concessão ou revalidação de habilitação.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "checkride",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 6,
+        "4": 1
+      },
+      "originProfiles": {
+        "instrucao": 3,
+        "instrucao:academia_linha": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            60
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 4,
+      "urgency": 1.2,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "voo_de_cheque",
+        "3.4.3"
+      ]
+    },
+    {
+      "id": "instrucao_stol",
+      "name": "Instrução STOL / Bush",
+      "description": "Treinamento avançado de pousos curtos e operação em pistas desfavoráveis.",
+      "enabled": true,
+      "board": "Instrucao",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "instrucao",
+      "xpType": "instrucao",
+      "generator": "stol_training",
+      "baseByTier": {
+        "1": 0,
+        "2": 1,
+        "3": 3,
+        "4": 6
+      },
+      "originProfiles": {
+        "aeroclube": 3,
+        "instrucao:bush": 4,
+        "altitude": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          4
+        ],
+        "country": "same",
+        "runway": "short_or_unpaved",
+        "maxNm": 30,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            10,
+            40
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        2,
+        6
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          2,
+          6
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "ponte_aerea",
+      "name": "Ponte Aérea de Alta Frequência",
+      "description": "Ligação rápida e contínua entre dois grandes centros econômicos interligados.",
+      "enabled": true,
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 10,
+        "2": 6,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha:ponte_aerea": 8,
+        "linha:alta_frequencia": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": 300,
+        "profiles": {
+          "linha:ponte_aerea": 8,
+          "linha:alta_frequencia": 4
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto:hub"
+        ],
+        "realRouteMultiplier": 6
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            150,
+            400
+          ],
+          "pax": [
+            120,
+            195
+          ],
+          "cargoLbs": [
+            0,
+            6000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.1,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "legacyIds": [
+        "ponte_aerea_troncal",
+        "1.7.5"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto:hub"
+      ]
+    },
+    {
+      "id": "troncal_domestico",
+      "name": "Troncal Doméstico",
+      "description": "Rotas troncais regulares interligando grandes capitais e polos metropolitanos nacionais.",
+      "enabled": true,
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 10,
+        "2": 6,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha": 3,
+        "linha:domestico": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "linha": 4
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto:hub"
+        ],
+        "realRouteMultiplier": 6
+      },
+      "profiles": [
+        {
+          "weight": 45,
+          "rangeNm": [
+            250,
+            700
+          ],
+          "pax": [
+            120,
+            190
+          ],
+          "cargoLbs": [
+            0,
+            8000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4300,
+          "paved": true
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            700,
+            1400
+          ],
+          "pax": [
+            140,
+            210
+          ],
+          "cargoLbs": [
+            0,
+            10000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4300,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            1400,
+            2400
+          ],
+          "pax": [
+            160,
+            230
+          ],
+          "cargoLbs": [
+            0,
+            10000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "legacyIds": [
+        "linha_domestica_hub",
+        "regional_direto",
+        "1.1.1",
+        "2.1.2"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto:hub"
+      ]
+    },
+    {
+      "id": "regional_internacional",
+      "name": "Regional Internacional",
+      "description": "Voo regular internacional entre capitais e grandes centros de países vizinhos.",
+      "enabled": true,
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 3,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha:internacional": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "linha": 3
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto:hub"
+        ],
+        "realRouteMultiplier": 6
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            400,
+            1000
+          ],
+          "pax": [
+            120,
+            190
+          ],
+          "cargoLbs": [
+            0,
+            8000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4300,
+          "paved": true
+        },
+        {
+          "weight": 45,
+          "rangeNm": [
+            1000,
+            1900
+          ],
+          "pax": [
+            140,
+            220
+          ],
+          "cargoLbs": [
+            0,
+            10000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4300,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            1900,
+            3000
+          ],
+          "pax": [
+            160,
+            220
+          ],
+          "cargoLbs": [
+            0,
+            8000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        32
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 36,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "legacyIds": [
+        "linha_regional_internacional",
+        "1.1.2"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto:hub"
+      ]
+    },
+    {
+      "id": "longo_curso",
+      "name": "Longo Curso Internacional",
+      "description": "Travessia intercontinental regular de passageiros e carga em aeronaves widebody.",
+      "enabled": true,
+      "board": "LinhaRegular",
+      "vip": false,
+      "phase": 7,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 0,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha:mega_hub": 4,
+        "linha:internacional": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "linha:mega_hub": 5
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto:hub"
+        ],
+        "realRouteMultiplier": 6
+      },
+      "profiles": [
+        {
+          "weight": 35,
+          "rangeNm": [
+            3000,
+            4500
+          ],
+          "pax": [
+            220,
+            320
+          ],
+          "cargoLbs": [
+            5000,
+            30000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 8000,
+          "paved": true
+        },
+        {
+          "weight": 50,
+          "rangeNm": [
+            4500,
+            6500
+          ],
+          "pax": [
+            250,
+            380
+          ],
+          "cargoLbs": [
+            5000,
+            35000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 8000,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            6500,
+            7700
+          ],
+          "pax": [
+            250,
+            400
+          ],
+          "cargoLbs": [
+            5000,
+            25000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 8000,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        32
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 48,
+      "maxExpHours": 72,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 7000,
+      "legacyIds": [
+        "linha_long_haul",
+        "long_haul_internacional",
+        "1.1.3",
+        "1.7.7"
+      ],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto:hub"
+      ]
+    },
+    {
+      "id": "feeder_inbound",
+      "name": "Alimentador de Hub (Inbound)",
+      "description": "Voo regional regular conectando polos do interior diretamente ao hub principal da companhia.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 10,
+        "3": 6,
+        "4": 0
+      },
+      "originProfiles": {
+        "alimentador": 5
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": 500,
+        "profiles": {
+          "linha": 5
+        },
+        "requireAnyTag": [
+          "linha",
+          "linha_auto"
+        ],
+        "realRouteMultiplier": 4
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            80,
+            250
+          ],
+          "pax": [
+            20,
+            48
+          ],
+          "cargoLbs": [
+            0,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 45,
+          "rangeNm": [
+            150,
+            400
+          ],
+          "pax": [
+            40,
+            72
+          ],
+          "cargoLbs": [
+            0,
+            3000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            250,
+            550
+          ],
+          "pax": [
+            60,
+            72
+          ],
+          "cargoLbs": [
+            0,
+            3000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3600,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [
+        "alimentacao_hub",
+        "2.1.1"
+      ]
+    },
+    {
+      "id": "feeder_outbound",
+      "name": "Distribuidor de Hub (Outbound)",
+      "description": "Distribuição de passageiros e conexões a partir de um grande hub para aeroportos regionais.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 3,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": 500,
+        "profiles": {
+          "alimentador": 5
+        },
+        "realRouteMultiplier": 4
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            80,
+            250
+          ],
+          "pax": [
+            20,
+            48
+          ],
+          "cargoLbs": [
+            0,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 45,
+          "rangeNm": [
+            150,
+            400
+          ],
+          "pax": [
+            40,
+            72
+          ],
+          "cargoLbs": [
+            0,
+            3000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            250,
+            550
+          ],
+          "pax": [
+            60,
+            72
+          ],
+          "cargoLbs": [
+            0,
+            3000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3600,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [],
+      "requireAnyTag": [
+        "linha",
+        "linha_auto"
+      ]
+    },
+    {
+      "id": "sub_regional",
+      "name": "Sub-Regional Leve",
+      "description": "Transporte aéreo regular entre cidades de menor porte e capitais ou polos regionais.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 10,
+        "4": 3
+      },
+      "originProfiles": {
+        "alimentador": 2,
+        "interior_distante": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "alimentador": 4
+        },
+        "realRouteMultiplier": 4
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            50,
+            200
+          ],
+          "pax": [
+            4,
+            12
+          ],
+          "cargoLbs": [
+            0,
+            800
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            100,
+            300
+          ],
+          "pax": [
+            10,
+            19
+          ],
+          "cargoLbs": [
+            0,
+            1000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "pinga_pinga",
+      "name": "Pinga-Pinga Regional",
+      "description": "Voo regular de múltiplas escalas curtas para atendimento de passageiros e encomendas.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "multi_stop",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "alimentador": 3,
+        "isolado": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            100,
+            400
+          ],
+          "pax": [
+            2,
+            14
+          ],
+          "cargoLbs": [
+            100,
+            1500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "regional_essencial",
+      "name": "Regional Essencial / Táxi Social",
+      "description": "Linha subsidiada ou comunitária conectando localidades isoladas à rede de serviços essenciais.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "isolado": 8,
+        "alimentador:amazonia": 4,
+        "alimentador:remoto": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "linha": 4,
+          "alimentador": 4
+        },
+        "realRouteMultiplier": 4
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            50,
+            300
+          ],
+          "pax": [
+            4,
+            14
+          ],
+          "cargoLbs": [
+            200,
+            1500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            100,
+            350
+          ],
+          "pax": [
+            20,
+            48
+          ],
+          "cargoLbs": [
+            500,
+            3000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3600,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        25
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "executivo_corporativo",
+      "name": "Táxi Aéreo Corporativo",
+      "description": "Fretamento executivo corporativo para executivos e empresários entre polos de negócios.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 10,
+        "3": 6,
+        "4": 1
+      },
+      "originProfiles": {
+        "executivo": 4,
+        "executivo:corporativo": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "executivo": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 45,
+          "rangeNm": [
+            100,
+            400
+          ],
+          "pax": [
+            1,
+            4
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            300,
+            1200
+          ],
+          "pax": [
+            2,
+            7
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3400,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            1000,
+            2000
+          ],
+          "pax": [
+            4,
+            10
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4900,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": [
+        "executiva_business",
+        "executivo_regional",
+        "fretamento_executivo",
+        "fretamento_executivo_regional",
+        "1.3.1",
+        "3.1.1",
+        "1.7.1",
+        "2.7.1"
+      ]
+    },
+    {
+      "id": "executivo_intercontinental",
+      "name": "Executivo Intercontinental",
+      "description": "Transporte VIP de longa distância intercontinental em jatos executivos de grande porte.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 1,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "executivo:dedicado": 4,
+        "executivo": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "executivo": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            1800,
+            3400
+          ],
+          "pax": [
+            2,
+            12
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4900,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "legacyIds": []
+    },
+    {
+      "id": "vip_internacional",
+      "name": "VIP Internacional",
+      "description": "Fretamento VIP privado internacional de médio alcance para países vizinhos.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 3,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "executivo": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "executivo:lazer": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            300,
+            1200
+          ],
+          "pax": [
+            2,
+            8
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3400,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [
+        "vip_internacional_curto",
+        "vip_internacional_regional",
+        "1.7.4",
+        "2.7.4"
+      ]
+    },
+    {
+      "id": "agro_executivo",
+      "name": "Táxi Aéreo do Agronegócio",
+      "description": "Deslocamento de produtores, agrônomos e investidores entre centros urbanos e propriedades rurais.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 10,
+        "4": 6
+      },
+      "originProfiles": {
+        "agro:executivo_rural": 4,
+        "agro": 3,
+        "fazenda": 3
+      },
+      "season": {
+        "safra:colheita": 1.4,
+        "safra:entressafra": 0.8
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "agro": 4,
+          "fazenda": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            80,
+            300
+          ],
+          "pax": [
+            1,
+            4
+          ],
+          "cargoLbs": [
+            0,
+            200
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            250,
+            600
+          ],
+          "pax": [
+            3,
+            8
+          ],
+          "cargoLbs": [
+            0,
+            200
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "agro_legacy",
+        "agro_tech",
+        "agro_investidores",
+        "2.2.1",
+        "2.2.2",
+        "2.2.3"
+      ]
+    },
+    {
+      "id": "familia_alto_padrao",
+      "name": "Família de Alto Padrão",
+      "description": "Fretamento VIP privativo para famílias em viagem de lazer ou deslocamento de residência.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "executivo:lazer": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "executivo:lazer": 3,
+          "turistico_curado": 3,
+          "turistico_poi": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            100,
+            800
+          ],
+          "pax": [
+            2,
+            7
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "familia_alto_padrao",
+        "3.1.2"
+      ]
+    },
+    {
+      "id": "equipes_urgentes",
+      "name": "Equipes Urgentes",
+      "description": "Transporte ágil de técnicos e especialistas com ferramentas e peças para atendimento urgente.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "mro": 2,
+        "carga:industrial": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            500
+          ],
+          "pax": [
+            2,
+            6
+          ],
+          "cargoLbs": [
+            50,
+            400
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        30
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.3,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "equipes_urgentes",
+        "3.1.3"
+      ]
+    },
+    {
+      "id": "charter_lazer",
+      "name": "Fretamento Turístico / Lazer",
+      "description": "Charter turístico para grupos e turistas com destino a resorts, praias e lodges de pesca.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 3,
+        "4": 1
+      },
+      "originProfiles": {
+        "linha:turistico": 3,
+        "executivo:lazer": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "turistico_curado": 4,
+          "turistico_poi": 2,
+          "executivo:lazer": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            100,
+            800
+          ],
+          "pax": [
+            4,
+            9
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            40,
+            300
+          ],
+          "pax": [
+            2,
+            8
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        30
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "charter_esportivo",
+      "name": "Charter Esportivo / Turnês",
+      "description": "Fretamento dedicado para delegações esportivas, comissões técnicas e bandas em turnê.",
+      "enabled": true,
+      "board": "LinhaRegional",
+      "vip": false,
+      "phase": 5,
+      "payFamily": "regional",
+      "xpType": "regional",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "linha": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            200,
+            1200
+          ],
+          "pax": [
+            30,
+            70
+          ],
+          "cargoLbs": [
+            0,
+            4000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            300,
+            1500
+          ],
+          "pax": [
+            60,
+            150
+          ],
+          "cargoLbs": [
+            0,
+            6000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4500,
+      "legacyIds": []
+    },
+    {
+      "id": "transfer_metropolitano",
+      "name": "Transfer Metropolitano",
+      "description": "Ligação executiva rápida de curto alcance entre aeroportos executivos e helipontos da mesma metrópole.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "executivo:urbano": 4,
+        "executivo:dedicado": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": 150,
+        "profiles": {
+          "executivo": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            250
+          ],
+          "pax": [
+            1,
+            6
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "legacyIds": []
+    },
+    {
+      "id": "panoramico",
+      "name": "Voo Panorâmico",
+      "description": "Passeio panorâmico local ou safári aéreo sobrevoando atrativos naturais com retorno à origem.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "panoramico",
+      "xpType": "panoramico",
+      "generator": "scenic_tour",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "turistico_curado:base": 8,
+        "turistico_poi": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            15,
+            60
+          ],
+          "pax": [
+            1,
+            3
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            30,
+            80
+          ],
+          "pax": [
+            4,
+            12
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        0,
+        5
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "voo_panoramico",
+        "3.5.1"
+      ]
+    },
+    {
+      "id": "demo_flight",
+      "name": "Voo de Demonstração Comercial",
+      "description": "Demonstração de performance de aeronave para potenciais compradores com retorno à origem.",
+      "enabled": false,
+      "board": "Geral",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "mro:fabrica": 8,
+        "mro:executivo": 3,
+        "executivo:dedicado": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            60
+          ],
+          "pax": [
+            1,
+            3
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        0,
+        5
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": []
+    },
+    {
+      "id": "carga_paletizada",
+      "name": "Carga Geral Paletizada",
+      "description": "Transporte de cargas industriais pesadas e contêineres paletizados em aeronaves cargueiras.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 6,
+      "payFamily": "linha",
+      "xpType": "linha",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 10,
+        "2": 6,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga": 3,
+        "carga:cargueiros": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "any",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "carga": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            300,
+            1600
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            20000,
+            45000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4300,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            600,
+            2600
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            45000,
+            100000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 8000,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        },
+        {
+          "weight": 20,
+          "rangeNm": [
+            3500,
+            7200
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            100000,
+            148000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 8000,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 6000,
+      "legacyIds": [
+        "carga_heavy_nacional",
+        "carga_heavy_internacional",
+        "carga_heavy_long_haul",
+        "fretamento_global_carga_alto_valor",
+        "1.2.1",
+        "1.2.2",
+        "1.2.3",
+        "1.7.8"
+      ]
+    },
+    {
+      "id": "carga_overnight",
+      "name": "Carga Expressa Overnight",
+      "description": "Malha noturna de encomendas prioritárias e encomendas urgentes entre hubs e alimentadores.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga:integrador": 5,
+        "carga:noturno": 4,
+        "carga:expressa": 3,
+        "carga:postal": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "carga": 3,
+          "alimentador": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 45,
+          "rangeNm": [
+            100,
+            400
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            1000,
+            3300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 35,
+          "rangeNm": [
+            150,
+            500
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            6000,
+            16000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 20,
+          "rangeNm": [
+            300,
+            1500
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            20000,
+            45000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 36,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [
+        "cargueiro_noturno",
+        "1.7.6"
+      ]
+    },
+    {
+      "id": "malotes",
+      "name": "Malotes Bancários e Documentos",
+      "description": "Transporte urgente de malotes bancários, compensação de cheques e documentação institucional.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "carga:postal": 2,
+        "interior_distante": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            350
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            50,
+            600
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "malotes_documentos",
+        "2.3.3"
+      ]
+    },
+    {
+      "id": "carga_valores",
+      "name": "Transporte de Valores",
+      "description": "Transporte seguro de numerário, barras de ouro e pedras preciosas com escolta armada a bordo.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "aog",
+      "xpType": "aog",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga:alto_valor": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "carga": 3,
+          "linha": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            100,
+            600
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            200,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": []
+    },
+    {
+      "id": "ecommerce",
+      "name": "E-Commerce e Carga Fracionada",
+      "description": "Distribuição expressa de encomendas e compras online conectando polos industriais ao consumidor.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga:ecommerce": 5,
+        "carga:integrador": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "alimentador": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 50,
+          "rangeNm": [
+            40,
+            300
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            500,
+            3300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 35,
+          "rangeNm": [
+            100,
+            500
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            4000,
+            15000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            300,
+            1200
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            20000,
+            45000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": [
+        "ecommerce_varejo",
+        "2.3.1"
+      ]
+    },
+    {
+      "id": "carga_jit",
+      "name": "Carga Industrial Just-In-Time / AOG",
+      "description": "Transporte de emergência de componentes eletrônicos, maquinário industrial parado ou peças agrícolas.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "aog",
+      "xpType": "aog",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "carga:industrial": 3,
+        "carga:automotivo": 3,
+        "carga:eletronicos": 3,
+        "agro": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "carga:industrial": 3,
+          "agro": 5,
+          "fazenda": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            50,
+            800
+          ],
+          "pax": [
+            0,
+            2
+          ],
+          "cargoLbs": [
+            50,
+            1500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            20,
+            150
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            50,
+            500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.2,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "aog_agro_suporte",
+        "aog_maquina_campo",
+        "3.2.1",
+        "4.3.2"
+      ]
+    },
+    {
+      "id": "cadeia_fria",
+      "name": "Cadeia Fria e Perecíveis",
+      "description": "Transporte refrigerado com controle térmico rigoroso de pescados, frutas finas e vacinas.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga:pereciveis": 6,
+        "agro:pereciveis": 5,
+        "agro:pescado": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "any",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "carga": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            80,
+            400
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            800,
+            3300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            150,
+            600
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            6000,
+            16000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 20,
+          "rangeNm": [
+            400,
+            1500
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            20000,
+            45000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true,
+          "requireAnyTag": [
+            "linha",
+            "linha_auto",
+            "carga:cargueiros",
+            "carga_auto"
+          ]
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.2,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": []
+    },
+    {
+      "id": "carga_dgr",
+      "name": "Carga Perigosa / Farmacêutica",
+      "description": "Materiais controlados, farmacêuticos hospitalares ou explosivos de mineração exigindo parâmetros suaves.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_fragil",
+      "xpType": "carga_fragil",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "carga:farma": 5,
+        "carga:mineracao": 3,
+        "saude": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "carga:farma": 3,
+          "saude": 3,
+          "carga:mineracao": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            100,
+            800
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            100,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            50,
+            300
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            500,
+            3000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 3,
+      "urgency": 1.3,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": [
+        "carga_fragil",
+        "carga_fragil_regional",
+        "carga_fragil_municipal",
+        "1.7.2",
+        "2.7.2",
+        "3.7.1"
+      ]
+    },
+    {
+      "id": "carga_sensivel",
+      "name": "Carga Sensível e Viva",
+      "description": "Insumos biológicos, botijões de genética animal com veterinário de campo ou fauna silvestre.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "carga_fragil",
+      "xpType": "carga_fragil",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 6,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "agro:genetica": 5,
+        "agro:sementes": 4,
+        "agro": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "fazenda": 4,
+          "agro": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            400
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            50,
+            500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "carga_combi",
+      "name": "Carga Combi (Passageiros + Suprimentos)",
+      "description": "Configuração mista de cabine transportando passageiros e volumes de carga para regiões isoladas.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "isolado": 6,
+        "alimentador:amazonia": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "isolado": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            50,
+            400
+          ],
+          "pax": [
+            2,
+            9
+          ],
+          "cargoLbs": [
+            500,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            100,
+            400
+          ],
+          "pax": [
+            15,
+            30
+          ],
+          "cargoLbs": [
+            3000,
+            6000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3600,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        25
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "insumos_agro",
+      "name": "Insumos e Peças Agrícolas",
+      "description": "Abastecimento logístico com peças, defensivos e ferramentas para polos de produção agrícola.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_municipal",
+      "xpType": "agro_municipal",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 10,
+        "4": 10
+      },
+      "originProfiles": {
+        "agro": 4,
+        "fazenda": 4
+      },
+      "season": {
+        "safra:plantio": 1.6,
+        "safra:colheita": 1.2,
+        "safra:entressafra": 0.6
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "fazenda": 5,
+          "agro": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            400
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            200,
+            3000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 12,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "agro_pecas_insumos",
+        "agro_insumos_biotecnologia",
+        "agro_suprimento_campanha",
+        "insumos_urgentes_agro",
+        "2.3.2",
+        "3.2.2",
+        "3.2.3",
+        "4.2.3"
+      ]
+    },
+    {
+      "id": "suprimentos_remotos",
+      "name": "Suprimentos para Comunidades Remotas",
+      "description": "Mantimentos, combustíveis e itens essenciais para ranchos, reservas indígenas e vilarejos.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "isolado": 4,
+        "fazenda": 3,
+        "interior_distante": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "fazenda": 5,
+          "isolado": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            15,
+            150
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            300,
+            1500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            30,
+            250
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            1500,
+            3300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "abastecimento_rancho",
+        "4.1.1"
+      ]
+    },
+    {
+      "id": "conexao_pista_curta",
+      "name": "Conexão de Pista Curta",
+      "description": "Salto curto com carga e suprimentos de polo municipal para pista rústica de fazenda.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 0,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "fazenda": 2,
+        "interior_distante": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          4
+        ],
+        "country": "same",
+        "runway": "short_or_unpaved",
+        "maxNm": 50,
+        "profiles": {
+          "fazenda": 3,
+          "pista_curta": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            15,
+            80
+          ],
+          "pax": [
+            0,
+            5
+          ],
+          "cargoLbs": [
+            0,
+            1200
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        25
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "orgaos",
+      "name": "Transporte de Órgãos para Transplante",
+      "description": "Missão crítica com contagem regressiva para entrega rápida de órgãos vitais em centro cirúrgico.",
+      "enabled": true,
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "saude:orgaos": 6,
+        "saude:hospital_referencia": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "maxMultiplier": 100,
+        "profiles": {
+          "saude:orgaos": 100,
+          "saude:hospital_referencia": 100
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            700
+          ],
+          "pax": [
+            2,
+            3
+          ],
+          "cargoLbs": [
+            20,
+            60
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        8
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 4,
+      "urgency": 1.5,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [
+        "transporte_orgaos",
+        "3.3.3"
+      ]
+    },
+    {
+      "id": "uti_inter_hospitalar",
+      "name": "Remoção Aeromédica UTI Inter-Hospitalar",
+      "description": "Transferência médica especializada de paciente em estado grave entre centros hospitalares.",
+      "enabled": true,
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "saude": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "saude:hospital_referencia": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            80,
+            500
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            150,
+            400
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 2,
+        "luggageKg": [
+          3,
+          8
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 12,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": [
+        "remocao_urgencia",
+        "transferencia_eletiva",
+        "3.3.1",
+        "3.3.2"
+      ]
+    },
+    {
+      "id": "medevac_remoto",
+      "name": "Evacuação Aeromédica Remota (Bush Medevac)",
+      "description": "Resgate de emergência em pistas curtas de terra/grama para transporte de paciente ferido.",
+      "enabled": true,
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "saude:medevac_remoto": 4,
+        "isolado": 4,
+        "fazenda": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "maxMultiplier": 100,
+        "profiles": {
+          "saude:hospital_referencia": 100,
+          "saude": 30
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            300
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            100,
+            300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 2,
+        "luggageKg": [
+          3,
+          8
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 1,
+      "maxExpHours": 2,
+      "urgency": 1.5,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "medivac_bush",
+        "medevac_dinamico",
+        "medevac_regional",
+        "medevac_municipal",
+        "4.3.1",
+        "1.7.3",
+        "2.7.3",
+        "3.7.2"
+      ]
+    },
+    {
+      "id": "uti_longa_distancia",
+      "name": "UTI Aérea de Longa Distância / Repatriação",
+      "description": "Repatriação médica internacional com acompanhamento de equipe e suporte avançado de vida.",
+      "enabled": true,
+      "board": "Medica",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 3,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "saude:repatriacao": 6,
+        "saude:uti_aerea": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "maxMultiplier": 100,
+        "profiles": {
+          "saude:hospital_referencia": 100
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            800,
+            3000
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            200,
+            400
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3400,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 2,
+        "luggageKg": [
+          3,
+          8
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4500,
+      "legacyIds": []
+    },
+    {
+      "id": "saude_familia",
+      "name": "Ronda Médica e Vacinação",
+      "description": "Deslocamento de profissionais de saúde e insumos para atendimento preventivo em aldeias e vilas.",
+      "enabled": true,
+      "board": "Medica",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "medevac",
+      "xpType": "medevac",
+      "generator": "round_trip",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "saude": 3,
+        "alimentador": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "isolado": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            50,
+            250
+          ],
+          "pax": [
+            3,
+            8
+          ],
+          "cargoLbs": [
+            100,
+            600
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "aerolevantamento",
+      "name": "Aerolevantamento e Fotogrametria",
+      "description": "Mapeamento aéreo por linhas paralelas com controle rigoroso de altitude, proa e velocidade.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "survey",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {},
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            15,
+            80
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            50,
+            200
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "aerolevantamento",
+        "3.6.1"
+      ]
+    },
+    {
+      "id": "paraquedismo",
+      "name": "Lançamento de Paraquedistas",
+      "description": "Subida rápida para lançamento de paraquedistas em dropzone e descida controlada para pouso na origem.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "paraquedismo",
+      "xpType": "paraquedismo",
+      "generator": "skydive",
+      "baseByTier": {
+        "1": 1,
+        "2": 1,
+        "3": 3,
+        "4": 1
+      },
+      "originProfiles": {
+        "zona_salto": 10
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 35,
+          "rangeNm": [
+            5,
+            15
+          ],
+          "pax": [
+            3,
+            6
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 50,
+          "rangeNm": [
+            5,
+            15
+          ],
+          "pax": [
+            8,
+            14
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 15,
+          "rangeNm": [
+            5,
+            15
+          ],
+          "pax": [
+            15,
+            20
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        12,
+        16
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 6,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "paraquedismo",
+        "3.6.2"
+      ]
+    },
+    {
+      "id": "pulverizacao",
+      "name": "Pulverização Agrícola",
+      "description": "Aplicação aérea de defensivos e fertilizantes em baixa altura sobre talhões agrícolas.",
+      "enabled": false,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 0,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "agro:pulverizacao": 6,
+        "fazenda": 4,
+        "agro": 3
+      },
+      "season": {
+        "safra:plantio": 1.4,
+        "safra:entressafra": 0.4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            5,
+            15
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            600,
+            1100
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "reboque_planador",
+      "name": "Reboque de Planadores",
+      "description": "Reboque de planador até altitude estipulada para desengate esportivo.",
+      "enabled": false,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 1,
+        "3": 3,
+        "4": 3
+      },
+      "originProfiles": {
+        "instrucao:planador": 10,
+        "aeroclube": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            5,
+            15
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "publicidade_aerea",
+      "name": "Publicidade Aérea",
+      "description": "Reboque de faixa publicitária ao longo de praias e eventos de grande aglomeração.",
+      "enabled": false,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "turistico_poi": 4,
+        "turistico_curado": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            80
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            30,
+            60
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "patrulha_vigilancia",
+      "name": "Patrulha e Vigilância de Área",
+      "description": "Vigilância ambiental, monitoramento de queimadas e contagem de rebanho em baixa altura.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "patrol",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "isolado": 3,
+        "fazenda": 3,
+        "agro": 2,
+        "militar:fronteira": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            200
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "inspecao_linhas",
+      "name": "Inspeção de Linhas e Dutos",
+      "description": "Rastreio e monitoramento aéreo de linhas de transmissão, dutos de combustível ou ferrovias.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "line_inspection",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 3
+      },
+      "originProfiles": {
+        "interior_distante": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            40,
+            200
+          ],
+          "pax": [
+            1,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "monitoramento_trafego",
+      "name": "Monitoramento de Tráfego e Eventos",
+      "description": "Voo de observação e suporte jornalístico/segurança sobre malhas viárias e eventos.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "traffic_orbit",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "executivo:urbano": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            10,
+            40
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            0,
+            50
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 2500,
+      "legacyIds": []
+    },
+    {
+      "id": "sar",
+      "name": "Busca e Salvamento (SAR)",
+      "description": "Operação de varredura visual e busca de emergência em padrões de creeping line ou expanding square.",
+      "enabled": true,
+      "board": "Sae",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "sar_pattern",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 3,
+        "4": 3
+      },
+      "originProfiles": {
+        "militar:sar": 5,
+        "saude:resgate": 3
+      },
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 50,
+          "variant": "expanding_square",
+          "rangeNm": [
+            40,
+            250
+          ],
+          "pax": [
+            1,
+            3
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 50,
+          "variant": "creeping_line",
+          "rangeNm": [
+            40,
+            250
+          ],
+          "pax": [
+            1,
+            3
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "calibracao_auxilios",
+      "name": "Calibração de Auxílios à Navegação",
+      "description": "Aproximações e voos técnicos de aferição de auxílios-rádio, ILS e balizamentos de pista.",
+      "enabled": false,
+      "board": "Sae",
+      "vip": false,
+      "phase": 4,
+      "payFamily": "aerofoto",
+      "xpType": "aerofoto",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 6,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {},
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            200
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            300,
+            800
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 4000,
+      "legacyIds": []
+    },
+    {
+      "id": "ferry_posicionamento",
+      "name": "Translado e Posicionamento (Ferry)",
+      "description": "Voo de translado de aeronave da frota para cobrir malha ou atender demanda em outra base.",
+      "enabled": true,
+      "board": "Geral",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "translado",
+      "xpType": "translado",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 3,
+        "3": 3,
+        "4": 1
+      },
+      "originProfiles": {
+        "mro": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "any",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "linha": 2,
+          "executivo": 2
+        }
+      },
+      "profiles": [
+        {
+          "weight": 55,
+          "rangeNm": [
+            20,
+            150
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 35,
+          "rangeNm": [
+            150,
+            600
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 10,
+          "rangeNm": [
+            600,
+            1500
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 3400,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          3,
+          10
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 8,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "translado_posicionamento_ferry",
+        "translado_basico",
+        "1.3.3",
+        "3.5.3"
+      ]
+    },
+    {
+      "id": "translado_manutencao",
+      "name": "Translado para Manutenção / Revisão",
+      "description": "Voo técnico para oficina homologada especializada para cumprimento de inspeções periódicas ou reparos.",
+      "enabled": true,
+      "board": "Geral",
+      "vip": false,
+      "phase": 1,
+      "payFamily": "translado",
+      "xpType": "translado",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 1
+      },
+      "originProfiles": {},
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "mro": 6
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            400
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          3,
+          10
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": [
+        "manutencao_regional",
+        "2.4.1"
+      ]
+    },
+    {
+      "id": "ferry_permit",
+      "name": "Translado com Restrição Técnica (Special Permit)",
+      "description": "Voo com autorização especial de translado cumprindo limitações operacionais estritas.",
+      "enabled": true,
+      "board": "Geral",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "translado",
+      "xpType": "translado",
+      "generator": "ferry_permit",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {},
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {
+          "mro": 6
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            300
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          3,
+          10
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": []
+    },
+    {
+      "id": "check_flight",
+      "name": "Voo de Teste Pós-Manutenção",
+      "description": "Verificação funcional em voo de sistemas, bússola e aviônicos após intervenção de manutenção.",
+      "enabled": true,
+      "board": "Geral",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "translado",
+      "xpType": "translado",
+      "generator": "check_flight",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "mro": 6
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "return_to_origin",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            60
+          ],
+          "pax": [
+            0,
+            1
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 0,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        3,
+        10
+      ],
+      "crew": {
+        "count": 1,
+        "luggageKg": [
+          3,
+          10
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3000,
+      "legacyIds": []
+    },
+    {
+      "id": "crew_parts",
+      "name": "Logística de Apoio a Aeronaves (Crew & Parts)",
+      "description": "Transporte de mecânicos, ferramentas ou tripulantes substitutos para aeronave em pane (AOG).",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 3,
+        "3": 3,
+        "4": 0
+      },
+      "originProfiles": {
+        "mro": 3,
+        "linha": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "linha": 3,
+          "mro": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            50,
+            800
+          ],
+          "pax": [
+            1,
+            6
+          ],
+          "cargoLbs": [
+            50,
+            600
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            30,
+            200
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            100,
+            1000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 12,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "logistica_apoio_crew_parts",
+        "1.3.2"
+      ]
+    },
+    {
+      "id": "translado_piloto_agricola",
+      "name": "Transporte de Piloto Agrícola",
+      "description": "Translado ágil de piloto agrícola para assunção de aeronave de pulverização na base de safra.",
+      "enabled": true,
+      "board": "Geral",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "agro:pulverizacao": 4,
+        "fazenda": 3
+      },
+      "season": {
+        "safra:plantio": 1.5,
+        "safra:colheita": 1.2,
+        "safra:entressafra": 0.5
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "agro": 4,
+          "fazenda": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            200
+          ],
+          "pax": [
+            1,
+            2
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 2,
+      "maxExpHours": 8,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "translado_piloto_agricola",
+        "4.2.2"
+      ]
+    },
+    {
+      "id": "pessoas_remotas",
+      "name": "Transporte de Pessoal para Locais Remotos",
+      "description": "Rodízio de turnos de trabalho, translado de brigadistas ou gerentes entre sedes e postos remotos.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "fazenda": 4,
+        "isolado": 3,
+        "agro": 2
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "fazenda": 4,
+          "isolado": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            15,
+            150
+          ],
+          "pax": [
+            1,
+            6
+          ],
+          "cargoLbs": [
+            0,
+            300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            30,
+            300
+          ],
+          "pax": [
+            6,
+            19
+          ],
+          "cargoLbs": [
+            0,
+            1000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        30
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 6,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": [
+        "transporte_patrao",
+        "troca_equipe",
+        "apoio_batedor",
+        "4.1.2",
+        "4.1.3",
+        "4.2.1"
+      ]
+    },
+    {
+      "id": "autoridades",
+      "name": "Autoridades e Comitivas Oficiais",
+      "description": "Transporte oficial de autoridades governamentais, urnas eleitorais ou documentos sigilosos de estado.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 3,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 3,
+        "2": 6,
+        "3": 3,
+        "4": 1
+      },
+      "originProfiles": {
+        "militar:vip": 4,
+        "executivo:governo": 3
+      },
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1,
+          2
+        ],
+        "country": "same",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            80,
+            600
+          ],
+          "pax": [
+            2,
+            8
+          ],
+          "cargoLbs": [
+            0,
+            600
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 2500,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 12,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 3500,
+      "legacyIds": [
+        "governo_local_estadual",
+        "2.4.2"
+      ]
+    },
+    {
+      "id": "diplomatico",
+      "name": "Missão Diplomática e Comitivas de Estado",
+      "description": "Voo internacional de comitiva diplomática e representantes governamentais em protocolo oficial.",
+      "enabled": true,
+      "board": "TaxiAereo",
+      "vip": true,
+      "phase": 4,
+      "payFamily": "taxi_aereo",
+      "xpType": "taxi_aereo",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 6,
+        "2": 3,
+        "3": 0,
+        "4": 0
+      },
+      "originProfiles": {
+        "militar:vip": 4,
+        "executivo:governo": 3
+      },
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          1
+        ],
+        "country": "other",
+        "runway": "paved",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 60,
+          "rangeNm": [
+            300,
+            3000
+          ],
+          "pax": [
+            4,
+            12
+          ],
+          "cargoLbs": [
+            0,
+            0
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 4900,
+          "paved": true
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            1000,
+            6000
+          ],
+          "pax": [
+            20,
+            60
+          ],
+          "cargoLbs": [
+            0,
+            3000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 4300,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 24,
+      "maxExpHours": 48,
+      "urgency": 1.0,
+      "requiresHardSurface": true,
+      "minRunwayDest": 5000,
+      "legacyIds": [
+        "diplomatico_militar",
+        "1.3.4"
+      ]
+    },
+    {
+      "id": "militar_can",
+      "name": "Logística Militar e Fronteiras (CAN)",
+      "description": "Apoio aerologístico a pelotões de fronteira, bases militares e correio militar avançado.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 6,
+        "3": 6,
+        "4": 3
+      },
+      "requireAnyTag": [
+        "militar",
+        "militar_misto"
+      ],
+      "originProfiles": {
+        "militar!": 6,
+        "militar_misto": 2,
+        "militar:fronteira": 4,
+        "militar:transporte": 3
+      },
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "militar:fronteira": 5,
+          "isolado": 3
+        }
+      },
+      "profiles": [
+        {
+          "weight": 40,
+          "rangeNm": [
+            100,
+            600
+          ],
+          "pax": [
+            0,
+            9
+          ],
+          "cargoLbs": [
+            500,
+            3000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 40,
+          "rangeNm": [
+            200,
+            1200
+          ],
+          "pax": [
+            5,
+            30
+          ],
+          "cargoLbs": [
+            3000,
+            15000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 3600,
+          "paved": true
+        },
+        {
+          "weight": 20,
+          "rangeNm": [
+            300,
+            2000
+          ],
+          "pax": [
+            10,
+            60
+          ],
+          "cargoLbs": [
+            15000,
+            60000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 8000,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "humanitario",
+      "name": "Apoio Humanitário e Defesa Civil",
+      "description": "Distribuição de água potável, lonas, remédios e socorro a populações atingidas por catástrofes.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "carga_expressa",
+      "xpType": "carga_expressa",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 1,
+        "2": 3,
+        "3": 6,
+        "4": 6
+      },
+      "originProfiles": {
+        "saude:humanitario": 4,
+        "militar:transporte": 2
+      },
+      "civilAtMilitaryBase": false,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3,
+          4
+        ],
+        "country": "same",
+        "runway": "any",
+        "maxNm": null,
+        "profiles": {
+          "isolado": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 70,
+          "rangeNm": [
+            50,
+            400
+          ],
+          "pax": [
+            0,
+            4
+          ],
+          "cargoLbs": [
+            1000,
+            4500
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        },
+        {
+          "weight": 30,
+          "rangeNm": [
+            200,
+            1500
+          ],
+          "pax": [
+            0,
+            20
+          ],
+          "cargoLbs": [
+            10000,
+            60000
+          ],
+          "bigAirport": true,
+          "minRunwayFt": 8000,
+          "paved": true
+        }
+      ],
+      "luggagePerPersonKg": [
+        8,
+        23
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "combustivel_tambor",
+      "name": "Transporte de Combustível em Tambores",
+      "description": "Transporte de combustíveis em tambores de 200 L para abastecimento de geradores e postos remotos.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "isolado": 3,
+        "alimentador:remoto": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          4
+        ],
+        "country": "same",
+        "runway": "short_or_unpaved",
+        "maxNm": null,
+        "profiles": {
+          "isolado": 4,
+          "fazenda": 4
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            20,
+            200
+          ],
+          "pax": [
+            0,
+            0
+          ],
+          "cargoLbs": [
+            720,
+            3600
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": null,
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "apoio_acampamento",
+      "name": "Apoio a Acampamentos e Expedições",
+      "description": "Suprimento de acampamentos de mineração, equipes científicas ou pesquisadores em campo.",
+      "enabled": true,
+      "board": "Carga",
+      "vip": false,
+      "phase": 2,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 3,
+        "3": 6,
+        "4": 10
+      },
+      "originProfiles": {
+        "carga:mineracao": 3,
+        "isolado": 4
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          4
+        ],
+        "country": "same",
+        "runway": "short_or_unpaved",
+        "maxNm": null,
+        "profiles": {
+          "isolado": 5
+        }
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            300
+          ],
+          "pax": [
+            0,
+            4
+          ],
+          "cargoLbs": [
+            200,
+            2000
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        15,
+        30
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    },
+    {
+      "id": "evacuacao_por_do_sol",
+      "name": "Evacuação Antes do Pôr do Sol",
+      "description": "Decolagem rápida de pista sem balizamento antes do pôr do sol rumo a aeródromo com balizamento noturno.",
+      "enabled": false,
+      "board": "TaxiAereo",
+      "vip": false,
+      "phase": 3,
+      "payFamily": "agro_bush",
+      "xpType": "agro_bush",
+      "generator": "standard",
+      "baseByTier": {
+        "1": 0,
+        "2": 0,
+        "3": 3,
+        "4": 6
+      },
+      "originProfiles": {
+        "isolado": 3
+      },
+      "civilAtMilitaryBase": true,
+      "destination": {
+        "rule": "standard",
+        "tiers": [
+          2,
+          3
+        ],
+        "country": "same",
+        "runway": "lighted",
+        "maxNm": null,
+        "profiles": {}
+      },
+      "profiles": [
+        {
+          "weight": 100,
+          "rangeNm": [
+            30,
+            250
+          ],
+          "pax": [
+            1,
+            6
+          ],
+          "cargoLbs": [
+            0,
+            300
+          ],
+          "bigAirport": false,
+          "minRunwayFt": 1200,
+          "paved": false
+        }
+      ],
+      "luggagePerPersonKg": [
+        5,
+        25
+      ],
+      "crew": {
+        "count": 0,
+        "luggageKg": [
+          0,
+          0
+        ]
+      },
+      "fixedTexts": null,
+      "minExpHours": 4,
+      "maxExpHours": 24,
+      "urgency": 1.0,
+      "requiresHardSurface": false,
+      "minRunwayDest": 0,
+      "legacyIds": []
+    }
+  ]
+}

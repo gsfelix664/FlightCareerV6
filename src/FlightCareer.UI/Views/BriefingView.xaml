@@ -154,10 +154,59 @@
 
                                                 <!-- Linha Intermediária: Contrato & Recompensa (visível se HasAssociatedMission == true) -->
                                                 <Border Visibility="{Binding HasAssociatedMission, Converter={StaticResource BooleanToVisibilityConverter}}" Margin="0,0,0,5" Background="#141C24" CornerRadius="4" Padding="7,4">
+                                                    <StackPanel>
                                                     <Grid>
                                                         <TextBlock Text="{Binding MissionTitle}" FontSize="11.5" FontWeight="SemiBold" Foreground="#94A3B8" FontFamily="Inter, Segoe UI, sans-serif" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,80,0"/>
                                                         <TextBlock Text="{Binding RewardMoney, StringFormat={}{0:C0}}" HorizontalAlignment="Right" FontSize="12" FontWeight="Bold" Foreground="#00E676" FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center"/>
                                                     </Grid>
+                                                    <!-- Texto do contrato (objetivo da missão) -->
+                                                    <TextBlock Text="{Binding AssociatedMission.Description}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                               FontSize="11.5" Foreground="#CBD5E1" FontFamily="Inter, Segoe UI, sans-serif"/>
+
+                                                    <!-- Bloco de Coordenadas dos Pontos da Missão -->
+                                                    <Border Visibility="{Binding HasCoordinatePoints, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                            Margin="0,8,0,2" Background="#0B0F14" BorderBrush="#263545" BorderThickness="1" CornerRadius="4" Padding="8,6">
+                                                        <StackPanel>
+                                                            <TextBlock Text="COORDENADAS" FontSize="9.5" FontWeight="Bold" Foreground="#8B9BAE" FontFamily="Inter, Segoe UI, sans-serif" Margin="0,0,0,4"/>
+                                                            <ItemsControl ItemsSource="{Binding CoordinatePoints}">
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+                                                                        <Grid Margin="0,2">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="11" Foreground="#CBD5E1" FontFamily="Inter, Segoe UI, sans-serif" 
+                                                                                       TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                                            <TextBlock Grid.Column="1" Text="{Binding Display}" FontSize="11" FontWeight="Bold" Foreground="#00E5FF" 
+                                                                                       FontFamily="JetBrains Mono, Consolas, monospace" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                                            <Button Grid.Column="2"
+                                                                                    Command="{Binding DataContext.CopyCoordinatesCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                    CommandParameter="{Binding CopyText}"
+                                                                                    ToolTip="Copiar em graus decimais"
+                                                                                    Cursor="Hand" VerticalAlignment="Center">
+                                                                                <Button.Template>
+                                                                                    <ControlTemplate TargetType="Button">
+                                                                                        <Border x:Name="btnBorder" Background="#1F2B37" BorderBrush="#263545" BorderThickness="1" CornerRadius="3" Padding="6,2">
+                                                                                            <TextBlock Text="COPIAR" FontSize="9.5" FontWeight="Bold" Foreground="#CBD5E1" FontFamily="Inter, Segoe UI, sans-serif"/>
+                                                                                        </Border>
+                                                                                        <ControlTemplate.Triggers>
+                                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                                <Setter TargetName="btnBorder" Property="Background" Value="#263545"/>
+                                                                                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#00E5FF"/>
+                                                                                            </Trigger>
+                                                                                        </ControlTemplate.Triggers>
+                                                                                    </ControlTemplate>
+                                                                                </Button.Template>
+                                                                            </Button>
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+                                                        </StackPanel>
+                                                    </Border>
+                                                    </StackPanel>
                                                 </Border>
 
                                                 <!-- Linha Inferior: Carga & Ação na Escala -->
@@ -273,6 +322,7 @@
                     <utils:FlightMapControl AircraftLat="{Binding Latitude}" 
                                             AircraftLon="{Binding Longitude}"
                                             RouteLegs="{Binding RouteLegs}"
+                                            ContractMissions="{Binding ContractMissions}"
                                             DestLat="{Binding DestLat}" 
                                             DestLon="{Binding DestLon}"
                                             OriginIcao="{Binding HangarAircraftLocation}"

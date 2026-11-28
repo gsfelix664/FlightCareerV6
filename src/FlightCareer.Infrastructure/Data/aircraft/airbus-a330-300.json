@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 6,
+  "id": "Airbus A330-300",
+  "class": "Jet",
+  "engineCount": 2,
+  "features": [
+    "antiskid",
+    "apu",
+    "autopilot",
+    "bleedAir",
+    "bleedAntiIce",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "galley",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "jet",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "ptu",
+    "rat",
+    "retractableGear",
+    "slats",
+    "spoilers",
+    "thsTrim",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 330.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: VMO 330 KIAS / MMO 0,86 (Airbus A330, valor típico)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:1",
+      "value": 240.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: CONF 1: 240 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:2",
+      "value": 196.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: CONF 2: 196 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:3",
+      "value": 186.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: CONF 3: 186 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "vfe:4",
+      "value": 180.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: FULL: 180 KIAS",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 400.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Jet (400 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: RR Trent 772B (TGT)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 160.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: RR Trent 772B (TGT)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 900.0,
+      "unit": "celsius",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: RR Trent 772B (TGT)",
+      "notes": null
+    }
+  ]
+}

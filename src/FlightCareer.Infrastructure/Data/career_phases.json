@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Escola de aviação / aeroclube",
+      "shortName": "Fase 1: Escola / Aeroclube",
+      "entryLevel": 1,
+      "minHours": 0.0,
+      "promotionCost": 0.0,
+      "licenseDisplay": "Piloto Privado (PPL)",
+      "badgeColor": "#3B82F6",
+      "operationalDescription": "Formação inicial, voos de instrução, navegações e cheques de aeroclube em aeronaves monomotoras leves."
+    },
+    {
+      "phase": 2,
+      "name": "Serviços aéreos especializados (SAE)",
+      "shortName": "Fase 2: SAE & Carga Leve",
+      "entryLevel": 6,
+      "minHours": 40.0,
+      "promotionCost": 35000.0,
+      "licenseDisplay": "Piloto Comercial (CPL)",
+      "badgeColor": "#10B981",
+      "operationalDescription": "Trabalho aéreo remunerado, logística de fazenda/sede, apoio agrícola e desafios em pistas não pavimentadas."
+    },
+    {
+      "phase": 3,
+      "name": "Táxi aéreo e carga leve",
+      "shortName": "Fase 3: Táxi Aéreo & Charter",
+      "entryLevel": 13,
+      "minHours": 150.0,
+      "promotionCost": 120000.0,
+      "licenseDisplay": "IFR e Multimotor (MLTE)",
+      "badgeColor": "#F59E0B",
+      "operationalDescription": "Fretamento executivo regional, transporte de passageiros sob demanda, cargas expressas e peças AOG."
+    },
+    {
+      "phase": 4,
+      "name": "Executiva de alta performance e MEDEVAC",
+      "shortName": "Fase 4: Executiva & MEDEVAC",
+      "entryLevel": 21,
+      "minHours": 300.0,
+      "promotionCost": 300000.0,
+      "licenseDisplay": "Type Rating Turboélice/Jato Leve e RVSM",
+      "badgeColor": "#06B6D4",
+      "operationalDescription": "Operações aeromédicas críticas, remoção de urgência, transporte VIP corporativo e voos diplomáticos em alta altitude."
+    },
+    {
+      "phase": 5,
+      "name": "Regional (commuter)",
+      "shortName": "Fase 5: Linha Regional",
+      "entryLevel": 29,
+      "minHours": 500.0,
+      "promotionCost": 500000.0,
+      "licenseDisplay": "ATPL — Fase Regional",
+      "badgeColor": "#8B5CF6",
+      "operationalDescription": "Linhas regionais regulares, conexões entre hubs e cidades do interior em aeronaves turboélice de grande porte e jatos regionais."
+    },
+    {
+      "phase": 6,
+      "name": "Linha aérea doméstica (narrowbody)",
+      "shortName": "Fase 6: Linha Doméstica",
+      "entryLevel": 37,
+      "minHours": 1000.0,
+      "promotionCost": 1200000.0,
+      "licenseDisplay": "ATPL + Type Rating",
+      "badgeColor": "#EC4899",
+      "operationalDescription": "Rotas troncais domésticas de alta densidade, pontes aéreas e voos cargueiros pesados em aeronaves narrowbody (A320/B737)."
+    },
+    {
+      "phase": 7,
+      "name": "Companhia internacional (widebody)",
+      "shortName": "Fase 7: Internacional / Long Haul",
+      "entryLevel": 45,
+      "minHours": 1500.0,
+      "promotionCost": 2000000.0,
+      "licenseDisplay": "Type Rating Widebody + ETOPS",
+      "badgeColor": "#E11D48",
+      "operationalDescription": "Travessias intercontinentais, operações ETOPS de longo alcance e malha global em aeronaves widebody (B777/B787/A330)."
+    }
+  ]
+}

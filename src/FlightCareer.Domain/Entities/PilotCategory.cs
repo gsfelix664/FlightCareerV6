@@ -1,5 +1,8 @@
+using System;
+
 namespace FlightCareer.Domain.Entities
 {
+    [Obsolete("Utilize CareerPhase (as 7 fases da carreira substituem as antigas 5 categorias)")]
     public enum PilotCategory
     {
         Category1_FlightSchool = 1,  // CIAC / Aeroclube - Instrução de Alunos (PP/PC/INVA)
@@ -9,7 +12,8 @@ namespace FlightCareer.Domain.Entities
         Category5_MajorAirline = 5   // Grande Linha Aérea Regular
     }
 
-    // Enum mantido para compatibilidade com código existente
+    // Enum mantido para compatibilidade com código legado
+    [Obsolete("Utilize CareerPhase")]
     public enum CompanyTier
     {
         Tier1_FlightSchool = 1,
@@ -88,10 +92,10 @@ namespace FlightCareer.Domain.Entities
         {
             return currentCategory switch
             {
-                PilotCategory.Category1_FlightSchool => 2500,     // Formação Básica e Prática
-                PilotCategory.Category2_SAE => 12000,             // Proficiência Comercial
-                PilotCategory.Category3_AirTaxi => 45000,         // Experiência em Rotas e Gestão
-                PilotCategory.Category4_Regional => 150000,       // Alta Performance e Precisão IFR
+                PilotCategory.Category1_FlightSchool => 10000,    // Formação Básica e Prática
+                PilotCategory.Category2_SAE => 45000,            // Proficiência Comercial
+                PilotCategory.Category3_AirTaxi => 175000,       // Experiência em Rotas e Gestão
+                PilotCategory.Category4_Regional => 600000,      // Alta Performance e Precisão IFR
                 _ => 0
             };
         }

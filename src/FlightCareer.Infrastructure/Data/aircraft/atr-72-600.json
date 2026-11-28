@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 9,
+  "id": "ATR 72-600",
+  "class": "Turboprop",
+  "engineCount": 2,
+  "features": [
+    "antiskid",
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "convertibleCabin",
+    "deIceBoots",
+    "fadec",
+    "fireProtection",
+    "fms",
+    "galley",
+    "glassCockpit",
+    "hydraulicGear",
+    "iceDetector",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "spoilers",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [],
+    "atcModel": []
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 250.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 185.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 150.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PW127M (ITT de decolagem com boost)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 125.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 800.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 85.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 113.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.55,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 170.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 170.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 2.5,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.0,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara ATR 72-600 FCOM / AFM (P&WC PW127M); não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 179.0,
+      "unit": "knots",
+      "source": "ClassDefault",
+      "reference": "estimativa — Va = Vs1·√n (n=2.5); atualizar pelo POH",
+      "notes": null
+    }
+  ]
+}

@@ -1,0 +1,349 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using FlightCareer.Domain.Sensors;
+using Xunit;
+
+namespace FlightCareer.Tests.Sensors
+{
+    public class SensorRegistryTests
+    {
+        [Fact]
+        public void Registry_RealFiles_Load_WithoutErrors()
+        {
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            Assert.NotNull(context);
+            Assert.NotEmpty(context.Sensors);
+
+            Assert.NotNull(sensors);
+            Assert.NotEmpty(sensors.Sensors);
+        }
+
+        [Fact]
+        public void Registry_Keys_AreUniqueAcrossBothFiles()
+        {
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            var allKeys = context.Sensors
+                .Concat(sensors.Sensors)
+                .Select(s => s.Key)
+                .ToList();
+
+            var duplicates = allKeys
+                .GroupBy(k => k, StringComparer.Ordinal)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
+            Assert.True(duplicates.Count == 0, $"Chaves duplicadas entre context e sensors: {string.Join(", ", duplicates)}");
+        }
+
+        [Fact]
+        public void Registry_EveryEntry_HasUnitAndGroup()
+        {
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            foreach (var s in context.Sensors.Concat(sensors.Sensors))
+            {
+                Assert.False(string.IsNullOrWhiteSpace(s.Unit), $"Sensor '{s.Key}' possui unidade vazia.");
+                Assert.False(string.IsNullOrWhiteSpace(s.Group), $"Sensor '{s.Key}' possui grupo vazio.");
+                Assert.Equal(s.Unit.ToLowerInvariant(), s.Unit);
+            }
+        }
+
+        [Fact]
+        public void Registry_EveryUnit_IsKnownSimConnectUnit()
+        {
+            var knownUnits = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "amperes",
+                "bool",
+                "celsius",
+                "degrees",
+                "enum",
+                "feet",
+                "feet per second",
+                "feet per second squared",
+                "foot pound",
+                "gallons",
+                "gforce",
+                "inhg",
+                "kelvin",
+                "knots",
+                "kpa",
+                "mach",
+                "mask",
+                "number",
+                "percent",
+                "percent over 100",
+                "position",
+                "position 32k",
+                "pound-force per square foot",
+                "pounds",
+                "pounds per hour",
+                "psf",
+                "psi",
+                "radians",
+                "ratio",
+                "rpm",
+                "string",
+                "volts"
+            };
+
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            foreach (var s in context.Sensors.Concat(sensors.Sensors))
+            {
+                Assert.True(knownUnits.Contains(s.Unit), $"Sensor '{s.Key}' possui unidade não reconhecida pelo SimConnect: '{s.Unit}'.");
+            }
+        }
+
+        [Fact]
+        public void Registry_ContainsEverySimVarFromInventory()
+        {
+            var inventoryPath = FindInventoryPath();
+            var expectedSimVars = ExtractSimVarsFromInventory(inventoryPath);
+
+            Assert.NotEmpty(expectedSimVars);
+
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            var registeredSimVars = context.Sensors
+                .Concat(sensors.Sensors)
+                .Select(s => s.SimVar)
+                .ToHashSet(StringComparer.Ordinal);
+
+            var missing = expectedSimVars.Except(registeredSimVars).ToList();
+
+            Assert.True(missing.Count == 0, $"SimVars do inventário ausentes no registro: {string.Join(", ", missing)}");
+        }
+
+        [Fact]
+        public void Registry_NoSimVarOutsideInventory()
+        {
+            var inventoryPath = FindInventoryPath();
+            var expectedSimVars = ExtractSimVarsFromInventory(inventoryPath);
+
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            var registeredSimVars = context.Sensors
+                .Concat(sensors.Sensors)
+                .Select(s => s.SimVar)
+                .ToHashSet(StringComparer.Ordinal);
+
+            var extra = registeredSimVars.Except(expectedSimVars).ToList();
+
+            Assert.True(extra.Count == 0, $"SimVars no registro que não constam no inventário: {string.Join(", ", extra)}");
+        }
+
+        [Fact]
+        public void Registry_NoSimVarHasPlaceholderOrSlash()
+        {
+            var context = SensorRegistry.LoadDefault("context_registry.json");
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+
+            foreach (var s in context.Sensors.Concat(sensors.Sensors))
+            {
+                Assert.DoesNotContain("/", s.SimVar);
+                Assert.DoesNotContain("<", s.SimVar);
+                Assert.DoesNotContain(">", s.SimVar);
+                Assert.DoesNotContain("...", s.SimVar);
+            }
+        }
+
+        [Fact]
+        public void Validate_DuplicateKey_Throws()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "eng-rpm", "simVar": "GENERAL ENG RPM", "unit": "rpm", "group": "piston", "perEngine": true },
+                { "key": "eng-rpm", "simVar": "PROP RPM", "unit": "rpm", "group": "piston", "perEngine": true }
+              ]
+            }
+            """;
+
+            var ex = Assert.Throws<InvalidDataException>(() => SensorRegistry.FromJson(json));
+            Assert.Contains("duplicada", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Validate_SimVarWithIndexSuffix_Throws()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "eng-rpm", "simVar": "GENERAL ENG RPM:1", "unit": "rpm", "group": "piston", "perEngine": true }
+              ]
+            }
+            """;
+
+            var ex = Assert.Throws<InvalidDataException>(() => SensorRegistry.FromJson(json));
+            Assert.Contains(":", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Validate_FixedIndexOnNonPerEngineSensor_IsAllowed()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "nw-level-28", "simVar": "WEAR AND TEAR LEVEL:28", "unit": "percent over 100", "group": "native-wear", "perEngine": false }
+              ]
+            }
+            """;
+
+            var registry = SensorRegistry.FromJson(json);
+            Assert.Equal("WEAR AND TEAR LEVEL:28", Assert.Single(registry.Sensors).SimVar);
+        }
+
+        [Fact]
+        public void Validate_EmptyUnit_Throws()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "eng-rpm", "simVar": "GENERAL ENG RPM", "unit": "", "group": "piston", "perEngine": true }
+              ]
+            }
+            """;
+
+            var ex = Assert.Throws<InvalidDataException>(() => SensorRegistry.FromJson(json));
+            Assert.Contains("Unidade", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Validate_InvalidKeyFormat_Throws()
+        {
+            const string json = """
+            {
+              "sensors": [
+                { "key": "eng_rpm_invalid", "simVar": "GENERAL ENG RPM", "unit": "rpm", "group": "piston", "perEngine": true }
+              ]
+            }
+            """;
+
+            var ex = Assert.Throws<InvalidDataException>(() => SensorRegistry.FromJson(json));
+            Assert.Contains("kebab-case", ex.Message, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Registry_NativeWear_HasFourVarsPerComponentId()
+        {
+            var sensors = SensorRegistry.LoadDefault("sensor_registry.json");
+            var nativeWear = sensors.Sensors.Where(s => s.Group == "native-wear").ToList();
+
+            // Deve ter 46 IDs conhecidos (0..14 e 19..49)
+            var expectedIds = Enumerable.Range(0, 15).Concat(Enumerable.Range(19, 31)).ToList();
+            Assert.Equal(46, expectedIds.Count);
+
+            foreach (var id in expectedIds)
+            {
+                var level = nativeWear.FirstOrDefault(s => s.Key == $"nw-level-{id}");
+                var isWeak = nativeWear.FirstOrDefault(s => s.Key == $"nw-is-weak-{id}");
+                var isFailed = nativeWear.FirstOrDefault(s => s.Key == $"nw-is-failed-{id}");
+                var overstress = nativeWear.FirstOrDefault(s => s.Key == $"nw-overstress-rate-{id}");
+
+                Assert.NotNull(level);
+                Assert.Equal($"WEAR AND TEAR LEVEL:{id}", level.SimVar);
+                Assert.Equal("percent over 100", level.Unit);
+
+                Assert.NotNull(isWeak);
+                Assert.Equal($"WEAR AND TEAR IS WEAK:{id}", isWeak.SimVar);
+                Assert.Equal("bool", isWeak.Unit);
+
+                Assert.NotNull(isFailed);
+                Assert.Equal($"WEAR AND TEAR IS FAILED:{id}", isFailed.SimVar);
+                Assert.Equal("bool", isFailed.Unit);
+
+                Assert.NotNull(overstress);
+                Assert.Equal($"WEAR AND TEAR OVERSTRESS DAMAGE RATE:{id}", overstress.SimVar);
+                Assert.Equal("percent over 100", overstress.Unit);
+            }
+
+            // Garante que nenhum ID de 15 a 18 existe
+            for (int missingId = 15; missingId <= 18; missingId++)
+            {
+                Assert.DoesNotContain(nativeWear, s => s.Key.EndsWith($"-{missingId}", StringComparison.Ordinal));
+                Assert.DoesNotContain(nativeWear, s => s.SimVar.EndsWith($":{missingId}", StringComparison.Ordinal));
+            }
+
+            // Confere também as duas expostas
+            Assert.Contains(nativeWear, s => s.Key == "nw-exposed-level" && s.SimVar == "WEAR AND TEAR EXPOSED PARTS LEVEL");
+            Assert.Contains(nativeWear, s => s.Key == "nw-exposed-lowest-level" && s.SimVar == "WEAR AND TEAR EXPOSED PARTS LOWEST LEVEL");
+
+            // Total no grupo native-wear: 46 * 4 + 2 = 186
+            Assert.Equal(186, nativeWear.Count);
+        }
+
+        private static string FindInventoryPath()
+        {
+            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+            while (dir != null)
+            {
+                var candidate = Path.Combine(dir.FullName, "docs", "plans", "sensor-inventory.md");
+                if (File.Exists(candidate))
+                    return candidate;
+                dir = dir.Parent;
+            }
+
+            throw new FileNotFoundException("docs/plans/sensor-inventory.md não encontrado subindo a partir de AppContext.BaseDirectory.");
+        }
+
+        private static HashSet<string> ExtractSimVarsFromInventory(string inventoryPath)
+        {
+            var lines = File.ReadAllLines(inventoryPath);
+            var simVars = new HashSet<string>(StringComparer.Ordinal);
+
+            int currentSection = 0;
+            var sectionHeaderRegex = new Regex(@"^##\s+(\d+)\.", RegexOptions.Compiled);
+            var backtickRegex = new Regex(@"`([^`]+)`", RegexOptions.Compiled);
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine.Trim();
+                var secMatch = sectionHeaderRegex.Match(line);
+                if (secMatch.Success)
+                {
+                    currentSection = int.Parse(secMatch.Groups[1].Value);
+                    continue;
+                }
+
+                if (currentSection < 1 || currentSection > 13)
+                    continue;
+
+                if (!line.StartsWith('|') || line.StartsWith("|---") || line.StartsWith("| SimVar"))
+                    continue;
+
+                var columns = line.Split('|', StringSplitOptions.TrimEntries);
+                if (columns.Length < 3)
+                    continue;
+
+                var simVarColumn = columns[1];
+                var matches = backtickRegex.Matches(simVarColumn);
+                foreach (Match match in matches)
+                {
+                    var rawSimVar = match.Groups[1].Value;
+                    var clean = rawSimVar.Replace(":N", "", StringComparison.Ordinal)
+                                         .Replace("✅", "", StringComparison.Ordinal)
+                                         .Trim();
+                    if (!string.IsNullOrEmpty(clean))
+                    {
+                        simVars.Add(clean);
+                    }
+                }
+            }
+
+            return simVars;
+        }
+    }
+}

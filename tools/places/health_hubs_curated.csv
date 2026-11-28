@@ -1,0 +1,260 @@
+icao,cc,note,tags
+SBSP,BR,Maior hub de UTIs aéreas e transporte de órgãos do Brasil,uti_aerea|orgaos|hospital_referencia
+SBMT,BR,Base de helicópteros UTI e resgate urbano,uti_aerea|resgate
+SBGR,BR,Repatriações médicas internacionais e órgãos em voos comerciais,repatriacao|orgaos
+SBJD,BR,Hangares e manutenção de aeronaves de UTI aérea,base_operador
+SBJR,BR,"Táxi aeromédico, helicópteros UTI e evacuação offshore",uti_aerea|offshore
+SBRJ,BR,Acesso rápido aos grandes hospitais da Zona Sul,hospital_referencia
+SBBH,BR,Base de operações aéreas e UTI aérea de Minas Gerais,uti_aerea|base_operador
+SBCF,BR,Transporte urgente de órgãos para transplantes,orgaos
+SBBI,BR,Remoção aeromédica e transporte de órgãos do Paraná,uti_aerea|orgaos
+SBPA,BR,Centros de referência em transplantes,orgaos|hospital_referencia
+SBBR,BR,Transporte nacional de órgãos (FAB e SAMU),orgaos|governo
+SBRF,BR,Polo médico e de transplantes do Nordeste,orgaos|hospital_referencia
+SBSV,BR,Remoção aeromédica e resgate da Bahia,uti_aerea
+SBFZ,BR,Referência nordestina em transplantes,orgaos|hospital_referencia
+SBEG,BR,Evacuação aeromédica da Amazônia Ocidental,medevac_remoto|amazonia
+SBBE,BR,Hub aeromédico da Amazônia Oriental,medevac_remoto|amazonia
+SBPV,BR,UTI aérea para Rondônia e sul do Amazonas,uti_aerea|medevac_remoto
+SBRB,BR,Evacuação aeromédica de urgência no Acre,medevac_remoto
+SBBV,BR,Apoio aeromédico e missões humanitárias em Roraima,medevac_remoto|humanitario
+SBMQ,BR,Transferências aeromédicas do Amapá,uti_aerea
+SBCY,BR,Remoção aeromédica do interior de Mato Grosso,uti_aerea|medevac_remoto
+SBCG,BR,Resgate aeromédico do Pantanal,medevac_remoto
+SBGO,BR,Polo de referência médica do Centro-Oeste,hospital_referencia
+SBRP,BR,Hub médico do interior paulista,hospital_referencia
+SBSR,BR,Polo de transplantes e cardiologia do interior paulista,orgaos|hospital_referencia
+SDAM,BR,Acesso ao hospital universitário de Campinas,hospital_referencia
+SBFL,BR,Transporte de órgãos e resgate aéreo catarinense,orgaos|resgate
+SBVT,BR,Hub aeromédico e offshore do Espírito Santo,uti_aerea|offshore
+SBSL,BR,Partida de UTIs aéreas do Maranhão,uti_aerea
+SBTE,BR,Polo médico regional do Piauí,hospital_referencia
+SBSG,BR,Remoção aeromédica do Rio Grande do Norte,uti_aerea
+SBJU,BR,Resgate aeromédico no interior nordestino,resgate
+SBTF,BR,Ponto intermediário de evacuação no Médio Solimões,medevac_remoto|amazonia
+KHOU,US,Portal do maior complexo médico do mundo,hospital_referencia
+KEFD,US,Evacuação médica e medicina aeroespacial,resgate
+KRST,US,Aeroporto da Mayo Clinic,hospital_referencia|repatriacao
+KBKL,US,Aeroporto urbano perto da Cleveland Clinic,hospital_referencia
+KBOS,US,Hubs hospitalares de Boston,hospital_referencia
+KBED,US,Hubs hospitalares de Boston,hospital_referencia
+KBWI,US,Portal para o Johns Hopkins,hospital_referencia
+KTEB,US,Chegada de ambulâncias aéreas internacionais em Nova York,repatriacao
+KOPF,US,Maior hub de repatriações médicas das Américas,repatriacao|base_operador
+KFXE,US,Base de operadores de ambulância aérea,base_operador
+KPHX,US,Hubs médicos do Arizona,hospital_referencia
+KSDL,US,Hubs médicos do Arizona,hospital_referencia
+KDAL,US,Hub médico do norte do Texas,hospital_referencia
+KSAT,US,Evacuação aeromédica militar e queimados,militar|hospital_referencia
+KSKF,US,Evacuação aeromédica militar,militar
+KDEN,US,Hub aeromédico das Montanhas Rochosas,uti_aerea
+KAPA,US,Hub aeromédico das Montanhas Rochosas,uti_aerea
+KSLC,US,Hub central de resgate aeromédico de seis estados,uti_aerea|resgate
+KBFI,US,Evacuações médicas do Alasca e Noroeste Pacífico,uti_aerea|medevac_remoto
+PANC,US,Evacuação aeromédica de vilas isoladas do Alasca,medevac_remoto|artico
+PAFA,US,Ambulância aérea do interior e Ártico do Alasca,medevac_remoto|artico
+PABE,US,Voos médicos constantes de King Air e Caravan,medevac_remoto|bush
+PAOT,US,Base aeromédica acima do Círculo Polar,medevac_remoto|artico
+PHNL,US,Evacuação médica interinsular do Pacífico,uti_aerea|interilhas
+PHKO,US,Transferência de pacientes da Big Island,interilhas
+PHTO,US,Transferência de pacientes da Big Island,interilhas
+KMEM,US,Portal para hospital pediátrico de referência,hospital_referencia
+KBNA,US,Hub para centro médico universitário,hospital_referencia
+KRDU,US,Hub médico do Research Triangle,hospital_referencia
+KDTW,US,Acesso a sistema de saúde universitário,hospital_referencia
+KARB,US,Acesso a sistema de saúde universitário,hospital_referencia
+KPIT,US,Centro global de transplantes de órgãos,orgaos|hospital_referencia
+KORD,US,Hubs hospitalares de Chicago,hospital_referencia
+KPWK,US,Hubs hospitalares de Chicago,hospital_referencia
+KSDF,US,Hub aeromédico e de trauma,uti_aerea
+KABQ,US,Transferências médicas do sudoeste,uti_aerea
+CYTZ,CA,Base principal da maior ambulância aérea do Canadá,uti_aerea|base_operador
+CYYZ,CA,Repatriação aeromédica internacional do Canadá,repatriacao
+CYVR,CA,Base dos serviços de emergência da Colúmbia Britânica,uti_aerea
+CYYC,CA,Bases de ambulância aérea de Alberta,uti_aerea
+CYEG,CA,Bases de ambulância aérea de Alberta,uti_aerea
+CYWG,CA,Evacuação médica do norte de Manitoba e Nunavut,medevac_remoto
+CYQT,CA,Base de ambulância aérea do norte de Ontário,medevac_remoto
+CYFB,CA,Evacuação aeromédica do Ártico oriental canadense,medevac_remoto|artico
+CYZF,CA,Medevac ártico,medevac_remoto|artico
+CYHZ,CA,Ambulância aérea das Províncias Marítimas,uti_aerea
+CYYT,CA,Resgate aeromédico do Atlântico Norte e offshore,resgate|offshore
+MMTO,MX,Base de ambulâncias aéreas da Cidade do México,base_operador
+MMMY,MX,Polo médico e de transplantes do norte mexicano,orgaos|hospital_referencia
+MMGL,MX,Hub médico do oeste do México,hospital_referencia
+MMUN,MX,Evacuação aeromédica de turistas para os EUA,repatriacao
+KCRQ,US,Transferência médica transfronteiriça,repatriacao
+KSAN,US,Transferência médica transfronteiriça,repatriacao
+KELP,US,Emergências médicas na fronteira,uti_aerea
+SKBO,CO,Principal hub médico da América Latina,hospital_referencia
+SKRG,CO,Referência em transplantes e cirurgia cardiovascular,orgaos|hospital_referencia
+SKCL,CO,Referência médica do Pacífico colombiano,hospital_referencia
+SABE,AR,Bases de ambulância aérea do Cone Sul,uti_aerea
+SADF,AR,Bases de ambulância aérea do Cone Sul,base_operador
+SCEL,CL,Bases de resgate andino e patagônico,uti_aerea
+SCTB,CL,Bases de resgate andino e patagônico,base_operador
+SCCI,CL,Evacuação aeromédica da Antártida,medevac_remoto|polar
+SAWH,AR,Apoio aeromédico a navios antárticos,medevac_remoto|polar
+SPJC,PE,Evacuação médica dos Andes e Amazônia peruana,uti_aerea|medevac_remoto
+SPQT,PE,Resgate aeromédico da selva peruana,medevac_remoto|amazonia
+MPTO,PA,Hub médico regional da América Central,hospital_referencia
+MPMG,PA,Hub médico regional da América Central,base_operador
+MROC,CR,Turismo médico e evacuação da América Central,hospital_referencia|repatriacao
+TJSJ,PR,Principal hub médico e de trauma do Caribe,hospital_referencia
+TJIG,PR,Principal hub médico e de trauma do Caribe,base_operador
+MYNN,BS,Evacuação aeromédica das ilhas das Bahamas,medevac_remoto|interilhas
+TFFR,GP,Centro hospitalar universitário do Caribe Francês,hospital_referencia
+TFFF,MQ,Hub aeromédico do sul do Caribe Francês,uti_aerea
+TNCC,CW,Transferência médica das Antilhas Holandesas,uti_aerea
+SUMU,UY,Repatriação e transferências médicas do Uruguai,repatriacao
+SEGS,EC,Evacuação aeromédica de Galápagos,medevac_remoto|interilhas
+SCIP,CL,Evacuação médica de longuíssimo alcance no Pacífico Sul,medevac_remoto|longa_distancia
+SLVR,BO,Transferência médica internacional da Bolívia,repatriacao
+LSZH,CH,Base principal da guarda aérea suíça de resgate,uti_aerea|base_operador|repatriacao
+LSGG,CH,Hub médico e hospitais universitários de Genebra,hospital_referencia
+LFSB,FR,Transporte de medicamentos biológicos e órgãos,orgaos|farma
+EDDN,DE,Sede da maior frota de ambulâncias aéreas da Europa,base_operador|repatriacao
+EDDK,DE,Evacuação médica governamental e militar,militar|repatriacao
+EDDM,DE,Hub médico e de transplantes do sul da Alemanha,orgaos|hospital_referencia
+EDDV,DE,Maior centro de transplantes pulmonares da Europa,orgaos|hospital_referencia
+EDDF,DE,Repatriações médicas intercontinentais,repatriacao
+EDDB,DE,Hospital universitário de referência mundial,hospital_referencia
+EGLF,GB,Entrada de ambulâncias aéreas para Londres,repatriacao
+EGKB,GB,Entrada de ambulâncias aéreas para Londres,repatriacao
+EGLL,GB,Órgãos e células-tronco em voos comerciais,orgaos
+EGPD,GB,Resgate médico offshore do Mar do Norte,resgate|offshore
+EGPH,GB,Ambulância aérea das ilhas escocesas,medevac_remoto|interilhas
+EGPF,GB,Ambulância aérea das ilhas escocesas,medevac_remoto|interilhas
+EGPC,GB,Evacuação médica do extremo norte britânico,medevac_remoto
+EGPB,GB,Evacuação médica de Shetland,medevac_remoto|interilhas
+LFPB,FR,Principal hub de ambulâncias aéreas e órgãos da França,uti_aerea|orgaos
+LFLL,FR,Centro europeu de transplantes,orgaos|hospital_referencia
+LFMN,FR,Hub aeromédico da Riviera e Mônaco,uti_aerea
+LIML,IT,Principal portal médico do norte da Itália,hospital_referencia
+LIRA,IT,Voos médicos de emergência e órgãos (força aérea),orgaos|militar
+LIPE,IT,Referência ortopédica e transplantes,orgaos|hospital_referencia
+LEMD,ES,Hub da organização nacional de transplantes,orgaos
+LETO,ES,Hub da organização nacional de transplantes,orgaos|militar
+LEBL,ES,Polo médico catalão,hospital_referencia
+GCLP,ES,Evacuação interinsular das Canárias,medevac_remoto|interilhas
+GCXO,ES,Evacuação interinsular das Canárias,medevac_remoto|interilhas
+LPPD,PT,Evacuação médica no Atlântico (Açores),medevac_remoto|interilhas
+LPLA,PT,Evacuação médica no Atlântico (Açores),medevac_remoto|militar
+LPMA,PT,Transferência aeromédica para Lisboa,uti_aerea|interilhas
+LPPT,PT,Emergência médica nacional e transplantes,orgaos|uti_aerea
+LPCS,PT,Emergência médica nacional,base_operador
+LOWI,AT,Hub mundial de trauma alpino e resgate em montanha,resgate|montanha
+LOWW,AT,Polo médico da Europa Central,hospital_referencia|orgaos
+EHAM,NL,Hubs médicos dos Países Baixos,hospital_referencia
+EHRD,NL,Hubs médicos dos Países Baixos,hospital_referencia
+EBBR,BE,Repatriações médicas europeias,repatriacao|militar
+ENTC,NO,Principal hub aeromédico do Ártico europeu,medevac_remoto|artico|hospital_referencia
+ENBO,NO,Base central da ambulância aérea norueguesa,uti_aerea|base_operador
+ENSB,NO,Evacuação médica polar,medevac_remoto|polar
+ENGM,NO,Centro nacional de transplantes da Noruega,orgaos
+ESSA,SE,Bases de ambulância aérea sueca,uti_aerea
+ESSB,SE,Bases de ambulância aérea sueca,base_operador
+ESPA,SE,Bases médicas da Lapônia sueca,medevac_remoto|artico
+ESNU,SE,Bases médicas da Lapônia sueca,medevac_remoto|artico
+EFHK,FI,Polo médico nórdico,hospital_referencia
+EFRO,FI,Evacuação médica do norte da Finlândia,medevac_remoto|artico
+EFOU,FI,Evacuação médica do norte da Finlândia,medevac_remoto
+EKCH,DK,Hospital de referência e evacuações da Groenlândia e Faroé,hospital_referencia
+BGSF,GL,Evacuação aeromédica da Groenlândia,medevac_remoto|artico
+BGGH,GL,Evacuação aeromédica da Groenlândia,medevac_remoto|artico
+BIRK,IS,Resgate marítimo e médico do Atlântico Norte,resgate
+BIKF,IS,Resgate marítimo e médico do Atlântico Norte,resgate
+EKVG,FO,Transferência aeromédica para a Dinamarca,medevac_remoto
+EPWA,PL,Sede da ambulância aérea polonesa,uti_aerea
+EPBC,PL,Sede da ambulância aérea polonesa,base_operador
+LKPR,CZ,Polo médico da Europa Central,hospital_referencia
+LHBP,HU,Hub aeromédico húngaro,uti_aerea
+LGAV,GR,Evacuação médica das ilhas do Egeu,medevac_remoto|interilhas
+LGEL,GR,Evacuação médica das ilhas do Egeu (força aérea),militar
+LTFM,TR,Turismo médico e repatriações internacionais,repatriacao
+LTBA,TR,Turismo médico e repatriações internacionais,repatriacao
+LTAC,TR,Frota de aviões-ambulância do Ministério da Saúde,uti_aerea|governo
+EIDW,IE,Evacuação médica da costa oeste irlandesa,uti_aerea
+EICM,IE,Evacuação médica das ilhas Aran,medevac_remoto
+LMML,MT,Ambulâncias aéreas no Mediterrâneo e Norte da África,base_operador
+OMDB,AE,Maiores hubs de ambulância aérea do Oriente Médio,uti_aerea|hospital_referencia
+OMDW,AE,Maiores hubs de ambulância aérea do Oriente Médio,base_operador
+OMAD,AE,Acesso a hospitais de referência de Abu Dhabi,hospital_referencia
+OMAA,AE,Acesso a hospitais de referência de Abu Dhabi,hospital_referencia
+OERK,SA,Hospital de referência em transplantes,orgaos|hospital_referencia
+OEJN,SA,Emergências da peregrinação,uti_aerea
+OTHH,QA,Hub médico de Doha,hospital_referencia
+LLBG,IL,Portal para centro médico de referência mundial,hospital_referencia
+OJAI,JO,Principal destino médico do Oriente Médio,hospital_referencia
+FAOR,ZA,Maior hub de ambulância aérea da África Subsaariana,uti_aerea|base_operador
+FALA,ZA,Maior hub de ambulância aérea da África Subsaariana,base_operador
+FACT,ZA,Polo médico histórico,hospital_referencia
+HKJK,KE,Médicos voadores da África Oriental,medevac_remoto
+HKNW,KE,Sede dos médicos voadores da África Oriental,medevac_remoto|base_operador
+HTKJ,TZ,Resgate de alpinistas e safáris,resgate|safari
+HTAR,TZ,Resgate de alpinistas e safáris,resgate|safari
+FBMN,BW,Evacuação médica de safáris no Okavango,medevac_remoto|safari
+FYWH,NA,Evacuações no deserto da Namíbia,medevac_remoto
+HAAB,ET,Hub humanitário e médico do Chifre da África,humanitario|hospital_referencia
+GOBD,SN,Evacuação médica da África Ocidental francófona,uti_aerea
+DGAA,GH,Base médica regional da África Ocidental,uti_aerea
+HECA,EG,Polo hospitalar do Norte da África,hospital_referencia
+GMMN,MA,Repatriações médicas entre África e Europa,repatriacao
+FIMP,MU,Evacuação médica do Oceano Índico,medevac_remoto|interilhas
+FMEE,RE,Centro hospitalar universitário do Índico,hospital_referencia
+FSIA,SC,Transferência aeromédica insular,medevac_remoto|interilhas
+WSSS,SG,Maior hub médico e de transplantes da Ásia,orgaos|hospital_referencia
+WSSL,SG,Base de ambulância aérea de Singapura,base_operador
+VTBS,TH,Turismo médico e evacuação regional,hospital_referencia|repatriacao
+VTBD,TH,Turismo médico e evacuação regional,base_operador
+VHHH,HK,Hub médico e resgate marítimo,hospital_referencia|resgate
+RJTT,JP,Portal para centros de emergência japoneses,hospital_referencia
+ROAH,JP,Transporte médico das ilhas de Okinawa,medevac_remoto|interilhas
+RJFK,JP,Evacuação médica das ilhas Amami e Yakushima,medevac_remoto|interilhas
+RKSI,KR,Centros de referência em oncologia e transplante hepático,orgaos|hospital_referencia
+RKSS,KR,Centros de referência em oncologia e transplante hepático,hospital_referencia
+RCTP,TW,Hospital de referência e evacuações das ilhas,hospital_referencia
+RCSS,TW,Hospital de referência e evacuações das ilhas,interilhas
+VOMM,IN,Maior polo de transplantes de coração e pulmão da Ásia,orgaos|hospital_referencia
+VIDP,IN,Portal para grandes hospitais de Nova Délhi,hospital_referencia
+VABB,IN,Hub médico do oeste indiano,hospital_referencia
+VOBL,IN,Polo de cardiologia pediátrica,hospital_referencia
+VOHS,IN,Grande hub médico e farmacêutico,hospital_referencia
+WMKK,MY,Hub médico do Sudeste Asiático,hospital_referencia
+WMSA,MY,Hub médico do Sudeste Asiático,base_operador
+WADD,ID,Evacuação aeromédica de turistas,repatriacao
+RPLL,PH,Hub médico do arquipélago filipino,hospital_referencia
+VRMM,MV,Evacuação médica insular de resorts,medevac_remoto|interilhas
+VNLK,NP,Maior corredor de resgate em alta altitude,resgate|montanha
+VNKT,NP,Destino do resgate em alta altitude,hospital_referencia
+ZSPD,CN,Grandes centros médicos da China,hospital_referencia
+ZSSS,CN,Grandes centros médicos da China,hospital_referencia
+ZBAA,CN,Portal para hospital de referência de Pequim,hospital_referencia
+YSSY,AU,Bases do serviço de médicos voadores e ambulância aérea,uti_aerea
+YSBK,AU,Bases do serviço de médicos voadores e ambulância aérea,base_operador
+YMML,AU,Ambulância aérea de Victoria,uti_aerea
+YMEN,AU,Ambulância aérea de Victoria,base_operador
+YBBN,AU,Base de ambulância aérea de Queensland,uti_aerea
+YPPH,AU,Médicos voadores cobrindo o Outback ocidental,medevac_remoto
+YPJT,AU,Médicos voadores cobrindo o Outback ocidental,base_operador|medevac_remoto
+YPAD,AU,Sede histórica dos médicos voadores,medevac_remoto|base_operador
+YPDN,AU,Ambulância aérea do norte da Austrália,medevac_remoto
+YBAS,AU,Base central dos médicos voadores no deserto,medevac_remoto|bush
+YBCS,AU,Hub aeromédico do norte de Queensland e Estreito de Torres,medevac_remoto
+YBTL,AU,Resgate médico da Grande Barreira,resgate
+YBMK,AU,Resgate médico da Grande Barreira,resgate
+YBRM,AU,Base remota dos médicos voadores em Kimberley,medevac_remoto|bush
+YPKA,AU,Base remota dos médicos voadores em Pilbara,medevac_remoto
+YPPD,AU,Base remota dos médicos voadores em Pilbara,medevac_remoto
+AYPY,PG,Evacuação médica da Papua-Nova Guiné,medevac_remoto
+NZAA,NZ,Principal hub médico da Nova Zelândia,hospital_referencia
+NZWN,NZ,Ponte aérea médica entre as ilhas,uti_aerea
+NZCH,NZ,Hub médico da Ilha Sul e evacuações antárticas,hospital_referencia|polar
+NZDN,NZ,Polo médico universitário do sul,hospital_referencia
+NFFN,FJ,Evacuação aeromédica do Pacífico Sul,medevac_remoto|interilhas
+NFNA,FJ,Evacuação aeromédica do Pacífico Sul,medevac_remoto
+NWWW,NC,Hub hospitalar francês do Pacífico Sul,hospital_referencia
+NTAA,PF,Hospital de alta complexidade da Polinésia,hospital_referencia|interilhas
+PGUM,GU,Hub médico militar e civil da Micronésia,hospital_referencia|militar
+NVVV,VU,Partida de evacuações médicas para Austrália e Nova Zelândia,medevac_remoto
+AGGH,SB,Partida de evacuações médicas para Austrália e Nova Zelândia,medevac_remoto

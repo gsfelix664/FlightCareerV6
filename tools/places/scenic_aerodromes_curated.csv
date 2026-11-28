@@ -1,0 +1,105 @@
+icao,name,cc,note,attractions,role
+SBJR,Passeios aéreos do Rio de Janeiro,BR,"Principal ponto de partida para passeios aéreos sobre o Rio, com muitos helicópteros e monomotores em corredores visuais dedicados (REA).",Cristo Redentor|Pão de Açúcar|Lagoa Rodrigo de Freitas|Copacabana|Ipanema,panoramico
+SBFI,Voos panorâmicos de Foz do Iguaçu,BR,Voos curtos de 10 a 35 minutos sobre a tríplice fronteira.,Cataratas do Iguaçu|Parque Nacional do Iguaçu|Marco das Três Fronteiras|Itaipu,panoramico
+SBMT,Panorâmico urbano de São Paulo,BR,"Base tradicional de voos panorâmicos urbanos diurnos e noturnos, sob coordenação com o controle terminal.",Avenida Paulista|Parque Ibirapuera|Estádio do Morumbi|Ponte Octávio Frias de Oliveira|Serra da Cantareira,panoramico
+SSRS,Lençóis Maranhenses,BR,"Asa alta (Cessna 172, 182, 206) com ótima visibilidade lateral para fotografia.",Parque Nacional dos Lençóis Maranhenses|Rio Preguiças,panoramico
+SSCN,Serra Gaúcha,BR,Pista em altitude sujeita a mudanças rápidas do tempo; rotas estendidas até os cânions.,Cascata do Caracol|Parque Nacional de Aparados da Serra|Itaimbezinho,panoramico
+SBFN,Fernando de Noronha,BR,Operação insular com altitude mínima rígida sobre o parque marinho.,Morro Dois Irmãos|Baía do Sancho|Baía dos Porcos|Parque Nacional Marinho de Fernando de Noronha,panoramico
+SDAG,Costa Verde,BR,"Aproximação cercada por montanhas e mar, com tráfego intenso de helicópteros e monomotores.",Ilha Grande|Lagoa Azul|Saco do Mamanguá|Baía da Ilha Grande,panoramico
+SBDB,Bonito e Pantanal Sul,BR,"Táxi aéreo regional e fretados em Cessna 182, 206 e Grand Caravan.",Serra da Bodoquena|Gruta do Lago Azul|Rio da Prata|Abismo Anhumas,panoramico
+KGCN,Grand Canyon,US,"Corredores aéreos exclusivos (Special Flight Rules Area) com Caravan, Twin Otter e helicópteros.",Grand Canyon|Grand Canyon Village|Desert View Watchtower,panoramico
+PATK,Denali flightseeing,US,"Referência mundial em flightseeing glacial, com Beaver, Otter e Cessna 185 de esqui.",Denali|Ruth Glacier|Cordilheira do Alasca,panoramico
+PHOG,Maui,US,Helicópteros e monomotores em rotas costeiras e de vale sob ventos alísios constantes.,Haleakalā|Hana|West Maui Mountains|Molokai,panoramico
+NZQN,Queenstown,NZ,"Operação técnica em vale cercado por montanhas, com Caravan, PC-6 e Islander.",Milford Sound|Monte Aspiring|Lago Wakatipu,panoramico
+VNLK,Himalaia (Lukla),NP,"Pista curta e inclinada a 2.845 m, com Dornier 228, L-410 e Twin Otter.",Monte Everest|Ama Dablam|Lhotse|Khumbu,panoramico
+LFLJ,Courchevel e Mont Blanc,FR,"Altiporto com rampa de 18,6% sem arremetida possível; exige qualificação de montanha.",Mont Blanc|Les Trois Vallées|Méribel|Val Thorens,panoramico
+BIRK,Islândia,IS,"Hub de aviação geral e excursões aéreas, com pousos em campos de lava e geleiras.",Península de Reykjanes|Þingvellir|Langjökull|Hallgrímskirkja,panoramico
+FVFA,Victoria Falls - Flight of Angels,ZW,"Órbitas escalonadas por altitude sobre o desfiladeiro para separar helicópteros, ultraleves e aviões leves.",Cataratas Vitória|Batoka Gorge|Parque Nacional Mosi-oa-Tunya,panoramico
+SBRJ,Santos Dumont e Baía de Guanabara,BR,"Aproximação visual icônica pela Baía de Guanabara, rente ao Pão de Açúcar.",Pão de Açúcar|Baía de Guanabara|Cristo Redentor|Ponte Rio-Niterói,destino
+SBBZ,Búzios e Região dos Lagos,BR,Destino de luxo; sobrevoos da Região dos Lagos e das praias de Búzios.,Armação dos Búzios|Arraial do Cabo|Lagoa de Araruama|Cabo Frio,panoramico
+SDTK,Paraty e Serra da Bocaina,BR,"Voos cênicos sobre a baía, o Saco do Mamanguá e a Serra da Bocaina.",Paraty|Saco do Mamanguá|Parque Nacional da Serra da Bocaina|Trindade,panoramico
+SDUB,Litoral Norte de São Paulo,BR,Sobrevoos das praias do Litoral Norte e da Serra do Mar.,Ubatuba|Ilha Anchieta|Ilhabela|Parque Estadual da Serra do Mar,panoramico
+SBLE,Chapada Diamantina,BR,"Base para sobrevoos do Morro do Pai Inácio, vales e cachoeiras da Chapada.",Morro do Pai Inácio|Cachoeira da Fumaça|Parque Nacional da Chapada Diamantina|Vale do Pati,panoramico
+SBJE,Jericoacoara,BR,Destino direto para as dunas e lagoas de Jeri.,Jericoacoara|Parque Nacional de Jericoacoara|Lagoa do Paraíso|Pedra Furada,destino
+SBPB,Delta do Parnaíba,BR,Ponto de partida para o Delta do Parnaíba e o litoral do Piauí.,Delta do Parnaíba|Pedra do Sal|Lagoa do Portinho|Rio Parnaíba,panoramico
+SBMO,Litoral alagoano,BR,Acesso aos corais de Maragogi e às praias do litoral alagoano.,Maragogi|Praia do Francês|Lagoa Mundaú|Pajuçara,destino
+SBPS,Costa do Descobrimento,BR,"Destino turístico para Trancoso, Arraial d'Ajuda e Caraíva.",Trancoso|Arraial d'Ajuda|Caraíva|Coroa Vermelha,destino
+SIRI,Península de Maraú,BR,Aeródromo turístico na Península de Maraú.,Península de Maraú|Lagoa do Cassange|Baía de Camamu,destino
+SNCL,Morro de São Paulo,BR,Pista turística na Ilha de Tinharé.,Morro de São Paulo|Ilha de Tinharé|Boipeba,destino
+SWBC,Rio Negro e lodges de selva,BR,Acesso a lodges de selva e ao arquipélago fluvial de Mariuá no Rio Negro.,Arquipélago de Mariuá|Rio Negro|Barcelos,destino
+SBCN,Caldas Novas,BR,Destino turístico das águas termais.,Caldas Novas|Lago Corumbá|Parque Estadual da Serra de Caldas Novas,destino
+SPZO,Cusco e Vale Sagrado,PE,"Base para Machu Picchu, o Vale Sagrado e a Montanha Colorida.",Machu Picchu|Vale Sagrado|Vinicunca|Sacsayhuamán,destino
+SPSO,Linhas de Nazca e Paracas,PE,Ponto de partida dos voos panorâmicos sobre as Linhas de Nazca.,Linhas de Nazca|Reserva Nacional de Paracas|Ilhas Ballestas,panoramico
+SAWH,"Ushuaia, fim do mundo",AR,Canal de Beagle e geleiras da Terra do Fogo.,Canal de Beagle|Parque Nacional Terra do Fogo|Glaciar Martial|Ushuaia,panoramico
+SAWC,Glaciares da Patagônia,AR,Sobrevoos do Glaciar Perito Moreno e do Parque Los Glaciares.,Glaciar Perito Moreno|Parque Nacional Los Glaciares|Lago Argentino|Fitz Roy,panoramico
+SAZS,Lagos andinos de Bariloche,AR,Lagos andinos e Cerro Catedral.,Lago Nahuel Huapi|Cerro Catedral|Cerro Tronador|Parque Nacional Nahuel Huapi,panoramico
+SCIP,Rapa Nui (Ilha de Páscoa),CL,Aeroporto mais remoto do mundo; destino dos moais de Rapa Nui.,Rano Raraku|Ahu Tongariki|Rano Kau|Orongo,panoramico
+SCNT,Torres del Paine,CL,Porta de entrada para o Parque Nacional Torres del Paine.,Torres del Paine|Parque Nacional Torres del Paine|Glaciar Grey|Cueva del Milodón,panoramico
+SCTE,Distrito dos Lagos chileno,CL,"Base para o Distrito dos Lagos, o Vulcão Osorno e Chiloé.",Vulcão Osorno|Lago Llanquihue|Ilha Grande de Chiloé|Vulcão Calbuco,panoramico
+SCCF,Deserto do Atacama,CL,Acesso ao Deserto do Atacama e ao Valle de la Luna.,Deserto do Atacama|Valle de la Luna|San Pedro de Atacama|El Tatio,destino
+SLUY,Salar de Uyuni,BO,Destino turístico direto para o Salar de Uyuni.,Salar de Uyuni|Isla Incahuasi|Cemitério de Trens,panoramico
+SEGS,Galápagos (Baltra),EC,Principal portal do Arquipélago de Galápagos.,Ilha Santa Cruz|Ilha Baltra|Ilha Seymour Norte|Ilha Daphne Major,destino
+SEST,Galápagos (San Cristóbal),EC,Segundo portal turístico de Galápagos.,Ilha San Cristóbal|León Dormido|Puerto Baquerizo Moreno,destino
+SVRS,Los Roques,VE,Ilha paradisíaca rodeada por barreira de corais.,Arquipélago Los Roques|Gran Roque|Cayo de Agua,destino
+SVCN,Salto Ángel,VE,Base dos voos cênicos até o Salto Ángel.,Salto Ángel|Auyantepui|Laguna de Canaima|Parque Nacional Canaima,panoramico
+SKSP,San Andrés,CO,Destino caribenho famoso pelo Mar de Sete Cores.,San Andrés|Johnny Cay|Providencia,destino
+KSEZ,Red Rocks de Sedona,US,Aeroporto em platô; voos sobre as formações rochosas vermelhas.,Bell Rock|Cathedral Rock|Sedona|Oak Creek Canyon,panoramico
+KPGA,Lake Powell e Horseshoe Bend,US,"Base para voos sobre Lake Powell, Horseshoe Bend e os cânions do Arizona.",Lake Powell|Horseshoe Bend|Antelope Canyon|Rainbow Bridge National Monument,panoramico
+UT25,Monument Valley,US,Pista aos pés dos buttes do Monument Valley.,Monument Valley|West Mitten Butte|Valley of the Gods|Goosenecks State Park,panoramico
+KJAC,Grand Teton e Yellowstone,US,Aeroporto dentro de um parque nacional; Grand Teton e Yellowstone.,Grand Teton|Parque Nacional de Grand Teton|Jenny Lake|Yellowstone Lake,panoramico
+KASE,Aspen,US,Estação de esqui de luxo nas Montanhas Rochosas.,Aspen|Maroon Bells|Snowmass|Independence Pass,destino
+KEGE,Vail e Beaver Creek,US,Acesso aos resorts de esqui de Vail e Beaver Creek.,Vail|Beaver Creek|Mount of the Holy Cross|Glenwood Canyon,destino
+KTVL,Lake Tahoe,US,Voos panorâmicos sobre o Lago Tahoe e a Serra Nevada.,Lake Tahoe|Emerald Bay|Desolation Wilderness|Palisades Tahoe,panoramico
+KMMH,Yosemite (lado leste),US,Porta de entrada leste para Yosemite.,Half Dome|Mono Lake|Devils Postpile National Monument|Mammoth Mountain,panoramico
+KAVX,Ilha Santa Catalina,US,"Airport in the Sky, no topo da Ilha Santa Catalina.",Santa Catalina Island|Avalon|Two Harbors,destino
+KEYW,Florida Keys,US,Destino final nas Florida Keys e voos para Dry Tortugas.,Dry Tortugas|Fort Jefferson|Key West|Seven Mile Bridge,panoramico
+PHLI,Kauai,US,Base para a Nā Pali Coast e o Waimea Canyon.,Nā Pali Coast|Waimea Canyon|Wailua Falls|Monte Waiʻaleʻale,panoramico
+PHTO,Big Island e Kīlauea,US,Base para sobrevoar a lava ativa do Kīlauea.,Kīlauea|Mauna Kea|Akaka Falls|Parque Nacional dos Vulcões do Havaí,panoramico
+PAJN,Juneau e geleiras,US,Mendenhall Glacier e fiordes do sudeste do Alasca.,Mendenhall Glacier|Juneau Icefield|Tracy Arm|Glacier Bay,panoramico
+PAKT,Misty Fjords,US,Porta de entrada para o Misty Fjords National Monument.,Misty Fjords National Monument|Ketchikan|Behm Canal,panoramico
+MMUN,Riviera Maya,MX,"Hub turístico da Riviera Maya, Cozumel e Isla Mujeres.",Cancún|Isla Mujeres|Cozumel|Tulum,destino
+TNCM,Sint Maarten e Maho Beach,SX,Aproximação rasante sobre a Maho Beach.,Maho Beach|Saint Martin|Philipsburg|Anguilla,destino
+TFFJ,Saint-Barthélemy,BL,Aproximação radical sobre o morro e a praia; destino de luxo.,Saint-Barthélemy|Gustavia|Saint-Jean,destino
+TNCS,Saba,BQ,Menor pista comercial do mundo (400 m) em ilha vulcânica.,Saba|Mount Scenery|Sint Eustatius,destino
+TNCA,Aruba,AW,Destino caribenho com aproximação sobre recifes.,Eagle Beach|Parque Nacional Arikok|Palm Beach|Oranjestad,destino
+TLPL,Pitons de Santa Lúcia,LC,Vista aérea direta dos picos Gros Piton e Petit Piton.,Gros Piton|Petit Piton|Soufrière,panoramico
+TBPB,Barbados,BB,Hub turístico do Caribe Oriental.,Bridgetown|Harrison's Cave|Bathsheba,destino
+MYNN,Nassau e Exumas,BS,Hub para passeios aéreos às ilhas Exumas.,Exuma|Paradise Island|Nassau|Thunderball Grotto,panoramico
+MBPV,Turks e Caicos,TC,Acesso à Grace Bay e às barreiras de corais.,Grace Bay|Chalk Sound|Providenciales,destino
+MZBZ,Great Blue Hole,BZ,Base para sobrevoar o Great Blue Hole e Ambergris Caye.,Great Blue Hole|Ambergris Caye|Lighthouse Reef|Barreira de Corais de Belize,panoramico
+MRLB,Guanacaste,CR,Porta de entrada para as praias de Guanacaste e os vulcões.,Vulcão Rincón de la Vieja|Vulcão Arenal|Golfo de Papagayo|Tamarindo,destino
+LFHM,Megève e Mont Blanc,FR,Altiporto alpino para voos ao redor do Mont Blanc.,Mont Blanc|Mer de Glace|Aiguille du Midi|Megève,panoramico
+LSZS,St. Moritz e Engadina,CH,"Aeroporto mais alto da Europa, com tráfego executivo nos Alpes suíços.",St. Moritz|Piz Bernina|Lago de St. Moritz|Diavolezza,destino
+LSGS,Matterhorn pelo vale do Ródano,CH,Aproximação pelo vale do Ródano; voos sobre o Matterhorn.,Matterhorn|Dent Blanche|Lac des Dix|Weisshorn,panoramico
+LOWI,Tirol,AT,Vale alpino no Tirol cercado por montanhas de quase 3.000 m.,Innsbruck|Nordkette|Zugspitze|Geleira de Stubai,destino
+LOWS,Salzburgo e Salzkammergut,AT,Cidade de Mozart e acesso aos lagos do Salzkammergut.,Salzburgo|Hallstatt|Wolfgangsee|Untersberg,destino
+LGSR,Santorini,GR,Ilha vulcânica icônica das Cíclades.,Oia|Caldeira de Santorini|Nea Kameni|Fira,destino
+LGMK,Mykonos,GR,Destino turístico famoso do Mar Egeu.,Mykonos|Delos|Little Venice,destino
+LGSK,Skiathos,GR,Aproximação baixíssima junto à praia e ao porto.,Skiathos|Koukounaries|Skopelos,destino
+LGKR,Corfu,GR,Aproximação cênica sobre a lagoa e o mosteiro de Vlacherna.,Mosteiro de Vlacherna|Pontikonisi|Paleokastritsa|Corfu,destino
+LPMA,Ilha da Madeira,PT,"Pista sobre pilares no oceano, entre montanhas.",Pico Ruivo|Cabo Girão|Funchal|Ponta de São Lourenço,panoramico
+LPPD,Açores (São Miguel),PT,Acesso às lagoas vulcânicas das Sete Cidades e Furnas.,Sete Cidades|Lagoa do Fogo|Furnas|Ponta Delgada,panoramico
+LXGB,Gibraltar,GI,Pista cruzada por avenida aos pés do Rochedo.,Rochedo de Gibraltar|Estreito de Gibraltar|Europa Point,destino
+EGPR,Barra (Hébridas Exteriores),GB,Pouso na areia da praia na maré baixa.,Kisimul Castle|Vatersay|Barra,destino
+BIAR,Norte da Islândia,IS,"Voos sobre cachoeiras, vulcões e auroras no norte da Islândia.",Goðafoss|Mývatn|Dettifoss|Akureyri,panoramico
+BIKF,Reykjanes e Lagoa Azul,IS,"Portal da Islândia, com a Lagoa Azul e os vulcões de Reykjanes.",Blue Lagoon|Reykjanes|Krýsuvík|Fagradalsfjall,destino
+ENSH,Ilhas Lofoten,NO,Arquipélago ártico de montanhas escarpadas e fiordes.,Lofoten|Reine|Henningsvær|Trollfjord,panoramico
+ENSB,Svalbard,NO,Aeroporto comercial mais ao norte do mundo; expedições polares.,Longyearbyen|Isfjorden|Pyramiden|Barentsburg,panoramico
+LDDU,Dubrovnik e Dalmácia,HR,Costa da Dalmácia e muralhas medievais no Adriático.,Muralhas de Dubrovnik|Lokrum|Ilhas Elafiti|Dubrovnik,destino
+VNJS,Annapurna e Mustang,NP,Vale do Kali Gandaki e acesso a Annapurna e Mustang.,Annapurna|Dhaulagiri|Muktinath|Lo Manthang,panoramico
+VQPR,Vale de Paro,BT,Vale sagrado no Himalaia cercado por picos de 5.500 m.,Taktsang|Jomolhari|Paro Dzong,destino
+VRMM,Maldivas,MV,"Maior base de hidroaviões do mundo, ligando atóis e resorts.",Atol de Malé Norte|Atol de Malé Sul|Maafushi|Malé,destino
+WADD,Bali,ID,Principal destino turístico da Indonésia.,Uluwatu|Tanah Lot|Monte Batur|Monte Agung,destino
+WATO,Komodo,ID,Porta de entrada para o Parque Nacional de Komodo e a Ilha Padar.,Parque Nacional de Komodo|Ilha Padar|Ilha Rinca|Ilha de Komodo,panoramico
+RPVE,Boracay,PH,Acesso direto à ilha de Boracay.,Boracay|White Beach|Caticlan,destino
+OJAQ,"Aqaba, Petra e Wadi Rum",JO,"Acesso a Petra, ao deserto de Wadi Rum e ao Mar Vermelho.",Petra|Wadi Rum|Aqaba,destino
+HTKJ,Kilimanjaro e safáris,TZ,Base para safáris e para o Kilimanjaro.,Kilimanjaro|Cratera de Ngorongoro|Parque Nacional de Arusha|Monte Meru,destino
+HTZA,Zanzibar,TZ,Ilha das especiarias e praias no Índico.,Stone Town|Floresta de Jozani|Nungwi,destino
+FBMN,Delta do Okavango,BW,Maior hub de voos panorâmicos de pequeno porte sobre o Delta do Okavango.,Delta do Okavango|Reserva de Caça de Moremi|Maun,panoramico
+FACT,Cidade do Cabo,ZA,Aproximação com vista da Table Mountain e do Cabo da Boa Esperança.,Table Mountain|Cabo da Boa Esperança|Robben Island|Cape Point,destino
+FSIA,Seychelles,SC,Hub turístico para as ilhas graníticas.,Praslin|La Digue|Morne Seychellois|Mahé,destino
+NZMF,Milford Sound,NZ,"Pista dentro do fiorde, cercada por cachoeiras e paredões.",Milford Sound|Mitre Peak|Sutherland Falls|Parque Nacional de Fiordland,panoramico
+NZMC,Aoraki / Mount Cook,NZ,Voos com esquis sobre a geleira Tasman e o Aoraki.,Aoraki / Mount Cook|Glaciar Tasman|Lake Pukaki|Hooker Valley,panoramico
+YAYE,Uluru,AU,Aeroporto do monólito Uluru e de Kata Tjuta.,Uluru|Kata Tjuta|Kings Canyon|Lake Amadeus,panoramico
+YBHM,Whitsundays e Grande Barreira,AU,Ilhas Whitsunday e voos sobre o Heart Reef.,Heart Reef|Whitehaven Beach|Ilhas Whitsunday|Grande Barreira de Corais,panoramico
+NTTB,Bora Bora,PF,Aeroporto num ilhote de coral com vista para o Monte Otemanu.,Monte Otemanu|Bora Bora|Monte Pahia,panoramico

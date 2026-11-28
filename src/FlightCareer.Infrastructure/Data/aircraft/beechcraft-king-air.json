@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": 9,
+  "id": "Beechcraft King Air",
+  "class": "Turboprop",
+  "engineCount": 2,
+  "features": [
+    "autopilot",
+    "bleedAir",
+    "constantSpeedProp",
+    "convertibleCabin",
+    "deIceBoots",
+    "fireProtection",
+    "fms",
+    "glassCockpit",
+    "hydraulicGear",
+    "lavatory",
+    "multiEngine",
+    "noseWheelSteering",
+    "oxygen",
+    "passengerCabin",
+    "pressurized",
+    "propDeIce",
+    "retractableGear",
+    "turboprop",
+    "weatherRadar",
+    "wipers"
+  ],
+  "simMatch": {
+    "title": [
+      "Beechcraft King Air"
+    ],
+    "atcModel": [
+      "B350"
+    ]
+  },
+  "limits": [
+    {
+      "key": "vne",
+      "value": 263.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "usuário 2026-11-19 (AFM; substitui valor anterior)",
+      "notes": null
+    },
+    {
+      "key": "vs0",
+      "value": 78.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS0 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vs1",
+      "value": 100.0,
+      "unit": "knots",
+      "source": "SimVar",
+      "reference": "DESIGN SPEED VS1 (20261115-0814-Beechcraft_King_Air.csv)",
+      "notes": null
+    },
+    {
+      "key": "vfe:1",
+      "value": 202.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Approach 202 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vfe:2",
+      "value": 158.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vfe Full Down 158 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "mmo",
+      "value": 0.58,
+      "unit": "mach",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Mmo 0.58, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vle",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vle 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "vlo",
+      "value": 182.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "DGAC Chile Manual de Evaluación Beechcraft Super King Air B350 ER (Dec 2009), Sec. A.1 p. 1 (Vlo extension 182 KIAS, https://www.dgac.gob.cl/wp-content/uploads/portalweb/rest-portalweb/jcr/repository/collaboration/sites%20content/live/dgac/documents/Beechcraft_B350_ER_R.pdf)",
+      "notes": null
+    },
+    {
+      "key": "va",
+      "value": 181.0,
+      "unit": "knots",
+      "source": "POH",
+      "reference": "King Air 350 POH, Sec. 2 (181 KIAS)",
+      "notes": null
+    },
+    {
+      "key": "alternatorRatedAmps",
+      "value": 250.0,
+      "unit": "amperes",
+      "source": "ClassDefault",
+      "reference": "estimativa — revisar: padrão aproximado da classe Turboprop (250 A)",
+      "notes": "ESTIMATIVA — trocar pelo valor do POH/AFM quando disponível (2026-11-16)"
+    },
+    {
+      "key": "elecSystemVolts",
+      "value": 28.0,
+      "unit": "volts",
+      "source": "ClassDefault",
+      "reference": "estimativa — atualizar pelo POH real: PT6A-60A (King Air 350)",
+      "notes": null
+    },
+    {
+      "key": "oilTempMax",
+      "value": 110.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "ittMax",
+      "value": 820.0,
+      "unit": "celsius",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitPos",
+      "value": 3.17,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "gLimitNeg",
+      "value": -1.27,
+      "unit": "g",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    },
+    {
+      "key": "rpmRedline",
+      "value": 1700.0,
+      "unit": "rpm",
+      "source": "POH",
+      "reference": "aircraft_limits-v4.json (usuário, 2026-11-17; declara Beechcraft Super King Air B300 (350i) POH / AFM; não conferido no POH)",
+      "notes": null
+    }
+  ]
+}
