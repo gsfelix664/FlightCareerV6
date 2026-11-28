@@ -162,8 +162,47 @@ namespace FlightCareer.UI.ViewModels
         private string _contractMarkersKey = string.Empty;
         private string _lastContractItemsKey = string.Empty;
 
+        private readonly Dictionary<string, AirportPosition> _airportCache = new(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>Contratos aceitos no briefing: o mini-mapa os mostra antes de o monitoramento começar.</summary>
         public IReadOnlyCollection<Mission>? AcceptedMissions { get; set; }
+
+        private AirportPosition? LookupAirportCached(string icao)
+        {
+            if (string.IsNullOrWhiteSpace(icao)) return null;
+            if (_airportCache.TryGetValue(icao, out var cached)) return cached;
+
+            var apt = FindAirport(icao);
+            if (apt == null) return null;
+
+            var pos = new AirportPosition(apt.ICAO, apt.Latitude, apt.Longitude);
+            _airportCache[icao] = pos;
+            return pos;
+        }
+
+        public void RefreshRouteFromCurrentState()
+        {
+            var resolved = HudRouteResolver.Resolve(
+                _flightMonitor.IsMonitoring,
+                _flightMonitor.ActiveMissions,
+                AcceptedMissions?.ToList(),
+                Latitude,
+                Longitude,
+                OriginIcao,
+                OriginLat,
+                OriginLon,
+                LookupAirportCached);
+
+            RouteText = resolved.RouteText;
+            OriginIcao = resolved.OriginIcao;
+            OriginLat = resolved.OriginLat;
+            OriginLon = resolved.OriginLon;
+            DestIcao = resolved.DestIcao;
+            DestLat = resolved.DestLat;
+            DestLon = resolved.DestLon;
+
+            RefreshContractMarkers();
+        }
 
         private void RefreshContractMarkers()
         {
@@ -284,72 +323,8 @@ namespace FlightCareer.UI.ViewModels
                 Latitude = data.PlaneLatitude;
                 Longitude = data.PlaneLongitude;
 
-                // Rota
-                if (_flightMonitor.ActiveMissions.Count > 0)
-                {
-                    var m = _flightMonitor.ActiveMissions[0];
-                    RouteText = $"{m.OriginICAO} ➔ {m.DestinationICAO} ({m.DistanceNM:N0} NM)";
-                    OriginIcao = m.OriginICAO;
-                    DestIcao = m.DestinationICAO;
-                    if (DestLat == 0 || DestLon == 0)
-                    {
-                        var destApt = FindAirport(m.DestinationICAO);
-                        if (destApt != null)
-                        {
-                            DestLat = destApt.Latitude;
-                            DestLon = destApt.Longitude;
-                        }
-                    }
-                    if (OriginLat == 0 || OriginLon == 0)
-                    {
-                        var origApt = FindAirport(m.OriginICAO);
-                        if (origApt != null)
-                        {
-                            OriginLat = origApt.Latitude;
-                            OriginLon = origApt.Longitude;
-                        }
-                    }
-                }
-                else if (_flightMonitor.IsMonitoring)
-                {
-                    RouteText = "VOO LOCAL / CIRCUITO";
-                    DestLat = 0;
-                    DestLon = 0;
-                    DestIcao = string.Empty;
-                    if (OriginLat == 0 && OriginLon == 0 && (data.PlaneLatitude != 0 || data.PlaneLongitude != 0))
-                    {
-                        OriginLat = data.PlaneLatitude;
-                        OriginLon = data.PlaneLongitude;
-                        OriginIcao = "PARTIDA";
-                    }
-                }
-                else
-                {
-                    RouteText = "EM SOLO";
-                    DestLat = 0;
-                    DestLon = 0;
-                    DestIcao = string.Empty;
-                    if (AcceptedMissions is { Count: > 0 } && (data.PlaneLatitude != 0 || data.PlaneLongitude != 0))
-                    {
-                        // Com contrato aceito, o ponto de partida entra no enquadramento junto com a área
-                        // Atualiza só se não houver partida ou se ela sobrou de outro voo (> ~1 NM)
-                        if (OriginIcao != "PARTIDA" || Math.Abs(OriginLat - data.PlaneLatitude) > 0.02 || Math.Abs(OriginLon - data.PlaneLongitude) > 0.02)
-                        {
-                            OriginLat = data.PlaneLatitude;
-                            OriginLon = data.PlaneLongitude;
-                            OriginIcao = "PARTIDA";
-                        }
-                    }
-                    else
-                    {
-                        OriginLat = 0;
-                        OriginLon = 0;
-                        OriginIcao = string.Empty;
-                    }
-                }
-
-                // Depois da origem e do destino, para o mapa enquadrar tudo
-                RefreshContractMarkers();
+                // Rota e marcadores (origem, destino e contratos para o mapa enquadrar tudo)
+                RefreshRouteFromCurrentState();
 
                 if (_flightMonitor.IsMonitoring)
                 {

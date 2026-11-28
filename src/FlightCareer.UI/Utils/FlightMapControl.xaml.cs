@@ -721,10 +721,21 @@ namespace FlightCareer.UI.Utils
             if (_destinationMarker != null) MainMap.Markers.Remove(_destinationMarker);
             if (_destinationRoute != null) MainMap.Markers.Remove(_destinationRoute);
 
+            bool hasRouteLegs = RouteLegs != null && RouteLegs.OfType<object>().Any();
+            if (!hasRouteLegs)
+            {
+                _routeFramingPoints.Clear();
+            }
+
             // 1. Marcador circular sutil no ponto de partida (mesmo estilo do destino, ciano neon com tooltip ICAO)
-            if (OriginLat != 0 && OriginLon != 0)
+            if (OriginLat != 0 || OriginLon != 0)
             {
                 var pOrigin = new PointLatLng(OriginLat, OriginLon);
+                if (!hasRouteLegs)
+                {
+                    _routeFramingPoints.Add(pOrigin);
+                }
+
                 var originCircle = new Ellipse
                 {
                     Width = 9,
@@ -738,29 +749,52 @@ namespace FlightCareer.UI.Utils
                 _originMarker = new GMapMarker(pOrigin)
                 {
                     ZIndex = 110,
-                    Shape = originCircle
+                    Shape = originCircle,
+                    Offset = new Point(-4.5, -4.5)
                 };
                 MainMap.Markers.Add(_originMarker);
             }
 
-            if (DestLat == 0 || DestLon == 0) return;
+            if (DestLat == 0 && DestLon == 0)
+            {
+                if (_contractFramingPoints.Count > 0)
+                {
+                    ApplyCombinedFraming();
+                }
+                return;
+            }
 
-            var pStart = new PointLatLng(AircraftLat, AircraftLon);
+            var pStart = (OriginLat != 0 || OriginLon != 0)
+                ? new PointLatLng(OriginLat, OriginLon)
+                : new PointLatLng(AircraftLat, AircraftLon);
             var pEnd = new PointLatLng(DestLat, DestLon);
 
-            // 2. Gerar arco geodésico curvo (Great-Circle) com 20 pontos intermediários
-            var points = GenerateGreatCircleArc(pStart, pEnd, 20);
-            _destinationRoute = new GMapRoute(points)
+            if (!hasRouteLegs)
             {
-                Shape = new Path
+                _routeFramingPoints.Add(pEnd);
+            }
+
+            // 2. Gerar arco geodésico curvo (Great-Circle) com 20 pontos intermediários quando há origem válida
+            if (pStart.Lat != 0 || pStart.Lng != 0)
+            {
+                var points = GenerateGreatCircleArc(pStart, pEnd, 20);
+                if (!hasRouteLegs)
                 {
-                    Stroke = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
-                    StrokeThickness = 3,
-                    StrokeDashArray = new DoubleCollection { 3, 2 },
-                    Opacity = 0.95
+                    _routeFramingPoints.AddRange(points);
                 }
-            };
-            MainMap.Markers.Add(_destinationRoute);
+
+                _destinationRoute = new GMapRoute(points)
+                {
+                    Shape = new Path
+                    {
+                        Stroke = (Brush)new BrushConverter().ConvertFromString("#00E5FF")!, // Ciano Aviônica
+                        StrokeThickness = 3,
+                        StrokeDashArray = new DoubleCollection { 3, 2 },
+                        Opacity = 0.95
+                    }
+                };
+                MainMap.Markers.Add(_destinationRoute);
+            }
 
             // 3. Marcador circular sutil no destino
             var destCircle = new Ellipse
@@ -776,23 +810,22 @@ namespace FlightCareer.UI.Utils
             _destinationMarker = new GMapMarker(pEnd)
             {
                 ZIndex = 110,
-                Shape = destCircle
+                Shape = destCircle,
+                Offset = new Point(-4.5, -4.5)
             };
             MainMap.Markers.Add(_destinationMarker);
 
             // 4. Transição e enquadramento suave (fly-to / pan-zoom)
-            if (AircraftLat != 0 && AircraftLon != 0 && DestLat != 0 && DestLon != 0)
+            if (_contractFramingPoints.Count > 0)
             {
-                var allPoints = new List<PointLatLng>(points);
-                if (OriginLat != 0 && OriginLon != 0)
-                {
-                    allPoints.Add(new PointLatLng(OriginLat, OriginLon));
-                }
-
-                double minLat = allPoints.Min(p => p.Lat);
-                double maxLat = allPoints.Max(p => p.Lat);
-                double minLon = allPoints.Min(p => p.Lng);
-                double maxLon = allPoints.Max(p => p.Lng);
+                ApplyCombinedFraming();
+            }
+            else if (_routeFramingPoints.Count >= 2)
+            {
+                double minLat = _routeFramingPoints.Min(p => p.Lat);
+                double maxLat = _routeFramingPoints.Max(p => p.Lat);
+                double minLon = _routeFramingPoints.Min(p => p.Lng);
+                double maxLon = _routeFramingPoints.Max(p => p.Lng);
 
                 double latSpan = Math.Max(0.08, maxLat - minLat);
                 double lonSpan = Math.Max(0.08, maxLon - minLon);

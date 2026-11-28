@@ -146,7 +146,11 @@ namespace FlightCareer.UI.Services
             }
 
             var missions = _flightMonitor.ActiveMissions?.ToList();
-            var content = ObjectiveCardBuilder.Build(missions, _flightMonitor.ContractObjectiveLines);
+            var content = ObjectiveCardBuilder.Build(
+                missions,
+                _flightMonitor.ContractObjectiveLines,
+                _flightMonitor.CurrentLandedIcao,
+                _flightMonitor.CurrentTrackerResults);
             _viewModel.Update(content);
         }
 

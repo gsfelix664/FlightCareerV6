@@ -537,6 +537,7 @@ namespace FlightCareer.UI.ViewModels
             if (overlayWindow.DataContext is DebugOverlayViewModel overlayViewModel)
             {
                 overlayViewModel.AcceptedMissions = ActiveMissions;
+                overlayViewModel.RefreshRouteFromCurrentState();
             }
             overlayWindow.Show();
             overlayWindow.Activate();

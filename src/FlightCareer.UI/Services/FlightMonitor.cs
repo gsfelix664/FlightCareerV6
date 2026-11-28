@@ -66,6 +66,9 @@ namespace FlightCareer.UI.Services
         public IReadOnlyList<Mission> ActiveMissions => _activeMissions;
         public string ContractProgressText { get; private set; } = string.Empty;
         public IReadOnlyList<ContractObjectiveLine> ContractObjectiveLines { get; private set; } = Array.Empty<ContractObjectiveLine>();
+        public string? CurrentLandedIcao { get; private set; }
+        public MissionTrackerResults CurrentTrackerResults { get; private set; } = new();
+        private IReadOnlyList<AirportPosition> _destinationCandidateAirports = Array.Empty<AirportPosition>();
         private bool _isAirborne;
         private readonly LandingCycleTracker _landingCycle;
         private DateTime _liftoffTime = DateTime.MinValue;
@@ -726,6 +729,9 @@ namespace FlightCareer.UI.Services
             _aerialWorkTracker.Reset();
             ContractProgressText = string.Empty;
             ContractObjectiveLines = Array.Empty<ContractObjectiveLine>();
+            CurrentLandedIcao = null;
+            CurrentTrackerResults = new MissionTrackerResults();
+            _destinationCandidateAirports = LoadDestinationCandidateAirports(missions);
             foreach (var m in missions)
             {
                 var def = MissionCatalog.Shared.Get(m.SubId);
@@ -1318,6 +1324,7 @@ namespace FlightCareer.UI.Services
                     _ferryMonitor,
                     _aerialWorkTracker));
             ContractProgressText = ContractProgressFormatter.FormatHud(ContractObjectiveLines);
+            CurrentTrackerResults = BuildCurrentTrackerResults();
 
             // --- FATOS OPERACIONAIS E AMBIENTAIS PARA XP ---
             if (data.SimulationRate > 1.01) _usedTimeAcceleration = true;
@@ -1487,6 +1494,14 @@ namespace FlightCareer.UI.Services
                     }
                 }
             }
+
+            CurrentLandedIcao = ObjectiveCardBuilder.ResolveLandedIcao(
+                data.IsOnGround,
+                _landingCycle.HasTouchedDown,
+                _flightInvalidated,
+                data.Latitude,
+                data.Longitude,
+                _destinationCandidateAirports);
 
             // Gravar Blackbox de Telemetria Contínua
             string destIcao = _activeMissions.FirstOrDefault()?.DestinationICAO ?? "DEST";
@@ -2066,7 +2081,78 @@ namespace FlightCareer.UI.Services
                 ? reason
                 : $"Voo invalidado: {reason}";
             _telemetryLogger.LogEvent("INTEGRIDADE", _flightInvalidationReason);
+            CurrentLandedIcao = null;
             OnAlert?.Invoke("VOO INVALIDADO", _flightInvalidationReason, true);
+        }
+
+        private MissionTrackerResults BuildCurrentTrackerResults()
+        {
+            return new MissionTrackerResults(
+                VisitedWaypoints: new HashSet<string>(_overflyTracker.VisitedWaypoints, StringComparer.OrdinalIgnoreCase),
+                TouchAndGoCount: _touchAndGoCounter.Count,
+                SurveyLegsCompleted: _surveyTracker.CompletedLegs,
+                SkydiveDropCompleted: _skydiveTracker.DropCompleted,
+                SkydiveThermalShock: _skydiveTracker.ThermalShockDetected,
+                SkydiveMaxCoolingRate: _skydiveTracker.MaxCoolingRateObserved,
+                MultiStop: _multiStopTracker,
+                Stol: _stolTracker,
+                CheckFlight: _checkFlightTracker,
+                Ferry: _ferryMonitor,
+                AerialWork: _aerialWorkTracker);
+        }
+
+        private IReadOnlyList<AirportPosition> LoadDestinationCandidateAirports(IReadOnlyList<Mission> missions)
+        {
+            if (missions == null || missions.Count == 0)
+            {
+                return Array.Empty<AirportPosition>();
+            }
+
+            var destIcaos = missions
+                .Select(m => m.DestinationICAO)
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (destIcaos.Count == 0)
+            {
+                return Array.Empty<AirportPosition>();
+            }
+
+            try
+            {
+                using var destContext = _contextFactory.CreateDbContext();
+                var destAirports = destContext.Airports
+                    .AsNoTracking()
+                    .Where(a => destIcaos.Contains(a.ICAO))
+                    .ToList();
+
+                var byIcao = new Dictionary<string, AirportPosition>(StringComparer.OrdinalIgnoreCase);
+                const double rangeDeg = 0.1;
+
+                foreach (var dest in destAirports)
+                {
+                    byIcao[dest.ICAO] = new AirportPosition(dest.ICAO, dest.Latitude, dest.Longitude);
+
+                    var nearby = destContext.Airports
+                        .AsNoTracking()
+                        .Where(a => a.Latitude > dest.Latitude - rangeDeg && a.Latitude < dest.Latitude + rangeDeg
+                                 && a.Longitude > dest.Longitude - rangeDeg && a.Longitude < dest.Longitude + rangeDeg)
+                        .ToList();
+
+                    foreach (var airport in nearby)
+                    {
+                        byIcao.TryAdd(airport.ICAO, new AirportPosition(airport.ICAO, airport.Latitude, airport.Longitude));
+                    }
+                }
+
+                return byIcao.Values.ToList();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[FlightMonitor] Erro ao carregar aeroportos candidatos de destino: {ex.Message}");
+                return Array.Empty<AirportPosition>();
+            }
         }
     }
 }
